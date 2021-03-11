@@ -28,6 +28,7 @@ using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
 using Xunit;
 using Xunit.Abstractions;
 using Shouldly;
+using Microsoft.Build.UnitTests.Shared;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -747,6 +748,37 @@ EndGlobal
 </SolutionConfiguration>".Replace("`", "\"").Replace("##temp##", Path.GetTempPath());
 
             Helpers.VerifyAssertLineByLine(expected, solutionConfigurationContents);
+        }
+
+        /// <summary>
+        /// This test forces a metaproj to be generated as part of the build. Since metaproj files are not written to disk, it will fail if its cached form does not align
+        /// with the version that is being built as when a property is part of the version added to the cache, but that version is not passed to the BuildManager.
+        /// </summary>
+        [Fact]
+        public void SolutionGeneratingMetaproj()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile proj1 = env.CreateFile("A.csproj", @"<Project><Target Name=""Printer""><Message Importance=""high"" Text=""print string"" /></Target></Project>");
+                TransientTestFile proj2 = env.CreateFile("B.csproj", @"<Project><Target Name=""Printer""><Message Importance=""high"" Text=""print string"" /></Target></Project>");
+                TransientTestFile proj3 = env.CreateFile("C.csproj", @"<Project><Target Name=""Printer""><Message Importance=""high"" Text=""print string"" /></Target></Project>");
+                TransientTestFile proj = env.CreateFile("mysln.sln",
+                @$"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 11
+Project(`{"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"}`) = `A`, `{proj1.Path}`, `{"{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}"}`
+EndProject
+Project(`{"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"}`) = `B`, `{proj2.Path}`, `{"{881C1674-4ECA-451D-85B6-D7C59B7F16FA}"}`
+    ProjectSection(ProjectDependencies) = postProject
+        {"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"} = {"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"}
+    EndProjectSection
+EndProject
+Project(`{"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"}`) = `C`, `{proj3.Path}`, `{"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"}`
+EndProject
+".Replace("`", "\""));
+                RunnerUtilities.ExecMSBuild("\"" + proj.Path + "\"", out bool successfulExit);
+                successfulExit.ShouldBeTrue();
+            }
         }
 
         /// <summary>
