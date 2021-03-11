@@ -3730,6 +3730,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
           Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(GenerateSatelliteAssembliesForCore)' != 'true'">
 
+    <PropertyGroup>
+      <_ALExeToolPath>$(TargetFrameworkSDKToolsDirectory)</_ALExeToolPath>
+      <_ALExeToolPath Condition="'$(PlatformTarget)' == 'x64'">$(TargetFrameworkSDKToolsDirectory)$(PlatformTarget)\</_ALExeToolPath>
+    </PropertyGroup>
+
     <MakeDir
         Directories="@(EmbeddedResource->'$(IntermediateOutputPath)%(Culture)')" />
 
@@ -3762,7 +3767,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Title="$(Satellite_Title)"
         ToolPath="$(AlToolPath)"
         ToolExe ="$(AlToolExe)"
-        SdkToolsPath="$(TargetFrameworkSDKToolsDirectory)"
+        SdkToolsPath="$(SdkToolsPathMaybeWithx64Architecture)"
         Trademark="$(Satellite_Trademark)"
         Version="$(Satellite_Version)"
         Win32Icon="$(Satellite_Win32Icon)"
