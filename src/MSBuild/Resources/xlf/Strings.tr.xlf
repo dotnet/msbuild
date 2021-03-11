@@ -235,10 +235,10 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+        <source>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </source>
-        <target state="translated">Anahtarlar:            Hem "-switch" hem de "/switch" değerini kullanarak
+        <target state="needs-review-translation">Anahtarlar:            Hem "-switch" hem de "/switch" değerini kullanarak
                      anahtar beliretebileceğinizi unutmayın.
 </target>
         <note>

@@ -235,10 +235,10 @@ Copyright (C) Microsoft Corporation.All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+        <source>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </source>
-        <target state="translated">スイッチ:            スイッチは "-switch" と "/switch" のどちらを使用して
+        <target state="needs-review-translation">スイッチ:            スイッチは "-switch" と "/switch" のどちらを使用して
                      指定しても構いません。
 </target>
         <note>

@@ -242,10 +242,10 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+        <source>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </source>
-        <target state="translated">Przełączniki:            Należy pamiętać, że przełączniki można określać
+        <target state="needs-review-translation">Przełączniki:            Należy pamiętać, że przełączniki można określać
                      zarówno za pomocą składni „-przełącznik”, jak i „/przełącznik”.
 </target>
         <note>
