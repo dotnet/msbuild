@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         private HashSet<string> _topLevelCommandNameAllowList { get; }
 
-        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
+        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult, Dictionary<string, double> measurements = null)
         {
             var topLevelCommandNameFromParse = parseResult["dotnet"]?.AppliedOptions?.FirstOrDefault()?.Name;
             var result = new List<ApplicationInsightsEntryFormat>();
@@ -34,7 +34,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                         {
                             { "verb", topLevelCommandNameFromParse},
                             {"argument", firstOption}
-                        }));
+                        },
+                        measurements));
                 }
             }
             return result;

@@ -24,17 +24,30 @@ namespace Microsoft.DotNet.Cli.Telemetry
         public IEnumerable<ApplicationInsightsEntryFormat> Filter(object objectToFilter)
         {
             var result = new List<ApplicationInsightsEntryFormat>();
+            Dictionary<string,double> measurements = null;
+            if (objectToFilter is Tuple<TopLevelCommandParserResult, Dictionary<string,double>> topLevelCommandWithMeasurements)
+            {
+                objectToFilter = topLevelCommandWithMeasurements.Item1;
+                measurements = topLevelCommandWithMeasurements.Item2;
+                measurements = RemoveZeroTimes(measurements);
+            }
+            else if (objectToFilter is Tuple<ParseResult, Dictionary<string,double>> parseResultWithMeasurements)
+            {
+                objectToFilter = parseResultWithMeasurements.Item1;
+                measurements = parseResultWithMeasurements.Item2;
+                measurements = RemoveZeroTimes(measurements);
+            }
 
             if (objectToFilter is ParseResult parseResult)
             {
                 var topLevelCommandName = parseResult[DotnetName]?.AppliedOptions?.FirstOrDefault()?.Name;
                 if (topLevelCommandName != null)
                 {
-                    LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName);
+                    LogVerbosityForAllTopLevelCommand(result, parseResult, topLevelCommandName, measurements);
 
                     foreach (IParseResultLogRule rule in ParseResultLogRules)
                     {
-                        result.AddRange(rule.AllowList(parseResult));
+                        result.AddRange(rule.AllowList(parseResult, measurements));
                     }
                 }
             }
@@ -44,6 +57,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
                             "toplevelparser/command",
                             new Dictionary<string, string>()
                         {{ "verb", topLevelCommandParserResult.Command}}
+                            ,measurements
                 ));
 
             }
@@ -119,7 +133,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private static void LogVerbosityForAllTopLevelCommand(
             ICollection<ApplicationInsightsEntryFormat> result,
             ParseResult parseResult,
-            string topLevelCommandName)
+            string topLevelCommandName,
+            Dictionary<string, double> measurements = null)
         {
             if (parseResult[DotnetName][topLevelCommandName]?.AppliedOptions != null &&
                 parseResult[DotnetName][topLevelCommandName].AppliedOptions.Contains("verbosity"))
@@ -133,7 +148,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
                     {
                         { "verb", topLevelCommandName},
                         {"verbosity", appliedOptions.Arguments.ElementAt(0)}
-                    }));
+                    },
+                    measurements));
             }
         }
 
@@ -187,6 +203,25 @@ namespace Microsoft.DotNet.Cli.Telemetry
             }
 
             return s;
+        }
+
+        private Dictionary<string,double> RemoveZeroTimes(Dictionary<string,double> measurements)
+        {
+            if (measurements != null)
+            {
+                foreach (var measurement in measurements)
+                {
+                    if (measurement.Value == 0)
+                    {
+                        measurements.Remove(measurement.Key);
+                    }
+                }
+                if (measurements.Count == 0)
+                {
+                    measurements = null;
+                }
+            }
+            return measurements;
         }
     }
 }
