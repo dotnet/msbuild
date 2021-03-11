@@ -125,8 +125,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public string Language => _commandOptions.ContainsKey("--language") ? _commandOptions["--language"] : string.Empty;
 
-        public string Locale { get; }
-
         public string Name { get; }
 
         public string OutputPath { get; }

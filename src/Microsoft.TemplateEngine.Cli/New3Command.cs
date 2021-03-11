@@ -1,12 +1,13 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable enable
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.TemplateLocator;
@@ -32,15 +33,12 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly SettingsLoader _settingsLoader;
         private readonly AliasRegistry _aliasRegistry;
         private readonly Paths _paths;
-        private readonly INewCommandInput _commandInput;    // It's safe to access template agnostic information anytime after the first parse. But there is never a guarantee which template the parse is in the context of.
+
+        // It's safe to access template agnostic information anytime after the first parse. But there is never a guarantee which template the parse is in the context of.
+        private readonly INewCommandInput _commandInput;
+
         private readonly IHostSpecificDataLoader _hostDataLoader;
-        private readonly string _defaultLanguage;
-        private static readonly Regex LocaleFormatRegex = new Regex(@"
-                    ^
-                        [a-z]{2}
-                        (?:-[A-Z]{2})?
-                    $"
-            , RegexOptions.IgnorePatternWhitespace);
+        private readonly string? _defaultLanguage;
         private readonly New3Callbacks _callbacks;
         private readonly Func<string> _inputGetter = () => Console.ReadLine();
 
@@ -49,7 +47,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
         }
 
-        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string hivePath)
+        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string? hivePath)
         {
             _telemetryLogger = telemetryLogger;
             host = new ExtendedTemplateEngineHost(host, this);
@@ -74,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        internal static Installer Installer { get; set; }
+        internal static Installer Installer { get; set; } = null!;
 
         public string CommandName { get; }
 
@@ -90,9 +88,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
-        private static Mutex _entryMutex;
+        private static Mutex? _entryMutex;
 
-        private static Mutex EnsureEntryMutex(string hivePath, ITemplateEngineHost host)
+        private static Mutex EnsureEntryMutex(string? hivePath, ITemplateEngineHost host)
         {
             if (_entryMutex == null)
             {
@@ -114,18 +112,18 @@ namespace Microsoft.TemplateEngine.Cli
             return _entryMutex;
         }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string hivePath)
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string? hivePath)
         {
             return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, hivePath);
         }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string hivePath)
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath)
         {
             if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
                 EnsureEntryMutex(hivePath, host);
 
-                if (!_entryMutex.WaitOne())
+                if (!_entryMutex!.WaitOne())
                 {
                     return -1;
                 }
@@ -144,7 +142,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string hivePath)
+        private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath)
         {
             if (args.Any(x => string.Equals(x, "--debug:version", StringComparison.Ordinal)))
             {
@@ -194,7 +192,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             catch (Exception ex)
             {
-                AggregateException ax = ex as AggregateException;
+                AggregateException? ax = ex as AggregateException;
 
                 while (ax != null && ax.InnerExceptions.Count == 1)
                 {
@@ -444,11 +442,6 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            if (!ConfigureLocale())
-            {
-                return CreationResultStatus.InvalidParamValues;
-            }
-
             if (!Initialize())
             {
                 return CreationResultStatus.Success;
@@ -512,25 +505,6 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());
                 return CreationResultStatus.CreateFailed;
             }
-        }
-
-        private bool ConfigureLocale()
-        {
-            if (!string.IsNullOrEmpty(_commandInput.Locale))
-            {
-                string newLocale = _commandInput.Locale;
-                if (!ValidateLocaleFormat(newLocale))
-                {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.BadLocaleError, newLocale).Bold().Red());
-                    return false;
-                }
-
-                EnvironmentSettings.Host.UpdateLocale(newLocale);
-                // cache the templates for the new locale
-                _settingsLoader.Reload();
-            }
-
-            return true;
         }
 
         private bool SyncOptionalWorkloads()
@@ -714,11 +688,6 @@ namespace Microsoft.TemplateEngine.Cli
             int targetLength = Math.Max(LocalizableStrings.Version.Length, LocalizableStrings.CommitHash.Length);
             Reporter.Output.WriteLine($" {LocalizableStrings.Version.PadRight(targetLength)} {GitInfo.PackageVersion}");
             Reporter.Output.WriteLine($" {LocalizableStrings.CommitHash.PadRight(targetLength)} {GitInfo.CommitHash}");
-        }
-
-        private static bool ValidateLocaleFormat(string localeToCheck)
-        {
-            return LocaleFormatRegex.IsMatch(localeToCheck);
         }
     }
 }

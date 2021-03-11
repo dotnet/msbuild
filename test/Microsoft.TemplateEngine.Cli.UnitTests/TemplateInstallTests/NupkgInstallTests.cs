@@ -126,7 +126,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
                 typeof(NupkgUpdater).GetTypeInfo().Assembly                         // for assembly: Microsoft.TemplateSearch.Common
             });
 
-            return new DefaultTemplateEngineHost(hostIdentifier, hostVersion, CultureInfo.CurrentCulture.Name, preferences, builtIns, new[] { "dotnetcli" });
+            return new DefaultTemplateEngineHost(hostIdentifier, hostVersion, preferences, builtIns, new[] { "dotnetcli" });
         }
     }
 }

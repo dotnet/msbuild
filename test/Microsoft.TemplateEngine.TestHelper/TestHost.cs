@@ -37,8 +37,6 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public IPhysicalFileSystem FileSystem { get; set; }
 
-        public string Locale { get; set; }
-
         public string HostIdentifier { get; set; }
 
         public IReadOnlyList<string> FallbackHostTemplateConfigNames { get; set; }
@@ -81,10 +79,6 @@ namespace Microsoft.TemplateEngine.TestHelper
         public void LogMessage(string message)
         {
             MessageReceived?.Invoke(message);
-        }
-
-        public void UpdateLocale(string newLocale)
-        {
         }
 
         public void VirtualizeDirectory(string path)

@@ -162,7 +162,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("-a|--alias", string.Empty, Accept.ExactlyOneArgument()),
                     Create.Option("--show-alias", string.Empty, Accept.ZeroOrOneArgument()),
                     Create.Option("-x|--extra-args", string.Empty, Accept.OneOrMoreArguments()),
-                    Create.Option("--locale", string.Empty, Accept.ExactlyOneArgument()),
                     Create.Option("--quiet", string.Empty, Accept.NoArguments()),
                     Create.Option("-all|--show-all", string.Empty, Accept.NoArguments()),
                     Create.Option("--allow-scripts", string.Empty, Accept.ZeroOrOneArgument()),

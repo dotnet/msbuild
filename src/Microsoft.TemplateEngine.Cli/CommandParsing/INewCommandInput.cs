@@ -32,7 +32,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         bool IsQuietFlagSpecified { get; }
         bool IsShowAllFlagSpecified { get; }
         string Language { get; }
-        string Locale { get; }
         string Name { get; }
         string OutputPath { get; }
         string PackageFilter { get; }

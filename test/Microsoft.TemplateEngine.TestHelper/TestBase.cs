@@ -19,7 +19,6 @@ namespace Microsoft.TemplateEngine.TestHelper
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             EngineEnvironmentSettings = new EngineEnvironmentSettings(host, x => new MockSettingsLoader(x));

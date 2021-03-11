@@ -161,8 +161,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string Language => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "language" });
 
-        public string Locale => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "locale" });
-
         public string Name => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "name" });
 
         public string OutputPath => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "output" });

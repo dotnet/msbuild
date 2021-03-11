@@ -278,7 +278,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                     "-a", "--alias",
                     "--show-alias",
                     "-x", "--extra-args",
-                    "--locale",
                     "--quiet",
                     "-all", "--show-all",
                     "--allow-scripts",

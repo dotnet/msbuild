@@ -20,10 +20,6 @@ namespace Microsoft.TemplateEngine.Cli
 
         public IPhysicalFileSystem FileSystem => _baseHost.FileSystem;
 
-        public string Locale => _baseHost.Locale;
-
-        public void UpdateLocale(string newLocale) => _baseHost.UpdateLocale(newLocale);
-
         public string HostIdentifier => _baseHost.HostIdentifier;
 
         public IReadOnlyList<string> FallbackHostTemplateConfigNames => _baseHost.FallbackHostTemplateConfigNames;

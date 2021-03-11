@@ -18,7 +18,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -63,7 +62,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -109,7 +107,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -154,7 +151,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -200,7 +196,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -246,7 +241,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
@@ -292,7 +286,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             {
                 HostIdentifier = "TestRunner",
                 Version = "1.0.0.0",
-                Locale = "en-US"
             };
 
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
