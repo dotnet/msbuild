@@ -6,8 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.Cli.Build
+namespace Microsoft.NET.TestFramework
 {
     public static class ExponentialRetry
     {
@@ -15,31 +16,34 @@ namespace Microsoft.DotNet.Cli.Build
         {
             get
             {
+                yield return TimeSpan.FromSeconds(0); // first retry immediately
                 var seconds = 5;
                 while (true)
                 {
                     yield return TimeSpan.FromSeconds(seconds);
-                    seconds *= 2;
+                    seconds *= 10;
                 }
             }
         }
 
-        public static async Task ExecuteWithRetry(Func<Task<string>> action,
-            Func<string, bool> isSuccess,
+        public static async Task<T> ExecuteWithRetry<T>(Func<T> action,
+            Func<T, bool> shouldStopRetry,
             int maxRetryCount,
             Func<IEnumerable<Task>> timer,
-            string taskDescription = "")
+            string taskDescription = "",
+            ITestOutputHelper log = null)
         {
             var count = 0;
             foreach (var t in timer())
             {
                 await t;
-                var result = await action();
-                if (isSuccess(result))
+                var result = action();
+                if (shouldStopRetry(result))
                 {
-                    return;
+                    return result;
                 }
 
+                log?.WriteLine($"Operation failed. Retry count: {count}");
                 count++;
                 if (count == maxRetryCount)
                 {

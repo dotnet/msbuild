@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 using System.Diagnostics;
 using System.Linq;
 using System;
+using static Microsoft.NET.TestFramework.ExponentialRetry;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
@@ -83,7 +84,23 @@ namespace Microsoft.NET.TestFramework.Commands
         public CommandResult Execute(params string[] args)
         {
             IEnumerable<string> enumerableArgs = args;
-            return Execute(enumerableArgs);
+            return ExecuteWithRetry(
+                    action: () => Execute(enumerableArgs),
+                    shouldStopRetry: SuccessOrNotTransientRestoreError,
+                    maxRetryCount: 3,
+                    timer: () => Timer(Intervals),
+                    taskDescription: "Run command while retry transient restore error")
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        private static bool SuccessOrNotTransientRestoreError(CommandResult result)
+        {
+            if (result.ExitCode == 0)
+            {
+                return true;
+            }
+
+            return !NuGetTransientErrorDetector.IsTransientError(result.StdOut);
         }
 
         public virtual CommandResult Execute(IEnumerable<string> args)

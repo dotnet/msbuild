@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.DotNet.Cli.Build
+namespace Microsoft.NET.TestFramework
 {
     public class RetryFailedException : Exception
     {
