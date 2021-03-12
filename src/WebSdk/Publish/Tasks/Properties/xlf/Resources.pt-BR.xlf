@@ -1855,7 +1855,7 @@ Detalhes do erro:</target>
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
         <source>Generating AssemblyInfo.</source>
-        <target state="translated">Gerando AssemblyInfo.</target>
+        <target state="translated">Gerando Informações do Assembly.</target>
         <note />
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">

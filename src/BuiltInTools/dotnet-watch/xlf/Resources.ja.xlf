@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="Error_MultipleProjectsFound">
         <source>Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</source>
-        <target state="new">Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</target>
+        <target state="translated">複数の MSBuild プロジェクト ファイルが '{0}' で見つかりました。使用するものを --project オプションで指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_NoProjectsFound">
         <source>Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</source>
-        <target state="new">Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</target>
+        <target state="translated">'{0}' で MSBuild プロジェクト ファイルが見つかりませんでした。使用するプロジェクトを --project オプションで指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_ProjectPath_NotFound">
         <source>The project file '{0}' does not exist.</source>
-        <target state="new">The project file '{0}' does not exist.</target>
+        <target state="translated">プロジェクト ファイル '{0}' が存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_QuietAndVerboseSpecified">
         <source>Cannot specify both '--quiet' and '--verbose' options.</source>
-        <target state="new">Cannot specify both '--quiet' and '--verbose' options.</target>
+        <target state="translated">'--quiet' と '--verbose' の両方のオプションを指定することはできません。</target>
         <note />
       </trans-unit>
     </body>

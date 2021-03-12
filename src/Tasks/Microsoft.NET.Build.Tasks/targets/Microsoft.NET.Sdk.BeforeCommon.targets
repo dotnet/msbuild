@@ -23,7 +23,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
     <OutputType Condition="'$(DisableWinExeOutputInference)' != 'true' and '$(OutputType)' == 'Exe' and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">WinExe</OutputType>
-    <IncludePackageReferencesDuringMarkupCompilation Condition=" '$(IncludePackageReferencesDuringMarkupCompilation)' == '' ">true</IncludePackageReferencesDuringMarkupCompilation>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HasRuntimeOutput)' == ''">

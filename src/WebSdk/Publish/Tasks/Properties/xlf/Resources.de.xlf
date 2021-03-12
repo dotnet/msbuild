@@ -1855,7 +1855,7 @@ Fehlerdetails:</target>
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Start">
         <source>Generating AssemblyInfo.</source>
-        <target state="translated">"AssemblyInfo" wird generiert.</target>
+        <target state="translated">Assemblyinformationen werden generiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="WEBDEPLOY_AssemblyInfo_Succeeded">

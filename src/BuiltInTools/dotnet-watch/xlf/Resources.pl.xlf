@@ -4,22 +4,22 @@
     <body>
       <trans-unit id="Error_MultipleProjectsFound">
         <source>Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</source>
-        <target state="new">Multiple MSBuild project files found in '{0}'. Specify which to use with the --project option.</target>
+        <target state="translated">W elemencie „{0}” znaleziono wiele plików projektów MSBuild. Określ projekt do użycia za pomocą opcji --project.</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_NoProjectsFound">
         <source>Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</source>
-        <target state="new">Could not find a MSBuild project file in '{0}'. Specify which project to use with the --project option.</target>
+        <target state="translated">Nie można znaleźć pliku projektu MSBuild w elemencie „{0}”. Określ projekt do użycia za pomocą opcji --project.</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_ProjectPath_NotFound">
         <source>The project file '{0}' does not exist.</source>
-        <target state="new">The project file '{0}' does not exist.</target>
+        <target state="translated">Plik projektu „{0}” nie istnieje.</target>
         <note />
       </trans-unit>
       <trans-unit id="Error_QuietAndVerboseSpecified">
         <source>Cannot specify both '--quiet' and '--verbose' options.</source>
-        <target state="new">Cannot specify both '--quiet' and '--verbose' options.</target>
+        <target state="translated">Nie można jednocześnie określić opcji „--quiet” i „--verbose”.</target>
         <note />
       </trans-unit>
     </body>
