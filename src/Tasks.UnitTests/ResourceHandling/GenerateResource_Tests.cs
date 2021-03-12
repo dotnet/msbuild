@@ -3410,17 +3410,23 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             var matches = Regex.Matches(unformattedMessage, @"\{\d+.*?\}");
             if (matches.Count > 0)
             {
+                var sb = new StringBuilder();
                 int i = 0;
+
                 foreach (Match match in matches)
                 {
                     string segment = unformattedMessage.Substring(i, match.Index - i);
-                    if (segment.Length > 0)
-                    {
-                        Assert.Contains(segment, ((MockEngine)t.BuildEngine).Log);
-                    }
+                    sb.Append(Regex.Escape(segment));
+                    sb.Append(".*");
 
                     i = match.Index + match.Length;
                 }
+                if (i < unformattedMessage.Length)
+                {
+                    sb.Append(Regex.Escape(unformattedMessage.Substring(i)));
+                }
+
+                Assert.Matches(sb.ToString(), ((MockEngine)t.BuildEngine).Log);
             }
             else
             {
