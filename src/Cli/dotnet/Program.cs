@@ -3,6 +3,9 @@
 
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Telemetry;
@@ -28,6 +31,7 @@ namespace Microsoft.DotNet.Cli
 
             // Capture the current timestamp to calculate the host overhead.
             DateTime mainTimeStamp = DateTime.Now;
+            TimeSpan startupTime = mainTimeStamp - Process.GetCurrentProcess().StartTime;
 
             bool perfLogEnabled = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_PERF_LOG", false);
             PerformanceLogStartupInformation startupInfo = null;
@@ -52,7 +56,10 @@ namespace Microsoft.DotNet.Cli
 
                 try
                 {
-                    return ProcessArgs(args);
+                    using (PerfTrace.Current.CaptureTiming())
+                    {
+                        return ProcessArgs(args, startupTime);
+                    }
                 }
                 catch (HelpException e)
                 {
@@ -95,9 +102,20 @@ namespace Microsoft.DotNet.Cli
             }
         }
 
-        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null )
         {
-            var parseResult = Parser.Instance.Parse(args);
+            return ProcessArgs(args, new TimeSpan(0));
+        }
+
+        internal static int ProcessArgs(string[] args, TimeSpan startupTime, ITelemetry telemetryClient = null )
+        {
+            // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
+            var success = true;
+            var command = string.Empty;
+            var lastArg = 0;
+            Dictionary<string, double> performanceData = new Dictionary<string, double>();
+            TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
+
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel())
             {
@@ -158,6 +176,54 @@ namespace Microsoft.DotNet.Cli
                         toolPathSentinel = new NoOpFileSentinel(exists: false);
                         isDotnetBeingInvokedFromNativeInstaller = true;
                     }
+                    else
+                    {
+                        // It's the command, and we're done!
+                        command = args[lastArg];
+                        if (string.IsNullOrEmpty(command))
+                        {
+                            command = "help";
+                        }
+
+                        PerformanceLogEventSource.Log.FirstTimeConfigurationStart();
+
+                        var environmentProvider = new EnvironmentProvider();
+
+                        bool generateAspNetCertificate =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", defaultValue: true);
+                        bool telemetryOptout =
+                          environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", defaultValue: false);
+                        bool addGlobalToolsToPath =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_ADD_GLOBAL_TOOLS_TO_PATH", defaultValue: true);
+                        bool nologo =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_NOLOGO", defaultValue: false);
+
+                        ReportDotnetHomeUsage(environmentProvider);
+
+                        topLevelCommandParserResult = new TopLevelCommandParserResult(command);
+                        var isDotnetBeingInvokedFromNativeInstaller = false;
+                        if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
+                        {
+                            aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
+                            firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
+                            toolPathSentinel = new NoOpFileSentinel(exists: false);
+                            isDotnetBeingInvokedFromNativeInstaller = true;
+                        }
+
+                        var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
+                            generateAspNetCertificate: generateAspNetCertificate,
+                            telemetryOptout: telemetryOptout,
+                            addGlobalToolsToPath: addGlobalToolsToPath,
+                            nologo: nologo);
+
+                        ConfigureDotNetForFirstTimeUse(
+                            firstTimeUseNoticeSentinel,
+                            aspNetCertificateSentinel,
+                            toolPathSentinel,
+                            isDotnetBeingInvokedFromNativeInstaller,
+                            dotnetFirstRunConfiguration,
+                            environmentProvider,
+                            performanceData);
 
                     var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
                         generateAspNetCertificate: generateAspNetCertificate,
@@ -173,7 +239,13 @@ namespace Microsoft.DotNet.Cli
                         dotnetFirstRunConfiguration,
                         environmentProvider);
                         PerformanceLogEventSource.Log.FirstTimeConfigurationStop();
-
+                        break;
+                    }
+                }
+                if (!success)
+                {
+                    HelpCommand.PrintHelp();
+                    return 1;
                 }
 
                 PerformanceLogEventSource.Log.TelemetryRegistrationStart();
@@ -193,23 +265,26 @@ namespace Microsoft.DotNet.Cli
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-            TelemetryEventEntry.SendFiltered(parseResult);
+            performanceData.Add("Startup Time", startupTime.TotalMilliseconds);
+            TelemetryEventEntry.SendFiltered(Tuple.Create(topLevelCommandParserResult, performanceData));
             PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
 
             var topLevelCommands = new string[] { "dotnet", parseResult.RootSubCommandResult() }.Concat(Parser.DiagOption.Aliases);
             int exitCode;
             if (parseResult.CommandResult.Command.Name.Equals("dotnet") && string.IsNullOrEmpty(parseResult.ValueForArgument<string>(Parser.DotnetSubCommand)))
             {
-                exitCode = 0;
-            }
-            else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootSubCommandResult(), out var builtIn))
-            {
-			    PerformanceLogEventSource.Log.BuiltInCommandParserStart();
-                if (parseResult.Errors.Count <= 0)
+                PerformanceLogEventSource.Log.BuiltInCommandParserStart();
+                Stopwatch parseStartTime = Stopwatch.StartNew() ;
+                var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
+                TimeSpan parseTime = parseStartTime.Elapsed;
+                PerformanceLogEventSource.Log.BuiltInCommandParserStop();
+
+                if (!parseResult.Errors.Any())
                 {
-				    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
-                    TelemetryEventEntry.SendFiltered(parseResult);
-					PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
+                    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStart();
+                    performanceData.Add("Parse Time", parseTime.TotalMilliseconds);
+                    TelemetryEventEntry.SendFiltered(Tuple.Create(parseResult, performanceData));
+                    PerformanceLogEventSource.Log.TelemetrySaveIfEnabledStop();
                 }
 
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
@@ -261,7 +336,8 @@ namespace Microsoft.DotNet.Cli
             IFileSentinel toolPathSentinel,
             bool isDotnetBeingInvokedFromNativeInstaller,
             DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
-            IEnvironmentProvider environmentProvider)
+            IEnvironmentProvider environmentProvider,
+            Dictionary<string,double> performanceMeasurements)
         {
             var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
             var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
@@ -280,7 +356,25 @@ namespace Microsoft.DotNet.Cli
 
             if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
             {
-                DotDefaultPathCorrector.Correct();
+                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(isDotnetBeingInvokedFromNativeInstaller, environmentProvider);
+                var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
+                var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
+                var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
+                    firstTimeUseNoticeSentinel,
+                    aspNetCertificateSentinel,
+                    aspnetCertificateGenerator,
+                    toolPathSentinel,
+                    dotnetFirstRunConfiguration,
+                    Reporter.Output,
+                    CliFolderPathCalculator.CliFallbackFolderPath,
+                    environmentPath,
+                    performanceMeasurements);
+
+                dotnetConfigurer.Configure();
+                if (isDotnetBeingInvokedFromNativeInstaller && OperatingSystem.IsWindows())
+                {
+                    DotDefaultPathCorrector.Correct();
+                }
             }
         }
 
