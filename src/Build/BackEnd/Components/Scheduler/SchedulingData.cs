@@ -486,7 +486,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Retrieves a request which has been assigned to a node and is in the executing, blocked or ready states.
+        /// Retrieves a request which has been assigned to a node and is in the executing, yielding, blocked, ready states.
         /// </summary>
         public SchedulableRequest GetScheduledRequest(int globalRequestId)
         {

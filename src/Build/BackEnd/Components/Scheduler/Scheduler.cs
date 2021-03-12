@@ -538,7 +538,7 @@ namespace Microsoft.Build.BackEnd
         public int RequestCores(int requestId, int requestedCores)
         {
             int grantedCores = Math.Min(requestedCores, GetAvailableCoresForExplicitRequests());
-            SchedulableRequest request = _schedulingData.GetExecutingRequest(requestId);
+            SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
             request.AddRequestedCores(grantedCores);
             return grantedCores;
         }
