@@ -10,6 +10,7 @@ using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
 using System.IO;
+using System.Threading;
 using Shouldly;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
@@ -1942,7 +1943,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Execute();
 
                 // "cannot read state file (opening for read/write)"
-                Utilities.AssertLogContains(t, "MSB3088");
+                Utilities.AssertLogContainsResourceWithUnspecifiedReplacements(t, "General.CouldNotReadStateFileMessage");
                 // "cannot write state file (opening for read/write)"
                 Utilities.AssertLogContains(t, "MSB3101");
             }
