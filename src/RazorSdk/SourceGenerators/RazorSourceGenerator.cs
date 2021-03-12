@@ -27,6 +27,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         // https://github.com/dotnet/roslyn/issues/51257 track the long-term resolution for this.
         private static readonly ConcurrentDictionary<Guid, IReadOnlyList<TagHelperDescriptor>> _tagHelperCache = new();
 
+        private static readonly SourceText ProvideApplicationPartFactoryAttributeSourceText = GetProvideApplicationPartFactorySourceText();
+
         public void Initialize(GeneratorInitializationContext context)
         {
         }
@@ -79,7 +81,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var arraypool = ArrayPool<(string, SourceText)>.Shared;
             var outputs = arraypool.Rent(files.Count);
 
-            PopulateAssemblyInfo(context);
+            context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info", ProvideApplicationPartFactoryAttributeSourceText);
 
             Parallel.For(0, files.Count, GetParallelOptions(context), i =>
             {
@@ -192,7 +194,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             // Add declaration codegen to the compilation so we can perform discovery on it.
             var compilationWithDeclarationCodeGen = GeneratorExecutionContext.Compilation.AddSyntaxTrees(results.Take(files.Count));
             ArrayPool<SyntaxTree>.Shared.Return(results);
-                
+
             tagHelperFeature.Compilation = compilationWithDeclarationCodeGen;
 
             tagHelperFeature.TargetAssembly = compilationWithDeclarationCodeGen.Assembly;
@@ -225,7 +227,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                         {
                             tagHelperFeature.TargetAssembly = assembly;
                             descriptors = tagHelperFeature.GetDescriptors();
-                            // Clear out the cache if it is growing too large. A 
+                            // Clear out the cache if it is growing too large. A
                             // simple compilation can include around ~300 references
                             // so give a little bit of buffer beyond this.
                             if (_tagHelperCache.Count > 400)
@@ -252,11 +254,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return tagHelperDescriptors;
         }
 
-        private static void PopulateAssemblyInfo(GeneratorExecutionContext context)
+        private static SourceText GetProvideApplicationPartFactorySourceText()
         {
-            var typeInfo = "typeof(global::Microsoft.AspNetCore.Mvc.ApplicationParts.ConsolidatedAssemblyApplicationPartFactory)";
+            var typeInfo = "Microsoft.AspNetCore.Mvc.ApplicationParts.ConsolidatedAssemblyApplicationPartFactory, Microsoft.AspNetCore.Mvc.Razor";
             var assemblyInfo = $@"[assembly: global::Microsoft.AspNetCore.Mvc.ApplicationParts.ProvideApplicationPartFactoryAttribute(""{typeInfo}"")]";
-            context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info", SourceText.From(assemblyInfo, Encoding.UTF8));
+            return SourceText.From(assemblyInfo, Encoding.UTF8);
         }
 
         private static string GetIdentifierFromPath(string filePath)
