@@ -8,11 +8,14 @@ using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.Reflection;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
+using Command = System.CommandLine.Command;
+using ICommand = System.CommandLine.ICommand;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -71,6 +74,12 @@ namespace Microsoft.DotNet.Cli
             foreach (var subcommand in Subcommands)
             {
                 rootCommand.AddCommand(subcommand);
+            }
+
+            // Workload command is behind a feature flag during development
+            if (Env.GetEnvironmentVariableAsBool("DEVENABLEWORKLOADCOMMAND", defaultValue: false))
+            {
+                rootCommand.AddCommand(WorkloadCommandParser.GetCommand());
             }
 
             //Add internal commands

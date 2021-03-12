@@ -13,7 +13,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
     {
         private readonly string _fileKind;
 
-        public SourceGeneratorProjectItem(string basePath, string filePath, string relativePhysicalPath, string fileKind, AdditionalText additionalText, string cssScope)
+        private readonly GeneratorExecutionContext _context;
+
+        public SourceGeneratorProjectItem(string basePath, string filePath, string relativePhysicalPath, string fileKind, AdditionalText additionalText, string? cssScope, GeneratorExecutionContext context)
         {
             BasePath = basePath;
             FilePath = filePath;
@@ -21,8 +23,16 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             _fileKind = fileKind;
             AdditionalText = additionalText;
             CssScope = cssScope;
+            _context = context;
             var text = AdditionalText.GetText();
-            RazorSourceDocument = new SourceTextRazorSourceDocument(AdditionalText.Path, relativePhysicalPath, text);
+            if (text is null)
+            {
+                _context.ReportDiagnostic(Diagnostic.Create(RazorDiagnostics.SourceTextNotFoundDescriptor, Location.None, filePath));
+            }
+            else 
+            {
+                RazorSourceDocument = new SourceTextRazorSourceDocument(AdditionalText.Path, relativePhysicalPath, text);
+            }
         }
 
         public AdditionalText AdditionalText { get; }
@@ -39,9 +49,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public override string FileKind => _fileKind ?? base.FileKind;
 
-        public override string CssScope { get; }
+        public override string? CssScope { get; }
 
-        public override Stream Read()
+        public override Stream Read() 
             => throw new NotSupportedException("This API should not be invoked. We should instead be relying on " +
                 "the RazorSourceDocument associated with this item instead.");
     }

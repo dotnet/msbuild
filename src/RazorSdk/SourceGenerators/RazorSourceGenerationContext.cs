@@ -13,17 +13,16 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     internal class RazorSourceGenerationContext
     {
-        public string RootNamespace { get; private set; }
+        public string RootNamespace { get; private set; } = "ASP";
 
-        public IReadOnlyList<RazorInputItem> RazorFiles { get; private set; }
+        public IReadOnlyList<RazorInputItem> RazorFiles { get; private set; } = Array.Empty<RazorInputItem>();
 
-        public IReadOnlyList<RazorInputItem> CshtmlFiles { get; private set; }
+        public IReadOnlyList<RazorInputItem> CshtmlFiles { get; private set; } = Array.Empty<RazorInputItem>();
 
         public VirtualRazorProjectFileSystem FileSystem { get; private set; }
 
         public RazorConfiguration Configuration { get; private set; }
 
-        public bool DesignTimeBuild { get; private set; }
 
         /// <summary>
         /// Gets a flag that determines if the source generator waits for the debugger to attach.
@@ -43,7 +42,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         /// </para>
         public bool EnableLogging { get; private set; }
 
-        public static RazorSourceGenerationContext Create(GeneratorExecutionContext context)
+        public RazorSourceGenerationContext(GeneratorExecutionContext context)
         {
             var globalOptions = context.AnalyzerConfigOptions.GlobalOptions;
 
@@ -52,17 +51,14 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 rootNamespace = "ASP";
             }
 
-            globalOptions.TryGetValue("build_property.DesignTimeBuild", out var designTimeBuild);
-
+            var razorLanguageVersion = RazorLanguageVersion.Latest;
             if (!globalOptions.TryGetValue("build_property.RazorLangVersion", out var razorLanguageVersionString) ||
-                !RazorLanguageVersion.TryParse(razorLanguageVersionString, out var razorLanguageVersion))
+                !RazorLanguageVersion.TryParse(razorLanguageVersionString, out razorLanguageVersion))
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     RazorDiagnostics.InvalidRazorLangVersionDescriptor,
                     Location.None,
                     razorLanguageVersionString));
-
-                return null;
             }
 
             if (!globalOptions.TryGetValue("build_property.RazorConfiguration", out var configurationName))
@@ -75,22 +71,18 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>());
             var (razorFiles, cshtmlFiles) = GetRazorInputs(context);
-            var fileSystem = GetVirtualFileSystem(razorFiles, cshtmlFiles);
+            var fileSystem = GetVirtualFileSystem(context, razorFiles, cshtmlFiles);
 
-            return new RazorSourceGenerationContext
-            {
-                RootNamespace = rootNamespace,
-                Configuration = razorConfiguration,
-                FileSystem = fileSystem,
-                RazorFiles = razorFiles,
-                CshtmlFiles = cshtmlFiles,
-                DesignTimeBuild = designTimeBuild == "true",
-                WaitForDebugger = waitForDebugger == "true",
-                EnableLogging = enableLogging == "true"
-            };
+            RootNamespace = rootNamespace;
+            Configuration = razorConfiguration;
+            FileSystem = fileSystem;
+            RazorFiles = razorFiles;
+            CshtmlFiles = cshtmlFiles;
+            WaitForDebugger = waitForDebugger == "true";
+            EnableLogging = enableLogging == "true";
         }
 
-        private static VirtualRazorProjectFileSystem GetVirtualFileSystem(IReadOnlyList<RazorInputItem> razorFiles, IReadOnlyList<RazorInputItem> cshtmlFiles)
+        private static VirtualRazorProjectFileSystem GetVirtualFileSystem(GeneratorExecutionContext context, IReadOnlyList<RazorInputItem> razorFiles, IReadOnlyList<RazorInputItem> cshtmlFiles)
         {
             var fileSystem = new VirtualRazorProjectFileSystem();
             for (var i = 0; i < razorFiles.Count; i++)
@@ -102,7 +94,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     relativePhysicalPath: item.RelativePath,
                     fileKind: FileKinds.Component,
                     item.AdditionalText,
-                    cssScope: item.CssScope));
+                    cssScope: item.CssScope,
+                    context: context));
             }
 
             for (var i = 0; i < cshtmlFiles.Count; i++)
@@ -114,7 +107,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     relativePhysicalPath: item.RelativePath,
                     fileKind: FileKinds.Legacy,
                     item.AdditionalText,
-                    cssScope: item.CssScope));
+                    cssScope: item.CssScope,
+                    context: context));
             }
 
             return fileSystem;
@@ -122,8 +116,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         private static (IReadOnlyList<RazorInputItem> razorFiles, IReadOnlyList<RazorInputItem> cshtmlFiles) GetRazorInputs(GeneratorExecutionContext context)
         {
-            List<RazorInputItem> razorFiles = null;
-            List<RazorInputItem> cshtmlFiles = null;
+            List<RazorInputItem> razorFiles = new();
+            List<RazorInputItem> cshtmlFiles = new();
 
             foreach (var item in context.AdditionalFiles)
             {
@@ -139,40 +133,38 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 var options = context.AnalyzerConfigOptions.GetOptions(item);
                 if (!options.TryGetValue("build_metadata.AdditionalFiles.TargetPath", out var relativePath))
                 {
-                    throw new InvalidOperationException($"TargetPath is not specified for additional file '{item.Path}.");
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        RazorDiagnostics.TargetPathNotProvided,
+                        Location.None,
+                        item.Path));
+                    continue;
                 }
 
                 options.TryGetValue("build_metadata.AdditionalFiles.CssScope", out var cssScope);
 
-                string generatedDeclarationPath = null;
-
-                options.TryGetValue("build_metadata.AdditionalFiles.GeneratedOutputFullPath", out var generatedOutputPath);
-                if (isComponent)
+                if (!options.TryGetValue("build_metadata.AdditionalFiles.GeneratedOutputFullPath", out var generatedOutputPath))
                 {
-                    options.TryGetValue("build_metadata.AdditionalFiles.GeneratedDeclarationFullPath", out generatedDeclarationPath);
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        RazorDiagnostics.GeneratedOutputFullPathNotProvided,
+                        Location.None,
+                        item.Path));
                 }
 
                 var fileKind = isComponent ? FileKinds.GetComponentFileKindFromFilePath(item.Path) : FileKinds.Legacy;
 
-                var inputItem = new RazorInputItem(item, relativePath, fileKind, generatedOutputPath, generatedDeclarationPath, cssScope);
+                var inputItem = new RazorInputItem(item, relativePath, fileKind, generatedOutputPath, cssScope);
 
                 if (isComponent)
                 {
-                    razorFiles ??= new();
                     razorFiles.Add(inputItem);
                 }
                 else
                 {
-                    cshtmlFiles ??= new();
                     cshtmlFiles.Add(inputItem);
                 }
             }
 
-            return (
-                (IReadOnlyList<RazorInputItem>)razorFiles ?? Array.Empty<RazorInputItem>(),
-                (IReadOnlyList<RazorInputItem>)cshtmlFiles ?? Array.Empty<RazorInputItem>()
-            );
+            return (razorFiles, cshtmlFiles);
         }
-
     }
 }

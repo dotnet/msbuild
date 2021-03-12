@@ -23,54 +23,6 @@ namespace Microsoft.NET.Sdk.Razor.Tests
     {
         public BuildIncrementalismTest(ITestOutputHelper log) : base(log) {}
 
-        [Fact]
-        public void BuildIncremental_SimpleMvc_PersistsTargetInputFile()
-        {
-            // Arrange
-            var thumbprintLookup = new Dictionary<string, FileThumbPrint>();
-
-            // Act 1
-            var testAsset = "RazorSimpleMvc";
-            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-
-            var build = new BuildCommand(projectDirectory);
-            var result = build.Execute();
-
-            var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
-            var filesToIgnore = new[]
-            {
-                // These files are generated on every build.
-                Path.Combine(intermediateOutputPath, "SimpleMvc.csproj.CopyComplete"),
-                Path.Combine(intermediateOutputPath, "SimpleMvc.csproj.FileListAbsolute.txt"),
-            };
-
-            var files = Directory.GetFiles(intermediateOutputPath).Where(p => !filesToIgnore.Contains(p));
-            foreach (var file in files)
-            {
-                var thumbprint = FileThumbPrint.Create(file);
-                thumbprintLookup[file] = thumbprint;
-            }
-
-            // Assert 1
-            result.Should().Pass();
-
-            // Act & Assert 2
-            for (var i = 0; i < 2; i++)
-            {
-                // We want to make sure nothing changed between multiple incremental builds.
-                using (var razorGenDirectoryLock = LockDirectory(Path.Combine(intermediateOutputPath, "Razor")))
-                {
-                    result = build.Execute();
-                }
-
-                result.Should().Pass();
-                foreach (var file in files)
-                {
-                    var thumbprint = FileThumbPrint.Create(file);
-                    Assert.Equal(thumbprintLookup[file], thumbprint);
-                }
-            }
-        }
 
         [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/28780")]
         public void Build_ErrorInGeneratedCode_ReportsMSBuildError_OnIncrementalBuild()
@@ -103,40 +55,6 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
                 // File with error does not get written to disk.
                 new FileInfo(Path.Combine(intermediateOutputPath, "Razor", "Views", "Home", "Index.cshtml.g.cs")).Should().NotExist();
-            }
-        }
-
-        [Fact]
-        public void BuildComponents_ErrorInGeneratedCode_ReportsMSBuildError_OnIncrementalBuild()
-        {
-            var testAsset = "RazorMvcWithComponents";
-            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-                
-            // Introducing a Razor semantic error
-            var indexPage = Path.Combine(projectDirectory.Path, "Views", "Shared", "NavMenu.razor");
-            File.WriteAllText(indexPage, "@{ // Unterminated code block");
-
-            // Regular build
-            VerifyError(projectDirectory);
-
-            // Incremental build
-            VerifyError(projectDirectory);
-
-            void VerifyError(TestAsset projectDirectory)
-            {
-                var build = new BuildCommand(projectDirectory);
-                var result = build.Execute();
-
-                result.Should().Fail().And.HaveStdOutContaining("RZ1006");
-
-                var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
-
-                // Compilation failed without creating the views assembly
-                new FileInfo(Path.Combine(intermediateOutputPath, "MvcWithComponents.dll")).Should().NotExist();
-                new FileInfo(Path.Combine(intermediateOutputPath, "MvcWithComponents.Views.dll")).Should().NotExist();
-
-                // File with error does not get written to disk.
-                new FileInfo(Path.Combine(intermediateOutputPath, "RazorComponents", "Views", "Shared", "NavMenu.razor.g.cs")).Should().NotExist();
             }
         }
 
@@ -195,46 +113,6 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             // TagHelper cache should remain unchanged.
             Assert.Equal(definitionThumbprint, FileThumbPrint.Create(tagHelperOutputCache));
-        }
-
-        [Fact]
-        public void IncrementalBuild_WithP2P_WorksWhenBuildProjectReferencesIsDisabled()
-        {
-            // Simulates building the same way VS does by setting BuildProjectReferences=false.
-            // With this flag, the only target called is GetCopyToOutputDirectoryItems on the referenced project.
-            // We need to ensure that we continue providing Razor binaries and symbols as files to be copied over.
-            var testAsset = "RazorAppWithP2PReference";
-            var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-            
-            var build = new BuildCommand(projectDirectory, "AppWithP2PReference");
-            build.Execute().Should().Pass();
-
-            string outputPath = build.GetOutputDirectory(DefaultTfm).FullName;
-
-            new FileInfo(Path.Combine(outputPath, "AppWithP2PReference.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "AppWithP2PReference.Views.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.pdb")).Should().Exist();
-
-            var clean = new MSBuildCommand(Log, "Clean", build.FullPathProjectFile);
-            clean.Execute("/p:BuildProjectReferences=false").Should().Pass();
-
-            new FileInfo(Path.Combine(outputPath, "AppWithP2PReference.dll")).Should().NotExist();
-            new FileInfo(Path.Combine(outputPath, "AppWithP2PReference.Views.dll")).Should().NotExist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.dll")).Should().NotExist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.dll")).Should().NotExist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.pdb")).Should().NotExist();
-
-            // dotnet msbuild /p:BuildProjectReferences=false
-            build = new BuildCommand(projectDirectory, "AppWithP2PReference");
-            build.Execute("/p:BuildProjectReferences=false").Should().Pass();
-
-            new FileInfo(Path.Combine(outputPath, "AppWithP2PReference.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "AppWithP2PReference.Views.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "ClassLibrary.Views.pdb")).Should().Exist();
         }
 
         [Fact(Skip = "https://github.com/dotnet/aspnetcore/issues/28780")]

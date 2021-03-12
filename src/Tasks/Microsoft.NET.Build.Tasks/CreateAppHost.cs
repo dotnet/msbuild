@@ -80,8 +80,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
                     catch (Exception ex) when (ex is IOException ||
                                                ex is UnauthorizedAccessException ||
-                                               // Note: replace this when https://github.com/dotnet/core-setup/issues/7516 is fixed
-                                               ex.GetType().Name == "HResultException" ||
+                                               ex is HResultException ||
                                                (ex is AggregateException && (ex.InnerException is IOException || ex.InnerException is UnauthorizedAccessException)))
                     {
                         if (Retries < 0 || attempts == Retries) {

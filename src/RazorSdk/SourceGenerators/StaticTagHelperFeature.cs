@@ -6,12 +6,20 @@ using Microsoft.AspNetCore.Razor.Language;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
-    internal sealed class StaticTagHelperFeature : ITagHelperFeature
+    internal sealed class StaticTagHelperFeature : RazorEngineFeatureBase, ITagHelperFeature
     {
-        public RazorEngine Engine { get; set; }
-
         public IReadOnlyList<TagHelperDescriptor> TagHelpers { get; set; }
 
         public IReadOnlyList<TagHelperDescriptor> GetDescriptors() => TagHelpers;
+
+        public StaticTagHelperFeature()
+        {
+            TagHelpers = new List<TagHelperDescriptor>();
+        }
+
+        public StaticTagHelperFeature(IEnumerable<TagHelperDescriptor> tagHelpers)
+        {
+            TagHelpers = new List<TagHelperDescriptor>(tagHelpers);
+        }
     }
 }

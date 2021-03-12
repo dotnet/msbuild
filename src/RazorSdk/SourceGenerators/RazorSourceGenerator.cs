@@ -26,15 +26,21 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         // Until the compiler supports granular caching for generators, we roll out our own simple caching implementation.
         // https://github.com/dotnet/roslyn/issues/51257 track the long-term resolution for this.
         private static readonly ConcurrentDictionary<Guid, IReadOnlyList<TagHelperDescriptor>> _tagHelperCache = new();
+
         public void Initialize(GeneratorInitializationContext context)
         {
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var razorContext = RazorSourceGenerationContext.Create(context);
-            if (razorContext is null ||
-                (razorContext.RazorFiles.Count == 0 && razorContext.CshtmlFiles.Count == 0))
+            var razorContext = new RazorSourceGenerationContext(context);
+            if (razorContext is null)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(RazorDiagnostics.InvalidRazorContextComputedDescriptor, Location.None));
+                return;
+            }
+
+            if (razorContext.RazorFiles.Count == 0 && razorContext.CshtmlFiles.Count == 0)
             {
                 return;
             }
@@ -65,6 +71,16 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         {
             var files = razorContext.CshtmlFiles;
 
+            if (files.Count == 0)
+            {
+                return;
+            }
+
+            var arraypool = ArrayPool<(string, SourceText)>.Shared;
+            var outputs = arraypool.Rent(files.Count);
+
+            PopulateAssemblyInfo(context);
+
             Parallel.For(0, files.Count, GetParallelOptions(context), i =>
             {
                 var file = files[i];
@@ -78,9 +94,18 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     context.ReportDiagnostic(csharpDiagnostic);
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(file.GeneratedOutputPath));
-                File.WriteAllText(file.GeneratedOutputPath, csharpDocument.GeneratedCode);
+                var generatedCode = csharpDocument.GeneratedCode;
+                var hint = GetIdentifierFromPath(file.GeneratedOutputPath ?? file.NormalizedPath);
+                outputs[i] = (hint, SourceText.From(generatedCode, Encoding.UTF8));
             });
+
+            for (var i = 0; i < files.Count; i++)
+            {
+                var (hint, sourceText) = outputs[i];
+                context.AddSource(hint, sourceText);
+            }
+
+            arraypool.Return(outputs);
         }
 
         private static void CodeGenerateRazorComponents(GeneratorExecutionContext context, RazorSourceGenerationContext razorContext, RazorProjectEngine projectEngine)
@@ -121,9 +146,10 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         private static IReadOnlyList<TagHelperDescriptor> ResolveTagHelperDescriptors(GeneratorExecutionContext GeneratorExecutionContext, RazorSourceGenerationContext razorContext)
         {
-            var tagHelperFeature = new StaticCompilationTagHelperFeature();
+            var tagHelperFeature = new StaticCompilationTagHelperFeature(GeneratorExecutionContext);
 
-            var langVersion = ((CSharpParseOptions)GeneratorExecutionContext.ParseOptions).LanguageVersion;
+            var parseOptions = (CSharpParseOptions)GeneratorExecutionContext.ParseOptions;
+            var langVersion = parseOptions.LanguageVersion;
 
             var discoveryProjectEngine = RazorProjectEngine.Create(razorContext.Configuration, razorContext.FileSystem, b =>
             {
@@ -149,9 +175,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             });
 
             var files = razorContext.RazorFiles;
-            var parseOptions = (CSharpParseOptions)GeneratorExecutionContext.ParseOptions;
 
             var results = ArrayPool<SyntaxTree>.Shared.Rent(files.Count);
+
             Parallel.For(0, files.Count, GetParallelOptions(GeneratorExecutionContext), i =>
             {
                 var file = files[i];
@@ -172,7 +198,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             tagHelperFeature.TargetAssembly = compilationWithDeclarationCodeGen.Assembly;
             var assemblyTagHelpers = tagHelperFeature.GetDescriptors();
 
-            var refTagHelpers = GetTagHelperDescriptorsFromReferences(GeneratorExecutionContext.Compilation, tagHelperFeature);
+            var refTagHelpers = GetTagHelperDescriptorsFromReferences(GeneratorExecutionContext, tagHelperFeature);
 
             var result = new List<TagHelperDescriptor>(refTagHelpers.Count + assemblyTagHelpers.Count);
             result.AddRange(assemblyTagHelpers);
@@ -181,16 +207,17 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return result;
         }
 
-        private static IReadOnlyList<TagHelperDescriptor> GetTagHelperDescriptorsFromReferences(Compilation compilation, StaticCompilationTagHelperFeature tagHelperFeature)
+        private static IReadOnlyList<TagHelperDescriptor> GetTagHelperDescriptorsFromReferences(GeneratorExecutionContext context, StaticCompilationTagHelperFeature tagHelperFeature)
         {
             List<TagHelperDescriptor> tagHelperDescriptors = new();
+            var compilation = context.Compilation;
 
             foreach (var reference in compilation.References)
             {
                 if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assembly)
                 {
                     var guid = reference.GetModuleVersionId(compilation);
-                    IReadOnlyList<TagHelperDescriptor> descriptors = default;
+                    IReadOnlyList<TagHelperDescriptor> descriptors = new List<TagHelperDescriptor>();
 
                     if (guid is Guid _guid)
                     {
@@ -212,6 +239,10 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     {
                         tagHelperFeature.TargetAssembly = assembly;
                         descriptors = tagHelperFeature.GetDescriptors();
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            RazorDiagnostics.ReComputingTagHelpersDescriptor,
+                            Location.None,
+                            reference.Display));
                     }
 
                     tagHelperDescriptors.AddRange(descriptors);
@@ -219,6 +250,13 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
 
             return tagHelperDescriptors;
+        }
+
+        private static void PopulateAssemblyInfo(GeneratorExecutionContext context)
+        {
+            var typeInfo = "typeof(global::Microsoft.AspNetCore.Mvc.ApplicationParts.ConsolidatedAssemblyApplicationPartFactory)";
+            var assemblyInfo = $@"[assembly: global::Microsoft.AspNetCore.Mvc.ApplicationParts.ProvideApplicationPartFactoryAttribute(""{typeInfo}"")]";
+            context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info", SourceText.From(assemblyInfo, Encoding.UTF8));
         }
 
         private static string GetIdentifierFromPath(string filePath)

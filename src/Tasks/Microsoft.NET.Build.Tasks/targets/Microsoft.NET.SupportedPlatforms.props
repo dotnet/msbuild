@@ -17,6 +17,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SupportedPlatform Include="iOS" />
     <SupportedPlatform Include="Linux" />
     <SupportedPlatform Include="macOS" />
+    <SupportedPlatform Include="macCatalyst" />
     <SupportedPlatform Include="Windows" />
   </ItemGroup>
 </Project>

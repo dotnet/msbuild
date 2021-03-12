@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="translated">指定されたバージョン '{0}' は、有効な NuGet バージョン範囲ではありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the workload to update.</source>
+        <target state="translated">更新するツールの NuGet パッケージ ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one workload Package Id to update.</source>
+        <target state="translated">更新するツール パッケージの ID を 1 つ指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaWorkloadSucceededVersionNoChange">
+        <source>Workload '{0}' is up to date.</source>
+        <target state="new">Workload '{0}' is up to date.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocaWorkloadToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1}.</source>
+        <target state="new">The requested version {0} is lower than existing version {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateLocalWorkloadSucceeded">
+        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="new">Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToLowerVersion">
+        <source>The requested version {0} is lower than existing version {1}.</source>
+        <target state="translated">要求されたバージョン {0} は、既存のバージョン {1} を下回っています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>The version range of the workload package to update to.</source>
+        <target state="translated">更新対象のツール パッケージのバージョン範囲。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Update a workload.</source>
+        <target state="needs-review-translation">グローバル ツールを更新します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">使用する NuGet 構成ファイル。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to update the workload for.</source>
+        <target state="translated">ツールを更新するターゲット フレームワーク。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">NuGet 構成ファイル '{0}' は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceeded">
+        <source>Workload '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="translated">ツール '{0}' がバージョン '{1}' からバージョン '{2}' に正常に更新されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFullCommandNameLocalized">
+        <source>.NET update Command</source>
+        <target state="translated">.NET update コマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededVersionNoChange">
+        <source>Workload '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">ツール '{0}' が安定した最新バージョン (バージョン '{1}') で再インストールされました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateWorkloadFailed">
+        <source>Workload '{0}' failed to update due to the following:</source>
+        <target state="translated">ツール '{0}' を更新できませんでした。原因:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Add an additional NuGet package source to use during the update.</source>
+        <target state="translated">更新中に使用する他の NuGet パッケージ ソースを追加します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="translated">VERSION</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

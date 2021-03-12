@@ -29,8 +29,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 .Should()
                 .Pass()
                 .And.HaveStdOutContaining($"UpToDateCheckInput: {Path.Combine("Views", "Home", "Index.cshtml")}")
-                .And.HaveStdOutContaining($"UpToDateCheckInput: {Path.Combine("Views", "_ViewStart.cshtml")}")
-                .And.HaveStdOutContaining($"UpToDateCheckBuilt: {Path.Combine("obj", "Debug", DefaultTfm, "SimpleMvc.Views.dll")}");
+                .And.HaveStdOutContaining($"UpToDateCheckInput: {Path.Combine("Views", "_ViewStart.cshtml")}");
         }
 
         [Fact]

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>The NuGet Package Id of the workload to uninstall.</source>
+        <target state="translated">Die NuGet-Paket-ID des Workloads, das deinstalliert werden soll.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Uninstall a workload.</source>
+        <target state="needs-review-translation">Deinstallieren Sie ein globales oder lokales Workload.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Specify one workload Package Id to uninstall.</source>
+        <target state="translated">Geben Sie eine Workloadpaket-ID für die Deinstallation an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallLocalWorkloadSucceeded">
+        <source>Workload '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="translated">Das Workload "{0}" wurde erfolgreich deinstalliert und aus der Manifestdatei "{1}" entfernt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UninstallSucceeded">
+        <source>Workload '{0}' (version '{1}') was successfully uninstalled.</source>
+        <target state="translated">Das Workload "{0}" (Version "{1}") wurde erfolgreich deinstalliert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotInstalled">
+        <source>A workload with the package Id '{0}' could not be found.</source>
+        <target state="needs-review-translation">Ein Workload mit der Paket-ID "{0}" wurde nicht gefunden. 
+
+Workloads werden unter Verwendung der zugehörigen Paket-ID deinstalliert. Diese unterscheidet sich möglicherweise 
+vom Workloadnamen, den Sie zum Aufrufen des Workloads verwenden. Sie können die Workloadnamen 
+und die zugehörigen Paket-IDs für installierte Workloads über den Befehl
+"dotnet workload list" abrufen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallWorkload">
+        <source>Failed to uninstall workload '{0}': {1}</source>
+        <target state="translated">Fehler beim Deinstallieren des Workloads "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidWorkloadPathOption">
+        <source>Workload path '{0}' does not exist.</source>
+        <target state="translated">Der Workloadpfad "{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadPathOptionDescription">
+        <source>The directory containing the workload to uninstall.</source>
+        <target state="translated">Das Verzeichnis, das das zu deinstallierende Workload enthält.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

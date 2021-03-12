@@ -54,21 +54,16 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).Should().Exist();
             new FileInfo(Path.Combine(outputPath, "MvcWithComponents.pdb")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.Views.dll")).Should().Exist();
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.Views.pdb")).Should().Exist();
+            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.Views.dll")).Should().NotExist();
+            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.Views.pdb")).Should().NotExist();
 
             new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().ContainType("MvcWithComponents.TestComponent");
             new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().ContainType("MvcWithComponents.Views.Shared.NavMenu");
 
-            // This is a component file with a .cshtml extension. It should appear in the main assembly, but not in the views dll.
+            // Components should appear in the app assembly.
             new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().ContainType("MvcWithComponents.Components.Counter");
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.Views.dll")).AssemblyShould().NotContainType("MvcWithComponents.Components.Counter");
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.Views.dll")).AssemblyShould().NotContainType("AspNetCore.Components_Counter");
-
-            // Verify a regular View appears in the views dll, but not in the main assembly.
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().NotContainType("AspNetCore.Views.Home.Index");
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().NotContainType("AspNetCore.Views_Home_Index");
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.Views.dll")).AssemblyShould().ContainType("AspNetCore.Views_Home_Index");
+            // Views should also appear in the app assembly.
+            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().ContainType("AspNetCore.Views_Home_Index");
         }
     }
 }
