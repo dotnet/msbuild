@@ -37,9 +37,9 @@ namespace Microsoft.Build.BackEnd.Components.ResourceManager
             TotalNumberHeld = -2;
         }
 
-        public int? RequestCores(int requestedCores, TaskLoggingContext _taskLoggingContext)
+        public int RequestCores(int requestedCores, TaskLoggingContext _taskLoggingContext)
         {
-            return null;
+            return 0;
 
             // _loggingService?.LogComment(_taskLoggingContext.BuildEventContext, Framework.MessageImportance.Low, "ResourceManagerRequestedCores", requestedCores, i, TotalNumberHeld);
         }

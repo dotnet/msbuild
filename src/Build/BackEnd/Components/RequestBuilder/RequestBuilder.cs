@@ -493,7 +493,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources from the scheduler.
         /// </summary>
-        public int? RequestCores(int requestedCores)
+        public int RequestCores(int requestedCores)
         {
             VerifyIsNotZombie();
             RaiseResourceRequest(new ResourceRequest(true, _requestEntry.Request.GlobalRequestId, requestedCores));

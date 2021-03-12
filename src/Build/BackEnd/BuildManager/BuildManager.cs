@@ -2179,7 +2179,7 @@ namespace Microsoft.Build.Execution
             if (request.IsAcquire)
             {
                 var coresAcquired = _scheduler.RequestCores(request.BlockedRequestId, request.NumCores);
-                var response = new ResourceResponse(request.BlockedRequestId, coresAcquired ?? -1);
+                var response = new ResourceResponse(request.BlockedRequestId, coresAcquired);
 
                 _nodeManager.SendData(node, response);
             }

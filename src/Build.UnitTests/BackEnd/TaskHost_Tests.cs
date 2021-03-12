@@ -1302,9 +1302,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Mock
             /// </summary>
-            public int? RequestCores(int requestedCores)
+            public int RequestCores(int requestedCores)
             {
-                return null;
+                return 0;
             }
 
             /// <summary>

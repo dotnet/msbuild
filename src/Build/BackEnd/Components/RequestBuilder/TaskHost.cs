@@ -684,17 +684,14 @@ namespace Microsoft.Build.BackEnd
         int runningTotal = 0;
         bool implicitCoreUsed = false;
 
-        public int? RequestCores(int requestedCores)
+        public int RequestCores(int requestedCores)
         {
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 var coresAcquired = builderCallback.RequestCores(implicitCoreUsed ? requestedCores : requestedCores - 1);
 
-                if (coresAcquired.HasValue)
-                {
-                    runningTotal += coresAcquired.Value;
-                }
+                runningTotal += coresAcquired;
 
                 if (!implicitCoreUsed)
                 {

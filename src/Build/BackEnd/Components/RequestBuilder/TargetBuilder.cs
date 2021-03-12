@@ -366,7 +366,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources from the scheduler.
         /// </summary>
-        int? IRequestBuilderCallback.RequestCores(int requestedCores)
+        int IRequestBuilderCallback.RequestCores(int requestedCores)
         {
             return _requestBuilderCallback.RequestCores(requestedCores);
         }

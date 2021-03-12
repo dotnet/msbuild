@@ -61,7 +61,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="requestedCores">Number of logical cores being requested.</param>
         /// <returns>Number of logical cores actually granted.</returns>
-        int? RequestCores(int requestedCores);
+        int RequestCores(int requestedCores);
 
         /// <summary>
         /// Returns CPU resources to the scheduler.

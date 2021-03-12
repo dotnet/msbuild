@@ -758,9 +758,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Empty impl
         /// </summary>
-        int? IRequestBuilderCallback.RequestCores(int requestedCores)
+        int IRequestBuilderCallback.RequestCores(int requestedCores)
         {
-            return null;
+            return 0;
         }
 
         /// <summary>

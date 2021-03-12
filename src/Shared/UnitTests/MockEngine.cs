@@ -491,9 +491,9 @@ namespace Microsoft.Build.UnitTests
             return obj;
         }
 
-        public int? RequestCores(int requestedCores)
+        public int RequestCores(int requestedCores)
         {
-            return null;
+            return 0;
         }
 
         public void ReleaseCores(int coresToRelease)
