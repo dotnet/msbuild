@@ -13,9 +13,7 @@ namespace Microsoft.DotNet.NativeWrapper
             IntPtr reserved = IntPtr.Zero;
             IntPtr resultContext = IntPtr.Zero;
 
-            int errorCode = Interop.RunningOnWindows
-                ? Interop.Windows.hostfxr_get_dotnet_environment_info(dotnetExeDirectory, reserved, info.Initialize, resultContext)
-                : Interop.Unix.hostfxr_get_dotnet_environment_info(dotnetExeDirectory, reserved, info.Initialize, resultContext);
+            int errorCode = Interop.hostfxr_get_dotnet_environment_info(dotnetExeDirectory, reserved, info.Initialize, resultContext);
 
             return info;
         }

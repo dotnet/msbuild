@@ -83,6 +83,18 @@ namespace Microsoft.DotNet.NativeWrapper
             public string path;
         }
 
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+        internal delegate void hostfxr_get_dotnet_environment_info_result_fn(
+            IntPtr info,
+            IntPtr result_context);
+
+        [DllImport("hostfxr", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int hostfxr_get_dotnet_environment_info(
+            string dotnet_root,
+            IntPtr reserved,
+            hostfxr_get_dotnet_environment_info_result_fn result,
+            IntPtr result_context);
+
         public static class Windows
         {
             private const CharSet UTF16 = CharSet.Unicode;
@@ -109,18 +121,6 @@ namespace Microsoft.DotNet.NativeWrapper
             internal static extern int hostfxr_get_available_sdks(
                 string exe_dir,
                 hostfxr_get_available_sdks_result_fn result);
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = UTF16)]
-            internal delegate void hostfxr_get_dotnet_environment_info_result_fn(
-                IntPtr info,
-                IntPtr result_context);
-
-            [DllImport("hostfxr", CharSet = UTF16, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            internal static extern int hostfxr_get_dotnet_environment_info(
-                string dotnet_root,
-                IntPtr reserved,
-                hostfxr_get_dotnet_environment_info_result_fn result,
-                IntPtr result_context);
         }
 
         public static class Unix
@@ -151,18 +151,6 @@ namespace Microsoft.DotNet.NativeWrapper
             internal static extern int hostfxr_get_available_sdks(
                 string exe_dir,
                 hostfxr_get_available_sdks_result_fn result);
-
-            [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = UTF8)]
-            internal delegate void hostfxr_get_dotnet_environment_info_result_fn(
-                IntPtr info,
-                IntPtr result_context);
-
-            [DllImport("hostfxr", CharSet = UTF8, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            internal static extern int hostfxr_get_dotnet_environment_info(
-                string dotnet_root,
-                IntPtr reserved,
-                hostfxr_get_dotnet_environment_info_result_fn result,
-                IntPtr result_context);
 
             [DllImport("libc", CharSet = UTF8, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             private static extern IntPtr realpath(string path, IntPtr buffer);
