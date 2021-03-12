@@ -190,7 +190,6 @@ namespace Microsoft.DotNet.Cli
                         environmentProvider,
                         performanceData);
                     PerformanceLogEventSource.Log.FirstTimeConfigurationStop();
-
                 }
 
                 PerformanceLogEventSource.Log.TelemetryRegistrationStart();
@@ -222,7 +221,6 @@ namespace Microsoft.DotNet.Cli
             }
             else if (BuiltInCommandsCatalog.Commands.TryGetValue(parseResult.RootSubCommandResult(), out var builtIn))
             {
-
                 PerformanceLogEventSource.Log.BuiltInCommandStart();
                 exitCode = builtIn.Command(args.Where(t => !topLevelCommands.Contains(t)).ToArray());
                 PerformanceLogEventSource.Log.BuiltInCommandStop();
