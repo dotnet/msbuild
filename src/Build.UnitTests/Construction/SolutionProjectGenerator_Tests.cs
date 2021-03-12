@@ -2477,6 +2477,30 @@ EndGlobal
             }
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/6236
+        /// </summary>
+        [Theory]
+        [InlineData("http://localhost:8080")]
+        [InlineData("a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-")]
+        public void AbsolutePathWorksForUnsupportedPaths(string relativePath)
+        {
+            string solutionFileContents =
+                $@"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{{E24C65DC-7377-472B-9ABA-BC803B73C61A}}"") = ""WebSite1"", ""{relativePath}"", ""{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}""
+EndProject";
+
+            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+
+            ProjectInSolution projectInSolution = solution.ProjectsInOrder.ShouldHaveSingleItem();
+
+            projectInSolution.AbsolutePath.ShouldBe(Path.Combine(solution.SolutionFileDirectory, projectInSolution.RelativePath));
+        }
+
         #region Helper Functions
 
         /// <summary>
