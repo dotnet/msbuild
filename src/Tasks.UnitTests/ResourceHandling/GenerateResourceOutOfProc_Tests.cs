@@ -1943,7 +1943,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t.Execute();
 
                 // "cannot read state file (opening for read/write)"
-                var x = Thread.CurrentThread.CurrentUICulture;
                 Utilities.AssertLogContainsResourceWithUnspecifiedReplacements(t, "General.CouldNotReadStateFileMessage");
                 // "cannot write state file (opening for read/write)"
                 Utilities.AssertLogContains(t, "MSB3101");
