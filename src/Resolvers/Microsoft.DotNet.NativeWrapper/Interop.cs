@@ -57,19 +57,19 @@ namespace Microsoft.DotNet.NativeWrapper
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         internal struct hostfxr_dotnet_environment_info
         {
-            public int size;
+            public nuint size;
             public string hostfxr_version;
             public string hostfxr_commit_hash;
-            public int sdk_count;
+            public nuint sdk_count;
             public IntPtr sdks;
-            public int framework_count;
+            public nuint framework_count;
             public IntPtr frameworks;
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         internal struct hostfxr_dotnet_environment_framework_info
         {
-            public int size;
+            public nuint size;
             public string name;
             public string version;
             public string path;
@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.NativeWrapper
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         internal struct hostfxr_dotnet_environment_sdk_info
         {
-            public int size;
+            public nuint size;
             public string version;
             public string path;
         }

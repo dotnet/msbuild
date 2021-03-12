@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.NativeWrapper
         {
             var infoStruct = Marshal.PtrToStructure<hostfxr_dotnet_environment_info>(info);
             var runtimes = new hostfxr_dotnet_environment_framework_info[infoStruct.framework_count];
-            for (var i = 0; i < infoStruct.framework_count; i++)
+            for (var i = 0; i < (int)infoStruct.framework_count; i++)
             {
                 var pointer = new IntPtr(infoStruct.frameworks.ToInt64() + i * Marshal.SizeOf(typeof(hostfxr_dotnet_environment_framework_info)));
                 runtimes[i] = Marshal.PtrToStructure<hostfxr_dotnet_environment_framework_info>(pointer);
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.NativeWrapper
             RuntimeInfo = runtimes.Select(runtime => new NetRuntimeInfo(runtime.name, runtime.version, runtime.path));
 
             var sdks = new hostfxr_dotnet_environment_sdk_info[infoStruct.sdk_count];
-            for (var i = 0; i < infoStruct.sdk_count; i++)
+            for (var i = 0; i < (int)infoStruct.sdk_count; i++)
             {
                 var pointer = new IntPtr(infoStruct.sdks.ToInt64() + i * Marshal.SizeOf(typeof(hostfxr_dotnet_environment_sdk_info)));
                 sdks[i] = Marshal.PtrToStructure<hostfxr_dotnet_environment_sdk_info>(pointer);
