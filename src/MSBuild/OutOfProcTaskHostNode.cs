@@ -33,7 +33,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine7
+        IBuildEngine8
 #endif
     {
         /// <summary>
@@ -265,6 +265,20 @@ namespace Microsoft.Build.CommandLine
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
         public bool AllowFailureWithoutError { get; set; } = false;
+        #endregion
+
+        #region IBuildEngine8 Implementation
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsAsErrors { get; set; }
+
+        public bool ShouldTreatWarningAsError(string warningCode)
+        {
+            return WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode));
+        }
         #endregion
 
         #region IBuildEngine Implementation (Methods)
@@ -793,7 +807,7 @@ namespace Microsoft.Build.CommandLine
             _debugCommunications = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
-
+            WarningsAsErrors = taskConfiguration.WarningsAsErrors;
             try
             {
                 // Change to the startup directory

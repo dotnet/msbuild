@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine7
+        IBuildEngine8
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -674,6 +674,44 @@ namespace Microsoft.Build.BackEnd
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
         public bool AllowFailureWithoutError { get; set; } = false;
+        #endregion
+
+        #region IBuildEngine8 Members
+        private ICollection<string> _warningsAsErrors;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsAsErrors
+        {
+            get
+            {
+                // Test compatibility
+                if(_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsAsErrors ??= _taskLoggingContext.GetWarningsAsErrors();
+            }
+        }
+
+        /// <summary>
+        /// Determines if the given warning should be treated as an error.
+        /// </summary>
+        /// <param name="warningCode"></param>
+        /// <returns>True if WarningsAsErrors is an empty set or contains the given warning code.</returns>
+        public bool ShouldTreatWarningAsError(string warningCode)
+        {
+            if (WarningsAsErrors == null)
+            {
+                return false;
+            }
+
+            // An empty set means all warnings are errors.
+            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+        }
         #endregion
 
         /// <summary>
