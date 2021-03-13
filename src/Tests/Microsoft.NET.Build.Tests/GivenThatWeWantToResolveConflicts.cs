@@ -113,7 +113,7 @@ namespace Microsoft.NET.Build.Tests
                 RuntimeIdentifier = string.Empty
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Mvc.Razor", "2.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Mvc.Razor", "2.1.0"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 

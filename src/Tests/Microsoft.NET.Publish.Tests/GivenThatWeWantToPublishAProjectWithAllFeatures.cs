@@ -55,8 +55,8 @@ namespace Microsoft.NET.Publish.Tests
 
                 // Verify package reference with satellites gets created correctly in the .deps.json file
                 VerifyDependency(dependencyContext, "Humanizer.Core", "lib/netstandard1.0/", "Humanizer",
-                    "af", "ar", "bg", "bn-BD", "cs", "da", "de", "el", "es", "fa", "fi-FI", "fr", "fr-BE", "he", "hr",
-                    "hu", "id", "it", "ja", "lv", "nb", "nb-NO", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr",
+                    "af", "ar", "az", "bg", "bn-BD", "cs", "da", "de", "el", "es", "fa", "fi-FI", "fr", "fr-BE", "he", "hr",
+                    "hu", "hy", "id", "it", "ja", "lv", "ms-MY", "mt", "nb", "nb-NO", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sr",
                     "sr-Latn", "sv", "tr", "uk", "uz-Cyrl-UZ", "uz-Latn-UZ", "vi", "zh-CN", "zh-Hans", "zh-Hant");
             }
 
@@ -317,6 +317,10 @@ namespace Microsoft.NET.Publish.Tests
                         "bg/Humanizer.resources.dll",
                         "ar/Humanizer.resources.dll",
                         "af/Humanizer.resources.dll",
+                        "az/Humanizer.resources.dll",
+                        "hy/Humanizer.resources.dll",
+                        "ms-MY/Humanizer.resources.dll",
+                        "mt/Humanizer.resources.dll",
                         "runtimes/debian.8-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
                         "runtimes/fedora.23-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
                         "runtimes/fedora.24-x64/native/System.Security.Cryptography.Native.OpenSsl.so",
@@ -416,7 +420,11 @@ namespace Microsoft.NET.Publish.Tests
                         "bn-BD/Humanizer.resources.dll",
                         "bg/Humanizer.resources.dll",
                         "ar/Humanizer.resources.dll",
-                        "af/Humanizer.resources.dll"
+                        "af/Humanizer.resources.dll",
+                        "az/Humanizer.resources.dll",
+                        "hy/Humanizer.resources.dll",
+                        "ms-MY/Humanizer.resources.dll",
+                        "mt/Humanizer.resources.dll",
                     }
                 };
             }

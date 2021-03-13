@@ -73,6 +73,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.0.0" PrivateAssets="All" />
 
     <!-- Has satellite assembly -->
-    <PackageReference Include="Humanizer" Version="2.2.0" />
+    <PackageReference Include="Humanizer" Version="2.8.26" />
   </ItemGroup>
 </Project>
