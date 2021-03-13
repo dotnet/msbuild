@@ -1927,17 +1927,43 @@ namespace Microsoft.Build.Evaluation
         private LoadImportsResult ExpandAndLoadImportsFromUnescapedImportExpression(string directoryOfImportingFile, ProjectImportElement importElement, string unescapedExpression,
                                             bool throwOnFileNotExistsError, out List<ProjectRootElement> imports)
         {
+            imports = new List<ProjectRootElement>();
+
             string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
             {
+                if ((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0)
+                {
+                    // Log message for import skipped
+                    ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
+                        importElement.Location.Line,
+                        importElement.Location.Column,
+                        ResourceUtilities.GetResourceString("ProjectImportSkippedExpressionEvaluatedToEmpty"),
+                        unescapedExpression,
+                        importElement.ContainingProject.FullPath,
+                        importElement.Location.Line,
+                        importElement.Location.Column)
+                    {
+                        BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                        UnexpandedProject = importElement.Project,
+                        ProjectFile = importElement.ContainingProject.FullPath,
+                        ImportedProjectFile = string.Empty,
+                        ImportIgnored = true,
+                    };
+
+                    _evaluationLoggingContext.LogBuildEvent(eventArgs);
+
+                    return LoadImportsResult.ImportExpressionResolvedToNothing;
+                }
+
                 ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValue", String.Empty, XMakeAttributes.project, XMakeElements.import);
             }
 
             bool atleastOneImportIgnored = false;
             bool atleastOneImportEmpty = false;
-            imports = new List<ProjectRootElement>();
+            
             foreach (string importExpressionEscapedItem in ExpressionShredder.SplitSemiColonSeparatedList(importExpressionEscaped))
             {
                 string[] importFilesEscaped = null;
