@@ -4239,6 +4239,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Condition="'$(_DeploymentSignClickOnceManifests)'=='true' and '$(_DeploymentLauncherBased)' == 'true' and '$(PublishSingleFile)' == 'true'"
       />
 
+    <!--
+    If ReadyToRun is enabled in loose files scenario, we need to remove entries of the IL images that have gone through R2R
+    compiler and replace them with the entries for their R2R images. The R2R application image also needs to be signed if necessary.
+    -->
+
+    <ItemGroup Condition="'$(PublishReadyToRun)' == 'true' and '$(PublishSingleFile)' != 'true'">
+      <_ManifestManagedReferences Remove="@(_ReadyToRunCompileList)" />
+      <_ClickOnceFiles Remove="@(_ReadyToRunCompileList)" />
+      <_ClickOnceFiles Include="@(_ReadyToRunFilesToPublish)" />
+      <_ClickOnceTargetFile Include="@(_ReadyToRunFilesToPublish)" Condition="'%(Filename)%(Extension)' == '$(TargetFileName)'" />
+    </ItemGroup>
+
+    <!-- Sign application image created by R2R -->
+    <SignFile
+        CertificateThumbprint="$(_DeploymentResolvedManifestCertificateThumbprint)"
+        TimestampUrl="$(ManifestTimestampUrl)"
+        SigningTarget="@(_ClickOnceTargetFile)"
+        TargetFrameworkVersion="$(TargetFrameworkVersion)"
+        TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+        Condition="'$(_DeploymentSignClickOnceManifests)' == 'true' and '$(PublishReadyToRun)' == 'true' and '$(PublishSingleFile)' != 'true'" />
+
     <!-- Copy the application executable from Obj folder to app.publish folder.
     This is being done to avoid Windows Forms designer memory issues that can arise while operating directly on files located in Obj directory. -->
     <Copy
