@@ -208,9 +208,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DotNetCLIToolTargets", "Dot
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishProfiles", "PublishProfiles", "{A3404EAB-8247-4E41-9C30-68316412F249}"
 	ProjectSection(SolutionItems) = preProject
-		src\WebSdk\Publish\Targets\PublishProfiles\FileSystem.pubxml = src\WebSdk\Publish\Targets\PublishProfiles\FileSystem.pubxml
-		src\WebSdk\Publish\Targets\PublishProfiles\MSDeploy.pubxml = src\WebSdk\Publish\Targets\PublishProfiles\MSDeploy.pubxml
-		src\WebSdk\Publish\Targets\PublishProfiles\MSDeployPackage.pubxml = src\WebSdk\Publish\Targets\PublishProfiles\MSDeployPackage.pubxml
+		src\WebSdk\Publish\Targets\PublishProfiles\Default.pubxml = src\WebSdk\Publish\Targets\PublishProfiles\Default.pubxml
+		src\WebSdk\Publish\Targets\PublishProfiles\DefaultMSDeploy.pubxml = src\WebSdk\Publish\Targets\PublishProfiles\DefaultMSDeploy.pubxml
+		src\WebSdk\Publish\Targets\PublishProfiles\DefaultMSDeployPackage.pubxml = src\WebSdk\Publish\Targets\PublishProfiles\DefaultMSDeployPackage.pubxml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishTargets", "PublishTargets", "{40E6E4B1-286B-4542-B814-2A3DA29510D1}"
