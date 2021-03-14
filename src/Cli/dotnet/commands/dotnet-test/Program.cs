@@ -15,11 +15,9 @@ namespace Microsoft.DotNet.Tools.Test
     {
         public TestCommand(
             IEnumerable<string> msbuildArgs,
-            IEnumerable<string> userDefinedArguments,
-            IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
@@ -64,8 +62,6 @@ namespace Microsoft.DotNet.Tools.Test
 
             TestCommand testCommand = new TestCommand(
                 msbuildArgs,
-                result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()),
-                result.ValueForArgument<IReadOnlyCollection<string>>(TestCommandParser.SlnOrProjectArgument),
                 noRestore,
                 msbuildPath);
 

@@ -4,10 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Tools.MSBuild;
-using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Cli;
-using System.Diagnostics;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System;
 using System.CommandLine.Parsing;
@@ -18,11 +15,9 @@ namespace Microsoft.DotNet.Tools.Pack
     {
         public PackCommand(
             IEnumerable<string> msbuildArgs,
-            IEnumerable<string> userDefinedArguments,
-            IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(msbuildArgs, userDefinedArguments, trailingArguments, noRestore, msbuildPath)
+            : base(msbuildArgs, noRestore, msbuildPath)
         {
         }
 
@@ -47,8 +42,6 @@ namespace Microsoft.DotNet.Tools.Pack
 
             return new PackCommand(
                 msbuildArgs,
-                parseResult.OptionValuesToBeForwarded(PackCommandParser.GetCommand()),
-                parseResult.ValueForArgument<IEnumerable<string>>(PackCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>(),
                 noRestore,
                 msbuildPath);
         }
