@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Telemetry
         private HashSet<string> _topLevelCommandName { get; }
         private HashSet<string> _optionsToLog { get; }
 
-        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult)
+        public List<ApplicationInsightsEntryFormat> AllowList(ParseResult parseResult, Dictionary<string, double> measurements = null)
         {
             var topLevelCommandName = parseResult.RootSubCommandResult();
             var result = new List<ApplicationInsightsEntryFormat>();
@@ -34,8 +34,9 @@ namespace Microsoft.DotNet.Cli.Telemetry
                         new Dictionary<string, string>
                         {
                             { "verb", topLevelCommandName},
-                            {option, parseResult.ValueForOption<string>($"--{option}")}
-                        }));
+                            { option, parseResult.ValueForOption<string>($"--{option}")}
+                        },
+                        measurements));
                 }
             }
             return result;
