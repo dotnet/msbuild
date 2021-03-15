@@ -81,6 +81,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("c:/fully/qualified/path.txt")]
         [InlineData("test/output/file.txt")]
         [InlineData(@"some\dir\to\file.txt")]
         [InlineData("file.txt")]
