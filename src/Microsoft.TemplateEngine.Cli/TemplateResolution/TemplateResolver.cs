@@ -370,7 +370,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                                     InputParameterFormat = commandInput.TemplateParamInputFormat(paramName)
                                 });
                             }
-                            else if (paramDetails.ChoicesAndDescriptions.ContainsKey(paramValue))
+                            else if (paramDetails.Choices.ContainsKey(paramValue))
                             {
                                 template.AddDisposition(new MatchInfo
                                 {
@@ -383,7 +383,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                             }
                             else
                             {
-                                int startsWithCount = paramDetails.ChoicesAndDescriptions.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
+                                int startsWithCount = paramDetails.Choices.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
                                 if (startsWithCount == 1)
                                 {
                                     template.AddDisposition(new MatchInfo

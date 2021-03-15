@@ -30,11 +30,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     Name = "allow-scripts",
                     DataType = "choice",
                     DefaultValue = "prompt",
-                    Choices = new Dictionary<string, string>()
+                    Choices = new Dictionary<string, ParameterChoice>()
                     {
-                        { "yes", LocalizableStrings.AllowScriptsYesChoice },
-                        { "no", LocalizableStrings.AllowScriptsNoChoice },
-                        { "prompt", LocalizableStrings.AllowScriptsPromptChoice }
+                        { "yes", new ParameterChoice(string.Empty, LocalizableStrings.AllowScriptsYesChoice) },
+                        { "no", new ParameterChoice(string.Empty, LocalizableStrings.AllowScriptsNoChoice) },
+                        { "prompt", new ParameterChoice(string.Empty, LocalizableStrings.AllowScriptsPromptChoice) }
                     }
                 };
 

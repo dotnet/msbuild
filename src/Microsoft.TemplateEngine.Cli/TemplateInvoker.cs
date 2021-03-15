@@ -60,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
                 {
-                    { TelemetryConstants.Language, language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                    { TelemetryConstants.Language, language?.Choices.Keys.FirstOrDefault() },
                     { TelemetryConstants.ArgError, "True" },
                     { TelemetryConstants.Framework, framework },
                     { TelemetryConstants.TemplateName, templateName },
@@ -104,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
                     {
-                        { TelemetryConstants.Language, language?.ChoicesAndDescriptions.Keys.FirstOrDefault() },
+                        { TelemetryConstants.Language, language?.Choices.Keys.FirstOrDefault() },
                         { TelemetryConstants.ArgError, "False" },
                         { TelemetryConstants.Framework, framework },
                         { TelemetryConstants.TemplateName, templateName },

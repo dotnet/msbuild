@@ -1,4 +1,5 @@
-﻿using Microsoft.TemplateEngine.Cli.TemplateResolution;
+﻿using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,7 +118,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return invalidParamsErrorText.ToString();
         }
 
-        private static void DisplayValidValues(StringBuilder text, string header, IDictionary<string, string> possibleValues, int padWidth)
+        private static void DisplayValidValues(StringBuilder text, string header, IDictionary<string, ParameterChoice> possibleValues, int padWidth)
         {
             text.Append(' ', padWidth).Append(header);
 
@@ -128,13 +129,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             text.Append(' ').AppendLine(LocalizableStrings.PossibleValuesHeader);
             int longestChoiceLength = possibleValues.Keys.Max(x => x.Length);
-            foreach (KeyValuePair<string, string> choiceInfo in possibleValues)
+            foreach (KeyValuePair<string, ParameterChoice> choiceInfo in possibleValues)
             {
                 text.Append(' ', padWidth * 2).Append(choiceInfo.Key.PadRight(longestChoiceLength + padWidth));
 
-                if (!string.IsNullOrWhiteSpace(choiceInfo.Value))
+                if (!string.IsNullOrWhiteSpace(choiceInfo.Value.Description))
                 {
-                    text.Append("- " + choiceInfo.Value);
+                    text.Append("- " + choiceInfo.Value.Description);
                 }
 
                 text.AppendLine();

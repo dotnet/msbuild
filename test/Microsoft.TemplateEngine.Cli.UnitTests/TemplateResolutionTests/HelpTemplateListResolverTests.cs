@@ -104,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.True(matchResult.HasUnambiguousTemplateGroupForDefaultLanguage);
             Assert.Equal("console", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.ShortName);
             Assert.Equal("Console.App.L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.Identity);
-            Assert.Equal("L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.Tags["language"].ChoicesAndDescriptions.Keys.FirstOrDefault());
+            Assert.Equal("L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.Tags["language"].Choices.Keys.FirstOrDefault());
             Assert.Equal(2, matchResult.UnambiguousTemplateGroup.Count);
             Assert.Equal(1, matchResult.UnambiguousTemplatesForDefaultLanguage.Count);
         }
@@ -123,7 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortName);
             Assert.Equal("Console.App.L2", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
-            Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.Tags["language"].ChoicesAndDescriptions.Keys.FirstOrDefault());
+            Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.Tags["language"].Choices.Keys.FirstOrDefault());
             Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
         }
 

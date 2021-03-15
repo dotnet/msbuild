@@ -24,7 +24,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (_parameterDefinitions == null)
                 {
                     IDictionary<string, ITemplateParameter> combinedParams = new Dictionary<string, ITemplateParameter>();
-                    IDictionary<string, Dictionary<string, string>> combinedChoices = new Dictionary<string, Dictionary<string, string>>();
+                    IDictionary<string, Dictionary<string, ParameterChoice>> combinedChoices = new Dictionary<string, Dictionary<string, ParameterChoice>>();
 
                     // gather info
                     foreach (IParameterSet paramSet in _parameterSetList)
@@ -40,14 +40,14 @@ namespace Microsoft.TemplateEngine.Cli
                             // build the combined choice lists
                             if (parameter.Choices != null)
                             {
-                                Dictionary<string, string> combinedChoicesForParam;
+                                Dictionary<string, ParameterChoice> combinedChoicesForParam;
                                 if (!combinedChoices.TryGetValue(parameter.Name, out combinedChoicesForParam))
                                 {
-                                    combinedChoicesForParam = new Dictionary<string, string>();
+                                    combinedChoicesForParam = new Dictionary<string, ParameterChoice>();
                                     combinedChoices.Add(parameter.Name, combinedChoicesForParam);
                                 }
 
-                                foreach (KeyValuePair<string, string> choiceAndDescription in parameter.Choices)
+                                foreach (KeyValuePair<string, ParameterChoice> choiceAndDescription in parameter.Choices)
                                 {
                                     if (!combinedChoicesForParam.ContainsKey(choiceAndDescription.Key))
                                     {
@@ -68,10 +68,10 @@ namespace Microsoft.TemplateEngine.Cli
                         }
                         else
                         {
-                            Dictionary<string, string> choicesAndDescriptions;
+                            Dictionary<string, ParameterChoice> choicesAndDescriptions;
                             if (!combinedChoices.TryGetValue(paramInfo.Key, out choicesAndDescriptions))
                             {
-                                choicesAndDescriptions = new Dictionary<string, string>();
+                                choicesAndDescriptions = new Dictionary<string, ParameterChoice>();
                             }
 
                             ITemplateParameter combinedParameter = new TemplateParameter

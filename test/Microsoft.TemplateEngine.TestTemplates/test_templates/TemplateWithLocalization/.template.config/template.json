@@ -15,6 +15,7 @@
     "description": "desc",
     "symbols": {
         "someSymbol": {
+            "displayName": "sym0_displayName",
             "description": "sym0_desc",
             "type": "parameter",
             "datatype": "string",
@@ -24,6 +25,7 @@
         },
         "someChoice": {
             "type": "parameter",
+            "displayName": "sym1_displayName",
             "description": "sym1_desc",
             "datatype": "choice",
             "choices": [

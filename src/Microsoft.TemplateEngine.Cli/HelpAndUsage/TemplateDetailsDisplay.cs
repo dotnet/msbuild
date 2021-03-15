@@ -124,13 +124,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     {
                         int longestChoiceLength = param.Choices.Keys.Max(x => x.Length);
 
-                        foreach (KeyValuePair<string, string> choiceInfo in param.Choices)
+                        foreach (KeyValuePair<string, ParameterChoice> choiceInfo in param.Choices)
                         {
                             displayValue.Append("    " + choiceInfo.Key.PadRight(longestChoiceLength + 4));
 
-                            if (!string.IsNullOrWhiteSpace(choiceInfo.Value))
+                            if (!string.IsNullOrWhiteSpace(choiceInfo.Value.Description))
                             {
-                                displayValue.Append("- " + choiceInfo.Value);
+                                displayValue.Append("- " + choiceInfo.Value.Description);
                             }
 
                             displayValue.AppendLine();

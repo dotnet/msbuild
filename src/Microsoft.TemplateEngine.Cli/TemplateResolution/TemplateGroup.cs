@@ -1,3 +1,4 @@
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge.Template;
 using System;
@@ -235,14 +236,14 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// </summary>
         /// <param name="parameter">parameter canonical name</param>
         /// <returns>the dictionary of valid choices and descriptions</returns>
-        internal IDictionary<string, string> GetValidValuesForChoiceParameter(string parameter)
+        internal IDictionary<string, ParameterChoice> GetValidValuesForChoiceParameter(string parameter)
         {
-            Dictionary<string, string> validChoices = new Dictionary<string, string>();
+            Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
             foreach (ITemplateMatchInfo template in Templates)
             {
                 if (template.Info.Tags.ContainsKey(parameter))
                 {
-                    foreach (var choice in template.Info.Tags[parameter].ChoicesAndDescriptions)
+                    foreach (var choice in template.Info.Tags[parameter].Choices)
                     {
                         validChoices[choice.Key] = choice.Value;
                     }
@@ -257,14 +258,14 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <param name="parameter">parameter canonical name</param>
         /// <param name="value">ambiguous value for the parameter to return possible choices for</param>
         /// <returns>the dictionary of possible choices and descriptions that are matching ambiguous input</returns>
-        internal Dictionary<string, string> GetAmbiguousValuesForChoiceParameter(string parameter, string value)
+        internal Dictionary<string, ParameterChoice> GetAmbiguousValuesForChoiceParameter(string parameter, string value)
         {
-            Dictionary<string, string> validChoices = new Dictionary<string, string>();
+            Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
             foreach (ITemplateMatchInfo template in Templates)
             {
                 if (template.Info.Tags.ContainsKey(parameter))
                 {
-                    foreach (var choice in template.Info.Tags[parameter].ChoicesAndDescriptions)
+                    foreach (var choice in template.Info.Tags[parameter].Choices)
                     {
                         if (choice.Key.StartsWith(value, StringComparison.OrdinalIgnoreCase))
                         {

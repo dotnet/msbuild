@@ -4,6 +4,7 @@
     "description": "desc_de-DE:äÄßöÖüÜ",
     "symbols": {
         "someSymbol": {
+            "displayName": "sym0_displayName_de-DE:äÄßöÖüÜ",
             "description": "sym0_desc_de-DE:äÄßöÖüÜ"
         },
         "someChoice": {

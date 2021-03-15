@@ -51,10 +51,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateParameter param = new MockParameter()
             {
                 Name = "TestName",
-                Choices = new Dictionary<string, string>()
+                Choices = new Dictionary<string, ParameterChoice>()
                 {
-                    { "foo", "Foo value" },
-                    { "bar", "Bar value" }
+                    { "foo", new ParameterChoice("Foo", "Foo value") },
+                    { "bar", new ParameterChoice("Bar", "Bar value") }
                 }
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
@@ -74,10 +74,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateParameter param = new MockParameter()
             {
                 Name = "TestName",
-                Choices = new Dictionary<string, string>()
+                Choices = new Dictionary<string, ParameterChoice>()
                 {
-                    { "foo", "Foo value" },
-                    { "bar", "Bar value" }
+                    { "foo", new ParameterChoice("Foo", "Foo value") },
+                    { "bar", new ParameterChoice("Bar", "Bar value") }
                 }
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
@@ -97,10 +97,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateParameter param = new MockParameter()
             {
                 Name = "TestName",
-                Choices = new Dictionary<string, string>()
+                Choices = new Dictionary<string, ParameterChoice>()
                 {
-                    { "foo", "Foo value" },
-                    { "bar", "Bar value" }
+                    { "foo", new ParameterChoice("Foo", "Foo value") },
+                    { "bar", new ParameterChoice("Bar", "Bar value") }
                 }
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
@@ -120,11 +120,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateParameter param = new MockParameter()
             {
                 Name = "TestName",
-                Choices = new Dictionary<string, string>()
+                Choices = new Dictionary<string, ParameterChoice>()
                 {
-                    { "foo", "Foo value" },
-                    { "bar", "Bar value" },
-                    { "foot", "Foot value" }
+                    { "foo", new ParameterChoice("Foo", "Foo value") },
+                    { "bar", new ParameterChoice("Bar", "Bar value") },
+                    { "foot", new ParameterChoice("Foot", "Foot value") }
                 }
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
@@ -144,10 +144,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateParameter param = new MockParameter()
             {
                 Name = "TestName",
-                Choices = new Dictionary<string, string>()
+                Choices = new Dictionary<string, ParameterChoice>()
                 {
-                    { "foo", "Foo value" },
-                    { "bar", "Bar value" }
+                    { "foo", new ParameterChoice("Foo", "Foo value") },
+                    { "bar", new ParameterChoice("Bar", "Bar value") }
                 }
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
@@ -167,12 +167,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateParameter param = new MockParameter()
             {
                 Name = "TestName",
-                Choices = new Dictionary<string, string>()
+                Choices = new Dictionary<string, ParameterChoice>()
                 {
-                    { "foot", "Foo value" },
-                    { "bar", "Bar value" },
-                    { "Football", "Foo value" },
-                    { "FOOTPOUND", "Foo value" }
+                    { "foot", new ParameterChoice("Foo", "Foo value") },
+                    { "bar", new ParameterChoice("Bar", "Bar value") },
+                    { "Football", new ParameterChoice("Football", "Foo value") },
+                    { "FOOTPOUND", new ParameterChoice("Footpound", "Foo value") }
                 }
             };
             IReadOnlyList<ITemplateParameter> parametersForTemplate = new List<ITemplateParameter>() { param };
