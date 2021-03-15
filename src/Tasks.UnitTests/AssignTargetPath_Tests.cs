@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -85,12 +85,12 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"some\dir\to\file.txt")]
         [InlineData("file.txt")]
         [InlineData("file")]
-        public void TargetPathAlreadySet(string targetPath)
+        public void TargetPathOverrideSet(string targetPath)
         {
             AssignTargetPath t = new AssignTargetPath();
             t.BuildEngine = new MockEngine();
             Dictionary<string, string> metaData = new Dictionary<string, string>();
-            metaData.Add("TargetPath", targetPath);
+            metaData.Add("TargetPathOverride", targetPath);
             t.Files = new ITaskItem[]
                           {
                               new TaskItem(

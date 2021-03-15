@@ -72,9 +72,9 @@ namespace Microsoft.Build.Tasks
                 for (int i = 0; i < Files.Length; ++i)
                 {
                     AssignedFiles[i] = new TaskItem(Files[i]);
-                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPath);
+                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPathOverride);
 
-                    // If TargetPath is already set, copy it over.
+                    // TargetPathOverride takes priority.
                     // https://github.com/dotnet/msbuild/issues/2795
                     if (!string.IsNullOrEmpty(targetPath))
                     {

@@ -171,6 +171,11 @@ namespace Microsoft.Build.Shared
         /// The output path for a given item.
         /// </summary>
         internal const string targetPath = "TargetPath";
+
+        /// <summary>
+        /// The user-specified override for TargetPath. See the AssignTargetPath task.
+        /// </summary>
+        internal const string targetPathOverride = "TargetPathOverride";
         internal const string dependentUpon = "DependentUpon";
         internal const string msbuildSourceProjectFile = "MSBuildSourceProjectFile";
         internal const string msbuildSourceTargetName = "MSBuildSourceTargetName";
