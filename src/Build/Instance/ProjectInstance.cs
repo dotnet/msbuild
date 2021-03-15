@@ -2790,8 +2790,8 @@ namespace Microsoft.Build.Execution
             // ProjectTargetInstances are immutable so only the dictionary must be cloned
             _targets = CreateCloneDictionary(targets);
 
-            this.DefaultTargets = new List<string>(defaultTargets);
-            this.InitialTargets = new List<string>(initialTargets);
+            this.DefaultTargets = defaultTargets == null ? new List<string>(0) : new List<string>(defaultTargets);
+            this.InitialTargets = defaultTargets == null ? new List<string>(0) : new List<string>(initialTargets);
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(beforeTargets, StringComparer.OrdinalIgnoreCase);
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(afterTargets, StringComparer.OrdinalIgnoreCase);
         }

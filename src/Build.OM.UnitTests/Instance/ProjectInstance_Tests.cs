@@ -465,7 +465,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             projA.AddItem("Compile", "aItem.cs");
             projB.AddItem("Compile", "bItem.cs");
 
-            var projBEval = new Project(projB, null, null, pc);
+            var loadSettings = ProjectLoadSettings.RecordDuplicateButNotCircularImports
+                | ProjectLoadSettings.RejectCircularImports
+                | ProjectLoadSettings.IgnoreEmptyImports
+                | ProjectLoadSettings.IgnoreMissingImports
+                | ProjectLoadSettings.IgnoreInvalidImports;
+
+            var projBEval = new Project(projB, null, null, pc, loadSettings);
             var projBInstance = new ProjectInstance(projBEval, ProjectInstanceSettings.ImmutableWithFastItemLookup);
             var projBInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "bItem.cs").Single();
             var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
