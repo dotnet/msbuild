@@ -72,17 +72,16 @@ namespace Microsoft.Build.Tasks
                 for (int i = 0; i < Files.Length; ++i)
                 {
                     AssignedFiles[i] = new TaskItem(Files[i]);
-                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPathOverride);
 
                     // TargetPathOverride takes priority.
                     // https://github.com/dotnet/msbuild/issues/2795
-                    if (!string.IsNullOrEmpty(targetPath))
-                    {
-                        AssignedFiles[i].SetMetadata(ItemMetadataNames.targetPath, EscapingUtilities.Escape(targetPath));
-                        continue;
-                    }
+                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPathOverride);
 
-                    targetPath = Files[i].GetMetadata(ItemMetadataNames.link);
+                    // If TargetPathOverride not set, fall back to default behavior.
+                    if (string.IsNullOrEmpty(targetPath))
+                    {
+                        targetPath = Files[i].GetMetadata(ItemMetadataNames.link);
+                    }
 
                     if (string.IsNullOrEmpty(targetPath))
                     {
