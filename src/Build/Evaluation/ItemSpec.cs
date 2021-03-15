@@ -211,30 +211,27 @@ namespace Microsoft.Build.Evaluation
                         // The expression is not of the form "@(X)". Treat as string
 
                         //  Code corresponds to EngineFileUtilities.GetFileList
-                        var containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(splitEscaped);
-                        var containsRealWildcards = FileMatcher.HasWildcards(splitEscaped);
-
-                        // '*' is an illegal character to have in a filename.
-                        // todo: file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
-                        if (containsEscapedWildcards && containsRealWildcards)
+                        if (!FileMatcher.HasWildcards(splitEscaped))
                         {
+                            // No real wildcards means we just return the original string.  Don't even bother
+                            // escaping ... it should already be escaped appropriately since it came directly
+                            // from the project file
+
+                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
+                        }
+                        else if (EscapingUtilities.ContainsEscapedWildcards(splitEscaped))
+                        {
+                            // '*' is an illegal character to have in a filename.
+                            // todo: file-system assumption on legal path characters: https://github.com/Microsoft/msbuild/issues/781
                             // Just return the original string.
                             fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
-                        else if (!containsEscapedWildcards && containsRealWildcards)
+                        else
                         {
                             // Unescape before handing it to the filesystem.
                             var filespecUnescaped = EscapingUtilities.UnescapeAll(splitEscaped);
 
                             fragments.Add(new GlobFragment(filespecUnescaped, projectDirectory));
-                        }
-                        else
-                        {
-                            // No real wildcards means we just return the original string.  Don't even bother 
-                            // escaping ... it should already be escaped appropriately since it came directly
-                            // from the project file
-
-                            fragments.Add(new ValueFragment(splitEscaped, projectDirectory));
                         }
                     }
                 }

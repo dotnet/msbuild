@@ -243,12 +243,12 @@ namespace Microsoft.Build.Tasks
 
             if (_includePatterns.Length > 0)
             {
-                result = _includePatterns.All(pattern => !FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern, true));
+                result = _includePatterns.All(pattern => !FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
             }
 
             if (_excludePatterns.Length > 0)
             {
-                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern, true));
+                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
             }
 
             return result;

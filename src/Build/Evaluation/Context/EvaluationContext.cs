@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.FileSystem;
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Evaluation.Context
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
-        private ConcurrentDictionary<string, ImmutableArray<string>> FileEntryExpansionCache { get; }
+        private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem)
         {
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Evaluation.Context
             Policy = policy;
 
             SdkResolverService = new CachingSdkResolverService();
-            FileEntryExpansionCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
+            FileEntryExpansionCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
             EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, FileEntryExpansionCache));
         }

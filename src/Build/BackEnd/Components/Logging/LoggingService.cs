@@ -285,6 +285,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 CreateLoggingEventQueue();
             }
 
+            // Ensure the static constructor of ItemGroupLoggingHelper runs.
+            // It is important to ensure the Message delegate on TaskParameterEventArgs is set.
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+
             _serviceState = LoggingServiceState.Instantiated;
         }
 
@@ -513,6 +517,44 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
+        }
+
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as errors for the specified build context.
+        /// Note that WarningsAsMessages takes priority over WarningsAsErrors and are excluded from the set.
+        ///
+        /// If all warnings to be treated as errors should also be treated as messages, return null.
+        /// This is to avoid all warnings being treated as errors. <see cref="RequestBuilder.ConfigureWarningsAsErrorsAndMessages()"/>
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns>
+        /// An empty set if all warnings should be treated as errors.
+        /// A set containing warning codes to be logged as errors.
+        /// Null if no warnings should be treated as errors.
+        /// </returns>
+        public ICollection<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
+        {
+            if (_warningsAsErrorsByProject == null)
+            {
+                return null;
+            }
+
+            int key = GetWarningsAsErrorOrMessageKey(context);
+
+            HashSet<string> warningsAsErrorsExcludingMessages = new HashSet<string>(_warningsAsErrorsByProject[key]);
+
+            if (_warningsAsMessagesByProject != null)
+            {
+                warningsAsErrorsExcludingMessages.ExceptWith(_warningsAsMessagesByProject[key]);
+
+                // A non-null empty set means all warnings are errors. Avoid this.
+                if (warningsAsErrorsExcludingMessages.Count == 0)
+                {
+                    warningsAsErrorsExcludingMessages = null;
+                }
+            }
+
+            return warningsAsErrorsExcludingMessages;
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)

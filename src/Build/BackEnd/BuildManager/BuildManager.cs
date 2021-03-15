@@ -1945,8 +1945,14 @@ namespace Microsoft.Build.Execution
 
                 lock (_buildManager._syncLock)
                 {
-                    _buildManager._projectCacheService?.Result.ShutDown().GetAwaiter().GetResult();
-                    _buildManager._projectCacheService = null;
+                    try
+                    {
+                        _buildManager._projectCacheService?.Result.ShutDown().GetAwaiter().GetResult();
+                    }
+                    finally
+                    {
+                        _buildManager._projectCacheService = null;
+                    }
                 }
             }
         }

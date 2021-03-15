@@ -68,6 +68,7 @@ namespace Microsoft.Build.UnitTests.Logging
             eventHelper.RaiseBuildEvent(RaiseEventHelper.NormalMessage);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.TaskFinished);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.CommandLine);
+            eventHelper.RaiseBuildEvent(RaiseEventHelper.TaskParameter);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.Warning);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.Error);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.TargetStarted);
@@ -99,6 +100,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 RaiseExceptionInEventHandler(RaiseEventHelper.NormalMessage, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.TaskFinished, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.CommandLine, exception);
+                RaiseExceptionInEventHandler(RaiseEventHelper.TaskParameter, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.Warning, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.Error, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.TargetStarted, exception);
@@ -734,6 +736,11 @@ namespace Microsoft.Build.UnitTests.Logging
             private static TaskCommandLineEventArgs s_taskCommandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
 
             /// <summary>
+            /// Task Parameter Event
+            /// </summary>
+            private static TaskParameterEventArgs s_taskParameter = new TaskParameterEventArgs(TaskParameterMessageKind.TaskInput, "ItemName", null, true, DateTime.MinValue);
+
+            /// <summary>
             /// Build Warning Event
             /// </summary>
             private static BuildWarningEventArgs s_buildWarning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender")
@@ -882,6 +889,11 @@ namespace Microsoft.Build.UnitTests.Logging
                     return s_taskCommandLine;
                 }
             }
+
+            /// <summary>
+            /// Event which can be raised in multiple tests.
+            /// </summary>
+            internal static TaskParameterEventArgs TaskParameter => s_taskParameter;
 
             /// <summary>
             /// Event which can be raised in multiple tests.

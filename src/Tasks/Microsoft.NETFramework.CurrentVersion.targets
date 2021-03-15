@@ -24,12 +24,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore')"/>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportByWildcardBeforeMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportBefore')"/>
-  
+
   <Target
       Name="GetFrameworkPaths"
       DependsOnTargets="$(GetFrameworkPathsDependsOn)">
 
-    <!-- For backwards compatibility of targets who replaced this target we cannot move these values outside the target even though they 
+    <!-- For backwards compatibility of targets who replaced this target we cannot move these values outside the target even though they
              now only depend on statically availiable values-->
 
     <ItemGroup>
@@ -58,7 +58,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <_CombinedTargetFrameworkDirectoriesItem Condition=" '@(_CombinedTargetFrameworkDirectoriesItem)' == ''"
                                                  Include="@(_TargetedFrameworkDirectoryItem)" />
-
     </ItemGroup>
 
     <PropertyGroup>
@@ -69,6 +68,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_TargetFrameworkSDKDirectoryItem Include="$(TargetFrameworkSDKDirectory)"/>
     </ItemGroup>
+
   </Target>
 
   <PropertyGroup>
@@ -82,14 +82,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       GetReferenceAssemblyPaths
     </ImplicitlyExpandDesignTimeFacadesDependsOn>
   </PropertyGroup>
-  
+
   <!-- Implicitly references all portable design-time facades if the user is referencing a System.Runtime-based portable library -->
   <Target Name="ImplicitlyExpandDesignTimeFacades" Condition="'$(ImplicitlyExpandDesignTimeFacades)' == 'true'" DependsOnTargets="$(ImplicitlyExpandDesignTimeFacadesDependsOn)">
 
     <PropertyGroup>
       <!-- Does one of our dependencies reference a System.Runtime-based portable library? -->
       <_HasReferenceToSystemRuntime Condition="'$(DependsOnSystemRuntime)' == 'true'">true</_HasReferenceToSystemRuntime>
-
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetPlatformIdentifier)' == 'Portable'">true</_HasReferenceToSystemRuntime>
       <_HasReferenceToSystemRuntime Condition="'%(_ResolvedProjectReferencePaths.TargetFrameworkIdentifier)' == '.NETStandard' and '%(_ResolvedProjectReferencePaths.TargetFrameworkVersion)' &lt; '2.0'">true</_HasReferenceToSystemRuntime>
 
@@ -100,10 +99,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true'">
       <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)*.dll"/>
     </ItemGroup>
+
     <ItemGroup Condition="'$(_HasReferenceToNETStandard)' == 'true' And '$(_HasReferenceToSystemRuntime)' != 'true'">
       <_DesignTimeFacadeAssemblies Include="%(DesignTimeFacadeDirectories.Identity)netstandard.dll"
                                    Condition="Exists('%(DesignTimeFacadeDirectories.Identity)netstandard.dll')"/>
     </ItemGroup>
+
     <ItemGroup Condition="'$(_HasReferenceToSystemRuntime)' == 'true' Or '$(_HasReferenceToNETStandard)' == 'true' ">
       <_DesignTimeFacadeAssemblies_Names Include="@(_DesignTimeFacadeAssemblies->'%(FileName)')">
           <OriginalIdentity>%(_DesignTimeFacadeAssemblies.Identity)</OriginalIdentity>
@@ -120,6 +121,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CopyLocal>false</CopyLocal>
         <ResolvedFrom>ImplicitlyExpandDesignTimeFacades</ResolvedFrom>
       </ReferencePath>
+
       <_ResolveAssemblyReferenceResolvedFiles Include="@(ReferencePath)" Condition="'%(ReferencePath.ResolvedFrom)' == 'ImplicitlyExpandDesignTimeFacades'" />
     </ItemGroup>
 
@@ -128,7 +130,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.WinFX.targets" Condition="'$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetCompactFramework)' != 'true' and Exists('$(MSBuildToolsPath)\Microsoft.WinFX.targets')"/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Data.Entity.targets" Condition="'$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' !=  'v3.0' and Exists('$(MSBuildToolsPath)\Microsoft.Data.Entity.targets')"/>
-  
+
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfterMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter')"/>
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.NETFramework.targets\ImportAfter')"/>
 

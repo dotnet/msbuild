@@ -53,17 +53,15 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
-        /// <param name="forceEvaluate">Whether to force file glob expansion when eager expansion is turned off</param>
         /// <returns>Array of file paths, unescaped.</returns>
         internal string[] GetFileListUnescaped
             (
             string directoryEscaped,
-            string filespecEscaped,
-            bool forceEvaluate = false
+            string filespecEscaped
             )
 
         {
-            return GetFileList(directoryEscaped, filespecEscaped, false /* returnEscaped */, forceEvaluate);
+            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: false, forceEvaluateWildCards: false);
         }
 
         /// <summary>
@@ -89,31 +87,21 @@ namespace Microsoft.Build.Internal
             bool forceEvaluate = false
             )
         {
-            return GetFileList(directoryEscaped, filespecEscaped, true /* returnEscaped */, forceEvaluate, excludeSpecsEscaped);
+            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: true, forceEvaluate, excludeSpecsEscaped);
         }
 
         internal static bool FilespecHasWildcards(string filespecEscaped)
         {
-            bool containsEscapedWildcards = EscapingUtilities.ContainsEscapedWildcards(filespecEscaped);
-            bool containsRealWildcards = FileMatcher.HasWildcards(filespecEscaped);
-
-            if (containsEscapedWildcards && containsRealWildcards)
-            {
-                // Umm, this makes no sense.  The item's Include has both escaped wildcards and 
-                // real wildcards.  What does he want us to do?  Go to the file system and find
-                // files that literally have '*' in their filename?  Well, that's not going to 
-                // happen because '*' is an illegal character to have in a filename.
-
-                return false;
-            }
-            else if (!containsEscapedWildcards && containsRealWildcards)
-            {
-                return true;
-            }
-            else
+            if (!FileMatcher.HasWildcards(filespecEscaped))
             {
                 return false;
             }
+
+            // If the item's Include has both escaped wildcards and real wildcards, then it's
+            // not clear what they are asking us to do.  Go to the file system and find
+            // files that literally have '*' in their filename?  Well, that's not going to
+            // happen because '*' is an illegal character to have in a filename.
+            return !EscapingUtilities.ContainsEscapedWildcards(filespecEscaped);
         }
 
         /// <summary>
@@ -143,11 +131,6 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
-            if (excludeSpecsEscaped == null)
-            {
-                excludeSpecsEscaped = Enumerable.Empty<string>();
-            }
-
             string[] fileList;
 
             if (!FilespecHasWildcards(filespecEscaped) ||
@@ -166,7 +149,7 @@ namespace Microsoft.Build.Internal
                 // Unescape before handing it to the filesystem.
                 var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
-                var excludeSpecsUnescaped = excludeSpecsEscaped.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
+                var excludeSpecsUnescaped = excludeSpecsEscaped?.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
 
                 // Get the list of actual files which match the filespec.  Put
                 // the list into a string array.  If the filespec started out

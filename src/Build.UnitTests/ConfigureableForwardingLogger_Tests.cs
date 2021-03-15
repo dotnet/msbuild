@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -20,6 +21,7 @@ namespace Microsoft.Build.UnitTests
         private readonly TaskStartedEventArgs _taskStarted = new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName");
         private readonly TaskFinishedEventArgs _taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
         private readonly TaskCommandLineEventArgs _commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
+        private readonly TaskParameterEventArgs _taskParameter = new TaskParameterEventArgs(TaskParameterMessageKind.TaskInput, "ItemName", null, true, DateTime.MinValue);
         private readonly BuildWarningEventArgs _warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
         private readonly BuildErrorEventArgs _error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
         private readonly TargetStartedEventArgs _targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
@@ -131,6 +133,7 @@ namespace Microsoft.Build.UnitTests
                         _normalMessage,
                         _highMessage,
                         _commandLine,
+                        _taskParameter,
                         _warning,
                         _error,
                         _taskFinished,
@@ -150,6 +153,7 @@ namespace Microsoft.Build.UnitTests
                         _normalMessage,
                         _highMessage,
                         _commandLine,
+                        _taskParameter,
                         _externalStartedEvent,
                         _warning,
                         _error,
@@ -266,6 +270,7 @@ namespace Microsoft.Build.UnitTests
             source.Consume(_normalMessage);
             source.Consume(_highMessage);
             source.Consume(_commandLine);
+            source.Consume(_taskParameter);
             source.Consume(_externalStartedEvent);
             source.Consume(_warning);
             source.Consume(_error);

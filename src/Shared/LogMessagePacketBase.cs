@@ -89,7 +89,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Event is a TaskCommandLineEventArgs
         /// </summary>
-        TaskCommandLineEvent = 12
+        TaskCommandLineEvent = 12,
+
+        /// <summary>
+        /// Event is a TaskParameterEventArgs
+        /// </summary>
+        TaskParameterEvent = 13,
     }
     #endregion
 
@@ -485,6 +490,10 @@ namespace Microsoft.Build.Shared
                     return new TaskFinishedEventArgs(null, null, null, null, null, false);
                 case LoggingEventType.TaskCommandLineEvent:
                     return new TaskCommandLineEventArgs(null, null, MessageImportance.Normal);
+#if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
+                case LoggingEventType.TaskParameterEvent:
+                    return new TaskParameterEventArgs(0, null, null, true, default);
+#endif
                 default:
                     ErrorUtilities.VerifyThrow(false, "Should not get to the default of GetBuildEventArgFromId ID: " + _eventType);
                     return null;
@@ -509,6 +518,12 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.TaskCommandLineEvent;
             }
+#if !TASKHOST
+            else if (eventType == typeof(TaskParameterEventArgs))
+            {
+                return LoggingEventType.TaskParameterEvent;
+            }
+#endif
             else if (eventType == typeof(ProjectFinishedEventArgs))
             {
                 return LoggingEventType.ProjectFinishedEvent;

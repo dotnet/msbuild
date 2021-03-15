@@ -95,6 +95,11 @@ namespace Microsoft.Build.Utilities
         public IBuildEngine7 BuildEngine7 => (IBuildEngine7)BuildEngine;
 
         /// <summary>
+        /// Retrieves the <see cref="IBuildEngine8" /> version of the build engine interface provided by the host.
+        /// </summary>
+        public IBuildEngine8 BuildEngine8 => (IBuildEngine8)BuildEngine;
+
+        /// <summary>
         /// The build engine sets this property if the host IDE has associated a host object with this particular task.
         /// </summary>
         /// <value>The host object instance (can be null).</value>

@@ -198,6 +198,7 @@ namespace Microsoft.Build.Utilities
         public Microsoft.Build.Framework.IBuildEngine5 BuildEngine5 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine6 BuildEngine6 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine7 BuildEngine7 { get { throw null; } }
+        public Microsoft.Build.Framework.IBuildEngine8 BuildEngine8 { get { throw null; } }
         protected string HelpKeywordPrefix { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskHost HostObject { get { throw null; } set { } }
         public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
@@ -395,6 +396,7 @@ namespace Microsoft.Build.Utilities
         protected abstract string ToolName { get; }
         public string ToolPath { get { throw null; } set { } }
         public bool UseCommandProcessor { get { throw null; } set { } }
+        public string UseUtf8Encoding { get { throw null; } set { } }
         public bool YieldDuringToolExecution { get { throw null; } set { } }
         protected virtual string AdjustCommandsForOperatingSystem(string input) { throw null; }
         protected virtual bool CallHostObjectToExecute() { throw null; }

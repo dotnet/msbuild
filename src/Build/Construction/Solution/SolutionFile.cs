@@ -190,6 +190,11 @@ namespace Microsoft.Build.Construction
         public IReadOnlyDictionary<string, ProjectInSolution> ProjectsByGuid => new ReadOnlyDictionary<string, ProjectInSolution>(_projects);
 
         /// <summary>
+        /// This is the read accessor for the solution filter file, if present. Set through FullPath.
+        /// </summary>
+        internal string SolutionFilterFilePath { get => _solutionFilterFile; }
+
+        /// <summary>
         /// This is the read/write accessor for the solution file which we will parse.  This
         /// must be set before calling any other methods on this class.
         /// </summary>

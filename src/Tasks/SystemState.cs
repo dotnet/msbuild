@@ -277,7 +277,7 @@ namespace Microsoft.Build.Tasks
         /// Read the contents of this object out to the specified file.
         /// TODO: once all classes derived from StateFileBase adopt the new serialization, we should consider moving this into the base class
         /// </summary>
-        internal static SystemState DeserializeCacheByTranslator(string stateFile, TaskLoggingHelper log, bool logWarning = true)
+        internal static SystemState DeserializeCacheByTranslator(string stateFile, TaskLoggingHelper log)
         {
             // First, we read the cache from disk if one exists, or if one does not exist, we create one.
             try
@@ -310,15 +310,7 @@ namespace Microsoft.Build.Tasks
                 // any exception imaginable.  Catch them all here.
                 // Not being able to deserialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
-                if (logWarning)
-                {
-                    log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, e.Message);
-                }
-                else
-                {
-                    log.LogMessageFromResources("General.CouldNotReadStateFile", stateFile, e.Message);
-                }
-                return null;
+                log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, e.Message);
             }
 
             return null;
@@ -622,7 +614,7 @@ namespace Microsoft.Build.Tasks
             foreach (ITaskItem stateFile in stateFiles)
             {
                 // Verify that it's a real stateFile. Log message but do not error if not.
-                SystemState sysState = DeserializeCacheByTranslator(stateFile.ToString(), log, false);
+                SystemState sysState = DeserializeCacheByTranslator(stateFile.ToString(), log);
                 if (sysState == null)
                 {
                     continue;
