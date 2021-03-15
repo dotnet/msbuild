@@ -23,7 +23,7 @@
     <Compile Include="..\dotnet-back-compat.Tests\**\*.cs" LinkBase="dotnet-back-compat" />
     <Compile Include="..\dotnet-build.Tests\**\*.cs" LinkBase="dotnet-build" />
     <Compile Include="..\dotnet-clean.Tests\**\*.cs" LinkBase="dotnet-clean" />
-    <Compile Include="..\dotnet-check-update.Tests\**\*.cs" LinkBase="dotnet-check-update" />
+    <Compile Include="..\dotnet-sdk-check.Tests\**\*.cs" LinkBase="dotnet-sdk-check" />
     <Compile Include="..\dotnet-fsi.Tests\**\*.cs" LinkBase="dotnet-fsi" />
     <Compile Include="..\dotnet-help.Tests\**\*.cs" LinkBase="dotnet-help" />
     <Compile Include="..\dotnet-install-tool.Tests\**\*.cs" LinkBase="dotnet-install-tool" />

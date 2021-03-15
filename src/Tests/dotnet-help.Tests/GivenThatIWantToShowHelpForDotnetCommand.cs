@@ -46,7 +46,6 @@ SDK commands:
   build             Build a .NET project.
   build-server      Interact with servers started by a build.
   clean             Clean build outputs of a .NET project.
-  check-update      Check for .NET SDK and runtime updates.
   help              Show command line help.
   list              List project references of a .NET project.
   msbuild           Run Microsoft Build Engine (MSBuild) commands.
@@ -57,6 +56,7 @@ SDK commands:
   remove            Remove a package or reference from a .NET project.
   restore           Restore dependencies specified in a .NET project.
   run               Build and run a .NET project output.
+  sdk               Manage .NET SDK installation.
   sln               Modify Visual Studio solution files.
   store             Store the specified assemblies in the runtime package store.
   test              Run unit tests using the test runner specified in a .NET project.

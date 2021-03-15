@@ -38,7 +38,6 @@ sdk-options:
   build             {LocalizableStrings.BuildDefinition}
   build-server      {LocalizableStrings.BuildServerDefinition}
   clean             {LocalizableStrings.CleanDefinition}
-  check-update      {LocalizableStrings.CheckUpdateDefinition}
   help              {LocalizableStrings.HelpDefinition}
   list              {LocalizableStrings.ListDefinition}
   msbuild           {LocalizableStrings.MsBuildDefinition}
@@ -49,6 +48,7 @@ sdk-options:
   remove            {LocalizableStrings.RemoveDefinition}
   restore           {LocalizableStrings.RestoreDefinition}
   run               {LocalizableStrings.RunDefinition}
+  sdk               {LocalizableStrings.SdkDefinition}
   sln               {LocalizableStrings.SlnDefinition}
   store             {LocalizableStrings.StoreDefinition}
   test              {LocalizableStrings.TestDefinition}

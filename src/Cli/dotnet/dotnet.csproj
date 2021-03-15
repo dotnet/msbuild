@@ -28,7 +28,8 @@
     <EmbeddedResource Update="**\dotnet-buildserver\*.resx" Namespace="Microsoft.DotNet.Tools.BuildServer" />
     <EmbeddedResource Update="**\dotnet-buildserver\shutdown\*.resx" Namespace="Microsoft.DotNet.Tools.BuildServer.Shutdown" />
     <EmbeddedResource Update="**\dotnet-clean\*.resx" Namespace="Microsoft.DotNet.Tools.Clean" />
-    <EmbeddedResource Update="**\dotnet-check-update\*.resx" Namespace="Microsoft.DotNet.Tools.CheckUpdate" />
+    <EmbeddedResource Update="**\dotnet-sdk\*.resx" Namespace="Microsoft.DotNet.Tools.Sdk" />
+    <EmbeddedResource Update="**\dotnet-sdk\check\*.resx" Namespace="Microsoft.DotNet.Tools.Sdk.Check" />
     <EmbeddedResource Update="**\dotnet-help\*.resx" Namespace="Microsoft.DotNet.Tools.Help" />
     <EmbeddedResource Update="**\dotnet-list-package\*.resx" Namespace="Microsoft.DotNet.Tools.List.PackageReferences" />
     <EmbeddedResource Update="**\dotnet-list-reference\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectToProjectReferences" />
