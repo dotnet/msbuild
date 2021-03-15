@@ -215,6 +215,19 @@ namespace Microsoft.Build.Framework
     {
         void Cancel();
     }
+    public partial class TaskExecutionContext
+    {
+        public TaskExecutionContext(string startupDirectory, Dictionary<string, string> buildProcessEnvironment, CultureInfo culture, CultureInfo uiCulture) { throw null; }
+
+        public string StartupDirectory { get; }
+        public Dictionary<string, string> BuildProcessEnvironment { get; }
+        public CultureInfo Culture { get; }
+        public CultureInfo UICulture { get; }
+    }
+    public partial interface IConcurrentTask
+    {
+        void ConfigureForConcurrentExecution(TaskExecutionContext executionContext);
+    }     
     public partial interface IEventRedirector
     {
         void ForwardEvent(Microsoft.Build.Framework.BuildEventArgs buildEvent);

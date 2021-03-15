@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Reflection;
 
@@ -23,9 +25,9 @@ using System.Runtime.Remoting;
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
-    /// This class represents an implementation of INode for out-of-proc node for hosting tasks.
+    /// This class represents an implementation of INode for RAR service out-of-proc node for hosting 'resolve assembly reference' tasks.
     /// </summary>
-    internal class OutOfProcTaskHostNode :
+    internal class RarServiceTaskHostNode :
 #if FEATURE_APPDOMAIN
         MarshalByRefObject, 
 #endif
@@ -53,7 +55,7 @@ namespace Microsoft.Build.CommandLine
         /// Note that either value in the KeyValuePair can be null, as it is completely possible to have an 
         /// environment variable that is set in 32-bit processes but not in 64-bit, or vice versa.  
         /// 
-        /// This dictionary must be static because otherwise, if a node is sitting around waiting for reuse, it will 
+        /// This dictionary must be static because otherwise, if a node is sitting around waiting for reuse, it will
         /// have inherited the environment from the previous build, and any differences between the two will be seen 
         /// as "legitimate".  There is no way for us to know what the differences between the startup environment of 
         /// the previous build and the environment of the first task run in the task host in this build -- so we 
@@ -63,9 +65,14 @@ namespace Microsoft.Build.CommandLine
         private static IDictionary<string, KeyValuePair<string, string>> s_mismatchedEnvironmentValues;
 
         /// <summary>
+        /// backing queue used to control creating concurrent RAR service clients (requests)
+        /// </summary>
+        private static BlockingCollection<bool> s_waitForConcurrentClient = new ();
+
+        /// <summary>
         /// The endpoint used to talk to the host.
         /// </summary>
-        private NodeEndpointOutOfProcTaskHost _nodeEndpoint;
+        private NodeEndpointRarTaskHost _nodeEndpoint;
 
         /// <summary>
         /// The packet factory.
@@ -167,7 +174,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Constructor.
         /// </summary>
-        public OutOfProcTaskHostNode()
+        public RarServiceTaskHostNode()
         {
             // We don't know what the current build thinks this variable should be until RunTask(), but as a fallback in case there are 
             // communications before we get the configuration set up, just go with what was already in the environment from when this node
@@ -522,9 +529,76 @@ namespace Microsoft.Build.CommandLine
 
         #region INode Members
 
+        public static NodeEngineShutdownReason RunMultiClient(int maxClients, out Exception shutdownException)
+        {
+            // Option A
+            const int minListenCapacity = 2;
+            int currentCapacity = 0;
+
+            // initiate with two waiting clients
+            for (int i = 0; i < minListenCapacity; i++)
+            {
+                s_waitForConcurrentClient.Add(true);
+            }
+
+            // run draining queue
+            foreach (var _ in s_waitForConcurrentClient.GetConsumingEnumerable())
+            {
+                System.Threading.Tasks.Task.Run(() =>
+                {
+                    // TODO: block when max clients is reached
+
+                    Interlocked.Increment(ref currentCapacity);
+
+                    var rarTaskHost = new RarServiceTaskHostNode();
+                    var shutdownReason = rarTaskHost.Run(out var rarTaskHostShutdownException);
+
+                    Interlocked.Decrement(ref currentCapacity);
+                    // TODO: somehow react to shutdownException and unexpected shutdownReason, maybe log unexpected somewhere?
+                });
+
+                // TODO: how to do graceful node termination?
+            }
+
+            throw new NotImplementedException();
+
+            // Option B
+            // create list of N instances when N is concurrency level
+            //var clients = Enumerable.Range(0, maxClients).Select(_ =>
+            //    System.Threading.Tasks.Task.Run(() =>
+            //    {
+            //        RarServiceTaskHostNode rarTaskHost;
+            //        NodeEngineShutdownReason rarTaskHostShutdownReason;
+            //        Exception rarTaskHostShutdownException;
+
+            //        do
+            //        {
+            //            rarTaskHost = new RarServiceTaskHostNode();
+            //            rarTaskHostShutdownReason = rarTaskHost.Run(out rarTaskHostShutdownException);
+            //        } while (rarTaskHostShutdownReason == NodeEngineShutdownReason.ConnectionFailed || rarTaskHostShutdownReason == NodeEngineShutdownReason.BuildCompleteReuse);
+
+            //        return (TaskHost: rarTaskHost, shutdownReason: rarTaskHostShutdownReason, shutdownException: rarTaskHostShutdownException);
+            //    })).ToArray();
+            //// wait for them all to be finished
+            //System.Threading.Tasks.Task.WaitAll(clients.Cast<System.Threading.Tasks.Task>().ToArray());
+            //// aggregate exceptions
+            //var exceptions = clients.Where(c => c.Result.shutdownException != null).Select(c => c.Result.shutdownException).ToArray();
+            //if (exceptions.Length > 0)
+            //{
+            //    shutdownException = new AggregateException(exceptions);
+            //    return NodeEngineShutdownReason.Error;
+            //}
+            //else
+            //{
+            //    shutdownException = null;
+            //    return NodeEngineShutdownReason.BuildCompleteReuse;
+            //}
+        }
+
         /// <summary>
         /// Starts up the node and processes messages until the node is requested to shut down.
         /// </summary>
+        /// <param name="isRar">True if we are hosting RAR node</param>
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception shutdownException)
@@ -539,7 +613,7 @@ namespace Microsoft.Build.CommandLine
 
             string pipeName = "MSBuild" + Process.GetCurrentProcess().Id;
 
-            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(pipeName);
+            _nodeEndpoint = new NodeEndpointRarTaskHost(pipeName/*, multiConnections: true*/);
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
@@ -696,8 +770,7 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
-            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
-            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
         }
 
@@ -765,11 +838,20 @@ namespace Microsoft.Build.CommandLine
             {
                 case LinkStatus.ConnectionFailed:
                 case LinkStatus.Failed:
+                    // connection fail - unexpected but could happen if handshake fails for any reason
+                    // in such case we need to start new client as LinkStatus.Active has not been reached
+                    s_waitForConcurrentClient.Add(false);
+
                     _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
                     _shutdownEvent.Set();
                     break;
 
                 case LinkStatus.Inactive:
+                    break;
+
+                case LinkStatus.Active:
+                    // start listen to another incoming connection
+                    s_waitForConcurrentClient.Add(true);
                     break;
 
                 default:
@@ -796,15 +878,18 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
+                // TODO: delete eventually
                 // Change to the startup directory
                 NativeMethodsShared.SetCurrentDirectory(taskConfiguration.StartupDirectory);
 
                 if (_updateEnvironment)
                 {
+                    // TODO: delete eventually
                     InitializeMismatchedEnvironmentTable(taskConfiguration.BuildProcessEnvironment);
                 }
 
                 // Now set the new environment
+                // TODO: delete eventually
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
 
                 // Set culture
@@ -830,7 +915,7 @@ namespace Microsoft.Build.CommandLine
                     taskConfiguration.AppDomainSetup,
 #endif
                     taskParams,
-                    null
+                    new TaskExecutionContext(taskConfiguration.StartupDirectory, taskConfiguration.BuildProcessEnvironment, taskConfiguration.Culture, taskConfiguration.UICulture)
                 );
             }
             catch (Exception e)

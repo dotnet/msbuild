@@ -2654,6 +2654,10 @@ namespace Microsoft.Build.CommandLine
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                         shutdownReason = node.Run(out nodeException);
                     }
+                    else if (nodeModeNumber == 3)
+                    {
+                        shutdownReason = RarServiceTaskHostNode.RunMultiClient(100, out nodeException);
+                    }
                     else
                     {
                         CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());

@@ -279,6 +279,10 @@ namespace Microsoft.Build.BackEnd
                 lock (_taskHostLock)
                 {
                     _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
+                    if (_taskType.Type.Name == "ResolveAssemblyReference")
+                    {
+                        _requiredContext |= HandshakeOptions.RarService;
+                    }
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
                 }
 

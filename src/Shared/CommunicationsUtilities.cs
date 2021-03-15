@@ -56,7 +56,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Building with administrator privileges
         /// </summary>
-        Administrator = 32
+        Administrator = 32,
+
+        /// <summary>
+        /// RAR service
+        /// </summary>
+        RarService = 64
     }
 
     internal readonly struct Handshake
@@ -90,7 +95,7 @@ namespace Microsoft.Build.Internal
         // This is used as a key, so it does not need to be human readable.
         public override string ToString()
         {
-            return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
+            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
         }
 
         internal int[] RetrieveHandshakeComponents()

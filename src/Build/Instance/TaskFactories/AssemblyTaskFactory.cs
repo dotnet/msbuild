@@ -346,7 +346,7 @@ namespace Microsoft.Build.BackEnd
                 // if we don't have any task host parameters specified on either the using task or the 
                 // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
                 // as the task factory.  
-                useTaskFactory = _taskHostFactoryExplicitlyRequested;
+                useTaskFactory = _taskHostFactoryExplicitlyRequested || _taskName == "Microsoft.Build.Tasks.ResolveAssemblyReference";
             }
 
             if (useTaskFactory)

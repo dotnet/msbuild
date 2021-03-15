@@ -295,7 +295,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
         {
-            return hostHandshake.ToString() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
+            return $"{hostHandshake.ToString()}|{nodeProcessId}";
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY

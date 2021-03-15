@@ -88,6 +88,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="taskColumn">The column in the project file where the task invocation is located.</param>
         /// <param name="appDomainSetup">The AppDomainSetup that we want to use to launch our AppDomainIsolated tasks</param>
         /// <param name="taskParams">Parameters that will be passed to the task when created</param>
+        /// <param name="taskExecutionContext"></param>
         /// <returns>Task completion result showing success, failure or if there was a crash</returns>
         internal OutOfProcTaskHostTaskResult ExecuteTask
             (
@@ -97,10 +98,11 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
-#if FEATURE_APPDOMAIN
+    #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
-#endif
-                IDictionary<string, TaskParameter> taskParams
+    #endif
+                IDictionary<string, TaskParameter> taskParams,
+                TaskExecutionContext taskExecutionContext
             )
         {
             buildEngine = oopTaskHostNode;
@@ -167,7 +169,8 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
-                    taskParams);
+                    taskParams,
+                    taskExecutionContext);
             }
 
             return taskResult;
@@ -236,7 +239,8 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                                                 appDomainSetup,
 #endif
-                                                taskParams
+                                                taskParams,
+                                                null
                                             );
                     }
                     catch (Exception e)
@@ -296,10 +300,11 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
-#if FEATURE_APPDOMAIN
+        #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
-#endif
-                IDictionary<string, TaskParameter> taskParams
+        #endif
+                IDictionary<string, TaskParameter> taskParams,
+                TaskExecutionContext taskExecutionContext
             )
         {
 #if FEATURE_APPDOMAIN
@@ -377,6 +382,12 @@ namespace Microsoft.Build.CommandLine
                                         new string[] { param.Key, param.Value.ToString(), taskName }
                                     );
                 }
+            }
+
+            // TODO: ESCAPE HATCH here
+            if (wrappedTask is IConcurrentTask concurrentTask)
+            {
+                concurrentTask.ConfigureForConcurrentExecution(taskExecutionContext);
             }
 
             bool success = false;
