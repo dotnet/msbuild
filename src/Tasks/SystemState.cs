@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -35,7 +36,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache at the SystemState instance level. It is serialized and reused between instances.
         /// </summary>
-        private Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+        internal Dictionary<string, FileState> instanceLocalFileStateCache = new Dictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// LastModified information is purely instance-local. It doesn't make sense to
@@ -112,7 +113,7 @@ namespace Microsoft.Build.Tasks
         /// Class that holds the current file state.
         /// </summary>
         [Serializable]
-        private sealed class FileState : ITranslatable
+        internal sealed class FileState : ITranslatable
         {
             /// <summary>
             /// The last modified time for this file.
@@ -337,6 +338,7 @@ namespace Microsoft.Build.Tasks
         internal bool IsDirty
         {
             get { return isDirty; }
+            set { isDirty = value; }
         }
 
         /// <summary>
@@ -594,6 +596,73 @@ namespace Microsoft.Build.Tasks
             dependencies = fileState.dependencies;
             scatterFiles = fileState.scatterFiles;
             frameworkName = fileState.frameworkName;
+        }
+
+        /// <summary>
+        /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
+        /// </summary>
+        /// <param name="stateFiles">List of locations of caches on disk.</param>
+        /// <param name="log">How to log</param>
+        /// <param name="fileExists">Whether a file exists</param>
+        /// <returns>A cache representing key aspects of file states.</returns>
+        internal static SystemState DeserializePrecomputedCachesByTranslator(ITaskItem[] stateFiles, TaskLoggingHelper log, FileExists fileExists)
+        {
+            SystemState retVal = new SystemState();
+            retVal.isDirty = stateFiles.Length > 0;
+            HashSet<string> assembliesFound = new HashSet<string>();
+
+            foreach (ITaskItem stateFile in stateFiles)
+            {
+                // Verify that it's a real stateFile. Log message but do not error if not.
+                SystemState sysState = DeserializeCacheByTranslator(stateFile.ToString(), log);
+                if (sysState == null)
+                {
+                    continue;
+                }
+                foreach (KeyValuePair<string, FileState> kvp in sysState.instanceLocalFileStateCache)
+                {
+                    string relativePath = kvp.Key;
+                    if (!assembliesFound.Contains(relativePath))
+                    {
+                        FileState fileState = kvp.Value;
+                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile.ToString()), relativePath));
+                        if (fileExists(fullPath))
+                        {
+                            // Correct file path
+                            retVal.instanceLocalFileStateCache[fullPath] = fileState;
+                            assembliesFound.Add(relativePath);
+                        }
+                    }
+                }
+            }
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Modifies this object to be more portable across machines, then writes it to filePath.
+        /// </summary>
+        /// <param name="stateFile">Path to which to write the precomputed cache</param>
+        /// <param name="log">How to log</param>
+        internal void SerializePrecomputedCacheByTranslator(string stateFile, TaskLoggingHelper log)
+        {
+            // Save a copy of instanceLocalFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
+            // instanceLocalFileStateCache by default, so change that to the relativized form, then change it back.
+            Dictionary<string, FileState> oldFileStateCache = instanceLocalFileStateCache;
+            instanceLocalFileStateCache = instanceLocalFileStateCache.ToDictionary(kvp => FileUtilities.MakeRelative(Path.GetDirectoryName(stateFile), kvp.Key), kvp => kvp.Value);
+
+            try
+            {
+                if (FileUtilities.FileExistsNoThrow(stateFile))
+                {
+                    log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
+                }
+                SerializeCacheByTranslator(stateFile, log);
+            }
+            finally
+            {
+                instanceLocalFileStateCache = oldFileStateCache;
+            }
         }
 
         /// <summary>

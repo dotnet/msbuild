@@ -2226,6 +2226,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         TargetFrameworkMonikerDisplayName="$(TargetFrameworkMonikerDisplayName)"
         TargetedRuntimeVersion="$(TargetedRuntimeVersion)"
         StateFile="$(ResolveAssemblyReferencesStateFile)"
+        AssemblyInformationCachePaths="$(AssemblyInformationCachePaths)"
+        AssemblyInformationCacheOutputPath="$(AssemblyInformationCacheOutputPath)"
         InstalledAssemblySubsetTables="@(InstalledAssemblySubsetTables)"
         TargetFrameworkSubsets="@(_ReferenceInstalledAssemblySubsets)"
         FullTargetFrameworkSubsetNames="$(FullReferenceAssemblyNames)"
