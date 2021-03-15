@@ -1,5 +1,4 @@
 trigger:
-- master
 - main
 - exp/*
 - vs*
