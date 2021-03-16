@@ -689,15 +689,16 @@ namespace Microsoft.Build.BackEnd
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
-                var coresAcquired = builderCallback.RequestCores(implicitCoreUsed ? requestedCores : requestedCores - 1);
+                var coresAcquired = builderCallback.RequestCores(requestedCores);
 
                 runningTotal += coresAcquired;
 
-                if (!implicitCoreUsed)
+                if (!implicitCoreUsed && coresAcquired == 0)
                 {
-                    // Always factor in the implicit core assigned to the node running this task.
+                    // If we got nothing back from the actual system, pad it with the one implicit core
+                    // you get just for running--that way we never block and always return > 1
                     implicitCoreUsed = true;
-                    return coresAcquired + 1;
+                    coresAcquired = 1;
                 }
 
                 return coresAcquired;
@@ -708,7 +709,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                if (coresToRelease > 0 && implicitCoreUsed)
+                if (implicitCoreUsed)
                 {
                     coresToRelease -= 1;
                     implicitCoreUsed = false;
