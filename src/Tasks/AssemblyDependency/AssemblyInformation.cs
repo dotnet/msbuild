@@ -361,6 +361,21 @@ namespace Microsoft.Build.Tasks
                 using (var stream = File.OpenRead(_sourceFile))
                 using (var peFile = new PEReader(stream))
                 {
+                    bool hasMetadata = false;
+                    try
+                    {
+                        hasMetadata = peFile.HasMetadata;
+                    }
+                    finally
+                    {
+                        if (!hasMetadata)
+                        {
+                            throw new BadImageFormatException(string.Format(CultureInfo.CurrentCulture,
+                                AssemblyResources.GetString("ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata"),
+                                _sourceFile));
+                        }
+                    }
+
                     var metadataReader = peFile.GetMetadataReader();
 
                     var assemblyReferences = metadataReader.AssemblyReferences;
