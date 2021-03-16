@@ -719,7 +719,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                if (implicitCoreUsed)
+                if (implicitCoreUsed && coresToRelease > runningTotal)
                 {
                     coresToRelease -= 1;
                     implicitCoreUsed = false;
