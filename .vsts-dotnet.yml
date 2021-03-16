@@ -97,6 +97,7 @@ stages:
                 /p:DotNetPublishUsingPipelines=true
                 /p:VisualStudioIbcDrop=$(OptProfDropName)
       displayName: Build
+      env: { DOTNET_PERFLOG_DIR: '$(Build.SourcesDirectory)\artifacts\log\$(BuildConfiguration)\perf' }
       condition: succeeded()
 
     # Publish OptProf configuration files
