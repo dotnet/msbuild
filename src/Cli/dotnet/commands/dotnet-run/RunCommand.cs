@@ -178,8 +178,6 @@ namespace Microsoft.DotNet.Tools.Run
             var buildResult =
                 new RestoringCommand(
                     restoreArgs.Prepend(Project),
-                    restoreArgs,
-                    new[] { Project },
                     NoRestore
                 ).Execute();
 

@@ -15,52 +15,45 @@ namespace Microsoft.DotNet.Tools
 
         public RestoringCommand(
             IEnumerable<string> msbuildArgs,
-            IEnumerable<string> parsedArguments,
-            IEnumerable<string> trailingArguments,
             bool noRestore,
             string msbuildPath = null)
-            : base(GetCommandArguments(msbuildArgs, parsedArguments, noRestore), msbuildPath)
+            : base(GetCommandArguments(msbuildArgs, noRestore), msbuildPath)
         {
-            SeparateRestoreCommand = GetSeparateRestoreCommand(parsedArguments, trailingArguments, noRestore, msbuildPath);
+            SeparateRestoreCommand = GetSeparateRestoreCommand(msbuildArgs, noRestore, msbuildPath);
         }
 
         private static IEnumerable<string> GetCommandArguments(
-            IEnumerable<string> msbuildArgs,
-            IEnumerable<string> parsedArguments,
+            IEnumerable<string> arguments,
             bool noRestore)
         {
             if (noRestore) 
             {
-                return msbuildArgs;
+                return arguments;
             }
 
-            if (HasArgumentToExcludeFromRestore(parsedArguments))
+            if (HasArgumentToExcludeFromRestore(arguments))
             {
-                return Prepend("-nologo", msbuildArgs);
+                return Prepend("-nologo", arguments);
             }
 
-            return Prepend("-restore", msbuildArgs);
+            return Prepend("-restore", arguments);
         }
 
         private static RestoreCommand GetSeparateRestoreCommand(
-            IEnumerable<string> parsedArguments,
-            IEnumerable<string> trailingArguments, 
+            IEnumerable<string> arguments,
             bool noRestore,
             string msbuildPath)
         {
-            if (noRestore || !HasArgumentToExcludeFromRestore(parsedArguments))
+            if (noRestore || !HasArgumentToExcludeFromRestore(arguments))
             {
                 return null;
             }
 
             IEnumerable<string> restoreArguments = new string[] { "-target:Restore" };
-            if (parsedArguments != null)
+            if (arguments != null)
             {
-                restoreArguments = restoreArguments.Concat(parsedArguments.Where(a => !IsExcludedFromRestore(a)));
-            }
-            if (trailingArguments != null)
-            {
-                restoreArguments = restoreArguments.Concat(trailingArguments);
+                restoreArguments = restoreArguments.Concat(arguments.Where(
+                    a => !IsExcludedFromRestore(a) && !IsExcludedFromSeparateRestore(a)));
             }
 
             return new RestoreCommand(restoreArguments, msbuildPath);
@@ -72,8 +65,19 @@ namespace Microsoft.DotNet.Tools
         private static bool HasArgumentToExcludeFromRestore(IEnumerable<string> arguments)
             => arguments.Any(a => IsExcludedFromRestore(a));
 
-        private static bool IsExcludedFromRestore(string argument) 
-            => argument.StartsWith("-property:TargetFramework=", StringComparison.Ordinal);
+        private static readonly string[] propertyPrefixes = new string[]{ "-", "/" };
+
+        private static bool IsExcludedFromRestore(string argument)
+            => propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}property:TargetFramework=", StringComparison.Ordinal)) ||
+               propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}p:TargetFramework=", StringComparison.Ordinal));
+
+        //  These arguments don't by themselves require that restore be run in a separate process,
+        //  but if there is a separate restore process they shouldn't be passed to it
+        private static bool IsExcludedFromSeparateRestore(string argument)
+            => propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}t:", StringComparison.Ordinal)) ||
+               propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}target:", StringComparison.Ordinal)) ||
+               propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}consoleloggerparameters:", StringComparison.Ordinal)) ||
+               propertyPrefixes.Any(prefix => argument.StartsWith($"{prefix}clp:", StringComparison.Ordinal));
 
         public override int Execute()
         {
