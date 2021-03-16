@@ -1,5 +1,4 @@
 trigger:
-- master
 - main
 - vs*
 - exp/*
@@ -16,7 +15,7 @@ variables:
     value: $(IbcSourceBranchName)
   - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}:
     - name: SourceBranch
-      value: master
+      value: main
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
