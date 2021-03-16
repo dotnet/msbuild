@@ -78,6 +78,11 @@ namespace Microsoft.Build.BackEnd
         private int _coreLimit;
 
         /// <summary>
+        /// The weight of busy nodes in GetAvailableCoresForExplicitRequests().
+        /// </summary>
+        private int _nodeCoreAllocationWeight;
+
+        /// <summary>
         /// { nodeId -> NodeInfo }
         /// A list of nodes we know about.  For the non-distributed case, there will be no more nodes than the
         /// maximum specified on the command-line.
@@ -201,6 +206,13 @@ namespace Microsoft.Build.BackEnd
             // Tasks are factoring in the "implicit core" so let's make the maximum return value from
             // RequestCore exactly the number of cores.
             _coreLimit = Math.Max(0, _coreLimit - 1);
+
+            if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDNODECOREALLOCATIONWEIGHT"), out _nodeCoreAllocationWeight)
+                || _nodeCoreAllocationWeight <= 0
+                || _nodeCoreAllocationWeight > 100)
+            {
+                _nodeCoreAllocationWeight = 0;
+            }
 
             if (String.IsNullOrEmpty(_debugDumpPath))
             {
@@ -1360,7 +1372,9 @@ namespace Microsoft.Build.BackEnd
 
         private int GetAvailableCoresForExplicitRequests()
         {
-            return Math.Max(0, _coreLimit - (/*_schedulingData.ExecutingRequestsCount +*/ _schedulingData.ExplicitlyRequestedCores));
+            int implicitlyAllocatedCores = ((_schedulingData.ExecutingRequestsCount - 1) * _nodeCoreAllocationWeight) / 100;
+            int explicitlyAllocatedCores = _schedulingData.ExplicitlyRequestedCores;
+            return Math.Max(0, _coreLimit - (implicitlyAllocatedCores + explicitlyAllocatedCores));
         }
 
         /// <summary>
