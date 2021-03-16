@@ -40,8 +40,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(EnableTrimAnalyzer)' == 'true' or '$(PublishTrimmed)' == 'true'">
-    <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == ''">true</SuppressTrimAnalysisWarnings>
+  <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And ('$(EnableTrimAnalyzer)' == 'true' Or '$(PublishTrimmed)' == 'true')">
+    <!-- Trim analysis warnings are suppressed for .NET < 6. -->
+    <SuppressTrimAnalysisWarnings Condition="$([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0'))">true</SuppressTrimAnalysisWarnings>
+    <!-- Suppress for WPF/WinForms -->
+    <SuppressTrimAnalysisWarnings Condition="'$(UseWpf)' == 'true' Or '$(UseWindowsForms)' == 'true'">true</SuppressTrimAnalysisWarnings>
+    <!-- Otherwise, for .NET 6+, warnings are on by default -->
+    <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == ''">false</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
 
   <!-- Suppress warnings produced by the linker or by the ILLink Roslyn analyzer. Warnings produced
@@ -178,14 +183,18 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ILLinkWarningLevel Condition=" '$(ILLinkWarningLevel)' == '' ">0</ILLinkWarningLevel>
     </PropertyGroup>
 
-    <PropertyGroup>
-      <ILLinkTreatWarningsAsErrors Condition=" '$(ILLinkTreatWarningsAsErrors)' == '' ">$(TreatWarningsAsErrors)</ILLinkTreatWarningsAsErrors>
-      <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
+    <!-- Defaults for .NET < 6 -->
+    <PropertyGroup Condition=" $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0')) ">
       <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
-      <!-- For .NET < 6, the defaults are the same regardless of whether the assembly has an IsTrimmable attribute. (The attribute didn't exist until .NET 6.) -->
-      <_TrimmerDefaultAction Condition=" $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '6.0')) ">$(TrimMode)</_TrimmerDefaultAction>
+      <!-- Action is the same regardless of whether the assembly has an IsTrimmable attribute. (The attribute didn't exist until .NET 6.) -->
+      <_TrimmerDefaultAction>$(TrimMode)</_TrimmerDefaultAction>
+    </PropertyGroup>
+    <PropertyGroup>
+      <TrimMode Condition=" '$(TrimMode)' == '' ">link</TrimMode>
       <!-- For .NET 6+, assemblies without IsTrimmable attribute get the "copy" action. -->
       <_TrimmerDefaultAction Condition=" '$(_TrimmerDefaultAction)' == '' ">copy</_TrimmerDefaultAction>
+      <ILLinkTreatWarningsAsErrors Condition=" '$(ILLinkTreatWarningsAsErrors)' == '' ">$(TreatWarningsAsErrors)</ILLinkTreatWarningsAsErrors>
+      <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
     </PropertyGroup>
     
     <!-- Suppress warnings produced by the linker. Any warnings shared with the analyzer should be
