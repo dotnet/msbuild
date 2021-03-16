@@ -4,15 +4,14 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 #nullable disable
 
-namespace Microsoft.DotNet.DotNetSdkResolver
+namespace Microsoft.DotNet.NativeWrapper
 {
-    internal static partial class Interop
+    public static partial class Interop
     {
-        internal static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        public static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
         static Interop()
         {
@@ -55,7 +54,48 @@ namespace Microsoft.DotNet.DotNetSdkResolver
             global_json_path = 1,
         }
 
-        internal static class Windows
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        internal struct hostfxr_dotnet_environment_info
+        {
+            public nuint size;
+            public string hostfxr_version;
+            public string hostfxr_commit_hash;
+            public nuint sdk_count;
+            public IntPtr sdks;
+            public nuint framework_count;
+            public IntPtr frameworks;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        internal struct hostfxr_dotnet_environment_framework_info
+        {
+            public nuint size;
+            public string name;
+            public string version;
+            public string path;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        internal struct hostfxr_dotnet_environment_sdk_info
+        {
+            public nuint size;
+            public string version;
+            public string path;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+        internal delegate void hostfxr_get_dotnet_environment_info_result_fn(
+            IntPtr info,
+            IntPtr result_context);
+
+        [DllImport("hostfxr", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int hostfxr_get_dotnet_environment_info(
+            string dotnet_root,
+            IntPtr reserved,
+            hostfxr_get_dotnet_environment_info_result_fn result,
+            IntPtr result_context);
+
+        public static class Windows
         {
             private const CharSet UTF16 = CharSet.Unicode;
 
@@ -83,7 +123,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
                 hostfxr_get_available_sdks_result_fn result);
         }
 
-        internal static class Unix
+        public static class Unix
         {
             // Ansi marshaling on Unix is actually UTF8
             private const CharSet UTF8 = CharSet.Ansi;
@@ -118,7 +158,7 @@ namespace Microsoft.DotNet.DotNetSdkResolver
             [DllImport("libc", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             private static extern void free(IntPtr ptr);
 
-            internal static string realpath(string path)
+            public static string realpath(string path)
             {
                 var ptr = realpath(path, IntPtr.Zero);
                 var result = PtrToStringUTF8(ptr);

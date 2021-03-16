@@ -6,9 +6,9 @@ using System.Diagnostics;
 
 #nullable disable
 
-namespace Microsoft.DotNet.DotNetSdkResolver
+namespace Microsoft.DotNet.NativeWrapper
 {
-    internal static class NETCoreSdkResolverNativeWrapper
+    public static class NETCoreSdkResolverNativeWrapper
     {
         public static SdkResolutionResult ResolveSdk(
             string dotnetExeDirectory, 

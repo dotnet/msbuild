@@ -18,6 +18,11 @@
     <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj">
       <Aliases>sdkResolver</Aliases>
     </ProjectReference>
+
+    <!-- Microsoft.DotNet.MSBuildSdkResolver compiles source of Microsoft.DotNet.NativeWrapper to reduce dll load. There are duplicated types-->
+    <ProjectReference Include="..\..\Resolvers\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj">
+      <Aliases>nativeWrapper</Aliases>
+    </ProjectReference>
     
     <ProjectReference Include="..\..\Resolvers\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj" />
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />

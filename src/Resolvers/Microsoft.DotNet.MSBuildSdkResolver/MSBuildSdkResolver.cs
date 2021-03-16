@@ -3,8 +3,8 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.DotNet.DotNetSdkResolver;
+using Microsoft.DotNet.NativeWrapper;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (msbuildSdksDir == null)
             {
-                string dotnetExeDir = _netCoreSdkResolver.GetDotnetExeDirectory();
+                string dotnetExeDir = EnvironmentProvider.GetDotnetExeDirectory(_getEnvironmentVariable);
                 string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
                 var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetExeDir);
 

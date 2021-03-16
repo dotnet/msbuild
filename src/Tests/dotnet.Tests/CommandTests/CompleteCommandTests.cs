@@ -36,6 +36,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 "build",
                 "build-server",
                 "clean",
+                "sdk",
                 "fsi",
                 "help",
                 "list",
@@ -72,8 +73,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 "-?",
                 "-d",
                 "-h",
-                "build-server" // This should be removed when completion is based on "starts with" rather than "contains".
-                               // See https://github.com/dotnet/cli/issues/8958.
+                "build-server", // These should be removed when completion is based on "starts with" rather than "contains".
+                                // See https://github.com/dotnet/cli/issues/8958.
             };
 
             var reporter = new BufferedReporter();
