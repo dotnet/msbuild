@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
     /// Given a list of assemblyFiles, determine the closure of all assemblyFiles that
     /// depend on those assemblyFiles including second and nth-order dependencies too.
     /// </summary>
-    public class ResolveAssemblyReference : TaskExtension
+    public class ResolveAssemblyReference : TaskExtension, IConcurrentTask
     {
         /// <summary>
         /// key assembly used to trigger inclusion of facade references.
@@ -890,6 +890,12 @@ namespace Microsoft.Build.Tasks
         /// Storage for names of all files writen to disk.
         /// </summary>
         private List<ITaskItem> _filesWritten = new List<ITaskItem>();
+
+        /// <summary>
+        /// Execution context used when task is supposed to run concurrently in multiple threads.
+        /// If null hosting process do not run this task concurrently and set it execution context on process level.
+        /// </summary>
+        private TaskExecutionContext _concurrencyExecutionContext;
 
         /// <summary>
         /// The names of all files written to disk.
@@ -1885,7 +1891,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
+            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
@@ -1910,7 +1916,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
-                _cache.SerializeCacheByTranslator(_stateFile, Log);
+                _cache.SerializeCache(_stateFile, Log);
             }
         }
         #endregion
@@ -3049,5 +3055,10 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+
+        void IConcurrentTask.ConfigureForConcurrentExecution(TaskExecutionContext executionContext)
+        {
+            _concurrencyExecutionContext = executionContext;
+        }
     }
 }

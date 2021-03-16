@@ -227,6 +227,10 @@ namespace Microsoft.Build.Framework
     {
         void Cancel();
     }
+    public partial interface IConcurrentTask
+    {
+        void ConfigureForConcurrentExecution(Microsoft.Build.Framework.TaskExecutionContext executionContext);
+    }
     public partial interface IEventRedirector
     {
         void ForwardEvent(Microsoft.Build.Framework.BuildEventArgs buildEvent);
@@ -586,6 +590,14 @@ namespace Microsoft.Build.Framework
         public TaskCommandLineEventArgs(string commandLine, string taskName, Microsoft.Build.Framework.MessageImportance importance, System.DateTime eventTimestamp) { }
         public string CommandLine { get { throw null; } }
         public string TaskName { get { throw null; } }
+    }
+    public partial class TaskExecutionContext
+    {
+        public TaskExecutionContext(string startupDirectory, System.Collections.Generic.Dictionary<string, string> buildProcessEnvironment, System.Globalization.CultureInfo culture, System.Globalization.CultureInfo uiCulture) { }
+        public System.Collections.Generic.Dictionary<string, string> BuildProcessEnvironment { get { throw null; } }
+        public System.Globalization.CultureInfo Culture { get { throw null; } }
+        public string StartupDirectory { get { throw null; } }
+        public System.Globalization.CultureInfo UICulture { get { throw null; } }
     }
     public partial class TaskFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
