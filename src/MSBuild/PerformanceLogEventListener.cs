@@ -51,7 +51,8 @@ namespace Microsoft.Build.CommandLine
 
                 // Check to see if we should enable the event listener.
                 string logDirectory = Environment.GetEnvironmentVariable(PerfLogDirEnvVar);
-                if (Directory.Exists(logDirectory))
+
+                if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(logDirectory).Exists)
                 {
                     eventListener = new PerformanceLogEventListener();
                     eventListener.Initialize(logDirectory);
