@@ -491,10 +491,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources from the scheduler.
         /// </summary>
-        public int RequestCores(int requestedCores)
+        public int RequestCores(int requestedCores, bool waitForCores)
         {
             VerifyIsNotZombie();
-            RaiseResourceRequest(new ResourceRequest(true, _requestEntry.Request.GlobalRequestId, requestedCores));
+            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
             WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueWithResourcesEvent };
 
@@ -516,7 +516,7 @@ namespace Microsoft.Build.BackEnd
         public void ReleaseCores(int coresToRelease)
         {
             VerifyIsNotZombie();
-            RaiseResourceRequest(new ResourceRequest(false, _requestEntry.Request.GlobalRequestId, coresToRelease));
+            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, coresToRelease));
         }
 
         #endregion

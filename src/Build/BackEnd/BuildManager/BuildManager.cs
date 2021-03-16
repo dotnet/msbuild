@@ -2178,7 +2178,7 @@ namespace Microsoft.Build.Execution
         {
             if (request.IsAcquire)
             {
-                _scheduler.RequestCores(request.BlockedRequestId, request.NumCores).ContinueWith((Task<int> task) =>
+                _scheduler.RequestCores(request.BlockedRequestId, request.NumCores, request.IsBlocking).ContinueWith((Task<int> task) =>
                 {
                     var response = new ResourceResponse(request.BlockedRequestId, task.Result);
                     _nodeManager.SendData(node, response);

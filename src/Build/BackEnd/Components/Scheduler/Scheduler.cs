@@ -541,7 +541,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources.
         /// </summary>
-        public Task<int> RequestCores(int requestId, int requestedCores)
+        public Task<int> RequestCores(int requestId, int requestedCores, bool waitForCores)
         {
             if (requestedCores == 0)
             {
@@ -560,7 +560,7 @@ namespace Microsoft.Build.BackEnd
             };
 
             int grantedCores = grantCores(GetAvailableCoresForExplicitRequests());
-            if (grantedCores > 0)
+            if (grantedCores > 0 || !waitForCores)
             {
                 return Task.FromResult(grantedCores);
             }

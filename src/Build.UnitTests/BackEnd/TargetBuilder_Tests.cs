@@ -1420,7 +1420,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Empty impl
         /// </summary>
-        int IRequestBuilderCallback.RequestCores(int requestedCores)
+        int IRequestBuilderCallback.RequestCores(int requestedCores, bool waitForCores)
         {
             return 0;
         }

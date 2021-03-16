@@ -60,8 +60,10 @@ namespace Microsoft.Build.BackEnd
         /// Requests CPU resources from the scheduler.
         /// </summary>
         /// <param name="requestedCores">Number of logical cores being requested.</param>
-        /// <returns>Number of logical cores actually granted.</returns>
-        int RequestCores(int requestedCores);
+        /// <param name="waitForCores">True to make the request block and wait for at least one core.</param>
+        /// <returns>Number of logical cores actually granted. If <paramref name="waitForCores"/> is false, the call can return
+        /// zero. Otherwise the return value is always positive.</returns>
+        int RequestCores(int requestedCores, bool waitForCores);
 
         /// <summary>
         /// Returns CPU resources to the scheduler.

@@ -16,6 +16,8 @@ namespace Microsoft.Build.BackEnd
 
         private bool _isAcquire;
 
+        private bool _isBlocking;
+
         private int _numCores;
 
         /// <summary>
@@ -27,11 +29,22 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructor
+        /// Constructor for acquiring.
         /// </summary>
-        internal ResourceRequest(bool acquire, int blockedGlobalRequestId, int numCores)
+        internal ResourceRequest(int blockedGlobalRequestId, int numCores, bool isBlocking)
         {
-            _isAcquire = acquire;
+            _isAcquire = true;
+            _isBlocking = isBlocking;
+            _blockedGlobalRequestId = blockedGlobalRequestId;
+            _numCores = numCores;
+        }
+
+        /// <summary>
+        /// Constructor for releasing.
+        /// </summary>
+        internal ResourceRequest(int blockedGlobalRequestId, int numCores)
+        {
+            _isAcquire = false;
             _blockedGlobalRequestId = blockedGlobalRequestId;
             _numCores = numCores;
         }
@@ -71,6 +84,17 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// </summary>
+        public bool IsBlocking
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return _isBlocking;
+            }
+        }
+
+        /// <summary>
+        /// </summary>
         public int NumCores
         {
             [DebuggerStepThrough]
@@ -89,6 +113,7 @@ namespace Microsoft.Build.BackEnd
         {
             translator.Translate(ref _blockedGlobalRequestId);
             translator.Translate(ref _isAcquire);
+            translator.Translate(ref _isBlocking);
             translator.Translate(ref _numCores);
         }
 
