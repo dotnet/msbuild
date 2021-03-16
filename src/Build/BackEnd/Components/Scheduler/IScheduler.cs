@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
@@ -72,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources.
         /// </summary>
-        int RequestCores(int requestId, int requestedCores);
+        Task<int> RequestCores(int requestId, int requestedCores);
 
         /// <summary>
         /// Returns CPU resources.

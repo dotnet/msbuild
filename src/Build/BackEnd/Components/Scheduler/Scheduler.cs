@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.ResourceManager;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -100,6 +100,11 @@ namespace Microsoft.Build.BackEnd
         /// The collection of all requests currently known to the system.
         /// </summary>
         private SchedulingData _schedulingData;
+
+        /// <summary>
+        /// A queue of RequestCores request waiting for at least one core to become available.
+        /// </summary>
+        private Queue<TaskCompletionSource<int>> _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
 
         #endregion
 
@@ -502,6 +507,7 @@ namespace Microsoft.Build.BackEnd
             DumpRequests();
             _schedulingPlan = null;
             _schedulingData = new SchedulingData();
+            _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
             _availableNodes = new Dictionary<int, NodeInfo>(8);
             _currentInProcNodeCount = 0;
             _currentOutOfProcNodeCount = 0;
@@ -535,12 +541,36 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources.
         /// </summary>
-        public int RequestCores(int requestId, int requestedCores)
+        public Task<int> RequestCores(int requestId, int requestedCores)
         {
-            int grantedCores = Math.Min(requestedCores, GetAvailableCoresForExplicitRequests());
-            SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
-            request.AddRequestedCores(grantedCores);
-            return grantedCores;
+            if (requestedCores == 0)
+            {
+                return Task.FromResult(0);
+            }
+
+            Func<int, int> grantCores = (int availableCores) =>
+            {
+                int grantedCores = Math.Min(requestedCores, availableCores);
+                if (grantedCores > 0)
+                {
+                    SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
+                    request.AddRequestedCores(grantedCores);
+                }
+                return grantedCores;
+            };
+
+            int grantedCores = grantCores(GetAvailableCoresForExplicitRequests());
+            if (grantedCores > 0)
+            {
+                return Task.FromResult(grantedCores);
+            }
+            else
+            {
+                // We have no cores to grant at the moment, queue up the request.
+                TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
+                _pendingRequestCoresCallbacks.Enqueue(completionSource);
+                return completionSource.Task.ContinueWith((Task<int> task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
+            }
         }
 
         /// <summary>
@@ -1780,6 +1810,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ResumeRequiredWork(List<ScheduleResponse> responses)
         {
+            // If we have pending RequestCore calls, satisfy those first.
+            while (_pendingRequestCoresCallbacks.Count > 0)
+            {
+                int availableCores = GetAvailableCoresForExplicitRequests();
+                if (availableCores == 0)
+                {
+                    break;
+                }
+                TaskCompletionSource<int> completionSource = _pendingRequestCoresCallbacks.Dequeue();
+                completionSource.SetResult(availableCores);
+            }
+
             // Resume any ready requests on the existing nodes.
             foreach (int nodeId in _availableNodes.Keys)
             {

@@ -2178,10 +2178,11 @@ namespace Microsoft.Build.Execution
         {
             if (request.IsAcquire)
             {
-                var coresAcquired = _scheduler.RequestCores(request.BlockedRequestId, request.NumCores);
-                var response = new ResourceResponse(request.BlockedRequestId, coresAcquired);
-
-                _nodeManager.SendData(node, response);
+                _scheduler.RequestCores(request.BlockedRequestId, request.NumCores).ContinueWith((Task<int> task) =>
+                {
+                    var response = new ResourceResponse(request.BlockedRequestId, task.Result);
+                    _nodeManager.SendData(node, response);
+                }, TaskContinuationOptions.ExecuteSynchronously);
             }
             else
             {
