@@ -2636,7 +2636,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return new RetrievableEntryHashSet<TValue>(dictionary, StringComparer.OrdinalIgnoreCase, readOnly: true);
+                return new ObjectModel.ReadOnlyDictionary<string, TValue>(dictionary);
             }
         }
 
@@ -2906,7 +2906,12 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
+                var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
+                evaluatedIncludeEscaped ??= item.EvaluatedInclude;
+                var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
+                evaluatedIncludeBeforeWildcardExpansionEscaped ??= item.EvaluatedInclude;
+
+                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
 
                 _items.Add(instance);
 
