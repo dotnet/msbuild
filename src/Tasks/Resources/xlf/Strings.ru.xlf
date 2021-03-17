@@ -2550,6 +2550,31 @@
         <target state="translated">MSB3952: несоответствие хэша файла. Для {0} ожидался хэш файла {1}, соответствующий {2}, но вычисленное значение было равно {3}.</target>
         <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
+      <trans-unit id="WriteCodeFragment.CouldNotConvertToInferredType">
+        <source>Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</source>
+        <target state="new">Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteCodeFragment.CouldNotConvertValue">
+        <source>MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</source>
+        <target state="new">MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</target>
+        <note>{StrBegin="MSB3716: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
+        <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
+        <target state="new">Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
+        <source>Multiple attribute constructors were found for type inferencing.</source>
+        <target state="new">Multiple attribute constructors were found for type inferencing.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteCodeFragment.ParameterTypeNotFound">
+        <source>MSB3715: The type "{0}" was not found.</source>
+        <target state="new">MSB3715: The type "{0}" was not found.</target>
+        <note>{StrBegin="MSB3715: "}</note>
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
         <target state="translated">MSB3491: Не удалось записать строки в файл "{0}". {1}</target>
