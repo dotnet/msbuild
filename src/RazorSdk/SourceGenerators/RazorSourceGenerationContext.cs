@@ -69,7 +69,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             globalOptions.TryGetValue("build_property._RazorSourceGeneratorDebug", out var waitForDebugger);
             globalOptions.TryGetValue("build_property._RazorSourceGeneratorLog", out var enableLogging);
 
-            var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>());
+            var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>(), true);
             var (razorFiles, cshtmlFiles) = GetRazorInputs(context);
             var fileSystem = GetVirtualFileSystem(context, razorFiles, cshtmlFiles);
 

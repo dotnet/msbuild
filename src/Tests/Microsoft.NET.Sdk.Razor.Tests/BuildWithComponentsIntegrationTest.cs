@@ -63,7 +63,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // Components should appear in the app assembly.
             new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().ContainType("MvcWithComponents.Components.Counter");
             // Views should also appear in the app assembly.
-            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().ContainType("AspNetCore.Views_Home_Index");
+            new FileInfo(Path.Combine(outputPath, "MvcWithComponents.dll")).AssemblyShould().ContainType("AspNetCoreGeneratedDocument.Views_Home_Index");
         }
     }
 }
