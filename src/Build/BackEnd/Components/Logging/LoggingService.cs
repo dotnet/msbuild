@@ -541,7 +541,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
             int key = GetWarningsAsErrorOrMessageKey(context);
 
-            HashSet<string> warningsAsErrorsExcludingMessages = new HashSet<string>(_warningsAsErrorsByProject[key]);
+            if (!_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrorsExcludingMessages))
+            {
+                return null;
+            }
 
             if (_warningsAsMessagesByProject != null)
             {
