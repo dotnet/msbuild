@@ -19,7 +19,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
     //  2. Nevertheless, in the IDE, project re-evaluation can create new instances for each evaluation.
     //
     // As such, all state (instance or static) must be guarded against concurrent access/updates.
-    // Caches of minimum versions, compatible SDKs are static to benefit multiple IDE evaluations.
     // VSSettings are also effectively static (singleton instance that can be swapped by tests).
 
     public sealed class DotNetMSBuildSdkResolver : SdkResolver
@@ -48,6 +47,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
             public string MSBuildSdksDir;
             public string NETCoreSdkVersion;
+            public IDictionary<string, string> PropertiesToAdd;
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
@@ -62,6 +62,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             {
                 msbuildSdksDir = priorResult.MSBuildSdksDir;
                 netcoreSdkVersion = priorResult.NETCoreSdkVersion;
+                propertiesToAdd = priorResult.PropertiesToAdd;
             }
 
             if (msbuildSdksDir == null)
@@ -138,7 +139,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             context.State = new CachedResult
             {
                 MSBuildSdksDir = msbuildSdksDir,
-                NETCoreSdkVersion = netcoreSdkVersion
+                NETCoreSdkVersion = netcoreSdkVersion,
+                PropertiesToAdd = propertiesToAdd
             };
 
             string msbuildSdkDir = Path.Combine(msbuildSdksDir, sdkReference.Name, "Sdk");
