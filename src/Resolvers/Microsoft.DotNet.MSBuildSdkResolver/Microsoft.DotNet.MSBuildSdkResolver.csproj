@@ -58,11 +58,6 @@
     <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-
   <!-- To reduce dll load (cause RPS perf regression). Directly compile files from Microsoft.DotNet.SdkResolver, and the workload resolver -->
   <ItemGroup>
     <Compile Include="..\Microsoft.DotNet.SdkResolver\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver" />
@@ -78,6 +73,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" PrivateAssets="All" ExcludeAssets="Runtime" />
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
   
   <ItemGroup>
