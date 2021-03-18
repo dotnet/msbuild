@@ -71,11 +71,11 @@
     </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.9.0">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>57a23d249aafe6409b3e24836a486f769cb74c2c</Sha>
+      <Sha>5e4b48a27efce55a613664b58d353ab4c8d1f6c1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="16.9.0-preview-21112-03">
+    <Dependency Name="Microsoft.Build.Localization" Version="16.9.0-preview-21167-03">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>57a23d249aafe6409b3e24836a486f769cb74c2c</Sha>
+      <Sha>5e4b48a27efce55a613664b58d353ab4c8d1f6c1</Sha>
     </Dependency>
     <Dependency Name="Microsoft.FSharp.Compiler" Version="11.3.2-beta.21102.9">
       <Uri>https://github.com/dotnet/fsharp</Uri>
