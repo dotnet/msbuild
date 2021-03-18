@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <HelixType>test/product/</HelixType>
-    <Creator Condition="'$(BUILD_BUILDNUMBER)' != ''">sdk-dev</Creator>
+    <Creator Condition="'$(BUILD_BUILDNUMBER)' != '' and '$(HelixAccessToken)' == ''">sdk-dev</Creator>
 
     <IncludeDotNetCli>false</IncludeDotNetCli>
 
@@ -16,7 +16,7 @@
     <SDKCustomXUnitProject Include="**\*.Tests.csproj"/>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(HelixAccessToken)' == '' ">
+  <ItemGroup Condition=" '$(_CustomHelixTargetQueue)' != '' ">
     <HelixTargetQueue Include="$(_CustomHelixTargetQueue)"/>
   </ItemGroup>
 
