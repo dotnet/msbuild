@@ -31,23 +31,23 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 
         public WorkloadSdkResolver()
         {
-            //  Put workload resolution behind a feature flag.
-            _enabled = false;
+            // Support opt-out for workload resolution
+            _enabled = true;
             var envVar = Environment.GetEnvironmentVariable("MSBuildEnableWorkloadResolver");
             if (envVar != null)
             {
-                if (envVar.Equals("true", StringComparison.OrdinalIgnoreCase))
+                if (envVar.Equals("false", StringComparison.OrdinalIgnoreCase))
                 {
-                    _enabled = true;
+                    _enabled = false;
                 }
             }
 
             if (!_enabled)
             {
-                string sentinelPath = Path.Combine(Path.GetDirectoryName(typeof(WorkloadSdkResolver).Assembly.Location), "EnableWorkloadResolver.sentinel");
+                string sentinelPath = Path.Combine(Path.GetDirectoryName(typeof(WorkloadSdkResolver).Assembly.Location), "DisableWorkloadResolver.sentinel");
                 if (File.Exists(sentinelPath))
                 {
-                    _enabled = true;
+                    _enabled = false;
                 }
             }
 
