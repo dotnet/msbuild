@@ -9,7 +9,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class FileChangeHandler
+    internal sealed class StaticFileHandler
     {
         private static readonly JsonSerializerOptions JsonSerializerOptions = new(JsonSerializerDefaults.Web)
         {
@@ -17,12 +17,12 @@ namespace Microsoft.DotNet.Watcher.Tools
         };
         private readonly IReporter _reporter;
 
-        public FileChangeHandler(IReporter reporter)
+        public StaticFileHandler(IReporter reporter)
         {
             _reporter = reporter;
         }
 
-        internal async ValueTask<bool> TryHandleFileAction(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
+        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
         {
             if (!file.IsStaticFile || context.BrowserRefreshServer is null)
             {

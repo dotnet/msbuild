@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.Watcher
     {
         private readonly Dictionary<string, FileItem> _files;
 
-        public FileSet(bool isNetCoreApp31OrNewer, IEnumerable<FileItem> files)
+        public FileSet(ProjectInfo projectInfo, IEnumerable<FileItem> files)
         {
-            IsNetCoreApp31OrNewer = isNetCoreApp31OrNewer;
+            Project = projectInfo;
             _files = new Dictionary<string, FileItem>(StringComparer.Ordinal);
             foreach (var item in files)
             {
@@ -25,9 +25,9 @@ namespace Microsoft.DotNet.Watcher
 
         public int Count => _files.Count;
 
-        public bool IsNetCoreApp31OrNewer { get; }
+        public ProjectInfo Project { get; }
 
-        public static readonly FileSet Empty = new FileSet(false, Array.Empty<FileItem>());
+        public static readonly FileSet Empty = new FileSet(null, Array.Empty<FileItem>());
 
         public IEnumerator<FileItem> GetEnumerator() => _files.Values.GetEnumerator();
 

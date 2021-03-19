@@ -2,9 +2,9 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Watcher.Internal;
@@ -13,28 +13,26 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher
 {
-    public class DotNetWatcher : IAsyncDisposable
+    public class HotReloadDotNetWatcher : IAsyncDisposable
     {
         private readonly IReporter _reporter;
         private readonly ProcessRunner _processRunner;
-        private readonly DotNetWatchOptions _dotnetWatchOptions;
-        private readonly StaticFileHandler _staticFileHandler;
+        private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly IWatchFilter[] _filters;
 
-        public DotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions)
+        public HotReloadDotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions)
         {
             Ensure.NotNull(reporter, nameof(reporter));
 
             _reporter = reporter;
             _processRunner = new ProcessRunner(reporter);
-            _dotnetWatchOptions = dotNetWatchOptions;
-            _staticFileHandler = new StaticFileHandler(reporter);
+            _dotNetWatchOptions = dotNetWatchOptions;
 
             _filters = new IWatchFilter[]
             {
                 new MSBuildEvaluationFilter(fileSetFactory),
-                new NoRestoreFilter(),
-                new LaunchBrowserFilter(dotNetWatchOptions),
+                new DotNetBuildFilter(_processRunner, _reporter),
+                new LaunchBrowserFilter(_dotNetWatchOptions),
             };
         }
 
@@ -45,7 +43,6 @@ namespace Microsoft.DotNet.Watcher
                 cancelledTaskSource);
 
             var processSpec = context.ProcessSpec;
-            var initialArguments = processSpec.Arguments.ToArray();
 
             if (context.SuppressMSBuildIncrementalism)
             {
@@ -55,9 +52,6 @@ namespace Microsoft.DotNet.Watcher
             while (true)
             {
                 context.Iteration++;
-
-                // Reset arguments
-                processSpec.Arguments = initialArguments;
 
                 for (var i = 0; i < _filters.Length; i++)
                 {
@@ -76,17 +70,29 @@ namespace Microsoft.DotNet.Watcher
                     return;
                 }
 
+                if (!fileSet.Project.IsNetCoreApp60OrNewer())
+                {
+                    _reporter.Error($"Hot reload based watching is only supported in .NET 6.0 or newer apps. Update the project's launchSettings.json to disable this feature.");
+                    return;
+                }
+
                 if (cancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
 
-                using (var currentRunCancellationSource = new CancellationTokenSource())
-                using (var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
+                CreateExecutable(context, processSpec);
+
+                using var currentRunCancellationSource = new CancellationTokenSource();
+                using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
                     cancellationToken,
-                    currentRunCancellationSource.Token))
-                using (var fileSetWatcher = new FileSetWatcher(fileSet, _reporter))
+                    currentRunCancellationSource.Token);
+                using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter);
+                try
                 {
+                    using var hotReload = new HotReload(_reporter);
+                    await hotReload.InitializeAsync(context, cancellationToken);
+
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);
                     var args = string.Join(" ", processSpec.Arguments);
                     _reporter.Verbose($"Running {processSpec.ShortDisplayName()} with the following arguments: {args}");
@@ -100,15 +106,27 @@ namespace Microsoft.DotNet.Watcher
                     {
                         fileSetTask = fileSetWatcher.GetChangedFileAsync(combinedCancellationSource.Token);
                         finishedTask = await Task.WhenAny(processTask, fileSetTask, cancelledTaskSource.Task);
-                        if (finishedTask == fileSetTask
-                            && fileSetTask.Result is FileItem fileItem &&
-                            await _staticFileHandler.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
+
+                        if (finishedTask != fileSetTask || fileSetTask.Result is not FileItem fileItem)
                         {
-                            // We're able to handle the file change event without doing a full-rebuild.
+                            // The app exited.
+                            break;
                         }
                         else
                         {
-                            break;
+                            _reporter.Output($"File changed: {fileItem.FilePath}.");
+
+                            var start = Stopwatch.GetTimestamp();
+                            if (await hotReload.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
+                            {
+                                var totalTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
+                                _reporter.Verbose($"Successfully handled changes to {fileItem.FilePath} in {totalTime.TotalMilliseconds}ms.");
+                            }
+                            else
+                            {
+                                _reporter.Verbose($"Unable to handle changes to {fileItem.FilePath}. Rebuilding the app.");
+                                break;
+                            }
                         }
                     }
 
@@ -146,8 +164,44 @@ namespace Microsoft.DotNet.Watcher
                         Debug.Assert(finishedTask == fileSetTask);
                         var changedFile = fileSetTask.Result;
                         context.ChangedFile = changedFile;
-                        _reporter.Output($"File changed: {changedFile.Value.FilePath}");
                     }
+                }
+                catch
+                {
+                    if (!currentRunCancellationSource.IsCancellationRequested)
+                    {
+                        currentRunCancellationSource.Cancel();
+                    }
+                }
+            }
+        }
+
+        private static void CreateExecutable(DotNetWatchContext context, ProcessSpec processSpec)
+        {
+            var project = context.FileSet.Project;
+            processSpec.Executable = project.RunCommand;
+            if (!string.IsNullOrEmpty(project.RunArguments))
+            {
+                processSpec.EscapedArguments = project.RunArguments;
+            }
+
+            if (!string.IsNullOrEmpty(project.RunWorkingDirectory))
+            {
+                processSpec.WorkingDirectory = project.RunWorkingDirectory;
+            }
+
+            if (!string.IsNullOrEmpty(context.DefaultLaunchSettingsProfile.ApplicationUrl))
+            {
+                processSpec.EnvironmentVariables["ASPNETCORE_URLS"] = context.DefaultLaunchSettingsProfile.ApplicationUrl;
+            }
+
+            if (context.DefaultLaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
+            {
+                foreach (var entry in context.DefaultLaunchSettingsProfile.EnvironmentVariables)
+                {
+                    var value = Environment.ExpandEnvironmentVariables(entry.Value);
+                    // NOTE: MSBuild variables are not expanded like they are in VS
+                    processSpec.EnvironmentVariables[entry.Key] = value;
                 }
             }
         }
@@ -164,7 +218,6 @@ namespace Microsoft.DotNet.Watcher
                 {
                     diposable.Dispose();
                 }
-
             }
         }
     }

@@ -96,9 +96,9 @@
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Web.ProjectSystem"/>
       <NETSdksContent Include="$(NETSdkWorkerSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Worker"/>
-      <NETSdksContent Include="$(NETSdkBlazorWasmSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkBlazorWasmSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.BlazorWebAssembly"/>
-      <NETSdksContent Include="$(NETSdkRazorSourceRoot)\**\*.*" 
+      <NETSdksContent Include="$(NETSdkRazorSourceRoot)\**\*.*"
                      DeploymentSubPath="Sdks\Microsoft.NET.Sdk.Razor"/>
     </ItemGroup>
     <Copy SourceFiles="@(NETSdksContent)"
@@ -141,6 +141,7 @@
     <ItemGroup>
       <DotNetWatchFile Include="$(ArtifactsDir)bin\dotnet-watch\$(Configuration)\$(SdkTargetFramework)\**" />
       <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.AspNetCore.Watch.BrowserRefresh\$(Configuration)\netcoreapp3.1\*.dll" DeploymentSubpath="middleware" />
+      <DotNetWatchFile Include="$(ArtifactsDir)bin\Microsoft.Extensions.AspNetCoreDeltaApplier\$(Configuration)\net6.0\*.dll" DeploymentSubpath="hotreload" />
       <DotNetWatchFile Include="$(ArtifactsDir)bin\DotNetWatchTasks\$(Configuration)\netstandard2.0\DotNetWatchTasks.dll" />
     </ItemGroup>
 
@@ -223,7 +224,7 @@
     <Error
       Text="WebAssembly SDK tools outputs were not found in $(ArtifactsBinDir)Microsoft.NET.Sdk.BlazorWebAssembly.Tool\$(Configuration)\$(SdkTargetFramework)\publish"
       Condition="'@(_WebAssemblyToolsOutput->Count())' == '0'" />
-    
+
     <Copy
       SourceFiles="@(_WebAssemblyToolsOutput)"
       DestinationFolder="$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.BlazorWebAssembly\tools\$(SdkTargetFramework)\"

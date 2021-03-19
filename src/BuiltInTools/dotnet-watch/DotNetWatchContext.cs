@@ -7,13 +7,13 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     public class DotNetWatchContext
     {
-        public IReporter Reporter { get; set; } = NullReporter.Singleton;
+        public IReporter Reporter { get; init; } = NullReporter.Singleton;
 
         public ProcessSpec ProcessSpec { get; set; }
 
         public FileSet FileSet { get; set; }
 
-        public int Iteration { get; set; }
+        public int Iteration { get; set; } = -1;
 
         public FileItem? ChangedFile { get; set; }
 
@@ -22,5 +22,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public bool SuppressMSBuildIncrementalism { get; set; }
 
         public BrowserRefreshServer BrowserRefreshServer { get; set; }
+
+        public LaunchSettingsProfile DefaultLaunchSettingsProfile { get; set; }
     }
 }

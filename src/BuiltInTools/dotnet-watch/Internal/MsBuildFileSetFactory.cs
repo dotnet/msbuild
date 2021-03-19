@@ -149,7 +149,18 @@ namespace Microsoft.DotNet.Watcher.Internal
                         Debug.Assert(fileItems.All(f => Path.IsPathRooted(f.FilePath)), "All files should be rooted paths");
 #endif
 
-                        return new FileSet(result.IsNetCoreApp31OrNewer, fileItems);
+                        // TargetFrameworkVersion appears as v6.0 in msbuild. Ignore the leading v
+                        var targetFrameworkVersion = !string.IsNullOrEmpty(result.TargetFrameworkVersion) ?
+                            Version.Parse(result.TargetFrameworkVersion.AsSpan(1)) : // Ignore leading v
+                            null;
+                        var projectInfo = new ProjectInfo(
+                            _projectFile,
+                            result.IsNetCoreApp,
+                            targetFrameworkVersion,
+                            result.RunCommand,
+                            result.RunArguments,
+                            result.RunWorkingDirectory);
+                        return new FileSet(projectInfo, fileItems);
                     }
 
                     _reporter.Error($"Error(s) finding watch items project file '{Path.GetFileName(_projectFile)}'");
@@ -172,7 +183,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                     {
                         _reporter.Warn("Fix the error to continue or press Ctrl+C to exit.");
 
-                        var fileSet = new FileSet(false, new[] { new FileItem { FilePath = _projectFile } });
+                        var fileSet = new FileSet(null, new[] { new FileItem { FilePath = _projectFile } });
 
                         using (var watcher = new FileSetWatcher(fileSet, _reporter))
                         {

@@ -13,14 +13,16 @@ them to a file.
           DependsOnTargets="_CollectWatchItems">
 
     <PropertyGroup>
-      <_IsMicrosoftNETCoreApp31OrNewer Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND
-        $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '3.1'))">true</_IsMicrosoftNETCoreApp31OrNewer>
-
-      <_IsMicrosoftNETCoreApp31OrNewer Condition="'$(_IsMicrosoftNETCoreApp31OrNewer)' == ''">false</_IsMicrosoftNETCoreApp31OrNewer>
+      <_IsNetCoreApp Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</_IsNetCoreApp>
+      <_IsNetCoreApp Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">false</_IsNetCoreApp>
     </PropertyGroup>
 
     <FileSetSerializer
-       IsNetCoreApp31OrNewer="$(_IsMicrosoftNETCoreApp31OrNewer)"
+       IsNetCoreApp="$(_IsNetCoreApp)"
+       TargetFrameworkVersion="$(TargetFrameworkVersion)"
+       RunCommand="$(RunCommand)"
+       RunArguments="$(RunArguments)"
+       RunWorkingDirectory="$(RunWorkingDirectory)"
        OutputPath="$(_DotNetWatchListFile)"
        WatchFiles="@(Watch)" />
   </Target>

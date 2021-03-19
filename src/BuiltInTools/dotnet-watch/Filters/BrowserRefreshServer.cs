@@ -2,9 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -23,10 +25,11 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private readonly byte[] ReloadMessage = Encoding.UTF8.GetBytes("Reload");
         private readonly byte[] WaitMessage = Encoding.UTF8.GetBytes("Wait");
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new (JsonSerializerDefaults.Web);
+        private readonly List<WebSocket> _clientSockets = new();
         private readonly IReporter _reporter;
         private readonly TaskCompletionSource _taskCompletionSource;
         private IHost _refreshServer;
-        private WebSocket _webSocket;
 
         public BrowserRefreshServer(IReporter reporter)
         {
@@ -72,33 +75,44 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            _webSocket = await context.WebSockets.AcceptWebSocketAsync();
+            _clientSockets.Add(await context.WebSockets.AcceptWebSocketAsync());
             await _taskCompletionSource.Task;
+        }
+
+        public ValueTask SendJsonSerlialized<TValue>(TValue value, CancellationToken cancellationToken = default)
+        {
+            var jsonSerialized = JsonSerializer.SerializeToUtf8Bytes(value, _jsonSerializerOptions);
+            return SendMessage(jsonSerialized, cancellationToken);
         }
 
         public async ValueTask SendMessage(ReadOnlyMemory<byte> messageBytes, CancellationToken cancellationToken = default)
         {
-            if (_webSocket == null || _webSocket.CloseStatus.HasValue)
+            for (var i = 0; i < _clientSockets.Count; i++)
             {
-                return;
-            }
+                var clientSocket = _clientSockets[i];
+                if (clientSocket.CloseStatus.HasValue)
+                {
+                    continue;
+                }
 
-            try
-            {
-                await _webSocket.SendAsync(messageBytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _reporter.Verbose($"Refresh server error: {ex}");
+                try
+                {
+                    await clientSocket.SendAsync(messageBytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _reporter.Verbose($"Refresh server error: {ex}");
+                }
             }
         }
 
         public async ValueTask DisposeAsync()
         {
-            if (_webSocket != null)
+            for (var i = 0; i < _clientSockets.Count; i++)
             {
-                await _webSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, default);
-                _webSocket.Dispose();
+                var clientSocket = _clientSockets[i];
+                await clientSocket.CloseOutputAsync(WebSocketCloseStatus.Empty, null, default);
+                clientSocket.Dispose();
             }
 
             if (_refreshServer != null)
