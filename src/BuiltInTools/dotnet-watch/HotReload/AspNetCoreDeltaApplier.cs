@@ -4,10 +4,10 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.ExternalAccess.DotNetWatch;
@@ -65,17 +65,15 @@ namespace Microsoft.DotNet.Watcher.Tools
             var payload = new UpdatePayload
             {
                 ChangedFile = changedFile,
-                Deltas = updates.Value.Updates.Select(c => new UpdateDelta
+                Deltas = ImmutableArray.CreateRange(updates.Value.Updates, c => new UpdateDelta
                 {
                     ModuleId = c.Module,
                     ILDelta = c.ILDelta.ToArray(),
                     MetadataDelta = c.MetadataDelta.ToArray(),
-                    UpdatedMethods = c.UpdatedMethods.ToArray(),
                 }),
             };
 
-            // Jank mode. We should send this in a better (not json) format
-            await JsonSerializer.SerializeAsync(_pipe, payload, cancellationToken: cancellationToken);
+            await payload.WriteAsync(_pipe, cancellationToken);
             await _pipe.FlushAsync(cancellationToken);
 
             var result = ApplyResult.Failed;

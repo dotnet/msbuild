@@ -25,22 +25,18 @@ setTimeout(function () {
       let i = 0;
       setInterval(function () { document.title = glyphs[i++ % glyphs.length] + ' ' + title; }, 240);
     } else {
-      const parsed = JSON.parse(message.data);
-        if (parsed.type == 'UpdateStaticFile') {
-            const path = parsed.path;
-            if (path && path.endsWith('.css')) {
-                updateCssByPath(path);
-            } else {
-                console.debug(`File change detected to css file ${path}. Reloading page...`);
-                location.reload();
-                return;
-            }
-        } else if (parsed.type == 'BlazorHotReloadDeltav1') {
-            window.Blazor._applyHotReload(parsed.deltas);
-        } else if (parsed.type == 'HotReloadDiagnosticsv1') {
-            displayDiagnostics(parsed.diagnostics);
-        } else if (parsed.type == 'HotReloadApplied') {
-          notifyHotReloadApplied();
+      const payload = JSON.parse(message.data);
+      const action = {
+        'UpdateStaticFile': () => updateStaticFile(payload.path),
+        'BlazorHotReloadDeltav1': () => window.Blazor._applyHotReload(payload.deltas),
+        'HotReloadDiagnosticsv1': () => displayDiagnostics(payload.diagnostics),
+        'HotReloadApplied': () => notifyHotReloadApplied(),
+      };
+
+      if (payload.type && action.hasOwnProperty(payload.type)) {
+        action[payload.type]();
+      } else {
+        console.error('Unknown payload:', message.data);
       }
     }
   }
@@ -48,6 +44,16 @@ setTimeout(function () {
   connection.onerror = function (event) { console.debug('dotnet-watch reload socket error.', event) }
   connection.onclose = function () { console.debug('dotnet-watch reload socket closed.') }
   connection.onopen = function () { console.debug('dotnet-watch reload socket connected.') }
+
+  function updateStaticFile(path) {
+    if (path && path.endsWith('.css')) {
+        updateCssByPath(path);
+    } else {
+        console.debug(`File change detected to css file ${path}. Reloading page...`);
+        location.reload();
+        return;
+    }
+  }
 
   function updateCssByPath(path) {
     const styleElement = document.querySelector(`link[href^="${path}"]`) ||

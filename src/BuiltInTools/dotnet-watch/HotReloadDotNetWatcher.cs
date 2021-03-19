@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Watcher
                     return;
                 }
 
-                CreateExecutable(context, processSpec);
+                ConfigureExecutable(context, processSpec);
 
                 using var currentRunCancellationSource = new CancellationTokenSource();
                 using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Watcher
             }
         }
 
-        private static void CreateExecutable(DotNetWatchContext context, ProcessSpec processSpec)
+        private static void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
         {
             var project = context.FileSet.Project;
             processSpec.Executable = project.RunCommand;

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Watcher.Tools;
 
@@ -87,16 +86,15 @@ internal sealed class StartupHook
         catch (TimeoutException)
         {
             Log("Unable to connect to hot-reload server.");
+            return;
         }
 
         List<Action>? receiveDeltaNotifications = null;
 
         while (pipeClient.IsConnected)
         {
-            var bytes = new byte[4096];
-            var numBytes = await pipeClient.ReadAsync(bytes);
 
-            var update = JsonSerializer.Deserialize<UpdatePayload>(bytes.AsSpan(0, numBytes));
+            var update = await UpdatePayload.ReadAsync(pipeClient, default);
             Log("Attempting to apply deltas.");
 
             try
