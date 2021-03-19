@@ -48,13 +48,6 @@ jobs:
       ArtifactName: 'FullOnWindows test logs'
     continueOnError: true
     condition: always()
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: PerfLogs'
-    inputs:
-      PathtoPublish: 'artifacts/log/Debug/perf'
-      ArtifactName: 'FullOnWindows perf logs'
-    continueOnError: true
-    condition: always()
 
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
@@ -98,13 +91,6 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnWindows test logs'
-    continueOnError: true
-    condition: always()
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: PerfLogs'
-    inputs:
-      PathtoPublish: 'artifacts/log/Debug/perf'
-      ArtifactName: 'CoreOnWindows perf logs'
     continueOnError: true
     condition: always()
 
@@ -190,13 +176,6 @@ jobs:
       ArtifactName: 'CoreOnLinux test logs'
     continueOnError: true
     condition: always()
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: PerfLogs'
-    inputs:
-      PathtoPublish: 'artifacts/log/Debug/perf'
-      ArtifactName: 'CoreOnLinux perf logs'
-    continueOnError: true
-    condition: always()
 
 - job: CoreOnMac
   displayName: "macOS Core"
@@ -227,13 +206,6 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/TestResults'
       ArtifactName: 'CoreOnMac test logs'
-    continueOnError: true
-    condition: always()
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: PerfLogs'
-    inputs:
-      PathtoPublish: 'artifacts/log/Debug/perf'
-      ArtifactName: 'CoreOnMac perf logs'
     continueOnError: true
     condition: always()
 
