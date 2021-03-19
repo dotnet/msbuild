@@ -7,6 +7,7 @@ using System.Diagnostics.Tracing;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Build.CommandLine
                 // EventSources will remain enabled even if there aren't any consuming EventListeners.
 
                 // Check to see if we should enable the event listener.
-                string logDirectory = Environment.GetEnvironmentVariable(PerfLogDirEnvVar);
+                string logDirectory = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable(PerfLogDirEnvVar));
 
                 if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(logDirectory).Exists)
                 {
