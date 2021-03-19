@@ -124,14 +124,6 @@ namespace Microsoft.Build.Tasks
         protected override Encoding StandardErrorEncoding => _standardErrorEncoding;
 
         /// <summary>
-        /// Whether or not to use UTF8 encoding for the cmd file and console window.
-        /// Values: Always, Never, Detect
-        /// If set to Detect, the current code page will be used unless it cannot represent 
-        /// the Command string. In that case, UTF-8 is used.
-        /// </summary>
-        public string UseUtf8Encoding { get; set; }
-
-        /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
         /// </summary>
         [Output]

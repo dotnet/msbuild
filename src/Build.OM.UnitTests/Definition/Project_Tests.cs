@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-            Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
+            ProjectCollection.GlobalProjectCollection.Count.ShouldBe(0);
 
             IDictionary<string, string> globalProperties = ProjectCollection.GlobalProjectCollection.GlobalProperties;
             foreach (string propertyName in globalProperties.Keys)
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectCollection.GlobalProjectCollection.RemoveGlobalProperty(propertyName);
             }
 
-            Assert.Empty(ProjectCollection.GlobalProjectCollection.GlobalProperties);
+            ProjectCollection.GlobalProjectCollection.GlobalProperties.ShouldBeEmpty();
         }
 
         private static readonly string ProjectWithItemGroup =
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
             Project project = new Project(xml);
             bool result = project.Build(new ILogger[] { mockLogger });
-            Assert.True(result);
+            result.ShouldBeTrue();
             mockLogger.AssertLogContains("NewLineEvalAsEmpty");
             mockLogger.AssertLogContains("TabEvalAsEmpty");
             mockLogger.AssertLogContains("CarriageReturnEvalAsEmpty");
@@ -136,7 +136,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(xml, null, null, collection);
 
             bool result = project.Build();
-            Assert.True(result);
+            result.ShouldBeTrue();
             mockLogger.AssertLogContains("IHaveBeenLogged");
         }
 
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(xml, null, null, collection);
 
             bool result = project.Build(mockLogger);
-            Assert.True(result);
+            result.ShouldBeTrue();
             mockLogger.AssertLogContains("IHaveBeenLogged");
             mockLogger2.AssertLogDoesntContain("IHaveBeenLogged");
         }
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReadFromEmptyReader1()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 ProjectRootElement.Create(reader);
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReadFromEmptyReader2()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 Project project = new Project(reader);
@@ -266,7 +266,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReadFromEmptyReader3()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 // Variation, we have a reader but it's already read
                 XmlReader reader = XmlReader.Create(new StringReader(ProjectRootElement.Create().RawXml));
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReadFromClosedReader()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 reader.Dispose();
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project2 = new Project(reader);
 
-            Assert.False(reader.Read());
+            reader.Read().ShouldBeFalse();
         }
 
         /// <summary>
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ImportDoesNotExistDefaultSettings()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddImport("__nonexistent__");
@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ImportInvalidUriFormat()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddImport(@"//MSBuildExtensionsPath32)\4.0\Microsoft.VisualStudioVersion.v11.Common.props");
@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(xml, null, null, new ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
 
             // Make sure some evaluation did occur
-            Assert.Equal("1", project.GetPropertyValue("q"));
+            project.GetPropertyValue("q").ShouldBe("1");
         }
 
         /// <summary>
@@ -385,12 +385,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void TryImportsIncludingDuplicatesExpectException()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Should.Throw<InvalidOperationException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 Project project = new Project(xml, null, null, new ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
                 IList<ResolvedImport> imports = project.ImportsIncludingDuplicates;
-                Assert.Empty(imports);
+                imports.ShouldBeEmpty();
             }
            );
         }
@@ -600,27 +600,27 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
             Project project = new Project(xml);
 
-            Assert.Equal("v3", project.GetPropertyValue("p2"));
+            project.GetPropertyValue("p2").ShouldBe("v3");
 
             List<ProjectItem> items = Helpers.MakeList(project.GetItems("i"));
-            Assert.Equal(4, items.Count);
-            Assert.Equal("i1", items[0].EvaluatedInclude);
-            Assert.Equal("v2X", items[1].EvaluatedInclude);
-            Assert.Equal("i3", items[2].EvaluatedInclude);
-            Assert.Equal("i4", items[3].EvaluatedInclude);
+            items.Count.ShouldBe(4);
+            items[0].EvaluatedInclude.ShouldBe("i1");
+            items[1].EvaluatedInclude.ShouldBe("v2X");
+            items[2].EvaluatedInclude.ShouldBe("i3");
+            items[3].EvaluatedInclude.ShouldBe("i4");
 
             IList<ResolvedImport> imports = project.Imports;
-            Assert.Single(imports);
-            Assert.True(object.ReferenceEquals(imports.First().ImportingElement, xml.Imports.ElementAt(0)));
+            imports.ShouldHaveSingleItem();
+            object.ReferenceEquals(imports.First().ImportingElement, xml.Imports.ElementAt(0)).ShouldBeTrue();
 
             // We can take advantage of the fact that we will get the same ProjectRootElement from the cache if we try to
             // open it with a path; get that and then compare it to what project.Imports gave us.
-            Assert.True(object.ReferenceEquals(imports.First().ImportedProject, ProjectRootElement.Open(importPath)));
+            object.ReferenceEquals(imports.First().ImportedProject, ProjectRootElement.Open(importPath)).ShouldBeTrue();
 
             // Test the logical project iterator
             List<ProjectElement> logicalElements = new List<ProjectElement>(project.GetLogicalProject());
 
-            Assert.Equal(18, logicalElements.Count);
+            logicalElements.Count.ShouldBe(18);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -651,11 +651,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.Save(file);
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal(
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(
                     NativeMethodsShared.IsWindows
                         ? Path.Combine(Path.GetTempPath(), @"obj\i386\foo.dll")
-                        : Path.Combine(Path.GetTempPath(), @"obj/i386/foo.dll"),
-                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                        : Path.Combine(Path.GetTempPath(), @"obj/i386/foo.dll"));
             }
             finally
             {
@@ -685,21 +684,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             if (NativeMethodsShared.IsWindows)
             {
-                Assert.Equal(
-                    Path.Combine(Directory.GetCurrentDirectory(), @"obj\i386\foo.dll"),
-                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.Equal(
-                    Path.Combine(Directory.GetCurrentDirectory(), @"obj\i386\foo.dll"),
-                    projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), @"obj\i386\foo.dll"));
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), @"obj\i386\foo.dll"));
             }
             else
             {
-                Assert.Equal(
-                    Path.Combine(Directory.GetCurrentDirectory(), @"obj/i386/foo.dll"),
-                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.Equal(
-                   Path.Combine(Directory.GetCurrentDirectory(), @"obj/i386/foo.dll"),
-                    projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), @"obj/i386/foo.dll"));
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), @"obj/i386/foo.dll"));
             }
         }
 
@@ -728,12 +719,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
-                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
-                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
             }
             finally
             {
@@ -767,12 +754,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
-                        project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.Equal(
-                        Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar,
-                        projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
             }
             finally
             {
@@ -809,12 +792,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
                 // Should be the full path to the directory
-                Assert.Equal(
-                    Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"),
-                    project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
-                Assert.Equal(
-                    Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"),
-                    projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude);
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"));
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"));
             }
             finally
             {
@@ -834,8 +813,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             globalProperties.Add("g2", "v2");
             Project project = new Project(xml, globalProperties, null);
 
-            Assert.Equal("v1", project.GlobalProperties["g1"]);
-            Assert.Equal("v2", project.GlobalProperties["g2"]);
+            project.GlobalProperties["g1"].ShouldBe("v1");
+            project.GlobalProperties["g2"].ShouldBe("v2");
         }
 
         /// <summary>
@@ -852,8 +831,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             globalProperties.Add("g2", "v2");
 
-            Assert.Equal("v1", project.GlobalProperties["g1"]);
-            Assert.False(project.GlobalProperties.ContainsKey("g2"));
+            project.GlobalProperties["g1"].ShouldBe("v1");
+            project.GlobalProperties.ContainsKey("g2").ShouldBeFalse();
         }
 
         /// <summary>
@@ -865,7 +844,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectRootElement xml = GetSampleProjectRootElement();
             Project project = new Project(xml);
 
-            Assert.Empty(project.GlobalProperties);
+            project.GlobalProperties.ShouldBeEmpty();
         }
 
         /// <summary>
@@ -879,13 +858,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("p", "v0");
             propertyElement.Condition = "'$(g)'=='v1'";
             project.ReevaluateIfNecessary();
-            Assert.Equal(string.Empty, project.GetPropertyValue("p"));
+            project.GetPropertyValue("p").ShouldBe(string.Empty);
 
-            Assert.True(project.SetGlobalProperty("g", "v1"));
-            Assert.True(project.IsDirty);
+            project.SetGlobalProperty("g", "v1").ShouldBeTrue();
+            project.IsDirty.ShouldBeTrue();
             project.ReevaluateIfNecessary();
-            Assert.Equal("v0", project.GetPropertyValue("p"));
-            Assert.Equal("v1", project.GlobalProperties["g"]);
+            project.GetPropertyValue("p").ShouldBe("v0");
+            project.GlobalProperties["g"].ShouldBe("v1");
         }
 
         /// <summary>
@@ -899,8 +878,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.ReevaluateIfNecessary();
             project.SetGlobalProperty("p", "v2");
 
-            Assert.Equal("v2", project.GetPropertyValue("p"));
-            Assert.True(project.GetProperty("p").IsGlobalProperty);
+            project.GetPropertyValue("p").ShouldBe("v2");
+            project.GetProperty("p").IsGlobalProperty.ShouldBeTrue();
         }
 
         /// <summary>
@@ -912,19 +891,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             project.SetGlobalProperty("p", "v1");
             project.ReevaluateIfNecessary();
-            Assert.Equal("v1", project.GetPropertyValue("p"));
+            project.GetPropertyValue("p").ShouldBe("v1");
 
             project.SkipEvaluation = true;
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("p1", "v0");
             propertyElement.Condition = "'$(g)'=='v1'";
             project.SetGlobalProperty("g", "v1");
             project.ReevaluateIfNecessary();
-            Assert.Equal(string.Empty, project.GetPropertyValue("p1"));
+            project.GetPropertyValue("p1").ShouldBe(string.Empty);
 
             project.SkipEvaluation = false;
             project.SetGlobalProperty("g", "v1");
             project.ReevaluateIfNecessary();
-            Assert.Equal("v0", project.GetPropertyValue("p1"));
+            project.GetPropertyValue("p1").ShouldBe("v0");
         }
 
         /// <summary>
@@ -934,7 +913,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ChangeGlobalPropertyAfterReevaluation2()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Should.Throw<InvalidOperationException>(() =>
             {
                 Project project = new Project();
                 project.SetGlobalProperty("p", "v1");
@@ -952,12 +931,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             project.SetProperty("computername", "v1");
 
-            Assert.Equal("v1", project.GetPropertyValue("computername"));
-            Assert.True(project.IsDirty);
+            project.GetPropertyValue("computername").ShouldBe("v1");
+            project.IsDirty.ShouldBeTrue();
 
             project.ReevaluateIfNecessary();
 
-            Assert.Equal("v1", project.GetPropertyValue("computername"));
+            project.GetPropertyValue("computername").ShouldBe("v1");
         }
 
         /// <summary>
@@ -966,7 +945,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetReservedPropertyThroughProject()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Should.Throw<InvalidOperationException>(() =>
             {
                 Project project = new Project();
                 project.SetProperty("msbuildprojectdirectory", "v1");
@@ -986,14 +965,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("pp", "vv");
             propertyElement.Condition = "'$(p0)'=='v0' and '$(p1)'=='v1b'";
             project.ReevaluateIfNecessary();
-            Assert.Equal(string.Empty, project.GetPropertyValue("pp"));
+            project.GetPropertyValue("pp").ShouldBe(string.Empty);
 
             project.SetGlobalProperty("p1", "v1b");
-            Assert.True(project.IsDirty);
+            project.IsDirty.ShouldBeTrue();
             project.ReevaluateIfNecessary();
-            Assert.Equal("vv", project.GetPropertyValue("pp"));
-            Assert.Equal("v0", project.GlobalProperties["p0"]);
-            Assert.Equal("v1b", project.GlobalProperties["p1"]);
+            project.GetPropertyValue("pp").ShouldBe("vv");
+            project.GlobalProperties["p0"].ShouldBe("v0");
+            project.GlobalProperties["p1"].ShouldBe("v1b");
         }
 
         /// <summary>
@@ -1016,14 +995,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("pp", "vv");
             propertyElement.Condition = "'$(p0)'=='v0' and '$(p1)'=='v1b'";
             project.ReevaluateIfNecessary();
-            Assert.Equal(string.Empty, project.GetPropertyValue("pp"));
+            project.GetPropertyValue("pp").ShouldBe(string.Empty);
 
             project.SetGlobalProperty("p1", "v1b");
-            Assert.True(project.IsDirty);
+            project.IsDirty.ShouldBeTrue();
             project.ReevaluateIfNecessary();
-            Assert.Equal("vv", project.GetPropertyValue("pp"));
-            Assert.Equal("v0", collection.GlobalProperties["p0"]);
-            Assert.Equal("v1", collection.GlobalProperties["p1"]);
+            project.GetPropertyValue("pp").ShouldBe("vv");
+            collection.GlobalProperties["p0"].ShouldBe("v0");
+            collection.GlobalProperties["p1"].ShouldBe("v1");
         }
 
         /// <summary>
@@ -1034,11 +1013,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Project project = new Project();
             project.SetGlobalProperty("g", "v1");
-            Assert.True(project.IsDirty);
+            project.IsDirty.ShouldBeTrue();
             project.ReevaluateIfNecessary();
 
-            Assert.False(project.SetGlobalProperty("g", "v1"));
-            Assert.False(project.IsDirty);
+            project.SetGlobalProperty("g", "v1").ShouldBeFalse();
+            project.IsDirty.ShouldBeFalse();
         }
 
         /// <summary>
@@ -1053,14 +1032,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             propertyElement.Condition = "'$(g)'==''";
             project.SetGlobalProperty("g", "v1");
             project.ReevaluateIfNecessary();
-            Assert.Equal(string.Empty, project.GetPropertyValue("p"));
+            project.GetPropertyValue("p").ShouldBe(string.Empty);
 
             bool existed = project.RemoveGlobalProperty("g");
-            Assert.True(existed);
-            Assert.True(project.IsDirty);
+            existed.ShouldBeTrue();
+            project.IsDirty.ShouldBeTrue();
             project.ReevaluateIfNecessary();
-            Assert.Equal("v0", project.GetPropertyValue("p"));
-            Assert.False(project.GlobalProperties.ContainsKey("g"));
+            project.GetPropertyValue("p").ShouldBe("v0");
+            project.GlobalProperties.ContainsKey("g").ShouldBeFalse();
         }
 
         /// <summary>
@@ -1072,8 +1051,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             bool existed = project.RemoveGlobalProperty("x");
 
-            Assert.False(existed);
-            Assert.False(project.IsDirty);
+            existed.ShouldBeFalse();
+            project.IsDirty.ShouldBeFalse();
         }
 
         /// <summary>
@@ -1094,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
                 ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
+            project.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         /// <summary>
@@ -1110,7 +1089,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(xml);
 
-            Assert.Equal(string.Empty, project.Xml.ToolsVersion);
+            project.Xml.ToolsVersion.ShouldBe(string.Empty);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -1123,7 +1102,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Project project = new Project();
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
+            project.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         /// <summary>
@@ -1147,12 +1126,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and
             // clearing some internal state to make sure that the update environment variable is picked up, so
             // there's not a good way of doing it from these deliberately public OM only tests.
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
+            project.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             project.Xml.ToolsVersion = "4.0";
 
             // Still defaulting to the current ToolsVersion
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
+            project.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         /// <summary>
@@ -1172,11 +1151,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.Xml.ToolsVersion = "2.0";
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
+            project.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             project.Xml.ToolsVersion = ObjectModelHelpers.MSBuildDefaultToolsVersion;
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
+            project.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         /// <summary>
@@ -1200,17 +1179,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and
             // clearing some internal state to make sure that the update environment variable is picked up, so
             // there's not a good way of doing it from these deliberately public OM only tests.
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.GetPropertyValue("msbuildtoolsversion"));
+            project.GetPropertyValue("msbuildtoolsversion").ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             project.Xml.ToolsVersion = "4.0";
 
             // Still current
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.GetPropertyValue("msbuildtoolsversion"));
+            project.GetPropertyValue("msbuildtoolsversion").ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             project.ReevaluateIfNecessary();
 
             // Still current
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.GetPropertyValue("msbuildtoolsversion"));
+            project.GetPropertyValue("msbuildtoolsversion").ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         /// <summary>
@@ -1222,7 +1201,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Project project = new Project();
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.GetPropertyValue("msbuildtoolsversion"));
+            project.GetPropertyValue("msbuildtoolsversion").ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         /// <summary>
@@ -1237,7 +1216,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             project.Xml.ToolsVersion = "bogus";
 
-            Assert.Equal("bogus", project.Xml.ToolsVersion);
+            project.Xml.ToolsVersion.ShouldBe("bogus");
         }
 
         /// <summary>
@@ -1254,13 +1233,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
+                p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = p.ProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
-                Assert.Equal(t.DefaultSubToolsetVersion, p.SubToolsetVersion);
+                p.SubToolsetVersion.ShouldBe(t.DefaultSubToolsetVersion);
 
-                Assert.Equal(t.DefaultSubToolsetVersion ?? MSBuildConstants.CurrentVisualStudioVersion, p.GetPropertyValue("VisualStudioVersion"));
+                p.GetPropertyValue("VisualStudioVersion").ShouldBe(t.DefaultSubToolsetVersion ?? MSBuildConstants.CurrentVisualStudioVersion);
             }
             finally
             {
@@ -1284,9 +1263,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
-                Assert.Equal("ABCD", p.SubToolsetVersion);
-                Assert.Equal("ABCD", p.GetPropertyValue("VisualStudioVersion"));
+                p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                p.SubToolsetVersion.ShouldBe("ABCD");
+                p.GetPropertyValue("VisualStudioVersion").ShouldBe("ABCD");
             }
             finally
             {
@@ -1311,9 +1290,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
-                Assert.Equal("ABCDE", p.SubToolsetVersion);
-                Assert.Equal("ABCDE", p.GetPropertyValue("VisualStudioVersion"));
+                p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                p.SubToolsetVersion.ShouldBe("ABCDE");
+                p.GetPropertyValue("VisualStudioVersion").ShouldBe("ABCDE");
             }
             finally
             {
@@ -1342,9 +1321,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties), ProjectLoadSettings.Default);
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.ToolsVersion);
-                Assert.Equal("ABCDEF", p.SubToolsetVersion);
-                Assert.Equal("ABCDEF", p.GetPropertyValue("VisualStudioVersion"));
+                p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                p.SubToolsetVersion.ShouldBe("ABCDEF");
+                p.GetPropertyValue("VisualStudioVersion").ShouldBe("ABCDEF");
             }
             finally
             {
@@ -1362,12 +1341,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             int last = project.LastEvaluationId;
 
             project.ReevaluateIfNecessary();
-            Assert.Equal(project.LastEvaluationId, last);
+            last.ShouldBe(project.LastEvaluationId);
             last = project.LastEvaluationId;
 
             project.SetProperty("p", "v");
             project.ReevaluateIfNecessary();
-            Assert.NotEqual(project.LastEvaluationId, last);
+            project.LastEvaluationId.ShouldNotBe(last);
         }
 
         /// <summary>
@@ -1389,7 +1368,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.ProjectCollection.UnloadAllProjects();
 
                 project = new Project(path);
-                Assert.NotEqual(project.LastEvaluationId, last);
+                project.LastEvaluationId.ShouldNotBe(last);
             }
             finally
             {
@@ -1417,21 +1396,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 project.Xml.AddImport(path);
                 project.ReevaluateIfNecessary();
-                Assert.NotEqual(project.LastEvaluationId, last);
+                project.LastEvaluationId.ShouldNotBe(last);
                 last = project.LastEvaluationId;
 
                 project.ReevaluateIfNecessary();
-                Assert.Equal(project.LastEvaluationId, last);
+                last.ShouldBe(project.LastEvaluationId);
 
                 import.AddProperty("p", "v");
-                Assert.True(project.IsDirty);
+                project.IsDirty.ShouldBeTrue();
                 project.ReevaluateIfNecessary();
-                Assert.NotEqual(project.LastEvaluationId, last);
+                project.LastEvaluationId.ShouldNotBe(last);
                 last = project.LastEvaluationId;
-                Assert.Equal("v", project.GetPropertyValue("p"));
+                project.GetPropertyValue("p").ShouldBe("v");
 
                 project.ReevaluateIfNecessary();
-                Assert.Equal(project.LastEvaluationId, last);
+                last.ShouldBe(project.LastEvaluationId);
             }
             finally
             {
@@ -1474,13 +1453,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // puts the import in the PRE cache
                 import.Save(importFile);
-                Assert.False(import.HasUnsavedChanges);
+                import.HasUnsavedChanges.ShouldBeFalse();
 
                 Project project = new Project(projectCollection);
                 project.Xml.AddImport(importFile);
                 project.ReevaluateIfNecessary();
-
-                Assert.Same(import, project.Imports.First().ImportedProject);
+                project.Imports.First().ImportedProject.ShouldBeSameAs(import);
             }
         }
 
@@ -1519,10 +1497,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Action<string, string, string, Project> assertContents = (p, i, m, project) =>
             {
-                Assert.Equal(p, project.GetPropertyValue("P"));
-                Assert.Single(project.GetItems("I"));
-                Assert.Equal(i, project.GetItems("I").First().EvaluatedInclude);
-                Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
+                project.GetPropertyValue("P").ShouldBe(p);
+                project.GetItems("I").ShouldHaveSingleItem();
+                project.GetItems("I").First().EvaluatedInclude.ShouldBe(i);
+                project.GetItems("I").First().GetMetadataValue("M").ShouldBe(m);
             };
 
             using (var env = TestEnvironment.Create())
@@ -1539,23 +1517,23 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // add to cache by saving
                 import.Save(importFile);
-                Assert.False(import.HasUnsavedChanges);
+                import.HasUnsavedChanges.ShouldBeFalse();
 
                 var project = new Project(projectCollection);
                 project.Xml.AddImport(importFile);
                 project.ReevaluateIfNecessary();
 
                 assertContents("p1", "i1", "m1", project);
-                Assert.False(project.IsDirty);
+                project.IsDirty.ShouldBeFalse();
 
                 import.ReloadFrom(XmlReader.Create(new StringReader(changedImportContents)));
-                Assert.True(import.HasUnsavedChanges);
+                import.HasUnsavedChanges.ShouldBeTrue();
 
-                Assert.True(project.IsDirty);
+                project.IsDirty.ShouldBeTrue();
                 assertContents("p1", "i1", "m1", project);
 
                 project.ReevaluateIfNecessary();
-                Assert.False(project.IsDirty);
+                project.IsDirty.ShouldBeFalse();
                 assertContents("p2", "i2", "m2", project);
 
                 var newProject = new Project(projectCollection);
@@ -1563,8 +1541,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 newProject.ReevaluateIfNecessary();
                 assertContents("p2", "i2", "m2", newProject);
 
-                Assert.Same(import, project.Imports.First().ImportedProject);
-                Assert.Same(import, newProject.Imports.First().ImportedProject);
+                project.Imports.First().ImportedProject.ShouldBeSameAs(import);
+                newProject.Imports.First().ImportedProject.ShouldBeSameAs(import);
             }
         }
 
@@ -1603,10 +1581,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Action<string, string, string, Project> assertContents = (p, i, m, project) =>
             {
-                Assert.Equal(p, project.GetPropertyValue("P"));
-                Assert.Single(project.GetItems("I"));
-                Assert.Equal(i, project.GetItems("I").First().EvaluatedInclude);
-                Assert.Equal(m, project.GetItems("I").First().GetMetadataValue("M"));
+                project.GetPropertyValue("P").ShouldBe(p);
+                project.GetItems("I").ShouldHaveSingleItem();
+                project.GetItems("I").First().EvaluatedInclude.ShouldBe(i);
+                project.GetItems("I").First().GetMetadataValue("M").ShouldBe(m);
             };
 
             using (var env = TestEnvironment.Create())
@@ -1623,22 +1601,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 // add to cache by saving
                 projectRootElement.Save(projectFile);
-                Assert.False(projectRootElement.HasUnsavedChanges);
+                projectRootElement.HasUnsavedChanges.ShouldBeFalse();
 
                 var project = new Project(projectRootElement, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
                 project.ReevaluateIfNecessary();
 
                 assertContents("p1", "i1", "m1", project);
-                Assert.False(project.IsDirty);
+                project.IsDirty.ShouldBeFalse();
 
                 projectRootElement.ReloadFrom(XmlReader.Create(new StringReader(changedProjectContents)));
-                Assert.True(projectRootElement.HasUnsavedChanges);
+                projectRootElement.HasUnsavedChanges.ShouldBeTrue();
 
-                Assert.True(project.IsDirty);
+                project.IsDirty.ShouldBeTrue();
                 assertContents("p1", "i1", "m1", project);
 
                 project.ReevaluateIfNecessary();
-                Assert.False(project.IsDirty);
+                project.IsDirty.ShouldBeFalse();
                 assertContents("p2", "i2", "m2", project);
             }
         }
@@ -1654,21 +1632,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("p", "v");
             project.ReevaluateIfNecessary();
 
-            Assert.False(project.IsDirty);
+            project.IsDirty.ShouldBeFalse();
 
             ProjectProperty property1 = project.GetProperty("p");
 
             project.MarkDirty();
 
-            Assert.True(project.IsDirty);
+            project.IsDirty.ShouldBeTrue();
 
             project.ReevaluateIfNecessary();
 
-            Assert.False(project.IsDirty);
+            project.IsDirty.ShouldBeFalse();
 
             ProjectProperty property2 = project.GetProperty("p");
 
-            Assert.False(object.ReferenceEquals(property1, property2)); // different object indicates reevaluation occurred
+            object.ReferenceEquals(property1, property2).ShouldBeFalse(); // different object indicates reevaluation occurred
         }
 
         /// <summary>
@@ -1687,10 +1665,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectItem> items = Helpers.MakeList(project.GetItemsByEvaluatedInclude("i1"));
 
-            Assert.Equal(3, items.Count);
+            items.Count.ShouldBe(3);
             foreach (ProjectItem item in items)
             {
-                Assert.Equal("i1", item.EvaluatedInclude);
+                item.EvaluatedInclude.ShouldBe("i1");
             }
         }
 
@@ -1710,13 +1688,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectItem> items = Helpers.MakeList(project.GetItemsByEvaluatedInclude("i&1"));
 
-            Assert.Equal(2, items.Count);
+            items.Count.ShouldBe(2);
             foreach (ProjectItem item in items)
             {
-                Assert.Equal("i&1", item.EvaluatedInclude);
-                Assert.True(
-                    string.Equals(item.ItemType, "i", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(item.ItemType, "l", StringComparison.OrdinalIgnoreCase));
+                item.EvaluatedInclude.ShouldBe("i&1");
+                (string.Equals(item.ItemType, "i", StringComparison.OrdinalIgnoreCase)
+                 || string.Equals(item.ItemType, "l", StringComparison.OrdinalIgnoreCase)).ShouldBeTrue();
             }
         }
 
@@ -1733,7 +1710,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectItem> items = Helpers.MakeList(project.GetItemsByEvaluatedInclude("i2"));
 
-            Assert.Empty(items);
+            items.ShouldBeEmpty();
         }
 
         /// <summary>
@@ -1762,12 +1739,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 projectConstruction.AddItem("foo", Path.Combine(testFileRoot, "*.foo"));
 
                 count = Helpers.Count(projectConstruction.Items);
-                Assert.Equal(1, count); // "Construction Model"
+                count.ShouldBe(1); // "Construction Model"
 
                 Project project = new Project(projectConstruction);
 
                 count = Helpers.Count(project.GetItems("foo"));
-                Assert.Equal(2, count); // "Evaluation Model, Before Removal"
+                count.ShouldBe(2); // "Evaluation Model, Before Removal"
 
                 ProjectItem itemToRemove = null;
 
@@ -1780,15 +1757,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 project.RemoveItem(itemToRemove);
                 count = Helpers.Count(project.GetItems("foo"));
-                Assert.Equal(1, count); // "Evaluation Model, After Removal"
+                count.ShouldBe(1); // "Evaluation Model, After Removal"
 
                 ProjectInstance projectInstance = project.CreateProjectInstance();
                 count = Helpers.Count(projectInstance.Items);
-                Assert.Equal(1, count); // "Instance Model"
+                count.ShouldBe(1); // "Instance Model"
 
                 // Ensure XML has been updated accordingly on the Evaluation model (projectInstance doesn't back onto XML)
-                Assert.DoesNotContain(itemToRemove.Xml.Include, project.Xml.RawXml);
-                Assert.DoesNotContain("*.foo", project.Xml.RawXml);
+                project.Xml.RawXml.ShouldNotContain(itemToRemove.Xml.Include);
+                project.Xml.RawXml.ShouldNotContain("*.foo");
             }
             finally
             {
@@ -1812,13 +1789,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.ReevaluateIfNecessary();
 
             List<ProjectItem> items = Helpers.MakeList(project.GetItemsByEvaluatedInclude("i1"));
-            Assert.Single(items);
+            items.ShouldHaveSingleItem();
 
             project.Xml.AddItem("j", "i1");
             project.ReevaluateIfNecessary();
 
             items = Helpers.MakeList(project.GetItemsByEvaluatedInclude("i1"));
-            Assert.Equal(2, items.Count);
+            items.Count.ShouldBe(2);
         }
 
         /// <summary>
@@ -1832,7 +1809,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.AddItem("i", "i1");
 
             List<ProjectItem> items = Helpers.MakeList(project.GetItemsByEvaluatedInclude("i1"));
-            Assert.Single(items);
+            items.ShouldHaveSingleItem();
         }
 
         /// <summary>
@@ -1847,7 +1824,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.RemoveItem(item1);
 
             List<ProjectItem> items = Helpers.MakeList(project.GetItemsByEvaluatedInclude("i1"));
-            Assert.Empty(items);
+            items.ShouldBeEmpty();
         }
 
         /// <summary>
@@ -1873,8 +1850,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal("v1", project.GetPropertyValue("p"));
-            Assert.Equal("i1", Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude);
+            project.GetPropertyValue("p").ShouldBe("v1");
+            Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i1");
         }
 
         /// <summary>
@@ -1908,8 +1885,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal("v2", project.GetPropertyValue("p"));
-            Assert.Equal("i2", Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude);
+            project.GetPropertyValue("p").ShouldBe("v2");
+            Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i2");
         }
 
         /// <summary>
@@ -1943,8 +1920,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal("v2", project.GetPropertyValue("p"));
-            Assert.Equal("i2", Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude);
+            project.GetPropertyValue("p").ShouldBe("v2");
+            Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i2");
         }
 
         /// <summary>
@@ -1991,12 +1968,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal("@(i);v1", project.GetPropertyValue("p"));
-            Assert.Equal("@(j);v1", project.GetPropertyValue("q"));
-            Assert.Equal("v1_v2", project.GetItems("i").ElementAt(0).EvaluatedInclude);
-            Assert.Single(project.GetItems("i"));
-            Assert.Equal("v1_v2", project.GetItems("j").ElementAt(0).EvaluatedInclude);
-            Assert.Single(project.GetItems("j"));
+            project.GetPropertyValue("p").ShouldBe("@(i);v1");
+            project.GetPropertyValue("q").ShouldBe("@(j);v1");
+            project.GetItems("i").ElementAt(0).EvaluatedInclude.ShouldBe("v1_v2");
+            project.GetItems("i").ShouldHaveSingleItem();
+            project.GetItems("j").ElementAt(0).EvaluatedInclude.ShouldBe("v1_v2");
+            project.GetItems("j").ShouldHaveSingleItem();
         }
 
         /// <summary>
@@ -2024,7 +2001,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Empty(project.GetItems("i"));
+            project.GetItems("i").ShouldBeEmpty();
         }
 
         /// <summary>
@@ -2056,7 +2033,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(XmlReader.Create(new StringReader(content)));
 
-            Assert.Equal("m0;m1", project.GetItems("i").ElementAt(0).GetMetadataValue("m"));
+            project.GetItems("i").ElementAt(0).GetMetadataValue("m").ShouldBe("m0;m1");
         }
 
         /// <summary>
@@ -2073,9 +2050,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             bool result = project.Build();
 
-            Assert.False(result);
+            result.ShouldBeFalse();
 
-            Assert.Equal("MSB4112", mockLogger.Errors[0].Code); //                 "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
+            mockLogger.Errors[0].Code.ShouldBe("MSB4112"); //                 "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
         }
 
         /// <summary>
@@ -2088,8 +2065,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             MockLogger logger = new MockLogger();
             bool result = project.Build(new string[] { "nonexistent" }, new List<ILogger>() { logger });
-            Assert.False(result);
-            Assert.Equal(1, logger.ErrorCount);
+            result.ShouldBeFalse();
+            logger.ErrorCount.ShouldBe(1);
         }
 
         /// <summary>
@@ -2139,11 +2116,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.ProjectCollection.UnregisterAllLoggers();
             }
 
-            Assert.True(result);
+            result.ShouldBeTrue();
 
-            Assert.Equal(0, mockLogger.WarningCount); //                 "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
+            mockLogger.WarningCount.ShouldBe(0); //                 "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
 
-            Assert.Equal("MSB4011", collectionLogger.Warnings[0].Code); //                 "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
+            collectionLogger.Warnings[0].Code.ShouldBe("MSB4011"); //                 "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
         }
 
         /// <summary>
@@ -2153,7 +2130,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void UsingTaskExpansion1()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("x", "@(x->'%(x)')", null);
@@ -2168,7 +2145,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void UsingTaskExpansion2()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("@(x->'%(x)')", "y", null);
@@ -2183,7 +2160,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void UsingTaskExpansion3()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("x", null, "@(x->'%(x)')");
@@ -2201,8 +2178,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             string contents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'/>");
             Project project = new Project(XmlReader.Create(new StringReader(contents)));
 
-            Assert.True(project.Xml.HasUnsavedChanges); // Not dirty for saving
-            Assert.False(project.IsDirty); // "1" // was evaluated on load
+            project.Xml.HasUnsavedChanges.ShouldBeTrue(); // Not dirty for saving
+            project.IsDirty.ShouldBeFalse(); // "1" // was evaluated on load
 
             string file = null;
             try
@@ -2218,8 +2195,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 }
             }
 
-            Assert.False(project.Xml.HasUnsavedChanges); // Not dirty for saving
-            Assert.True(project.IsDirty); // "2" // Dirty for reevaluation, because the project now has gotten a new file name
+            project.Xml.HasUnsavedChanges.ShouldBeFalse(); // Not dirty for saving
+            project.IsDirty.ShouldBeTrue(); // "2" // Dirty for reevaluation, because the project now has gotten a new file name
         }
 
         /// <summary>
@@ -2240,7 +2217,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.RemoveItem(itemToRemove);
             project.RemoveItem(itemToRemove); // should not throw
 
-            Assert.Empty(Helpers.MakeList(project.Items));
+            Helpers.MakeList(project.Items).ShouldBeEmpty();
         }
 
         /// <summary>
@@ -2261,7 +2238,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             itemToRemove.UnevaluatedInclude = "b.cs";
             project.RemoveItem(itemToRemove); // should not throw
 
-            Assert.Empty(Helpers.MakeList(project.Items));
+            Helpers.MakeList(project.Items).ShouldBeEmpty();
         }
 
         /// <summary>
@@ -2282,7 +2259,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             project.RemoveItems(project.GetItems("i"));
 
-            Assert.Empty(project.Items);
+            project.Items.ShouldBeEmpty();
         }
 
         /// <summary>
@@ -2307,7 +2284,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             project.RemoveItems(list);
 
-            Assert.Equal(2, project.Items.Count());
+            project.Items.Count().ShouldBe(2);
         }
 
         /// <summary>
@@ -2327,7 +2304,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
 
             project.RemoveItems(project.GetItems("j").Take(2));
-            Assert.Equal(3, project.Items.Count());
+            project.Items.Count().ShouldBe(3);
 
             StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
@@ -2362,7 +2339,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             project.RemoveItems(project.GetItems("i"));
 
-            Assert.Empty(project.Items);
+            project.Items.ShouldBeEmpty();
         }
 
         /// <summary>
@@ -2371,7 +2348,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItemsOneNull()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Should.Throw<ArgumentNullException>(() =>
             {
                 Project project = new Project();
                 project.RemoveItems(new List<ProjectItem>() { null });
@@ -2385,7 +2362,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItemWrongProject()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Should.Throw<ArgumentException>(() =>
             {
                 ProjectRootElement root1 = ProjectRootElement.Create();
                 root1.AddItem("i", "i1");
@@ -2418,7 +2395,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.RemoveItems(new List<ProjectItem>() { item });
             project.RemoveItems(new List<ProjectItem>() { item });
 
-            Assert.Empty(project.Items);
+            project.Items.ShouldBeEmpty();
         }
 
         /// <summary>
@@ -2427,7 +2404,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReservedPropertyProjectConstructor()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Should.Throw<ArgumentException>(() =>
             {
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("msbuildprojectdirectory", "x");
@@ -2442,7 +2419,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReservedPropertyProjectCollectionConstructor()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("msbuildprojectdirectory", "x");
@@ -2467,7 +2444,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReservedPropertyProjectCollectionConstructor2()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("Target", "x");
@@ -2523,8 +2500,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(projectPath);
 
                 IEnumerable<ProjectItem> items = project.GetItems("i");
-                Assert.Equal(unevaluatedInclude, Helpers.GetFirst(items).UnevaluatedInclude);
-                Assert.Equal(evaluatedInclude, Helpers.GetFirst(items).EvaluatedInclude);
+                Helpers.GetFirst(items).UnevaluatedInclude.ShouldBe(unevaluatedInclude);
+                Helpers.GetFirst(items).EvaluatedInclude.ShouldBe(evaluatedInclude);
             }
             finally
             {
@@ -2538,7 +2515,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReservedPropertyProjectCollectionConstructor3()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("Target", "x");
@@ -2588,15 +2565,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectElement> logicalProject = new List<ProjectElement>(project.GetLogicalProject());
 
-            Assert.Equal(8, logicalProject.Count); // 4 properties + 4 property groups
-            Assert.True(object.ReferenceEquals(zero, logicalProject[0].ContainingProject));
-            Assert.True(object.ReferenceEquals(zero, logicalProject[1].ContainingProject));
-            Assert.True(object.ReferenceEquals(one, logicalProject[2].ContainingProject));
-            Assert.True(object.ReferenceEquals(one, logicalProject[3].ContainingProject));
-            Assert.True(object.ReferenceEquals(three, logicalProject[4].ContainingProject));
-            Assert.True(object.ReferenceEquals(three, logicalProject[5].ContainingProject));
-            Assert.True(object.ReferenceEquals(two, logicalProject[6].ContainingProject));
-            Assert.True(object.ReferenceEquals(two, logicalProject[7].ContainingProject));
+            logicalProject.Count.ShouldBe(8); // 4 properties + 4 property groups
+            object.ReferenceEquals(zero, logicalProject[0].ContainingProject).ShouldBeTrue();
+            object.ReferenceEquals(zero, logicalProject[1].ContainingProject).ShouldBeTrue();
+            object.ReferenceEquals(one, logicalProject[2].ContainingProject).ShouldBeTrue();
+            object.ReferenceEquals(one, logicalProject[3].ContainingProject).ShouldBeTrue();
+            object.ReferenceEquals(three, logicalProject[4].ContainingProject).ShouldBeTrue();
+            object.ReferenceEquals(three, logicalProject[5].ContainingProject).ShouldBeTrue();
+            object.ReferenceEquals(two, logicalProject[6].ContainingProject).ShouldBeTrue();
+            object.ReferenceEquals(two, logicalProject[7].ContainingProject).ShouldBeTrue();
 
             // Clear the cache
             project.ProjectCollection.UnloadAllProjects();
@@ -2634,13 +2611,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 List<ProjectElement> logicalProject = new List<ProjectElement>(project.GetLogicalProject());
 
-                Assert.Equal(6, logicalProject.Count); // 3 properties + 3 property groups
-                Assert.True(object.ReferenceEquals(zero, logicalProject[0].ContainingProject)); // PropertyGroup
-                Assert.True(object.ReferenceEquals(zero, logicalProject[1].ContainingProject)); // p = 0
-                Assert.True(object.ReferenceEquals(one, logicalProject[2].ContainingProject));  // PropertyGroup
-                Assert.True(object.ReferenceEquals(one, logicalProject[3].ContainingProject));  // p = 1
-                Assert.True(object.ReferenceEquals(two, logicalProject[4].ContainingProject));  // PropertyGroup
-                Assert.True(object.ReferenceEquals(two, logicalProject[5].ContainingProject));  // p = 2
+                logicalProject.Count.ShouldBe(6); // 3 properties + 3 property groups
+                object.ReferenceEquals(zero, logicalProject[0].ContainingProject).ShouldBeTrue(); // PropertyGroup
+                object.ReferenceEquals(zero, logicalProject[1].ContainingProject).ShouldBeTrue(); // p = 0
+                object.ReferenceEquals(one, logicalProject[2].ContainingProject).ShouldBeTrue();  // PropertyGroup
+                object.ReferenceEquals(one, logicalProject[3].ContainingProject).ShouldBeTrue();  // p = 1
+                object.ReferenceEquals(two, logicalProject[4].ContainingProject).ShouldBeTrue();  // PropertyGroup
+                object.ReferenceEquals(two, logicalProject[5].ContainingProject).ShouldBeTrue();  // p = 2
 
                 // Clear the cache
                 project.ProjectCollection.UnloadAllProjects();
@@ -2661,7 +2638,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ImportPropertyEvaluatingToEmpty()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
@@ -2707,7 +2684,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ImportPropertyEvaluatingToInvalidPath()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Should.Throw<InvalidProjectFileException>(() =>
             {
                 string projectOriginalContents = ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
@@ -3760,12 +3737,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             foreach (var matchingString in stringsThatShouldMatch)
             {
-                Assert.True(uberGlob.IsMatch(matchingString));
+                uberGlob.IsMatch(matchingString).ShouldBeTrue();
             }
 
             foreach (var nonMatchingString in stringsThatShouldNotMatch)
             {
-                Assert.False(uberGlob.IsMatch(nonMatchingString));
+                uberGlob.IsMatch(nonMatchingString).ShouldBeFalse();
             }
         }
 
@@ -3886,18 +3863,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var projectInstance = project.CreateProjectInstance();
 
-                Assert.NotEqual(BuildEventContext.InvalidEvaluationId, initialEvaluationId);
-                Assert.Equal(initialEvaluationId, projectInstance.EvaluationId);
+                initialEvaluationId.ShouldNotBe(BuildEventContext.InvalidEvaluationId);
+                projectInstance.EvaluationId.ShouldBe(initialEvaluationId);
 
                 // trigger a new evaluation which increments the evaluation ID in the Project
                 project.AddItem("foo", "bar");
                 project.ReevaluateIfNecessary();
 
-                Assert.NotEqual(initialEvaluationId, project.LastEvaluationId);
-                Assert.Equal(initialEvaluationId, projectInstance.EvaluationId);
+                project.LastEvaluationId.ShouldNotBe(initialEvaluationId);
+                projectInstance.EvaluationId.ShouldBe(initialEvaluationId);
 
                 var newProjectInstance = project.CreateProjectInstance();
-                Assert.Equal(project.LastEvaluationId, newProjectInstance.EvaluationId);
+                newProjectInstance.EvaluationId.ShouldBe(project.LastEvaluationId);
             }
         }
 
@@ -3930,16 +3907,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    Assert.NotNull(eventArgs);
+                    eventArgs.ShouldNotBeNull();
 
-                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
 
-                    Assert.Null(eventArgs.ImportedProjectFile);
+                    eventArgs.ImportedProjectFile.ShouldBeNull();
 
-                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+                    eventArgs.ProjectFile.ShouldBe(pre.FullPath);
 
-                    Assert.Equal(6, eventArgs.LineNumber);
-                    Assert.Equal(3, eventArgs.ColumnNumber);
+                    eventArgs.LineNumber.ShouldBe(6);
+                    eventArgs.ColumnNumber.ShouldBe(3);
 
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to false condition; ( \'$(Something)\' == \'nothing\' ) was evaluated as ( \'\' == \'nothing\' )."); 
                 }
@@ -3973,16 +3950,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    Assert.NotNull(eventArgs);
+                    eventArgs.ShouldNotBeNull();
 
-                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
 
-                    Assert.Null(eventArgs.ImportedProjectFile);
+                    eventArgs.ImportedProjectFile.ShouldBeNull();
 
-                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+                    eventArgs.ProjectFile.ShouldBe(pre.FullPath);
 
-                    Assert.Equal(6, eventArgs.LineNumber);
-                    Assert.Equal(3, eventArgs.ColumnNumber);
+                    eventArgs.LineNumber.ShouldBe(6);
+                    eventArgs.ColumnNumber.ShouldBe(3);
 
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to no matching files.");
                 }
@@ -4017,17 +3994,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    Assert.NotNull(eventArgs);
-                    Assert.True(eventArgs.ImportIgnored);
+                    eventArgs.ShouldNotBeNull();
+                    eventArgs.ImportIgnored.ShouldBeTrue();
 
-                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
 
-                    Assert.Equal(importFile.Path, eventArgs.ImportedProjectFile);
+                    eventArgs.ImportedProjectFile.ShouldBe(importFile.Path);
 
-                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+                    eventArgs.ProjectFile.ShouldBe(pre.FullPath);
 
-                    Assert.Equal(6, eventArgs.LineNumber);
-                    Assert.Equal(3, eventArgs.ColumnNumber);
+                    eventArgs.LineNumber.ShouldBe(6);
+                    eventArgs.ColumnNumber.ShouldBe(3);
 
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being empty.");
                 }
@@ -4064,19 +4041,59 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    Assert.NotNull(eventArgs);
-                    Assert.True(eventArgs.ImportIgnored);
+                    eventArgs.ShouldNotBeNull();
+                    eventArgs.ImportIgnored.ShouldBeTrue();
 
-                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
 
-                    Assert.Equal(importFile.Path, eventArgs.ImportedProjectFile);
+                    eventArgs.ImportedProjectFile.ShouldBe(importFile.Path);
 
-                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+                    eventArgs.ProjectFile.ShouldBe(pre.FullPath);
 
-                    Assert.Equal(6, eventArgs.LineNumber);
-                    Assert.Equal(3, eventArgs.ColumnNumber);
+                    eventArgs.LineNumber.ShouldBe(6);
+                    eventArgs.ColumnNumber.ShouldBe(3);
 
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file being invalid.");
+                }
+            }
+        }
+
+        [Fact]
+        public void ProjectImportedEventInvalidFileWhenExpressionEvaluatesToEmpty()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+
+                ProjectRootElement pre = ProjectRootElement.Create(env.CreateFile(".proj").Path);
+
+                var import = pre.AddImport("$(SomethingThatEvaluatesToEmpty)");
+
+                pre.Save();
+                pre.Reload();
+
+                using (ProjectCollection collection = new ProjectCollection())
+                {
+                    MockLogger logger = new MockLogger();
+                    collection.RegisterLogger(logger);
+
+                    Project unused = new Project(pre, null, null, collection, ProjectLoadSettings.IgnoreInvalidImports);
+
+                    ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
+
+                    eventArgs.ShouldNotBeNull();
+                    eventArgs.ImportIgnored.ShouldBeTrue();
+
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
+
+                    eventArgs.ImportedProjectFile.ShouldBe(string.Empty);
+
+                    eventArgs.ProjectFile.ShouldBe(pre.FullPath);
+
+                    eventArgs.LineNumber.ShouldBe(3);
+                    eventArgs.ColumnNumber.ShouldBe(3);
+
+                    logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the expression evaluating to an empty string.");
                 }
             }
         }
@@ -4107,17 +4124,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    Assert.NotNull(eventArgs);
-                    Assert.True(eventArgs.ImportIgnored);
+                    eventArgs.ShouldNotBeNull();
+                    eventArgs.ImportIgnored.ShouldBeTrue();
 
-                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
 
-                    Assert.Equal(importPath, eventArgs.ImportedProjectFile);
+                    eventArgs.ImportedProjectFile.ShouldBe(importPath);
 
-                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+                    eventArgs.ProjectFile.ShouldBe(pre.FullPath);
 
-                    Assert.Equal(6, eventArgs.LineNumber);
-                    Assert.Equal(3, eventArgs.ColumnNumber);
+                    eventArgs.LineNumber.ShouldBe(6);
+                    eventArgs.ColumnNumber.ShouldBe(3);
 
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to the file not existing.");
                 }
@@ -4150,17 +4167,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    Assert.NotNull(eventArgs);
-                    Assert.False(eventArgs.ImportIgnored);
+                    eventArgs.ShouldNotBeNull();
+                    eventArgs.ImportIgnored.ShouldBeFalse();
 
-                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
 
-                    Assert.Null(eventArgs.ImportedProjectFile);
+                    eventArgs.ImportedProjectFile.ShouldBeNull();
 
-                    Assert.Equal(pre.FullPath, eventArgs.ProjectFile);
+                    eventArgs.ProjectFile.ShouldBe(pre.FullPath);
 
-                    Assert.Equal(6, eventArgs.LineNumber);
-                    Assert.Equal(3, eventArgs.ColumnNumber);
+                    eventArgs.LineNumber.ShouldBe(6);
+                    eventArgs.ColumnNumber.ShouldBe(3);
 
                     logger.AssertLogContains($"Project \"{import.Project}\" was not imported by \"{pre.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}), due to no matching files.");
                 }
@@ -4198,17 +4215,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                     ProjectImportedEventArgs eventArgs = logger.AllBuildEvents.SingleOrDefault(i => i is ProjectImportedEventArgs) as ProjectImportedEventArgs;
 
-                    Assert.NotNull(eventArgs);
+                    eventArgs.ShouldNotBeNull();
 
-                    Assert.Equal(import.Project, eventArgs.UnexpandedProject);
+                    eventArgs.UnexpandedProject.ShouldBe(import.Project);
 
-                    Assert.Equal(pre1.FullPath, eventArgs.ImportedProjectFile);
+                    eventArgs.ImportedProjectFile.ShouldBe(pre1.FullPath);
 
-                    Assert.Equal(pre2.FullPath, eventArgs.ProjectFile);
+                    eventArgs.ProjectFile.ShouldBe(pre2.FullPath);
 
-                    Assert.False(eventArgs.ImportIgnored);
-                    Assert.Equal(6, eventArgs.LineNumber);
-                    Assert.Equal(3, eventArgs.ColumnNumber);
+                    eventArgs.ImportIgnored.ShouldBeFalse();
+                    eventArgs.LineNumber.ShouldBe(6);
+                    eventArgs.ColumnNumber.ShouldBe(3);
 
                     logger.AssertLogContains($"Importing project \"{pre1.FullPath}\" into project \"{pre2.FullPath}\" at ({eventArgs.LineNumber},{eventArgs.ColumnNumber}).");
                 }
@@ -4244,14 +4261,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static void AssertGlobResultsEqual(GlobResultList expected, List<GlobResult> globs)
         {
-            Assert.Equal(expected.Count, globs.Count);
+            globs.Count.ShouldBe(expected.Count);
 
             for (var i = 0; i < expected.Count; i++)
             {
-                Assert.Equal(expected[i].Item1, globs[i].ItemElement.ItemType);
-                Assert.Equal(expected[i].Item2, globs[i].IncludeGlobs);
-                Assert.Equal(expected[i].Item3, globs[i].Excludes);
-                Assert.Equal(expected[i].Item4, globs[i].Removes);
+                globs[i].ItemElement.ItemType.ShouldBe(expected[i].Item1);
+                globs[i].IncludeGlobs.ShouldBe(expected[i].Item2);
+                globs[i].Excludes.ShouldBe(expected[i].Item3);
+                globs[i].Removes.ShouldBe(expected[i].Item4);
             }
         }
 
@@ -4291,17 +4308,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static void AssertProvenanceResult(ProvenanceResultTupleList expected, List<ProvenanceResult> actual)
         {
-            Assert.Equal(expected.Count, actual.Count);
+            actual.Count.ShouldBe(expected.Count);
 
             for (var i = 0; i < expected.Count; i++)
             {
                 var expectedProvenance = expected[i];
                 var actualProvenance = actual[i];
 
-                Assert.Equal(expectedProvenance.Item1, actualProvenance.ItemElement.ItemType);
-                Assert.Equal(expectedProvenance.Item2, actualProvenance.Operation);
-                Assert.Equal(expectedProvenance.Item3, actualProvenance.Provenance);
-                Assert.Equal(expectedProvenance.Item4, actualProvenance.Occurrences);
+                actualProvenance.ItemElement.ItemType.ShouldBe(expectedProvenance.Item1);
+                actualProvenance.Operation.ShouldBe(expectedProvenance.Item2);
+                actualProvenance.Provenance.ShouldBe(expectedProvenance.Item3);
+                actualProvenance.Occurrences.ShouldBe(expectedProvenance.Item4);
             }
         }
 
@@ -4353,16 +4370,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         private void VerifyContentOfSampleProject(Project project)
         {
-            Assert.Equal("v2", project.GetProperty("p").UnevaluatedValue);
-            Assert.Equal("Xv2", project.GetProperty("p2").EvaluatedValue);
-            Assert.Equal("X$(p)", project.GetProperty("p2").UnevaluatedValue);
+            project.GetProperty("p").UnevaluatedValue.ShouldBe("v2");
+            project.GetProperty("p2").EvaluatedValue.ShouldBe("Xv2");
+            project.GetProperty("p2").UnevaluatedValue.ShouldBe("X$(p)");
 
             IList<ProjectItem> items = Helpers.MakeList(project.GetItems("i"));
-            Assert.Equal(3, items.Count);
-            Assert.Equal("i1", items[0].EvaluatedInclude);
-            Assert.Equal("v2X", items[1].EvaluatedInclude);
-            Assert.Equal("$(p)X;i3", items[1].UnevaluatedInclude);
-            Assert.Equal("i3", items[2].EvaluatedInclude);
+            items.Count.ShouldBe(3);
+            items[0].EvaluatedInclude.ShouldBe("i1");
+            items[1].EvaluatedInclude.ShouldBe("v2X");
+            items[1].UnevaluatedInclude.ShouldBe("$(p)X;i3");
+            items[2].EvaluatedInclude.ShouldBe("i3");
         }
     }
 }

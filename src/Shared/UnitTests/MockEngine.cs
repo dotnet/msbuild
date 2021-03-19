@@ -499,5 +499,11 @@ namespace Microsoft.Build.UnitTests
         public void ReleaseCores(int coresToRelease)
         {
         }
+
+        public bool ShouldTreatWarningAsError(string warningCode)
+        {
+            return false;
+        }
+
     }
 }

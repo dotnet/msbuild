@@ -113,7 +113,6 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ITaskFactory.FactoryName"/>
         public string FactoryName => "Roslyn Code Task Factory";
 
-        /// <inheritdoc />
         /// <summary>
         /// Gets the <see cref="T:System.Type" /> of the compiled task.
         /// </summary>

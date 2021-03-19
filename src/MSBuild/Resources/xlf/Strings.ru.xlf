@@ -234,10 +234,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+        <source>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </source>
-        <target state="translated">Параметры:            Вы можете указывать параметры с помощью
+        <target state="needs-review-translation">Параметры:            Вы можете указывать параметры с помощью
                      "-switch" и "/switch".
 </target>
         <note>

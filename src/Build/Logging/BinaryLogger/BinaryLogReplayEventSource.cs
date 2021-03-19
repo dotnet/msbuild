@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -14,6 +15,14 @@ namespace Microsoft.Build.Logging
     /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
     public sealed class BinaryLogReplayEventSource : EventArgsDispatcher
     {
+        /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
+        /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
+        /// and <see cref="TaskParameterEventArgs.DictionaryFactory"/>
+        static BinaryLogReplayEventSource()
+        {
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+        }
+
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>

@@ -103,8 +103,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Timeout()
         {
-            // On non-Windows the exit code of a killed process is SIGTERM (143)
-            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 143;
+            // On non-Windows the exit code of a killed process is SIGKILL (137)
+            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 137;
 
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
@@ -122,7 +122,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TimeoutFailsEvenWhenExitCodeIsIgnored()
         {
-
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
             exec.IgnoreExitCode = true;
@@ -138,16 +137,13 @@ namespace Microsoft.Build.UnitTests
 
             if (NativeMethodsShared.IsMono)
             {
-                // The standard check for SIGTERM fails intermittently on macOS Mono
-                // https://github.com/dotnet/msbuild/issues/5506
-                // To avoid test flakiness, allow 259 even though I can't justify it.
-                exec.ExitCode.ShouldBeOneOf(143, 259);
+                const int STILL_ACTIVE = 259; // When Process.WaitForExit times out.
+                exec.ExitCode.ShouldBeOneOf(137, STILL_ACTIVE);
             }
             else
             {
-                // On non-Windows the exit code of a killed process is generally 128 + SIGTERM = 143
-                // though this isn't 100% guaranteed, see https://unix.stackexchange.com/a/99134
-                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 143);
+                // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
+                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
             }
         }
 

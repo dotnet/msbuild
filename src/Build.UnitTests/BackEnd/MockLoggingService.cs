@@ -557,6 +557,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return false;
         }
 
+        public ICollection<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

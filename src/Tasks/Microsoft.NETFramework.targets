@@ -14,18 +14,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-   <!-- 
-        In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed 
-        as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead 
-        just used whatever ToolsVersion was in the project file if it existed on the machine, and 
-        only forced 4.0 if that ToolsVersion did not exist.  
 
-        Moving forward, we do want to enforce a single acting ToolsVersion per version of Visual Studio, 
-        but in order to approximate this behavior on VS 2010 SP1 and VS 2012 as well, we've redirected 
-        the targets:  If we're building using 4.X MSBuild (which doesn't define the new reserved 
-        property, MSBuildAssemblyVersion), we'll point right back at the 4.0 targets, which still exist 
+   <!--
+        In VS 2010 SP1 and VS 2012, both supported for asset compatibility, the MSBuild installed
+        as part of them did not enforce using the local ToolsVersion (4.0) in all cases, but instead
+        just used whatever ToolsVersion was in the project file if it existed on the machine, and
+        only forced 4.0 if that ToolsVersion did not exist.
+
+        Moving forward, we do want to enforce a single acting ToolsVersion per version of Visual Studio,
+        but in order to approximate this behavior on VS 2010 SP1 and VS 2012 as well, we've redirected
+        the targets:  If we're building using 4.X MSBuild (which doesn't define the new reserved
+        property, MSBuildAssemblyVersion), we'll point right back at the 4.0 targets, which still exist
         as part of the .NET Framework.  Only if we're using the new MSBuild will we point to the current
-        targets. 
+        targets.
    -->
 
    <Choose>
@@ -43,8 +44,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
    <PropertyGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
       <!--
-           Overrides for the Microsoft.NETFramework.targets extension targets.  Used to make sure that only the imports we specify 
-           (hard-coded to 4.0 locations) are used, not the 12.0 locations that would be used by default. 
+           Overrides for the Microsoft.NETFramework.targets extension targets.  Used to make sure that only the imports we specify
+           (hard-coded to 4.0 locations) are used, not the 12.0 locations that would be used by default.
        -->
       <ImportByWildcardBefore40MicrosoftNetFrameworkTargets Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkTargets)' == ''">$(ImportByWildcardBeforeMicrosoftNetFrameworkTargets)</ImportByWildcardBefore40MicrosoftNetFrameworkTargets>
       <ImportByWildcardBefore40MicrosoftNetFrameworkTargets Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkTargets)' == ''">true</ImportByWildcardBefore40MicrosoftNetFrameworkTargets>
@@ -67,13 +68,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
       <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBefore40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore')"/>
       <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore\*" Condition="'$(ImportByWildcardBefore40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportBefore')"/>
-   </ImportGroup> 
+   </ImportGroup>
 
    <Import Project="$(NetFrameworkTargetsPath)" />
 
    <ImportGroup Condition="'$(MSBuildAssemblyVersion)' == ''">
       <Import Project="$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportByWildcardAfter40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter')"/>
       <Import Project="$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfter40MicrosoftNetFrameworkTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\4.0\Microsoft.NETFramework.targets\ImportAfter')"/>
-   </ImportGroup> 
+   </ImportGroup>
 
 </Project>

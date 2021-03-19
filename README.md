@@ -6,9 +6,9 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 ### Build Status
 
-The current development branch is `master`. Changes in `master` will go into a future update of MSBuild, which will release with Visual Studio 16.10 and a corresponding version of the .NET Core SDK.
+The current development branch is `main`. Changes in `main` will go into a future update of MSBuild, which will release with Visual Studio 16.10 and a corresponding version of the .NET Core SDK.
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=master)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=main)
 
 We have forked for MSBuild 16.9 in the branch [`vs16.9`](https://github.com/Microsoft/msbuild/tree/vs16.9). Changes to that branch need special approval.
 

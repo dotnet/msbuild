@@ -465,10 +465,8 @@ namespace Microsoft.Build.Shared
                                 string arch = null;
                                 if (proc != null)
                                 {
-                                    // Since uname -m simply returns kernel property, it should be quick.
-                                    // 1 second is the best guess for a safe timeout.
-                                    proc.WaitForExit(1000);
                                     arch = proc.StandardOutput.ReadLine();
+                                    proc.WaitForExit();
                                 }
 
                                 if (!string.IsNullOrEmpty(arch))

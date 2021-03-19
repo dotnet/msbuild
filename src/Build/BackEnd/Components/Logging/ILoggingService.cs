@@ -219,6 +219,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as errors for the specified project instance ID.
+        /// Note that WarningsAsMessages takes priority over WarningsAsErrors and are excluded from the set.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns>A Hashset containing warning codes that should be treated as warnings that will not be treated as messages.</returns>
+        ICollection<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context);
+
         #region Register
 
         /// <summary>

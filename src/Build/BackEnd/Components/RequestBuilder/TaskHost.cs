@@ -744,6 +744,44 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+        #region IBuildEngine8 Members
+        private ICollection<string> _warningsAsErrors;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsAsErrors
+        {
+            get
+            {
+                // Test compatibility
+                if(_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsAsErrors ??= _taskLoggingContext.GetWarningsAsErrors();
+            }
+        }
+
+        /// <summary>
+        /// Determines if the given warning should be treated as an error.
+        /// </summary>
+        /// <param name="warningCode"></param>
+        /// <returns>True if WarningsAsErrors is an empty set or contains the given warning code.</returns>
+        public bool ShouldTreatWarningAsError(string warningCode)
+        {
+            if (WarningsAsErrors == null)
+            {
+                return false;
+            }
+
+            // An empty set means all warnings are errors.
+            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+        }
+        #endregion
+
         /// <summary>
         /// Called by the internal MSBuild task.
         /// Does not take the lock because it is called by another request builder thread.

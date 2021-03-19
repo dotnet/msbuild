@@ -1,11 +1,17 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -29,6 +35,8 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// A list of dictionaries we've encountered so far. Dictionaries are referred to by their order in this list.
         /// </summary>
+        /// <remarks>This is designed to not hold on to strings. We just store the string indices and
+        /// hydrate the dictionary on demand before returning.</remarks>
         private readonly List<(int keyIndex, int valueIndex)[]> nameValueListRecords = new List<(int, int)[]>();
 
         /// <summary>
@@ -146,6 +154,9 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.TaskCommandLine:
                     result = ReadTaskCommandLineEventArgs();
                     break;
+                case BinaryLogRecordKind.TaskParameter:
+                    result = ReadTaskParameterEventArgs();
+                    break;
                 case BinaryLogRecordKind.ProjectEvaluationStarted:
                     result = ReadProjectEvaluationStartedEventArgs();
                     break;
@@ -215,14 +226,17 @@ namespace Microsoft.Build.Logging
             {
                 var list = nameValueListRecords[id];
 
-                var dictionary = new Dictionary<string, string>(list.Length);
+                // We can't cache these as they would hold on to strings.
+                // This reader is designed to not hold onto strings,
+                // so that we can fit in a 32-bit process when reading huge binlogs
+                var dictionary = ArrayDictionary<string, string>.Create(list.Length);
                 for (int i = 0; i < list.Length; i++)
                 {
                     string key = GetStringFromRecord(list[i].keyIndex);
                     string value = GetStringFromRecord(list[i].valueIndex);
                     if (key != null)
                     {
-                        dictionary[key] = value;
+                        dictionary.Add(key, value);
                     }
                 }
 
@@ -596,6 +610,27 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
+        private BuildEventArgs ReadTaskParameterEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            // Read unused Importance, it defaults to Low
+            ReadInt32();
+
+            var kind = (TaskParameterMessageKind)ReadInt32();
+            var itemName = ReadDeduplicatedString();
+            var items = ReadTaskItemList() as IList;
+
+            var e = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
+                fields.BuildEventContext,
+                kind,
+                itemName,
+                items,
+                true,
+                fields.Timestamp);
+            e.ProjectFile = fields.ProjectFile;
+            return e;
+        }
+
         private BuildEventArgs ReadCriticalBuildMessageEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
@@ -896,65 +931,12 @@ namespace Microsoft.Build.Logging
             return result;
         }
 
-        private class TaskItem : ITaskItem
-        {
-            private static readonly Dictionary<string, string> emptyMetadata = new Dictionary<string, string>();
-
-            public string ItemSpec { get; set; }
-            public IDictionary<string, string> Metadata { get; }
-
-            public TaskItem()
-            {
-                Metadata = new Dictionary<string, string>();
-            }
-
-            public TaskItem(string itemSpec, IDictionary<string, string> metadata)
-            {
-                ItemSpec = itemSpec;
-                Metadata = metadata ?? emptyMetadata;
-            }
-
-            public int MetadataCount => Metadata.Count;
-
-            public ICollection MetadataNames => (ICollection)Metadata.Keys;
-
-            public IDictionary CloneCustomMetadata()
-            {
-                return (IDictionary)Metadata;
-            }
-
-            public void CopyMetadataTo(ITaskItem destinationItem)
-            {
-                throw new NotImplementedException();
-            }
-
-            public string GetMetadata(string metadataName)
-            {
-                return Metadata[metadataName];
-            }
-
-            public void RemoveMetadata(string metadataName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SetMetadata(string metadataName, string metadataValue)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override string ToString()
-            {
-                return $"{ItemSpec} Metadata: {MetadataCount}";
-            }
-        }
-
         private ITaskItem ReadTaskItem()
         {
             string itemSpec = ReadDeduplicatedString();
             var metadata = ReadStringDictionary();
 
-            var taskItem = new TaskItem(itemSpec, metadata);
+            var taskItem = new TaskItemData(itemSpec, metadata);
             return taskItem;
         }
 
@@ -1079,7 +1061,10 @@ namespace Microsoft.Build.Logging
 
         private int ReadInt32()
         {
-            return Read7BitEncodedInt(binaryReader);
+            // on some platforms (net5) this method was added to BinaryReader
+            // but it's not available on others. Call our own extension method
+            // explicitly to avoid ambiguity.
+            return BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
         }
 
         private long ReadInt64()
@@ -1100,30 +1085,6 @@ namespace Microsoft.Build.Logging
         private TimeSpan ReadTimeSpan()
         {
             return new TimeSpan(binaryReader.ReadInt64());
-        }
-
-        private int Read7BitEncodedInt(BinaryReader reader)
-        {
-            // Read out an Int32 7 bits at a time.  The high bit
-            // of the byte when on means to continue reading more bytes.
-            int count = 0;
-            int shift = 0;
-            byte b;
-            do
-            {
-                // Check for a corrupted stream.  Read a max of 5 bytes.
-                // In a future version, add a DataFormatException.
-                if (shift == 5 * 7)  // 5 bytes max per Int32, shift += 7
-                {
-                    throw new FormatException();
-                }
-
-                // ReadByte handles end of stream cases for us.
-                b = reader.ReadByte();
-                count |= (b & 0x7F) << shift;
-                shift += 7;
-            } while ((b & 0x80) != 0);
-            return count;
         }
 
         private ProfiledLocation ReadProfiledLocation()

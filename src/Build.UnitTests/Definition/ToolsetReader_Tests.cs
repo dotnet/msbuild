@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
-#endif
 using System.IO;
 
 using Microsoft.Build.Collections;

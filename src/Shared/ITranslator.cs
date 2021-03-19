@@ -181,6 +181,16 @@ namespace Microsoft.Build.BackEnd
         void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>;
 
         /// <summary>
+        /// Translates a collection of T into the specified type using an <see cref="ObjectTranslator{T}"/> and <see cref="NodePacketCollectionCreator{L}"/>
+        /// </summary>
+        /// <param name="collection">The collection to be translated.</param>
+        /// <param name="objectTranslator">The translator to use for the values in the collection.</param>
+        /// <param name="collectionFactory">The factory to create the ICollection.</param>
+        /// <typeparam name="T">The type contained in the collection.</typeparam>
+        /// <typeparam name="L">The type of collection to be created.</typeparam>
+        void Translate<T, L>(ref ICollection<T> collection, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : ICollection<T>;
+
+        /// <summary>
         /// Translates a DateTime.
         /// </summary>
         /// <param name="value">The value to be translated.</param>

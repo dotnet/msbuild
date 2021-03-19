@@ -4,8 +4,8 @@
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface extends <see cref="IBuildEngine7" /> to allow tasks to set whether they want to
-    /// log an error when a task returns without logging an error.
+    /// This interface extends <see cref="IBuildEngine7" /> to let tasks know if a warning
+    /// they are about to log will be converted into an error.
     /// </summary>
     public interface IBuildEngine8 : IBuildEngine7
     {
@@ -22,5 +22,13 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="coresToRelease">Number of cores no longer in use.</param>
         void ReleaseCores(int coresToRelease);
+
+        /// <summary>
+        /// Determines whether the logging service will convert the specified
+        /// warning code into an error.
+        /// </summary>
+        /// <param name="warningCode">The warning code to check.</param>
+        /// <returns>A boolean to determine whether the warning should be treated as an error.</returns>
+        public bool ShouldTreatWarningAsError(string warningCode);
     }
 }

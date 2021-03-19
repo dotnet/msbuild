@@ -1548,8 +1548,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_MatchingProjectAlreadyInCollection" xml:space="preserve">
     <value>An equivalent project (a project with the same global properties and tools version) is already present in the project collection, with the path "{0}". To load an equivalent into this project collection, unload this project first.</value>
   </data>
-  <data name="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem" xml:space="preserve">
-    <value>Only one item type may be referenced when removing with MatchOnMetadata.</value>
+  <data name="OM_MatchOnMetadataIsRestrictedToReferencedItems" xml:space="preserve">
+    <value>Only item types may be referenced when removing with MatchOnMetadata.</value>
   </data>
   <data name="OM_ProjectWasNotLoaded" xml:space="preserve">
     <value>The project provided was not loaded in the collection.</value>
@@ -1698,6 +1698,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ProjectImportSkippedMissingFile" xml:space="preserve">
     <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file not existing.</value>
+  </data>
+  <data name="ProjectImportSkippedExpressionEvaluatedToEmpty" xml:space="preserve">
+    <value>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</value>
   </data>
   <data name="ProjectImported" xml:space="preserve">
     <value>Importing project "{0}" into project "{1}" at ({2},{3}).</value>
@@ -1884,5 +1887,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="ResourceManagerExcessRelease" xml:space="preserve">
     <value>MSB4270: Task attempted to release {0} cores but held only {1}.</value>
+  </data>
+  <data name="KillingProcessWithPid" xml:space="preserve">
+    <value>Killing process with pid = {0}.</value>
   </data>
 </root>
