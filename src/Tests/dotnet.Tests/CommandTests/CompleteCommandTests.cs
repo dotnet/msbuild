@@ -81,38 +81,6 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenNewCommandItDisplaysCompletions()
-        {
-            var expected = new[] {
-                "--dry-run",
-                "--force",
-                "--help",
-                "--install",
-                "--language",
-                "--list",
-                "--interactive",
-                "--name",
-                "--nuget-source",
-                "--output",
-                "--type",
-                "--uninstall",
-                "-h",
-                "-i",
-                "-l",
-                "-lang",
-                "-n",
-                "-o",
-                "-u",
-                "--update-check",
-                "--update-apply"
-            };
-
-            var reporter = new BufferedReporter();
-            CompleteCommand.RunWithReporter(new[] { "dotnet new " }, reporter).Should().Be(0);
-            reporter.Lines.Should().Equal(expected.OrderBy(c => c));
-        }
-
-        [Fact]
         public void GivenNuGetCommandItDisplaysCompletions()
         {
             var expected = new[] {
