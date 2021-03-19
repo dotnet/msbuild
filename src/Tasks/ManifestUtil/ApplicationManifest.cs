@@ -65,9 +65,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Indicates the application configuration file.
-        /// For a Win32 native manifest, this input is ignored.
+        /// Gets or sets the application configuration file.
         /// </summary>
+        /// <remarks>
+        /// For a Win32 native manifest, this input is ignored.
+        /// </remarks>
         [XmlIgnore]
         public string ConfigFile
         {
@@ -91,7 +93,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the target framework version
+        /// Gets or sets the target framework version
         /// </summary>
         [XmlIgnore]
         public string TargetFrameworkVersion
@@ -101,7 +103,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the link to use if there is a failure launching the application.
+        /// Gets or sets the link to use if there is a failure launching the application.
         /// The specified value should be a fully qualified URL or UNC path.
         /// </summary>
         [XmlIgnore]
@@ -162,8 +164,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                                              (_fileAssociationList = new FileAssociationCollection(_fileAssociations));
 
         /// <summary>
-        /// If true, the application will run in IE using WPF's xbap application model.
+        /// Gets or sets a value that indicates whether the application will run in IE using WPF's XBAP application model.
         /// </summary>
+        /// <value><see langword="true" /> if the application will run in IE using WPF's XBAP application model; otherwise, <see langword="false" />.</value>
         [XmlIgnore]
         public bool HostInBrowser
         {
@@ -172,11 +175,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Indicates the application icon file.
+        /// Gets or sets the application icon file.
+        /// </summary>
+        /// <remarks>
         /// The application icon is expressed in the generated application manifest and is used for the start menu and Add/Remove Programs dialog.
         /// If this input is not specified then a default icon is used.
         /// For a Win32 native manifest, this input is ignored.
-        /// </summary>
+        /// </remarks>
         [XmlIgnore]
         public string IconFile
         {
@@ -185,7 +190,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Indicates whether the manifest is a ClickOnce application manifest or a native Win32 application manifest.
+        /// Gets or sets a value that indicates whether the manifest is a ClickOnce application manifest or a native Win32 application manifest.
         /// </summary>
         [XmlIgnore]
         public bool IsClickOnceManifest
@@ -195,12 +200,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the maximum allowable length of a file path in a ClickOnce application deployment.
+        /// Gets or sets the maximum allowable length of a file path in a ClickOnce application deployment.
+        /// </summary>
+        /// <remarks>
         /// If this value is specified, then the length of each file path in the application is checked against this limit.
         /// Any items that exceed the limit will result in a warning message.
         /// If this input is not specified or is zero, then no checking is performed.
         /// For a Win32 native manifest, this input is ignored.
-        /// </summary>
+        /// </remarks>
         [XmlIgnore]
         public int MaxTargetPath
         {
@@ -235,7 +242,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies a textual description for the OS dependency.
+        /// Gets or sets a textual description for the OS dependency.
         /// </summary>
         [XmlIgnore]
         public string OSDescription
@@ -245,7 +252,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies a support URL for the OS dependency.
+        /// Gets or sets a support URL for the OS dependency.
         /// </summary>
         [XmlIgnore]
         public string OSSupportUrl
@@ -255,13 +262,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the minimum required OS version required by the application.
-        /// An example value is "5.1.2600.0" for Windows XP.
-        /// If this input is not specified a default value is used.
-        /// The default value is the minimum supported OS of the .NET Framework, which is "4.10.0.0" for Windows 98SE.
-        /// However, if the application contains any native or Reg-Free COM references, then the default will be the Windows XP version.
-        /// For a Win32 native manifest, this input is ignored.
+        /// Gets or sets the minimum OS version required by the application.
         /// </summary>
+        /// <remarks>
+        /// An example value is "5.1.2600.0" for Windows XP.
+        /// For a Win32 native manifest, this input is ignored.
+        /// </remarks>
         [XmlIgnore]
         public string OSVersion
         {
@@ -304,10 +310,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the name of the application.
+        /// Gets or sets the name of the application.
+        /// </summary>
+        /// <remarks>
         /// If this input is not specified then the Product is not written into the Application Manifest
         /// This name is used for the shortcut name on the Start menu and is part of the name that appears in the Add/Remove Programs dialog.
-        /// </summary>
+        /// </remarks>
         [XmlIgnore]
         public string Product
         {
@@ -316,10 +324,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the publisher of the application.
-        /// If this input is not specified then the Publisher is not written into the Application Manifest
-        /// This name is used for the folder name on the Start menu and is part of the name that appears in the Add/Remove Programs dialog.
+        /// Gets or sets the publisher of the application.
         /// </summary>
+        /// <remarks>
+        /// If this input is not, specified then the Publisher is not written into the Application Manifest
+        /// This name is used for the folder name on the Start menu and is part of the name that appears in the Add/Remove Programs dialog.
+        /// </remarks>
         [XmlIgnore]
         public string Publisher
         {
@@ -328,9 +338,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the suite name of the application.
-        /// This name is used for the sub-folder name on the Start menu (as a child of the publisher)
+        /// Gets or sets the suite name of the application.
         /// </summary>
+        /// <remarks>
+        /// This name is used for the sub-folder name on the Start menu (as a child of the publisher)
+        /// </remarks>
         [XmlIgnore]
         public string SuiteName
         {
@@ -339,9 +351,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies the link that appears in the Add/Remove Programs dialog for the application.
-        /// The specified value should be a fully qualified URL or UNC path.
+        /// Gets or sets the link that appears in the Add/Remove Programs dialog for the application.
         /// </summary>
+        /// <remarks>
+        /// The specified value should be a fully qualified URL or UNC path.
+        /// </remarks>
         [XmlIgnore]
         public string SupportUrl
         {
@@ -350,7 +364,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// Specifies a trust object defining the application security.
+        /// Gets or sets a trust object defining the application security.
         /// </summary>
         [XmlIgnore]
         public TrustInfo TrustInfo
@@ -360,8 +374,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// If true, the install will use the settings in the application manifest in the trust prompt.
+        /// Gets or sets a value that indicates whether the install will use the settings in the application manifest in the trust prompt.
         /// </summary>
+        /// <value>
+        /// <see langword="true" /> to use the settings in the application manifest in the trust prompt; otherwise, <see langword="false" />.
+        /// </value>
         [XmlIgnore]
         public bool UseApplicationTrust
         {
