@@ -2872,9 +2872,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Create Items snapshot
         /// </summary>
-        private Dictionary<ProjectItem, ProjectItemInstance> CreateItemsSnapshot(ICollection<ProjectItem> items, int itemTypecount, bool keepEvaluationCache)
+        private Dictionary<ProjectItem, ProjectItemInstance> CreateItemsSnapshot(ICollection<ProjectItem> items, int itemTypeCount, bool keepEvaluationCache)
         {
-            _items = new ItemDictionary<ProjectItemInstance>(itemTypecount);
+            _items = new ItemDictionary<ProjectItemInstance>(itemTypeCount);
 
             var projectItemToInstanceMap = keepEvaluationCache ? new Dictionary<ProjectItem, ProjectItemInstance>(items.Count) : null;
 
@@ -2906,6 +2906,7 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
+                // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
                 var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
                 evaluatedIncludeEscaped ??= item.EvaluatedInclude;
                 var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
