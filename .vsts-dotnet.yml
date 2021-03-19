@@ -148,14 +148,6 @@ stages:
         ArtifactName: logs
       condition: succeededOrFailed()
 
-    # Publish perf logs
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: perf logs'
-      inputs:
-        PathtoPublish: 'artifacts\log\$(BuildConfiguration)\perf'
-        ArtifactName: PerfLogs
-      condition: succeeded()
-
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Artifact: bin'
       inputs:
