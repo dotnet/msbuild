@@ -129,12 +129,12 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">"SharingPolicy.Isolated ile oluşturulan EvaluationContext nesneleri bir MSBuildFileSystemBase dosya sisteminin geçirilmesini desteklemez."</target>
+        <target state="translated">SharingPolicy.Isolated ile oluşturulan EvaluationContext nesneleri bir MSBuildFileSystemBase dosya sisteminin geçirilmesini desteklemez.</target>
         <note />
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
-        <target state="new">Killing process with pid = {0}.</target>
+        <target state="translated">PID = {0} işlemi sonlandırılıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -191,7 +191,7 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only item types may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">MatchOnMetadata ile kaldırırken yalnızca öğe türlerine başvurulabilir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
@@ -244,7 +244,7 @@
       </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</target>
+        <target state="translated">"{0}" adlı proje, ifadenin boş dize olarak değerlendirilmesi nedeniyle ({2},{3}) konumundaki "{1}" tarafından içeri aktarılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
@@ -273,7 +273,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
-        <target state="needs-review-translation">"Statik graf {0} saniye içinde yüklendi: {1} düğüm, {2} uç"</target>
+        <target state="translated">Statik graf {0} saniye içinde yüklendi: {1} düğüm, {2} uç</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -1681,7 +1681,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
-        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
+        <target state="translated">MSB4064: "{0}" parametresi, {2} derlemesinin {3} yolundan yüklenmiş "{1}" görevi tarafından desteklenmiyor. Parametrenin görevde bulunduğunu, &lt;UsingTask&gt; öğesinin doğru derlemeyi işaret ettiğini ve bu özelliğin ayarlanabilir bir ortak örnek özelliği olduğunu doğrulayın.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

@@ -238,8 +238,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <source>Switches:            Note that you can specify switches using
                      "-switch", "/switch" and "--switch".
 </source>
-        <target state="needs-review-translation">스위치:            스위치를 지정하는 데 "-switch" 및 "/switch"를
-                     둘 다 사용할 수 있습니다.
+        <target state="translated">스위치:            스위치를 지정하는 데 "-switch", "/switch" 및 "--switch"를
+                     사용할 수 있습니다.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -956,7 +956,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid.</target>
+        <target state="translated">MSBUILD : error MSB1057: 그래프 빌드 값이 잘못되었습니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

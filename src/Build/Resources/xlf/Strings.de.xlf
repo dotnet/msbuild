@@ -129,12 +129,12 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">"Die Übergabe eines MSBuildFileSystemBase-Dateisystems wird von EvaluationContext-Objekten, die mit SharingPolicy.Isolated erstellt wurden, nicht unterstützt."</target>
+        <target state="translated">Die Übergabe eines MSBuildFileSystemBase-Dateisystems an EvaluationContext-Objekte, die mit "SharingPolicy.Isolated" erstellt wurden, wird nicht unterstützt.</target>
         <note />
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
-        <target state="new">Killing process with pid = {0}.</target>
+        <target state="translated">Der Prozess mit PID {0} wird beendet.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -191,7 +191,7 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only item types may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">Beim Entfernen mit "MatchOnMetadata" können nur Elementtypen referenziert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
@@ -244,7 +244,7 @@
       </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</target>
+        <target state="translated">Das Projekt "{0}" wurde nicht von "{1}" bei ({2},{3}) importiert, weil der Ausdruck in eine leere Zeichenfolge ausgewertet wurde.</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
@@ -273,7 +273,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
-        <target state="needs-review-translation">"Statisches Diagramm in {0} Sekunden geladen: {1} Knoten, {2} Edges"</target>
+        <target state="translated">Statisches Diagramm in {0} Sekunden geladen: {1} Knoten, {2} Edges</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -1681,7 +1681,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
-        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
+        <target state="translated">MSB4064: Der Parameter "{0}" wird von der Aufgabe "{1}", die aus der Assembly "{2}" und dem Pfad "{3}" geladen wurde, nicht unterstützt. Stellen Sie sicher, dass der Parameter für die Aufgabe vorhanden ist, dass &lt;UsingTask&gt; auf die richtige Assembly verweist und dass die Eigenschaft der öffentlichen Instanz festgelegt werden kann.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

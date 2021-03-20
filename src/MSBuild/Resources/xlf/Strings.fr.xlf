@@ -238,8 +238,8 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
         <source>Switches:            Note that you can specify switches using
                      "-switch", "/switch" and "--switch".
 </source>
-        <target state="needs-review-translation">Commutateurs :            Notez que vous pouvez spécifier des commutateurs avec
-                     "-switch" et "/switch".
+        <target state="translated">Commutateurs :            Vous pouvez spécifier des commutateurs avec
+                     "-switch", "/switch" et "--switch".
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -957,7 +957,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid.</target>
+        <target state="translated">MSBUILD : error MSB1057: la valeur de build du graphe n'est pas valide.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
