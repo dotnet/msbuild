@@ -84,13 +84,13 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             Solution? updatedSolution = null;
             ProjectId updatedProjectId;
-            if (_currentSolution.Projects.SelectMany(p => p.Documents).FirstOrDefault(d => d.FilePath == file.FilePath) is Document documentToUpdate)
+            if (_currentSolution.Projects.SelectMany(p => p.Documents).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is Document documentToUpdate)
             {
                 var sourceText = await GetSourceTextAsync(file.FilePath);
                 updatedSolution = documentToUpdate.WithText(sourceText).Project.Solution;
                 updatedProjectId = documentToUpdate.Project.Id;
             }
-            else if (_currentSolution.Projects.SelectMany(p => p.AdditionalDocuments).FirstOrDefault(d => d.FilePath == file.FilePath) is AdditionalDocument additionalDocument)
+            else if (_currentSolution.Projects.SelectMany(p => p.AdditionalDocuments).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is AdditionalDocument additionalDocument)
             {
                 var sourceText = await GetSourceTextAsync(file.FilePath);
                 updatedSolution = _currentSolution.WithAdditionalDocumentText(additionalDocument.Id, sourceText, PreservationMode.PreserveValue);
