@@ -28,7 +28,7 @@ setTimeout(function () {
       const payload = JSON.parse(message.data);
       const action = {
         'UpdateStaticFile': () => updateStaticFile(payload.path),
-        'BlazorHotReloadDeltav1': () => window.Blazor._applyHotReload(payload.deltas),
+        'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.deltas),
         'HotReloadDiagnosticsv1': () => displayDiagnostics(payload.diagnostics),
         'HotReloadApplied': () => notifyHotReloadApplied(),
       };
@@ -98,6 +98,10 @@ setTimeout(function () {
     [...document.querySelectorAll('link')]
       .filter(l => l.baseURI === document.baseURI && l.href && l.href.indexOf('.styles.css') !== -1)
       .forEach(e => updateCssElement(e));
+  }
+
+  function applyBlazorDeltas(deltas) {
+    deltas.forEach(d => window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta));
   }
 
   function displayDiagnostics(diagnostics) {
