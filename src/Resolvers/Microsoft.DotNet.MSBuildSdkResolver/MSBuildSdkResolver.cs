@@ -10,6 +10,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+#if USE_SERILOG
+using Serilog;
+#endif
+
 #nullable disable
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
@@ -41,7 +45,30 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
+
+#if USE_SERILOG
+            _instanceId = System.Threading.Interlocked.Increment(ref _lastInstanceId);
+#endif
         }
+
+#if USE_SERILOG
+        static Serilog.Core.Logger Logger;
+
+        static int _lastInstanceId = 1;
+        int _instanceId;
+        
+        static DotNetMSBuildSdkResolver()
+        {
+            Logger = new LoggerConfiguration()
+                .WriteTo.Seq("http://localhost:5341")
+                .CreateLogger();
+
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+            {
+                Logger.Dispose();
+            };
+        }
+#endif
 
         private sealed class CachedResult
         {
@@ -52,6 +79,17 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
         {
+#if USE_SERILOG
+            var msbuildSubmissionId = (int?) System.Threading.Thread.GetData(System.Threading.Thread.GetNamedDataSlot("MSBuildSubmissionId"));
+            Logger
+                .ForContext("Process", System.Diagnostics.Process.GetCurrentProcess().Id)
+                .ForContext("Thread", System.Threading.Thread.CurrentThread.ManagedThreadId)
+                .ForContext("ResolverInstance", _instanceId)
+                .ForContext("MSBuildSubmissionId", msbuildSubmissionId)
+                .ForContext("HasCache", context.State != null)
+                .Information("Resolving SDK {sdkName}", sdkReference.Name);
+#endif
+
             string msbuildSdksDir = null;
             string netcoreSdkVersion = null;
             IDictionary<string, string> propertiesToAdd = null;
