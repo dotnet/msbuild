@@ -25,6 +25,18 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 
         private bool _enabled;
 
+
+        //  MSBuild SDK resolvers can use the SdkResolverContext's State property to cache state across multiple calls.  However,
+        //  MSBuild only caches those within the same build (which is tracked via a build submission ID).
+        //  When running in Visual Studio, there are lots of evaluations that aren't associated with with a build, and then
+        //  it looks like each project is evaluated under a separate build submission ID.  So the built-in caching support doesn't
+        //  work well when running in Visual Studio.
+        //  Because of this, when running in Visual Studio, we will use our own cache state, which will be stored staticly.  In order
+        //  to avoid requiring that the workload manifest reader and resolver classes are fully thread safe, we include a lock object
+        //  in the cache state which we use to ensure that multiple threads don't access it at the same time.  We don't expect high
+        //  concurrency in MSBuild SDK Resolver calls, so we don't expect the lock to impact the performance.
+        private static CachedState _staticCachedState;
+
 #if NETFRAMEWORK
         private readonly NETCoreSdkResolver _sdkResolver;
 #endif
@@ -59,11 +71,21 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 #endif
         }
 
-        private record CachedState(
-            string DotNetRootPath,
-            string SdkVersion,
-            ImmutableDictionary<string, ResolutionResult> CachedResults
-        );
+        private record CachedState
+        {
+            public object LockObject { get; init; }
+            public string DotnetRootPath { get; init; }
+            public string SdkVersion { get; init; }
+            public IWorkloadManifestProvider ManifestProvider { get; init; }
+            public IWorkloadResolver WorkloadResolver { get; init; }
+            public ImmutableDictionary<string, ResolutionResult> CachedResults { get; init; }
+
+            public CachedState()
+            {
+                LockObject = new object();
+                CachedResults = ImmutableDictionary.Create<string, ResolutionResult>(StringComparer.OrdinalIgnoreCase);
+            }
+        }
 
         private record ResolutionResult();
 
@@ -146,48 +168,64 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 return null;
             }
 
-            CachedState cachedState;
+            CachedState cachedState = null;
 
-            if (resolverContext.State is CachedState resolverContextState)
+            if (resolverContext.IsRunningInVisualStudio)
             {
-                cachedState = resolverContextState;
+                cachedState = _staticCachedState;
             }
             else
             {
-                cachedState = new CachedState(null, null, ImmutableDictionary.Create<string, ResolutionResult>(StringComparer.OrdinalIgnoreCase));
+                if (resolverContext.State is CachedState resolverContextState)
+                {
+                    cachedState = resolverContextState;
+                }
+            }
+
+            
+            if (cachedState == null)
+            {
+                //  If we don't have any cached state yet, then find the dotnet directory and SDK version, and create the workload resolver classes
+                //  Note that in Visual Studio, we could end up doing this multiple times if the resolver gets called on multiple threads before any
+                //  state has been cached.
+
+                var dotnetRootPath = GetDotNetRoot(resolverContext);
+
+                var sdkDirectory = GetSdkDirectory(resolverContext);
+                //  The SDK version is the name of the SDK directory (ie dotnet\sdk\5.0.100)
+                var sdkVersion = Path.GetFileName(sdkDirectory);
+
+                var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
+                var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetRootPath, sdkVersion);
+
+                cachedState = new CachedState()
+                {
+                    DotnetRootPath = dotnetRootPath,
+                    SdkVersion = sdkVersion,
+                    ManifestProvider = workloadManifestProvider,
+                    WorkloadResolver = workloadResolver
+                };
             }
 
             ResolutionResult resolutionResult;
-
-            if (!cachedState.CachedResults.TryGetValue(sdkReference.Name, out resolutionResult))
+            lock (cachedState.LockObject)
             {
-                if (cachedState.DotNetRootPath == null || cachedState.SdkVersion == null)
+                if (!cachedState.CachedResults.TryGetValue(sdkReference.Name, out resolutionResult))
                 {
-                    var dotnetRootPath = GetDotNetRoot(resolverContext);
-
-                    var sdkDirectory = GetSdkDirectory(resolverContext);
-                    //  The SDK version is the name of the SDK directory (ie dotnet\sdk\5.0.100)
-                    var sdkVersion = Path.GetFileName(sdkDirectory);
+                    resolutionResult = Resolve(sdkReference.Name, cachedState.ManifestProvider, cachedState.WorkloadResolver);
 
                     cachedState = cachedState with
                     {
-                        DotNetRootPath = dotnetRootPath,
-                        SdkVersion = sdkVersion
+                        CachedResults = cachedState.CachedResults.Add(sdkReference.Name, resolutionResult)
                     };
 
+                    resolverContext.State = cachedState;
+
+                    if (resolverContext.IsRunningInVisualStudio)
+                    {
+                        _staticCachedState = cachedState;
+                    }
                 }
-
-                var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(cachedState.DotNetRootPath, cachedState.SdkVersion);
-                var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, cachedState.DotNetRootPath, cachedState.SdkVersion);
-
-                resolutionResult = Resolve(sdkReference.Name, workloadManifestProvider, workloadResolver);
-
-                cachedState = cachedState with
-                {
-                    CachedResults = cachedState.CachedResults.Add(sdkReference.Name, resolutionResult)
-                };
-
-                resolverContext.State = cachedState;
             }
 
             switch (resolutionResult)
