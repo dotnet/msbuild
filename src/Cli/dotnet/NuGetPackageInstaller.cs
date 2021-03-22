@@ -36,19 +36,17 @@ namespace Microsoft.DotNet.Cli.Utils
             var nupkgPath = Path.Combine(_packageInstallDir, packageId.ToString(), packageVersion.ToNormalizedString(), $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using var destinationStream = File.Create(nupkgPath);
-            {
-                var success = await findPackageByIdResource.CopyNupkgToStreamAsync(
-                    id: packageId.ToString(),
-                    version: packageVersion,
-                    destination: destinationStream,
-                    cacheContext: cache,
-                    logger: _logger,
-                    cancellationToken: cancellationToken);
+            var success = await findPackageByIdResource.CopyNupkgToStreamAsync(
+                id: packageId.ToString(),
+                version: packageVersion,
+                destination: destinationStream,
+                cacheContext: cache,
+                logger: _logger,
+                cancellationToken: cancellationToken);
 
-                if (!success)
-                {
-                    throw new Exception($"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed.");
-                }
+            if (!success)
+            {
+                throw new Exception($"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed.");
             }
 
             return nupkgPath;
@@ -57,23 +55,21 @@ namespace Microsoft.DotNet.Cli.Utils
         public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder)
         {
             using var packageStream = File.OpenRead(packagePath);
-            {
-                var packageReader = new PackageFolderReader(targetFolder);
-                var packageExtractionContext = new PackageExtractionContext(
-                            PackageSaveMode.Defaultv3,
-                            XmlDocFileSaveMode.None,
-                            clientPolicyContext: null,
-                            logger: _logger);
-                var packagePathResolver = new PackagePathResolver(targetFolder);
-                var cancellationToken = CancellationToken.None;
+            var packageReader = new PackageFolderReader(targetFolder);
+            var packageExtractionContext = new PackageExtractionContext(
+                        PackageSaveMode.Defaultv3,
+                        XmlDocFileSaveMode.None,
+                        clientPolicyContext: null,
+                        logger: _logger);
+            var packagePathResolver = new PackagePathResolver(targetFolder);
+            var cancellationToken = CancellationToken.None;
 
-                return await PackageExtractor.ExtractPackageAsync(
-                    source: targetFolder,
-                    packageStream: packageStream,
-                    packagePathResolver: packagePathResolver,
-                    packageExtractionContext: packageExtractionContext,
-                    token: cancellationToken);
-            }
+            return await PackageExtractor.ExtractPackageAsync(
+                source: targetFolder,
+                packageStream: packageStream,
+                packagePathResolver: packagePathResolver,
+                packageExtractionContext: packageExtractionContext,
+                token: cancellationToken);
         }
     }
 }
