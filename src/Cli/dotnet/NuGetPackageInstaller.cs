@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.ToolPackage;
 using NuGet.Common;
+using NuGet.Packaging;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
@@ -50,6 +52,28 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             return nupkgPath;
+        }
+
+        public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder)
+        {
+            using var packageStream = File.OpenRead(packagePath);
+            {
+                var packageReader = new PackageFolderReader(targetFolder);
+                var packageExtractionContext = new PackageExtractionContext(
+                            PackageSaveMode.Defaultv3,
+                            XmlDocFileSaveMode.None,
+                            clientPolicyContext: null,
+                            logger: _logger);
+                var packagePathResolver = new PackagePathResolver(targetFolder);
+                var cancellationToken = CancellationToken.None;
+
+                return await PackageExtractor.ExtractPackageAsync(
+                    source: targetFolder,
+                    packageStream: packageStream,
+                    packagePathResolver: packagePathResolver,
+                    packageExtractionContext: packageExtractionContext,
+                    token: cancellationToken);
+            }
         }
     }
 }
