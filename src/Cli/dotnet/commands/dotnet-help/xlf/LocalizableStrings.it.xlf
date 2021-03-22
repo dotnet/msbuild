@@ -53,8 +53,8 @@
         <note />
       </trans-unit>
       <trans-unit id="VersionDescription">
-        <source>Display .NET CLI Version Number</source>
-        <target state="translated">Visualizza il numero di versione dell'interfaccia della riga di comando .NET</target>
+        <source>Display the version of the .NET SDK, including the effects of any global.json</source>
+        <target state="needs-review-translation">Visualizza il numero di versione dell'interfaccia della riga di comando .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="InfoDescription">
