@@ -56,6 +56,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 b.Features.Add(new DefaultTypeNameFeature());
                 b.SetRootNamespace(razorContext.RootNamespace);
 
+                b.Features.Add(new ConfigureRazorCodeGenerationOptions(options =>
+                {
+                    options.SuppressMetadataSourceChecksumAttributes = !razorContext.GenerateMetadataSourceChecksumAttributes;
+                }));
+
                 b.Features.Add(new StaticTagHelperFeature { TagHelpers = tagHelpers, });
                 b.Features.Add(new DefaultTagHelperDescriptorProvider());
 
