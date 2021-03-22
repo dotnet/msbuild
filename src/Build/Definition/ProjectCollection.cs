@@ -1615,12 +1615,11 @@ namespace Microsoft.Build.Evaluation
         {
             Debug.Assert(_locker.IsWriteLockHeld);
 
-            if (!_toolsets.ContainsKey(toolsVersion))
+            if (!_toolsets.Remove(toolsVersion))
             {
                 return false;
             }
 
-            _toolsets.Remove(toolsVersion);
             _toolsetsVersion++;
             return true;
         }

@@ -142,16 +142,16 @@ namespace Microsoft.Build.BackEnd
 
             foreach (string targetName in targetNames)
             {
-                var targetExists = _projectInstance.Targets.ContainsKey(targetName);
+                var targetExists = _projectInstance.Targets.TryGetValue(targetName, out ProjectTargetInstance targetInstance);
                 if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
                 {
                     _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
                         "TargetSkippedWhenSkipNonexistentTargets", targetName);
-
-                    continue;
                 }
-
-                targets.Add(new TargetSpecification(targetName, targetExists ? _projectInstance.Targets[targetName].Location : _projectInstance.ProjectFileLocation));
+                else
+                {
+                    targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation));
+                }
             }
 
             // Push targets onto the stack.  This method will reverse their push order so that they
@@ -484,13 +484,7 @@ namespace Microsoft.Build.BackEnd
                             }
                             catch
                             {
-                                if (_requestEntry.RequestConfiguration.ActivelyBuildingTargets.ContainsKey(
-                                    currentTargetEntry.Name))
-                                {
-                                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry
-                                        .Name);
-                                }
-
+                                _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
                                 throw;
                             }
                         }
@@ -764,7 +758,7 @@ namespace Microsoft.Build.BackEnd
         {
             foreach (string targetName in targetNames)
             {
-                if (_buildResult.ResultsByTarget.ContainsKey(targetName))
+                if (_buildResult.ResultsByTarget.TryGetValue(targetName, out TargetResult targetBuildResult))
                 {
                     // Queue of targets waiting to be processed, seeded with the specific target for which we're computing AfterTargetsHaveFailed.
                     var targetsToCheckForAfterTargets = new Queue<string>();
@@ -785,7 +779,7 @@ namespace Microsoft.Build.BackEnd
                             if (result?.ResultCode == TargetResultCode.Failure && !result.TargetFailureDoesntCauseBuildFailure)
                             {
                                 // Mark the target as having an after target failed, and break the loop to move to the next target.
-                                _buildResult.ResultsByTarget[targetName].AfterTargetsHaveFailed = true;
+                                targetBuildResult.AfterTargetsHaveFailed = true;
                                 targetsToCheckForAfterTargets = null;
                                 break;
                             }

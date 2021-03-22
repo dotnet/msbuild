@@ -629,9 +629,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectRequestWeAreBlockedBy(BlockingRequestKey blockingRequestKey)
         {
-            ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.ContainsKey(blockingRequestKey), "We are not blocked by the specified request.");
-
-            SchedulableRequest unblockingRequest = _requestsWeAreBlockedBy[blockingRequestKey];
+            ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.TryGetValue(blockingRequestKey, out SchedulableRequest unblockingRequest), "We are not blocked by the specified request.");
             ErrorUtilities.VerifyThrow(unblockingRequest._requestsWeAreBlocking.Contains(this), "The request unblocking us doesn't think it is blocking us.");
 
             _requestsWeAreBlockedBy.Remove(blockingRequestKey);

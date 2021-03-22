@@ -118,10 +118,9 @@ namespace Microsoft.Build.Tasks
 
                 foreach (Product product in products)
                 {
-                    if (items.ContainsKey(product.ProductCode))
+                    if (items.Remove(product.ProductCode))
                     {
                         settings.ProductBuilders.Add(product.ProductBuilder);
-                        items.Remove(product.ProductCode);
                     }
                 }
 

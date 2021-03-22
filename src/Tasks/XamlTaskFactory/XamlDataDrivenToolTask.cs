@@ -102,12 +102,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public bool IsPropertySet(string propertyName)
         {
-            if (!String.IsNullOrEmpty(propertyName))
-            {
-                return ActiveToolSwitches.ContainsKey(propertyName);
-            }
-
-            return false;
+            return !String.IsNullOrEmpty(propertyName) && ActiveToolSwitches.ContainsKey(propertyName);
         }
 
         /// <summary>

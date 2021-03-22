@@ -1068,14 +1068,14 @@ namespace Microsoft.Build.Shared
 
         private static VisualStudioSpec GetVisualStudioSpec(Version version)
         {
-            ErrorUtilities.VerifyThrowArgument(s_visualStudioSpecDict.ContainsKey(version), "FrameworkLocationHelper.UnsupportedVisualStudioVersion", version);
-            return s_visualStudioSpecDict[version];
+            ErrorUtilities.VerifyThrowArgument(s_visualStudioSpecDict.TryGetValue(version, out VisualStudioSpec spec), "FrameworkLocationHelper.UnsupportedVisualStudioVersion", version);
+            return spec;
         }
 
         private static DotNetFrameworkSpec GetDotNetFrameworkSpec(Version version)
         {
-            ErrorUtilities.VerifyThrowArgument(s_dotNetFrameworkSpecDict.ContainsKey(version), "FrameworkLocationHelper.UnsupportedFrameworkVersion", version);
-            return s_dotNetFrameworkSpecDict[version];
+            ErrorUtilities.VerifyThrowArgument(s_dotNetFrameworkSpecDict.TryGetValue(version, out DotNetFrameworkSpec spec), "FrameworkLocationHelper.UnsupportedFrameworkVersion", version);
+            return spec;
         }
 
         /// <summary>

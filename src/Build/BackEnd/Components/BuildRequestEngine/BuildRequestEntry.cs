@@ -230,12 +230,12 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                if (_unresolvedConfigurations?.ContainsKey(unresolvedConfigId) != true)
+                List<BuildRequest> requests = null;
+                if (_unresolvedConfigurations?.TryGetValue(unresolvedConfigId, out requests) != true)
                 {
                     return false;
                 }
 
-                List<BuildRequest> requests = _unresolvedConfigurations[unresolvedConfigId];
                 _unresolvedConfigurations.Remove(unresolvedConfigId);
 
                 if (_unresolvedConfigurations.Count == 0)

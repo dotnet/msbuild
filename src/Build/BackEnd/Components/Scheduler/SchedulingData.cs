@@ -360,9 +360,9 @@ namespace Microsoft.Build.BackEnd
                     ErrorUtilities.VerifyThrow(_configurationToRequests.ContainsKey(request.BuildRequest.ConfigurationId), "Configuration {0} never had requests assigned to it.", request.BuildRequest.ConfigurationId);
                     ErrorUtilities.VerifyThrow(_configurationToRequests[request.BuildRequest.ConfigurationId].Count > 0, "Configuration {0} has no requests assigned to it.", request.BuildRequest.ConfigurationId);
                     _configurationToRequests[request.BuildRequest.ConfigurationId].Remove(request);
-                    if (_scheduledRequestsByNode.ContainsKey(request.AssignedNode))
+                    if (_scheduledRequestsByNode.TryGetValue(request.AssignedNode, out var requests))
                     {
-                        _scheduledRequestsByNode[request.AssignedNode].Remove(request);
+                        requests.Remove(request);
                     }
 
                     request.EndTime = EventTime;
