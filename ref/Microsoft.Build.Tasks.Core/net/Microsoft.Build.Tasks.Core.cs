@@ -920,6 +920,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] AssemblyInformationCachePaths { get { throw null; } set { } }
         public bool AutoUnify { get { throw null; } set { } }
         public string[] CandidateAssemblyFiles { get { throw null; } set { } }
+        public Microsoft.Build.Framework.TaskExecutionContext ConcurrencyExecutionContext { get { throw null; } set { } }
         public bool CopyLocalDependenciesWhenParentReferenceInGac { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] CopyLocalFiles { get { throw null; } }

@@ -593,11 +593,13 @@ namespace Microsoft.Build.Framework
     }
     public partial class TaskExecutionContext
     {
+        public TaskExecutionContext() { }
         public TaskExecutionContext(string startupDirectory, System.Collections.Generic.Dictionary<string, string> buildProcessEnvironment, System.Globalization.CultureInfo culture, System.Globalization.CultureInfo uiCulture) { }
         public System.Collections.Generic.Dictionary<string, string> BuildProcessEnvironment { get { throw null; } }
         public System.Globalization.CultureInfo Culture { get { throw null; } }
         public string StartupDirectory { get { throw null; } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } }
+        public string GetFullPath(string path) { throw null; }
     }
     public partial class TaskFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
