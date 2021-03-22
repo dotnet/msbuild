@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.ToolPackage;
 using NuGet.Common;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
@@ -24,18 +25,18 @@ namespace Microsoft.DotNet.Cli.Utils
             _logger = logger ?? new NullLogger();
         }
 
-        public async Task<string> InstallPackageAsync(string packageId, NuGetVersion packageVersion)
+        public async Task<string> InstallPackageAsync(PackageId packageId, NuGetVersion packageVersion)
         {
             var cancellationToken = CancellationToken.None;
             var cache = new SourceCacheContext() { DirectDownload = true, NoCache = true };
             var source = Repository.Factory.GetCoreV3(sourceUrl);
             var findPackageByIdResource = await source.GetResourceAsync<FindPackageByIdResource>();
-            var nupkgPath = Path.Combine(_packageInstallDir, packageId, packageVersion.ToNormalizedString(), $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
+            var nupkgPath = Path.Combine(_packageInstallDir, packageId.ToString(), packageVersion.ToNormalizedString(), $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
-            using (FileStream destinationStream = File.Create(nupkgPath))
+            using var destinationStream = File.Create(nupkgPath);
             {
                 var success = await findPackageByIdResource.CopyNupkgToStreamAsync(
-                    id: packageId,
+                    id: packageId.ToString(),
                     version: packageVersion,
                     destination: destinationStream,
                     cacheContext: cache,

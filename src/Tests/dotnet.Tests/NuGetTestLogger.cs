@@ -9,15 +9,15 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
-    public class TestLogger : ILogger
+    public class NuGetTestLogger : ILogger
     {
         private readonly ITestOutputHelper _output;
 
-        public TestLogger()
+        public NuGetTestLogger()
         {
         }
 
-        public TestLogger(ITestOutputHelper output)
+        public NuGetTestLogger(ITestOutputHelper output)
         {
             _output = output;
         }
