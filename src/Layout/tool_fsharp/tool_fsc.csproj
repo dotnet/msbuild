@@ -14,7 +14,7 @@
         AfterTargets="_ResolveCopyLocalAssetsForPublish">
     <ItemGroup>
         <ResolvedFileToPublish
-          Include="$(PkgMicrosoft_FSharp_Compiler)/lib/netcoreapp3.1/FSharp.Core.xml"
+          Include="$(PkgMicrosoft_FSharp_Compiler)/lib/net5.0/FSharp.Core.xml"
           CopyToPublishDirectory="PreserveNewest"
           DestinationSubPath="FSharp.Core.xml"
           RelativePath="FSharp.Core.xml"
