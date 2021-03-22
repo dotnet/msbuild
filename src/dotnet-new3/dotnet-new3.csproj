@@ -7,7 +7,6 @@
 
     <ItemGroup>
         <None Update="**\*.list" CopyToOutputDirectory="Always" />
-        <None Update="defaultinstall.TemplateSearchInfo.json" CopyToOutputDirectory="Always" />
         <None Update="dotnet-new3.sh" CopyToOutputDirectory="Always" />
         <None Update="dotnet-new3.cmd" CopyToOutputDirectory="Always" />
     </ItemGroup>
