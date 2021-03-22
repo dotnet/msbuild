@@ -98,8 +98,11 @@ namespace Microsoft.NET.Build.Tests
 
         [WindowsOnlyTheory]
         [InlineData("net5.0", "TargetPlatformIdentifier", "Windows", "Exe")]
-        [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "WinExe")]
-        [InlineData("netcoreapp3.1", "UseWPF", "true", "WinExe")]
+        [InlineData("net5.0", "UseWindowsForms", "true", "WinExe")]
+        [InlineData("netcoreapp3.1", "UseWindowsForms", "true", "Exe")]
+        [InlineData("net5.0", "UseWPF", "true", "WinExe")]
+        [InlineData("netcoreapp3.1", "UseWPF", "true", "Exe")]
+        [InlineData("net5.0", "UseWPF", "false", "Exe")]
         [InlineData("netcoreapp3.1", "UseWPF", "false", "Exe")]
         public void It_infers_WinExe_output_type(string targetFramework, string propName, string propValue, string expectedOutputType)
         {
