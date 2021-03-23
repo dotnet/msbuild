@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver;
 
 #if USE_SERILOG
 using Serilog;
@@ -34,6 +35,8 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         private readonly Func<string, string> _getEnvironmentVariable;
         private readonly NETCoreSdkResolver _netCoreSdkResolver;
+
+        private static WorkloadPartialResolver _staticWorkloadResolver = new WorkloadPartialResolver();
 
         public DotNetMSBuildSdkResolver() 
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
@@ -70,54 +73,85 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         }
 #endif
 
-        private sealed class CachedResult
+        private sealed class CachedState
         {
+            public string DotnetRoot;
             public string MSBuildSdksDir;
             public string NETCoreSdkVersion;
             public IDictionary<string, string> PropertiesToAdd;
+            public WorkloadPartialResolver WorkloadResolver;
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
         {
 #if USE_SERILOG
-            var msbuildSubmissionId = (int?) System.Threading.Thread.GetData(System.Threading.Thread.GetNamedDataSlot("MSBuildSubmissionId"));
-            Logger
+            List<Action<Serilog.ILogger>> logActions = new List<Action<Serilog.ILogger>>();
+
+            var result = Resolve(sdkReference, context, factory, logActions);
+
+            var msbuildSubmissionId = (int?)System.Threading.Thread.GetData(System.Threading.Thread.GetNamedDataSlot("MSBuildSubmissionId"));
+            var log = Logger
                 .ForContext("Resolver", "Sdk")
                 .ForContext("Process", System.Diagnostics.Process.GetCurrentProcess().Id)
                 .ForContext("Thread", System.Threading.Thread.CurrentThread.ManagedThreadId)
                 .ForContext("ResolverInstance", _instanceId)
+                .ForContext("RunningInVS", context.IsRunningInVisualStudio)
                 .ForContext("MSBuildSubmissionId", msbuildSubmissionId)
                 .ForContext("HasCache", context.State != null)
-                .Information("Resolving SDK {sdkName}", sdkReference.Name);
+                .ForContext("SdkName", sdkReference.Name);
+
+            foreach (var logAction in logActions)
+            {
+                logAction(log);
+            }
+
+            return result;
+        }
+
+        private SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory, List<Action<Serilog.ILogger>> logActions)
+        {
+
+            logActions.Add(log => log.Information("Resolving SDK {sdkName}", sdkReference.Name));
 #endif
 
+            string dotnetRoot = null;
             string msbuildSdksDir = null;
             string netcoreSdkVersion = null;
             IDictionary<string, string> propertiesToAdd = null;
             IDictionary<string, SdkResultItem> itemsToAdd = null;
             List<string> warnings = null;
+            WorkloadPartialResolver workloadResolver = null;
 
-            if (context.State is CachedResult priorResult)
+            if (context.State is CachedState priorResult)
             {
+                dotnetRoot = priorResult.DotnetRoot;
                 msbuildSdksDir = priorResult.MSBuildSdksDir;
                 netcoreSdkVersion = priorResult.NETCoreSdkVersion;
                 propertiesToAdd = priorResult.PropertiesToAdd;
+                workloadResolver = priorResult.WorkloadResolver;
+            }
+
+            if (context.IsRunningInVisualStudio)
+            {
+                workloadResolver = _staticWorkloadResolver;
             }
 
             if (msbuildSdksDir == null)
             {
-                // These are overrides that are used to force the resolved SDK tasks and targets to come from a given
-                // base directory and report a given version to msbuild (which may be null if unknown. One key use case
-                // for this is to test SDK tasks and targets without deploying them inside the .NET Core SDK.
-                msbuildSdksDir = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
-                netcoreSdkVersion = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
+                
+                dotnetRoot = _netCoreSdkResolver.GetDotnetExeDirectory();
+            }
+
+            if (workloadResolver == null)
+            {
+                workloadResolver = new WorkloadPartialResolver();
             }
 
             if (msbuildSdksDir == null)
             {
-                string dotnetExeDir = _netCoreSdkResolver.GetDotnetExeDirectory();
+                dotnetRoot = _netCoreSdkResolver.GetDotnetExeDirectory();
                 string globalJsonStartDir = Path.GetDirectoryName(context.SolutionFilePath ?? context.ProjectFilePath);
-                var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetExeDir);
+                var resolverResult = _netCoreSdkResolver.ResolveNETCoreSdkDirectory(globalJsonStartDir, context.MSBuildVersion, context.IsRunningInVisualStudio, dotnetRoot);
 
                 if (resolverResult.ResolvedSdkDirectory == null)
                 {
@@ -128,6 +162,20 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
                 msbuildSdksDir = Path.Combine(resolverResult.ResolvedSdkDirectory, "Sdks");
                 netcoreSdkVersion = new DirectoryInfo(resolverResult.ResolvedSdkDirectory).Name;
+
+                // These are overrides that are used to force the resolved SDK tasks and targets to come from a given
+                // base directory and report a given version to msbuild (which may be null if unknown. One key use case
+                // for this is to test SDK tasks and targets without deploying them inside the .NET Core SDK.
+                var msbuildSdksDirFromEnv = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR");
+                var netcoreSdkVersionFromEnv = _getEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER");
+                if (!string.IsNullOrEmpty(msbuildSdksDirFromEnv))
+                {
+                    msbuildSdksDir = msbuildSdksDirFromEnv;
+                }
+                if (!string.IsNullOrEmpty(netcoreSdkVersionFromEnv))
+                {
+                    netcoreSdkVersion = netcoreSdkVersionFromEnv;
+                }
 
                 if (IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
                 {
@@ -175,12 +223,26 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 }
             }
 
-            context.State = new CachedResult
+            context.State = new CachedState
             {
+                DotnetRoot = dotnetRoot,
                 MSBuildSdksDir = msbuildSdksDir,
                 NETCoreSdkVersion = netcoreSdkVersion,
-                PropertiesToAdd = propertiesToAdd
+                PropertiesToAdd = propertiesToAdd,
+                WorkloadResolver = workloadResolver
             };
+
+            //  First check if requested SDK resolves to a workload SDK pack
+            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion
+#if USE_SERILOG
+                , logActions: logActions
+#endif
+                );
+
+            if (workloadResult is not WorkloadPartialResolver.NullResolutionResult)
+            {
+                return workloadResult.ToSdkResult(sdkReference, factory);
+            }
 
             string msbuildSdkDir = Path.Combine(msbuildSdksDir, sdkReference.Name, "Sdk");
             if (!Directory.Exists(msbuildSdkDir))

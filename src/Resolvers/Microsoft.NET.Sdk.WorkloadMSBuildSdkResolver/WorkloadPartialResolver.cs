@@ -1,0 +1,258 @@
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Framework;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using System.Collections.Immutable;
+
+#if NET
+using Microsoft.DotNet.Cli;
+#else
+using Microsoft.DotNet.DotNetSdkResolver;
+#endif
+
+#if USE_SERILOG
+using Serilog;
+#endif
+
+#nullable disable
+
+namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
+{
+
+    //  This class contains workload SDK resolution logic which will be used by both .NET SDK MSBuild and Full Framework / Visual Studio MSBuild.
+    //
+    //  Keeping this performant in Visual Studio is tricky, as VS performs a lot of evaluations, but they are not linked by an MSBuild "Submission ID",
+    //  so the state caching support provided by MSBuild for SDK Resolvers doesn't really help.  Additionally, multiple instances of the SDK resolver
+    //  may be created, and the same instance may be called on multiple threads.  So state needs to be cached staticly and be thread-safe.
+    //
+    //  To keep the state static, the MSBuildSdkResolver keeps a static reference to the WorkloadPartialResolver that is used if the build is inside
+    //  Visual Studio.  To keep it thread-safe, the body of the Resolve method is all protected by a lock statement.  This avoids having to make
+    //  the classes consumed by the WorkloadPartialResolver (the manifest provider and workload resolver) thread-safe.
+    //
+    //  A resolver should not over-cache and return out-of-date results.  For workloads, the resolution could change due to:
+    //  - Installation, update, or uninstallation of a workload
+    //  - Resolved SDK changes (either due to an SDK installation or uninstallation, or a global.json change)
+    //  For SDK or workload installation actions, we expect to be running under a new process since Visual Studio will have been restarted.
+    //  For global.json changes, the Resolve method takes parameters for the dotnet root and the SDK version.  If those values have changed
+    //  from the previous call, the cached state will be thrown out and recreated.
+    class WorkloadPartialResolver
+    {
+        private record CachedState
+        {            
+            public string DotnetRootPath { get; init; }
+            public string SdkVersion { get; init; }
+            public IWorkloadManifestProvider ManifestProvider { get; init; }
+            public IWorkloadResolver WorkloadResolver { get; init; }
+            public ImmutableDictionary<string, ResolutionResult> CachedResults { get; init; }
+
+            public CachedState()
+            {
+                CachedResults = ImmutableDictionary.Create<string, ResolutionResult>(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        public object _lockObject { get; } = new object();
+        private CachedState _cachedState;
+        private bool _enabled;
+
+
+        public WorkloadPartialResolver()
+        {
+            // Support opt-out for workload resolution
+            _enabled = true;
+            var envVar = Environment.GetEnvironmentVariable("MSBuildEnableWorkloadResolver");
+            if (envVar != null)
+            {
+                if (envVar.Equals("false", StringComparison.OrdinalIgnoreCase))
+                {
+                    _enabled = false;
+                }
+            }
+
+            if (!_enabled)
+            {
+                string sentinelPath = Path.Combine(Path.GetDirectoryName(typeof(WorkloadPartialResolver).Assembly.Location), "DisableWorkloadResolver.sentinel");
+                if (File.Exists(sentinelPath))
+                {
+                    _enabled = false;
+                }
+            }
+        }
+
+        public record ResolutionResult()
+        {
+            public SdkResult ToSdkResult(SdkReference sdkReference, SdkResultFactory factory)
+            {
+                switch (this)
+                {
+                    case SinglePathResolutionResult r:
+                        return factory.IndicateSuccess(r.Path, sdkReference.Version);
+                    case MultiplePathResolutionResult r:
+                        return factory.IndicateSuccess(r.Paths, sdkReference.Version);
+                    case EmptyResolutionResult r:
+                        return factory.IndicateSuccess(Enumerable.Empty<string>(), sdkReference.Version, r.propertiesToAdd, r.itemsToAdd);
+                    case NullResolutionResult:
+                        return null;
+                }
+
+                throw new InvalidOperationException("Unknown resolutionResult type: " + this.GetType());
+            }
+        }
+
+        public record SinglePathResolutionResult(
+            string Path
+        ) : ResolutionResult;
+
+        public record MultiplePathResolutionResult(
+            IEnumerable<string> Paths
+        ) : ResolutionResult;
+
+        public record EmptyResolutionResult(
+            IDictionary<string, string> propertiesToAdd,
+            IDictionary<string, SdkResultItem> itemsToAdd
+        ) : ResolutionResult;
+
+        public record NullResolutionResult() : ResolutionResult;
+
+        private static ResolutionResult Resolve(string sdkReferenceName, IWorkloadManifestProvider manifestProvider, IWorkloadResolver workloadResolver)
+        {
+            if (sdkReferenceName.Equals("Microsoft.NET.SDK.WorkloadAutoImportPropsLocator", StringComparison.OrdinalIgnoreCase))
+            {
+                List<string> autoImportSdkPaths = new List<string>();
+                foreach (var sdkPackInfo in workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk))
+                {
+                    string sdkPackSdkFolder = Path.Combine(sdkPackInfo.Path, "Sdk");
+                    string autoImportPath = Path.Combine(sdkPackSdkFolder, "AutoImport.props");
+                    if (File.Exists(autoImportPath))
+                    {
+                        autoImportSdkPaths.Add(sdkPackSdkFolder);
+                    }
+                }
+                //  Call Distinct() here because with aliased packs, there may be duplicates of the same path
+                return new MultiplePathResolutionResult(autoImportSdkPaths.Distinct());
+            }
+            else if (sdkReferenceName.Equals("Microsoft.NET.SDK.WorkloadManifestTargetsLocator", StringComparison.OrdinalIgnoreCase))
+            {
+                List<string> workloadManifestPaths = new List<string>();
+                foreach (var manifestDirectory in manifestProvider.GetManifestDirectories())
+                {
+                    var workloadManifestTargetPath = Path.Combine(manifestDirectory, "WorkloadManifest.targets");
+                    if (File.Exists(workloadManifestTargetPath))
+                    {
+                        workloadManifestPaths.Add(manifestDirectory);
+                    }
+                }
+                return new MultiplePathResolutionResult(workloadManifestPaths);
+            }
+            else
+            {
+                var packInfo = workloadResolver.TryGetPackInfo(sdkReferenceName);
+                if (packInfo != null)
+                {
+                    if (Directory.Exists(packInfo.Path))
+                    {
+                        return new SinglePathResolutionResult(Path.Combine(packInfo.Path, "Sdk"));
+                    }
+                    else
+                    {
+                        var itemsToAdd = new Dictionary<string, SdkResultItem>();
+                        itemsToAdd.Add("MissingWorkloadPack",
+                            new SdkResultItem(sdkReferenceName,
+                                metadata: new Dictionary<string, string>()
+                                {
+                                    { "Version", packInfo.Version }
+                                }));
+
+                        Dictionary<string, string> propertiesToAdd = new Dictionary<string, string>();
+                        return new EmptyResolutionResult(propertiesToAdd, itemsToAdd);
+                    }
+                }
+            }
+            return new NullResolutionResult();
+        }
+
+        public ResolutionResult Resolve(string sdkReferenceName, string dotnetRootPath, string sdkVersion
+#if USE_SERILOG
+            , List<Action<Serilog.ILogger>> logActions
+#endif
+            )
+        {
+            if (!_enabled)
+            {
+                return new NullResolutionResult();
+            }
+
+            ResolutionResult resolutionResult;
+
+            lock (_lockObject)
+            {
+                if (_cachedState == null ||
+                    _cachedState.DotnetRootPath != dotnetRootPath ||
+                    _cachedState.SdkVersion != sdkVersion)
+                {
+#if USE_SERILOG
+                    if (_cachedState == null)
+                    {
+                        logActions.Add(log => log.Information($"Creating initial {nameof(WorkloadPartialResolver)} state"));
+                    }
+                    else
+                    {
+                        logActions.Add(log => log.Information($"Recreating {nameof(WorkloadPartialResolver)} state (resolved SDK changed)"));
+                    }
+#endif
+
+                    var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
+                    var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetRootPath, sdkVersion);
+
+                    _cachedState = new CachedState()
+                    {
+                        DotnetRootPath = dotnetRootPath,
+                        SdkVersion = sdkVersion,
+                        ManifestProvider = workloadManifestProvider,
+                        WorkloadResolver = workloadResolver
+                    };
+                }
+                else
+                {
+#if USE_SERILOG
+                    logActions.Add(log => log.Information($"Using cached {nameof(WorkloadPartialResolver)} state"));
+#endif
+                }
+
+                if (!_cachedState.CachedResults.TryGetValue(sdkReferenceName, out resolutionResult))
+                {
+#if USE_SERILOG
+                    logActions.Add(log => log.Information($"Resolving workload in {nameof(WorkloadPartialResolver)}"));
+#endif
+                    resolutionResult = Resolve(sdkReferenceName, _cachedState.ManifestProvider, _cachedState.WorkloadResolver);
+
+                    _cachedState = _cachedState with
+                    {
+                        CachedResults = _cachedState.CachedResults.Add(sdkReferenceName, resolutionResult)
+                    };
+                }
+#if USE_SERILOG
+                else
+                {
+                    logActions.Add(log => log.Information($"Using cached workload resolution result in {nameof(WorkloadPartialResolver)}"));
+                }
+#endif
+            }
+
+            return resolutionResult;
+        }
+    }
+}
+
+#if !NET
+namespace System.Runtime.CompilerServices
+{
+    public class IsExternalInit { }
+}
+#endif
