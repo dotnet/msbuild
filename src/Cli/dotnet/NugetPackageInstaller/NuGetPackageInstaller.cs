@@ -13,7 +13,7 @@ using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
-namespace Microsoft.DotNet.Cli.Utils
+namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
 {
     internal class NuGetPackageInstaller
     {

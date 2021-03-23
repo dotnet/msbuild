@@ -4,13 +4,14 @@
 using System.IO;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.DotNet.Cli.NuGetPackageInstaller;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.NET.TestFramework;
 using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.Cli.Utils.Tests
+namespace Microsoft.DotNet.Tests
 {
     public class NuGetPackageInstallerTests : SdkTest
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using NuGet.Common;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.Cli.Utils.Tests
+namespace Microsoft.DotNet.Tests
 {
     public class NuGetTestLogger : ILogger
     {
