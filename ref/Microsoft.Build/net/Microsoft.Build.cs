@@ -1126,6 +1126,7 @@ namespace Microsoft.Build.Execution
         public ProjectInstance(Microsoft.Build.Construction.ProjectRootElement xml) { }
         public ProjectInstance(Microsoft.Build.Construction.ProjectRootElement xml, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public ProjectInstance(Microsoft.Build.Construction.ProjectRootElement xml, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
+        public ProjectInstance(Microsoft.Build.Evaluation.Project project, Microsoft.Build.Execution.ProjectInstanceSettings settings) { }
         public ProjectInstance(string projectFile) { }
         public ProjectInstance(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion) { }
         public ProjectInstance(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
@@ -1982,6 +1983,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         public abstract bool Build(string[] targets, System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> loggers, System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> remoteLoggers, Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext);
         public abstract Microsoft.Build.Execution.ProjectInstance CreateProjectInstance(Microsoft.Build.Execution.ProjectInstanceSettings settings, Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext);
         public abstract string ExpandString(string unexpandedValue);
+        public abstract System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs();
         public abstract System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs(Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext);
         public abstract System.Collections.Generic.List<Microsoft.Build.Evaluation.GlobResult> GetAllGlobs(string itemType, Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext);
         public abstract System.Collections.Generic.List<Microsoft.Build.Evaluation.ProvenanceResult> GetItemProvenance(Microsoft.Build.Evaluation.ProjectItem item, Microsoft.Build.Evaluation.Context.EvaluationContext evaluationContext);
