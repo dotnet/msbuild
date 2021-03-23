@@ -13,6 +13,10 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.DotNetSdkResolver;
 #endif
 
+#if USE_SERILOG
+using Serilog;
+#endif
+
 #nullable disable
 
 namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
@@ -69,7 +73,30 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 _sdkResolver = new NETCoreSdkResolver();
             }
 #endif
+
+#if USE_SERILOG
+            _instanceId = System.Threading.Interlocked.Increment(ref _lastInstanceId);
+#endif
         }
+
+#if USE_SERILOG
+        static Serilog.Core.Logger Logger;
+
+        static int _lastInstanceId = 1;
+        int _instanceId;
+
+        static WorkloadSdkResolver()
+        {
+            Logger = new LoggerConfiguration()
+                .WriteTo.Seq("http://localhost:5341")
+                .CreateLogger();
+
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+            {
+                Logger.Dispose();
+            };
+        }
+#endif
 
         private record CachedState
         {
@@ -168,6 +195,10 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 return null;
             }
 
+#if USE_SERILOG
+            List<Action<Serilog.ILogger>> logActions = new List<Action<Serilog.ILogger>>();
+#endif
+
             CachedState cachedState = null;
 
             if (resolverContext.IsRunningInVisualStudio)
@@ -185,6 +216,10 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             
             if (cachedState == null)
             {
+#if USE_SERILOG
+                logActions.Add(log => log.Information("Initializing resolver state"));
+#endif
+
                 //  If we don't have any cached state yet, then find the dotnet directory and SDK version, and create the workload resolver classes
                 //  Note that in Visual Studio, we could end up doing this multiple times if the resolver gets called on multiple threads before any
                 //  state has been cached.
@@ -206,12 +241,21 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                     WorkloadResolver = workloadResolver
                 };
             }
+            else
+            {
+#if USE_SERILOG
+                logActions.Add(log => log.Information("Using cached resolver state"));
+#endif
+            }
 
             ResolutionResult resolutionResult;
             lock (cachedState.LockObject)
             {
                 if (!cachedState.CachedResults.TryGetValue(sdkReference.Name, out resolutionResult))
                 {
+#if USE_SERILOG
+                    logActions.Add(log => log.Information("Resolving workload"));
+#endif
                     resolutionResult = Resolve(sdkReference.Name, cachedState.ManifestProvider, cachedState.WorkloadResolver);
 
                     cachedState = cachedState with
@@ -226,19 +270,42 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                         _staticCachedState = cachedState;
                     }
                 }
+#if USE_SERILOG
+                else
+                {
+                    logActions.Add(log => log.Information("Using cached workload resolution result"));
+                }
+#endif
             }
 
-            switch (resolutionResult)
+
+#if USE_SERILOG
+            var msbuildSubmissionId = (int?)System.Threading.Thread.GetData(System.Threading.Thread.GetNamedDataSlot("MSBuildSubmissionId"));
+            var log = Logger
+                .ForContext("Resolver", "Sdk")
+                .ForContext("Process", System.Diagnostics.Process.GetCurrentProcess().Id)
+                .ForContext("Thread", System.Threading.Thread.CurrentThread.ManagedThreadId)
+                .ForContext("ResolverInstance", _instanceId)
+                .ForContext("RunningInVS", resolverContext.IsRunningInVisualStudio)
+                .ForContext("MSBuildSubmissionId", msbuildSubmissionId);
+            
+            foreach (var logAction in logActions)
             {
-                case SinglePathResolutionResult r:
-                    return factory.IndicateSuccess(r.Path, sdkReference.Version);
-                case MultiplePathResolutionResult r:
-                    return factory.IndicateSuccess(r.Paths, sdkReference.Version);
-                case EmptyResolutionResult r:
-                    return factory.IndicateSuccess(Enumerable.Empty<string>(), sdkReference.Version, r.propertiesToAdd, r.itemsToAdd);
-                case NullResolutionResult:
-                    return null;
+                logAction(log);
             }
+#endif
+
+                switch (resolutionResult)
+                {
+                    case SinglePathResolutionResult r:
+                        return factory.IndicateSuccess(r.Path, sdkReference.Version);
+                    case MultiplePathResolutionResult r:
+                        return factory.IndicateSuccess(r.Paths, sdkReference.Version);
+                    case EmptyResolutionResult r:
+                        return factory.IndicateSuccess(Enumerable.Empty<string>(), sdkReference.Version, r.propertiesToAdd, r.itemsToAdd);
+                    case NullResolutionResult:
+                        return null;
+                }
 
             throw new InvalidOperationException("Unknown resolutionResult type: " + resolutionResult.GetType());
 

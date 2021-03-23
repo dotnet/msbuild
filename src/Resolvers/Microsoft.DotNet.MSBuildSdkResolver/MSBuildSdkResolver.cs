@@ -82,6 +82,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 #if USE_SERILOG
             var msbuildSubmissionId = (int?) System.Threading.Thread.GetData(System.Threading.Thread.GetNamedDataSlot("MSBuildSubmissionId"));
             Logger
+                .ForContext("Resolver", "Sdk")
                 .ForContext("Process", System.Diagnostics.Process.GetCurrentProcess().Id)
                 .ForContext("Thread", System.Threading.Thread.CurrentThread.ManagedThreadId)
                 .ForContext("ResolverInstance", _instanceId)

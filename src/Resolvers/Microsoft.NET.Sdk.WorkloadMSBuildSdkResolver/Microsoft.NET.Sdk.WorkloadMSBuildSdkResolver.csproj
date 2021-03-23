@@ -33,6 +33,11 @@
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(EnableSerilogLogging)' == 'true'">
+    <PackageReference Include="Serilog" Version="2.10.0"/>
+    <PackageReference Include="Serilog.Sinks.Seq" Version="5.0.0" />
+  </ItemGroup>
+
   <Target Name="WriteFullFrameworkResolverManifest" AfterTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PropertyGroup>
       <_ResolverManifestDir>$(OutputPath)\SdkResolvers\$(AssemblyName)\</_ResolverManifestDir>
