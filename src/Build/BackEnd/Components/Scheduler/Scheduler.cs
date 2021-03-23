@@ -590,7 +590,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public List<ScheduleResponse> ReleaseCores(int requestId, int coresToRelease)
         {
-            SchedulableRequest request = _schedulingData.GetExecutingRequest(requestId);
+            SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
             request.RemoveRequestedCores(coresToRelease);
 
             // Releasing cores means that we may be able to schedule more work.

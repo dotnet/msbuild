@@ -242,7 +242,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
             ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
             ErrorUtilities.VerifyThrow(!_continueWithResourcesEvent.WaitOne(0), "Request already continued");
-            VerifyEntryInActiveState();
+            VerifyEntryInActiveOrWaitingState();
 
             _continueResources = response;
             _continueWithResourcesEvent.Set();
@@ -506,7 +506,7 @@ namespace Microsoft.Build.BackEnd
                 throw new BuildAbortedException();
             }
 
-            VerifyEntryInActiveState();
+            VerifyEntryInActiveOrWaitingState();
             return _continueResources.NumCores;
         }
 
@@ -733,6 +733,15 @@ namespace Microsoft.Build.BackEnd
         private void VerifyEntryInActiveState()
         {
             ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active, "Entry is not in the Active state, it is in the {0} state.", _requestEntry.State);
+        }
+
+        /// <summary>
+        /// Asserts that the entry is in the active or waiting state.
+        /// </summary>
+        private void VerifyEntryInActiveOrWaitingState()
+        {
+            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active || _requestEntry.State == BuildRequestEntryState.Waiting,
+                "Entry is not in the Active state, it is in the {0} state.", _requestEntry.State);
         }
 
         /// <summary>
