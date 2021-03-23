@@ -75,7 +75,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
       ""GeneratorId"": ""0c434df7-e2cb-4dee-b216-d7c58c8eb4b3"",
       ""GroupIdentity"": ""Microsoft.Common.Library"",
       ""Precedence"": 100,
-      ""Name"": ""Class library"",
+      ""Name"": ""Class Library"",
       ""ShortName"": ""classlib"",
       ""Tags"": {
         ""language"": {
@@ -128,7 +128,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
       ""GeneratorId"": ""0c434df7-e2cb-4dee-b216-d7c58c8eb4b3"",
       ""GroupIdentity"": ""Microsoft.Common.Library"",
       ""Precedence"": 100,
-      ""Name"": ""Class library"",
+      ""Name"": ""Class Library"",
       ""ShortName"": ""classlib"",
       ""Tags"": {
         ""language"": {
@@ -198,7 +198,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
       ""Identity"": ""Microsoft.Common.Library.CSharp"",
       ""GeneratorId"": ""0c434df7-e2cb-4dee-b216-d7c58c8eb4b3"",
       ""GroupIdentity"": ""Microsoft.Common.Library"",
-      ""Name"": ""Class library"",
+      ""Name"": ""Class Library"",
       ""ShortName"": ""classlib"",
       ""Tags"": {
         ""language"": ""C#"",
@@ -220,7 +220,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
       ""Identity"": ""Microsoft.Common.Library.FSharp"",
       ""GeneratorId"": ""0c434df7-e2cb-4dee-b216-d7c58c8eb4b3"",
       ""GroupIdentity"": ""Microsoft.Common.Library"",
-      ""Name"": ""Class library"",
+      ""Name"": ""Class Library"",
       ""ShortName"": ""classlib"",
       ""Tags"": {
         ""language"": ""F#"",
