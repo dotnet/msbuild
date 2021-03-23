@@ -96,7 +96,7 @@ try {
   else
   {
     $buildToolPath = $dotnetExePath
-    $buildToolCommand = Join-Path $bootstrapRoot "net5.0\MSBuild\MSBuild.dll"
+    $buildToolCommand = Join-Path $bootstrapRoot "net6.0\MSBuild\MSBuild.dll"
     $buildToolFramework = "netcoreapp3.1"
   }
 

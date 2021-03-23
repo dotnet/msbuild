@@ -21,11 +21,15 @@
          Can be removed after Arcade moves up. -->
     <MicrosoftVSSDKBuildToolsVersion>16.7.13</MicrosoftVSSDKBuildToolsVersion>
   </PropertyGroup>
+  <!-- Production Dependencies -->
+  <PropertyGroup>
+  </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>6.0.100-preview.2.21155.3</DotNetCliVersion>
+    <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftNetCompilersToolsetVersion>3.9.0-2.20574.26</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>5.10.0-rc.7240</NuGetBuildTasksVersion>
   </PropertyGroup>
