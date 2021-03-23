@@ -4,7 +4,7 @@
 
 See the [public documentation](https://docs.microsoft.com/dotnet/framework/app-domains/gac). The GAC is a folder where different installations of VS on the same machine look for assemblies that are commonly used. If an assembly is in the GAC, it will be prioritized over any other assembly.
 
-The only MSBuild assemblies you may see in the GAC are version 4.8. There is no reason any modern (15.0+) MSBuild assembly should be in the GAC today.
+The only MSBuild assemblies you may see in the GAC are version 4.8. There is no reason any modern (15.1+) MSBuild assembly should be in the GAC today.
 
 ## What MSBuild Assemblies are installed on my Machine?
 Run the [EnumerateMSBuild powershell script](https://github.com/Microsoft/msbuild/blob/master/scripts/EnumerateMSBuild.ps1) from our repo. It will output a `msbuild_versions.txt` file that lists MSBuild assemblies in their common folders along with their versions.
