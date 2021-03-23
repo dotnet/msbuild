@@ -3,6 +3,7 @@ trigger:
   branches:
     include:
     - master
+    - main
     - release/*
     - internal/release/3.*
     - internal/release/5.*

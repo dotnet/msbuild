@@ -85,7 +85,6 @@ namespace Microsoft.DotNet.Watcher.Tools
             // Assert
             Assert.True(context.RequiresMSBuildRevaluation);
             Mock.Get(_fileSetFactory).Verify(v => v.CreateAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
-
         }
 
         [Fact]
@@ -95,7 +94,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             // concurrent edits. MSBuildEvaluationFilter uses timestamps to additionally track changes to these files.
 
             // Arrange
-            var fileSet = new FileSet(false, new[] { new FileItem { FilePath = "Controlller.cs" }, new FileItem { FilePath = "Proj.csproj" } });
+            var fileSet = new FileSet(null, new[] { new FileItem { FilePath = "Controlller.cs" }, new FileItem { FilePath = "Proj.csproj" } });
             var fileSetFactory = Mock.Of<IFileSetFactory>(f => f.CreateAsync(It.IsAny<CancellationToken>()) == Task.FromResult<FileSet>(fileSet));
 
             var filter = new TestableMSBuildEvaluationFilter(fileSetFactory)

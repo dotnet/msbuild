@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Help;
 using System.CommandLine.Invocation;
-using System.CommandLine.IO;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -14,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Watcher.Internal;
+using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IConsole = Microsoft.Extensions.Tools.Internal.IConsole;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
@@ -90,12 +89,6 @@ Examples:
         internal async Task<int> RunAsync(string[] args)
         {
             var rootCommand = CreateRootCommand(HandleWatch);
-            if (args == null || !args.Any())
-            {
-                // if no command argument provided, we fall back to dotnet watch run
-                args = new[] { "run" } ;
-            }
-
             return await rootCommand.InvokeAsync(args);
         }
 
@@ -207,7 +200,7 @@ Examples:
         private async Task<int> MainInternalAsync(
             IReporter reporter,
             string project,
-            IReadOnlyCollection<string> args,
+            IReadOnlyList<string> args,
             CancellationToken cancellationToken)
         {
             // TODO multiple projects should be easy enough to add here
@@ -220,6 +213,17 @@ Examples:
             {
                 reporter.Error(ex.Message);
                 return 1;
+            }
+
+            var isDefaultRunCommand = false;
+            if (args.Count == 1 && args[0] == "run")
+            {
+                isDefaultRunCommand = true;
+            }
+            else if (args.Count == 0)
+            {
+                isDefaultRunCommand = true;
+                args = new[] { "run" };
             }
 
             var watchOptions = DotNetWatchOptions.Default;
@@ -245,8 +249,36 @@ Examples:
                 _reporter.Output("Polling file watcher is enabled");
             }
 
-            await using var watcher = new DotNetWatcher(reporter, fileSetFactory, watchOptions);
-            await watcher.WatchAsync(processInfo, cancellationToken);
+            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(_workingDirectory, reporter);
+
+            var context = new DotNetWatchContext
+            {
+                ProcessSpec = processInfo,
+                Reporter = _reporter,
+                SuppressMSBuildIncrementalism = watchOptions.SuppressMSBuildIncrementalism,
+                DefaultLaunchSettingsProfile = defaultProfile,
+            };
+
+            if (isDefaultRunCommand && !string.IsNullOrEmpty(defaultProfile?.HotReloadProfile))
+            {
+                _reporter.Verbose($"Found HotReloadProfile={defaultProfile.HotReloadProfile}. Watching with hot-reload");
+
+                // We'll sue hot-reload based watching if
+                // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
+                // b) The launch profile supports hot-reload based watching.
+                // The watcher will complain if users configure this for runtimes that would not support it.
+                await using var watcher = new HotReloadDotNetWatcher(reporter, fileSetFactory, watchOptions);
+                await watcher.WatchAsync(context, cancellationToken);
+            }
+            else
+            {
+                _reporter.Verbose("Did not find a HotReloadProfile or running a non-default command. Watching with legacy behavior.");
+
+                // We'll use the presence of a profile to decide if we're going to use the hot-reload based watching.
+                // The watcher will complain if users configure this for runtimes that would not support it.
+                await using var watcher = new DotNetWatcher(reporter, fileSetFactory, watchOptions);
+                await watcher.WatchAsync(context, cancellationToken);
+            }
 
             return 0;
         }

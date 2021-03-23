@@ -25,16 +25,18 @@ setTimeout(function () {
       let i = 0;
       setInterval(function () { document.title = glyphs[i++ % glyphs.length] + ' ' + title; }, 240);
     } else {
-      const parsed = JSON.parse(message.data);
-      if (parsed.type == 'UpdateStaticFile') {
-        const path = parsed.path;
-        if (path && path.endsWith('.css')) {
-          updateCssByPath(path);
-        } else {
-          console.debug(`File change detected to css file ${path}. Reloading page...`);
-          location.reload();
-          return;
-        }
+      const payload = JSON.parse(message.data);
+      const action = {
+        'UpdateStaticFile': () => updateStaticFile(payload.path),
+        'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.deltas),
+        'HotReloadDiagnosticsv1': () => displayDiagnostics(payload.diagnostics),
+        'HotReloadApplied': () => notifyHotReloadApplied(),
+      };
+
+      if (payload.type && action.hasOwnProperty(payload.type)) {
+        action[payload.type]();
+      } else {
+        console.error('Unknown payload:', message.data);
       }
     }
   }
@@ -42,6 +44,16 @@ setTimeout(function () {
   connection.onerror = function (event) { console.debug('dotnet-watch reload socket error.', event) }
   connection.onclose = function () { console.debug('dotnet-watch reload socket closed.') }
   connection.onopen = function () { console.debug('dotnet-watch reload socket connected.') }
+
+  function updateStaticFile(path) {
+    if (path && path.endsWith('.css')) {
+        updateCssByPath(path);
+    } else {
+        console.debug(`File change detected to css file ${path}. Reloading page...`);
+        location.reload();
+        return;
+    }
+  }
 
   function updateCssByPath(path) {
     const styleElement = document.querySelector(`link[href^="${path}"]`) ||
@@ -86,5 +98,37 @@ setTimeout(function () {
     [...document.querySelectorAll('link')]
       .filter(l => l.baseURI === document.baseURI && l.href && l.href.indexOf('.styles.css') !== -1)
       .forEach(e => updateCssElement(e));
+  }
+
+  function applyBlazorDeltas(deltas) {
+    deltas.forEach(d => window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta));
+  }
+
+  function displayDiagnostics(diagnostics) {
+    document.querySelectorAll('#dotnet-compile-error').forEach(el => el.remove());
+    const el = document.body.appendChild(document.createElement('div'));
+    el.id = 'dotnet-compile-error';
+    el.setAttribute('style', 'z-index:1000000; position:fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); color:black');
+    diagnostics.forEach(error => {
+        const item = el.appendChild(document.createElement('div'));
+        item.setAttribute('style', 'border: 2px solid red; padding: 8px; background-color: #faa;')
+        const message = item.appendChild(document.createElement('div'));
+        message.setAttribute('style', 'font-weight: bold');
+        message.textContent = error.Message;
+        item.appendChild(document.createElement('div')).textContent = error;
+    });
+  }
+
+  function notifyHotReloadApplied() {
+      document.querySelectorAll('#dotnet-compile-error').forEach(el => el.remove());
+      if (document.querySelector('#dotnet-hotreload-toast')) {
+        return;
+      }
+      const el = document.createElement('div');
+      el.id = 'dotnet-hotreload-toast';
+      el.setAttribute('style', 'z-index:1000000; width:100%; height: 30px; font-size: large; text-align:center; position:fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); color:black; transition: 0.5s all ease-in-out;');
+      el.textContent = 'Updated the page';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 520);
   }
 }, 500);

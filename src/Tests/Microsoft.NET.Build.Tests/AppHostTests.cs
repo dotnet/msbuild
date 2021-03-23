@@ -253,7 +253,7 @@ namespace Microsoft.NET.Build.Tests
 
         }
 
-        [WindowsOnlyFact] // https://github.com/dotnet/sdk/issues/16252
+        [Fact]
         public void It_retries_on_failure_to_create_apphost()
         {
             const string TFM = "net5.0";
@@ -293,13 +293,14 @@ namespace Microsoft.NET.Build.Tests
                 var result = buildCommand.Execute(
                     "/clp:NoSummary",
                     $"/p:CopyRetryCount={Retries}",
+                    "/warnaserror",
                     "/p:CopyRetryDelayMilliseconds=0");
 
                 result
                     .Should()
                     .Fail()
                     .And
-                    .HaveStdOutContaining("System.IO.IOException");
+                    .HaveStdOutContaining("NETSDK1113");
 
                 Regex.Matches(result.StdOut, "NETSDK1113", RegexOptions.None).Count.Should().Be(Retries);
             }

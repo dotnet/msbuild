@@ -109,7 +109,9 @@ namespace Microsoft.DotNet.Watcher.Tools
         static bool IsMsBuildFileExtension(string fileName)
         {
             var extension = Path.GetExtension(fileName.AsSpan());
+#pragma warning disable RS1024 // Analyzer bug - https://github.com/dotnet/roslyn-analyzers/issues/4956
             var hashCode = string.GetHashCode(extension, StringComparison.OrdinalIgnoreCase);
+#pragma warning restore RS1024
             for (var i = 0; i < _msBuildFileExtensionHashes.Length; i++)
             {
                 if (_msBuildFileExtensionHashes[i] == hashCode && extension.Equals(_msBuildFileExtensions[i], StringComparison.OrdinalIgnoreCase))

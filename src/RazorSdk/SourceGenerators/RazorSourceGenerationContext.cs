@@ -2,10 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 
@@ -23,7 +21,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public RazorConfiguration Configuration { get; private set; }
 
-
         /// <summary>
         /// Gets a flag that determines if the source generator waits for the debugger to attach.
         /// <para>
@@ -34,13 +31,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public bool WaitForDebugger { get; private set; }
 
         /// <summary>
-        /// Gets a flag that determine if the source generator should log verbose messages.
+        /// Gets a flag that determines if generated Razor views and Pages includes the <c>RazorSourceChecksumAttribute</c>.
         /// </summary>
-        /// <para>
-        /// To configure this using MSBuild, use the <c>_RazorSourceGeneratorLog</c> property.
-        /// For instance <c>dotnet msbuild /p:_RazorSourceGeneratorLog=true</c>
-        /// </para>
-        public bool EnableLogging { get; private set; }
+        public bool GenerateMetadataSourceChecksumAttributes { get; private set; }
 
         public RazorSourceGenerationContext(GeneratorExecutionContext context)
         {
@@ -67,9 +60,10 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
 
             globalOptions.TryGetValue("build_property._RazorSourceGeneratorDebug", out var waitForDebugger);
-            globalOptions.TryGetValue("build_property._RazorSourceGeneratorLog", out var enableLogging);
 
-            var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>());
+            globalOptions.TryGetValue("build_property.GenerateRazorMetadataSourceChecksumAttributes", out var generateMetadataSourceChecksumAttributes);
+
+            var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>(), true);
             var (razorFiles, cshtmlFiles) = GetRazorInputs(context);
             var fileSystem = GetVirtualFileSystem(context, razorFiles, cshtmlFiles);
 
@@ -79,7 +73,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             RazorFiles = razorFiles;
             CshtmlFiles = cshtmlFiles;
             WaitForDebugger = waitForDebugger == "true";
-            EnableLogging = enableLogging == "true";
+            GenerateMetadataSourceChecksumAttributes = generateMetadataSourceChecksumAttributes == "true";
         }
 
         private static VirtualRazorProjectFileSystem GetVirtualFileSystem(GeneratorExecutionContext context, IReadOnlyList<RazorInputItem> razorFiles, IReadOnlyList<RazorInputItem> cshtmlFiles)

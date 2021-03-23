@@ -151,7 +151,7 @@
     <value>Host options (passed before the command)</value>
   </data>
   <data name="VersionDescription" xml:space="preserve">
-    <value>Display .NET CLI Version Number</value>
+    <value>Display the version of the .NET SDK, including the effects of any global.json</value>
   </data>
   <data name="InfoDescription" xml:space="preserve">
     <value>Display .NET CLI Info</value>

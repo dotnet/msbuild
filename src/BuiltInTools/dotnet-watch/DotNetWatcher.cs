@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Watcher
         private readonly IReporter _reporter;
         private readonly ProcessRunner _processRunner;
         private readonly DotNetWatchOptions _dotnetWatchOptions;
-        private readonly FileChangeHandler _fileChangeHandler;
+        private readonly StaticFileHandler _staticFileHandler;
         private readonly IWatchFilter[] _filters;
 
         public DotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions)
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Watcher
             _reporter = reporter;
             _processRunner = new ProcessRunner(reporter);
             _dotnetWatchOptions = dotNetWatchOptions;
-            _fileChangeHandler = new FileChangeHandler(reporter);
+            _staticFileHandler = new StaticFileHandler(reporter);
 
             _filters = new IWatchFilter[]
             {
@@ -38,22 +38,14 @@ namespace Microsoft.DotNet.Watcher
             };
         }
 
-        public async Task WatchAsync(ProcessSpec processSpec, CancellationToken cancellationToken)
+        public async Task WatchAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
-            Ensure.NotNull(processSpec, nameof(processSpec));
-
             var cancelledTaskSource = new TaskCompletionSource();
             cancellationToken.Register(state => ((TaskCompletionSource)state).TrySetResult(),
                 cancelledTaskSource);
 
+            var processSpec = context.ProcessSpec;
             var initialArguments = processSpec.Arguments.ToArray();
-            var context = new DotNetWatchContext
-            {
-                Iteration = -1,
-                ProcessSpec = processSpec,
-                Reporter = _reporter,
-                SuppressMSBuildIncrementalism = _dotnetWatchOptions.SuppressMSBuildIncrementalism,
-            };
 
             if (context.SuppressMSBuildIncrementalism)
             {
@@ -108,10 +100,9 @@ namespace Microsoft.DotNet.Watcher
                     {
                         fileSetTask = fileSetWatcher.GetChangedFileAsync(combinedCancellationSource.Token);
                         finishedTask = await Task.WhenAny(processTask, fileSetTask, cancelledTaskSource.Task);
-
                         if (finishedTask == fileSetTask
                             && fileSetTask.Result is FileItem fileItem &&
-                            await _fileChangeHandler.TryHandleFileAction(context, fileItem, combinedCancellationSource.Token))
+                            await _staticFileHandler.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
                         {
                             // We're able to handle the file change event without doing a full-rebuild.
                         }

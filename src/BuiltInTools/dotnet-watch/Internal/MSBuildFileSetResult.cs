@@ -1,13 +1,22 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Watcher.Internal
 {
     public class MSBuildFileSetResult
     {
-        public bool IsNetCoreApp31OrNewer { get; set; }
+        public string RunCommand { get; set; }
+
+        public string RunArguments { get; set; }
+
+        public string RunWorkingDirectory { get; set; }
+
+        public bool IsNetCoreApp { get; set; }
+
+        public string TargetFrameworkVersion { get; set; }
 
         public Dictionary<string, ProjectItems> Projects { get; set; }
     }

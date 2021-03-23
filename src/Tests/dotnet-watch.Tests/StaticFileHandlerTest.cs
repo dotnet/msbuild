@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    public class FileChangeHandlerTest
+    public class StaticFileHandlerTest
     {
         [Fact]
         public async ValueTask TryHandleFileAction_WritesUpdateCssMessage()
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 {
                     writtenBytes = bytes;
                 });
-            var fileContentHandler = new FileChangeHandler(NullReporter.Singleton);
+            var fileContentHandler = new StaticFileHandler(NullReporter.Singleton);
             var context = new DotNetWatchContext
             {
                 BrowserRefreshServer = server.Object,
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var file = new FileItem { FilePath = "Test.css", IsStaticFile = true, StaticWebAssetPath = "content/Test.css" };
 
             // Act
-            var result = await fileContentHandler.TryHandleFileAction(context, file, default);
+            var result = await fileContentHandler.TryHandleFileChange(context, file, default);
 
             // Assert
             Assert.True(result);
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 {
                     writtenBytes = bytes;
                 });
-            var fileContentHandler = new FileChangeHandler(NullReporter.Singleton);
+            var fileContentHandler = new StaticFileHandler(NullReporter.Singleton);
             var context = new DotNetWatchContext
             {
                 BrowserRefreshServer = server.Object,
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             var file = new FileItem { FilePath = "Test.js", IsStaticFile = true, StaticWebAssetPath = "Test.js" };
 
             // Act
-            var result = await fileContentHandler.TryHandleFileAction(context, file, default);
+            var result = await fileContentHandler.TryHandleFileChange(context, file, default);
 
             // Assert
             Assert.True(result);
