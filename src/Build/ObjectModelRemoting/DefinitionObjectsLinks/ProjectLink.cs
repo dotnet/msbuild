@@ -129,11 +129,6 @@ namespace Microsoft.Build.ObjectModelRemoting
         public abstract int LastEvaluationId { get; }
 
         /// <summary>
-        /// Facilitate remoting the <see cref="Project.GetAllGlobs()"/>.
-        /// </summary>
-        public abstract List<GlobResult> GetAllGlobs();
-
-        /// <summary>
         /// Facilitate remoting the <see cref="Project.GetAllGlobs(EvaluationContext)"/>.
         /// </summary>
         public abstract List<GlobResult> GetAllGlobs(EvaluationContext evaluationContext);

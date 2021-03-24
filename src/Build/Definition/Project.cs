@@ -2422,14 +2422,6 @@ namespace Microsoft.Build.Evaluation
             internal ILoggingService LoggingService => ProjectCollection.LoggingService;
 
             /// <summary>
-            /// See <see cref="ProjectLink.GetAllGlobs()"/>.
-            /// </summary>
-            public override List<GlobResult> GetAllGlobs()
-            {
-                return GetAllGlobs(evaluationContext: null);
-            }
-
-            /// <summary>
             /// See <see cref="ProjectLink.GetAllGlobs(EvaluationContext)"/>.
             /// </summary>
             /// <param name="evaluationContext">
