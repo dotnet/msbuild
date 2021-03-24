@@ -51,9 +51,9 @@ namespace Microsoft.Build.CommandLine
                 // EventSources will remain enabled even if there aren't any consuming EventListeners.
 
                 // Check to see if we should enable the event listener.
-                string logDirectory = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable(PerfLogDirEnvVar));
+                string logDirectory = Environment.GetEnvironmentVariable(PerfLogDirEnvVar);
 
-                if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(logDirectory).Exists)
+                if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(FileUtilities.TrimAndStripAnyQuotes(logDirectory)).Exists)
                 {
                     eventListener = new PerformanceLogEventListener();
                     eventListener.Initialize(logDirectory);
