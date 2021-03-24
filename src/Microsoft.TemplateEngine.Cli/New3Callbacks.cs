@@ -15,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Callback to be executed on first run of the template engine.
         /// </summary>
-        public Action<IEngineEnvironmentSettings, IInstaller> OnFirstRun { get; set; }
+        public Action<IEngineEnvironmentSettings> OnFirstRun { get; set; }
 
         /// <summary>
         /// Callback to be executed to restore a project.

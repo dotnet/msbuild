@@ -53,7 +53,6 @@ namespace Microsoft.TemplateEngine.Cli
             host = new ExtendedTemplateEngineHost(host, this);
             EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x), hivePath);
             _settingsLoader = (SettingsLoader)EnvironmentSettings.SettingsLoader;
-            Installer = new Installer(EnvironmentSettings);
             _templateCreator = new TemplateCreator(EnvironmentSettings);
             _aliasRegistry = new AliasRegistry(EnvironmentSettings);
             CommandName = commandName;
@@ -72,8 +71,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        internal static Installer Installer { get; set; } = null!;
-
         public string CommandName { get; }
 
         public string TemplateName => _commandInput.TemplateName;
@@ -82,7 +79,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args)
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings> onFirstRun, string[] args)
         {
             return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, null);
         }
@@ -112,7 +109,7 @@ namespace Microsoft.TemplateEngine.Cli
             return _entryMutex;
         }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings, IInstaller> onFirstRun, string[] args, string? hivePath)
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings> onFirstRun, string[] args, string? hivePath)
         {
             return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, hivePath);
         }
@@ -232,7 +229,7 @@ namespace Microsoft.TemplateEngine.Cli
                 _paths.DeleteDirectory(_paths.User.BaseDir);
             }
 
-            _callbacks.OnFirstRun?.Invoke(EnvironmentSettings, Installer);
+            _callbacks.OnFirstRun?.Invoke(EnvironmentSettings);
             EnvironmentSettings.SettingsLoader.Components.RegisterMany(typeof(New3Command).GetTypeInfo().Assembly.GetTypes());
         }
 
