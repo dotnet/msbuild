@@ -484,7 +484,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectFromHost(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrow(_nodeIdToPacketFactory.Remove((int)hostContext) && _nodeIdToPacketHandler.Remove((int)hostContext), "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
+            ErrorUtilities.VerifyThrow(_nodeIdToPacketFactory.ContainsKey((int)hostContext) && _nodeIdToPacketHandler.ContainsKey((int)hostContext), "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
+
+            _nodeIdToPacketFactory.Remove((int)hostContext);
+            _nodeIdToPacketHandler.Remove((int)hostContext);
         }
 
         /// <summary>

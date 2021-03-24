@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     int projectTargetKeyLocal = 1;
                     int projectIncrementKeyLocal;
                     // If we haven't seen this project before (by full path) then
-                    // allocate a new key for it and save it away. Otherwise, retrive it.
+                    // allocate a new key for it and save it away. Otherwise, retrieve it.
                     if (!_projectKey.TryGetValue(e.ProjectFile, out projectIncrementKeyLocal))
                     {
                         _projectIncrementKey++;

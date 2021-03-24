@@ -852,7 +852,7 @@ namespace Microsoft.Build.Evaluation
                             // Defaults to false
                             _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out NGen<bool> projectSupportsReturnsAttribute);
 
-                            _projectSupportsReturnsAttribute[currentProjectOrImport] = projectSupportsReturnsAttribute | (target.Returns != null);
+                            _projectSupportsReturnsAttribute[currentProjectOrImport] = projectSupportsReturnsAttribute || (target.Returns != null);
                             _targetElements.Add(target);
                             break;
                         case ProjectImportElement import:
