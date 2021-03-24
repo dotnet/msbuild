@@ -68,11 +68,6 @@
         <target state="new">Add reference action is not configured correctly in the template.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AddRefPostActionNoRefConfigured">
-        <source>No references configured to be added to project.</source>
-        <target state="new">No references configured to be added to project.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AddRefPostActionProjFileListHeader">
         <source>Project files found:</source>
         <target state="new">Project files found:</target>
@@ -95,11 +90,6 @@
       <trans-unit id="AddRefPostActionUnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
         <target state="new">Adding reference type {0} is not supported.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Alias">
-        <source>Alias</source>
-        <target state="new">Alias</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
@@ -132,11 +122,6 @@
       <trans-unit id="AliasExpansionError">
         <source>Error expanding aliases on input params.</source>
         <target state="new">Error expanding aliases on input params.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AliasHelp">
-        <source>Creates, updates, or deletes the named alias. The alias value is the remainder of the command. If extra args files are specified, the alias value includes their expansions.</source>
-        <target state="new">Creates, updates, or deletes the named alias. The alias value is the remainder of the command. If extra args files are specified, the alias value includes their expansions.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasName">
@@ -206,11 +191,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">Allow scripts to run</target>
         <note />
       </trans-unit>
-      <trans-unit id="AmbiguousInputTemplateName">
-        <source>Unable to determine the desired template from the input template name: {0}.</source>
-        <target state="new">Unable to determine the desired template from the input template name: {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="AmbiguousLanguageHint">
         <source>Re-run the command specifying the language to use with --language option.</source>
         <target state="new">Re-run the command specifying the language to use with --language option.</target>
@@ -246,11 +226,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">The package {0} is not correct, uninstall it and report the issue to the package author.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AmbiguousTemplatesUninstallationHint">
-        <source>To check the uninstallation command for the template, run dotnet {0} -u.</source>
-        <target state="new">To check the uninstallation command for the template, run dotnet {0} -u.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ArgsFileNotFound">
         <source>The specified extra args file does not exist: {0}.</source>
         <target state="new">The specified extra args file does not exist: {0}.</target>
@@ -281,24 +256,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BadLocaleError">
-        <source>Invalid format for input locale: "{0}". Example valid formats: [en] [en-US].</source>
-        <target state="new">Invalid format for input locale: "{0}". Example valid formats: [en] [en-US].</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="BadPackageSpec">
-        <source>Could not install "{0}".</source>
-        <target state="new">Could not install "{0}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
         <target state="new">Change</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CheckingForUpdates">
-        <source>Checking for updates for {0}...</source>
-        <target state="new">Checking for updates for {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
@@ -388,34 +348,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">Configured Value: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ContinueQuestion">
-        <source>Continue?</source>
-        <target state="new">Continue?</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CouldNotFindItemToInstall">
-        <source>Couldn't find item to install: "{0}".</source>
-        <target state="new">Couldn't find item to install: "{0}".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CouldntDetermineFilesToRestore">
         <source>Couldn't determine files to restore.</source>
         <target state="new">Couldn't determine files to restore.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CouldntUninstall">
-        <source>Could not find something to uninstall called '{0}'.</source>
-        <target state="new">Could not find something to uninstall called '{0}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CreateAliasHelp">
-        <source>Creates an alias for the specified template.</source>
-        <target state="new">Creates an alias for the specified template.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CreateDirectoryHelp">
-        <source>Indicates whether to create a directory for the generated content.</source>
-        <target state="new">Indicates whether to create a directory for the generated content.</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateFailed">
@@ -443,11 +378,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       <trans-unit id="DefaultValue">
         <source>Default: {0}</source>
         <target state="new">Default: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DefaultValuePlusSwitchWithoutValueDefault">
-        <source>Default: {0} / (*) {1}</source>
-        <target state="new">Default: {0} / (*) {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
@@ -482,16 +412,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
     dotnet {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ExtraArgsFileHelp">
-        <source>Specifies a file containing additional parameters.</source>
-        <target state="new">Specifies a file containing additional parameters.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Factory">
-        <source>Factory</source>
-        <target state="new">Factory</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
         <target state="new">File actions would have been taken:</target>
@@ -512,11 +432,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">Error: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="GenericPlaceholderTemplateContextError">
-        <source>Cannot retrieve the type for {0}.</source>
-        <target state="new">Cannot retrieve the type for {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="GenericWarning">
         <source>Warning: {0}</source>
         <target state="new">Warning: {0}</target>
@@ -527,41 +442,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">Getting ready...</target>
         <note />
       </trans-unit>
-      <trans-unit id="Id">
-        <source>Id</source>
-        <target state="new">Id</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallDescriptor_NotFound">
-        <source>Could not find install descriptor for template: {0}</source>
-        <target state="new">Could not find install descriptor for template: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallFailed">
-        <source>"{0}" could not be installed.
-{1}.</source>
-        <target state="new">"{0}" could not be installed.
-{1}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InstallHelp">
-        <source>Installs a source or a template pack.</source>
-        <target state="new">Installs a source or a template pack.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallSuccessful">
-        <source>"{0}" was installed successfully.</source>
-        <target state="new">"{0}" was installed successfully.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstalledItems">
-        <source>Currently installed items:</source>
-        <target state="new">Currently installed items:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallingUpdates">
-        <source>Installing updates...</source>
-        <target state="new">Installing updates...</target>
+        <source>Installs a source or a template package.</source>
+        <target state="new">Installs a source or a template package.</target>
         <note />
       </trans-unit>
       <trans-unit id="InteractiveHelp">
@@ -599,11 +482,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">For more information, run '{0}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidParameterValues">
-        <source>Error: Invalid values for option(s) {0} for template {1}.</source>
-        <target state="new">Error: Invalid values for option(s) {0} for template {1}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidTemplateParameterValues">
         <source>Error: Invalid option(s):</source>
         <target state="new">Error: Invalid option(s):</target>
@@ -624,11 +502,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">Lists templates containing the specified template name. If no name is specified, lists all templates.</target>
         <note />
       </trans-unit>
-      <trans-unit id="LocaleHelp">
-        <source>The locale to use.</source>
-        <target state="new">The locale to use.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
         <target state="new">Mandatory option {0} missing for template {1}.</target>
@@ -642,16 +515,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
         <target state="new">Mount Point Factories</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="MountPoints">
-        <source>Mount Points</source>
-        <target state="new">Mount Points</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="MultipleArgsSpecifiedError">
-        <source>Template name is the only allowed argument. Invalid argument: {0}.</source>
-        <target state="new">Template name is the only allowed argument. Invalid argument: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NameOfOutput">
@@ -674,24 +537,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">No Primary Outputs to restore.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoTemplatesMatchName">
-        <source>No templates matched the input template name: {0}.</source>
-        <target state="new">No templates matched the input template name: {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
         <target state="new">No templates found matching: {0}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoUpdates">
-        <source>No updates were found.</source>
-        <target state="new">No updates were found.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoUpdatesFound">
-        <source>No updates found.</source>
-        <target state="new">No updates found.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetSourceHelp">
@@ -731,19 +579,9 @@ The supported columns are: language, tags, author, type.</target>
         <target state="new">Filters the templates based on the tag. Applies to --search and --list.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OptionVariantAlreadyDefined">
-        <source>Option variant {0} for canonical {1} was already defined for canonical {2}.</source>
-        <target state="new">Option variant {0} for canonical {1} was already defined for canonical {2}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
         <source>Error during synchronization with the Optional SDK Workloads.</source>
         <target state="new">Error during synchronization with the Optional SDK Workloads.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OptionalWorkloadsSynchronized">
-        <source>The list of templates was synchronized with the Optional SDK Workloads.</source>
-        <target state="new">The list of templates was synchronized with the Optional SDK Workloads.</target>
         <note />
       </trans-unit>
       <trans-unit id="Options">
@@ -759,11 +597,6 @@ The supported columns are: language, tags, author, type.</target>
       <trans-unit id="Overwrite">
         <source>Overwrite</source>
         <target state="new">Overwrite</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Parent">
-        <source>Parent</source>
-        <target state="new">Parent</target>
         <note />
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
@@ -814,11 +647,6 @@ The supported columns are: language, tags, author, type.</target>
       <trans-unit id="ProcessingPostActions">
         <source>Processing post-creation actions...</source>
         <target state="new">Processing post-creation actions...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="QuietModeHelp">
-        <source>Doesn't output any status information.</source>
-        <target state="new">Doesn't output any status information.</target>
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
@@ -896,19 +724,9 @@ Examples:
         <target state="new">To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</target>
         <note />
       </trans-unit>
-      <trans-unit id="SearchResultNoMatches">
-        <source>No matches found</source>
-        <target state="new">No matches found</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SearchResultSourceIndicator">
         <source>Matches from template source: {0}</source>
         <target state="new">Matches from template source: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchResultTemplateInfo">
-        <source>Template name "{0}" ({1}) from author "{2}" in pack {3}</source>
-        <target state="new">Template name "{0}" ({1}) from author "{2}" in pack {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
@@ -919,11 +737,6 @@ Examples:
       <trans-unit id="SettingsReadError">
         <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
         <target state="new">Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ShowAliasesHelp">
-        <source>Displays the value of the named alias, or all aliases if no name is specified.</source>
-        <target state="new">Displays the value of the named alias, or all aliases if no name is specified.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsAllTemplates">
@@ -941,26 +754,6 @@ Examples:
         <target state="new">The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</target>
         <note />
       </trans-unit>
-      <trans-unit id="SwitchWithoutValueDefaultFootnote">
-        <source>* Indicates the value used if the switch is provided without a value.</source>
-        <target state="new">* Indicates the value used if the switch is provided without a value.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TemplateArgumentHelp">
-        <source>The template to instantiate.</source>
-        <target state="new">The template to instantiate.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TemplateMultiplePartialNameMatches">
-        <source>The following templates partially match the input. Be more specific with the template name and/or language.</source>
-        <target state="new">The following templates partially match the input. Be more specific with the template name and/or language.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="TemplateUpdateError">
-        <source>An error occured updating templates for: {0}</source>
-        <target state="new">An error occured updating templates for: {0}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Templates">
         <source>Templates</source>
         <target state="new">Templates</target>
@@ -974,6 +767,171 @@ Examples:
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
         <source>{0} template(s) partially matched, but failed on {1}.</source>
         <target state="new">{0} template(s) partially matched, but failed on {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Error_PackageForTemplateNotFound">
+        <source>Could not find the template package containing template '{0}'</source>
+        <target state="new">Could not find the template package containing template '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Error_PackageNameContainsTemplates">
+        <source>  {0} (contains {1} templates)</source>
+        <target state="new">  {0} (contains {1} templates)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Error_PackageNotFound">
+        <source>The template package '{0}' is not found</source>
+        <target state="new">The template package '{0}' is not found</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Error_TemplateIncludedToPackages">
+        <source>The template '{0}' is included to the packages:</source>
+        <target state="new">The template '{0}' is included to the packages:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Info_PackageName">
+        <source>  {0}</source>
+        <target state="new">  {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Info_PackageNameVersion">
+        <source>  {0}, version: {1}</source>
+        <target state="new">  {0}, version: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall">
+        <source>Found no template packages to install</source>
+        <target state="new">Found no template packages to install</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled">
+        <source>The following template packages will be installed:</source>
+        <target state="new">The following template packages will be installed:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Uninstall_Error_GenericError">
+        <source>Failed to uninstall {0}, reason: {1}.</source>
+        <target state="new">Failed to uninstall {0}, reason: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint">
+        <source>To list installed template packages, use dotnet {0} -u</source>
+        <target state="new">To list installed template packages, use dotnet {0} -u</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint">
+        <source>To uninstall the template package, use dotnet {0} -u {1}</source>
+        <target state="new">To uninstall the template package, use dotnet {0} -u {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader">
+        <source>Details:</source>
+        <target state="new">Details:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Uninstall_Info_InstalledItems">
+        <source>Currently installed items:</source>
+        <target state="new">Currently installed items:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Uninstall_Info_Success">
+        <source>Success: {0} was uninstalled.</source>
+        <target state="new">Success: {0} was uninstalled.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint">
+        <source>Uninstall Command:</source>
+        <target state="new">Uninstall Command:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Error_GenericError">
+        <source>Failed to check update for {0}: {1}.</source>
+        <target state="new">Failed to check update for {0}: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds">
+        <source>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</source>
+        <target state="new">Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Error_PackageNotFound">
+        <source>Failed to check update for {0}: the package is not available in configured NuGet feeds.</source>
+        <target state="new">Failed to check update for {0}: the package is not available in configured NuGet feeds.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Error_PackageNotSupported">
+        <source>Failed to check update for {0}: the package is not supported.</source>
+        <target state="new">Failed to check update for {0}: the package is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate">
+        <source>All template packages are up-to-date.</source>
+        <target state="new">All template packages are up-to-date.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Info_InstallCommand">
+        <source>    install command: dotnet {0} -i {1}</source>
+        <target state="new">    install command: dotnet {0} -i {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated">
+        <source>The following template packages will be updated:</source>
+        <target state="new">The following template packages will be updated:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Update_Info_UpdateAvailable">
+        <source>An update for template package '{0}' is available.</source>
+        <target state="new">An update for template package '{0}' is available.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError">
+        <source>Failed to initialize NuGet credential service, details: {0}.</source>
+        <target state="new">Failed to initialize NuGet credential service, details: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled">
+        <source>{0} is already installed</source>
+        <target state="new">{0} is already installed</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_DownloadFailed">
+        <source>{0} could not be installed, download failed</source>
+        <target state="new">{0} could not be installed, download failed</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_GenericError">
+        <source>{0} could not be installed</source>
+        <target state="new">{0} could not be installed</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds">
+        <source>{0} could not be installed, no NuGet feeds are configured or they are invalid</source>
+        <target state="new">{0} could not be installed, no NuGet feeds are configured or they are invalid</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_InvalidPackage">
+        <source>Failed to install {0}, failed to uninstall previous version of the template package</source>
+        <target state="new">Failed to install {0}, failed to uninstall previous version of the template package</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_PackageNotFound">
+        <source>{0} could not be installed, the package does not exist</source>
+        <target state="new">{0} could not be installed, the package does not exist</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_UninstallFailed">
+        <source>Failed to install {0}, the template package is invalid</source>
+        <target state="new">Failed to install {0}, the template package is invalid</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest">
+        <source>{0} is not supported</source>
+        <target state="new">{0} is not supported</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_lnstall_Info_Success">
+        <source>Success: {0} installed the following templates:</source>
+        <target state="new">Success: {0} installed the following templates:</target>
         <note />
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
@@ -992,18 +950,8 @@ Examples:
         <note />
       </trans-unit>
       <trans-unit id="UninstallHelp">
-        <source>Uninstalls a source or a template pack.</source>
-        <target state="new">Uninstalls a source or a template pack.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallListDetailsHeader">
-        <source>Details:</source>
-        <target state="new">Details:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallListUninstallCommand">
-        <source>Uninstall Command:</source>
-        <target state="new">Uninstall Command:</target>
+        <source>Uninstalls a source or a template package.</source>
+        <target state="new">Uninstalls a source or a template package.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
@@ -1012,58 +960,13 @@ Examples:
         <note />
       </trans-unit>
       <trans-unit id="UpdateApplyCommandHelp">
-        <source>Check the currently installed template packs for update, and install the updates.</source>
-        <target state="new">Check the currently installed template packs for update, and install the updates.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateApplyStartMessage">
-        <source>Updating...</source>
-        <target state="new">Updating...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateApplySuccessMessage">
-        <source>...Update succeeded</source>
-        <target state="new">...Update succeeded</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateAvailable">
-        <source>An update for template pack {0} is available.</source>
-        <target state="new">An update for template pack {0} is available.</target>
+        <source>Check the currently installed template packages for update, and install the updates.</source>
+        <target state="new">Check the currently installed template packages for update, and install the updates.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateCheckCommandHelp">
-        <source>Check the currently installed template packs for updates.</source>
-        <target state="new">Check the currently installed template packs for updates.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateCheckError">
-        <source>An error occured checking for {0} template updates.</source>
-        <target state="new">An error occured checking for {0} template updates.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateCheck_InstallCommand">
-        <source>    install command: dotnet {0} -i {1}</source>
-        <target state="new">    install command: dotnet {0} -i {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateCheck_UnknownError">
-        <source>An error occured checking for updates for template pack {0}</source>
-        <target state="new">An error occured checking for updates for template pack {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateCheckerNotAvailable">
-        <source>No update checker(s) for the following:</source>
-        <target state="new">No update checker(s) for the following:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdateHelp">
-        <source>Update matching templates.</source>
-        <target state="new">Update matching templates.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UpdatesAvailableListHeader">
-        <source>Updates are available for the following:</source>
-        <target state="new">Updates are available for the following:</target>
+        <source>Check the currently installed template packages for updates.</source>
+        <target state="new">Check the currently installed template packages for updates.</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">
@@ -1074,11 +977,6 @@ Examples:
       <trans-unit id="WhetherToAllowScriptsToRun">
         <source>Specify if post action scripts should run.</source>
         <target state="new">Specify if post action scripts should run.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WillCreateTemplate">
-        <source>About to create: </source>
-        <target state="new">About to create: </target>
         <note />
       </trans-unit>
     </body>

@@ -117,14 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Alias" xml:space="preserve">
-    <value>Alias</value>
-  </data>
   <data name="AliasCreated" xml:space="preserve">
     <value>Successfully created alias named '{0}' with value '{1}'</value>
-  </data>
-  <data name="AmbiguousInputTemplateName" xml:space="preserve">
-    <value>Unable to determine the desired template from the input template name: {0}.</value>
   </data>
   <data name="ArgsFileNotFound" xml:space="preserve">
     <value>The specified extra args file does not exist: {0}.</value>
@@ -138,32 +132,14 @@
   <data name="Author" xml:space="preserve">
     <value>Author: {0}</value>
   </data>
-  <data name="BadLocaleError" xml:space="preserve">
-    <value>Invalid format for input locale: "{0}". Example valid formats: [en] [en-US].</value>
-  </data>
-  <data name="BadPackageSpec" xml:space="preserve">
-    <value>Could not install "{0}".</value>
-  </data>
   <data name="Change" xml:space="preserve">
     <value>Change</value>
-  </data>
-  <data name="CheckingForUpdates" xml:space="preserve">
-    <value>Checking for updates for {0}...</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
     <value>Template Instantiation Commands for .NET Core CLI</value>
   </data>
   <data name="ConfiguredValue" xml:space="preserve">
     <value>Configured Value: {0}</value>
-  </data>
-  <data name="ContinueQuestion" xml:space="preserve">
-    <value>Continue?</value>
-  </data>
-  <data name="CreateAliasHelp" xml:space="preserve">
-    <value>Creates an alias for the specified template.</value>
-  </data>
-  <data name="CreateDirectoryHelp" xml:space="preserve">
-    <value>Indicates whether to create a directory for the generated content.</value>
   </data>
   <data name="CreateFailed" xml:space="preserve">
     <value>Template "{0}" could not be created.
@@ -190,48 +166,23 @@
   <data name="DisplaysHelp" xml:space="preserve">
     <value>Displays help for this command.</value>
   </data>
-  <data name="ExtraArgsFileHelp" xml:space="preserve">
-    <value>Specifies a file containing additional parameters.</value>
-  </data>
-  <data name="Factory" xml:space="preserve">
-    <value>Factory</value>
-  </data>
   <data name="ForcesTemplateCreation" xml:space="preserve">
     <value>Forces content to be generated even if it would change existing files.</value>
   </data>
   <data name="Generators" xml:space="preserve">
     <value>Generators</value>
   </data>
-  <data name="GenericPlaceholderTemplateContextError" xml:space="preserve">
-    <value>Cannot retrieve the type for {0}.</value>
-  </data>
   <data name="GettingReady" xml:space="preserve">
     <value>Getting ready...</value>
   </data>
-  <data name="Id" xml:space="preserve">
-    <value>Id</value>
-  </data>
-  <data name="InstallFailed" xml:space="preserve">
-    <value>"{0}" could not be installed.
-{1}.</value>
-  </data>
   <data name="InstallHelp" xml:space="preserve">
-    <value>Installs a source or a template pack.</value>
-  </data>
-  <data name="InstallingUpdates" xml:space="preserve">
-    <value>Installing updates...</value>
-  </data>
-  <data name="InstallSuccessful" xml:space="preserve">
-    <value>"{0}" was installed successfully.</value>
+    <value>Installs a source or a template package.</value>
   </data>
   <data name="InvalidInputSwitch" xml:space="preserve">
     <value>Invalid input switch:</value>
   </data>
   <data name="InvalidParameterDetail" xml:space="preserve">
     <value>'{1}' is not a valid value for {0}.</value>
-  </data>
-  <data name="InvalidParameterValues" xml:space="preserve">
-    <value>Error: Invalid values for option(s) {0} for template {1}.</value>
   </data>
   <data name="InvalidTemplateParameterValues" xml:space="preserve">
     <value>Error: Invalid option(s):</value>
@@ -245,20 +196,11 @@
   <data name="ListsTemplates" xml:space="preserve">
     <value>Lists templates containing the specified template name. If no name is specified, lists all templates.</value>
   </data>
-  <data name="LocaleHelp" xml:space="preserve">
-    <value>The locale to use.</value>
-  </data>
   <data name="MissingRequiredParameter" xml:space="preserve">
     <value>Mandatory option {0} missing for template {1}.</value>
   </data>
   <data name="MountPointFactories" xml:space="preserve">
     <value>Mount Point Factories</value>
-  </data>
-  <data name="MountPoints" xml:space="preserve">
-    <value>Mount Points</value>
-  </data>
-  <data name="MultipleArgsSpecifiedError" xml:space="preserve">
-    <value>Template name is the only allowed argument. Invalid argument: {0}.</value>
   </data>
   <data name="NameOfOutput" xml:space="preserve">
     <value>The name for the output being created. If no name is specified, the name of the output directory is used.</value>
@@ -272,35 +214,17 @@
   <data name="NoTemplatesMatchingInputParameters" xml:space="preserve">
     <value>No templates found matching: {0}.</value>
   </data>
-  <data name="OptionalWorkloadsSynchronized" xml:space="preserve">
-    <value>The list of templates was synchronized with the Optional SDK Workloads.</value>
-  </data>
   <data name="OptionalWorkloadsSyncFailed" xml:space="preserve">
     <value>Error during synchronization with the Optional SDK Workloads.</value>
   </data>
-  <data name="NoTemplatesMatchName" xml:space="preserve">
-    <value>No templates matched the input template name: {0}.</value>
-  </data>
-  <data name="NoUpdates" xml:space="preserve">
-    <value>No updates were found.</value>
-  </data>
   <data name="Options" xml:space="preserve">
     <value>Options:</value>
-  </data>
-  <data name="OptionVariantAlreadyDefined" xml:space="preserve">
-    <value>Option variant {0} for canonical {1} was already defined for canonical {2}.</value>
   </data>
   <data name="OutputPath" xml:space="preserve">
     <value>Location to place the generated output.</value>
   </data>
   <data name="Overwrite" xml:space="preserve">
     <value>Overwrite</value>
-  </data>
-  <data name="Parent" xml:space="preserve">
-    <value>Parent</value>
-  </data>
-  <data name="QuietModeHelp" xml:space="preserve">
-    <value>Doesn't output any status information.</value>
   </data>
   <data name="RerunCommandAndPassForceToCreateAnyway" xml:space="preserve">
     <value>Rerun the command and pass --force to accept and create.</value>
@@ -320,12 +244,6 @@
   <data name="ColumnNameTags" xml:space="preserve">
     <value>Tags</value>
   </data>
-  <data name="TemplateArgumentHelp" xml:space="preserve">
-    <value>The template to instantiate.</value>
-  </data>
-  <data name="TemplateMultiplePartialNameMatches" xml:space="preserve">
-    <value>The following templates partially match the input. Be more specific with the template name and/or language.</value>
-  </data>
   <data name="Templates" xml:space="preserve">
     <value>Templates</value>
   </data>
@@ -338,14 +256,8 @@
   <data name="UnknownChangeKind" xml:space="preserve">
     <value>Unknown Change</value>
   </data>
-  <data name="UpdateAvailable" xml:space="preserve">
-    <value>An update for template pack {0} is available.</value>
-  </data>
-  <data name="UpdateHelp" xml:space="preserve">
-    <value>Update matching templates.</value>
-  </data>
-  <data name="WillCreateTemplate" xml:space="preserve">
-    <value>About to create: </value>
+  <data name="TemplatesPackageCoordinator_Update_Info_UpdateAvailable" xml:space="preserve">
+    <value>An update for template package '{0}' is available.</value>
   </data>
   <data name="NoPrimaryOutputsToRestore" xml:space="preserve">
     <value>No Primary Outputs to restore.</value>
@@ -409,19 +321,16 @@
     <value>This template contains technologies from parties other than Microsoft, see {0} for details.</value>
   </data>
   <data name="UninstallHelp" xml:space="preserve">
-    <value>Uninstalls a source or a template pack.</value>
+    <value>Uninstalls a source or a template package.</value>
   </data>
-  <data name="CouldntUninstall" xml:space="preserve">
-    <value>Could not find something to uninstall called '{0}'.</value>
+  <data name="TemplatesPackageCoordinator_Uninstall_Error_GenericError" xml:space="preserve">
+    <value>Failed to uninstall {0}, reason: {1}.</value>
   </data>
   <data name="InvalidParameterDefault" xml:space="preserve">
     <value>The default value '{1}' is not a valid value for {0}.</value>
   </data>
   <data name="AddRefPostActionFailed" xml:space="preserve">
     <value>Failed to add reference {0} to project file {1}</value>
-  </data>
-  <data name="AddRefPostActionNoRefConfigured" xml:space="preserve">
-    <value>No references configured to be added to project.</value>
   </data>
   <data name="AddRefPostActionAddProjectRef" xml:space="preserve">
     <value>Adding a project reference. Running dotnet add {0} reference {1}</value>
@@ -452,17 +361,11 @@
   <data name="AddRefPostActionProjFileListHeader" xml:space="preserve">
     <value>Project files found:</value>
   </data>
-  <data name="AliasHelp" xml:space="preserve">
-    <value>Creates, updates, or deletes the named alias. The alias value is the remainder of the command. If extra args files are specified, the alias value includes their expansions.</value>
-  </data>
   <data name="AliasName" xml:space="preserve">
     <value>Alias Name</value>
   </data>
   <data name="AliasValue" xml:space="preserve">
     <value>Alias Value</value>
-  </data>
-  <data name="ShowAliasesHelp" xml:space="preserve">
-    <value>Displays the value of the named alias, or all aliases if no name is specified.</value>
   </data>
   <data name="AliasNameContainsInvalidCharacters" xml:space="preserve">
     <value>Alias names can only contain letters, numbers, underscores, and periods.</value>
@@ -530,9 +433,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="AddProjToSlnPostActionUnresolvedSlnFile" xml:space="preserve">
     <value>Unable to determine which solution file to add the reference to.</value>
   </data>
-  <data name="CouldNotFindItemToInstall" xml:space="preserve">
-    <value>Couldn't find item to install: "{0}".</value>
-  </data>
   <data name="UnableToSetPermissions" xml:space="preserve">
     <value>Unable to apply permissions {0} to "{1}".</value>
   </data>
@@ -545,23 +445,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="Version" xml:space="preserve">
     <value>Version:</value>
   </data>
-  <data name="InstalledItems" xml:space="preserve">
+  <data name="TemplatesPackageCoordinator_Uninstall_Info_InstalledItems" xml:space="preserve">
     <value>Currently installed items:</value>
-  </data>
-  <data name="NoUpdatesFound" xml:space="preserve">
-    <value>No updates found.</value>
-  </data>
-  <data name="UpdatesAvailableListHeader" xml:space="preserve">
-    <value>Updates are available for the following:</value>
-  </data>
-  <data name="UpdateCheckError" xml:space="preserve">
-    <value>An error occured checking for {0} template updates.</value>
-  </data>
-  <data name="TemplateUpdateError" xml:space="preserve">
-    <value>An error occured updating templates for: {0}</value>
-  </data>
-  <data name="UpdateCheckerNotAvailable" xml:space="preserve">
-    <value>No update checker(s) for the following:</value>
   </data>
   <data name="SettingsReadError" xml:space="preserve">
     <value>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</value>
@@ -578,14 +463,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="NuGetSourceHelp" xml:space="preserve">
     <value>Specifies a NuGet source to use during install.</value>
   </data>
-  <data name="DefaultValuePlusSwitchWithoutValueDefault" xml:space="preserve">
-    <value>Default: {0} / (*) {1}</value>
-  </data>
   <data name="DefaultIfOptionWithoutValue" xml:space="preserve">
     <value>Default if option is provided without a value: {0}</value>
-  </data>
-  <data name="SwitchWithoutValueDefaultFootnote" xml:space="preserve">
-    <value>* Indicates the value used if the switch is provided without a value.</value>
   </data>
   <data name="DryRunDescription" xml:space="preserve">
     <value>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</value>
@@ -605,20 +484,17 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="CouldntDetermineFilesToRestore" xml:space="preserve">
     <value>Couldn't determine files to restore.</value>
   </data>
-  <data name="UninstallListDetailsHeader" xml:space="preserve">
+  <data name="TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader" xml:space="preserve">
     <value>Details:</value>
   </data>
-  <data name="UninstallListUninstallCommand" xml:space="preserve">
+  <data name="TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint" xml:space="preserve">
     <value>Uninstall Command:</value>
   </data>
-  <data name="InstallDescriptor_NotFound" xml:space="preserve">
-    <value>Could not find install descriptor for template: {0}</value>
+  <data name="TemplatesPackageCoordinator_Error_PackageForTemplateNotFound" xml:space="preserve">
+    <value>Could not find the template package containing template '{0}'</value>
   </data>
-  <data name="UpdateCheck_InstallCommand" xml:space="preserve">
+  <data name="TemplatesPackageCoordinator_Update_Info_InstallCommand" xml:space="preserve">
     <value>    install command: dotnet {0} -i {1}</value>
-  </data>
-  <data name="UpdateCheck_UnknownError" xml:space="preserve">
-    <value>An error occured checking for updates for template pack {0}</value>
   </data>
   <data name="SearchOnlineNotification" xml:space="preserve">
     <value>Searching for the templates...</value>
@@ -629,26 +505,14 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="SearchResultInstallHeader" xml:space="preserve">
     <value>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</value>
   </data>
-  <data name="SearchResultNoMatches" xml:space="preserve">
-    <value>No matches found</value>
-  </data>
-  <data name="SearchResultTemplateInfo" xml:space="preserve">
-    <value>Template name "{0}" ({1}) from author "{2}" in pack {3}</value>
-  </data>
   <data name="SearchResultSourceIndicator" xml:space="preserve">
     <value>Matches from template source: {0}</value>
   </data>
   <data name="UpdateApplyCommandHelp" xml:space="preserve">
-    <value>Check the currently installed template packs for update, and install the updates.</value>
-  </data>
-  <data name="UpdateApplyStartMessage" xml:space="preserve">
-    <value>Updating...</value>
-  </data>
-  <data name="UpdateApplySuccessMessage" xml:space="preserve">
-    <value>...Update succeeded</value>
+    <value>Check the currently installed template packages for update, and install the updates.</value>
   </data>
   <data name="UpdateCheckCommandHelp" xml:space="preserve">
-    <value>Check the currently installed template packs for updates.</value>
+    <value>Check the currently installed template packages for updates.</value>
   </data>
   <data name="InteractiveHelp" xml:space="preserve">
     <value>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</value>
@@ -734,9 +598,6 @@ Examples:
   <data name="AmbiguousTemplatesSamePackageHint" xml:space="preserve">
     <value>The package {0} is not correct, uninstall it and report the issue to the package author.</value>
   </data>
-  <data name="AmbiguousTemplatesUninstallationHint" xml:space="preserve">
-    <value>To check the uninstallation command for the template, run dotnet {0} -u.</value>
-  </data>
   <data name="ColumnNameIdentity" xml:space="preserve">
     <value>Identity</value>
   </data>
@@ -752,6 +613,21 @@ Examples:
   <data name="AmbiguousLanguageHint" xml:space="preserve">
     <value>Re-run the command specifying the language to use with --language option.</value>
   </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_DownloadFailed" xml:space="preserve">
+    <value>{0} could not be installed, download failed</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_GenericError" xml:space="preserve">
+    <value>{0} could not be installed</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds" xml:space="preserve">
+    <value>{0} could not be installed, no NuGet feeds are configured or they are invalid</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_PackageNotFound" xml:space="preserve">
+    <value>{0} could not be installed, the package does not exist</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest" xml:space="preserve">
+    <value>{0} is not supported</value>
+  </data>
   <data name="GenericError" xml:space="preserve">
     <value>Error: {0}</value>
   </data>
@@ -760,5 +636,67 @@ Examples:
   </data>
   <data name="OptionDescriptionTagFilter" xml:space="preserve">
     <value>Filters the templates based on the tag. Applies to --search and --list.</value>
+  <data name="TemplatesPackageCoordinator_Error_PackageNameContainsTemplates" xml:space="preserve">
+    <value>  {0} (contains {1} templates)</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Error_PackageNotFound" xml:space="preserve">
+    <value>The template package '{0}' is not found</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Error_TemplateIncludedToPackages" xml:space="preserve">
+    <value>The template '{0}' is included to the packages:</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Info_PackageName" xml:space="preserve">
+    <value>  {0}</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Info_PackageNameVersion" xml:space="preserve">
+    <value>  {0}, version: {1}</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall" xml:space="preserve">
+    <value>Found no template packages to install</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled" xml:space="preserve">
+    <value>The following template packages will be installed:</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled" xml:space="preserve">
+    <value>{0} is already installed</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_InvalidPackage" xml:space="preserve">
+    <value>Failed to install {0}, failed to uninstall previous version of the template package</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Error_UninstallFailed" xml:space="preserve">
+    <value>Failed to install {0}, the template package is invalid</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_lnstall_Info_Success" xml:space="preserve">
+    <value>Success: {0} installed the following templates:</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint" xml:space="preserve">
+    <value>To list installed template packages, use dotnet {0} -u</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint" xml:space="preserve">
+    <value>To uninstall the template package, use dotnet {0} -u {1}</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Uninstall_Info_Success" xml:space="preserve">
+    <value>Success: {0} was uninstalled.</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Update_Error_GenericError" xml:space="preserve">
+    <value>Failed to check update for {0}: {1}.</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds" xml:space="preserve">
+    <value>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Update_Error_PackageNotFound" xml:space="preserve">
+    <value>Failed to check update for {0}: the package is not available in configured NuGet feeds.</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Update_Error_PackageNotSupported" xml:space="preserve">
+    <value>Failed to check update for {0}: the package is not supported.</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate" xml:space="preserve">
+    <value>All template packages are up-to-date.</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated" xml:space="preserve">
+    <value>The following template packages will be updated:</value>
+  </data>
+  <data name="TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError" xml:space="preserve">
+    <value>Failed to initialize NuGet credential service, details: {0}.</value>
   </data>
 </root>
