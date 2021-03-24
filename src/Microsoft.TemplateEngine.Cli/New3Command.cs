@@ -444,19 +444,6 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.Success;
             }
 
-            try
-            {
-                bool isHiveUpdated = SyncOptionalWorkloads();
-                if (isHiveUpdated)
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.OptionalWorkloadsSynchronized);
-                }
-            }
-            catch (HiveSynchronizationException hiex)
-            {
-                Reporter.Error.WriteLine(hiex.Message.Bold().Red());
-            }
-
             bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
             try
             {
@@ -502,83 +489,6 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());
                 return CreationResultStatus.CreateFailed;
             }
-        }
-
-        private bool SyncOptionalWorkloads()
-        {
-            bool isHiveUpdated = false;
-            bool isCustomHive = _commandInput.HasDebuggingFlag("--debug:ephemeral-hive") || _commandInput.HasDebuggingFlag("--debug:custom-hive");
-
-            if (!isCustomHive)
-            {
-                string sdkVersion = EnvironmentSettings.Host.Version.Substring(1); // Host.Version (from SDK) has a leading "v" that need to remove.
-
-                try
-                {
-                    List<InstallationRequest> owInstallationRequests = new List<InstallationRequest>();
-                    Dictionary<string, string> owInstalledPkgs = new Dictionary<string, string>();  // packageId -> packageVersion
-                    HashSet<string> owSyncRequestsPackageIds = new HashSet<string>();
-                    TemplateLocator optionalWorkloadLocator = new TemplateLocator();
-                    string dotnetPath = Path.GetDirectoryName(Path.GetDirectoryName(_paths.Global.BaseDir));
-
-                    IReadOnlyCollection<IOptionalSdkTemplatePackageInfo> owPkgsToSync = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, dotnetPath);
-
-                    foreach (IInstallUnitDescriptor descriptor in _settingsLoader.InstallUnitDescriptorCache.Descriptors.Values)
-                    {
-                        if (descriptor.IsPartOfAnOptionalWorkload)
-                        {
-                            if (!descriptor.Details.TryGetValue("Version", out string pkgVersion))
-                            {
-                                pkgVersion = string.Empty;
-                            }
-                            owInstalledPkgs.Add(descriptor.Identifier, pkgVersion);
-                        }
-                    }
-
-                    foreach (IOptionalSdkTemplatePackageInfo packageInfo in owPkgsToSync)
-                    {
-                        owSyncRequestsPackageIds.Add(packageInfo.TemplatePackageId);
-
-                        if (!owInstalledPkgs.TryGetValue(packageInfo.TemplatePackageId, out string version) ||
-                            version != packageInfo.TemplateVersion)
-                        {
-                            isHiveUpdated = true;
-                            owInstallationRequests.Add(new InstallationRequest(packageInfo.Path, isPartOfAnOptionalWorkload: true));
-                        }
-                    }
-
-                    if (owInstallationRequests.Count != 0)
-                    {
-                        Installer.InstallPackages(owInstallationRequests);
-                    }
-
-                    // remove uninstalled Optional SDK Workload packages
-                    List<string> owRemovalRequestsPackageIds = new List<string>();
-                    foreach (string descriptorIdentifier in owInstalledPkgs.Keys)
-                    {
-                        if (!owSyncRequestsPackageIds.Contains(descriptorIdentifier))
-                        {
-                            owRemovalRequestsPackageIds.Add(descriptorIdentifier);
-                        }
-                    }
-
-                    if (owRemovalRequestsPackageIds.Count != 0)
-                    {
-                        isHiveUpdated = true;
-                        IEnumerable<string> failures = Installer.Uninstall(owRemovalRequestsPackageIds);
-                        foreach (string failure in failures)
-                        {
-                            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CouldntUninstall, failure));
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new HiveSynchronizationException(LocalizableStrings.OptionalWorkloadsSyncFailed, sdkVersion, ex);
-                }
-            }
-
-            return isHiveUpdated;
         }
 
         private bool Initialize()
