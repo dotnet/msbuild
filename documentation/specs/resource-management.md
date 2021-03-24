@@ -10,17 +10,17 @@ As a result, the standard guidance is to use only one multiproc option: MSBuild'
 
 ## Design
 
-`IBuildEngine` will be extended to allow a task to indicate to MSBuild that it would like to consume more than one CPU core (`BlockingWaitForCore`). These will be advisory only—a task can still do as much work as it desires with as many threads and processes as it desires.
+`IBuildEngine` will be extended to allow a task to indicate to MSBuild that it would like to consume more than one CPU core (`RequestCores`). These will be advisory only — a task can still do as much work as it desires with as many threads and processes as it desires.
 
 A cooperating task would limit its own parallelism to the number of CPU cores MSBuild can reserve for the requesting task.
 
-All resources acquired by a task will be automatically returned when the task's `Execute()` method returns, and a task can optionally return a subset by calling `ReleaseCores`.
+`RequestCores(int requestedCores)` will always return a positive value, possibly less than the parameter if that many cores are not available. If no cores are available at the moment, the call blocks until at least one becomes available. The first `RequestCores` call made by a task is guaranteed to be non-blocking, though, as at minimum it will return the "implicit" core allocated to the task itself. This leads to two conceptual ways of adopting the API. Either the task calls `RequestCores` once, passing the desired number of cores, and then limiting its parallelism to whatever the call returns. Or the task makes additional calls throughout its execution, perhaps as it discovers more work to do. In this second scenario the task must be OK with waiting for additional cores for a long time or even forever if the sum of allocated cores has exceeded the limit defined by the policy.
 
-MSBuild will respect core reservations given to tasks for tasks that opt into resource management only. If a project/task is eligible for execution, MSBuild will not wait until a resource is freed before starting execution of the new task. As a result, the machine can be oversubscribed, but only by a finite amount: the resource pool's core count.
+All resources acquired by a task will be automatically returned when the task's `Execute()` method returns, and a task can optionally return a subset by calling `ReleaseCores`. Additionally, all resources will be returned when the task calls `Reacquire` as this call is a signal to the scheduler that external tools have finished their work and the task can continue running. It does not matter when the resources where allocated - whether it was before or after calling `Yield` - they will all be released. Depending on the scheduling policy, freeing resources on `Reacquire` may prevent deadlocks.
 
-Task `Yield()`ing has no effect on the resources held by a task.
+The exact core reservation policy and its interaction with task execution scheduling is still TBD. The pool of resources explicitly allocated by tasks may be completely separate, i.e. MSBuild will not wait until a resource is freed before starting execution of new tasks. Or it may be partially or fully shared to prevent oversubscribing the machine. In general, `ReleaseCores` may cause a transition of a waiting task to a Ready state. And vice-versa, completing a task or calling `Yield` may unblock a pending `RequestCores` call issued by a task.
 
-## Example
+## Example 1
 
 In a 16-process build of a solution with 30 projects, 16 worker nodes are launched and begin executing work. Most block on dependencies to projects `A`, `B`, `C`, `D`, and `E`, so they don't have tasks running holding resources.
 
@@ -30,16 +30,12 @@ Task `Work` is called in project `A` with 25 inputs. It would like to run as man
 int allowedParallelism = BuildEngine8.RequestCores(Inputs.Count); // Inputs.Count == 25
 ```
 
-and gets `16`--the number of cores available to the build overall. Other tasks that do not call `RequestCores` do not affect this value.
+and gets up to `16`--the number of cores available to the build overall.
 
-While `A` runs `Work`, projects `B` and `C` run another task `Work2` that also calls `RequestCores` with a high value. Since `Work` in `A` has reserved all cores, the calls in `B` and `C` block, waiting on `Work` to release cores (or return).
+While `A` runs `Work`, projects `B` and `C` run another task `Work2` that also calls `RequestCores` with a high value. Since `Work` in `A` has reserved all cores, the calls in `B` and `C` may return only 1, indicating that the task should not be doing parallel work. Subsequent `RequestCores` may block, waiting on `Work` to release cores (or return).
 
-When `Work` returns, MSBuild automatically returns all resources reserved by the task to the pool. At that time `Work2`'s calls to `RequestCores` unblock, and
+When `Work` returns, MSBuild automatically returns all resources reserved by the task to the pool. At that time blocked `RequestCores` calls in `Work2` may unblock.
 
 ## Implementation
 
-The initial implementation of the system will use a Win32 [named semaphore](https://docs.microsoft.com/windows/win32/sync/semaphore-objects) to track resource use. This was the implementation of `MultiToolTask` in the VC++ toolchain and is a performant implementation of a counter that can be shared across processes.
-
-There is no guarantee of fair resource allocation. If multiple tasks are blocked in `RequestCores`, one of them will be unblocked when cores are released, but the returned cores may be split evenly, unevenly, or even entirely given to one task.
-
-On platforms where named semaphores are not supported (.NET Core MSBuild running on macOS, Linux, or other UNIXes), `RequestCores` will always return `1`. That is the minimum return value when the manager is fully functional, and hopefully will not dramatically overburden the machine. We will consider implementing full support using a cross-process semaphore (or an addition to the existing MSBuild communication protocol, if it isn't prohibitively costly to do the packet exchange and processing) on these platforms in the future.
+The `RequestCores` and `ReleaseCores` calls are marshaled back to the scheduler via newly introduced `INodePacket` implementations. The scheduler, having full view of the state of the system - i.e. number of build requests running, waiting, yielding, ..., number of cores explicitly allocated by individual tasks using the new API - is free to implement an arbitrary core allocation policy. In the initial implementation the policy will be controlled by a couple of environment variables to make it easy to test different settings.
