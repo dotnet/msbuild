@@ -1,8 +1,9 @@
-using Microsoft.TemplateEngine.Cli.TemplateResolution;
-using Microsoft.TemplateEngine.Edge.Template;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -14,8 +15,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
     /// - implement corresponding FilterOption class
     /// - add filter to required collection in SupportedFilterOptions class to apply it to certain dotnet new --option
     /// Currenty supported action options and their filter options:
-    /// - --list|-l: --author, --language, --type, --baseline
-    /// - --search: --author, --language, --type, --baseline, --package
+    /// - --list|-l: --author, --language, --type, --baseline, --tag
+    /// - --search: --author, --language, --type, --baseline, --package, --tag
     /// Potentially the approach should be extended to --help and template instatiation actions.
     /// </remarks>
     internal static class SupportedFilterOptions
@@ -27,7 +28,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 AuthorFilter,
                 BaselineFilter,
                 LanguageFilter,
-                TypeFilter
+                TypeFilter,
+                TagFilter
             };
 
             SupportedSearchFilters = new List<FilterOption>()
@@ -36,17 +38,18 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 BaselineFilter,
                 LanguageFilter,
                 TypeFilter,
-                PackageFilter
+                PackageFilter,
+                TagFilter
             };
         }
 
         /// <summary>
-        /// Supported filters for --list option
+        /// Supported filters for --list option.
         /// </summary>
         internal static IReadOnlyCollection<FilterOption> SupportedListFilters { get; private set; }
 
         /// <summary>
-        /// Supported filters for --search option
+        /// Supported filters for --search option.
         /// </summary>
         internal static IReadOnlyCollection<FilterOption> SupportedSearchFilters { get; private set; }
 
@@ -77,6 +80,15 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             MismatchCriteria = resolutionResult => resolutionResult.HasLanguageMismatch
         };
 
+        internal static FilterOption TagFilter { get; } = new TemplateFilterOption()
+        {
+            Name = "tag",
+            FilterValue = command => command.TagFilter,
+            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.TagFilter),
+            TemplateMatchFilter = command => WellKnownSearchFilters.TagFilter(command.TagFilter),
+            MismatchCriteria = resolutionResult => resolutionResult.HasTagsMismatch
+        };
+
         internal static FilterOption TypeFilter { get; } = new TemplateFilterOption()
         {
             Name = "type",
@@ -94,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             PackageMatchFilter = command =>
             {
                 return (pack) =>
-                { 
+                {
                     if (string.IsNullOrWhiteSpace(command.PackageFilter))
                     {
                         return true;

@@ -145,7 +145,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--author", LocalizableStrings.OptionDescriptionAuthorFilter, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionAuthorFilter, "AUTHOR")),
                     Create.Option("--package", LocalizableStrings.OptionDescriptionPackageFilter, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionPackageFilter, "PACKAGE")),
                     Create.Option("--columns", LocalizableStrings.OptionDescriptionColumns, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionColumns, "COLUMNS_LIST")),
-                    Create.Option("--columns-all", LocalizableStrings.OptionDescriptionColumnsAll, Accept.NoArguments())
+                    Create.Option("--columns-all", LocalizableStrings.OptionDescriptionColumnsAll, Accept.NoArguments()),
+                    Create.Option("--tag", LocalizableStrings.OptionDescriptionTagFilter, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionTagFilter, "TAG")),
                 };
             }
         }

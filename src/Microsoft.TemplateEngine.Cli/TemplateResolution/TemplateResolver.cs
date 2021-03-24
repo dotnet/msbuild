@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -75,8 +75,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
 
-            IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
-            (
+            IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
                 WellKnownSearchFilters.NameFilter(string.Empty)
@@ -119,16 +118,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             var listFilters = new List<Func<ITemplateInfo, MatchInfo?>>()
             {
-                WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
-                WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName)
+                WellKnownSearchFilters.NameFilter(commandInput.TemplateName)
             };
             listFilters.AddRange(SupportedFilterOptions.SupportedListFilters
                                     .OfType<TemplateFilterOption>()
                                     .Select(filter => filter.TemplateMatchFilter(commandInput)));
 
-
-            IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo
-            (
+            IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
                 listFilters.ToArray()
@@ -142,8 +138,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
-            IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo
-            (
+            IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
                 WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
@@ -156,7 +151,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             //for help if template name from CLI exactly matches the template name we should consider only that template
             IReadOnlyList<ITemplateMatchInfo> matchesWithExactDispositionsInNameFields = coreMatchedTemplates.Where(x => x.MatchDisposition.Any(y => NameFields.Contains(y.Location) && y.Kind == MatchKind.Exact)).ToList();
             if (matchesWithExactDispositionsInNameFields.Count > 0)
-            {               
+            {
                 coreMatchedTemplates = matchesWithExactDispositionsInNameFields;
             }
 
@@ -174,10 +169,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// Performs filtering of provided template list for --search option. Filters applied: template name filter, --search option filters, template parameters filter.
         /// Only templates that exactly match the filters are returned.
         /// </summary>
-        /// <param name="templateInfo">the list of templates to be filtered</param>
-        /// <param name="hostDataLoader">data of the host</param>
-        /// <param name="commandInput">new command data used in CLI</param>
-        /// <returns>filtered list of templates</returns>
+        /// <param name="templateInfo">the list of templates to be filtered.</param>
+        /// <param name="hostDataLoader">data of the host.</param>
+        /// <param name="commandInput">new command data used in CLI.</param>
+        /// <returns>filtered list of templates.</returns>
         public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForSearch(IEnumerable<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo.ToList());
@@ -201,21 +196,19 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// In case any templates in match above are matching name or short name exactly, only they are returned.
         /// The matches for default language and template specific parameters are added to the result.
         /// </summary>
-        /// <param name="templateInfo">the list of templates to be filtered</param>
-        /// <param name="hostDataLoader">data of the host</param>
-        /// <param name="commandInput">new command data used in CLI</param>
+        /// <param name="templateInfo">the list of templates to be filtered.</param>
+        /// <param name="hostDataLoader">data of the host.</param>
+        /// <param name="commandInput">new command data used in CLI.</param>
         /// <param name="defaultLanguage"></param>
-        /// <returns>the collection of the templates with their match dispositions (<seealso cref="ITemplateMatchInfo"/>). The templates that do not match are not added to the collection</returns>
+        /// <returns>the collection of the templates with their match dispositions (<seealso cref="ITemplateMatchInfo"/>). The templates that do not match are not added to the collection.</returns>
         public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
 
-            IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo
-            (
+            IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 TemplateListFilter.ExactMatchFilter,
                 WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
-                //WellKnownSearchFilters.ClassificationsFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.ContextFilter(commandInput.TypeFilter),
                 WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName)
@@ -290,8 +283,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Adds match dispositions to the templates based on matches between the default language and the language defined in template.
         /// </summary>
-        /// <param name="listToFilter">the templates to match</param>
-        /// <param name="language">default language</param>
+        /// <param name="listToFilter">the templates to match.</param>
+        /// <param name="language">default language.</param>
         private static void AddDefaultLanguageMatchingToTemplates(IReadOnlyCollection<ITemplateMatchInfo> listToFilter, string language)
         {
             if (string.IsNullOrEmpty(language))
@@ -330,9 +323,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Adds match dispositions to the templates based on matches between the input parameters and the template specific parameters.
         /// </summary>
-        /// <param name="templatesToFilter">the templates to match</param>
+        /// <param name="templatesToFilter">the templates to match.</param>
         /// <param name="hostDataLoader"></param>
-        /// <param name="commandInput">the command input used in CLI</param>
+        /// <param name="commandInput">the command input used in CLI.</param>
         private static void AddParameterMatchingToTemplates(IReadOnlyCollection<ITemplateMatchInfo> templatesToFilter, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
             foreach (ITemplateMatchInfo template in templatesToFilter)
@@ -443,7 +436,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                         }
                     }
 
-                    foreach (string unmatchedParamName in commandInput.RemainingParameters.Keys.Where(x => !x.Contains(':')))   // filter debugging params
+                    foreach (string unmatchedParamName in commandInput.RemainingParameters.Keys.Where(x => !x.Contains(':'))) // filter debugging params
                     {
                         if (commandInput.TryGetCanonicalNameForVariant(unmatchedParamName, out string canonical))
                         {

@@ -740,6 +740,11 @@ The default list of columns shown without the option for --search: template name
         <target state="new">Searches for the templates in configured remote sources.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionTagFilter">
+        <source>Filters the templates based on the template tag (classification). It is possible to specify multiple tag filters. Applicable only with --search or --list | -l option.</source>
+        <target state="new">Filters the templates based on the template tag (classification). It is possible to specify multiple tag filters. Applicable only with --search or --list | -l option.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionVariantAlreadyDefined">
         <source>Option variant {0} for canonical {1} was already defined for canonical {2}.</source>
         <target state="new">Option variant {0} for canonical {1} was already defined for canonical {2}.</target>

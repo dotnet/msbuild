@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -200,6 +203,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool SkipUpdateCheck => _parseResult.HasAppliedOption(new[] { _commandName, "skip-update-check" });
 
+        public string TagFilter => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "tag" });
+
         public string TemplateName => _templateNameArg;
 
         public IList<string> ToInstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "install" })?.ToList();
@@ -258,7 +263,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             bool needsReparse = false;
 
             if (ExtraArgsFileNames != null && ExtraArgsFileNames.Count > 0)
-            {   // add the extra args to the _args and force a reparse
+            {
+                // add the extra args to the _args and force a reparse
                 // This cannot adjust the template name, so no need to re-check here.
                 IReadOnlyList<string> extraArgs = AppExtensions.CreateArgListFromAdditionalFiles(ExtraArgsFileNames);
                 List<string> allArgs = RemoveExtraArgsTokens(_args);
@@ -329,7 +335,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     string firstVariant = paramInfo.Value[0];
 
                     // This returns true if the arg was specified, irrespective of whether it has a value.
-                    // If the arg was specified, it goes in the list. 
+                    // If the arg was specified, it goes in the list.
                     // Null valued args are important - they facilitate bools & other value-optional args.
                     if (_parseResult.TryGetArgumentValueAtPath(out string argValue, new[] { _commandName, firstVariant }))
                     {

@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,8 +65,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             _commandOptions[optionName] = optionValue;
             return this;
         }
-
-
 
         public string Alias { get; }
 
@@ -148,6 +149,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public bool ShowAllColumns => _commandOptions.ContainsKey("--columns-all");
 
         public bool SkipUpdateCheck { get; }
+
+        public string TagFilter => _commandOptions.ContainsKey("--tag") ? _commandOptions["--tag"] : string.Empty;
 
         public string TemplateName { get; private set; }
 

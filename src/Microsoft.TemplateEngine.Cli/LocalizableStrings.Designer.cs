@@ -1357,6 +1357,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Filters the templates based on the template tag (classification). It is possible to specify multiple tag filters. Applicable only with --search or --list | -l option..
+        /// </summary>
+        public static string OptionDescriptionTagFilter {
+            get {
+                return ResourceManager.GetString("OptionDescriptionTagFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Options:.
         /// </summary>
         public static string Options {

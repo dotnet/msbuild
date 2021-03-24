@@ -765,4 +765,7 @@ Examples:
   <data name="GenericWarning" xml:space="preserve">
     <value>Warning: {0}</value>
   </data>
+  <data name="OptionDescriptionTagFilter" xml:space="preserve">
+    <value>Filters the templates based on the template tag (classification). It is possible to specify multiple tag filters. Applicable only with --search or --list | -l option.</value>
+  </data>
 </root>

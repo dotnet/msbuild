@@ -1,17 +1,14 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
-using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using System.Linq;
-using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
-using Xunit;
 using Microsoft.TemplateEngine.Mocks;
+using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
@@ -248,11 +245,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
+            Assert.False(matchResult.HasTagsMismatch);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
         }
-
-
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTags))]
         public void TestGetTemplateResolutionResult_MatchByTags()
@@ -265,8 +261,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     .WithClassifications("Common", "Test")
                     .WithBaselineInfo("app", "standard"));
 
-
-            INewCommandInput userInputs = new MockNewCommandInput("Common").WithListOption();
+            INewCommandInput userInputs = new MockNewCommandInput().WithListOption().WithCommandOption("--tag", "Common");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
@@ -275,6 +270,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
+            Assert.False(matchResult.HasTagsMismatch);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsIgnoredOnNameMatch))]
@@ -324,7 +320,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                   .WithClassifications("Common", "Test", "Console")
                   .WithBaselineInfo("app", "standard"));
 
-
             INewCommandInput userInputs = new MockNewCommandInput("Console").WithListOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
@@ -338,8 +333,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal("Console.App.T1", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
         }
 
-        [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsAndMismatchByFilter))]
-        public void TestGetTemplateResolutionResult_MatchByTagsAndMismatchByFilter()
+        [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsAndMismatchByOtherFilter))]
+        public void TestGetTemplateResolutionResult_MatchByTagsAndMismatchByOtherFilter()
         {
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
             templatesToSearch.Add(
@@ -349,8 +344,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                    .WithClassifications("Common", "Test")
                    .WithBaselineInfo("app", "standard"));
 
-
-            INewCommandInput userInputs = new MockNewCommandInput("Common", "L2", "item").WithListOption();
+            INewCommandInput userInputs = new MockNewCommandInput()
+                .WithListOption()
+                .WithCommandOption("--tag", "Common")
+                .WithCommandOption("--language", "L2")
+                .WithCommandOption("--type", "item");
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);
@@ -414,6 +412,63 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasBaselineMismatch);
         }
 
+        [Theory(DisplayName = nameof(TestGetTemplateResolutionResult_TagsMatch))]
+        [InlineData("TestTag", "TestTag", true)]
+        [InlineData("Tag1||Tag2", "Tag1", true)]
+        [InlineData("Tag1||Tag2", "Tag", false)]
+        [InlineData("", "Tag", false)]
+        [InlineData("TestTag", "Other", false)]
+        [InlineData("TestTag", "", true)]
+        [InlineData("TestTag", null, true)]
+        [InlineData("TestTag", "TeSTTag", true)]
+        [InlineData("TestTag", "TeştTag", false)]
+        [InlineData("match_middle_test", "middle", false)]
+        [InlineData("input", "İnput", false)]
+        public void TestGetTemplateResolutionResult_TagsMatch(string templateTags, string commandTag, bool matchExpected)
+        {
+            const string separator = "||";
+            string[] templateTagsArray = templateTags.Split(separator);
+
+            List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
+
+            templatesToSearch.Add(
+               new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test", author: "TemplateAuthor")
+                   .WithTag("language", "L1")
+                   .WithTag("type", "project")
+                   .WithClassifications(templateTagsArray)
+                   .WithBaselineInfo("app", "standard"));
+
+            MockNewCommandInput userInputs = new MockNewCommandInput("console").WithListOption().WithCommandOption("--tag", commandTag);
+
+            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+
+            if (matchExpected)
+            {
+                Assert.True(matchResult.HasExactMatches);
+                Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
+                Assert.Equal(1, matchResult.ExactMatchedTemplates.Count);
+                Assert.False(matchResult.HasPartialMatches);
+                Assert.Equal(0, matchResult.PartiallyMatchedTemplates.Count);
+                Assert.Equal(0, matchResult.PartiallyMatchedTemplateGroups.Count);
+                Assert.False(matchResult.HasTagsMismatch);
+            }
+            else
+            {
+                Assert.False(matchResult.HasExactMatches);
+                Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
+                Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
+                Assert.True(matchResult.HasPartialMatches);
+                Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
+                Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
+                Assert.True(matchResult.HasTagsMismatch);
+            }
+
+            Assert.False(matchResult.HasLanguageMismatch);
+            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasBaselineMismatch);
+            Assert.False(matchResult.HasAuthorMismatch);
+        }
+
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_TemplateWithoutTypeShouldNotBeMatchedForContextFilter))]
         public void TestGetTemplateResolutionResult_TemplateWithoutTypeShouldNotBeMatchedForContextFilter()
         {
@@ -422,7 +477,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                     .WithClassifications("Common", "Test"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("Common", type: "item").WithListOption();
+            INewCommandInput userInputs = new MockNewCommandInput("console", type: "item").WithListOption();
 
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.False(matchResult.HasExactMatches);

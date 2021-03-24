@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// -- in case there are multiple templates with same precendence and user didn't specify the language to use, the default language template is preferred.<br/>
     /// -- Note that the template will not be resolved in case the value specified for choice parameter is not exact and there is an ambiguity between template to select:<br/>
     /// --- in case at least one template in the group has more than 1 choice value which starts with specified value in the command<br/>
-    /// --- in case at least two templates in the group have 1 choice value which starts with specified value in the command<br/>
+    /// --- in case at least two templates in the group have 1 choice value which starts with specified value in the command.<br/>
     /// </summary>
     public class TemplateResolutionResult
     {
@@ -38,9 +38,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         private IReadOnlyCollection<TemplateGroup> _templateGroups;
 
-        private ITemplateMatchInfo _templateToInvoke = null;
+        private ITemplateMatchInfo _templateToInvoke;
 
-        private TemplateGroup _unambiguousTemplateGroup = null;
+        private TemplateGroup _unambiguousTemplateGroup;
 
         private UnambiguousTemplateGroupStatus _unambigiousTemplateGroupStatus = UnambiguousTemplateGroupStatus.NotEvaluated;
 
@@ -59,30 +59,37 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             /// the status is not evaluated yet
             /// </summary>
             NotEvaluated,
+
             /// <summary>
             /// no matched template groups were resolved
             /// </summary>
             NoMatch,
+
             /// <summary>
             /// single template group and single template to use in the group is resolved
             /// </summary>
             SingleMatch,
+
             /// <summary>
             /// multiple template groups were resolved; not possible to determing the group to use
             /// </summary>
             AmbiguousTemplateGroupChoice,
+
             /// <summary>
             /// single template group was resolved, but it is not possible to resolve choice parameter value to use
             /// </summary>
             AmbiguousParameterValueChoice,
+
             /// <summary>
             /// single template group was resolved, but there is an ambiguous choice for template inside the group and the templates are of same language. Ususlly means that the installed templates are conflicting and the confict should be resolved by uninistalling some of templates.
             /// </summary>
             AmbiguousTemplateChoice,
+
             /// <summary>
             /// single template group was resolved, but there is an ambiguous choice for template inside the group with templates having different languages and the language was not selected by user and no default language match
             /// </summary>
             AmbiguousLanguageChoice,
+
             /// <summary>
             /// single template group was resolved, but parameters or choice parameter values provided are invalid for all templates in the group.
             /// </summary>
@@ -90,7 +97,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Enum defines possible statuses for unambiguous template group resolution
+        /// Enum defines possible statuses for unambiguous template group resolution.
         /// </summary>
         internal enum UnambiguousTemplateGroupStatus
         {
@@ -98,23 +105,25 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             /// the status is not evaluated yet
             /// </summary>
             NotEvaluated,
+
             /// <summary>
             /// no matched template groups were resolved
             /// </summary>
             NoMatch,
+
             /// <summary>
             /// single template group is resolved
             /// </summary>
             SingleMatch,
+
             /// <summary>
             /// multiple template groups were resolved; not possible to determing the group to use
             /// </summary>
             Ambiguous
         }
 
-
         /// <summary>
-        /// Returns status of template resolution <br />
+        /// Returns status of template resolution. <br />
         /// </summary>
         internal Status ResolutionStatus
         {
@@ -130,7 +139,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         /// <summary>
         /// Returns the template to invoke or <see cref="null"/> if the template to invoke cannot be determined.
-        /// Has value only when <see cref="Status" /> is <see cref="Status.SingleMatch"/>
+        /// Has value only when <see cref="Status" /> is <see cref="Status.SingleMatch"/>.
         /// </summary>
         internal ITemplateMatchInfo TemplateToInvoke
         {
@@ -145,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Returns template groups that matches command input (template specific options are not considered in the match)
+        /// Returns template groups that matches command input (template specific options are not considered in the match).
         /// </summary>
         internal IReadOnlyCollection<TemplateGroup> TemplateGroups
         {
@@ -179,7 +188,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         /// <summary>
         /// Returns unambiguous template group resolved; <see cref="null"/> if group cannot be resolved based on command input
-        /// Has value only when <see cref="GroupResolutionStatus" /> is <see cref="UnambiguousTemplateGroupStatus.SingleMatch"/>
+        /// Has value only when <see cref="GroupResolutionStatus" /> is <see cref="UnambiguousTemplateGroupStatus.SingleMatch"/>.
         /// </summary>
         internal TemplateGroup UnambiguousTemplateGroup
         {

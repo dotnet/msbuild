@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Edge.Template;
@@ -47,6 +50,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         public static bool HasAuthorMismatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Author && x.Kind == MatchKind.Mismatch);
+        }
+
+        public static bool HasTagsMismatch(this ITemplateMatchInfo templateMatchInfo)
+        {
+            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Classification && x.Kind == MatchKind.Mismatch);
         }
 
         public static bool HasAmbiguousParameterValueMatch(this ITemplateMatchInfo templateMatchInfo)
@@ -174,7 +182,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return hasLanguageMismatch;
         }
 
-
         // Returns true if there is a context mismatch and no other mismatches, false otherwise.
         // Note: there must be at least one disposition that is not mismatch, in addition to the context mismatch.
         public static bool IsPartialMatchExceptContext(this ITemplateMatchInfo templateMatchInfo)
@@ -217,54 +224,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         public static bool HasAnyMismatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(m => m.Kind == MatchKind.Mismatch);
-        }
-
-        public static bool HasClassificationMatchAndNameMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            if (templateMatchInfo.MatchDisposition.Count == 0)
-            {
-                return false;
-            }
-
-            bool hasNameMismatch = false;
-            bool hasClassificationMatch = false;
-
-            foreach (MatchInfo disposition in templateMatchInfo.MatchDisposition)
-            {
-                if (disposition.Location == MatchLocation.Name && disposition.Kind != MatchKind.Mismatch)
-                {
-                    return false;
-                }
-                else if (disposition.Location == MatchLocation.Name && disposition.Kind == MatchKind.Mismatch)
-                {
-                    hasNameMismatch = true;
-                }
-                else if (disposition.Location == MatchLocation.ShortName && disposition.Kind != MatchKind.Mismatch)
-                {
-                    return false;
-                }
-                else if (disposition.Location == MatchLocation.ShortName && disposition.Kind == MatchKind.Mismatch)
-                {
-                    hasNameMismatch = true;
-                }
-                else if (disposition.Location == MatchLocation.Classification)
-                {
-                    if (disposition.Kind == MatchKind.Exact || disposition.Kind == MatchKind.Partial)
-                    {
-                        hasClassificationMatch = true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else if (disposition.Kind == MatchKind.Mismatch)
-                {
-                    return false;
-                }
-            }
-
-            return hasNameMismatch && hasClassificationMatch;
         }
     }
 }
