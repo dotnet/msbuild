@@ -1,18 +1,19 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
-using Microsoft.TemplateSearch.Common.TemplateUpdate;
 
 namespace Microsoft.TemplateEngine.Cli
 {
     internal class TemplateInvocationCoordinator
     {
-        private readonly SettingsLoader _settingsLoader;
+        private readonly ISettingsLoader _settingsLoader;
         private readonly IEngineEnvironmentSettings _environment;
         private readonly INewCommandInput _commandInput;
         private readonly ITelemetryLogger _telemetryLogger;
@@ -20,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly Func<string> _inputGetter;
         private readonly New3Callbacks _callbacks;
 
-        public TemplateInvocationCoordinator(SettingsLoader settingsLoader, INewCommandInput commandInput, ITelemetryLogger telemetryLogger,  string commandName, Func<string> inputGetter, New3Callbacks callbacks)
+        public TemplateInvocationCoordinator(ISettingsLoader settingsLoader, INewCommandInput commandInput, ITelemetryLogger telemetryLogger,  string commandName, Func<string> inputGetter, New3Callbacks callbacks)
         {
             _settingsLoader = settingsLoader;
             _environment = _settingsLoader.EnvironmentSettings;
@@ -31,12 +32,12 @@ namespace Microsoft.TemplateEngine.Cli
             _callbacks = callbacks;
         }
 
-        public async Task<CreationResultStatus> CoordinateInvocationOrAcquisitionAsync(ITemplateMatchInfo templateToInvoke)
+        public async Task<CreationResultStatus> CoordinateInvocationOrAcquisitionAsync(ITemplateMatchInfo templateToInvoke, CancellationToken cancellationToken)
         {
             // invoke and then check for updates
             CreationResultStatus creationResult = await InvokeTemplateAsync(templateToInvoke).ConfigureAwait(false);
             // check for updates on this template (pack)
-            await CheckForTemplateUpdateAsync(templateToInvoke).ConfigureAwait(false);
+            await CheckForTemplateUpdateAsync(templateToInvoke, cancellationToken).ConfigureAwait(false);
             return creationResult;
         }
 
@@ -46,38 +47,10 @@ namespace Microsoft.TemplateEngine.Cli
             return invoker.InvokeTemplate(templateToInvoke);
         }
 
-        // check for updates for the matched template, based on the Identity
-        private async Task CheckForTemplateUpdateAsync(ITemplateMatchInfo templateToInvoke)
+        private async Task CheckForTemplateUpdateAsync(ITemplateMatchInfo templateToInvoke, CancellationToken cancellationToken)
         {
-            if(!_settingsLoader.InstallUnitDescriptorCache.TryGetDescriptorForTemplate(templateToInvoke.Info, out IInstallUnitDescriptor descriptor))
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.InstallDescriptor_NotFound, templateToInvoke.Info.Identity));
-                return;
-            }
-
-            List<IInstallUnitDescriptor> descriptorList = new List<IInstallUnitDescriptor>() { descriptor };
-            TemplateUpdateChecker updateChecker = new TemplateUpdateChecker(_environment);
-            IUpdateCheckResult updateCheckResult = await updateChecker.CheckForUpdatesAsync(descriptorList).ConfigureAwait(false);
-
-            if (updateCheckResult.Updates.Count == 0)
-            {
-                return;
-            }
-            else if (updateCheckResult.Updates.Count == 1)
-            {
-                DisplayUpdateMessage(updateCheckResult.Updates[0]);
-            }
-            else
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.UpdateCheck_UnknownError, descriptor.Identifier));
-            }
-        }
-
-        private void DisplayUpdateMessage(IUpdateUnitDescriptor updateDescriptor)
-        {
-            Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.UpdateAvailable, updateDescriptor.UpdateDisplayInfo));
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.UpdateCheck_InstallCommand, _commandName, updateDescriptor.InstallString));
+            TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, _environment);
+            await packageCoordinator.CheckUpdateForTemplate(templateToInvoke.Info, _commandInput, cancellationToken).ConfigureAwait(false);
         }
     }
 }

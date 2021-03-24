@@ -62,14 +62,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
+        public bool ApplyUpdates => _parseResult.HasAppliedOption(new[] { _commandName, "update-apply" });
         public string AuthorFilter => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "author" });
 
         public string BaselineName => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "baseline" });
 
         public bool CheckForUpdates => _parseResult.HasAppliedOption(new[] { _commandName, "update-check" });
-
-        public bool CheckForUpdatesNoPrompt => _parseResult.HasAppliedOption(new[] { _commandName, "update-apply" });
-
         public IReadOnlyCollection<string> Columns
         {
             get

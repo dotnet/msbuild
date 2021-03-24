@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.TableOutput
@@ -25,11 +23,11 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
         /// <param name="language">language from the command input</param>
         /// <param name="defaultLanguage">default language</param>
         /// <returns></returns>
-        internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(IReadOnlyCollection<ITemplateMatchInfo> templateList, string language, string defaultLanguage)
+        internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(IEnumerable<ITemplateInfo> templateList, string language, string defaultLanguage)
         {
             List<TemplateGroupTableRow> templateGroupsForDisplay = new List<TemplateGroupTableRow>();
-            IEnumerable<IGrouping<string, ITemplateMatchInfo>> groupedTemplateList = templateList.GroupBy(x => x.Info.GroupIdentity, x => !string.IsNullOrEmpty(x.Info.GroupIdentity), StringComparer.OrdinalIgnoreCase);
-            foreach (IGrouping<string, ITemplateMatchInfo> grouping in groupedTemplateList)
+            IEnumerable<IGrouping<string, ITemplateInfo>> groupedTemplateList = templateList.GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase);
+            foreach (IGrouping<string, ITemplateInfo> grouping in groupedTemplateList)
             {
                 templateGroupsForDisplay.Add(GetTemplateGroupRow(grouping, language, defaultLanguage));
             }
@@ -56,19 +54,19 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
             List<TemplateGroupTableRow> templateGroupsForDisplay = new List<TemplateGroupTableRow>();
             foreach (TemplateGroup templateGroup in templateGroupList)
             {
-                templateGroupsForDisplay.Add(GetTemplateGroupRow(templateGroup.Templates, language, defaultLanguage));
+                templateGroupsForDisplay.Add(GetTemplateGroupRow(templateGroup.Templates.Select(mi => mi.Info), language, defaultLanguage));
             }
             return templateGroupsForDisplay;
         }
 
-        private static TemplateGroupTableRow GetTemplateGroupRow(IEnumerable<ITemplateMatchInfo> templateGroup, string language, string defaultLanguage)
+        private static TemplateGroupTableRow GetTemplateGroupRow(IEnumerable<ITemplateInfo> templateGroup, string language, string defaultLanguage)
         {
             List<string> languageForDisplay = new List<string>();
             HashSet<string> uniqueLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             string defaultLanguageDisplay = string.Empty;
-            foreach (ITemplateMatchInfo template in templateGroup)
+            foreach (ITemplateInfo template in templateGroup)
             {
-                string lang = template.Info.GetLanguage();
+                string lang = template.GetLanguage();
                 if (string.IsNullOrWhiteSpace(lang))
                 {
                     continue;
@@ -94,19 +92,19 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
                 languageForDisplay.Insert(0, defaultLanguageDisplay);
             }
 
-            ITemplateMatchInfo highestPrecedenceTemplate = templateGroup.OrderByDescending(x => x.Info.Precedence).First();
-            string shortName = highestPrecedenceTemplate.Info is IShortNameList highestWithShortNameList
+            ITemplateInfo highestPrecedenceTemplate = templateGroup.OrderByDescending(x => x.Precedence).First();
+            string shortName = highestPrecedenceTemplate is IShortNameList highestWithShortNameList
                                 ? highestWithShortNameList.ShortNameList[0]
-                                : highestPrecedenceTemplate.Info.ShortName;
+                                : highestPrecedenceTemplate.ShortName;
 
             TemplateGroupTableRow groupDisplayInfo = new TemplateGroupTableRow
             {
-                Name = highestPrecedenceTemplate.Info.Name,
+                Name = highestPrecedenceTemplate.Name,
                 ShortName = shortName,
                 Languages = string.Join(",", languageForDisplay),
-                Classifications = highestPrecedenceTemplate.Info.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Info.Classifications) : null,
-                Author = highestPrecedenceTemplate.Info.Author,
-                Type = highestPrecedenceTemplate.Info.GetTemplateType() ?? string.Empty
+                Classifications = highestPrecedenceTemplate.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Classifications) : null,
+                Author = highestPrecedenceTemplate.Author,
+                Type = highestPrecedenceTemplate.GetTemplateType() ?? string.Empty
             };
             return groupDisplayInfo;
         }

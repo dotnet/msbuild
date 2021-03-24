@@ -113,7 +113,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
             foreach (TemplatePackSearchResult packSearchResult in sourceResult.PacksWithMatches.Values)
             {
-                var templateGroupsForPack = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(packSearchResult.TemplateMatches, language, defaultLanguage);
+                var templateGroupsForPack = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(packSearchResult.TemplateMatches.Select(mi => mi.Info), language, defaultLanguage);
                 templateGroupsForDisplay.AddRange(templateGroupsForPack.Select(t => new SearchResultTableRow(t, packSearchResult.PackInfo.Name, packSearchResult.PackInfo.TotalDownloads)));
             }
 

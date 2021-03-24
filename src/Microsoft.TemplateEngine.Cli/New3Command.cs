@@ -237,20 +237,8 @@ namespace Microsoft.TemplateEngine.Cli
             EnvironmentSettings.SettingsLoader.Components.RegisterMany(typeof(New3Command).GetTypeInfo().Assembly.GetTypes());
         }
 
-        private CreationResultStatus EnterInstallFlow()
-        {
-            _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.InstallEventSuffix, new Dictionary<string, string> { { TelemetryConstants.ToInstallCount, _commandInput.ToInstallList.Count.ToString() } });
-
-            bool allowDevInstall = _commandInput.HasDebuggingFlag("--dev:install");
-            Installer.InstallPackages(_commandInput.ToInstallList, _commandInput.InstallNuGetSourceList, allowDevInstall, _commandInput.IsInteractiveFlagSpecified);
-
-            //TODO: When an installer that directly calls into NuGet is available,
-            //  return a more accurate representation of the outcome of the operation
-            return CreationResultStatus.Success;
-        }
-
         // TODO: make sure help / usage works right in these cases.
-        private CreationResultStatus EnterMaintenanceFlow()
+        private async Task<CreationResultStatus> EnterMaintenanceFlow()
         {
             if (!TemplateResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
             {
@@ -268,141 +256,32 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.InvalidParamValues;
             }
 
-            if (_commandInput.ToUninstallList != null)
-            {
-                return EnterUninstallFlow();
-            }
-
-            if (_commandInput.ToInstallList != null && _commandInput.ToInstallList.Count > 0 && _commandInput.ToInstallList[0] != null)
-            {
-                CreationResultStatus installResult = EnterInstallFlow();
-
-                if (installResult == CreationResultStatus.Success)
-                {
-                    _settingsLoader.Reload();
-                    TemplateListResolutionResult resolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
-                    HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(resolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: false);
-                }
-
-                return installResult;
-            }
-
             // No other cases specified, we've fallen through to "Optional usage help + List"
-            TemplateListResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+            TemplateListResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
             HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
 
             return CreationResultStatus.Success;
         }
 
-        private CreationResultStatus EnterUninstallFlow()
-        {
-            if (_commandInput.ToUninstallList.Count > 0 && _commandInput.ToUninstallList[0] != null)
-            {
-                IEnumerable<string> failures = Installer.Uninstall(_commandInput.ToUninstallList);
 
-                foreach (string failure in failures)
-                {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.CouldntUninstall, failure));
-                }
-            }
-            else
-            {
-                Reporter.Output.WriteLine(LocalizableStrings.CommandDescription);
-                Reporter.Output.WriteLine();
-                Reporter.Output.WriteLine(LocalizableStrings.InstalledItems);
 
-                foreach (IInstallUnitDescriptor descriptor in _settingsLoader.InstallUnitDescriptorCache.Descriptors.Values)
-                {
-                    Reporter.Output.WriteLine($"  {descriptor.Identifier}");
-
-                    bool wroteHeader = false;
-
-                    foreach (string detailKey in descriptor.DetailKeysDisplayOrder)
-                    {
-                        WriteDescriptorDetail(descriptor, detailKey, ref wroteHeader);
-                    }
-
-                    HashSet<string> standardDetails = new HashSet<string>(descriptor.DetailKeysDisplayOrder, StringComparer.OrdinalIgnoreCase);
-
-                    foreach (string detailKey in descriptor.Details.Keys.OrderBy(x => x))
-                    {
-                        if (standardDetails.Contains(detailKey))
-                        {
-                            continue;
-                        }
-
-                        WriteDescriptorDetail(descriptor, detailKey, ref wroteHeader);
-                    }
-
-                    // template info
-                    HashSet<string> templateDisplayStrings = new HashSet<string>(StringComparer.Ordinal);
-
-                    foreach (TemplateInfo info in _settingsLoader.UserTemplateCache.TemplateInfo.Where(x => x.ConfigMountPointId == descriptor.MountPointId))
-                    {
-                        string str = $"      {info.Name} ({info.ShortName})";
-
-                        string templateLanguage = info.GetLanguage();
-                        if (!string.IsNullOrWhiteSpace(templateLanguage))
-                        {
-                            str += " " + templateLanguage;
-                        }
-
-                        templateDisplayStrings.Add(str);
-                    }
-
-                    if (templateDisplayStrings.Count > 0)
-                    {
-                        Reporter.Output.WriteLine($"    {LocalizableStrings.Templates}:");
-
-                        foreach (string displayString in templateDisplayStrings)
-                        {
-                            Reporter.Output.WriteLine(displayString);
-                        }
-                    }
-
-                    // uninstall command:
-                    Reporter.Output.WriteLine($"    {LocalizableStrings.UninstallListUninstallCommand}");
-                    Reporter.Output.WriteLine(string.Format("      dotnet {0} -u {1}", _commandInput.CommandName, descriptor.UninstallString));
-
-                    Reporter.Output.WriteLine();
-                }
-            }
-
-            return CreationResultStatus.Success;
-        }
-
-        private void WriteDescriptorDetail(IInstallUnitDescriptor descriptor, string detailKey, ref bool wroteHeader)
-        {
-            if (descriptor.Details.TryGetValue(detailKey, out string detailValue)
-                && !string.IsNullOrEmpty(detailValue))
-            {
-                if (!wroteHeader)
-                {
-                    Reporter.Output.WriteLine($"    {LocalizableStrings.UninstallListDetailsHeader}");
-                    wroteHeader = true;
-                }
-
-                Reporter.Output.WriteLine($"      {detailKey}: {detailValue}");
-            }
-        }
-
-        private Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
+        private async Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
         {
             if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
             {
-                TemplateListResolutionResult listingTemplateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
-                return Task.FromResult(HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified));
+                TemplateListResolutionResult listingTemplateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
+                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
             }
 
-            TemplateResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader, _commandInput, _defaultLanguage);
+            TemplateResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
             if (templateResolutionResult.ResolutionStatus == TemplateResolutionResult.Status.SingleMatch)
             {
                 TemplateInvocationCoordinator invocationCoordinator = new TemplateInvocationCoordinator(_settingsLoader, _commandInput, _telemetryLogger, CommandName, _inputGetter, _callbacks);
-                return invocationCoordinator.CoordinateInvocationOrAcquisitionAsync(templateResolutionResult.TemplateToInvoke);
+                return await invocationCoordinator.CoordinateInvocationOrAcquisitionAsync(templateResolutionResult.TemplateToInvoke, CancellationToken.None).ConfigureAwait(false);
             }
             else
             {
-                return Task.FromResult(HelpForTemplateResolution.CoordinateAmbiguousTemplateResolutionDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _defaultLanguage, _settingsLoader.InstallUnitDescriptorCache.Descriptors.Values));
+                return await HelpForTemplateResolution.CoordinateAmbiguousTemplateResolutionDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _defaultLanguage).ConfigureAwait(false);
             }
         }
 
@@ -464,16 +343,13 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (!string.IsNullOrEmpty(_commandInput.Alias) && !_commandInput.IsHelpFlagSpecified)
                 {
-                    return AliasSupport.ManipulateAliasIfValid(_aliasRegistry, _commandInput.Alias, _commandInput.Tokens.ToList(), AllTemplateShortNames);
+                    return AliasSupport.ManipulateAliasIfValid(_aliasRegistry, _commandInput.Alias, _commandInput.Tokens.ToList(), await GetAllTemplateShortNamesAsync().ConfigureAwait(false));
                 }
 
-                if (_commandInput.CheckForUpdates || _commandInput.CheckForUpdatesNoPrompt)
+                if (TemplatePackageCoordinator.IsTemplatePackageManipulationFlow(_commandInput))
                 {
-                    bool applyUpdates = _commandInput.CheckForUpdatesNoPrompt;
-                    CliTemplateUpdater updater = new CliTemplateUpdater(EnvironmentSettings, Installer, CommandName);
-                    bool updateCheckResult = await updater.CheckForUpdatesAsync(_settingsLoader.InstallUnitDescriptorCache.Descriptors.Values.ToList(), applyUpdates);
-
-                    return updateCheckResult ? CreationResultStatus.Success : CreationResultStatus.CreateFailed;
+                    TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, EnvironmentSettings, _defaultLanguage);
+                    return await packageCoordinator.ProcessAsync(_commandInput).ConfigureAwait(false);
                 }
 
                 if (_commandInput.SearchOnline)
@@ -483,7 +359,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (string.IsNullOrWhiteSpace(TemplateName))
                 {
-                    return EnterMaintenanceFlow();
+                    return await EnterMaintenanceFlow().ConfigureAwait(false);
                 }
 
                 return await EnterTemplateManipulationFlowAsync().ConfigureAwait(false);

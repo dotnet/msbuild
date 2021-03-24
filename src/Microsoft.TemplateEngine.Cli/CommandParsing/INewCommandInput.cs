@@ -13,10 +13,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
     {
         string Alias { get; }
         string AllowScriptsToRun { get; }
+        bool ApplyUpdates { get; }
         string AuthorFilter { get; }
         string BaselineName { get; }
         bool CheckForUpdates { get; }
-        bool CheckForUpdatesNoPrompt { get; }
         IReadOnlyCollection<string> Columns { get; }
         string ColumnsParseError { get; }
         string CommandName { get; }
