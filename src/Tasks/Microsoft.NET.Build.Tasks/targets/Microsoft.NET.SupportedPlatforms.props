@@ -13,11 +13,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project>
   <ItemGroup>
     <!-- Platforms supported by this SDK for analyzer warnings. Spec: https://github.com/dotnet/designs/blob/master/accepted/2020/platform-exclusion/platform-exclusion.md  -->
-    <SupportedPlatform Include="Android" />
-    <SupportedPlatform Include="iOS" />
     <SupportedPlatform Include="Linux" />
     <SupportedPlatform Include="macOS" />
-    <SupportedPlatform Include="macCatalyst" />
     <SupportedPlatform Include="Windows" />
   </ItemGroup>
 </Project>
