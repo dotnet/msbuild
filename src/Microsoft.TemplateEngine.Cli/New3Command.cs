@@ -451,7 +451,7 @@ namespace Microsoft.TemplateEngine.Cli
             bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
             try
             {
-                _settingsLoader.RebuildCacheFromSettingsIfNotCurrent(forceCacheRebuild);
+                await _settingsLoader.RebuildCacheFromSettingsIfNotCurrent(forceCacheRebuild).ConfigureAwait(false);
             }
             catch (EngineInitializationException eiex)
             {
@@ -541,28 +541,25 @@ namespace Microsoft.TemplateEngine.Cli
             return true;
         }
 
-        private HashSet<string> AllTemplateShortNames
+        private async Task<HashSet<string>> GetAllTemplateShortNamesAsync()
         {
-            get
+            IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader);
+
+            HashSet<string> allShortNames = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (ITemplateMatchInfo templateMatchInfo in allTemplates)
             {
-                IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(_settingsLoader.UserTemplateCache.TemplateInfo, _hostDataLoader);
-
-                HashSet<string> allShortNames = new HashSet<string>(StringComparer.Ordinal);
-
-                foreach (ITemplateMatchInfo templateMatchInfo in allTemplates)
+                if (templateMatchInfo.Info is IShortNameList templateWithShortNameList)
                 {
-                    if (templateMatchInfo.Info is IShortNameList templateWithShortNameList)
-                    {
-                        allShortNames.UnionWith(templateWithShortNameList.ShortNameList);
-                    }
-                    else
-                    {
-                        allShortNames.Add(templateMatchInfo.Info.ShortName);
-                    }
+                    allShortNames.UnionWith(templateWithShortNameList.ShortNameList);
                 }
-
-                return allShortNames;
+                else
+                {
+                    allShortNames.Add(templateMatchInfo.Info.ShortName);
+                }
             }
+
+            return allShortNames;
         }
 
         private void ShowConfig()
