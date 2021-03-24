@@ -21,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                if (_settingsLoader.TryGetFileFromIdAndPath(templateInfo.HostConfigMountPointId, templateInfo.HostConfigPlace, out IFile file, out mountPoint))
+                if (_settingsLoader.TryGetFileFromIdAndPath(templateInfo.MountPointUri, templateInfo.HostConfigPlace, out IFile file, out mountPoint))
                 {
                     JObject jsonData;
                     using (Stream stream = file.OpenRead())
@@ -40,10 +40,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             finally
             {
-                if (mountPoint != null)
-                {
-                    _settingsLoader.ReleaseMountPoint(mountPoint);
-                }
+                mountPoint?.Dispose();
             }
 
             return HostSpecificTemplateData.Default;

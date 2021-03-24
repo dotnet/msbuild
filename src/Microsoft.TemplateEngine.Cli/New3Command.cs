@@ -655,13 +655,6 @@ namespace Microsoft.TemplateEngine.Cli
         {
             Reporter.Output.WriteLine(LocalizableStrings.CurrentConfiguration);
             Reporter.Output.WriteLine(" ");
-            TableFormatter.Print(EnvironmentSettings.SettingsLoader.MountPoints, LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<MountPointInfo, object>>
-            {
-                {LocalizableStrings.MountPoints, x => x.Place},
-                {LocalizableStrings.Id, x => x.MountPointId},
-                {LocalizableStrings.Parent, x => x.ParentMountPointId},
-                {LocalizableStrings.Factory, x => x.MountPointFactoryId}
-            });
 
             TableFormatter.Print(EnvironmentSettings.SettingsLoader.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
             {
