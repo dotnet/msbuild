@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         public void CanReadUnversionedCache()
         {
             IEngineEnvironmentSettings mockEnvironmentSettings = new MockEngineEnvironmentSettings();
-            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataOriginalStyle, string.Empty);
+            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataOriginalStyle);
 
             Assert.Equal(3, cache.TemplateInfo.Count);
         }
@@ -21,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         public void CanReadVersion1000Cache()
         {
             IEngineEnvironmentSettings mockEnvironmentSettings = new MockEngineEnvironmentSettings();
-            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataVersion1000, "1.0.0.0");
+            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataVersion1000);
 
             Assert.Equal(3, cache.TemplateInfo.Count);
         }
@@ -31,6 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             get
             {
                 string configString = @"{
+  ""Version"": ""1.0.0.0"",
   ""TemplateInfo"": [
     {
       ""ConfigMountPointId"": ""23c0e74b-9815-4e6b-bf19-c8a6efa8ba85"",

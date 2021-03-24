@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackages;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using Microsoft.TemplateEngine.Edge.TemplateUpdates;
+using Microsoft.TemplateEngine.Edge.Installers.NuGet;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateSearch.Common;
@@ -34,7 +34,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             const string templateName = "foo";
 
             TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
-            List<IInstallUnitDescriptor> existingInstalls = new List<IInstallUnitDescriptor>();
+            List<IManagedTemplatePackage> existingInstalls = new List<IManagedTemplatePackage>();
             SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, templateName).Result;
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
@@ -53,9 +53,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
 
-            IReadOnlyList<IInstallUnitDescriptor> packsToIgnore = new List<IInstallUnitDescriptor>()
+            IReadOnlyList<IManagedTemplatePackage> packsToIgnore = new List<IManagedTemplatePackage>()
             {
-                _fooPackInstallDescriptor
+                _fooPackTemplatePackage
             };
 
             SearchResults searchResults = searcher.SearchForTemplatesAsync(packsToIgnore, templateName).Result;
@@ -68,7 +68,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         private static readonly PackInfo _bluePackInfo = new PackInfo("bluePack", "2.1");
         private static readonly PackInfo _greenPackInfo = new PackInfo("greenPack", "3.0.0");
 
-        private static readonly IInstallUnitDescriptor _fooPackInstallDescriptor = new NupkgInstallUnitDescriptor(Guid.NewGuid(), Guid.NewGuid(), _fooPackInfo.Name, false, _fooPackInfo.Version, string.Empty);
+        private static readonly IManagedTemplatePackage _fooPackTemplatePackage = new NuGetManagedTemplatePackage(null, null, string.Empty, null);
 
         private static IReadOnlyDictionary<string, IReadOnlyList<ITemplateNameSearchResult>> GetMockNameSearchResults()
         {

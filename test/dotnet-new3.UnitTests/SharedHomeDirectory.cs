@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
 namespace dotnet_new3.UnitTests

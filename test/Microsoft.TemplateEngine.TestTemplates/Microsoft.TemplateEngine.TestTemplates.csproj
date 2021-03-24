@@ -11,10 +11,14 @@
         <NoWarn>$(NoWarn);NU5128</NoWarn>
         <IsPackable>true</IsPackable>
         <IsShipping>false</IsShipping>
+        <NoDefaultExcludes>true</NoDefaultExcludes>
     </PropertyGroup>
     <ItemGroup>
         <Compile Remove="**\*"  />
         <Content Include="test_templates\**\*" Exclude="test_templates\**\bin\**;test_templates\**\obj\**" />
         <None Include="test_templates\**\*" CopyToOutputDirectory="Always" />
+
+        <Content Include="nupkg_templates\**" />
+        <None Include="nupkg_templates\**" CopyToOutputDirectory="Always" />
     </ItemGroup>
 </Project>

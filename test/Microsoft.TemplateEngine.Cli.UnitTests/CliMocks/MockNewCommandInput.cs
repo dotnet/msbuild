@@ -76,7 +76,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool CheckForUpdates { get; }
 
-        public bool CheckForUpdatesNoPrompt { get; }
+        public bool ApplyUpdates { get; }
 
         public IReadOnlyCollection<string> Columns
         {

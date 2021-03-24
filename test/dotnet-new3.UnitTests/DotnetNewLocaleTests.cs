@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.NET.TestFramework.Assertions;
+using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,7 +29,7 @@ namespace dotnet_new3.UnitTests
         {
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
-            var home = Helpers.CreateTemporaryFolder("Home");
+            var home = TestUtils.CreateTemporaryFolder("Home");
             var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
             var testTemplatesFolder = Path.Combine(
                 thisDir ?? string.Empty,
@@ -43,8 +44,8 @@ namespace dotnet_new3.UnitTests
                 "TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder, "--quiet")
-                .WithWorkingDirectory(Helpers.CreateTemporaryFolder())
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", string.Empty)
                 .Execute();
 
@@ -62,7 +63,7 @@ namespace dotnet_new3.UnitTests
         [InlineData("tr-TR", "name_tr-TR")]
         public void TestDotnetCLIEnvVariable(string dotnetCliEnvVar, string expectedName)
         {
-            var home = Helpers.CreateTemporaryFolder("Home");
+            var home = TestUtils.CreateTemporaryFolder("Home");
             var thisDir = Path.GetDirectoryName(typeof(DotnetNewLocaleTests).Assembly.Location);
             var testTemplatesFolder = Path.Combine(
                 thisDir ?? string.Empty,
@@ -77,8 +78,8 @@ namespace dotnet_new3.UnitTests
                 "TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder, "--quiet")
-                .WithWorkingDirectory(Helpers.CreateTemporaryFolder())
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", dotnetCliEnvVar)
                 .Execute();
 

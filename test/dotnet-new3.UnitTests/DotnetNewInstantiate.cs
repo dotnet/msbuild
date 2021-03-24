@@ -4,6 +4,7 @@ using Xunit.Abstractions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.Edge.Template;
 using System.IO;
+using Microsoft.TemplateEngine.TestHelper;
 
 namespace dotnet_new3.UnitTests
 {
@@ -19,12 +20,12 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CanInstantiateTemplate()
         {
-            string home = Helpers.CreateTemporaryFolder("Home");
-            string workingDirectory = Helpers.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -35,11 +36,11 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CannotInstantiateUnknownTemplate()
         {
-            var home = Helpers.CreateTemporaryFolder("Home");
+            var home = TestUtils.CreateTemporaryFolder("Home");
 
             new DotnetNewCommand(_log, "webapp", "--quiet")
-                .WithWorkingDirectory(Helpers.CreateTemporaryFolder())
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -52,13 +53,13 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CanInstantiateTemplateWithSingleNonDefaultLanguageChoice()
         {
-            string home = Helpers.CreateTemporaryFolder("Home");
-            string workingDirectory = Helpers.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
             Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "basic")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -69,14 +70,14 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CannotInstantiateTemplateWhenAmbiguousLanguageChoice()
         {
-            string home = Helpers.CreateTemporaryFolder("Home");
-            string workingDirectory = Helpers.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
             Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
             Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "basic")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -89,12 +90,12 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CannotInstantiateTemplateWhenAmbiguousGroupChoice()
         {
-            string home = Helpers.CreateTemporaryFolder("Home");
-            string workingDirectory = Helpers.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "conf", "--quiet")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -105,7 +106,7 @@ namespace dotnet_new3.UnitTests
 
             new DotnetNewCommand(_log, "file")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -118,12 +119,12 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CannotInstantiateTemplateWhenParameterIsInvalid()
         {
-            string home = Helpers.CreateTemporaryFolder("Home");
-            string workingDirectory = Helpers.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--fake", "--quiet")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -134,7 +135,7 @@ namespace dotnet_new3.UnitTests
 
             new DotnetNewCommand(_log, "console", "--framework", "fake")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -147,7 +148,7 @@ namespace dotnet_new3.UnitTests
 
             new DotnetNewCommand(_log, "console", "--framework", "netcoreapp")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -160,7 +161,7 @@ namespace dotnet_new3.UnitTests
 
             new DotnetNewCommand(_log, "console", "--framework", "netcoreapp", "--fake")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -176,14 +177,14 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CannotInstantiateTemplateWhenPrecedenceIsSame()
         {
-            string home = Helpers.CreateTemporaryFolder("Home");
-            string workingDirectory = Helpers.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
             Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate1", _log, workingDirectory, home);
             Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate2", _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "basic")
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(Helpers.HomeEnvironmentVariableName, home)
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()

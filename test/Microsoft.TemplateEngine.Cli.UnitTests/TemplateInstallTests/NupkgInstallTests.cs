@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
@@ -11,10 +12,8 @@ using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
-using Microsoft.TemplateEngine.Edge.TemplateUpdates;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Utils;
-using Microsoft.TemplateSearch.Common.TemplateUpdate;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
@@ -22,11 +21,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
     public class NupkgInstallTests
     {
         private static readonly string HostIdentifier = "installTestHost";
-        private static readonly string HostVersion = "1.0.0";
+        private static readonly string HostVersion = "v1.0.0";
         private static readonly string CommandName = "new3";
 
         [Fact(DisplayName = nameof(NupkgReinstallDoesntRemoveTemplates))]
-        public void NupkgReinstallDoesntRemoveTemplates()
+        public async Task NupkgReinstallDoesntRemoveTemplates()
         {
             const string nupkgToInstallName = "TestNupkgInstallTemplate.0.0.1.nupkg";
             const string checkTemplateName = "nupkginstall";    // this is the short name of the template in the nupkg that gets installed.
@@ -42,7 +41,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             Uri cb = new Uri(codebase);
             string asmPath = cb.LocalPath;
             string dir = Path.GetDirectoryName(asmPath);
-            string pathToInstall = Path.Combine(dir, "TemplateInstallTests", "TestTemplates", nupkgToInstallName);
+
+            string pathToInstall = Path.Combine(dir, "..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "nupkg_templates", nupkgToInstallName);
 
             Assert.True(File.Exists(pathToInstall), $"directory didnt exist: {pathToInstall}");
 
@@ -61,17 +61,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             IHostSpecificDataLoader hostDataLoader = new MockHostSpecificDataLoader();
 
             // check that the template was installed from the first install.
-            IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(settingsLoader.UserTemplateCache.TemplateInfo, hostDataLoader);
+            IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default), hostDataLoader);
             Assert.Contains(checkTemplateName, allTemplates.Select(t => t.Info.ShortName));
 
             // install the same test pack again
             int secondInstallResult = New3Command.Run(CommandName, host, telemetryLogger, null, installArgs);
-            Assert.Equal(0, secondInstallResult);
-
-            settingsLoader.Reload();
+            Assert.NotEqual(0, secondInstallResult);
 
             // check that the template is still installed after the second install.
-            IReadOnlyCollection<ITemplateMatchInfo> allTemplatesAfterSecondInstall = TemplateResolver.PerformAllTemplatesQuery(settingsLoader.UserTemplateCache.TemplateInfo, hostDataLoader);
+            IReadOnlyCollection<ITemplateMatchInfo> allTemplatesAfterSecondInstall = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default), hostDataLoader);
             Assert.Contains(checkTemplateName, allTemplatesAfterSecondInstall.Select(t => t.Info.ShortName));
         }
 
@@ -94,7 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
                 return null;
             }
 
-            string hivePath = Path.Combine(profileDir, ".templateengine", hostIdentifier);
+            string hivePath = Path.Combine(profileDir, ".templateengine");
             host.VirtualizeDirectory(hivePath);
 
             return host;
@@ -121,9 +119,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             var builtIns = new AssemblyComponentCatalog(new[]
             {
                 typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
-                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
+                typeof(Microsoft.TemplateEngine.Edge.Paths).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
                 typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly,    // for assembly: Microsoft.TemplateEngine.Cli
-                typeof(NupkgUpdater).GetTypeInfo().Assembly                         // for assembly: Microsoft.TemplateSearch.Common
+                typeof(Microsoft.TemplateSearch.Common.NuGetSearchCacheConfig).GetTypeInfo().Assembly// for assembly: Microsoft.TemplateSearch.Common
             });
 
             return new DefaultTemplateEngineHost(hostIdentifier, hostVersion, preferences, builtIns, new[] { "dotnetcli" });

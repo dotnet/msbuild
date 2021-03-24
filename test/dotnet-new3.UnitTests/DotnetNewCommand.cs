@@ -1,4 +1,5 @@
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.TestHelper;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,9 +28,9 @@ namespace dotnet_new3.UnitTests
                 Arguments = args.ToList(),
                 WorkingDirectory = WorkingDirectory
             };
-            if (!_environment.ContainsKey(Helpers.HomeEnvironmentVariableName))
+            if (!_environment.ContainsKey(TestUtils.HomeEnvironmentVariableName))
             {
-                throw new Exception($"{nameof(Helpers.HomeEnvironmentVariableName)} is not set, call {nameof(DotnetNewCommand)}{nameof(WithEnvironmentVariable)} to set it.");
+                throw new Exception($"{nameof(TestUtils.HomeEnvironmentVariableName)} is not set, call {nameof(DotnetNewCommand)}{nameof(WithEnvironmentVariable)} to set it.");
             }
             return sdkCommandSpec;
         }
