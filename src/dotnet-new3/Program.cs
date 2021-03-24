@@ -75,11 +75,13 @@ namespace dotnet_new3
                 // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
                 typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,
                 // for assembly: Microsoft.TemplateEngine.Edge
-                typeof(NupkgInstallUnitDescriptorFactory).GetTypeInfo().Assembly,
+                typeof(Microsoft.TemplateEngine.Edge.Paths).GetTypeInfo().Assembly,
                 // for assembly: Microsoft.TemplateEngine.Cli
                 typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly,
                 // for assembly: Microsoft.TemplateSearch.Common
-                typeof(NupkgUpdater).GetTypeInfo().Assembly
+                typeof(Microsoft.TemplateSearch.Common.TemplateToPackMap).GetTypeInfo().Assembly,
+                // for this assembly
+                typeof(Program).GetTypeInfo().Assembly
             });
 
             ConfigureLocale();
