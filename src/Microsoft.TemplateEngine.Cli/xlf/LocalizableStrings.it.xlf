@@ -700,49 +700,35 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
-        <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="new">Filters the templates based on the template author. Applicable only with --search or --list | -l option.</target>
+        <source>Filters the templates based on the author. Applies to --search and --list.</source>
+        <target state="new">Filters the templates based on the author. Applies to --search and --list.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
-        <source>Comma separated list of columns to show for --list|-l or --search option.  The supported columns are: 
-- language - comma separated list of languages supported by the template
-- tags - the list of template tags
-- author - the template author
-- type - the template type: project or item
-The template name and short name are shown always. 
-For --search option additionally NuGet package ID and total downloads count are shown always.
-The default list of columns shown without the option for --list | -l: template name, short name, language, tags; equivalent to --columns=language,tags.
-The default list of columns shown without the option for --search: template name, short name, author, language, package, total downloads; equivalent to --columns=author,language.</source>
-        <target state="new">Comma separated list of columns to show for --list|-l or --search option.  The supported columns are: 
-- language - comma separated list of languages supported by the template
-- tags - the list of template tags
-- author - the template author
-- type - the template type: project or item
-The template name and short name are shown always. 
-For --search option additionally NuGet package ID and total downloads count are shown always.
-The default list of columns shown without the option for --list | -l: template name, short name, language, tags; equivalent to --columns=language,tags.
-The default list of columns shown without the option for --search: template name, short name, author, language, package, total downloads; equivalent to --columns=author,language.</target>
+        <source>Comma separated list of columns to display in --list and --search output. 
+The supported columns are: language, tags, author, type.</source>
+        <target state="new">Comma separated list of columns to display in --list and --search output. 
+The supported columns are: language, tags, author, type.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumnsAll">
-        <source>Shows all available columns for --list | -l or --search option, equivalent to --columns=language,tags,author,type.</source>
-        <target state="new">Shows all available columns for --list | -l or --search option, equivalent to --columns=language,tags,author,type.</target>
+        <source>Display all columns in --list and --search output.</source>
+        <target state="new">Display all columns in --list and --search output.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
-        <source>Filters the templates based on NuGet package ID. Applicable only with --search option.</source>
-        <target state="new">Filters the templates based on NuGet package ID. Applicable only with --search option.</target>
+        <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
+        <target state="new">Filters the templates based on NuGet package ID. Applies to --search.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionSearch">
-        <source>Searches for the templates in configured remote sources.</source>
-        <target state="new">Searches for the templates in configured remote sources.</target>
+        <source>Searches for the templates on NuGet.org.</source>
+        <target state="new">Searches for the templates on NuGet.org.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionTagFilter">
-        <source>Filters the templates based on the template tag (classification). It is possible to specify multiple tag filters. Applicable only with --search or --list | -l option.</source>
-        <target state="new">Filters the templates based on the template tag (classification). It is possible to specify multiple tag filters. Applicable only with --search or --list | -l option.</target>
+        <source>Filters the templates based on the tag. Applies to --search and --list.</source>
+        <target state="new">Filters the templates based on the tag. Applies to --search and --list.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionVariantAlreadyDefined">

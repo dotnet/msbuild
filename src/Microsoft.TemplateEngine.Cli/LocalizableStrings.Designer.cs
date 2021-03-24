@@ -1305,7 +1305,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filters the templates based on the template author. Applicable only with --search or --list | -l option..
+        ///   Looks up a localized string similar to Filters the templates based on the author. Applies to --search and --list..
         /// </summary>
         public static string OptionDescriptionAuthorFilter {
             get {
@@ -1314,14 +1314,8 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Comma separated list of columns to show for --list|-l or --search option.  The supported columns are: 
-        ///- language - comma separated list of languages supported by the template
-        ///- tags - the list of template tags
-        ///- author - the template author
-        ///- type - the template type: project or item
-        ///The template name and short name are shown always. 
-        ///For --search option additionally NuGet package ID and total downloads count are shown always.
-        ///The default list of columns shown without the option for --list | -l: tem [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to Comma separated list of columns to display in --list and --search output. 
+        ///The supported columns are: language, tags, author, type..
         /// </summary>
         public static string OptionDescriptionColumns {
             get {
@@ -1330,7 +1324,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Shows all available columns for --list | -l or --search option, equivalent to --columns=language,tags,author,type..
+        ///   Looks up a localized string similar to Display all columns in --list and --search output..
         /// </summary>
         public static string OptionDescriptionColumnsAll {
             get {
@@ -1339,7 +1333,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filters the templates based on NuGet package ID. Applicable only with --search option..
+        ///   Looks up a localized string similar to Filters the templates based on NuGet package ID. Applies to --search..
         /// </summary>
         public static string OptionDescriptionPackageFilter {
             get {
@@ -1348,7 +1342,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Searches for the templates in configured remote sources..
+        ///   Looks up a localized string similar to Searches for the templates on NuGet.org..
         /// </summary>
         public static string OptionDescriptionSearch {
             get {
@@ -1357,7 +1351,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filters the templates based on the template tag (classification). It is possible to specify multiple tag filters. Applicable only with --search or --list | -l option..
+        ///   Looks up a localized string similar to Filters the templates based on the tag. Applies to --search and --list..
         /// </summary>
         public static string OptionDescriptionTagFilter {
             get {
