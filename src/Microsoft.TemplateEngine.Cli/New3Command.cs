@@ -5,20 +5,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.TemplateLocator;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
-using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
-using Microsoft.TemplateEngine.Cli.TemplateUpdate;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
@@ -30,13 +26,14 @@ namespace Microsoft.TemplateEngine.Cli
     {
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly TemplateCreator _templateCreator;
-        private readonly SettingsLoader _settingsLoader;
+        private readonly ISettingsLoader _settingsLoader;
         private readonly AliasRegistry _aliasRegistry;
         private readonly Paths _paths;
-
-        // It's safe to access template agnostic information anytime after the first parse. But there is never a guarantee which template the parse is in the context of.
+        /// <summary>
+        /// It's safe to access template agnostic information anytime after the first parse.
+        /// But there is never a guarantee which template the parse is in the context of.
+        /// </summary>
         private readonly INewCommandInput _commandInput;
-
         private readonly IHostSpecificDataLoader _hostDataLoader;
         private readonly string? _defaultLanguage;
         private readonly New3Callbacks _callbacks;
@@ -52,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli
             _telemetryLogger = telemetryLogger;
             host = new ExtendedTemplateEngineHost(host, this);
             EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x), hivePath);
-            _settingsLoader = (SettingsLoader)EnvironmentSettings.SettingsLoader;
+            _settingsLoader = EnvironmentSettings.SettingsLoader;
             _templateCreator = new TemplateCreator(EnvironmentSettings);
             _aliasRegistry = new AliasRegistry(EnvironmentSettings);
             CommandName = commandName;
