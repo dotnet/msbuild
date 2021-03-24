@@ -122,6 +122,7 @@ namespace dotnet_new3
         {
             Paths paths = new Paths(environmentSettings);
 
+            environmentSettings.Host.FileSystem.CreateDirectory(paths.User.BaseDir);
         }
 
         private static void ConfigureLocale()
