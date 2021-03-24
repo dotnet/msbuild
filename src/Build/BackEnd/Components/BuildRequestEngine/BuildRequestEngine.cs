@@ -687,15 +687,6 @@ namespace Microsoft.Build.BackEnd
             OnNewConfigurationRequest?.Invoke(config);
         }
 
-        /// <summary>
-        /// Raises OnResourceRequest event.
-        /// </summary>
-        /// <param name="request">The resource request.</param>
-        private void RaiseResourceRequest(ResourceRequest request)
-        {
-            OnResourceRequest?.Invoke(request);
-        }
-
         #endregion
 
         /// <summary>
@@ -1015,7 +1006,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void Builder_OnResourceRequest(ResourceRequest request)
         {
-            RaiseResourceRequest(request);
+            OnResourceRequest?.Invoke(request);
         }
 
         #endregion

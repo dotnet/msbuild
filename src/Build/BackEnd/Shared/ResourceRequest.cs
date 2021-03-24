@@ -6,6 +6,7 @@ using System.Diagnostics;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// This packet is sent by a node to request or release resources from/to the scheduler.
     /// </summary>
     internal class ResourceRequest : INodePacket
     {
@@ -14,7 +15,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _blockedGlobalRequestId;
 
-        private bool _isAcquire;
+        private bool _isResourceAcquire;
 
         private bool _isBlocking;
 
@@ -33,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal ResourceRequest(int blockedGlobalRequestId, int numCores, bool isBlocking)
         {
-            _isAcquire = true;
+            _isResourceAcquire = true;
             _isBlocking = isBlocking;
             _blockedGlobalRequestId = blockedGlobalRequestId;
             _numCores = numCores;
@@ -44,7 +45,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal ResourceRequest(int blockedGlobalRequestId, int numCores)
         {
-            _isAcquire = false;
+            _isResourceAcquire = false;
             _blockedGlobalRequestId = blockedGlobalRequestId;
             _numCores = numCores;
         }
@@ -73,12 +74,12 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// </summary>
-        public bool IsAcquire
+        public bool IsResourceAcquire
         {
             [DebuggerStepThrough]
             get
             {
-                return _isAcquire;
+                return _isResourceAcquire;
             }
         }
 
@@ -112,7 +113,7 @@ namespace Microsoft.Build.BackEnd
         public void Translate(ITranslator translator)
         {
             translator.Translate(ref _blockedGlobalRequestId);
-            translator.Translate(ref _isAcquire);
+            translator.Translate(ref _isResourceAcquire);
             translator.Translate(ref _isBlocking);
             translator.Translate(ref _numCores);
         }

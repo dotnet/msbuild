@@ -2180,10 +2180,15 @@ namespace Microsoft.Build.Execution
             PerformSchedulingActions(response);
         }
 
+        /// <summary>
+        /// Handles a resource request coming from a node.
+        /// </summary>
         private void HandleResourceRequest(int node, ResourceRequest request)
         {
-            if (request.IsAcquire)
+            if (request.IsResourceAcquire)
             {
+                // Resource request requires a response and may be blocking. Our continuation is effectively a callback
+                // to be called once at least one core becomes available.
                 _scheduler.RequestCores(request.BlockedRequestId, request.NumCores, request.IsBlocking).ContinueWith((Task<int> task) =>
                 {
                     var response = new ResourceResponse(request.BlockedRequestId, task.Result);
@@ -2192,9 +2197,10 @@ namespace Microsoft.Build.Execution
             }
             else
             {
+                // Resource release is a one-way call, no response is expected. We release the cores as instructed
+                // and kick the scheduler because there may be work waiting for cores to become available.
                 IEnumerable<ScheduleResponse> response = _scheduler.ReleaseCores(request.BlockedRequestId, request.NumCores);
                 PerformSchedulingActions(response);
-                // No response needed.
             }
         }
 
