@@ -128,11 +128,6 @@ namespace Microsoft.Build.BackEnd
         /// The SDK resolution service.
         /// </summary>
         SdkResolverService,
-
-        /// <summary>
-        /// Resource manager for tasks to use via <see cref="Microsoft.Build.Framework.IBuildEngine8.RequestCores(int)"/>.
-        /// </summary>
-        TaskResourceManager,
     }
 
     /// <summary>

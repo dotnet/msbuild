@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Components.Caching;
-using Microsoft.Build.BackEnd.Components.ResourceManager;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
 
@@ -79,8 +78,6 @@ namespace Microsoft.Build.BackEnd
 
             // SDK resolution
             _componentEntriesByType[BuildComponentType.SdkResolverService] = new BuildComponentEntry(BuildComponentType.SdkResolverService, MainNodeSdkResolverService.CreateComponent, CreationPattern.Singleton);
-
-            _componentEntriesByType[BuildComponentType.TaskResourceManager] = new BuildComponentEntry(BuildComponentType.TaskResourceManager, ResourceManagerService.CreateComponent, CreationPattern.Singleton);
         }
 
         /// <summary>

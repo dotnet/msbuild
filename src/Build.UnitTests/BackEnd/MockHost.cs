@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.ResourceManager;
 using Microsoft.Build.BackEnd.Logging;
 using System;
 using Microsoft.Build.BackEnd.SdkResolution;
@@ -60,8 +59,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private ISdkResolverService _sdkResolverService;
 
-        private readonly ResourceManagerService _taskResourceManager;
-
         #region SystemParameterFields
 
         #endregion;
@@ -105,9 +102,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _sdkResolverService = new MockSdkResolverService();
             ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
-
-            _taskResourceManager = new ResourceManagerService();
-            ((IBuildComponent)_taskResourceManager).InitializeComponent(this);
         }
 
         /// <summary>
@@ -176,7 +170,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
-                BuildComponentType.TaskResourceManager => (IBuildComponent)_taskResourceManager,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }

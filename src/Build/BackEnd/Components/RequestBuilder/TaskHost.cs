@@ -20,7 +20,6 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
-using Microsoft.Build.BackEnd.Components.ResourceManager;
 using System.Reflection;
 using Microsoft.Build.Eventing;
 

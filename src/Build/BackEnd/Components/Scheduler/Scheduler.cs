@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Components.ResourceManager;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -122,7 +121,6 @@ namespace Microsoft.Build.BackEnd
         /// The configuration cache.
         /// </summary>
         private IConfigCache _configCache;
-        private ResourceManagerService _resourceManager;
 
         /// <summary>
         /// The results cache.
@@ -612,7 +610,6 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
-            _resourceManager = (ResourceManagerService)_componentHost.GetComponent(BuildComponentType.TaskResourceManager);
         }
 
         /// <summary>
