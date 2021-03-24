@@ -386,17 +386,6 @@ namespace Microsoft.TemplateEngine.Cli
                 _paths.Delete(_paths.User.BaseDir);
             }
 
-            // Note: this leaves things in a weird state. Might be related to the localized caches.
-            // not sure, need to look into it.
-            if (reinitFlag || _commandInput.HasDebuggingFlag("--debug:reset-config"))
-            {
-                _paths.Delete(_paths.User.AliasesFile);
-                _paths.Delete(_paths.User.SettingsFile);
-                _settingsLoader.UserTemplateCache.DeleteAllLocaleCacheFiles();
-                _settingsLoader.Reload();
-                return false;
-            }
-
             if (!_paths.Exists(_paths.User.BaseDir) || !_paths.Exists(_paths.User.FirstRunCookie))
             {
                 if (!_commandInput.IsQuietFlagSpecified)
