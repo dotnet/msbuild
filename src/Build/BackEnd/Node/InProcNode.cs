@@ -524,6 +524,9 @@ namespace Microsoft.Build.BackEnd
             _shutdownEvent.Set();
         }
 
+        /// <summary>
+        /// Handles the ResourceResponse packet.
+        /// </summary>
         private void HandleResourceResponse(ResourceResponse response)
         {
             _buildRequestEngine.GrantResources(response);

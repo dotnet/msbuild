@@ -680,71 +680,17 @@ namespace Microsoft.Build.BackEnd
 
         #region IBuildEngine8 Members
 
-        int runningTotal = 0;
-        bool implicitCoreUsed = false;
-
-        public int RequestCores(int requestedCores)
-        {
-            lock (_callbackMonitor)
-            {
-                int coresAcquired = 0;
-
-                IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
-                if (implicitCoreUsed)
-                {
-                    coresAcquired = builderCallback.RequestCores(requestedCores, waitForCores: true);
-                }
-                else if (requestedCores > 1)
-                {
-                    coresAcquired = builderCallback.RequestCores(requestedCores - 1, waitForCores: false);
-                }
-                runningTotal += coresAcquired;
-
-                if (!implicitCoreUsed)
-                {
-                    // If we got nothing back from the actual system, pad it with the one implicit core
-                    // you get just for running--that way the first call never blocks and always returns >= 1
-                    implicitCoreUsed = true;
-                    coresAcquired++;
-                }
-
-                Debug.Assert(coresAcquired >= 1);
-
-                return coresAcquired;
-            }
-        }
-
-        public void ReleaseCores(int coresToRelease)
-        {
-            lock (_callbackMonitor)
-            {
-                if (implicitCoreUsed && coresToRelease > runningTotal)
-                {
-                    coresToRelease -= 1;
-                    implicitCoreUsed = false;
-                }
-
-                if (coresToRelease >= 1)
-                {
-                    IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
-                    builderCallback.ReleaseCores(coresToRelease);
-                    runningTotal -= coresToRelease;
-                }
-            }
-        }
-
-        internal void ReleaseAllCores()
-        {
-            ReleaseCores(runningTotal + (implicitCoreUsed ? 1 : 0));
-
-            runningTotal = 0;
-            implicitCoreUsed = false;
-        }
-
-        #endregion
-
-        #region IBuildEngine8 Members
         private ICollection<string> _warningsAsErrors;
+
+        /// <summary>
+        /// Additional cores granted to the task by the scheduler. Does not include the one implicit core automatically granted to all tasks.
+        /// </summary>
+        private int _additionalAcquiredCores = 0;
+
+        /// <summary>
+        /// True if the one implicit core has been allocated by <see cref="RequestCores"/>, false otherwise.
+        /// </summary>
+        private bool _isImplicitCoreUsed = false;
 
         /// <summary>
         /// Contains all warnings that should be logged as errors.
@@ -779,6 +725,79 @@ namespace Microsoft.Build.BackEnd
             // An empty set means all warnings are errors.
             return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
         }
+
+        /// <summary>
+        /// Allocates shared CPU resources. Called by a task when it's about to do potentially multi-threaded/multi-process work.
+        /// </summary>
+        /// <param name="requestedCores">The number of cores the task wants to use.</param>
+        /// <returns>The number of cores the task is allowed to use given the current state of the build. This number is always between
+        /// 1 and <paramref name="requestedCores"/>. If the task has allocated its one implicit core, this call may block, waiting for
+        /// at least one core to become available.</returns>
+        public int RequestCores(int requestedCores)
+        {
+            lock (_callbackMonitor)
+            {
+                IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
+
+                int coresAcquired = 0;
+                if (_isImplicitCoreUsed)
+                {
+                    coresAcquired = builderCallback.RequestCores(requestedCores, waitForCores: true);
+                }
+                else if (requestedCores > 1)
+                {
+                    coresAcquired = builderCallback.RequestCores(requestedCores - 1, waitForCores: false);
+                }
+                _additionalAcquiredCores += coresAcquired;
+
+                if (!_isImplicitCoreUsed)
+                {
+                    // Pad the result with the one implicit core. This ensures that first call never blocks and always returns >= 1.
+                    _isImplicitCoreUsed = true;
+                    coresAcquired++;
+                }
+
+                Debug.Assert(coresAcquired >= 1);
+                return coresAcquired;
+            }
+        }
+
+        /// <summary>
+        /// Frees shared CPU resources. Called by a task when it's finished doing multi-threaded/multi-process work.
+        /// </summary>
+        /// <param name="coresToRelease">The number of cores the task wants to return. This number must be between 0 and the number of cores
+        /// granted and not yet released.</param>
+        public void ReleaseCores(int coresToRelease)
+        {
+            lock (_callbackMonitor)
+            {
+                if (_isImplicitCoreUsed && coresToRelease > _additionalAcquiredCores)
+                {
+                    // Release the implicit core last, i.e. only if we're asked to release everything.
+                    coresToRelease -= 1;
+                    _isImplicitCoreUsed = false;
+                }
+
+                if (coresToRelease >= 1)
+                {
+                    IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
+                    builderCallback.ReleaseCores(coresToRelease);
+                    _additionalAcquiredCores -= coresToRelease;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Frees all CPU resources granted so far.
+        /// </summary>
+        internal void ReleaseAllCores()
+        {
+            ReleaseCores(_additionalAcquiredCores + (_isImplicitCoreUsed ? 1 : 0));
+
+            _additionalAcquiredCores = 0;
+            _isImplicitCoreUsed = false;
+        }
+
         #endregion
 
         /// <summary>

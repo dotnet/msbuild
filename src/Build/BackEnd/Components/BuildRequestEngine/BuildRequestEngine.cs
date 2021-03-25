@@ -468,7 +468,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    BuildRequestEntry entry = _requestsByGlobalRequestId[response.BlockedRequestId];
+                    BuildRequestEntry entry = _requestsByGlobalRequestId[response.GlobalRequestId];
                     entry.Builder.ContinueRequestWithResources(response);
                 },
                 isLastTask: false);

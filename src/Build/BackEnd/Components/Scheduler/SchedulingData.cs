@@ -154,11 +154,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets the total number of cores requested by executing and yielding build requests.
+        /// Gets the total number of cores granted to executing and yielding build requests.
         /// </summary>
-        public int ExplicitlyRequestedCores
+        public int ExplicitlyGrantedCores
         {
-            get { return _executingRequests.Sum(kvp => kvp.Value.RequestedCores) + _yieldingRequests.Sum(kvp => kvp.Value.RequestedCores); }
+            get { return _executingRequests.Sum(kvp => kvp.Value.GrantedCores) + _yieldingRequests.Sum(kvp => kvp.Value.GrantedCores); }
         }
 
         /// <summary>
@@ -486,7 +486,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Retrieves a request which has been assigned to a node and is in the executing, yielding, blocked, ready states.
+        /// Retrieves a request which has been assigned to a node and is in the executing, yielding, blocked, or ready states.
         /// </summary>
         public SchedulableRequest GetScheduledRequest(int globalRequestId)
         {
@@ -508,7 +508,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (KeyValuePair<int, SchedulableRequest> kvp in _yieldingRequests)
             {
-                if (kvp.Value.AssignedNode == nodeId && kvp.Value.RequestedCores > 0)
+                if (kvp.Value.AssignedNode == nodeId && kvp.Value.GrantedCores > 0)
                 {
                     // This node does not have an executing task on it. However, it does have a yielding task
                     // that has explicitly asked for cores which makes it "working".

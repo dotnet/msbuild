@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Diagnostics;
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -12,8 +10,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The global request id of the request which is being responded to.
         /// </summary>
-        private int _blockedGlobalRequestId;
+        private int _globalRequestId;
 
+        /// <summary>
+        /// Number of CPU cores being granted.
+        /// </summary>
         private int _numCores;
 
         /// <summary>
@@ -25,45 +26,28 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Constructor for granting cores.
         /// </summary>
-        internal ResourceResponse(int blockedGlobalRequestId, int numCores)
+        internal ResourceResponse(int globalRequestId, int numCores)
         {
-            _blockedGlobalRequestId = blockedGlobalRequestId;
+            _globalRequestId = globalRequestId;
             _numCores = numCores;
         }
 
         /// <summary>
         /// Returns the type of packet.
         /// </summary>
-        public NodePacketType Type
-        {
-            [DebuggerStepThrough]
-            get
-            { return NodePacketType.ResourceResponse; }
-        }
+        public NodePacketType Type => NodePacketType.ResourceResponse;
 
         /// <summary>
-        /// Accessor for the blocked request id.
+        /// Accessor for the global request id.
         /// </summary>
-        public int BlockedRequestId
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return _blockedGlobalRequestId;
-            }
-        }
+        public int GlobalRequestId => _globalRequestId;
 
         /// <summary>
+        /// Accessor for _numCores.
         /// </summary>
-        public int NumCores
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return _numCores;
-            }
-        }
+        public int NumCores => _numCores;
 
         #region INodePacketTranslatable Members
 
@@ -72,7 +56,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Translate(ITranslator translator)
         {
-            translator.Translate(ref _blockedGlobalRequestId);
+            translator.Translate(ref _globalRequestId);
             translator.Translate(ref _numCores);
         }
 

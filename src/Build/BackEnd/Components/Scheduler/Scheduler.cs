@@ -564,7 +564,7 @@ namespace Microsoft.Build.BackEnd
                 if (grantedCores > 0)
                 {
                     SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
-                    request.AddRequestedCores(grantedCores);
+                    request.AddGrantedCores(grantedCores);
                 }
                 return grantedCores;
             };
@@ -589,7 +589,7 @@ namespace Microsoft.Build.BackEnd
         public List<ScheduleResponse> ReleaseCores(int requestId, int coresToRelease)
         {
             SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
-            request.RemoveRequestedCores(coresToRelease);
+            request.RemoveGrantedCores(coresToRelease);
 
             // Releasing cores means that we may be able to schedule more work.
             List<ScheduleResponse> responses = new List<ScheduleResponse>();
@@ -1364,13 +1364,13 @@ namespace Microsoft.Build.BackEnd
                 _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
             };
 
-            return Math.Max(0, limit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyRequestedCores + _schedulingData.YieldingRequestsCount));
+            return Math.Max(0, limit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyGrantedCores + _schedulingData.YieldingRequestsCount));
         }
 
         private int GetAvailableCoresForExplicitRequests()
         {
             int implicitlyAllocatedCores = ((_schedulingData.ExecutingRequestsCount - 1) * _nodeCoreAllocationWeight) / 100;
-            int explicitlyAllocatedCores = _schedulingData.ExplicitlyRequestedCores;
+            int explicitlyAllocatedCores = _schedulingData.ExplicitlyGrantedCores;
             return Math.Max(0, _coreLimit - (implicitlyAllocatedCores + explicitlyAllocatedCores));
         }
 

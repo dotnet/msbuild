@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="requestedCores">Number of logical cores being requested.</param>
         /// <param name="waitForCores">True to make the request block and wait for at least one core.</param>
         /// <returns>Number of logical cores actually granted. If <paramref name="waitForCores"/> is false, the call can return
-        /// zero. Otherwise the return value is always positive.</returns>
+        /// zero. Otherwise the return value is positive.</returns>
         int RequestCores(int requestedCores, bool waitForCores);
 
         /// <summary>

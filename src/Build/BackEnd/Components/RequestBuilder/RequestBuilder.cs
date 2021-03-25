@@ -497,10 +497,7 @@ namespace Microsoft.Build.BackEnd
             RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
             WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueWithResourcesEvent };
-
-            int handle = WaitHandle.WaitAny(handles);
-
-            if (handle == 0)
+            if (WaitHandle.WaitAny(handles) == 0)
             {
                 // We've been aborted
                 throw new BuildAbortedException();
