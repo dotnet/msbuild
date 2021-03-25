@@ -32,7 +32,11 @@ namespace Microsoft.Build.Evaluation
                 BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
             try
             {
+#if FEATURE_ASSEMBLYLOADCONTEXT
                 var NuGetAssembly = Assembly.LoadFrom(Path.Combine(assemblyDirectory, "NuGet.Frameworks.dll"));
+#else
+                var NuGetAssembly = Assembly.LoadFile(Path.Combine(assemblyDirectory, "NuGet.Frameworks.dll"));
+#endif
                 var NuGetFramework = NuGetAssembly.GetType("NuGet.Frameworks.NuGetFramework");
                 var NuGetFrameworkCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.CompatibilityProvider");
                 var NuGetFrameworkDefaultCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.DefaultCompatibilityProvider");
