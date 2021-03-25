@@ -108,7 +108,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A queue of RequestCores requests waiting for at least one core to become available.
         /// </summary>
-        private Queue<TaskCompletionSource<int>> _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
+        private Queue<TaskCompletionSource<int>> _pendingRequestCoresCallbacks;
 
         #endregion
 
@@ -513,8 +513,8 @@ namespace Microsoft.Build.BackEnd
             DumpRequests();
             _schedulingPlan = null;
             _schedulingData = new SchedulingData();
-            _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
             _availableNodes = new Dictionary<int, NodeInfo>(8);
+            _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
             _currentInProcNodeCount = 0;
             _currentOutOfProcNodeCount = 0;
 
@@ -1346,23 +1346,6 @@ namespace Microsoft.Build.BackEnd
             request.ResumeExecution(nodeId);
         }
 
-        private int GetAvailableCoresForScheduling()
-        {
-            if (_schedulingUnlimited)
-            {
-                return int.MaxValue;
-            }
-
-            int limit = _componentHost.BuildParameters.MaxNodeCount switch
-            {
-                1 => 1,
-                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
-                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
-            };
-
-            return Math.Max(0, limit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyGrantedCores + _schedulingData.YieldingRequestsCount));
-        }
-
         /// <summary>
         /// Returns the maximum number of cores that can be returned from a RequestCores() call at the moment.
         /// </summary>
@@ -1390,10 +1373,23 @@ namespace Microsoft.Build.BackEnd
 
             // We're at our limit of schedulable requests if: 
             // (1) MaxNodeCount requests are currently executing
-            // (2) Fewer than MaxNodeCount requests are currently executing but the sum of executing 
-            //     and yielding requests exceeds the limit set out above.  
-            return GetAvailableCoresForScheduling() == 0 ||
-                   _schedulingData.ExecutingRequestsCount >= _componentHost.BuildParameters.MaxNodeCount;
+            if (_schedulingData.ExecutingRequestsCount >= _componentHost.BuildParameters.MaxNodeCount)
+            {
+                return true;
+            }
+
+            // (2) Fewer than MaxNodeCount requests are currently executing but the sum of executing request,
+            //     yielding requests, and explicitly granted cores exceeds the limit set out below.
+            int limit = _componentHost.BuildParameters.MaxNodeCount switch
+            {
+                1 => 1,
+                2 => _componentHost.BuildParameters.MaxNodeCount + 1 + _nodeLimitOffset,
+                _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
+            };
+
+            return _schedulingData.ExecutingRequestsCount +
+                   _schedulingData.YieldingRequestsCount +
+                   _schedulingData.ExplicitlyGrantedCores >= limit;
         }
 
         /// <summary>

@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-using System.Linq;
 
 namespace Microsoft.Build.BackEnd
 {
