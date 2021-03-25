@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    internal class WorkloadDefinition
+    public class WorkloadDefinition
     {
         public WorkloadDefinition(
             WorkloadDefinitionId id, bool isAbstract, string? description, WorkloadDefinitionKind kind, List<WorkloadDefinitionId>? extends,
@@ -29,7 +29,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public List<string>? Platforms { get; }
     }
 
-    internal enum WorkloadDefinitionKind
+    public enum WorkloadDefinitionKind
     {
         Dev,
         Build

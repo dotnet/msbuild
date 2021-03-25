@@ -14,7 +14,7 @@ using JsonTokenType = Newtonsoft.Json.JsonToken;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    internal partial class WorkloadManifestReader
+    public partial class WorkloadManifestReader
     {
         private static void ConsumeToken(ref Utf8JsonStreamReader reader, JsonTokenType expected)
         {
