@@ -1,6 +1,6 @@
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
-using Microsoft.TemplateEngine.Abstractions.TemplatePackages;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
 using System;
@@ -12,18 +12,18 @@ using System.Threading.Tasks;
 
 namespace dotnet_new3
 {
-    class BuiltInTemplatePackagesProviderFactory : ITemplatePackagesProviderFactory
+    class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
         public string Name => "new3 BuiltIn";
 
         public Guid Id { get; } = new Guid("{3227D09D-C1EA-48F1-A33B-1F132BFD9F06}");
 
-        public ITemplatePackagesProvider CreateProvider(IEngineEnvironmentSettings settings)
+        public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
         {
             return new BuiltInTemplatePackagesProvider(this, settings);
         }
 
-        class BuiltInTemplatePackagesProvider : ITemplatePackagesProvider
+        class BuiltInTemplatePackagesProvider : ITemplatePackageProvider
         {
             private readonly IEngineEnvironmentSettings _settings;
 
@@ -33,9 +33,9 @@ namespace dotnet_new3
                 Factory = factory;
             }
 
-            public ITemplatePackagesProviderFactory Factory { get; }
+            public ITemplatePackageProviderFactory Factory { get; }
 
-            event Action ITemplatePackagesProvider.SourcesChanged
+            event Action ITemplatePackageProvider.SourcesChanged
             {
                 add { }
                 remove { }

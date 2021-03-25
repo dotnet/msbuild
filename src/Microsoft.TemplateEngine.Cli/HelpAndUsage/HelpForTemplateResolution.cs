@@ -10,7 +10,7 @@ using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Utils;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.TableOutput;
-using Microsoft.TemplateEngine.Abstractions.TemplatePackages;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using System.Threading.Tasks;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage

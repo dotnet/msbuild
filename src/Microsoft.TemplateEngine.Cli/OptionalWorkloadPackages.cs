@@ -1,7 +1,7 @@
 using Microsoft.DotNet.TemplateLocator;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
-using Microsoft.TemplateEngine.Abstractions.TemplatePackages;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Mount.Archive;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TemplateEngine.Utils
 {
-    internal class OptionalWorkloadPackages : ITemplatePackagesProviderFactory
+    internal class OptionalWorkloadPackages : ITemplatePackageProviderFactory
     {
         public static readonly Guid FactoryId = new Guid("{FAE2BB7C-054D-481B-B75C-E9F524193D56}");
 
@@ -21,24 +21,24 @@ namespace Microsoft.TemplateEngine.Utils
 
         public string Name => "OptionalWorkloads";
 
-        public ITemplatePackagesProvider CreateProvider(IEngineEnvironmentSettings settings)
+        public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
         {
             return new OptionalWorkloadProvider(this, settings);
         }
 
-        class OptionalWorkloadProvider : ITemplatePackagesProvider
+        class OptionalWorkloadProvider : ITemplatePackageProvider
         {
             private IEngineEnvironmentSettings EnvironmentSettings;
 
-            public OptionalWorkloadProvider(ITemplatePackagesProviderFactory factory, IEngineEnvironmentSettings settings)
+            public OptionalWorkloadProvider(ITemplatePackageProviderFactory factory, IEngineEnvironmentSettings settings)
             {
                 this.Factory = factory;
                 this.EnvironmentSettings = settings;
             }
 
-            public ITemplatePackagesProviderFactory Factory { get; }
+            public ITemplatePackageProviderFactory Factory { get; }
 
-            event Action ITemplatePackagesProvider.SourcesChanged
+            event Action ITemplatePackageProvider.SourcesChanged
             {
                 add { }
                 remove { }
