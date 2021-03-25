@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         private int _nodeLimitOffset;
 
         /// <summary>
-        /// NativeMethodsShared.GetLogicalCoreCount() or MSBUILDCORELIMIT if set
+        /// The result of calling NativeMethodsShared.GetLogicalCoreCount() unless overriden with MSBUILDCORELIMIT.
         /// </summary>
         private int _coreLimit;
 
@@ -106,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         private SchedulingData _schedulingData;
 
         /// <summary>
-        /// A queue of RequestCores request waiting for at least one core to become available.
+        /// A queue of RequestCores requests waiting for at least one core to become available.
         /// </summary>
         private Queue<TaskCompletionSource<int>> _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
 
@@ -201,10 +201,6 @@ namespace Microsoft.Build.BackEnd
             {
                 _coreLimit = NativeMethodsShared.GetLogicalCoreCount();
             }
-            // Tasks are factoring in the "implicit core" so let's make the maximum return value from
-            // RequestCore exactly the number of cores.
-            _coreLimit = Math.Max(0, _coreLimit - 1);
-
             if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDNODECOREALLOCATIONWEIGHT"), out _nodeCoreAllocationWeight)
                 || _nodeCoreAllocationWeight <= 0
                 || _nodeCoreAllocationWeight > 100)
@@ -1367,11 +1363,19 @@ namespace Microsoft.Build.BackEnd
             return Math.Max(0, limit - (_schedulingData.ExecutingRequestsCount + _schedulingData.ExplicitlyGrantedCores + _schedulingData.YieldingRequestsCount));
         }
 
+        /// <summary>
+        /// Returns the maximum number of cores that can be returned from a RequestCores() call at the moment.
+        /// </summary>
         private int GetAvailableCoresForExplicitRequests()
         {
-            int implicitlyAllocatedCores = ((_schedulingData.ExecutingRequestsCount - 1) * _nodeCoreAllocationWeight) / 100;
-            int explicitlyAllocatedCores = _schedulingData.ExplicitlyGrantedCores;
-            return Math.Max(0, _coreLimit - (implicitlyAllocatedCores + explicitlyAllocatedCores));
+            // At least one core is always implicitly granted to the node making the request.
+            // If _nodeCoreAllocationWeight is more than zero, it can increase this value by the specified fraction of executing nodes.
+            int implicitlyGrantedCores = Math.Max(1, ((_schedulingData.ExecutingRequestsCount - 1) * _nodeCoreAllocationWeight) / 100);
+
+            // The number of explicitly granted cores is a sum of everything we've granted via RequestCores() so far across all nodes.
+            int explicitlyGrantedCores = _schedulingData.ExplicitlyGrantedCores;
+
+            return Math.Max(0, _coreLimit - (implicitlyGrantedCores + explicitlyGrantedCores));
         }
 
         /// <summary>

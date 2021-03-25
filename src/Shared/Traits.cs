@@ -86,12 +86,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
 
-        /// <summary>
-        /// Allow tasks to collect more resources than the default.
-        /// </summary>
-        public readonly int ResourceManagerOversubscription = ParseIntFromEnvironmentVariableOrDefault("MSBUILDRESOURCEMANAGEROVERSUBSCRIPTION", 0); // Default to maxcpucount
-
-
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)

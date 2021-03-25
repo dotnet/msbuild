@@ -33,7 +33,6 @@ namespace Microsoft.Build.UnitTests
      **************************************************************************/
     internal sealed class MockEngine : IBuildEngine8
     {
-        private readonly string ResourceSemaphoreName = $"MSBuildTestResourceSemaphore{Guid.NewGuid().ToString()}";
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
         private readonly StringBuilder _log = new StringBuilder();
@@ -504,6 +503,5 @@ namespace Microsoft.Build.UnitTests
         {
             return false;
         }
-
     }
 }
