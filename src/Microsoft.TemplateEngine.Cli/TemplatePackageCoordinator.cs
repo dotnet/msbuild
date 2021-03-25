@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Installer;
-using Microsoft.TemplateEngine.Abstractions.TemplatePackages;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.NuGet;
@@ -156,7 +156,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             // In future we might want give user ability to pick IManagerSourceProvider by Name or GUID
-            var managedSourceProvider = _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedProvider(GlobalSettingsTemplatePackagesProviderFactory.FactoryId);
+            var managedSourceProvider = _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetBuiltInManagedProvider(InstallationScope.Global);
             List<InstallRequest> installRequests = new List<InstallRequest>();
             foreach (string unexpandedInstallRequest in commandInput.ToInstallList)
             {
@@ -170,15 +170,7 @@ namespace Microsoft.TemplateEngine.Cli
                         version = splitByColons[1];
                     }
 
-                    installRequests.Add(new InstallRequest()
-                    {
-                        Identifier = identifier,
-                        Version = version,
-                        Details = details,
-                        //TODO: Not needed, for now, but in future when we have more installers then just NuGet and Folder
-                        //give user ability to set InstallerName
-                        //InstallerName = _commandInput.InstallerName,
-                    });
+                    installRequests.Add(new InstallRequest(identifier, version, details: details));
                 }
             }
 
@@ -225,11 +217,12 @@ namespace Microsoft.TemplateEngine.Cli
             bool applyUpdates = commandInput.ApplyUpdates;
             bool allTemplatesUpToDate = true;
             CreationResultStatus success = CreationResultStatus.Success;
-            var managedSourcedGroupedByProvider = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedSourcesGroupedByProvider().ConfigureAwait(false);
+            var managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackages().ConfigureAwait(false);
 
-            foreach (var (provider, sources) in managedSourcedGroupedByProvider)
+            foreach (var packagesGrouping in managedTemplatePackages.GroupBy(package => package.ManagedProvider))
             {
-                IReadOnlyList<CheckUpdateResult> checkUpdateResults = await provider.GetLatestVersionsAsync(sources, cancellationToken).ConfigureAwait(false);
+                var provider = packagesGrouping.Key;
+                IReadOnlyList<CheckUpdateResult> checkUpdateResults = await provider.GetLatestVersionsAsync(packagesGrouping, cancellationToken).ConfigureAwait(false);
                 DisplayUpdateCheckResults(checkUpdateResults, commandInput, showUpdates: !applyUpdates);
                 if (checkUpdateResults.Any(result => !result.Success))
                 {
@@ -251,7 +244,7 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Output.WriteLine(
                             string.Format(
                                 LocalizableStrings.TemplatesPackageCoordinator_Info_PackageNameVersion,
-                                update.Source.Identifier,
+                                update.TemplatePackage.Identifier,
                                 update.LatestVersion));
                     }
                     Reporter.Output.WriteLine();
@@ -263,7 +256,7 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             success = CreationResultStatus.CreateFailed;
                         }
-                        await DisplayInstallResultAsync(commandInput, updateResult.UpdateRequest.Source?.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
+                        await DisplayInstallResultAsync(commandInput, updateResult.UpdateRequest.TemplatePackage?.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -292,10 +285,10 @@ namespace Microsoft.TemplateEngine.Cli
                 return result;
             }
 
-            Dictionary<IManagedTemplatePackagesProvider, List<IManagedTemplatePackage>> sourcesToUninstall;
+            Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>> sourcesToUninstall;
             (result, sourcesToUninstall) = await DetermineSourcesToUninstall(commandInput, cancellationToken).ConfigureAwait(false);
 
-            foreach (KeyValuePair<IManagedTemplatePackagesProvider, List<IManagedTemplatePackage>> providerSourcesToUninstall in sourcesToUninstall)
+            foreach (KeyValuePair<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>> providerSourcesToUninstall in sourcesToUninstall)
             {
                 IReadOnlyList<UninstallResult> uninstallResults = await providerSourcesToUninstall.Key.UninstallAsync(providerSourcesToUninstall.Value, cancellationToken).ConfigureAwait(false);
                 foreach (UninstallResult uninstallResult in uninstallResults)
@@ -305,11 +298,11 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Output.WriteLine(
                             string.Format(
                                 LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Info_Success,
-                                uninstallResult.Source.DisplayName));
+                                uninstallResult.TemplatePackage.DisplayName));
                     }
                     else
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_GenericError, uninstallResult.Source.DisplayName, uninstallResult.ErrorMessage));
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_GenericError, uninstallResult.TemplatePackage.DisplayName, uninstallResult.ErrorMessage));
                         result = CreationResultStatus.CreateFailed;
                     }
                 }
@@ -317,91 +310,89 @@ namespace Microsoft.TemplateEngine.Cli
             return result;
         }
 
-        private async Task<(CreationResultStatus, Dictionary<IManagedTemplatePackagesProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstall(INewCommandInput commandInput, CancellationToken cancellationToken)
+        private async Task<(CreationResultStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstall(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
 
             CreationResultStatus result = CreationResultStatus.Success;
-            IReadOnlyList<(IManagedTemplatePackagesProvider provider, IReadOnlyList<IManagedTemplatePackage> sources)> managedSourcedGroupedByProvider = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedSourcesGroupedByProvider().ConfigureAwait(false);
+            IReadOnlyList<IManagedTemplatePackage> templatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackages().ConfigureAwait(false);
 
-            var sourcesToUninstall = new Dictionary<IManagedTemplatePackagesProvider, List<IManagedTemplatePackage>>();
-            foreach (string sourceIdentifier in commandInput.ToUninstallList)
+            var packagesToUninstall = new Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>();
+            foreach (string templatePackageIdentifier in commandInput.ToUninstallList)
             {
-                bool sourceIdentified = false;
-                foreach (var providerSources in managedSourcedGroupedByProvider)
-                {
-                    foreach (var source in providerSources.sources)
-                    {
-                        if (source.Identifier.Equals(sourceIdentifier, StringComparison.OrdinalIgnoreCase))
-                        {
-                            sourceIdentified = true;
+                bool templatePackageIdentified = false;
 
-                            if (sourcesToUninstall.TryGetValue(providerSources.provider, out List<IManagedTemplatePackage> sources))
-                            {
-                                sources.Add(source);
-                            }
-                            else
-                            {
-                                sourcesToUninstall[providerSources.provider] = new List<IManagedTemplatePackage>() { source };
-                            }
+                foreach (IManagedTemplatePackage templatePackage in templatePackages)
+                {
+                    if (templatePackage.Identifier.Equals(templatePackageIdentifier, StringComparison.OrdinalIgnoreCase))
+                    {
+                        templatePackageIdentified = true;
+                        if (packagesToUninstall.TryGetValue(templatePackage.ManagedProvider, out List<IManagedTemplatePackage> packages))
+                        {
+                            packages.Add(templatePackage);
+                        }
+                        else
+                        {
+                            packagesToUninstall[templatePackage.ManagedProvider] = new List<IManagedTemplatePackage>() { templatePackage };
                         }
                     }
                 }
 
-                if (!sourceIdentified)
+                if (templatePackageIdentified)
                 {
-                    result = CreationResultStatus.NotFound;
-                    Reporter.Error.WriteLine(
-                        string.Format(
-                            LocalizableStrings.TemplatesPackageCoordinator_Error_PackageNotFound,
-                            sourceIdentifier).Bold().Red());
-                    if (await IsTemplateShortNameAsync(sourceIdentifier, cancellationToken).ConfigureAwait(false))
+                    continue;
+                }
+
+                result = CreationResultStatus.NotFound;
+                Reporter.Error.WriteLine(
+                    string.Format(
+                        LocalizableStrings.TemplatesPackageCoordinator_Error_PackageNotFound,
+                        templatePackageIdentifier).Bold().Red());
+                if (await IsTemplateShortNameAsync(templatePackageIdentifier, cancellationToken).ConfigureAwait(false))
+                {
+                    var packages = await GetTemplatePackagesByShortNameAsync(templatePackageIdentifier, cancellationToken).ConfigureAwait(false);
+                    var managedPackages = packages.OfType<IManagedTemplatePackage>();
+                    if (managedPackages.Any())
                     {
-                        var packages = await GetTemplatePackagesByShortNameAsync(sourceIdentifier, cancellationToken).ConfigureAwait(false);
-                        var managedPackages = packages.OfType<IManagedTemplatePackage>();
-                        if (managedPackages.Any())
+                        Reporter.Error.WriteLine(
+                              string.Format(
+                                  LocalizableStrings.TemplatesPackageCoordinator_Error_TemplateIncludedToPackages,
+                                  templatePackageIdentifier).Bold().Red());
+                        foreach (IManagedTemplatePackage managedPackage in managedPackages)
                         {
+                            IEnumerable<ITemplateInfo> templates = await managedPackage.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
                             Reporter.Error.WriteLine(
                                   string.Format(
-                                      LocalizableStrings.TemplatesPackageCoordinator_Error_TemplateIncludedToPackages,
-                                      sourceIdentifier).Bold().Red());
-                            foreach (IManagedTemplatePackage managedPackage in managedPackages)
-                            {
-                                IEnumerable<ITemplateInfo> templates = await managedPackage.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
-                                Reporter.Error.WriteLine(
-                                      string.Format(
-                                          LocalizableStrings.TemplatesPackageCoordinator_Error_PackageNameContainsTemplates,
-                                          managedPackage.DisplayName,
-                                          templates.Count()).Bold().Red());
-                            }
-                            Reporter.Error.WriteLine(
-                                  string.Format(
-                                      LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint,
-                                      commandInput.CommandName,
-                                      managedPackages?.First().Identifier).Bold().Red());
-                            //TODO:
-                            //Reporter.Error.WriteLine($"To list the templates installed in a package, use dotnet new3 <new option> <package name>.");
+                                      LocalizableStrings.TemplatesPackageCoordinator_Error_PackageNameContainsTemplates,
+                                      managedPackage.DisplayName,
+                                      templates.Count()).Bold().Red());
                         }
-                        else
-                        {
-                            Reporter.Error.WriteLine(
-                                  string.Format(
-                                      LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint,
-                                      commandInput.CommandName).Bold().Red());
-                        }
+                        Reporter.Error.WriteLine(
+                              string.Format(
+                                  LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint,
+                                  commandInput.CommandName,
+                                  managedPackages?.First().Identifier).Bold().Red());
+                        //TODO:
+                        //Reporter.Error.WriteLine($"To list the templates installed in a package, use dotnet new3 <new option> <package name>.");
                     }
                     else
                     {
                         Reporter.Error.WriteLine(
                               string.Format(
                                   LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint,
-                                  commandInput.CommandName));
+                                  commandInput.CommandName).Bold().Red());
                     }
-
+                }
+                else
+                {
+                    Reporter.Error.WriteLine(
+                          string.Format(
+                              LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint,
+                              commandInput.CommandName));
                 }
             }
-            return (result, sourcesToUninstall);
+            return (result, packagesToUninstall);
         }
 
         private async Task<IEnumerable<ITemplatePackage>> GetTemplatePackagesByShortNameAsync (string sourceIdentifier, CancellationToken cancellationToken)
@@ -466,9 +457,9 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     if (!result.IsLatestVersion && showUpdates)
                     {
-                        string displayString = $"{result.Source.Identifier}::{result.Source.Version}";         // the package::version currently installed
+                        string displayString = $"{result.TemplatePackage.Identifier}::{result.TemplatePackage.Version}";         // the package::version currently installed
                         Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_UpdateAvailable, displayString));
-                        string installString = $"{result.Source.Identifier}::{result.LatestVersion}"; // the package::version that will be installed
+                        string installString = $"{result.TemplatePackage.Identifier}::{result.LatestVersion}"; // the package::version that will be installed
                         Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_InstallCommand, commandInput.CommandName, installString));
                     }
                 }
@@ -480,26 +471,26 @@ namespace Microsoft.TemplateEngine.Cli
                             Reporter.Error.WriteLine(
                                 string.Format(
                                     LocalizableStrings.TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds,
-                                    result.Source.DisplayName).Bold().Red());
+                                    result.TemplatePackage.DisplayName).Bold().Red());
                             break;
                         case InstallerErrorCode.PackageNotFound:
                             Reporter.Error.WriteLine(
                                 string.Format(
                                     LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotFound,
-                                    result.Source.DisplayName).Bold().Red());
+                                    result.TemplatePackage.DisplayName).Bold().Red());
                             break;
                         case InstallerErrorCode.UnsupportedRequest:
                             Reporter.Error.WriteLine(
                                 string.Format(
                                     LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotSupported,
-                                    result.Source.DisplayName).Bold().Red());
+                                    result.TemplatePackage.DisplayName).Bold().Red());
                             break;
                         case InstallerErrorCode.GenericError:
                         default:
                             Reporter.Error.WriteLine(
                                 string.Format(
                                     LocalizableStrings.TemplatesPackageCoordinator_Update_Error_GenericError,
-                                    result.Source.DisplayName,
+                                    result.TemplatePackage.DisplayName,
                                     result.ErrorMessage).Bold().Red());
                             break;
                     }
@@ -581,8 +572,8 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(
                     string.Format(
                         LocalizableStrings.TemplatesPackageCoordinator_lnstall_Info_Success,
-                        result.Source.DisplayName));
-                IEnumerable<ITemplateInfo> templates = await result.Source.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
+                        result.TemplatePackage.DisplayName));
+                IEnumerable<ITemplateInfo> templates = await result.TemplatePackage.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
                 HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
             }
             else
