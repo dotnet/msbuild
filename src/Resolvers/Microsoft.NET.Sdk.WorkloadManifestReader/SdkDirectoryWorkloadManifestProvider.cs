@@ -12,7 +12,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         private readonly string _sdkRootPath;
         private readonly string _sdkVersionBand;
-        private readonly string [] _manifestDirectories;
+        private readonly string[] _manifestDirectories;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
             : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
@@ -80,7 +80,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectories[0]))
                     {
-                        yield return workloadManifestDirectory;
+                        if (!Path.GetFileName(workloadManifestDirectory).StartsWith("."))
+                        {
+                            yield return workloadManifestDirectory;
+                        }
                     }
                 }
             }
@@ -101,7 +104,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 foreach (var workloadManifestDirectory in directoriesWithManifests.Values)
                 {
-                    yield return workloadManifestDirectory;
+                    if (!Path.GetFileName(workloadManifestDirectory).StartsWith("."))
+                    {
+                        yield return workloadManifestDirectory;
+                    }
                 }
             }
         }
