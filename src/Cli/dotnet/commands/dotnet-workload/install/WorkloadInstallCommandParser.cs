@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
 
@@ -35,6 +34,8 @@ namespace Microsoft.DotNet.Cli
             ArgumentHelpName = LocalizableStrings.FrameworkOptionName
         };
 
+        public static readonly Option SkipManifestUpdateOption = new Option<bool>("--skip-manifest-update", LocalizableStrings.SkipManifestUpdateOptionDescription);
+
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
 
         public static Command GetCommand()
@@ -46,6 +47,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
             command.AddOption(FrameworkOption);
+            command.AddOption(SkipManifestUpdateOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.NoCacheOption);

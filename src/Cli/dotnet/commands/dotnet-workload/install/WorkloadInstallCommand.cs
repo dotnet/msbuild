@@ -3,29 +3,42 @@
 
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
-using System.Linq;
+using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Product = Microsoft.DotNet.Cli.Utils.Product;
+using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class WorkloadInstallCommand : CommandBase
     {
-        private readonly string _framework;
+        private readonly IReporter _reporter;
+        private readonly bool _skipManifestUpdate;
         private IReadOnlyCollection<string> _workloadIds;
+        private WorkloadInstallManager _workloadInstallManager;
 
         public WorkloadInstallCommand(
-            ParseResult parseResult)
+            ParseResult parseResult,
+            IReporter reporter = null)
             : base(parseResult)
         {
-            _framework = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FrameworkOption);
+            _reporter = reporter ?? Reporter.Output;
+            _skipManifestUpdate = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.SkipManifestUpdateOption);
             _workloadIds = parseResult.ValueForArgument<IReadOnlyCollection<string>>(WorkloadInstallCommandParser.WorkloadIdArgument);
+
+            var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
+            var sdkVersion = new ReleaseVersion(Product.Version);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion.ToString());
+            var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion.ToString());
+            var workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter);
+            _workloadInstallManager = new WorkloadInstallManager(_reporter, workloadInstaller, workloadResolver);
         }
 
         public override int Execute()
         {
-            // TODO stub
-            Reporter.Output.WriteLine($"WIP workload install {string.Join("; ",_workloadIds)}");
+            _workloadInstallManager.InstallWorkloads(_workloadIds, _skipManifestUpdate);
             return 0;
         }
     }

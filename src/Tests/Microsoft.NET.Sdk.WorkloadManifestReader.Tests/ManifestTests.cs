@@ -14,15 +14,17 @@ namespace ManifestReaderTests
     public class ManifestTests : SdkTest
     {
         private const string fakeRootPath = "fakeRootPath";
+        private readonly string ManifestPath;
 
         public ManifestTests(ITestOutputHelper log) : base(log)
         {
+            ManifestPath = Path.Combine(_testAssetsManager.GetTestManifestsDirectory(), "SampleManifest", "Sample.json");
         }
 
         [Fact]
         public void ItCanDeserialize()
         {
-            using (FileStream fsSource = new FileStream(Path.Combine("Manifests", "Sample.json"), FileMode.Open, FileAccess.Read))
+            using (FileStream fsSource = new FileStream(ManifestPath, FileMode.Open, FileAccess.Read))
             {
                 var result = WorkloadManifestReader.ReadWorkloadManifest(fsSource);
                 result.Version.Should().Be(5);
@@ -38,7 +40,7 @@ namespace ManifestReaderTests
         [Fact]
         public void AliasedPackPath()
         {
-            var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
+            var manifestProvider = new FakeManifestProvider(ManifestPath);
             var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath });
 
             resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
@@ -95,7 +97,7 @@ namespace ManifestReaderTests
                 Directory.CreateDirectory(additionalPackPath);
             }
 
-            var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
+            var manifestProvider = new FakeManifestProvider(ManifestPath);
             var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
 
             var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");
@@ -117,7 +119,7 @@ namespace ManifestReaderTests
             var defaultPackPath = Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7");
             Directory.CreateDirectory(defaultPackPath);
 
-            var manifestProvider = new FakeManifestProvider(Path.Combine("Manifests", "Sample.json"));
+            var manifestProvider = new FakeManifestProvider(ManifestPath);
             var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
 
             var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");

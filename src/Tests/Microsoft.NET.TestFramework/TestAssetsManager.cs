@@ -109,6 +109,11 @@ namespace Microsoft.NET.TestFramework
             return testProjectDirectory;
         }
 
+        public string GetTestManifestsDirectory()
+        {
+            return Path.Combine(TestAssetsRoot, "TestManifests");
+        }
+
         public static string GetTestDestinationDirectoryPath(
             string testProjectName,
             string callingMethodAndFileName,

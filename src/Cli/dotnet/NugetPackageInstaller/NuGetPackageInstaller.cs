@@ -15,9 +15,9 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
 {
-    internal class NuGetPackageInstaller
+    internal class NuGetPackageInstaller : INuGetPackageInstaller
     {
-        private static readonly string sourceUrl = "https://api.nuget.org/v3/index.json";
+        private static readonly string sourceUrl = "https://pkgs.dev.azure.com/azure-public/vside/_packaging/xamarin-impl/nuget/v3/index.json";
         private readonly ILogger _logger;
         private readonly string _packageInstallDir;
 
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
                         XmlDocFileSaveMode.None,
                         clientPolicyContext: null,
                         logger: _logger);
-            var packagePathResolver = new PackagePathResolver(targetFolder);
+            var packagePathResolver = new NuGetPackagePathResolver(targetFolder);
             var cancellationToken = CancellationToken.None;
 
             return await PackageExtractor.ExtractPackageAsync(
