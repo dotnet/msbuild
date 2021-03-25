@@ -39,6 +39,7 @@ done
 RepoRoot="$ScriptRoot/.."
 ArtifactsDir="$RepoRoot/artifacts"
 Stage1Dir="$RepoRoot/stage1"
+PerfLogDir="$ArtifactsDir/log/$configuration/PerformanceLogs"
 
 . "$ScriptRoot/common/tools.sh"
 InitializeDotNetCli true
@@ -85,6 +86,9 @@ mv $ArtifactsDir $Stage1Dir
 
 # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
 export MSBUILDDONOTLAUNCHDEBUGGER=true
+
+# Opt into performance logging.
+export DOTNET_PERFLOG_DIR=$PerfLogDir
 
 # Prior to 3.0, the Csc task uses this environment variable to decide whether to run
 # a CLI host or directly execute the compiler.
