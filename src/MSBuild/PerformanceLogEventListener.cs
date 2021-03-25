@@ -56,7 +56,7 @@ namespace Microsoft.Build.CommandLine
                 string logDirectory = Environment.GetEnvironmentVariable(PerfLogDirEnvVar);
                 Console.WriteLine("!!! DOTNET_PERFLOG_DIR: {0}", logDirectory);
 
-                if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(FileUtilities.TrimAndStripAnyQuotes(logDirectory)).Exists)
+                if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(logDirectory).Exists)
                 {
                     eventListener = new PerformanceLogEventListener();
                     eventListener.Initialize(logDirectory);
