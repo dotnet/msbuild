@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Watcher
                 using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter);
                 try
                 {
-                    using var hotReload = new HotReload(_reporter);
+                    using var hotReload = new HotReload(_processRunner, _reporter);
                     await hotReload.InitializeAsync(context, cancellationToken);
 
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);
