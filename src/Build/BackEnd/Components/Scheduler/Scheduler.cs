@@ -559,8 +559,7 @@ namespace Microsoft.Build.BackEnd
                 int grantedCores = Math.Min(requestedCores, availableCores);
                 if (grantedCores > 0)
                 {
-                    SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
-                    request.AddGrantedCores(grantedCores);
+                    _schedulingData.GrantCoresToRequest(requestId, grantedCores);
                 }
                 return grantedCores;
             };
@@ -584,8 +583,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public List<ScheduleResponse> ReleaseCores(int requestId, int coresToRelease)
         {
-            SchedulableRequest request = _schedulingData.GetScheduledRequest(requestId);
-            request.RemoveGrantedCores(coresToRelease);
+            _schedulingData.RemoveCoresFromRequest(requestId, coresToRelease);
 
             // Releasing cores means that we may be able to schedule more work.
             List<ScheduleResponse> responses = new List<ScheduleResponse>();

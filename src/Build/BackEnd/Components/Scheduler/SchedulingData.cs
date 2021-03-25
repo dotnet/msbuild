@@ -87,6 +87,15 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+        #region Resource management
+
+        /// <summary>
+        /// The sum of number of cores explicitly granted to all build requests.
+        /// </summary>
+        private int _grantedCores;
+
+        #endregion
+
         #region Diagnostic Information
 
         /// <summary>
@@ -158,7 +167,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public int ExplicitlyGrantedCores
         {
-            get { return _executingRequests.Sum(kvp => kvp.Value.GrantedCores) + _yieldingRequests.Sum(kvp => kvp.Value.GrantedCores); }
+            get { return _grantedCores; }
         }
 
         /// <summary>
@@ -501,21 +510,12 @@ namespace Microsoft.Build.BackEnd
         public bool IsNodeWorking(int nodeId)
         {
             SchedulableRequest request;
-            if (_executingRequestByNode.TryGetValue(nodeId, out request) && request != null)
+            if (!_executingRequestByNode.TryGetValue(nodeId, out request))
             {
-                return true;
+                return false;
             }
 
-            foreach (KeyValuePair<int, SchedulableRequest> kvp in _yieldingRequests)
-            {
-                if (kvp.Value.AssignedNode == nodeId && kvp.Value.GrantedCores > 0)
-                {
-                    // This node does not have an executing task on it. However, it does have a yielding task
-                    // that has explicitly asked for cores which makes it "working".
-                    return true;
-                }
-            }
-            return false;
+            return request != null;
         }
 
         /// <summary>
@@ -649,6 +649,33 @@ namespace Microsoft.Build.BackEnd
         {
             int requiredNodeId = GetAssignedNodeForRequestConfiguration(request.BuildRequest.ConfigurationId);
             return requiredNodeId == Scheduler.InvalidNodeId || requiredNodeId == nodeId;
+        }
+
+        /// <summary>
+        /// Explicitly grants CPU cores to a request.
+        /// </summary>
+        public void GrantCoresToRequest(int globalRequestId, int coresToGrant)
+        {
+            // Update per-request state.
+            SchedulableRequest request = GetScheduledRequest(globalRequestId);
+            request.GrantedCores += coresToGrant;
+
+            // Update global state.
+            _grantedCores += coresToGrant;
+        }
+
+        /// <summary>
+        /// Explicitly removes previously granted CPU cores from a request.
+        /// </summary>
+        public void RemoveCoresFromRequest(int globalRequestId, int coresToRemove)
+        {
+            // Update per-request state.
+            SchedulableRequest request = GetScheduledRequest(globalRequestId);
+            coresToRemove = Math.Min(request.GrantedCores, coresToRemove);
+            request.GrantedCores -= coresToRemove;
+
+            // Update global state.
+            _grantedCores -= coresToRemove;
         }
 
         /// <summary>
