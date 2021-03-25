@@ -252,21 +252,6 @@
         <target state="translated">Valor inicial de la propiedad: $({0})="{1}" Origen: {2}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResourceManagerExcessRelease">
-        <source>MSB4270: Task attempted to release {0} cores but held only {1}.</source>
-        <target state="new">MSB4270: Task attempted to release {0} cores but held only {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResourceManagerReleasedCores">
-        <source>Task released {0} cores and now holds {1}.</source>
-        <target state="new">Task released {0} cores and now holds {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResourceManagerRequestedCores">
-        <source>Task requested {0} cores and recieved {1}. It now holds {2}.</source>
-        <target state="new">Task requested {0} cores and recieved {1}. It now holds {2}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: El proyecto "{0}" ha omitido las restricciones de aislamiento de gráficos en el proyecto "{1}" al que se hace referencia.</target>

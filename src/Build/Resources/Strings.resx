@@ -1879,15 +1879,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="NoProjectCachePluginFoundInAssembly" xml:space="preserve">
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
   </data>
-  <data name="ResourceManagerReleasedCores" xml:space="preserve">
-    <value>Task released {0} cores and now holds {1}.</value>
-  </data>
-  <data name="ResourceManagerRequestedCores" xml:space="preserve">
-    <value>Task requested {0} cores and recieved {1}. It now holds {2}.</value>
-  </data>
-  <data name="ResourceManagerExcessRelease" xml:space="preserve">
-    <value>MSB4270: Task attempted to release {0} cores but held only {1}.</value>
-  </data>
   <data name="KillingProcessWithPid" xml:space="preserve">
     <value>Killing process with pid = {0}.</value>
   </data>
