@@ -30,7 +30,7 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
-                .And.HaveStdOutMatching("Class library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
-                .And.HaveStdOutMatching("Class library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
         }
     }
 }
