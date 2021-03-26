@@ -361,6 +361,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Reacquire()
         {
+            // Release all cores on reacquire. The assumption here is that the task is done with CPU intensive work at this point and forgetting
+            // to release explicitly granted cores when reacquiring the node may lead to deadlocks.
+            ReleaseAllCores();
+
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
