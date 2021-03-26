@@ -663,7 +663,8 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // Nodes still have work, but we have no requests.  Let them proceed.
+                    // Nodes still have work, but we have no requests.  Let them proceed and only handle resource requests.
+                    HandlePendingResourceRequests();
                     TraceScheduler("{0}: Waiting for existing work to proceed.", schedulingTime);
                 }
 
@@ -1813,6 +1814,25 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Satisfies pending resource requests. Requests are pulled from the queue in FIFO fashion and granted as many cores
+        /// as possible, optimizing for maximum number of cores granted to a single request, not for maximum number of satisfied
+        /// requests.
+        /// </summary>
+        private void HandlePendingResourceRequests()
+        {
+            while (_pendingRequestCoresCallbacks.Count > 0)
+            {
+                int availableCores = GetAvailableCoresForExplicitRequests();
+                if (availableCores == 0)
+                {
+                    return;
+                }
+                TaskCompletionSource<int> completionSource = _pendingRequestCoresCallbacks.Dequeue();
+                completionSource.SetResult(availableCores);
+            }
+        }
+
+        /// <summary>
         /// Determines which work is available which must be assigned to the nodes.  This includes:
         /// 1. Ready requests - those requests which can immediately resume executing.
         /// 2. Requests which can continue because results are now available but we haven't distributed them.
@@ -1820,16 +1840,7 @@ namespace Microsoft.Build.BackEnd
         private void ResumeRequiredWork(List<ScheduleResponse> responses)
         {
             // If we have pending RequestCore calls, satisfy those first.
-            while (_pendingRequestCoresCallbacks.Count > 0)
-            {
-                int availableCores = GetAvailableCoresForExplicitRequests();
-                if (availableCores == 0)
-                {
-                    break;
-                }
-                TaskCompletionSource<int> completionSource = _pendingRequestCoresCallbacks.Dequeue();
-                completionSource.SetResult(availableCores);
-            }
+            HandlePendingResourceRequests();
 
             // Resume any ready requests on the existing nodes.
             foreach (int nodeId in _availableNodes.Keys)
