@@ -806,10 +806,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void ReleaseAllCores()
         {
-            ReleaseCores(_additionalAcquiredCores + (_isImplicitCoreUsed ? 1 : 0));
-
-            _additionalAcquiredCores = 0;
-            _isImplicitCoreUsed = false;
+            int coresToRelease = _additionalAcquiredCores + (_isImplicitCoreUsed ? 1 : 0);
+            if (coresToRelease > 0)
+            {
+                ReleaseCores(coresToRelease);
+            }
         }
 
         #endregion
