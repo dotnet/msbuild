@@ -55,7 +55,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IReadOnlyList<IManagedTemplatePackage> packsToIgnore = new List<IManagedTemplatePackage>()
             {
-                _fooPackTemplatePackage
+                new MockManagedTemplatePackage()
             };
 
             SearchResults searchResults = searcher.SearchForTemplatesAsync(packsToIgnore, templateName).Result;
@@ -67,8 +67,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         private static readonly PackInfo _redPackInfo = new PackInfo("redPack", "1.1");
         private static readonly PackInfo _bluePackInfo = new PackInfo("bluePack", "2.1");
         private static readonly PackInfo _greenPackInfo = new PackInfo("greenPack", "3.0.0");
-
-        private static readonly IManagedTemplatePackage _fooPackTemplatePackage = new NuGetManagedTemplatePackage(null, null, string.Empty, null);
 
         private static IReadOnlyDictionary<string, IReadOnlyList<ITemplateNameSearchResult>> GetMockNameSearchResults()
         {

@@ -130,7 +130,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             InitializeNuGetCredentialService(commandInput);
-            IReadOnlyList<CheckUpdateResult> versionChecks = await managedTemplatePackage.Installer.Provider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<CheckUpdateResult> versionChecks = await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false);
             DisplayUpdateCheckResults(versionChecks, commandInput, showUpdates: true);
         }
 
