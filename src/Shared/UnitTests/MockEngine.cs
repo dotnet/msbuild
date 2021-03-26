@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -31,7 +30,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine8
+    internal sealed class MockEngine : IBuildEngine7
     {
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -488,20 +487,6 @@ namespace Microsoft.Build.UnitTests
         {
             _objectCache.TryRemove(key, out object obj);
             return obj;
-        }
-
-        public int RequestCores(int requestedCores)
-        {
-            return 0;
-        }
-
-        public void ReleaseCores(int coresToRelease)
-        {
-        }
-
-        public bool ShouldTreatWarningAsError(string warningCode)
-        {
-            return false;
         }
     }
 }

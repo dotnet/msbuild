@@ -739,6 +739,8 @@ namespace Microsoft.Build.BackEnd
         /// at least one core to become available.</returns>
         public int RequestCores(int requestedCores)
         {
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
@@ -779,6 +781,8 @@ namespace Microsoft.Build.BackEnd
         /// granted and not yet released.</param>
         public void ReleaseCores(int coresToRelease)
         {
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+
             lock (_callbackMonitor)
             {
                 if (_isImplicitCoreUsed && coresToRelease > _additionalAcquiredCores)
