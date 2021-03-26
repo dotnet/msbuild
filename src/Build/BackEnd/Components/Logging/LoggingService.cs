@@ -546,9 +546,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 return null;
             }
 
-            if (_warningsAsMessagesByProject != null)
+            if (_warningsAsMessagesByProject != null && _warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
             {
-                warningsAsErrorsExcludingMessages.ExceptWith(_warningsAsMessagesByProject[key]);
+                warningsAsErrorsExcludingMessages.ExceptWith(warningsAsMessages);
 
                 // A non-null empty set means all warnings are errors. Avoid this.
                 if (warningsAsErrorsExcludingMessages.Count == 0)
