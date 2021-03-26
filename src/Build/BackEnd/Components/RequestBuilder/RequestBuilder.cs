@@ -515,13 +515,13 @@ namespace Microsoft.Build.BackEnd
                 Monitor.Enter(monitorLockObject);
             }
 
-            VerifyEntryInActiveOrWaitingState();
             if (waitResult == 0)
             {
                 // We've been aborted.
                 throw new BuildAbortedException();
             }
 
+            VerifyEntryInActiveOrWaitingState();
             return responseObject.NumCores;
         }
 

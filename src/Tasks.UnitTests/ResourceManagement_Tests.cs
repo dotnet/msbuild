@@ -126,10 +126,11 @@ namespace Microsoft.Build.Tasks.UnitTests
 <Project>
   <UsingTask
     TaskName=""UseCores""
-    TaskFactory=""CodeTaskFactory""
+    TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <Task>
-      <Code Language=""cs"">
+      <Reference Include=""{typeof(Enumerable).Assembly.Location}"" />
+      <Code Type=""Fragment"" Language=""cs"">
         {taskCode}
       </Code>
     </Task>
