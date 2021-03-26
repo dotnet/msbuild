@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.BackEnd
         {
             // At least one core is always implicitly granted to the node making the request.
             // If _nodeCoreAllocationWeight is more than zero, it can increase this value by the specified fraction of executing nodes.
-            int implicitlyGrantedCores = Math.Max(1, ((_schedulingData.ExecutingRequestsCount - 1) * _nodeCoreAllocationWeight) / 100);
+            int implicitlyGrantedCores = Math.Max(1, (_schedulingData.ExecutingRequestsCount * _nodeCoreAllocationWeight) / 100);
 
             // The number of explicitly granted cores is a sum of everything we've granted via RequestCores() so far across all nodes.
             int explicitlyGrantedCores = _schedulingData.ExplicitlyGrantedCores;

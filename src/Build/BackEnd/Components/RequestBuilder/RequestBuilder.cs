@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The resources granted when a build request entry continues.
         /// </summary>
-        private ResourceResponse _continueResources;
+        private ConcurrentQueue<ResourceResponse> _continueResources;
 
         /// <summary>
         /// The task representing the currently-executing build request.
@@ -116,6 +116,7 @@ namespace Microsoft.Build.BackEnd
             _terminateEvent = new ManualResetEvent(false);
             _continueEvent = new AutoResetEvent(false);
             _continueWithResourcesEvent = new AutoResetEvent(false);
+            _continueResources = new ConcurrentQueue<ResourceResponse>();
         }
 
         /// <summary>
@@ -244,7 +245,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(!_continueWithResourcesEvent.WaitOne(0), "Request already continued");
             VerifyEntryInActiveOrWaitingState();
 
-            _continueResources = response;
+            _continueResources.Enqueue(response);
             _continueWithResourcesEvent.Set();
         }
 
@@ -516,21 +517,19 @@ namespace Microsoft.Build.BackEnd
                 }
             });
 
-            while (_continueResources == null && !_terminateEvent.WaitOne(0))
+            while (_continueResources.IsEmpty)
             {
+                if (_terminateEvent.WaitOne(0))
+                {
+                    // We've been aborted
+                    throw new BuildAbortedException();
+                }
                 Monitor.Wait(monitorLockObject);
-            }
-            if (_continueResources == null)
-            {
-                // We've been aborted
-                throw new BuildAbortedException();
             }
 
             VerifyEntryInActiveOrWaitingState();
 
-            int grantedCores = _continueResources.NumCores;
-            _continueResources = null;
-            return grantedCores;
+            return _continueResources.Dequeue().NumCores;
         }
 
         /// <summary>

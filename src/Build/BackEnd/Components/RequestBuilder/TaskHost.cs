@@ -744,7 +744,7 @@ namespace Microsoft.Build.BackEnd
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
 
                 int coresAcquired = 0;
-                bool returningImplicitCore = false;
+                bool allocatingImplicitCore = false;
                 if (_isImplicitCoreUsed)
                 {
                     coresAcquired = builderCallback.RequestCores(_callbackMonitor, requestedCores, waitForCores: true);
@@ -752,7 +752,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     _isImplicitCoreUsed = true;
-                    returningImplicitCore = true;
+                    allocatingImplicitCore = true;
                     if (requestedCores > 1)
                     {
                         coresAcquired = builderCallback.RequestCores(_callbackMonitor, requestedCores - 1, waitForCores: false);
@@ -760,7 +760,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 _additionalAcquiredCores += coresAcquired;
 
-                if (returningImplicitCore)
+                if (allocatingImplicitCore)
                 {
                     // Pad the result with the one implicit core if it was still available.
                     // This ensures that first call never blocks and always returns >= 1.
