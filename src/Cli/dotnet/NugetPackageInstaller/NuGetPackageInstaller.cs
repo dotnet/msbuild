@@ -17,13 +17,14 @@ namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
 {
     internal class NuGetPackageInstaller : INuGetPackageInstaller
     {
-        private static readonly string sourceUrl = "https://pkgs.dev.azure.com/azure-public/vside/_packaging/xamarin-impl/nuget/v3/index.json";
+        private readonly string _sourceUrl;
         private readonly ILogger _logger;
         private readonly string _packageInstallDir;
 
-        public NuGetPackageInstaller(string packageInstallDir, ILogger logger = null)
+        public NuGetPackageInstaller(string packageInstallDir, string sourceUrl = null, ILogger logger = null)
         {
             _packageInstallDir = packageInstallDir;
+            _sourceUrl = sourceUrl ?? "https://api.nuget.org/v3/index.json";
             _logger = logger ?? new NullLogger();
         }
 
@@ -31,7 +32,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
         {
             var cancellationToken = CancellationToken.None;
             var cache = new SourceCacheContext() { DirectDownload = true, NoCache = true };
-            var source = Repository.Factory.GetCoreV3(sourceUrl);
+            var source = Repository.Factory.GetCoreV3(_sourceUrl);
             var findPackageByIdResource = await source.GetResourceAsync<FindPackageByIdResource>();
             var nupkgPath = Path.Combine(_packageInstallDir, packageId.ToString(), packageVersion.ToNormalizedString(), $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));

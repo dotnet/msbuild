@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string dotnetDir =  null)
         {
             var packagesPath = Path.Combine(EnvironmentProvider.GetUserHomeDirectory(), "dotnetsdk");
-            _nugetPackageInstaller = nugetPackageInstaller ?? new NuGetPackageInstaller(packagesPath);
+            _nugetPackageInstaller = nugetPackageInstaller ?? new NuGetPackageInstaller(packagesPath, sourceUrl: "https://pkgs.dev.azure.com/azure-public/vside/_packaging/xamarin-impl/nuget/v3/index.json");
             _manifestsDir = Path.Combine(dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory(), "sdk-manifests");
             _reporter = reporter;
         }

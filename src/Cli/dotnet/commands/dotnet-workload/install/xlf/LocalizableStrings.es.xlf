@@ -45,6 +45,8 @@
       <trans-unit id="UnrecognizedPackError">
         <source>Pack Id {0} unrecognized.</source>
         <target state="new">Pack Id {0} unrecognized.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PrintDownloadLinkOnlyDescription">
         <source>Only print the list of links to download without downloading it.</source>
         <target state="new">Only print the list of links to download without downloading it.</target>
