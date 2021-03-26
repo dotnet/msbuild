@@ -12,7 +12,7 @@ using JsonTokenType = Newtonsoft.Json.JsonToken;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    internal partial class WorkloadManifestReader
+    public partial class WorkloadManifestReader
     {
 
         public static WorkloadManifest ReadWorkloadManifest(Stream manifestStream)

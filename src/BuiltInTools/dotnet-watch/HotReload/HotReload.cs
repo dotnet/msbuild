@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -11,11 +12,13 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal class HotReload : IDisposable
     {
         private readonly StaticFileHandler _staticFileHandler;
+        private readonly ScopedCssFileHandler _scopedCssFileHandler;
         private readonly CompilationHandler _compilationHandler;
 
-        public HotReload(IReporter reporter)
+        public HotReload(ProcessRunner processRunner, IReporter reporter)
         {
             _staticFileHandler = new StaticFileHandler(reporter);
+            _scopedCssFileHandler = new ScopedCssFileHandler(processRunner, reporter);
             _compilationHandler = new CompilationHandler(reporter);
         }
 
@@ -26,17 +29,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
         {
-            if (await _staticFileHandler.TryHandleFileChange(context, file, cancellationToken))
-            {
-                return true;
-            }
-
-            if (await _compilationHandler.TryHandleFileChange(context, file, cancellationToken)) // This needs to be 6.0
-            {
-                return true;
-            }
-
-            return false;
+            return
+                await _staticFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
+                await _scopedCssFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
+                await _compilationHandler.TryHandleFileChange(context, file, cancellationToken);
         }
 
         public void Dispose()

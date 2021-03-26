@@ -11,7 +11,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// This internal struct helps preserve/annotate these semantics.
     /// </summary>
     /// <remarks>We also use this for workload definition ids for consistency</remarks>
-    internal struct WorkloadPackId : IComparable<WorkloadPackId>, IEquatable<WorkloadPackId>
+    public struct WorkloadPackId : IComparable<WorkloadPackId>, IEquatable<WorkloadPackId>
     {
         string _id;
 

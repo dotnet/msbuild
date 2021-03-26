@@ -16,17 +16,19 @@ namespace Microsoft.DotNet.Watcher
     public class HotReloadDotNetWatcher : IAsyncDisposable
     {
         private readonly IReporter _reporter;
+        private readonly IConsole _console;
         private readonly ProcessRunner _processRunner;
         private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly IWatchFilter[] _filters;
 
-        public HotReloadDotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions)
+        public HotReloadDotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, IConsole console)
         {
             Ensure.NotNull(reporter, nameof(reporter));
 
             _reporter = reporter;
             _processRunner = new ProcessRunner(reporter);
             _dotNetWatchOptions = dotNetWatchOptions;
+            _console = console;
 
             _filters = new IWatchFilter[]
             {
@@ -38,16 +40,15 @@ namespace Microsoft.DotNet.Watcher
 
         public async Task WatchAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
-            var cancelledTaskSource = new TaskCompletionSource();
-            cancellationToken.Register(state => ((TaskCompletionSource)state).TrySetResult(),
-                cancelledTaskSource);
-
             var processSpec = context.ProcessSpec;
 
             if (context.SuppressMSBuildIncrementalism)
             {
                 _reporter.Verbose("MSBuild incremental optimizations suppressed.");
             }
+
+            _reporter.Output("Hot reload enabled. For a list of supported edits, see https://aka.ms/dotnet/hot-reload. " +
+                "Press \"Ctrl + R\" to restart.");
 
             while (true)
             {
@@ -84,13 +85,15 @@ namespace Microsoft.DotNet.Watcher
                 ConfigureExecutable(context, processSpec);
 
                 using var currentRunCancellationSource = new CancellationTokenSource();
+                var forceReload = _console.ListenForForceReloadRequest();
                 using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
                     cancellationToken,
-                    currentRunCancellationSource.Token);
+                    currentRunCancellationSource.Token,
+                    forceReload);
                 using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter);
                 try
                 {
-                    using var hotReload = new HotReload(_reporter);
+                    using var hotReload = new HotReload(_processRunner, _reporter);
                     await hotReload.InitializeAsync(context, cancellationToken);
 
                     var processTask = _processRunner.RunAsync(processSpec, combinedCancellationSource.Token);
@@ -105,7 +108,7 @@ namespace Microsoft.DotNet.Watcher
                     while (true)
                     {
                         fileSetTask = fileSetWatcher.GetChangedFileAsync(combinedCancellationSource.Token);
-                        finishedTask = await Task.WhenAny(processTask, fileSetTask, cancelledTaskSource.Task);
+                        finishedTask = await Task.WhenAny(processTask, fileSetTask).WaitAsync(combinedCancellationSource.Token);
 
                         if (finishedTask != fileSetTask || fileSetTask.Result is not FileItem fileItem)
                         {
@@ -120,7 +123,8 @@ namespace Microsoft.DotNet.Watcher
                             if (await hotReload.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
                             {
                                 var totalTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
-                                _reporter.Verbose($"Successfully handled changes to {fileItem.FilePath} in {totalTime.TotalMilliseconds}ms.");
+                                _reporter.Output($"Hot reload of changes succeeded.");
+                                _reporter.Verbose($"Hot reload applied in {totalTime.TotalMilliseconds}ms.");
                             }
                             else
                             {
@@ -147,11 +151,6 @@ namespace Microsoft.DotNet.Watcher
                         _reporter.Output("Exited");
                     }
 
-                    if (finishedTask == cancelledTaskSource.Task || cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
                     if (finishedTask == processTask)
                     {
                         // Process exited. Redo evaludation
@@ -171,6 +170,12 @@ namespace Microsoft.DotNet.Watcher
                     if (!currentRunCancellationSource.IsCancellationRequested)
                     {
                         currentRunCancellationSource.Cancel();
+                    }
+
+                    if (forceReload.IsCancellationRequested)
+                    {
+                        _console.Clear();
+                        _reporter.Output("Restart requested.");
                     }
                 }
             }

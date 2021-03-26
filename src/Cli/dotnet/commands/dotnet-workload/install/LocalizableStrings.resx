@@ -127,7 +127,7 @@
     <value>VERSION</value>
   </data>
   <data name="VersionOptionDescription" xml:space="preserve">
-    <value>The version of the workload package to install.</value>
+    <value>The version of the SDK.</value>
   </data>
   <data name="AddSourceOptionName" xml:space="preserve">
     <value>SOURCE</value>
@@ -143,9 +143,6 @@
   </data>
   <data name="ConfigFileOptionDescription" xml:space="preserve">
     <value>The NuGet configuration file to use.</value>
-  </data>
-  <data name="FrameworkOptionName" xml:space="preserve">
-    <value>FRAMEWORK</value>
   </data>
   <data name="FrameworkOptionDescription" xml:space="preserve">
     <value>The target framework to install the workload for.</value>
@@ -180,11 +177,11 @@
   <data name="WorkloadPathOptionDescription" xml:space="preserve">
     <value>The directory where the workload will be installed. The directory will be created if it does not exist.</value>
   </data>
-  <data name="ManifestPathOptionDescription" xml:space="preserve">
-    <value>Path to the manifest file.</value>
+  <data name="PrintDownloadLinkOnlyDescription" xml:space="preserve">
+    <value>Only print the list of links to download without downloading it.</value>
   </data>
-  <data name="ManifestPathOptionName" xml:space="preserve">
-    <value>PATH</value>
+  <data name="FromCacheOptionDescription" xml:space="preserve">
+    <value>Complete the operation from cache (offline).</value>
   </data>
   <data name="UnrecognizedPackError" xml:space="preserve">
     <value>Pack Id {0} unrecognized.</value>

@@ -10,6 +10,7 @@
 
     <LangVersion>8.0</LangVersion>
     <Nullable>Enable</Nullable>
+    <IsPackable>true</IsPackable>
 
     <UseSystemTextJson Condition="'$(TargetFramework)'!='netstandard2.0' And '$(TargetFramework)'!='net472'">True</UseSystemTextJson>
     <DefineConstants Condition="'$(UseSystemTextJson)'=='True'">$(DefineConstants);USE_SYSTEM_TEXT_JSON</DefineConstants>

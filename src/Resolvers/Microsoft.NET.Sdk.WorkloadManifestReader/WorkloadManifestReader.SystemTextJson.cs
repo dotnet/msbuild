@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    internal partial class WorkloadManifestReader
+    public partial class WorkloadManifestReader
     {
         public static WorkloadManifest ReadWorkloadManifest(Stream manifestStream)
         {

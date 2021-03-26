@@ -55,12 +55,15 @@ setTimeout(function () {
     }
   }
 
-  function updateCssByPath(path) {
+  async function updateCssByPath(path) {
     const styleElement = document.querySelector(`link[href^="${path}"]`) ||
       document.querySelector(`link[href^="${document.baseURI}${path}"]`);
 
+    // Receive a Clear-site-data header.
+    await fetch('/_framework/clear-browser-cache');
+
     if (!styleElement || !styleElement.parentNode) {
-      console.debug('Unable to find a stylesheet to update. Updating all css.');
+      console.debug('Unable to find a stylesheet to update. Updating all local css files.');
       updateAllLocalCss();
     }
 
@@ -74,7 +77,7 @@ setTimeout(function () {
   }
 
   function updateCssElement(styleElement) {
-    if (styleElement.loading) {
+    if (!styleElement || styleElement.loading) {
       // A file change notification may be triggered for the same file before the browser
       // finishes processing a previous update. In this case, it's easiest to ignore later updates
       return;
@@ -92,12 +95,6 @@ setTimeout(function () {
     });
 
     styleElement.parentNode.insertBefore(newElement, styleElement.nextSibling);
-  }
-
-  function updateScopedCss() {
-    [...document.querySelectorAll('link')]
-      .filter(l => l.baseURI === document.baseURI && l.href && l.href.indexOf('.styles.css') !== -1)
-      .forEach(e => updateCssElement(e));
   }
 
   function applyBlazorDeltas(deltas) {

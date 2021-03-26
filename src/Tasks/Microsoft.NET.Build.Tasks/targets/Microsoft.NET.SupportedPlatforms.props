@@ -6,18 +6,15 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 
 <Project>
   <ItemGroup>
     <!-- Platforms supported by this SDK for analyzer warnings. Spec: https://github.com/dotnet/designs/blob/master/accepted/2020/platform-exclusion/platform-exclusion.md  -->
-    <SupportedPlatform Include="Android" />
-    <SupportedPlatform Include="iOS" />
     <SupportedPlatform Include="Linux" />
     <SupportedPlatform Include="macOS" />
-    <SupportedPlatform Include="macCatalyst" />
     <SupportedPlatform Include="Windows" />
   </ItemGroup>
 </Project>

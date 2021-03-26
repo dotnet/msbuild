@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="FromCacheOptionDescription">
+        <source>Complete the operation from cache (offline).</source>
+        <target state="new">Complete the operation from cache (offline).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>Workload(s) {0} was successfully installed.</source>
         <target state="new">Workload(s) {0} was successfully installed.</target>
@@ -15,16 +20,6 @@
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="new">The settings file in the workload's NuGet package is invalid: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ManifestPathOptionDescription">
-        <source>Path to the manifest file.</source>
-        <target state="translated">Chemin du fichier manifeste.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ManifestPathOptionName">
-        <source>PATH</source>
-        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
@@ -50,10 +45,13 @@
       <trans-unit id="UnrecognizedPackError">
         <source>Pack Id {0} unrecognized.</source>
         <target state="new">Pack Id {0} unrecognized.</target>
+      <trans-unit id="PrintDownloadLinkOnlyDescription">
+        <source>Only print the list of links to download without downloading it.</source>
+        <target state="new">Only print the list of links to download without downloading it.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
-        <source>The version of the workload package to install.</source>
+        <source>The version of the SDK.</source>
         <target state="needs-review-translation">Version du package d'outils à installer.</target>
         <note />
       </trans-unit>
@@ -90,11 +88,6 @@
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
         <target state="translated">FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionName">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadAlreadyInstalled">

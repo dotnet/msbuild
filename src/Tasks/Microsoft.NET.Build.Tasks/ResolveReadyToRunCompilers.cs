@@ -257,7 +257,7 @@ namespace Microsoft.NET.Build.Tasks
                         // We can use the x86-hosted crossgen compiler to target ARM
                         _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "x86_arm", "crossgen.exe");
                         _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", "x86_arm", "native", "clrjit.dll");
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.x86.dll");
+                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", "x86_arm", "native", "Microsoft.DiaSymReader.Native.x86.dll");
                     }
                 }
                 else if (_targetArchitecture == Architecture.Arm64)
@@ -278,7 +278,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         _crossgenTool.ToolPath = Path.Combine(_crossgenTool.PackagePath, "tools", "x64_arm64", "crossgen.exe");
                         _crossgenTool.ClrJitPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", "x64_arm64", "native", "clrjit.dll");
-                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", _targetRuntimeIdentifier, "native", "Microsoft.DiaSymReader.Native.amd64.dll");
+                        _crossgenTool.DiaSymReaderPath = Path.Combine(_crossgenTool.PackagePath, "runtimes", "x64_arm64", "native", "Microsoft.DiaSymReader.Native.amd64.dll");
                     }
                 }
                 else
