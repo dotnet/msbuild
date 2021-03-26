@@ -1302,7 +1302,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Mock
             /// </summary>
-            public int RequestCores(int requestedCores, bool waitForCores)
+            public int RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
             {
                 return 0;
             }

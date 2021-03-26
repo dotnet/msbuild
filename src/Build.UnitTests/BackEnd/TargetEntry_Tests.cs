@@ -981,7 +981,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Empty impl
         /// </summary>
-        int IRequestBuilderCallback.RequestCores(int requestedCores, bool waitForCores)
+        int IRequestBuilderCallback.RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
         {
             return 0;
         }

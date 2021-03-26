@@ -491,20 +491,46 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources from the scheduler.
         /// </summary>
-        public int RequestCores(int requestedCores, bool waitForCores)
+        public int RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
         {
             VerifyIsNotZombie();
             RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
             WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueWithResourcesEvent };
-            if (WaitHandle.WaitAny(handles) == 0)
+
+            Task.Run(() =>
+            {
+                int waitResult = WaitHandle.WaitAny(handles);
+                lock (monitorLockObject)
+                {
+                    if (waitResult == 0)
+                    {
+                        // Notify all threads of a build abort.
+                        Monitor.PulseAll(monitorLockObject);
+                    }
+                    else
+                    {
+                        // Notify one thread of results becoming available.
+                        Monitor.Pulse(monitorLockObject);
+                    }
+                }
+            });
+
+            while (_continueResources == null && !_terminateEvent.WaitOne(0))
+            {
+                Monitor.Wait(monitorLockObject);
+            }
+            if (_continueResources == null)
             {
                 // We've been aborted
                 throw new BuildAbortedException();
             }
 
             VerifyEntryInActiveOrWaitingState();
-            return _continueResources.NumCores;
+
+            int grantedCores = _continueResources.NumCores;
+            _continueResources = null;
+            return grantedCores;
         }
 
         /// <summary>

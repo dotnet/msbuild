@@ -366,9 +366,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources from the scheduler.
         /// </summary>
-        int IRequestBuilderCallback.RequestCores(int requestedCores, bool waitForCores)
+        int IRequestBuilderCallback.RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
         {
-            return _requestBuilderCallback.RequestCores(requestedCores, waitForCores);
+            return _requestBuilderCallback.RequestCores(monitorLockObject, requestedCores, waitForCores);
         }
 
         /// <summary>
