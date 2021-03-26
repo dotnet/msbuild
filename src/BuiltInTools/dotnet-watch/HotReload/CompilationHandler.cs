@@ -64,18 +64,20 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
         {
+            HotReloadEventSource.Log.HotReloadStart(HotReloadEventSource.StartType.CompilationHandler);
             if (!file.FilePath.EndsWith(".cs", StringComparison.Ordinal) &&
                 !file.FilePath.EndsWith(".razor", StringComparison.Ordinal) &&
                 !file.FilePath.EndsWith(".cshtml", StringComparison.Ordinal))
             {
+                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
 
             if (!await EnsureSolutionInitializedAsync())
             {
+                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
-
             Debug.Assert(_editAndContinue != null);
             Debug.Assert(_currentSolution != null);
             Debug.Assert(_deltaApplier != null);
@@ -99,6 +101,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             else
             {
                 _reporter.Verbose($"Could not find document with path {file.FilePath} in the workspace.");
+                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
 
@@ -110,6 +113,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 _editAndContinue.EndEditSession();
 
                 await _deltaApplier.Apply(context, file.FilePath, default, cancellationToken);
+                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return true;
             }
             else if (updates.Status == DotNetWatchManagedModuleUpdateStatus.Blocked)
@@ -135,11 +139,13 @@ namespace Microsoft.DotNet.Watcher.Tools
                     // We'll instead simply keep track of the updated solution.
                     _currentSolution = updatedSolution;
 
+                    HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                     // Figure out how to recover from errors. Currently it seems unrecoverable.
                     return false;
                 }
 
                 _reporter.Verbose("Unable to apply update.");
+                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
 
@@ -150,7 +156,9 @@ namespace Microsoft.DotNet.Watcher.Tools
             // We'll instead simply keep track of the updated solution.
             _currentSolution = updatedSolution;
 
-            return await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+            var applyState = await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+            HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
+            return applyState;
         }
 
         private IReadOnlyList<string> GetDiagnostics(Project project, CancellationToken cancellationToken)

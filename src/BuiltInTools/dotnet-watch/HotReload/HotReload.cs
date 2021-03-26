@@ -29,10 +29,12 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
         {
-            return
-                await _staticFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
+            HotReloadEventSource.Log.HotReloadStart(HotReloadEventSource.StartType.Main);
+            var fileHandlerResult = await _staticFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
                 await _scopedCssFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
                 await _compilationHandler.TryHandleFileChange(context, file, cancellationToken);
+            HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.Main);
+            return fileHandlerResult;
         }
 
         public void Dispose()
