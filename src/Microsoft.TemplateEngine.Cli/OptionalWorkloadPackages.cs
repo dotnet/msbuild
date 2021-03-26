@@ -38,13 +38,13 @@ namespace Microsoft.TemplateEngine.Utils
 
             public ITemplatePackageProviderFactory Factory { get; }
 
-            event Action ITemplatePackageProvider.SourcesChanged
+            event Action ITemplatePackageProvider.TemplatePackagesChanged
             {
                 add { }
                 remove { }
             }
 
-            public Task<IReadOnlyList<ITemplatePackage>> GetAllSourcesAsync(CancellationToken cancellationToken)
+            public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
             {
                 string sdkVersion = EnvironmentSettings.Host.Version.Substring(1); // Host.Version (from SDK) has a leading "v" that need to remove.
                 try

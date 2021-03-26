@@ -35,13 +35,13 @@ namespace dotnet_new3
 
             public ITemplatePackageProviderFactory Factory { get; }
 
-            event Action ITemplatePackageProvider.SourcesChanged
+            event Action ITemplatePackageProvider.TemplatePackagesChanged
             {
                 add { }
                 remove { }
             }
 
-            public Task<IReadOnlyList<ITemplatePackage>> GetAllSourcesAsync(CancellationToken cancellationToken)
+            public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
             {
                 List<ITemplatePackage> templatePackages = new List<ITemplatePackage>();
 

@@ -217,7 +217,7 @@ namespace Microsoft.TemplateEngine.Cli
             bool applyUpdates = commandInput.ApplyUpdates;
             bool allTemplatesUpToDate = true;
             CreationResultStatus success = CreationResultStatus.Success;
-            var managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackages().ConfigureAwait(false);
+            var managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
 
             foreach (var packagesGrouping in managedTemplatePackages.GroupBy(package => package.ManagedProvider))
             {
@@ -316,7 +316,7 @@ namespace Microsoft.TemplateEngine.Cli
             cancellationToken.ThrowIfCancellationRequested();
 
             CreationResultStatus result = CreationResultStatus.Success;
-            IReadOnlyList<IManagedTemplatePackage> templatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackages().ConfigureAwait(false);
+            IReadOnlyList<IManagedTemplatePackage> templatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
 
             var packagesToUninstall = new Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>();
             foreach (string templatePackageIdentifier in commandInput.ToUninstallList)
@@ -503,7 +503,7 @@ namespace Microsoft.TemplateEngine.Cli
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
 
-            IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackages().ConfigureAwait(false);
+            IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Info_InstalledItems);
 
@@ -521,7 +521,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Output.WriteLine($"    {LocalizableStrings.Version} {managedSource.Version}");
                 }
 
-                IReadOnlyDictionary<string, string> displayDetails = managedSource.GetDisplayDetails();
+                IReadOnlyDictionary<string, string> displayDetails = managedSource.GetDetails();
                 if (displayDetails?.Any() ?? false)
                 {
                     Reporter.Output.WriteLine($"    {LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader}");
