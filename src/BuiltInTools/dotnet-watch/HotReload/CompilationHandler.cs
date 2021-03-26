@@ -201,10 +201,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private async ValueTask<SourceText> GetSourceTextAsync(string filePath)
         {
-            // FSW events sometimes appear before the file has been completely written to disk. Provide a small delay before we read the file contents
-            // to ensure we are not contending with partial writes or write locks.
-            await Task.Delay(20);
-
             for (var attemptIndex = 0; attemptIndex < 10; attemptIndex++)
             {
                 try
