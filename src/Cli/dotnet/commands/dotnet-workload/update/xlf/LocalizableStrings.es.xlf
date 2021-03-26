@@ -57,11 +57,6 @@
         <target state="translated">Archivo de configuración de NuGet que debe usarse.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>The target framework to update the workload for.</source>
-        <target state="translated">La plataforma de destino para la que se actualiza la herramienta.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
         <target state="translated">El archivo de configuración de NuGet "{0}" no existe.</target>
@@ -100,11 +95,6 @@
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
         <target state="translated">FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionName">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">

@@ -14,8 +14,6 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option AddSourceOption = WorkloadInstallCommandParser.AddSourceOption;
 
-        public static readonly Option FrameworkOption = WorkloadInstallCommandParser.FrameworkOption;
-
         public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
 
         public static readonly Option VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
@@ -27,7 +25,6 @@ namespace Microsoft.DotNet.Cli
             command.AddArgument(PackageIdArgument);
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
-            command.AddOption(FrameworkOption);
             command.AddOption(VersionOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
