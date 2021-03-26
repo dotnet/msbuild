@@ -90,7 +90,7 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
-      FileCopyOptions: '/r:5'
+      Parallel: true
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
@@ -136,7 +136,7 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnWindows build logs'
-      FileCopyOptions: '/r:5'
+      Parallel: true
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
