@@ -1,11 +1,11 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.NET.TestFramework.Assertions;
-using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace dotnet_new3.UnitTests
 {
@@ -16,18 +16,47 @@ namespace dotnet_new3.UnitTests
     /// </summary>
     public class SharedHomeDirectory : IDisposable
     {
-        private readonly ITestOutputHelper log;
+        private readonly HashSet<string> _installedPackages = new HashSet<string>();
+
+        public SharedHomeDirectory(IMessageSink messageSink)
+        {
+            Log = new SharedTestOutputHelper(messageSink);
+            Initialize();
+        }
 
         public string HomeDirectory { get; } = Helpers.CreateTemporaryFolder("Home");
         public string HomeVariable { get; } = Helpers.HomeEnvironmentVariableName;
 
-        public SharedHomeDirectory(IMessageSink messageSink)
+        protected ITestOutputHelper Log { get; private set; }
+
+        public void Dispose() => Directory.Delete(HomeDirectory, true);
+
+        public void InstallPackage(string packageName, string workingDirectory = null, string nugetSource = null)
         {
-            this.log = new SharedTestOutputHelper(messageSink);
-            Initialize();
+            if (!_installedPackages.Add(packageName))
+            {
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(workingDirectory))
+            {
+                workingDirectory = Directory.GetCurrentDirectory();
+            }
+            var args = new List<string> { "-i", packageName, };
+            if (!string.IsNullOrWhiteSpace(nugetSource))
+            {
+                args.AddRange(new[] { "--nuget-source", nugetSource });
+            }
+            new DotnetNewCommand(Log, args.ToArray())
+                .WithEnvironmentVariable(HomeVariable, HomeDirectory)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             var dn3Path = Environment.GetEnvironmentVariable("DN3");
             if (string.IsNullOrEmpty(dn3Path))
@@ -37,34 +66,12 @@ namespace dotnet_new3.UnitTests
                 {
                     path = Path.GetDirectoryName(path);
                 }
-                if (path == null)
-                    throw new Exception("Couldn't find repository root, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
-                dn3Path = path;
+                dn3Path = path ?? throw new Exception("Couldn't find repository root, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
             }
 
-            new DotnetNewCommand(log)
+            new DotnetNewCommand(Log)
                 .WithEnvironmentVariable(HomeVariable, HomeDirectory)
                 .WithEnvironmentVariable("DN3", dn3Path)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And
-                .NotHaveStdErr();
-        }
-
-        public void Dispose()
-        {
-            Directory.Delete(HomeDirectory, true);
-        }
-
-
-        HashSet<string> installedPackages = new HashSet<string>();
-        public void InstallPackage(string packageName)
-        {
-            if (!installedPackages.Add(packageName))
-                return;
-            new DotnetNewCommand(log, "-i", packageName)
-                .WithEnvironmentVariable(HomeVariable, HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)
