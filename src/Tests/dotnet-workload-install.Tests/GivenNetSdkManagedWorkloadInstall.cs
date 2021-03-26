@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             // Write fake workloads
             foreach (var version in versions)
             {
-                Directory.CreateDirectory(Path.Combine(dotnetRoot, "sdk-manifests", version, ".installedworkloads"));
+                Directory.CreateDirectory(Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads"));
             }
 
             var featureBands = installer.GetFeatureBandsWithInstallationRecords();
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var (dotnetRoot, installer, _) = GetTestInstaller(MethodBase.GetCurrentMethod().Name);
 
             // Write fake workloads
-            var path = Path.Combine(dotnetRoot, "sdk-manifests", version, ".installedworkloads");
+            var path = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads");
             Directory.CreateDirectory(path);
             foreach (var workload in workloads)
             {
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var version = "6.0.100";
             var (dotnetRoot, installer, _) = GetTestInstaller(MethodBase.GetCurrentMethod().Name);
             installer.WriteWorkloadInstallationRecord(workloadId, version);
-            var expectedPath = Path.Combine(dotnetRoot, "sdk-manifests", version, ".installedworkloads", workloadId);
+            var expectedPath = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads", workloadId);
             File.Exists(expectedPath).Should().BeTrue();
         }
 
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             (nugetInstaller as MockNuGetPackageInstaller).ExtractCallParams.Count.Should().Be(1);
             (nugetInstaller as MockNuGetPackageInstaller).ExtractCallParams[0].ShouldBeEquivalentTo(("Mock/path", Path.Combine(dotnetRoot, "packs", packInfo.Id, packInfo.Version)));
 
-            var installationRecordPath = Path.Combine(dotnetRoot, "sdk-manifests", ".installedpacks", "v1", packInfo.Id, packInfo.Version, version);
+            var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledPacks", packInfo.Id, packInfo.Version);
             File.Exists(installationRecordPath).Should().BeTrue();
         }
 

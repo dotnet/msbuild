@@ -18,9 +18,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     internal class NetSdkManagedInstaller : IPackWorkloadInstaller
     {
         private readonly IReporter _reporter;
-        private readonly string _manifestsDir;
-        private readonly string _installedWorkloadDir = ".installedworkloads";
-        private readonly string _installedPacksDir = ".installedpacks";
+        private readonly string _workloadMetadataDir;
+        private readonly string _installedWorkloadDir = "InstalledWorkloads";
+        private readonly string _installedPacksDir = "InstalledPacks";
         private INuGetPackageInstaller _nugetPackageInstaller;
 
         public NetSdkManagedInstaller(
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var packagesPath = Path.Combine(EnvironmentProvider.GetUserHomeDirectory(), "dotnetsdk");
             _nugetPackageInstaller = nugetPackageInstaller ?? new NuGetPackageInstaller(packagesPath, sourceUrl: "https://pkgs.dev.azure.com/azure-public/vside/_packaging/xamarin-impl/nuget/v3/index.json");
-            _manifestsDir = Path.Combine(dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory(), "sdk-manifests");
+            _workloadMetadataDir = Path.Combine(dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory(), "metadata", "workloads");
             _reporter = reporter;
         }
 
@@ -92,16 +92,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override IReadOnlyCollection<string> GetFeatureBandsWithInstallationRecords()
         {
-            var bands = Directory.EnumerateDirectories(_manifestsDir);
+            var bands = Directory.EnumerateDirectories(_workloadMetadataDir);
             return bands
-                .Where(band => Directory.Exists(Path.Combine(_manifestsDir, band, _installedWorkloadDir)))
+                .Where(band => Directory.Exists(Path.Combine(band, _installedWorkloadDir)))
                 .Select(path => Path.GetFileName(path))
                 .ToList().AsReadOnly();
         }
 
         public override IReadOnlyCollection<string> GetInstalledWorkloads(string featureBand)
         {
-            var path = Path.Combine(_manifestsDir, featureBand, _installedWorkloadDir);
+            var path = Path.Combine(_workloadMetadataDir, featureBand, _installedWorkloadDir);
             if (Directory.Exists(path))
             {
                 return Directory.EnumerateFiles(path)
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public override void WriteWorkloadInstallationRecord(string workloadId, string featureBand)
         {
             _reporter.WriteLine(string.Format(LocalizableStrings.WritingWorkloadInstallRecordMessage, workloadId));
-            var path = Path.Combine(_manifestsDir, featureBand, _installedWorkloadDir, workloadId);
+            var path = Path.Combine(_workloadMetadataDir, featureBand, _installedWorkloadDir, workloadId);
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override void DeleteWorkloadInstallationRecord(string workloadId, string featureBand)
         {
-            var path = Path.Combine(_manifestsDir, featureBand, _installedWorkloadDir, workloadId);
+            var path = Path.Combine(_workloadMetadataDir, featureBand, _installedWorkloadDir, workloadId);
             File.Delete(path);
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         private string GetPackInstallRecordPath(PackInfo packInfo, string featureBand) =>
-            Path.Combine(_manifestsDir, _installedPacksDir, "v1", packInfo.Id, packInfo.Version, featureBand);
+            Path.Combine(_workloadMetadataDir, featureBand, _installedPacksDir, packInfo.Id, packInfo.Version);
 
         private void WritePackInstallationRecord(PackInfo packInfo, string featureBand)
         {
