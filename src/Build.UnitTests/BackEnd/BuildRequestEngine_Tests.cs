@@ -189,7 +189,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public void ContinueRequestWithResources(ResourceResponse response)
             {
-                // TODO
             }
 
             public void CancelRequest()
