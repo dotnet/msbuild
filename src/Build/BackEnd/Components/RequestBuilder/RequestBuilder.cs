@@ -44,19 +44,14 @@ namespace Microsoft.Build.BackEnd
         private AutoResetEvent _continueEvent;
 
         /// <summary>
-        /// The event to signal that this request should wake up from its wait state after granting resources.
-        /// </summary>
-        private AutoResetEvent _continueWithResourcesEvent;
-
-        /// <summary>
         /// The results used when a build request entry continues.
         /// </summary>
         private IDictionary<int, BuildResult> _continueResults;
 
         /// <summary>
-        /// The resources granted when a build request entry continues.
+        /// Queue of actions to call when a resource request is responded to.
         /// </summary>
-        private ConcurrentQueue<ResourceResponse> _continueResources;
+        private ConcurrentQueue<Action<ResourceResponse>> _pendingResourceRequests;
 
         /// <summary>
         /// The task representing the currently-executing build request.
@@ -115,8 +110,7 @@ namespace Microsoft.Build.BackEnd
         {
             _terminateEvent = new ManualResetEvent(false);
             _continueEvent = new AutoResetEvent(false);
-            _continueWithResourcesEvent = new AutoResetEvent(false);
-            _continueResources = new ConcurrentQueue<ResourceResponse>();
+            _pendingResourceRequests = new ConcurrentQueue<Action<ResourceResponse>>();
         }
 
         /// <summary>
@@ -242,11 +236,10 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
             ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
-            ErrorUtilities.VerifyThrow(!_continueWithResourcesEvent.WaitOne(0), "Request already continued");
+            ErrorUtilities.VerifyThrow(!_pendingResourceRequests.IsEmpty, "No pending resource requests");
             VerifyEntryInActiveOrWaitingState();
 
-            _continueResources.Enqueue(response);
-            _continueWithResourcesEvent.Set();
+            _pendingResourceRequests.Dequeue()(response);
         }
 
         /// <summary>
@@ -494,42 +487,42 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public int RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
         {
+            ErrorUtilities.VerifyThrow(Monitor.IsEntered(monitorLockObject), "Not running under the given lock");
             VerifyIsNotZombie();
-            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
-            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueWithResourcesEvent };
-
-            Task.Run(() =>
+            ResourceResponse responseObject = null;
+            using AutoResetEvent responseEvent = new AutoResetEvent(false);
+            _pendingResourceRequests.Enqueue((ResourceResponse response) =>
             {
-                int waitResult = WaitHandle.WaitAny(handles);
-                lock (monitorLockObject)
-                {
-                    if (waitResult == 0)
-                    {
-                        // Notify all threads of a build abort.
-                        Monitor.PulseAll(monitorLockObject);
-                    }
-                    else
-                    {
-                        // Notify one thread of results becoming available.
-                        Monitor.Pulse(monitorLockObject);
-                    }
-                }
+                responseObject = response;
+                responseEvent.Set();
             });
 
-            while (_continueResources.IsEmpty)
+            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
+
+            WaitHandle[] waitHandles = new WaitHandle[] { _terminateEvent, responseEvent };
+            int waitResult;
+
+            // Drop the lock so that the same task can call ReleaseCores from other threads to unblock itself, and wait for the response.
+            Monitor.Exit(monitorLockObject);
+            try
             {
-                if (_terminateEvent.WaitOne(0))
-                {
-                    // We've been aborted
-                    throw new BuildAbortedException();
-                }
-                Monitor.Wait(monitorLockObject);
+                waitResult = WaitHandle.WaitAny(waitHandles);
+            }
+            finally
+            {
+                // Now re-take the lock before continuing.
+                Monitor.Enter(monitorLockObject);
             }
 
             VerifyEntryInActiveOrWaitingState();
+            if (waitResult == 0)
+            {
+                // We've been aborted.
+                throw new BuildAbortedException();
+            }
 
-            return _continueResources.Dequeue().NumCores;
+            return responseObject.NumCores;
         }
 
         /// <summary>
