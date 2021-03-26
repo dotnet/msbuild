@@ -172,6 +172,13 @@
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
 
+  <Target Name="RemoveResourcesFromDotnetDeps"
+        AfterTargets="Build">
+    <RemoveAssetFromDepsPackages DepsFile="$(OutputPath)/dotnet.deps.json"
+               SectionName="resources"
+               AssetPath="*" />
+  </Target>
+
   <Target Name="MakeFscRunnableAndMoveToPublishDir"
           AfterTargets="Build"
           BeforeTargets="RemoveFilesAfterPublish">
