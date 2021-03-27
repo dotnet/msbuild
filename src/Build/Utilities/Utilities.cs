@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
@@ -654,6 +655,14 @@ namespace Microsoft.Build.Internal
                     }
                     else
                     {
+                        if (item == null)
+                        {
+                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected: property is null");
+                        }
+                        else
+                        {
+                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected property {item} of type {item?.GetType().ToString()}");
+                        }
                     }
                 }
             }
@@ -700,6 +709,14 @@ namespace Microsoft.Build.Internal
                     }
                     else
                     {
+                        if (item == null)
+                        {
+                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected: {nameof(item)} is null");
+                        }
+                        else
+                        {
+                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                        }
                     }
 
                     if (string.IsNullOrEmpty(itemType))
