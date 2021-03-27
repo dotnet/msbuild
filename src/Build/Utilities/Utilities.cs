@@ -711,11 +711,11 @@ namespace Microsoft.Build.Internal
                     {
                         if (item == null)
                         {
-                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected: {nameof(item)} is null");
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
                         }
                         else
                         {
-                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
                         }
                     }
 
