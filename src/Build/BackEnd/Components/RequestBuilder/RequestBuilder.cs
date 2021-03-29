@@ -490,6 +490,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(Monitor.IsEntered(monitorLockObject), "Not running under the given lock");
             VerifyIsNotZombie();
 
+            // The task may be calling RequestCores from multiple threads and the call may be blocking, so in general, we have to maintain
+            // a queue of pending requests.
             ResourceResponse responseObject = null;
             using AutoResetEvent responseEvent = new AutoResetEvent(false);
             _pendingResourceRequests.Enqueue((ResourceResponse response) =>
@@ -500,10 +502,11 @@ namespace Microsoft.Build.BackEnd
 
             RaiseResourceRequest(ResourceRequest.CreateAcquireRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
+            // Wait for one of two events to be signaled: 1) The build was canceled, 2) The response to our request was received.
             WaitHandle[] waitHandles = new WaitHandle[] { _terminateEvent, responseEvent };
             int waitResult;
 
-            // Drop the lock so that the same task can call ReleaseCores from other threads to unblock itself, and wait for the response.
+            // Drop the lock so that the same task can call ReleaseCores from other threads to unblock itself.
             Monitor.Exit(monitorLockObject);
             try
             {
