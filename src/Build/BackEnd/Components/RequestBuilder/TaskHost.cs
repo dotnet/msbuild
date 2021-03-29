@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine8
+        IBuildEngine9
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -687,16 +687,6 @@ namespace Microsoft.Build.BackEnd
         private ICollection<string> _warningsAsErrors;
 
         /// <summary>
-        /// Additional cores granted to the task by the scheduler. Does not include the one implicit core automatically granted to all tasks.
-        /// </summary>
-        private int _additionalAcquiredCores = 0;
-
-        /// <summary>
-        /// True if the one implicit core has been allocated by <see cref="RequestCores"/>, false otherwise.
-        /// </summary>
-        private bool _isImplicitCoreUsed = false;
-
-        /// <summary>
         /// Contains all warnings that should be logged as errors.
         /// Non-null empty set when all warnings should be treated as errors.
         /// </summary>
@@ -729,6 +719,20 @@ namespace Microsoft.Build.BackEnd
             // An empty set means all warnings are errors.
             return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
         }
+
+        #endregion
+
+        #region IBuildEngine9 Members
+
+        /// <summary>
+        /// Additional cores granted to the task by the scheduler. Does not include the one implicit core automatically granted to all tasks.
+        /// </summary>
+        private int _additionalAcquiredCores = 0;
+
+        /// <summary>
+        /// True if the one implicit core has been allocated by <see cref="RequestCores"/>, false otherwise.
+        /// </summary>
+        private bool _isImplicitCoreUsed = false;
 
         /// <summary>
         /// Allocates shared CPU resources. Called by a task when it's about to do potentially multi-threaded/multi-process work.

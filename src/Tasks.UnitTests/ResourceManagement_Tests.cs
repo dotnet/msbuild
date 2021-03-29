@@ -17,9 +17,9 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             var messages = AssertBuildSucceededAndGetMessages(@"
                 {
-                    int grantedCores = BuildEngine8.RequestCores(1337);
+                    int grantedCores = BuildEngine9.RequestCores(1337);
                     Log.LogMessage(""Number of cores acquired: "" + grantedCores);
-                    BuildEngine8.ReleaseCores(grantedCores);
+                    BuildEngine9.ReleaseCores(grantedCores);
                 }", "<UseCores />");
 
             var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ")).ToArray();
@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             var messages = AssertBuildSucceededAndGetMessages(@"
                 {
-                    int grantedCores = BuildEngine8.RequestCores(1337);
+                    int grantedCores = BuildEngine9.RequestCores(1337);
                     Log.LogMessage(""Number of cores acquired: "" + grantedCores);
                     // Note that we're missing a call to ReleaseCores() so we rely on cores being released after the task is finished.
                 }", "<UseCores /> <UseCores />");
@@ -53,14 +53,14 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             var messages = AssertBuildSucceededAndGetMessages(@"
                 {
-                    int grantedCores1 = BuildEngine8.RequestCores(1337);
+                    int grantedCores1 = BuildEngine9.RequestCores(1337);
                     Log.LogMessage(""Number of cores acquired: "" + grantedCores1);
 
-                    BuildEngine8.Yield();
+                    BuildEngine9.Yield();
                     // Reacquire releases all cores.
-                    BuildEngine8.Reacquire();
+                    BuildEngine9.Reacquire();
 
-                    int grantedCores2 = BuildEngine8.RequestCores(1337);
+                    int grantedCores2 = BuildEngine9.RequestCores(1337);
                     Log.LogMessage(""Number of cores acquired: "" + grantedCores2);
                 }", "<UseCores />");
 
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     {
                         for (int i = 0; i &lt; coresToAcquire; i++)
                         {
-                            BuildEngine8.RequestCores(1);
+                            BuildEngine9.RequestCores(1);
                             System.Threading.Interlocked.Increment(ref acquiredCores);
                         }
                         System.Threading.Thread.VolatileWrite(ref done, 1);
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                             {
                                 if (System.Threading.Thread.VolatileRead(ref acquiredCores) > 0)
                                 {
-                                    BuildEngine8.ReleaseCores(1);
+                                    BuildEngine9.ReleaseCores(1);
                                     System.Threading.Interlocked.Decrement(ref acquiredCores);
                                 }
                                 else

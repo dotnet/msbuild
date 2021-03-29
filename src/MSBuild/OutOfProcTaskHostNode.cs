@@ -33,7 +33,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine8
+        IBuildEngine9
 #endif
     {
         /// <summary>
@@ -465,6 +465,22 @@ namespace Microsoft.Build.CommandLine
         public IReadOnlyDictionary<string, string> GetGlobalProperties()
         {
             return new Dictionary<string, string>(_currentConfiguration.GlobalProperties);
+        }
+
+        #endregion
+
+        #region IBuildEngine9 Implementation
+
+        public int RequestCores(int requestedCores)
+        {
+            // No resource management in OOP nodes
+            throw new NotImplementedException();
+        }
+
+        public void ReleaseCores(int coresToRelease)
+        {
+            // No resource management in OOP nodes
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -1174,18 +1190,6 @@ namespace Microsoft.Build.CommandLine
                                                 );
 
             LogErrorEvent(error);
-        }
-
-        public int RequestCores(int requestedCores)
-        {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
-        }
-
-        public void ReleaseCores(int coresToRelease)
-        {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
         }
     }
 }
