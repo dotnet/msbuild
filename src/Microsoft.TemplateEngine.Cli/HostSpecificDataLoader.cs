@@ -4,6 +4,8 @@ using Microsoft.TemplateEngine.Abstractions.Mount;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+#nullable enable
+
 namespace Microsoft.TemplateEngine.Cli
 {
     public class HostSpecificDataLoader : IHostSpecificDataLoader
@@ -17,21 +19,25 @@ namespace Microsoft.TemplateEngine.Cli
 
         public HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
         {
-            IMountPoint mountPoint = null;
+            IMountPoint? mountPoint = null;
 
             try
             {
-                if (_settingsLoader.TryGetFileFromIdAndPath(templateInfo.MountPointUri, templateInfo.HostConfigPlace, out IFile file, out mountPoint))
+                if (_settingsLoader.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint))
                 {
-                    JObject jsonData;
-                    using (Stream stream = file.OpenRead())
-                    using (TextReader textReader = new StreamReader(stream, true))
-                    using (JsonReader jsonReader = new JsonTextReader(textReader))
+                    var file = mountPoint.FileInfo(templateInfo.HostConfigPlace);
+                    if (file != null && file.Exists)
                     {
-                        jsonData = JObject.Load(jsonReader);
-                    }
+                        JObject jsonData;
+                        using (Stream stream = file.OpenRead())
+                        using (TextReader textReader = new StreamReader(stream, true))
+                        using (JsonReader jsonReader = new JsonTextReader(textReader))
+                        {
+                            jsonData = JObject.Load(jsonReader);
+                        }
 
-                    return jsonData.ToObject<HostSpecificTemplateData>();
+                        return jsonData.ToObject<HostSpecificTemplateData>();
+                    }
                 }
             }
             catch

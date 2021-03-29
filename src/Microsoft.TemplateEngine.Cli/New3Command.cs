@@ -327,7 +327,10 @@ namespace Microsoft.TemplateEngine.Cli
             bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
             try
             {
-                await _settingsLoader.RebuildCacheFromSettingsIfNotCurrent(forceCacheRebuild).ConfigureAwait(false);
+                if (forceCacheRebuild)
+                {
+                    await _settingsLoader.RebuildCacheAsync(CancellationToken.None).ConfigureAwait(false);
+                }
             }
             catch (EngineInitializationException eiex)
             {
