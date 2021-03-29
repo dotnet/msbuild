@@ -315,6 +315,116 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        [Fact]
+        public void TaskReturnsHasLoggedErrorAndLogsWarningAsError_WarningIsAlsoMessage_BuildShouldContinue()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>MSB1234</MSBuildWarningsAsErrors>
+                        <MSBuildWarningsAsMessages>MSB1234</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+                    <ItemGroup>
+                        <SomeItem Include=""Item1"">
+                            <Return>true</Return>
+                            <ReturnHasLoggedErrors>true</ReturnHasLoggedErrors>
+                            <WarningCode>MSB1234</WarningCode>
+                        </SomeItem>
+                    </ItemGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" ReturnHasLoggedErrors=""true"" WarningCode=""MSB1234""/>
+                        <ReturnFailureWithoutLoggingErrorTask/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(1);
+
+                // The build should CONTINUE when it logs a message that should be treated as an error and also a message.
+                // Message takes precedence.
+                logger.AssertLogContains("MSB4181");
+            }
+        }
+
+        [Fact]
+        public void TaskReturnsHasLoggedErrorAndLogsWarningAsError_MessageOverridesTreatAllWarningsAsErrors_BuildShouldContinue()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <PropertyGroup>
+                        <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+                        <MSBuildWarningsAsMessages>MSB1234</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+                    <ItemGroup>
+                        <SomeItem Include=""Item1"">
+                            <Return>true</Return>
+                            <ReturnHasLoggedErrors>true</ReturnHasLoggedErrors>
+                            <WarningCode>MSB1234</WarningCode>
+                        </SomeItem>
+                    </ItemGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" ReturnHasLoggedErrors=""true"" WarningCode=""MSB1234""/>
+                        <ReturnFailureWithoutLoggingErrorTask/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(1);
+
+                // The build should CONTINUE when it logs a message that should be treated as an error and also a message.
+                // Message takes precedence.
+                logger.AssertLogContains("MSB4181");
+            }
+        }
+
+        [Fact]
+        public void TaskReturnsHasLoggedErrorAndLogsWarningAsError_LoggedWarningIsNotTreatedAsMessage_TreatAllWarningsAsErrors_BuildShouldStop()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <PropertyGroup>
+                        <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+                        <MSBuildWarningsAsMessages>MSB1235</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+                    <ItemGroup>
+                        <SomeItem Include=""Item1"">
+                            <Return>true</Return>
+                            <ReturnHasLoggedErrors>true</ReturnHasLoggedErrors>
+                            <WarningCode>MSB1234</WarningCode>
+                        </SomeItem>
+                    </ItemGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" ReturnHasLoggedErrors=""true"" WarningCode=""MSB1234""/>
+                        <ReturnFailureWithoutLoggingErrorTask/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectFailure();
+
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(1);
+
+                // The build should STOP when it logs an error due to MSBuildTreatWarningsAsErrors
+                logger.AssertLogContains("MSB1234");
+            }
+        }
+
         /// <summary>
         /// Item1 and Item2 log warnings and continue, item 3 logs a warn-> error and prevents item 4 from running in the batched build.
         /// </summary>
