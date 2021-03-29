@@ -6,7 +6,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This packet is sent by a node to request or release resources from/to the scheduler.
     /// </summary>
-    internal class ResourceRequest : INodePacket
+    internal sealed class ResourceRequest : INodePacket
     {
         /// <summary>
         /// The global request id of the request which is asking for resources.
@@ -38,25 +38,27 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Constructor for acquiring.
+        /// Private constructor, use CreateAcquireRequest or CreateReleaseRequest to make instances.
         /// </summary>
-        internal ResourceRequest(int globalRequestId, int numCores, bool isBlocking)
+        private ResourceRequest(bool isResourceAcquire, int globalRequestId, int numCores, bool isBlocking)
         {
-            _isResourceAcquire = true;
+            _isResourceAcquire = isResourceAcquire;
             _isBlocking = isBlocking;
             _globalRequestId = globalRequestId;
             _numCores = numCores;
         }
 
         /// <summary>
-        /// Constructor for releasing.
+        /// Factory method for acquiring.
         /// </summary>
-        internal ResourceRequest(int globalRequestId, int numCores)
-        {
-            _isResourceAcquire = false;
-            _globalRequestId = globalRequestId;
-            _numCores = numCores;
-        }
+        public static ResourceRequest CreateAcquireRequest(int globalRequestId, int numCores, bool isBlocking)
+            => new ResourceRequest(isResourceAcquire: true, globalRequestId, numCores, isBlocking);
+
+        /// <summary>
+        /// Factory method for releasing.
+        /// </summary>
+        public static ResourceRequest CreateReleaseRequest(int globalRequestId, int numCores)
+            => new ResourceRequest(isResourceAcquire: false, globalRequestId, numCores, isBlocking: false);
 
         /// <summary>
         /// Returns the type of packet.

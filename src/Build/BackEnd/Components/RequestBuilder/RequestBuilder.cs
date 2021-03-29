@@ -498,7 +498,7 @@ namespace Microsoft.Build.BackEnd
                 responseEvent.Set();
             });
 
-            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
+            RaiseResourceRequest(ResourceRequest.CreateAcquireRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
             WaitHandle[] waitHandles = new WaitHandle[] { _terminateEvent, responseEvent };
             int waitResult;
@@ -531,7 +531,7 @@ namespace Microsoft.Build.BackEnd
         public void ReleaseCores(int coresToRelease)
         {
             VerifyIsNotZombie();
-            RaiseResourceRequest(new ResourceRequest(_requestEntry.Request.GlobalRequestId, coresToRelease));
+            RaiseResourceRequest(ResourceRequest.CreateReleaseRequest(_requestEntry.Request.GlobalRequestId, coresToRelease));
         }
 
         #endregion

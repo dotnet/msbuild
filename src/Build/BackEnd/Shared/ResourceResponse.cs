@@ -4,8 +4,9 @@
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// This packet is sent by the scheduler in response to <see cref="ResourceRequest"/> to grant resources to a node.
     /// </summary>
-    internal class ResourceResponse : INodePacket
+    internal sealed class ResourceResponse : INodePacket
     {
         /// <summary>
         /// The global request id of the request which is being responded to.
