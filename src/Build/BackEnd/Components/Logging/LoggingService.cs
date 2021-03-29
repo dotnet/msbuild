@@ -529,56 +529,38 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             int key = GetWarningsAsErrorOrMessageKey(context);
 
-            // If there is definitely nothing to convert into an error, return early.
-            if (WarningsAsErrors == null && (_warningsAsErrorsByProject == null || !_warningsAsErrorsByProject.ContainsKey(key)))
+            if (_warningsAsErrorsByProject != null && _warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrors))
             {
-                return null;
-            }
-
-            HashSet<string> allWarningsAsErrors = new HashSet<string>();
-
-            if (WarningsAsErrors != null)
-            {
-                allWarningsAsErrors.UnionWith(WarningsAsErrors);
-            }
-
-            if (_warningsAsErrorsByProject != null)
-            {
-                if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrors))
+                if (WarningsAsErrors != null)
                 {
-                    allWarningsAsErrors.UnionWith(warningsAsErrors);
+                    warningsAsErrors.UnionWith(WarningsAsErrors);
                 }
-            }
 
-            return allWarningsAsErrors;
+                return warningsAsErrors;
+            }
+            else
+            {
+                return WarningsAsErrors;
+            }
         }
 
         public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
         {
             int key = GetWarningsAsErrorOrMessageKey(context);
 
-            // If there is definitely nothing to convert into an message, return early.
-            if (WarningsAsMessages == null && (_warningsAsMessagesByProject == null || !_warningsAsMessagesByProject.ContainsKey(key)))
+            if (_warningsAsMessagesByProject != null && _warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
             {
-                return null;
-            }
-
-            HashSet<string> allWarningsAsMessages = new HashSet<string>();
-
-            if (WarningsAsMessages != null)
-            {
-                allWarningsAsMessages.UnionWith(WarningsAsMessages);
-            }
-
-            if (_warningsAsMessagesByProject != null)
-            {
-                if (_warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
+                if (WarningsAsMessages != null)
                 {
-                    allWarningsAsMessages.UnionWith(warningsAsMessages);
+                    warningsAsMessages.UnionWith(WarningsAsMessages);
                 }
-            }
 
-            return allWarningsAsMessages;
+                return warningsAsMessages;
+            }
+            else
+            {
+                return WarningsAsMessages;
+            }
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
