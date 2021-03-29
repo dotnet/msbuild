@@ -724,6 +724,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the warning should not be treated as a message and WarningsAsErrors is an empty set or contains the given warning code.</returns>
         public bool ShouldTreatWarningAsError(string warningCode)
         {
+            // Warnings as messages overrides warnings as errors.
             if (WarningsAsErrors == null || (WarningsAsMessages != null && WarningsAsMessages.Contains(warningCode)))
             {
                 return false;

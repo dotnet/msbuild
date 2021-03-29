@@ -279,12 +279,13 @@ namespace Microsoft.Build.CommandLine
 
         public bool ShouldTreatWarningAsError(string warningCode)
         {
-            if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningCode))
+            // Warnings as messages overrides warnings as errors.
+            if (WarningsAsErrors == null || (WarningsAsMessages != null && WarningsAsMessages.Contains(warningCode)))
             {
                 return false;
             }
 
-            return WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode));
+            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
         }
         #endregion
 

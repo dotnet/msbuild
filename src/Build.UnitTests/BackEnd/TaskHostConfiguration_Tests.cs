@@ -598,6 +598,51 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Test serialization / deserialization when the parameter dictionary contains warningsasmessages
+        /// </summary>
+        [Fact]
+        public void TestTranslationWithWarningsAsMessages()
+        {
+            HashSet<string> WarningsAsMessages = new HashSet<string>();
+            WarningsAsMessages.Add("MSB1234");
+            WarningsAsMessages.Add("MSB1235");
+            WarningsAsMessages.Add("MSB1236");
+            WarningsAsMessages.Add("MSB1237");
+            TaskHostConfiguration config = new TaskHostConfiguration(
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: null,
+                culture: Thread.CurrentThread.CurrentCulture,
+                uiCulture: Thread.CurrentThread.CurrentUICulture,
+#if FEATURE_APPDOMAIN
+                appDomainSetup:
+#if FEATURE_APPDOMAIN
+                null,
+#endif
+                lineNumberOfTask:
+#endif
+                1,
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"c:\my project\myproj.proj",
+                continueOnError: _continueOnErrorDefault,
+                taskName: "TaskName",
+                taskLocation: @"c:\MyTasks\MyTask.dll",
+                taskParameters: null,
+                globalParameters: null,
+                warningsAsErrors: null,
+                warningsAsMessages: WarningsAsMessages);
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
+
+            Assert.NotNull(deserializedConfig.WarningsAsMessages);
+            config.WarningsAsMessages.SequenceEqual(deserializedConfig.WarningsAsMessages, StringComparer.Ordinal).ShouldBeTrue();
+
+        }
+
+        /// <summary>
         /// Helper methods for testing the task host-related packets. 
         /// </summary>
         internal static class TaskHostPacketHelpers
