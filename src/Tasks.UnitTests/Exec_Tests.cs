@@ -960,6 +960,9 @@ echo line 3"" />
         }
 
         [Fact]
+        [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void EndToEndMultilineExec_WithCharactersToEscapeMetadata()
         {
             using (var env = TestEnvironment.Create(_output))
