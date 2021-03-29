@@ -188,6 +188,19 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
 
+        private HashSet<char> _charactersToEscape;
+
+        public string CharactersToEscape
+        {
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _charactersToEscape = new HashSet<char>(value);
+                }
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -618,12 +631,12 @@ namespace Microsoft.Build.Tasks
 
                     StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
 
-                    // Escape any '(', ')', or '&'
+                    // Escape any characters specified by the CharactersToEscape metadata, or '&'
                     for (int i = 0; i < batchFileForCommandLine.Length; i++)
                     {
                         char c = batchFileForCommandLine[i];
 
-                        if ((c == '(' || c == ')' || c == '&') && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
+                        if (ShouldEscapeCharacter(c) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
                         {
                             fileName.Append('^');
                         }
@@ -635,6 +648,12 @@ namespace Microsoft.Build.Tasks
 
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
             }
+        }
+
+        private bool ShouldEscapeCharacter(char c)
+        {
+            // Escape '&' to preserve previous functionality
+            return c == '&' || (_charactersToEscape != null && _charactersToEscape.Contains(c));
         }
 
         #endregion

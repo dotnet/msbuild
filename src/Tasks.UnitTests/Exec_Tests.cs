@@ -56,8 +56,6 @@ namespace Microsoft.Build.UnitTests
         {
             using (var testEnvironment = TestEnvironment.Create())
             {
-                // This test counts files in TEMP. If it uses the system TEMP, some
-                // other process may interfere. Use a private TEMP instead.
                 var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
 
                 string tempPath = Path.GetTempPath();
@@ -65,6 +63,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Now run the Exec task on a simple command.
                 Exec exec = PrepareExec("echo Hello World!");
+                exec.CharactersToEscape = "()";
                 exec.Execute().ShouldBeTrue();
             }
         }
@@ -934,6 +933,56 @@ echo line 3"" />
                     // To be correct, these need to be on separate lines, not
                     // all together on one.
                     logger.AssertLogDoesntContain("1 echo line");
+
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+            }
+        }
+
+        [Fact]
+        public void EndToEndMultilineExec_WithCharactersToEscapeMetadata()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var testProject = env.CreateTestProjectWithFiles(@"<Project>
+<Target Name=""ExecCommand"">
+  <Exec CharactersToEscape=""()"" Command=""echo Hello, World!"" />
+   </Target>
+</Project>");
+
+                // Ensure path has subfolders
+                var newTempPath = env.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
+                string tempPath = Path.GetTempPath();
+                Assert.StartsWith(newTempPath, tempPath);
+
+                using (var buildManager = new BuildManager())
+                {
+                    MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
+
+                    var parameters = new BuildParameters()
+                    {
+                        Loggers = new[] { logger },
+                    };
+
+                    var collection = new ProjectCollection(
+                        new Dictionary<string, string>(),
+                        new[] { logger },
+                        remoteLoggers: null,
+                        ToolsetDefinitionLocations.Default,
+                        maxNodeCount: 1,
+                        onlyLogCriticalEvents: false,
+                        loadProjectsReadOnly: true);
+
+                    var project = collection.LoadProject(testProject.ProjectFile).CreateProjectInstance();
+
+                    var request = new BuildRequestData(
+                        project,
+                        targetsToBuild: new[] { "ExecCommand" },
+                        hostServices: null);
+
+                    var result = buildManager.Build(parameters, request);
+
+                    logger.AssertLogContains("Hello, World!");
 
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
                 }

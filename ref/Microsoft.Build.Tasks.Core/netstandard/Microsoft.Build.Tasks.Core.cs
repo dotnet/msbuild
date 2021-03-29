@@ -243,6 +243,7 @@ namespace Microsoft.Build.Tasks
     public partial class Exec : Microsoft.Build.Tasks.ToolTaskExtension
     {
         public Exec() { }
+        public string CharactersToEscape { set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public string Command { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
