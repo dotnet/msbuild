@@ -557,7 +557,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return false;
         }
 
-        public ICollection<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
+        public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
         {
             throw new NotImplementedException();
         }

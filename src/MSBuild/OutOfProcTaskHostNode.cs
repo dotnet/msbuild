@@ -275,8 +275,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ICollection<string> WarningsAsErrors { get; set; }
 
+        private ICollection<string> WarningsAsMessages { get; set; }
+
         public bool ShouldTreatWarningAsError(string warningCode)
         {
+            if (WarningsAsMessages != null && WarningsAsMessages.Contains(warningCode))
+            {
+                return false;
+            }
+
             return WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode));
         }
         #endregion

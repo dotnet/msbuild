@@ -521,43 +521,64 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Returns a hashset of warnings to be logged as errors for the specified build context.
-        /// Note that WarningsAsMessages takes priority over WarningsAsErrors and are excluded from the set.
-        ///
-        /// If all warnings to be treated as errors should also be treated as messages, return null.
-        /// This is to avoid all warnings being treated as errors. <see cref="RequestBuilder.ConfigureWarningsAsErrorsAndMessages()"/>
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
         /// <returns>
-        /// An empty set if all warnings should be treated as errors.
-        /// A set containing warning codes to be logged as errors.
-        /// Null if no warnings should be treated as errors.
         /// </returns>
-        public ICollection<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context)
+        public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
         {
-            if (_warningsAsErrorsByProject == null)
+            int key = GetWarningsAsErrorOrMessageKey(context);
+
+            // If there is definitely nothing to convert into an error, return early.
+            if (WarningsAsErrors == null && (_warningsAsErrorsByProject == null || !_warningsAsErrorsByProject.ContainsKey(key)))
             {
                 return null;
             }
 
+            HashSet<string> allWarningsAsErrors = new HashSet<string>();
+
+            if (WarningsAsErrors != null)
+            {
+                allWarningsAsErrors.UnionWith(WarningsAsErrors);
+            }
+
+            if (_warningsAsErrorsByProject != null)
+            {
+                if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrors))
+                {
+                    allWarningsAsErrors.UnionWith(warningsAsErrors);
+                }
+            }
+
+            return allWarningsAsErrors;
+        }
+
+        public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
+        {
             int key = GetWarningsAsErrorOrMessageKey(context);
 
-            if (!_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrorsExcludingMessages))
+            // If there is definitely nothing to convert into an message, return early.
+            if (WarningsAsMessages == null && (_warningsAsMessagesByProject == null || !_warningsAsMessagesByProject.ContainsKey(key)))
             {
                 return null;
+            }
+
+            HashSet<string> allWarningsAsMessages = new HashSet<string>();
+
+            if (WarningsAsMessages != null)
+            {
+                allWarningsAsMessages.UnionWith(WarningsAsMessages);
             }
 
             if (_warningsAsMessagesByProject != null)
             {
-                warningsAsErrorsExcludingMessages.ExceptWith(_warningsAsMessagesByProject[key]);
-
-                // A non-null empty set means all warnings are errors. Avoid this.
-                if (warningsAsErrorsExcludingMessages.Count == 0)
+                if (_warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
                 {
-                    warningsAsErrorsExcludingMessages = null;
+                    allWarningsAsMessages.UnionWith(warningsAsMessages);
                 }
             }
 
-            return warningsAsErrorsExcludingMessages;
+            return allWarningsAsMessages;
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)

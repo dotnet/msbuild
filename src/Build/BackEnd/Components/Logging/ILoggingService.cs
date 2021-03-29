@@ -221,11 +221,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Returns a hashset of warnings to be logged as errors for the specified project instance ID.
-        /// Note that WarningsAsMessages takes priority over WarningsAsErrors and are excluded from the set.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
-        /// <returns>A Hashset containing warning codes that should be treated as warnings that will not be treated as messages.</returns>
-        ICollection<string> GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext context);
+        /// <returns>A Hashset containing warning codes that should be treated as errors.</returns>
+        ICollection<string> GetWarningsAsErrors(BuildEventContext context);
+
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as messages for the specified project instance ID.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns>A Hashset containing warning codes that should be treated as messages.</returns>
+        ICollection<string> GetWarningsAsMessages(BuildEventContext context);
 
         #region Register
 
