@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -13,11 +14,20 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal class MSBuildForwardingAppWithoutLogging
     {
+        internal static readonly bool executeMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_EXEC_MSBUILD");
+
+        private const string MSBuildAppClassName = "Microsoft.Build.CommandLine.MSBuildApp";
+
         private const string MSBuildExeName = "MSBuild.dll";
 
         private const string SdksDirectoryName = "Sdks";
 
+        // Null if we're running MSBuild in-proc.
         private readonly ForwardingAppImplementation _forwardingApp;
+
+        private IEnumerable<string> _argsToForward;
+
+        private string _msbuildPath;
 
         internal static string MSBuildExtensionsPathTestHook = null;
 
@@ -34,26 +44,79 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null)
         {
-            _forwardingApp = new ForwardingAppImplementation(
-                msbuildPath ?? GetMSBuildExePath(),
-                _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
-                environmentVariables: _msbuildRequiredEnvironmentVariables);
+            _argsToForward = argsToForward;
+            _msbuildPath = msbuildPath ?? GetMSBuildExePath();
+
+            if (executeMSBuildOutOfProc)
+            {
+                _forwardingApp = new ForwardingAppImplementation(
+                    _msbuildPath,
+                    _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
+                    environmentVariables: _msbuildRequiredEnvironmentVariables);
+            }
         }
 
         public virtual ProcessStartInfo GetProcessStartInfo()
         {
+            Debug.Assert(_forwardingApp != null, "Can't get ProcessStartInfo when not executing out-of-proc");
             return _forwardingApp
                 .GetProcessStartInfo();
         }
 
+        public string[] GetAllArgumentsUnescaped()
+        {
+            return _msbuildRequiredParameters.Concat(_argsToForward).ToArray();
+        }
+
         public void EnvironmentVariable(string name, string value)
         {
-            _forwardingApp.WithEnvironmentVariable(name, value);
+            if (_forwardingApp != null)
+            {
+                _forwardingApp.WithEnvironmentVariable(name, value);
+            }
+            else
+            {
+                _msbuildRequiredEnvironmentVariables.Add(name, value);
+            }
         }
 
         public int Execute()
         {
-            return GetProcessStartInfo().Execute();
+            if (executeMSBuildOutOfProc)
+            {
+                return GetProcessStartInfo().Execute();
+            }
+            else
+            {
+                return ExecuteInProc(GetAllArgumentsUnescaped());
+            }
+        }
+
+        public int ExecuteInProc(string[] arguments)
+        {
+            // Save current environment variables before overwriting them.
+            Dictionary<string, string> savedEnvironmentVariables = new Dictionary<string, string>();
+            try
+            {
+                foreach (KeyValuePair<string, string> kvp in _msbuildRequiredEnvironmentVariables)
+                {
+                    savedEnvironmentVariables[kvp.Key] = Environment.GetEnvironmentVariable(kvp.Key);
+                    Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+                }
+
+                Assembly assembly = Assembly.LoadFrom(_msbuildPath);
+                Type type = assembly.GetType(MSBuildAppClassName);
+                MethodInfo mi = type.GetMethod("Main");
+                return (int)mi.Invoke(null, new object[] { arguments });
+            }
+            finally
+            {
+                // Restore saved environment variables.
+                foreach (KeyValuePair<string, string> kvp in savedEnvironmentVariables)
+                {
+                    Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
+                }
+            }
         }
 
         private static string Escape(string arg) =>
@@ -98,4 +161,3 @@ namespace Microsoft.DotNet.Cli.Utils
         }
     }
 }
-

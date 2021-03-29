@@ -71,15 +71,30 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public virtual int Execute()
         {
-            // Ignore Ctrl-C for the remainder of the command's execution
-            // Forwarding commands will just spawn the child process and exit
-            Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
+            int exitCode;
 
-            ProcessStartInfo startInfo = GetProcessStartInfo();
+            if (MSBuildForwardingAppWithoutLogging.executeMSBuildOutOfProc)
+            {
+                // Ignore Ctrl-C for the remainder of the command's execution
+                // Forwarding commands will just spawn the child process and exit
+                Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
 
-            PerformanceLogEventSource.Log.LogMSBuildStart(startInfo);
-            int exitCode = startInfo.Execute();
-            PerformanceLogEventSource.Log.MSBuildStop(exitCode);
+                ProcessStartInfo startInfo = GetProcessStartInfo();
+
+                PerformanceLogEventSource.Log.LogMSBuildStart(startInfo.FileName, startInfo.Arguments);
+                exitCode = startInfo.Execute();
+                PerformanceLogEventSource.Log.MSBuildStop(exitCode);
+            }
+            else
+            {
+                string[] arguments = _forwardingAppWithoutLogging.GetAllArgumentsUnescaped();
+                if (PerformanceLogEventSource.Log.IsEnabled())
+                {
+                    PerformanceLogEventSource.Log.LogMSBuildStart(string.Empty, ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(arguments));
+                }
+                exitCode = _forwardingAppWithoutLogging.ExecuteInProc(arguments);
+                PerformanceLogEventSource.Log.MSBuildStop(exitCode);
+            }
 
             return exitCode;
         }
