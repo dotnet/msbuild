@@ -366,6 +366,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Requests CPU resources from the scheduler.
         /// </summary>
+        /// <remarks>This method is called from the <see cref="TaskHost"/>.</remarks>
         int IRequestBuilderCallback.RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
         {
             return _requestBuilderCallback.RequestCores(monitorLockObject, requestedCores, waitForCores);
@@ -374,6 +375,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns CPU resources to the scheduler.
         /// </summary>
+        /// <remarks>This method is called from the <see cref="TaskHost"/>.</remarks>
         void IRequestBuilderCallback.ReleaseCores(int coresToRelease)
         {
             _requestBuilderCallback.ReleaseCores(coresToRelease);
