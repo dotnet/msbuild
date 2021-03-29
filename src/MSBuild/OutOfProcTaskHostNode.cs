@@ -815,6 +815,7 @@ namespace Microsoft.Build.CommandLine
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
             WarningsAsErrors = taskConfiguration.WarningsAsErrors;
+            WarningsAsMessages = taskConfiguration.WarningsAsMessages;
             try
             {
                 // Change to the startup directory

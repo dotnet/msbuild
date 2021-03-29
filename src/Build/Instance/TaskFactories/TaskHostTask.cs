@@ -272,7 +272,8 @@ namespace Microsoft.Build.BackEnd
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
-                        _taskLoggingContext.GetWarningsAsErrors()
+                        _taskLoggingContext.GetWarningsAsErrors(),
+                        _taskLoggingContext.GetWarningsAsMessages()
                         
                     );
 

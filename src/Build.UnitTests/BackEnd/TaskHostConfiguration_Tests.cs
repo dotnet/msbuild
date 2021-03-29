@@ -57,7 +57,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskLocation: @"c:\my tasks\mytask.dll",
                     taskParameters: null,
                     globalParameters: null,
-                    warningsAsErrors: null);
+                    warningsAsErrors: null,
+                    warningsAsMessages: null);
             }
            );
         }
@@ -90,7 +91,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskLocation: @"c:\my tasks\mytask.dll",
                     taskParameters: null,
                     globalParameters: null,
-                    warningsAsErrors: null);
+                    warningsAsErrors: null,
+                    warningsAsMessages: null);
             }
            );
         }
@@ -123,7 +125,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskLocation: null,
                     taskParameters: null,
                     globalParameters: null,
-                    warningsAsErrors: null);
+                    warningsAsErrors: null,
+                    warningsAsMessages: null);
             }
            );
         }
@@ -158,7 +161,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskLocation: String.Empty,
                     taskParameters: null,
                     globalParameters: null,
-                    warningsAsErrors: null);
+                    warningsAsErrors: null,
+                    warningsAsMessages: null);
             }
            );
         }
@@ -191,26 +195,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: null,
                 globalParameters: null,
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             TaskHostConfiguration config2 = new TaskHostConfiguration(
-                1,
-                Directory.GetCurrentDirectory(),
-                null,
-                Thread.CurrentThread.CurrentCulture,
-                Thread.CurrentThread.CurrentUICulture,
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: null,
+                culture: Thread.CurrentThread.CurrentCulture,
+                uiCulture: Thread.CurrentThread.CurrentUICulture,
+#if FEATURE_APPDOMAIN
+                appDomainSetup:
 #if FEATURE_APPDOMAIN
                 null,
 #endif
+                lineNumberOfTask:
+#endif
                 1,
-                1,
-                @"c:\my project\myproj.proj",
-                _continueOnErrorDefault,
-                "TaskName",
-                @"c:\MyTasks\MyTask.dll",
-                null,
-                null,
-                null);
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"c:\my project\myproj.proj",
+                continueOnError: _continueOnErrorDefault,
+                taskName: "TaskName",
+                taskLocation: @"c:\MyTasks\MyTask.dll",
+                taskParameters: null,
+                globalParameters: null,
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             TaskHostConfiguration config3 = new TaskHostConfiguration(
@@ -234,7 +244,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: parameters,
                 globalParameters: null,
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             IDictionary<string, object> parameters2 = new Dictionary<string, object>();
             parameters2.Add("Text", "Hello!");
@@ -263,7 +274,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: parameters2,
                 globalParameters: null,
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             HashSet<string> WarningsAsErrors = new HashSet<string>();
             WarningsAsErrors.Add("MSB1234");
@@ -292,7 +304,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: parameters2,
                 globalParameters: null,
-                warningsAsErrors: WarningsAsErrors);
+                warningsAsErrors: WarningsAsErrors,
+                warningsAsMessages: null);
         }
 
         /// <summary>
@@ -328,7 +341,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: null,
                 globalParameters: expectedGlobalProperties,
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -371,7 +385,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: new Dictionary<string, object>(),
                 globalParameters: new Dictionary<string, string>(),
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -419,7 +434,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: parameters,
                 globalParameters: null,
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -465,7 +481,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: parameters,
                 globalParameters: null,
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -510,7 +527,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: parameters,
                 globalParameters: null,
-                warningsAsErrors: null);
+                warningsAsErrors: null,
+                warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -562,7 +580,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskLocation: @"c:\MyTasks\MyTask.dll",
                 taskParameters: null,
                 globalParameters: null,
-                warningsAsErrors: WarningsAsErrors);
+                warningsAsErrors: WarningsAsErrors,
+                warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
