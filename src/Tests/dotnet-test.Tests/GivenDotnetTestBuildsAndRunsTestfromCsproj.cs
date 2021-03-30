@@ -472,7 +472,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact]
+        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.Linux)]
         public void ItCreatesCoverageFileInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
@@ -508,7 +508,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [UnixOnlyFact]
+        [PlatformSpecificFact(TestPlatforms.FreeBSD | TestPlatforms.OSX)]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
