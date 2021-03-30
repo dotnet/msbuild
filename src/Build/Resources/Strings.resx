@@ -1070,6 +1070,15 @@
   <data name="OutputPropertyLogMessage" xml:space="preserve">
     <value>Output Property: {0}={1}</value>
   </data>
+  <data name="TaskAcquiredCores" xml:space="preserve">
+    <value>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</value>
+  </data>
+  <data name="TaskReleasedCores" xml:space="preserve">
+    <value>Task "{0}" released {1} cores and now holds {2} cores total.</value>
+  </data>
+  <data name="TaskReleasedCoresWarning" xml:space="preserve">
+    <value>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</value>
+  </data>
   <data name="TaskContinuedDueToContinueOnError" xml:space="preserve">
     <value>Build continuing because "{0}" on the task "{1}" is set to "{2}".</value>
   </data>

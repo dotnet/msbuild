@@ -735,6 +735,11 @@ namespace Microsoft.Build.BackEnd
         private bool _isImplicitCoreUsed = false;
 
         /// <summary>
+        /// Total number of cores granted to the task, including the one implicit core.
+        /// </summary>
+        private int TotalAcquiredCores => _additionalAcquiredCores + (_isImplicitCoreUsed ? 1 : 0);
+
+        /// <summary>
         /// Allocates shared CPU resources. Called by a task when it's about to do potentially multi-threaded/multi-process work.
         /// </summary>
         /// <param name="requestedCores">The number of cores the task wants to use.</param>
@@ -774,6 +779,11 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 Debug.Assert(coresAcquired >= 1);
+                if (LoggingContext.IsValid)
+                {
+                    LoggingContext.LogComment(MessageImportance.Low, "TaskAcquiredCores", _taskLoggingContext.TaskName,
+                        requestedCores, coresAcquired, TotalAcquiredCores);
+                }
                 return coresAcquired;
             }
         }
@@ -789,18 +799,36 @@ namespace Microsoft.Build.BackEnd
 
             lock (_callbackMonitor)
             {
-                if (_isImplicitCoreUsed && coresToRelease > _additionalAcquiredCores)
+                int coresBeingReleased = coresToRelease;
+                int previousTotalAcquiredCores = TotalAcquiredCores;
+
+                if (_isImplicitCoreUsed && coresBeingReleased > _additionalAcquiredCores)
                 {
                     // Release the implicit core last, i.e. only if we're asked to release everything.
-                    coresToRelease -= 1;
+                    coresBeingReleased -= 1;
                     _isImplicitCoreUsed = false;
                 }
 
-                if (coresToRelease >= 1)
+                coresBeingReleased = Math.Min(coresBeingReleased, _additionalAcquiredCores);
+                if (coresBeingReleased >= 1)
                 {
                     IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
-                    builderCallback.ReleaseCores(coresToRelease);
-                    _additionalAcquiredCores -= coresToRelease;
+                    builderCallback.ReleaseCores(coresBeingReleased);
+                    _additionalAcquiredCores -= coresBeingReleased;
+                }
+
+                if (LoggingContext.IsValid)
+                {
+                    if (TotalAcquiredCores == previousTotalAcquiredCores - coresToRelease)
+                    {
+                        LoggingContext.LogComment(MessageImportance.Low, "TaskReleasedCores", _taskLoggingContext.TaskName,
+                            coresToRelease, TotalAcquiredCores);
+                    }
+                    else
+                    {
+                        LoggingContext.LogComment(MessageImportance.Low, "TaskReleasedCoresWarning", _taskLoggingContext.TaskName,
+                            coresToRelease, previousTotalAcquiredCores, TotalAcquiredCores);
+                    }
                 }
             }
         }
@@ -810,7 +838,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void ReleaseAllCores()
         {
-            int coresToRelease = _additionalAcquiredCores + (_isImplicitCoreUsed ? 1 : 0);
+            int coresToRelease = TotalAcquiredCores;
             if (coresToRelease > 0)
             {
                 ReleaseCores(coresToRelease);
