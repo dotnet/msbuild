@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var msbuildPath = "<msbuildpath>";
                 CleanCommand.FromArgs(args, msbuildPath)
-                    .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                    .GetConcatenatedArguments().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }
     }

@@ -69,6 +69,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return _forwardingAppWithoutLogging.GetProcessStartInfo();
         }
 
+        public string GetConcatenatedArguments()
+        {
+            var argumentsUnescaped = _forwardingAppWithoutLogging.GetAllArgumentsUnescaped();
+            return Cli.Utils.ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(argumentsUnescaped);
+        }
+
         public virtual int Execute()
         {
             int exitCode;

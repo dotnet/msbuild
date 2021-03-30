@@ -46,8 +46,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 command.SeparateRestoreCommand.Should().BeNull();
 
-                command.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.GetConcatenatedArguments().Should()
                     .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
         }
