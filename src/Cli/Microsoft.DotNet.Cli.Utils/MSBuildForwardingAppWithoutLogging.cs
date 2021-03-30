@@ -107,7 +107,18 @@ namespace Microsoft.DotNet.Cli.Utils
                 Assembly assembly = Assembly.LoadFrom(_msbuildPath);
                 Type type = assembly.GetType(MSBuildAppClassName);
                 MethodInfo mi = type.GetMethod("Main");
-                return (int)mi.Invoke(null, new object[] { arguments });
+
+                try
+                {
+                    return (int)mi.Invoke(null, new object[] { arguments });
+                }
+                catch (TargetInvocationException targetException)
+                {
+                    Console.Error.Write("Unhandled exception: ");
+                    Console.Error.WriteLine(targetException.InnerException.ToString());
+
+                    return unchecked((int)0xe0434352); // EXCEPTION_COMPLUS
+                }
             }
             finally
             {
