@@ -404,7 +404,7 @@ namespace Microsoft.DotNet.CommandFactory
             string stdErr;
 
             var forwardingAppWithoutLogging = new MSBuildForwardingAppWithoutLogging(args, msBuildExePath);
-            if (MSBuildForwardingAppWithoutLogging.executeMSBuildOutOfProc)
+            if (forwardingAppWithoutLogging.ExecuteMSBuildOutOfProc)
             {
                 result = forwardingAppWithoutLogging
                     .GetProcessStartInfo()

@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             this.output = output;
         }
 
-        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
+        const string ExpectedPrefix = "-maxcpucount -verbosity:m";
 
         [Theory]
         [InlineData(new string[] { }, "")]

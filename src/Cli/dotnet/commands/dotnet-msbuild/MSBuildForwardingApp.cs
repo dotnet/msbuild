@@ -44,11 +44,12 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return argsToForward;
         }
 
-        public MSBuildForwardingApp(IEnumerable<string> argsToForward, string msbuildPath = null)
+        public MSBuildForwardingApp(IEnumerable<string> argsToForward, string msbuildPath = null, bool? executeOutOfProc = null)
         {
             _forwardingAppWithoutLogging = new MSBuildForwardingAppWithoutLogging(
                 ConcatTelemetryLogger(argsToForward),
-                msbuildPath);
+                msbuildPath,
+                executeOutOfProc);
 
             // Add the performance log location to the environment of the target process.
             if (PerformanceLogManager.Instance != null && !string.IsNullOrEmpty(PerformanceLogManager.Instance.CurrentLogDirectory))
@@ -79,7 +80,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
         {
             int exitCode;
 
-            if (MSBuildForwardingAppWithoutLogging.executeMSBuildOutOfProc)
+            if (_forwardingAppWithoutLogging.ExecuteMSBuildOutOfProc)
             {
                 // Ignore Ctrl-C for the remainder of the command's execution
                 // Forwarding commands will just spawn the child process and exit

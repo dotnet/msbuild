@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal class MSBuildForwardingAppWithoutLogging
     {
-        internal static bool executeMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_EXEC_MSBUILD");
+        private static readonly bool ExecuteMSBuildOutOfProcByDefault = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_EXEC_MSBUILD");
 
         private const string MSBuildAppClassName = "Microsoft.Build.CommandLine.MSBuildApp";
 
@@ -23,13 +23,15 @@ namespace Microsoft.DotNet.Cli.Utils
         private const string SdksDirectoryName = "Sdks";
 
         // Null if we're running MSBuild in-proc.
-        private readonly ForwardingAppImplementation _forwardingApp;
+        private ForwardingAppImplementation _forwardingApp;
 
         private IEnumerable<string> _argsToForward;
 
         private string _msbuildPath;
 
         internal static string MSBuildExtensionsPathTestHook = null;
+
+        internal bool ExecuteMSBuildOutOfProc => _forwardingApp != null;
 
         private readonly Dictionary<string, string> _msbuildRequiredEnvironmentVariables =
             new Dictionary<string, string>
@@ -42,12 +44,12 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly IEnumerable<string> _msbuildRequiredParameters =
             new List<string> { "-maxcpucount", "-verbosity:m" };
 
-        public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null)
+        public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null, bool? executeOutOfProc = null)
         {
             _argsToForward = argsToForward;
             _msbuildPath = msbuildPath ?? GetMSBuildExePath();
 
-            if (executeMSBuildOutOfProc)
+            if (executeOutOfProc == true || (executeOutOfProc == null && ExecuteMSBuildOutOfProcByDefault))
             {
                 _forwardingApp = new ForwardingAppImplementation(
                     _msbuildPath,
@@ -59,8 +61,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public virtual ProcessStartInfo GetProcessStartInfo()
         {
             Debug.Assert(_forwardingApp != null, "Can't get ProcessStartInfo when not executing out-of-proc");
-            return _forwardingApp
-                .GetProcessStartInfo();
+            return _forwardingApp.GetProcessStartInfo();
         }
 
         public string[] GetAllArgumentsUnescaped()
@@ -78,11 +79,22 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 _msbuildRequiredEnvironmentVariables.Add(name, value);
             }
+
+            if (value == string.Empty || value == "\0")
+            {
+                // Unlike ProcessStartInfo.EnvironmentVariables, Environment.SetEnvironmentVariable can't set a variable
+                // to an empty value, so we just fall back to calling MSBuild out-of-proc if we encounter this.
+                // https://github.com/dotnet/runtime/issues/34446
+                _forwardingApp = new ForwardingAppImplementation(
+                    _msbuildPath,
+                    _msbuildRequiredParameters.Concat(_argsToForward.Select(Escape)),
+                    environmentVariables: _msbuildRequiredEnvironmentVariables);
+            }
         }
 
         public int Execute()
         {
-            if (executeMSBuildOutOfProc)
+            if (_forwardingApp != null)
             {
                 return GetProcessStartInfo().Execute();
             }
