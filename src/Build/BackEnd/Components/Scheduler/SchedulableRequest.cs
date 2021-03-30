@@ -291,6 +291,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Number of cores granted as part of running the build request.
+        /// </summary>
+        public int GrantedCores { get; set; }
+
+        /// <summary>
         /// Gets the amount of time we spent in the specified state.
         /// </summary>
         public TimeSpan GetTimeSpentInState(SchedulableRequestState desiredState)

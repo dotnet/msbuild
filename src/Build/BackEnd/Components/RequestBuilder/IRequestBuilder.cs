@@ -49,6 +49,11 @@ namespace Microsoft.Build.BackEnd
         event BuildRequestBlockedDelegate OnBuildRequestBlocked;
 
         /// <summary>
+        /// Raised when resources are requested.
+        /// </summary>
+        event ResourceRequestDelegate OnResourceRequest;
+
+        /// <summary>
         /// Builds the request contained in the specified entry.
         /// </summary>
         /// <param name="nodeLoggingContext">The logging context for the node.</param>
@@ -59,6 +64,11 @@ namespace Microsoft.Build.BackEnd
         /// Continues building a request which was previously waiting for results.
         /// </summary>
         void ContinueRequest();
+
+        /// <summary>
+        /// Continues building a request which was previously waiting for a resource grant.
+        /// </summary>
+        void ContinueRequestWithResources(ResourceResponse response);
 
         /// <summary>
         /// Cancels an existing request.

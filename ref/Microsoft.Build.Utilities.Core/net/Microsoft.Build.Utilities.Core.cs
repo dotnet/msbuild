@@ -354,6 +354,7 @@ namespace Microsoft.Build.Utilities
         public Microsoft.Build.Framework.IBuildEngine6 BuildEngine6 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine7 BuildEngine7 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine8 BuildEngine8 { get { throw null; } }
+        public Microsoft.Build.Framework.IBuildEngine9 BuildEngine9 { get { throw null; } }
         protected string HelpKeywordPrefix { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskHost HostObject { get { throw null; } set { } }
         public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }

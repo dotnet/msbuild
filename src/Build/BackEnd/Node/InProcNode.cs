@@ -17,7 +17,7 @@ using Microsoft.Build.BackEnd.Components.Caching;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// This class represents an implementation of INode for out-of-proc nodes.
+    /// This class represents an implementation of INode for in-proc nodes.
     /// </summary>
     internal class InProcNode : INode, INodePacketFactory
     {
@@ -97,6 +97,11 @@ namespace Microsoft.Build.BackEnd
         private readonly RequestCompleteDelegate _requestCompleteEventHandler;
 
         /// <summary>
+        /// Handler for resource request events.
+        /// </summary>
+        private readonly ResourceRequestDelegate _resourceRequestHandler;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public InProcNode(IBuildComponentHost componentHost, INodeEndpoint inProcNodeEndpoint)
@@ -113,6 +118,7 @@ namespace Microsoft.Build.BackEnd
             _newConfigurationRequestEventHandler = OnNewConfigurationRequest;
             _requestBlockedEventHandler = OnNewRequest;
             _requestCompleteEventHandler = OnRequestComplete;
+            _resourceRequestHandler = OnResourceRequest;
         }
 
         #region INode Members
@@ -261,6 +267,17 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Event handler for the BuildEngine's OnResourceRequest event.
+        /// </summary>
+        private void OnResourceRequest(ResourceRequest request)
+        {
+            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
+            {
+                _nodeEndpoint.SendData(request);
+            }
+        }
+
+        /// <summary>
         /// Event handler for the LoggingService's OnLoggingThreadException event.
         /// </summary>
         private void OnLoggingThreadException(Exception e)
@@ -354,6 +371,7 @@ namespace Microsoft.Build.BackEnd
             _buildRequestEngine.OnNewConfigurationRequest -= _newConfigurationRequestEventHandler;
             _buildRequestEngine.OnRequestBlocked -= _requestBlockedEventHandler;
             _buildRequestEngine.OnRequestComplete -= _requestCompleteEventHandler;
+            _buildRequestEngine.OnResourceRequest -= _resourceRequestHandler;
 
             return _shutdownReason;
         }
@@ -387,6 +405,10 @@ namespace Microsoft.Build.BackEnd
 
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
+                    break;
+
+                case NodePacketType.ResourceResponse:
+                    HandleResourceResponse(packet as ResourceResponse);
                     break;
             }
         }
@@ -482,6 +504,7 @@ namespace Microsoft.Build.BackEnd
             _buildRequestEngine.OnNewConfigurationRequest += _newConfigurationRequestEventHandler;
             _buildRequestEngine.OnRequestBlocked += _requestBlockedEventHandler;
             _buildRequestEngine.OnRequestComplete += _requestCompleteEventHandler;
+            _buildRequestEngine.OnResourceRequest += _resourceRequestHandler;
 
             if (_shutdownException != null)
             {
@@ -499,6 +522,14 @@ namespace Microsoft.Build.BackEnd
         {
             _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
+        }
+
+        /// <summary>
+        /// Handles the ResourceResponse packet.
+        /// </summary>
+        private void HandleResourceResponse(ResourceResponse response)
+        {
+            _buildRequestEngine.GrantResources(response);
         }
     }
 }

@@ -174,9 +174,19 @@ namespace Microsoft.Build.BackEnd
         ResolveSdkRequest,
 
         /// <summary>
-        /// Message sent from back to a node when an SDK has been resolved.
+        /// Message sent back to a node when an SDK has been resolved.
         /// </summary>
         ResolveSdkResponse,
+
+        /// <summary>
+        /// Message sent from a node when a task is requesting or returning resources from the scheduler.
+        /// </summary>
+        ResourceRequest,
+
+        /// <summary>
+        /// Message sent back to a node informing it about the resource that were granted by the scheduler.
+        /// </summary>
+        ResourceResponse,
     }
     #endregion
 

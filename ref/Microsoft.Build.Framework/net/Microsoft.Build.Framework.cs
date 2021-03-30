@@ -218,6 +218,11 @@ namespace Microsoft.Build.Framework
     {
         bool ShouldTreatWarningAsError(string warningCode);
     }
+    public partial interface IBuildEngine9 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6, Microsoft.Build.Framework.IBuildEngine7, Microsoft.Build.Framework.IBuildEngine8
+    {
+        void ReleaseCores(int coresToRelease);
+        int RequestCores(int requestedCores);
+    }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();

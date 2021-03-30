@@ -755,6 +755,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        /// <summary>
+        /// Empty impl
+        /// </summary>
+        int IRequestBuilderCallback.RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
+        {
+            return 0;
+        }
+
+        /// <summary>
+        /// Empty impl
+        /// </summary>
+        void IRequestBuilderCallback.ReleaseCores(int coresToRelease)
+        {
+        }
+
         #endregion
 
         #region IRequestBuilderCallback Members
