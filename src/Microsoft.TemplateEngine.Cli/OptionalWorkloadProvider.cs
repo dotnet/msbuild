@@ -1,10 +1,9 @@
-using Microsoft.DotNet.TemplateLocator;
+﻿using Microsoft.DotNet.TemplateLocator;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.Edge.Mount.Archive;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,19 +12,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TemplateEngine.Utils
 {
-    internal class OptionalWorkloadPackages : ITemplatePackageProviderFactory
+    internal partial class OptionalWorkloadProviderFactory
     {
-        public static readonly Guid FactoryId = new Guid("{FAE2BB7C-054D-481B-B75C-E9F524193D56}");
-
-        public Guid Id => FactoryId;
-
-        public string Name => "OptionalWorkloads";
-
-        public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
-        {
-            return new OptionalWorkloadProvider(this, settings);
-        }
-
         class OptionalWorkloadProvider : ITemplatePackageProvider
         {
             private IEngineEnvironmentSettings EnvironmentSettings;
