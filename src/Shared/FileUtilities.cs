@@ -1031,27 +1031,72 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(basePath, nameof(basePath));
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
-            if (basePath.Length == 0)
+            string fullBase = Path.GetFullPath(basePath);
+            string fullPath = Path.GetFullPath(path);
+
+            string[] splitBase = fullBase.Split(Path.DirectorySeparatorChar).Where(x => !String.IsNullOrEmpty(x)).ToArray();
+            string[] splitPath = fullPath.Split(Path.DirectorySeparatorChar).Where(x => !String.IsNullOrEmpty(x)).ToArray();
+
+            ErrorUtilities.VerifyThrow(splitPath.Length > 0, "Cannot call MakeRelative on a path of only slashes.");
+
+            // On a mac, the path could start with any number of slashes and still be valid. We have to check them all.
+            int indexOfFirstNonSlashChar = 0;
+            while (IsSlash(path[indexOfFirstNonSlashChar]))
             {
-                return path;
+                indexOfFirstNonSlashChar++;
+            }
+            if (path.IndexOf(splitPath[0]) != indexOfFirstNonSlashChar)
+            {
+                // path was already relative so just return it
+                return FixFilePath(path);
             }
 
-            Uri baseUri = new Uri(EnsureTrailingSlash(basePath), UriKind.Absolute); // May throw UriFormatException
-
-            Uri pathUri = CreateUriFromPath(path);
-
-            if (!pathUri.IsAbsoluteUri)
+            int baseI = 0;
+            int pathI = 0;
+            while (true)
             {
-                // the path is already a relative url, we will just normalize it...
-                pathUri = new Uri(baseUri, pathUri);
+                if (baseI == splitBase.Length)
+                {
+                    if (pathI == splitPath.Length)
+                    {
+                        return ".";
+                    }
+                    break;
+                }
+                else if (pathI == splitPath.Length)
+                {
+                    break;
+                }
+                else if (splitBase[baseI].Equals(splitPath[pathI], PathComparison))
+                {
+                    baseI++;
+                    pathI++;
+                }
+                else
+                {
+                    break;
+                }
             }
 
-            Uri relativeUri = baseUri.MakeRelativeUri(pathUri);
-            string relativePath = Uri.UnescapeDataString(relativeUri.IsAbsoluteUri ? relativeUri.LocalPath : relativeUri.ToString());
+            StringBuilder sb = StringBuilderCache.Acquire();
 
-            string result = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
-            return result;
+            // If the paths have no component in common, the only valid relative path is the full path.
+            if (baseI == 0)
+            {
+                return fullPath;
+            }
+            while (baseI < splitBase.Length)
+            {
+                sb.Append("..").Append(Path.DirectorySeparatorChar);
+                baseI++;
+            }
+            while (pathI < splitPath.Length)
+            {
+                sb.Append(splitPath[pathI]).Append(Path.DirectorySeparatorChar);
+                pathI++;
+            }
+            sb.Remove(sb.Length - 1, 1);
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         /// <summary>
