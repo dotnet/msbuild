@@ -494,44 +494,27 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private BuildEventArgs GetBuildEventArgFromId()
         {
-            switch (_eventType)
+            return _eventType switch
             {
-                case LoggingEventType.BuildErrorEvent:
-                    return new BuildErrorEventArgs(null, null, null, -1, -1, -1, -1, null, null, null);
-                case LoggingEventType.BuildFinishedEvent:
-                    return new BuildFinishedEventArgs(null, null, false);
-                case LoggingEventType.BuildMessageEvent:
-                    return new BuildMessageEventArgs(null, null, null, MessageImportance.Normal);
-                case LoggingEventType.BuildStartedEvent:
-                    return new BuildStartedEventArgs(null, null);
-                case LoggingEventType.BuildWarningEvent:
-                    return new BuildWarningEventArgs(null, null, null, -1, -1, -1, -1, null, null, null);
-                case LoggingEventType.ProjectFinishedEvent:
-                    return new ProjectFinishedEventArgs(null, null, null, false);
-                case LoggingEventType.ProjectStartedEvent:
-                    return new ProjectStartedEventArgs(null, null, null, null, null, null);
-                case LoggingEventType.TargetStartedEvent:
-                    return new TargetStartedEventArgs(null, null, null, null, null);
-                case LoggingEventType.TargetFinishedEvent:
-                    return new TargetFinishedEventArgs(null, null, null, null, null, false);
-                case LoggingEventType.TaskStartedEvent:
-                    return new TaskStartedEventArgs(null, null, null, null, null);
-                case LoggingEventType.TaskFinishedEvent:
-                    return new TaskFinishedEventArgs(null, null, null, null, null, false);
-                case LoggingEventType.TaskCommandLineEvent:
-                    return new TaskCommandLineEventArgs(null, null, MessageImportance.Normal);
+                LoggingEventType.BuildErrorEvent => new BuildErrorEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
+                LoggingEventType.BuildFinishedEvent => new BuildFinishedEventArgs(null, null, false),
+                LoggingEventType.BuildMessageEvent => new BuildMessageEventArgs(null, null, null, MessageImportance.Normal),
+                LoggingEventType.BuildStartedEvent => new BuildStartedEventArgs(null, null),
+                LoggingEventType.BuildWarningEvent => new BuildWarningEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
+                LoggingEventType.ProjectFinishedEvent => new ProjectFinishedEventArgs(null, null, null, false),
+                LoggingEventType.ProjectStartedEvent => new ProjectStartedEventArgs(null, null, null, null, null, null),
+                LoggingEventType.TargetStartedEvent => new TargetStartedEventArgs(null, null, null, null, null),
+                LoggingEventType.TargetFinishedEvent => new TargetFinishedEventArgs(null, null, null, null, null, false),
+                LoggingEventType.TaskStartedEvent => new TaskStartedEventArgs(null, null, null, null, null),
+                LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
+                LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
-                case LoggingEventType.TaskParameterEvent:
-                    return new TaskParameterEventArgs(0, null, null, true, default);
-                case LoggingEventType.ProjectEvaluationStartedEvent:
-                    return new ProjectEvaluationStartedEventArgs();
-                case LoggingEventType.ProjectEvaluationFinishedEvent:
-                    return new ProjectEvaluationFinishedEventArgs();
+                LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
+                LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
+                LoggingEventType.ProjectEvaluationFinishedEvent => new ProjectEvaluationFinishedEventArgs(),
 #endif
-                default:
-                    ErrorUtilities.VerifyThrow(false, "Should not get to the default of GetBuildEventArgFromId ID: " + _eventType);
-                    return null;
-            }
+                _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
+            };
         }
 
         /// <summary>
