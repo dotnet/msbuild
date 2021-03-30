@@ -397,14 +397,14 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(collection: ref _warningsAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
 #if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>());
+                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
 #else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
 #endif
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
 #if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>());
+                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
 #else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
 #endif
