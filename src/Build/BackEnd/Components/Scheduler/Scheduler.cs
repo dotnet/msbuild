@@ -197,10 +197,16 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            // Resource management tuning knobs:
+            // 1) MSBUILDCORELIMIT is the maximum number of cores we hand out via IBuildEngine9.RequestCores.
+            //    Note that it is independent of build parallelism as given by /m on the command line.
             if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDCORELIMIT"), out _coreLimit) || _coreLimit <= 0)
             {
                 _coreLimit = NativeMethodsShared.GetLogicalCoreCount();
             }
+            // 1) MSBUILDNODECOREALLOCATIONWEIGHT is the weight with which executing nodes reduce the number of available cores.
+            //    Example: If the weight is 50, _coreLimit is 8, and there are 4 nodes that are busy executing build requests,
+            //    then the number of cores available via IBuildEngine9.RequestCores is 8 - (0.5 * 4) = 6.
             if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDNODECOREALLOCATIONWEIGHT"), out _nodeCoreAllocationWeight)
                 || _nodeCoreAllocationWeight <= 0
                 || _nodeCoreAllocationWeight > 100)
