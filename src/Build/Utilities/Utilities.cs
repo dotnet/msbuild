@@ -719,12 +719,10 @@ namespace Microsoft.Build.Internal
                         }
                     }
 
-                    if (string.IsNullOrEmpty(itemType))
+                    if (!String.IsNullOrEmpty(itemType))
                     {
-                        continue;
+                        callback(new DictionaryEntry(itemType, itemValue));
                     }
-
-                    callback(new DictionaryEntry(itemType, itemValue));
                 }
             }
         }
