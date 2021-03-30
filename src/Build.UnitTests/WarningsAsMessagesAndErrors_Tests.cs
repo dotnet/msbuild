@@ -368,9 +368,9 @@ namespace Microsoft.Build.Engine.UnitTests
         /// Both builds should continue despite logging errors.
         /// </summary>
         [Theory]
-        [InlineData("MSB1234", false)]
-        [InlineData("MSB0000", true)]
-        public void TaskReturnsTrue_Tests(string warningsAsErrors, bool treatAllWarningsAsErrors)
+        [InlineData("MSB1234", false, 1, 1)]
+        [InlineData("MSB0000", true, 0, 2)]
+        public void TaskReturnsTrue_Tests(string warningsAsErrors, bool treatAllWarningsAsErrors, int warningCountShouldBe, int errorCountShouldBe)
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
@@ -390,8 +390,8 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
-                logger.WarningCount.ShouldBe(1);
-                logger.ErrorCount.ShouldBe(1);
+                logger.WarningCount.ShouldBe(warningCountShouldBe);
+                logger.ErrorCount.ShouldBe(errorCountShouldBe);
 
                 // The build will continue so we should see the warning MSB1235
                 logger.AssertLogContains("MSB1235");
