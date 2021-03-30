@@ -3,9 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.ExternalAccess.DotNetWatch;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
@@ -13,7 +14,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken);
 
-        ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, DotNetWatchManagedModuleUpdatesWrapper? solutionUpdate, CancellationToken cancellationToken);
+        ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken);
 
         ValueTask ReportDiagnosticsAsync(DotNetWatchContext context, IEnumerable<string> diagnostics, CancellationToken cancellationToken);
     }

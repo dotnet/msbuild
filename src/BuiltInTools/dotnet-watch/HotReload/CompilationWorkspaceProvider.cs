@@ -8,9 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.ExternalAccess.DotNetWatch;
-using Microsoft.CodeAnalysis.Host;
-using Microsoft.CodeAnalysis.Host.Mef;
+using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.Extensions.Tools.Internal;
 
@@ -18,18 +16,17 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal static class CompilationWorkspaceProvider
     {
-        public static Task<(Solution, DotNetWatchEditAndContinueWorkspaceService)> CreateWorkspaceAsync(string projectPath, IReporter reporter, CancellationToken cancellationToken)
+        public static Task<(Solution, WatchHotReloadService)> CreateWorkspaceAsync(string projectPath, IReporter reporter, CancellationToken cancellationToken)
         {
-            var taskCompletionSource = new TaskCompletionSource<(Solution, DotNetWatchEditAndContinueWorkspaceService)>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var taskCompletionSource = new TaskCompletionSource<(Solution, WatchHotReloadService)>(TaskCreationOptions.RunContinuationsAsynchronously);
             CreateProject(taskCompletionSource, projectPath, reporter, cancellationToken);
 
             return taskCompletionSource.Task;
         }
 
-        static async void CreateProject(TaskCompletionSource<(Solution, DotNetWatchEditAndContinueWorkspaceService)> taskCompletionSource, string projectPath, IReporter reporter, CancellationToken cancellationToken)
+        static async void CreateProject(TaskCompletionSource<(Solution, WatchHotReloadService)> taskCompletionSource, string projectPath, IReporter reporter, CancellationToken cancellationToken)
         {
-            var hostServices = MefHostServices.Create(MSBuildMefHostServices.DefaultAssemblies.Append(typeof(DotNetWatchEditAndContinueWorkspaceService).Assembly));
-            var workspace = MSBuildWorkspace.Create(hostServices);
+            var workspace = MSBuildWorkspace.Create();
 
             workspace.WorkspaceFailed += (_sender, diag) =>
             {
@@ -45,21 +42,12 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await workspace.OpenProjectAsync(projectPath, cancellationToken: cancellationToken);
             var currentSolution = workspace.CurrentSolution;
-            var editAndContinue = workspace.Services.GetRequiredService<DotNetWatchEditAndContinueWorkspaceService>();
-            editAndContinue.StartDebuggingSession(workspace.CurrentSolution);
+            var hotReloadService = new WatchHotReloadService(workspace.Services);
+            await hotReloadService.StartSessionAsync(currentSolution, cancellationToken);
 
             // Read the documents to memory
             await Task.WhenAll(
                 currentSolution.Projects.SelectMany(p => p.Documents.Concat(p.AdditionalDocuments)).Select(d => d.GetTextAsync(cancellationToken)));
-
-            // Tell EnC to grab an initial snapshot of documents.
-            foreach (var project in currentSolution.Projects)
-            {
-                foreach (var document in project.Documents)
-                {
-                    await editAndContinue.OnSourceFileUpdatedAsync(document, cancellationToken);
-                }
-            }
 
             // Warm up the compilation. This would help make the deltas for first edit appear much more quickly
             foreach (var project in currentSolution.Projects)
@@ -67,7 +55,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 await project.GetCompilationAsync(cancellationToken);
             }
 
-            taskCompletionSource.TrySetResult((currentSolution, editAndContinue));
+            taskCompletionSource.TrySetResult((currentSolution, hotReloadService));
         }
     }
 }

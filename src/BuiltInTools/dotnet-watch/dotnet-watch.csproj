@@ -20,7 +20,6 @@
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
     <PackageReference Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(MicrosoftCodeAnalysisCSharpFeaturesPackageVersion)" />
-    <PackageReference Include="Microsoft.CodeAnalysis.ExternalAccess.DotNetWatch" Version="$(MicrosoftCodeAnalysisExternalAccessDotNetWatchPackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion)" />
   </ItemGroup>
 

@@ -90,10 +90,6 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>e85a9577dde206633a255538b18bc582d33915c9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.CodeAnalysis.ExternalAccess.DotNetWatch" Version="3.10.0-2.21180.20">
-      <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>e85a9577dde206633a255538b18bc582d33915c9</Sha>
-    </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="6.0.0-preview.4.21179.18">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>43ebb3bf3219c04890bb9e5b8772f028bd6679bc</Sha>

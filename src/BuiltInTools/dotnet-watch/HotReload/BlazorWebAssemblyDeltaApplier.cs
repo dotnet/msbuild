@@ -3,10 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.ExternalAccess.DotNetWatch;
+using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
@@ -25,7 +26,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             return default;
         }
 
-        public async ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, DotNetWatchManagedModuleUpdatesWrapper? updates, CancellationToken cancellationToken)
+        public async ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
         {
             if (context.BrowserRefreshServer is null)
             {
@@ -33,18 +34,13 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            if (updates is null)
-            {
-                return true;
-            }
-
             var payload = new UpdatePayload
             {
-                Deltas = updates.Value.Updates.Select(c => new UpdateDelta
+                Deltas = solutionUpdate.Select(c => new UpdateDelta
                 {
-                    ModuleId = c.Module,
-                    ILDelta = c.ILDelta.ToArray(),
-                    MetadataDelta = c.MetadataDelta.ToArray(),
+                    ModuleId = c.ModuleId,
+                    MetadataDelta = c.MetadataDelta,
+                    ILDelta = c.ILDelta,
                 }),
             };
 
@@ -69,8 +65,8 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly struct UpdateDelta
         {
             public Guid ModuleId { get; init; }
-            public byte[] MetadataDelta { get; init; }
-            public byte[] ILDelta { get; init; }
+            public ImmutableArray<byte> MetadataDelta { get; init; }
+            public ImmutableArray<byte> ILDelta { get; init; }
         }
     }
 }

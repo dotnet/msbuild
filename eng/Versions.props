@@ -118,7 +118,6 @@
     <MicrosoftCodeAnalysisCSharpPackageVersion>3.10.0-2.21180.20</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>3.10.0-2.21180.20</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
     <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>3.10.0-2.21180.20</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
-    <MicrosoftCodeAnalysisExternalAccessDotNetWatchPackageVersion>3.10.0-2.21180.20</MicrosoftCodeAnalysisExternalAccessDotNetWatchPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->

@@ -4,7 +4,7 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.ExternalAccess.DotNetWatch;
+using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Tools.Internal;
 
@@ -23,9 +23,9 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal class CompilationHandler : IDisposable
     {
         private readonly IReporter _reporter;
-        private Task<(Solution, DotNetWatchEditAndContinueWorkspaceService)>? _initializeTask;
+        private Task<(Solution, WatchHotReloadService)>? _initializeTask;
         private Solution? _currentSolution;
-        private DotNetWatchEditAndContinueWorkspaceService? _editAndContinue;
+        private WatchHotReloadService? _hotReloadService;
         private IDeltaApplier? _deltaApplier;
 
         public CompilationHandler(IReporter reporter)
@@ -78,11 +78,9 @@ namespace Microsoft.DotNet.Watcher.Tools
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
-            Debug.Assert(_editAndContinue != null);
+            Debug.Assert(_hotReloadService != null);
             Debug.Assert(_currentSolution != null);
             Debug.Assert(_deltaApplier != null);
-
-            _editAndContinue.StartEditSession();
 
             Solution? updatedSolution = null;
             ProjectId updatedProjectId;
@@ -105,55 +103,40 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            var updates = await _editAndContinue.EmitSolutionUpdateAsync(updatedSolution, cancellationToken);
+            var (updates, hotReloadDiagnostics) = await _hotReloadService.EmitSolutionUpdateAsync(updatedSolution, cancellationToken);
 
-            if (updates.Status == DotNetWatchManagedModuleUpdateStatus.None)
+            if (hotReloadDiagnostics.IsDefaultOrEmpty && updates.IsDefaultOrEmpty)
             {
-                // Nothing to do?
-                _editAndContinue.EndEditSession();
-
-                await _deltaApplier.Apply(context, file.FilePath, default, cancellationToken);
-                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
-                return true;
-            }
-            else if (updates.Status == DotNetWatchManagedModuleUpdateStatus.Blocked)
-            {
-                _editAndContinue.EndEditSession();
-
-                var project = updatedSolution.GetProject(updatedProjectId)!;
-                var diagnostics = GetDiagnostics(project, cancellationToken);
-
-                if (diagnostics.Count > 0)
+                // It's possible that there are compilation errors which prevented the solution update
+                // from being updated. Let's look to see if there are compilation errors.
+                var diagnostics = GetDiagnostics(updatedSolution, cancellationToken);
+                if (diagnostics.IsDefaultOrEmpty)
                 {
-                    foreach (var diagnostic in diagnostics)
-                    {
-                        _reporter.Verbose(diagnostic);
-                    }
-
+                    await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+                }
+                else
+                {
                     await _deltaApplier.ReportDiagnosticsAsync(context, diagnostics, cancellationToken);
-
-                    // We need a better way to differentiate between rude vs compilation errors, but for now let's assume any compilation
-                    // diagnostics mean the latter. In this case, treat it as if we successfully applied the delta.
-
-                    // Calling Workspace.TryApply on an MSBuildWorkspace causes the workspace to write source text changes to disk.
-                    // We'll instead simply keep track of the updated solution.
-                    _currentSolution = updatedSolution;
-
-                    HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
-                    // Figure out how to recover from errors. Currently it seems unrecoverable.
-                    return false;
                 }
 
-                _reporter.Verbose("Unable to apply update.");
+                HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
+                // Even if there were diagnostics, continue treating this as a success
+                return true;
+            }
+
+            if (!hotReloadDiagnostics.IsDefaultOrEmpty)
+            {
+                // Rude edit.
+                _reporter.Output("Unable to apply hot reload because of a rude edit. Rebuilding the app...");
+                foreach (var diagnostic in hotReloadDiagnostics)
+                {
+                    _reporter.Verbose(CSharpDiagnosticFormatter.Instance.Format(diagnostic));
+                }
+
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
 
-            _editAndContinue.CommitSolutionUpdate();
-            _editAndContinue.EndEditSession();
-
-            // Calling Workspace.TryApply on an MSBuildWorkspace causes the workspace to write source text changes to disk.
-            // We'll instead simply keep track of the updated solution.
             _currentSolution = updatedSolution;
 
             var applyState = await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
@@ -161,26 +144,41 @@ namespace Microsoft.DotNet.Watcher.Tools
             return applyState;
         }
 
-        private IReadOnlyList<string> GetDiagnostics(Project project, CancellationToken cancellationToken)
+        private ImmutableArray<string> GetDiagnostics(Solution solution, CancellationToken cancellationToken)
         {
-            if (!project.TryGetCompilation(out var compilation))
+            var @lock = new object();
+            var builder = ImmutableArray<string>.Empty;
+            Parallel.ForEach(solution.Projects, project =>
             {
-                return Array.Empty<string>();
-            }
+                if (!project.TryGetCompilation(out var compilation))
+                {
+                    return;
+                }
 
-            var compilationDiagnostics = compilation.GetDiagnostics(cancellationToken);
-            if (compilationDiagnostics.IsDefaultOrEmpty)
-            {
-                return Array.Empty<string>();
-            }
+                var compilationDiagnostics = compilation.GetDiagnostics(cancellationToken);
+                if (compilationDiagnostics.IsDefaultOrEmpty)
+                {
+                    return;
+                }
 
-            var diagnostics = new List<string>();
-            foreach (var item in compilationDiagnostics.Where(d => d.Severity == DiagnosticSeverity.Error))
-            {
-                diagnostics.Add(CSharpDiagnosticFormatter.Instance.Format(item));
-            }
+                var projectDiagnostics = ImmutableArray<string>.Empty;
+                foreach (var item in compilationDiagnostics)
+                {
+                    if (item.Severity == DiagnosticSeverity.Error)
+                    {
+                        var diagnostic = CSharpDiagnosticFormatter.Instance.Format(item);
+                        _reporter.Output(diagnostic);
+                        projectDiagnostics = projectDiagnostics.Add(diagnostic);
+                    }
+                }
 
-            return diagnostics;
+                lock (@lock)
+                {
+                    builder = builder.AddRange(projectDiagnostics);
+                }
+            });
+
+            return builder;
         }
 
         private async ValueTask<bool> EnsureSolutionInitializedAsync()
@@ -197,7 +195,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             try
             {
-                (_currentSolution, _editAndContinue) = await _initializeTask;
+                (_currentSolution, _hotReloadService) = await _initializeTask;
                 return true;
             }
             catch (Exception ex)
@@ -209,16 +207,16 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private async ValueTask<SourceText> GetSourceTextAsync(string filePath)
         {
-            for (var attemptIndex = 0; attemptIndex < 10; attemptIndex++)
+            for (var attemptIndex = 0; attemptIndex < 6; attemptIndex++)
             {
                 try
                 {
                     using var stream = File.OpenRead(filePath);
                     return SourceText.From(stream, Encoding.UTF8);
                 }
-                catch (IOException) when (attemptIndex < 8)
+                catch (IOException) when (attemptIndex < 5)
                 {
-                    await Task.Delay(100);
+                    await Task.Delay(20 * (attemptIndex + 1));
                 }
             }
 
@@ -228,7 +226,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public void Dispose()
         {
-            _editAndContinue?.EndDebuggingSession();
+            _hotReloadService?.EndSession();
             if (_deltaApplier is not null)
             {
                 _deltaApplier.Dispose();
