@@ -9,7 +9,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     internal readonly struct RazorInputItem
     {
-        public RazorInputItem(AdditionalText additionalText, string relativePath, string fileKind, string? generatedOutputPath, string? cssScope)
+        public RazorInputItem(AdditionalText additionalText, string relativePath, string fileKind, string? cssScope)
         {
             AdditionalText = additionalText;
             RelativePath = relativePath;
@@ -18,7 +18,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 .Replace(Path.DirectorySeparatorChar, '/')
                 .Replace("//", "/");
             FileKind = fileKind;
-            GeneratedOutputPath = generatedOutputPath;
         }
 
         public AdditionalText AdditionalText { get; }
@@ -30,7 +29,5 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public string FileKind { get; }
 
         public string? CssScope { get; }
-
-        public string? GeneratedOutputPath { get; }
     }
 }

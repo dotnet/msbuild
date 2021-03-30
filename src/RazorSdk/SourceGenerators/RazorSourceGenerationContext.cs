@@ -136,17 +136,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
                 options.TryGetValue("build_metadata.AdditionalFiles.CssScope", out var cssScope);
 
-                if (!options.TryGetValue("build_metadata.AdditionalFiles.GeneratedOutputFullPath", out var generatedOutputPath))
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        RazorDiagnostics.GeneratedOutputFullPathNotProvided,
-                        Location.None,
-                        item.Path));
-                }
-
                 var fileKind = isComponent ? FileKinds.GetComponentFileKindFromFilePath(item.Path) : FileKinds.Legacy;
 
-                var inputItem = new RazorInputItem(item, relativePath, fileKind, generatedOutputPath, cssScope);
+                var inputItem = new RazorInputItem(item, relativePath, fileKind, cssScope);
 
                 if (isComponent)
                 {
