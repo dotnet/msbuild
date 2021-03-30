@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public string[] GetAllArgumentsUnescaped()
         {
-            return _msbuildRequiredParameters.Concat(_argsToForward).ToArray();
+            return _msbuildRequiredParameters.Concat(_argsToForward.Select(Escape)).ToArray();
         }
 
         public void EnvironmentVariable(string name, string value)
