@@ -180,13 +180,10 @@ namespace Microsoft.Build.Collections
             {
                 foreach (var itemTypeBucket in _itemLists)
                 {
-                    if (itemTypeBucket.Value == null || itemTypeBucket.Value.Count == 0)
+                    if (itemTypeBucket.Value?.Any())
                     {
-                        // skip empty markers
-                        continue;
+                        itemTypeCallback(itemTypeBucket.Key, itemTypeBucket.Value);
                     }
-
-                    itemTypeCallback(itemTypeBucket.Key, itemTypeBucket.Value);
                 }
             }
         }
