@@ -62,10 +62,6 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>102d1e856c7e0e553abeec937783da5debed73ad</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Cli.CommandLine" Version="1.0.0-preview.19208.1">
-      <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
-      <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>
-    </Dependency>
     <Dependency Name="Microsoft.Build" Version="16.10.0-preview-21175-01">
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>afd0b62109300f3b088875b5a65d1a5bfd786e15</Sha>
