@@ -23,7 +23,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                if (_settingsLoader.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint))
+                if (!string.IsNullOrEmpty(templateInfo.HostConfigPlace) && _settingsLoader.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint))
                 {
                     var file = mountPoint.FileInfo(templateInfo.HostConfigPlace);
                     if (file != null && file.Exists)
