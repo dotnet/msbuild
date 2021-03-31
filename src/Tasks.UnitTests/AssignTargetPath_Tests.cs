@@ -137,6 +137,7 @@ namespace Microsoft.Build.UnitTests
             t.Execute().ShouldBeTrue();
             t.AssignedFiles.Length.ShouldBe(1);
             link.ShouldBe(t.AssignedFiles[0].GetMetadata("TargetPath"));
+            ChangeWaves.ResetStateForTests();
         }
     }
 }
