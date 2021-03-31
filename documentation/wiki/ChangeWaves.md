@@ -25,6 +25,7 @@ The opt-out comes in the form of setting the environment variable `MSBuildDisabl
 - [Don't expand full drive globs with false condition](https://github.com/dotnet/msbuild/pull/5669)
 ### 16.10
 - [Error when a property expansion in a condition has whitespace](https://github.com/dotnet/msbuild/pull/5672)
+- [Allow Custom CopyToOutputDirectory Location With TargetPath](https://github.com/dotnet/msbuild/pull/6237)
 ### 17.0
 
 ## Change Waves No Longer In Rotation
