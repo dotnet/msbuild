@@ -185,11 +185,11 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (string.IsNullOrWhiteSpace(installRequest.Version))
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Info_PackageName, installRequest.Identifier));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Info_PackageName, installRequest.PackageIdentifier));
                 }
                 else
                 {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Info_PackageNameVersion, installRequest.Identifier, installRequest.Version));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Info_PackageNameVersion, installRequest.PackageIdentifier, installRequest.Version));
                 }
             }
             Reporter.Output.WriteLine();
