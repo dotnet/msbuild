@@ -238,8 +238,8 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
         <source>Switches:            Note that you can specify switches using
                      "-switch", "/switch" and "--switch".
 </source>
-        <target state="needs-review-translation">參數:            請注意，您可以同時使用 "-switch" 和 "/switch"
-                     來指定參數。
+        <target state="translated">參數:            請注意，您可以同時使用 "-switch"、"/switch"，
+以及 "--switch"                     來指定參數。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -956,7 +956,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid.</target>
+        <target state="translated">MSBUILD : error MSB1057: 圖形組建值無效。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

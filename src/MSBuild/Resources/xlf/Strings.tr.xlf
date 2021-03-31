@@ -238,8 +238,8 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
         <source>Switches:            Note that you can specify switches using
                      "-switch", "/switch" and "--switch".
 </source>
-        <target state="needs-review-translation">Anahtarlar:            Hem "-switch" hem de "/switch" değerini kullanarak
-                     anahtar beliretebileceğinizi unutmayın.
+        <target state="translated">Anahtarlar:            Hem "-switch" hem de "/switch" ve "--switch" değerini kullanarak
+                     anahtar belirtebileceğinizi unutmayın.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -960,7 +960,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid.</target>
+        <target state="translated">MSBUILD : error MSB1057: Grafik derleme değeri geçerli değil.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

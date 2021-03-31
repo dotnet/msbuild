@@ -2487,7 +2487,7 @@
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
         <source>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">Il file "{0}" non è stato decompresso perché non corrisponde al filtro di inclusione oppure perché corrisponde al filtro di esclusione.</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
@@ -2522,12 +2522,12 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternInvalidPath">
         <source>MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB3937: non è stato possibile analizzare il modello "{0}" perché contiene un carattere di percorso non valido.</target>
         <note>{StrBegin="MSB3937: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternPropertyReferences">
         <source>MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB3938: non è stato possibile analizzare il modello "{0}" perché contiene un riferimento a proprietà che non è supportato.</target>
         <note>{StrBegin="MSB3938: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.FileComment">

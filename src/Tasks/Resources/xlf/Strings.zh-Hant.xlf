@@ -2487,7 +2487,7 @@
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
         <source>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">因為檔案 "{0}" 與包含篩選器不相符，或與排除篩選器相符，所以未將該檔案解壓縮。</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
@@ -2522,12 +2522,12 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternInvalidPath">
         <source>MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB3937: 因為模式 "{0}" 包含無效的路徑字元，所以無法加以剖析。</target>
         <note>{StrBegin="MSB3937: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternPropertyReferences">
         <source>MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB3938: 因為模式 "{0}" 包含不支援的屬性參考，所以無法加以剖析。</target>
         <note>{StrBegin="MSB3938: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.FileComment">

@@ -239,8 +239,8 @@ isoladamente.
         <source>Switches:            Note that you can specify switches using
                      "-switch", "/switch" and "--switch".
 </source>
-        <target state="needs-review-translation">Switches:            Você pode especificar as opções usando
-                     "-switch" e "/switch".
+        <target state="translated">Opções:            Observe que você pode especificar as opções usando
+                     "-switch", "/switch" e "--switch".
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -957,7 +957,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid.</target>
+        <target state="translated">MSBUILD : error MSB1057: o valor de build do grafo não é válido.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

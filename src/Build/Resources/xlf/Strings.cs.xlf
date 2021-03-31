@@ -129,12 +129,12 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nepodporují předávání souborového systému MSBuildFileSystemBase.</target>
+        <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nepodporují předávání souborového systému MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
-        <target state="new">Killing process with pid = {0}.</target>
+        <target state="translated">Ukončuje se proces s pid = {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -191,7 +191,7 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
-        <target state="new">Only item types may be referenced when removing with MatchOnMetadata.</target>
+        <target state="translated">Při odebírání pomocí MatchOnMetadata je možné odkazovat jen na typy položek.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
@@ -244,7 +244,7 @@
       </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
-        <target state="new">Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</target>
+        <target state="translated">{1} neimportoval projekt {0} v ({2},{3}), protože se výraz vyhodnocuje na prázdný řetězec.</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
@@ -273,7 +273,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
-        <target state="needs-review-translation">Statický graf se načetl za {0} s: počet uzlů: {1}, počet hraničních uzlů: {2}</target>
+        <target state="translated">Statický graf se načetl za {0} s: počet uzlů: {1}, počet hraničních uzlů: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -1696,7 +1696,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
-        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
+        <target state="translated">MSB4064: Úloha {1} načtená ze sestavení {2} na cestě {3} nepodporuje parametr {0}. Zkontrolujte, že parametr v úloze existuje, že &lt;UsingTask&gt; odkazuje na správné sestavení a že se jedná o nastavitelnou vlastnost veřejné instance.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">
