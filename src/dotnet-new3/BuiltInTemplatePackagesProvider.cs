@@ -14,7 +14,7 @@ namespace dotnet_new3
 {
     class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
-        public string Name => "new3 BuiltIn";
+        public string DisplayName => "new3 BuiltIn";
 
         public Guid Id { get; } = new Guid("{3227D09D-C1EA-48F1-A33B-1F132BFD9F06}");
 

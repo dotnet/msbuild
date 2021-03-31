@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 {
     class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
-        public string Name => "E2E Harness BuiltIn";
+        public string DisplayName => "E2E Harness BuiltIn";
 
         public Guid Id { get; } = new Guid("{3227D09D-C1EA-48F1-A33B-1F132BFD9F00}");
 

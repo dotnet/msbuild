@@ -11,7 +11,7 @@ namespace Microsoft.TemplateEngine.Utils
 
         public Guid Id => FactoryId;
 
-        public string Name => "OptionalWorkloads";
+        public string DisplayName => "OptionalWorkloads";
 
         public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
         {
