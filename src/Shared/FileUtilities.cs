@@ -1034,14 +1034,14 @@ namespace Microsoft.Build.Shared
             string fullBase = Path.GetFullPath(basePath);
             string fullPath = Path.GetFullPath(path);
 
-            string[] splitBase = fullBase.Split(Path.DirectorySeparatorChar).Where(x => !String.IsNullOrEmpty(x)).ToArray();
-            string[] splitPath = fullPath.Split(Path.DirectorySeparatorChar).Where(x => !String.IsNullOrEmpty(x)).ToArray();
+            string[] splitBase = fullBase.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            string[] splitPath = fullPath.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
 
             ErrorUtilities.VerifyThrow(splitPath.Length > 0, "Cannot call MakeRelative on a path of only slashes.");
 
             // On a mac, the path could start with any number of slashes and still be valid. We have to check them all.
             int indexOfFirstNonSlashChar = 0;
-            while (IsSlash(path[indexOfFirstNonSlashChar]))
+            while (path[indexOfFirstNonSlashChar] == Path.DirectorySeparatorChar)
             {
                 indexOfFirstNonSlashChar++;
             }
