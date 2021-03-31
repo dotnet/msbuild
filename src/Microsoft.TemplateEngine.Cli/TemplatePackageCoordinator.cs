@@ -557,7 +557,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private async Task DisplayInstallResultAsync(INewCommandInput commandInput, string packageToInstall, Result result, CancellationToken cancellationToken)
+        private async Task DisplayInstallResultAsync(INewCommandInput commandInput, string packageToInstall, InstallerOperationResult result, CancellationToken cancellationToken)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             if (string.IsNullOrWhiteSpace(packageToInstall))
