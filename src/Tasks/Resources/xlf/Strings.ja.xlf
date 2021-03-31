@@ -511,7 +511,7 @@
       </trans-unit>
       <trans-unit id="General.StateFileAlreadyPresent">
         <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
-        <target state="new">MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</target>
+        <target state="translated">MSB3667: "{0}" には既にファイルが存在します。事前計算済みキャッシュを作成しようとしている場合は、アセンブリ自体をビルドするのではなく、アセンブリに依存する単一のプロジェクトをビルドしてください。ResolveAssemblyReference タスクを正常に実行している場合は、ResolveAssemblyReference タスクの "AssemblyInformationCacheOutputPath" パラメーターを設定しないでください。</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
       <trans-unit id="General.UndefineProperties">
