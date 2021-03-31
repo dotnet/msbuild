@@ -52,8 +52,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Should()
                     .BeNull();
 
-                command.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.GetConcatenatedArguments()
+                    .Should()
                     .Be($"{ExpectedPrefix} -restore -target:Publish{expectedAdditionalArgs}");
             });
         }
@@ -68,13 +68,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var msbuildPath = "<msbuildpath>";
             var command = PublishCommand.FromArgs(args, msbuildPath);
 
-            command.SeparateRestoreCommand
-                   .GetProcessStartInfo()
-                   .Arguments.Should()
+            command.GetConcatenatedArguments()
+                   .Should()
                    .Be($"{ExpectedPrefix} -target:Restore");
 
-            command.GetProcessStartInfo()
-                   .Arguments.Should()
+            command.GetConcatenatedArguments()
+                   .Should()
                    .Be($"{ExpectedPrefix} -nologo -target:Publish{expectedAdditionalArgs}");
         }
 
@@ -89,8 +88,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                    .BeNull();
 
             // NOTE --no-build implies no-restore hence no -restore argument to msbuild below.
-            command.GetProcessStartInfo()
-                   .Arguments
+            command.GetConcatenatedArguments()
                    .Should()
                    .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
         }

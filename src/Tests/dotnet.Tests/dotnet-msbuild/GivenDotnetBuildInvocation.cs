@@ -46,7 +46,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 command.SeparateRestoreCommand.Should().BeNull();
 
-                command.GetConcatenatedArguments().Should()
+                command.GetConcatenatedArguments()
+                    .Should()
                     .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
         }
@@ -79,8 +80,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Arguments.Should()
                     .Be($"{ExpectedPrefix} {expectedAdditionalArgsForRestore}");
 
-                command.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.GetConcatenatedArguments()
+                    .Should()
                     .Be($"{ExpectedPrefix} -nologo -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
 
