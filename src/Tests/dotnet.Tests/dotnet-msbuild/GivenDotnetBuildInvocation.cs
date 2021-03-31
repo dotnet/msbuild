@@ -76,8 +76,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var msbuildPath = "<msbuildpath>";
                 var command = BuildCommand.FromArgs(args, msbuildPath);
 
-                command.SeparateRestoreCommand.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.SeparateRestoreCommand.GetConcatenatedArguments()
+                    .Should()
                     .Be($"{ExpectedPrefix} {expectedAdditionalArgsForRestore}");
 
                 command.GetConcatenatedArguments()
