@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -116,18 +115,14 @@ namespace Microsoft.DotNet.Cli.Utils
                     Environment.SetEnvironmentVariable(kvp.Key, kvp.Value);
                 }
 
-                Assembly assembly = Assembly.LoadFrom(_msbuildPath);
-                Type type = assembly.GetType(MSBuildAppClassName);
-                MethodInfo mi = type.GetMethod("Main");
-
                 try
                 {
-                    return (int)mi.Invoke(null, new object[] { arguments });
+                    return Microsoft.Build.CommandLine.MSBuildApp.Main(arguments);
                 }
-                catch (TargetInvocationException targetException)
+                catch (Exception exception)
                 {
                     Console.Error.Write("Unhandled exception: ");
-                    Console.Error.WriteLine(targetException.InnerException.ToString());
+                    Console.Error.WriteLine(exception.ToString());
 
                     return unchecked((int)0xe0434352); // EXCEPTION_COMPLUS
                 }

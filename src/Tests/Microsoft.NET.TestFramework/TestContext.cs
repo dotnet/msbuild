@@ -208,8 +208,10 @@ namespace Microsoft.NET.TestFramework
                 "MSBuildSDKsPath",
                 Path.Combine(testContext.ToolsetUnderTest.SdksPath));
 
+#if NETCOREAPP
             DotNet.Cli.Utils.MSBuildForwardingAppWithoutLogging.MSBuildExtensionsPathTestHook =
                 testContext.ToolsetUnderTest.SdkFolderUnderTest;
+#endif
         }
 
         public static string GetRepoRoot()

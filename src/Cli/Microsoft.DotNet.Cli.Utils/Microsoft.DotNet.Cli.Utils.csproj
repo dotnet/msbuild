@@ -15,7 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime"
+        Version="$(MicrosoftBuildRuntimePackageVersion)"
+        Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'"
+        GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetPackagingPackageVersion)" />
@@ -28,6 +31,14 @@
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+
+    <Reference Include="$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net5.0\ref\MSBuild.dll"
+        Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'"
+        Private="True" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="MSBuildForwardingAppWithoutLogging.cs" Condition="'$(TargetFramework)' != '$(SdkTargetFramework)'" />
   </ItemGroup>
 
 </Project>
