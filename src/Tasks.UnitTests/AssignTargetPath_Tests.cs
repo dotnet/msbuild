@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             string link = "c:/some/path";
 
             ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBuildDisableFeaturesFromVersion", ChangeWaves.Wave16_10.ToString());
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
             BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
             AssignTargetPath t = new AssignTargetPath();
