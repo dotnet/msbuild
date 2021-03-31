@@ -191,7 +191,7 @@
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
-        <target state="translated">Solo se puede hacer referencia a los tipos de elemento al quitar con MatchOnMetadata.</target>
+        <target state="translated">Solo se puede hacer referencia a los objetos de tipo elemento al quitar con MatchOnMetadata</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
