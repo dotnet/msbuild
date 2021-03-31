@@ -86,7 +86,7 @@ jobs:
     continueOnError: true
     condition: always()
   - powershell: | 
-      Get-ChildItem -Path "C:\src\git\msbuild\artifacts\log\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
+      Get-ChildItem -Path "artifacts\log\Debug\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
         $s = $_.BaseName.Split('-')[1];
         Write-Host "Checking Process ID: $s"
         Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s"
@@ -138,7 +138,7 @@ jobs:
     continueOnError: true
     condition: always()
   - powershell: | 
-      Get-ChildItem -Path "artifacts\log\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
+      Get-ChildItem -Path "artifacts\log\Debug\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
         $s = $_.BaseName.Split('-')[1];
         Write-Host "Checking Process ID: $s"
         Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s"
