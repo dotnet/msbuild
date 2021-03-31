@@ -116,7 +116,11 @@ namespace Microsoft.Build.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create();
             string link = "c:/some/path";
-            env.SetEnvironmentVariable("MSBuildDisableFeaturesFromVersion", "16.10");
+
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBuildDisableFeaturesFromVersion", ChangeWaves.Wave16_10.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
             AssignTargetPath t = new AssignTargetPath();
             t.BuildEngine = new MockEngine();
             Dictionary<string, string> metaData = new Dictionary<string, string>();
