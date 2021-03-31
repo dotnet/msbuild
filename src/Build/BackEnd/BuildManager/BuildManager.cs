@@ -1702,6 +1702,11 @@ namespace Microsoft.Build.Execution
                                 projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
                             }
 
+                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                            {
+                                projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                            }
+
                             return new ProjectInstance(
                                 path,
                                 properties,

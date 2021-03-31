@@ -2109,6 +2109,79 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// When specifying /t:restore, fail when an SDK can't be resolved.  Previous behavior was to try and continue anyway but then "restore" would succeed and build workflows continue on.
+        /// </summary>
+        [Fact]
+        public void RestoreFailsOnUnresolvedSdk()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+$@"<Project>
+  <Sdk Name=""UnresolvedSdk"" />
+  <Target Name=""Restore"">
+    <Message Text=""Restore target ran"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectFailure(projectContents, arguments: "/t:restore");
+
+            logContents.ShouldContain("error MSB4236: The SDK 'UnresolvedSdk' specified could not be found.");
+        }
+
+        /// <summary>
+        /// Verifies a non-existent target doesn't fail restore as long as its not considered "top-level" or a target that we're directly executing, in this case Restore.
+        /// </summary>
+        [Fact]
+        public void RestoreSkipsNonExistentNonTopLevelTargets()
+        {
+            string restoreFirstProps = $"{Guid.NewGuid():N}.props";
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+$@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore"">
+  <PropertyGroup>
+    <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
+  </PropertyGroup>
+  
+  <Import Project=""$(RestoreFirstProps)"" />
+  <Target Name=""Restore"">
+    <Message Text=""Restore target ran"" />
+    <ItemGroup>
+      <Lines Include=""&lt;Project&gt;&lt;Target Name=&quot;TargetThatComesFromRestore&quot;&gt;&lt;Message Text=&quot;Initial target ran&quot; /&gt;&lt;/Target&gt;&lt;/Project&gt;"" />
+    </ItemGroup>
+    
+    <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
+  </Target>
+
+  <Target Name=""Build"">
+    <Message Text=""Build target ran&quot;"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/restore");
+
+            logContents.ShouldContain("Restore target ran");
+            logContents.ShouldContain("Build target ran");
+            logContents.ShouldContain("Initial target ran");
+        }
+
+        /// <summary>
+        /// Verifies restore will fail if the "top-level" target doesn't exist, in this case Restore.
+        /// </summary>
+        [Fact]
+        public void RestoreFailsWhenTopLevelTargetIsNonExistent()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+@"<Project DefaultTargets=""Build"">
+  <Target Name=""Build"">
+    <Message Text=""Build target ran&quot;"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectFailure(projectContents, arguments: "/t:restore");
+            
+            logContents.ShouldContain("error MSB4057: The target \"Restore\" does not exist in the project.");
+        }
+
+        /// <summary>
         /// We check if there is only one target name specified and this logic caused a regression: https://github.com/Microsoft/msbuild/issues/3317
         /// </summary>
         [Fact]
@@ -2313,6 +2386,24 @@ namespace Microsoft.Build.UnitTests
 
         private string ExecuteMSBuildExeExpectSuccess(string projectContents, IDictionary<string, string> filesToCreate = null,  IDictionary<string, string> envsToCreate = null, params string[] arguments)
         {
+            (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
+
+            result.ShouldBeTrue(() => output);
+
+            return output;
+        }
+
+        private string ExecuteMSBuildExeExpectFailure(string projectContents, IDictionary<string, string> filesToCreate = null, IDictionary<string, string> envsToCreate = null, params string[] arguments)
+        {
+            (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
+
+            result.ShouldBeFalse(() => output);
+
+            return output;
+        }
+
+        private (bool result, string output) ExecuteMSBuildExe(string projectContents, IDictionary<string, string> filesToCreate = null, IDictionary<string, string> envsToCreate = null, params string[] arguments)
+        {
             using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
             {
                 TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents, new string[0]);
@@ -2336,10 +2427,8 @@ namespace Microsoft.Build.UnitTests
                 bool success;
 
                 string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success, _output);
-
-                success.ShouldBeTrue(() => output);
-
-                return output;
+                
+                return (success, output);
             }
         }
     }

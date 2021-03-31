@@ -143,10 +143,16 @@ namespace Microsoft.Build.BackEnd
             foreach (string targetName in targetNames)
             {
                 var targetExists = _projectInstance.Targets.TryGetValue(targetName, out ProjectTargetInstance targetInstance);
-                if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
+                // Ignore the missing target if:
+                //  SkipNonexistentTargets is set
+                //  -or-
+                //  SkipNonexistentNonTopLevelTargets and the target is is not a top level target
+                if (!targetExists
+                    && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets)
+                    || entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentNonTopLevelTargets) && !entry.Request.Targets.Contains(targetName))
                 {
                     _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
-                        "TargetSkippedWhenSkipNonexistentTargets", targetName);
+                    "TargetSkippedWhenSkipNonexistentTargets", targetName);
                 }
                 else
                 {
