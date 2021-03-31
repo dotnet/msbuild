@@ -104,10 +104,7 @@ namespace Microsoft.Build.Execution
             {
                 ErrorUtilities.VerifyThrow(_legacyThreadingEventsById.ContainsKey(submissionId), "Submission {0} should have been previously registered with LegacyThreadingData", submissionId);
 
-                if (_legacyThreadingEventsById.ContainsKey(submissionId))
-                {
-                    _legacyThreadingEventsById.Remove(submissionId);
-                }
+                _legacyThreadingEventsById.Remove(submissionId);
             }
         }
 

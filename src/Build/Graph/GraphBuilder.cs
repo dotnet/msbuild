@@ -209,17 +209,14 @@ namespace Microsoft.Build.Graph
             {
                 var referencingProjectPath = solutionDependency.Key;
 
-                ErrorUtilities.VerifyThrow(projectsByPath.ContainsKey(referencingProjectPath), "nodes should include solution projects");
+                ErrorUtilities.VerifyThrow(projectsByPath.TryGetValue(referencingProjectPath, out var referencingNodes), "nodes should include solution projects");
 
                 var referencedNodes = solutionDependency.Value.SelectMany(
                     referencedProjectPath =>
                     {
-                        ErrorUtilities.VerifyThrow(projectsByPath.ContainsKey(referencedProjectPath), "nodes should include solution projects");
-
-                        return projectsByPath[referencedProjectPath];
+                        ErrorUtilities.VerifyThrow(projectsByPath.TryGetValue(referencedProjectPath, out List<ProjectGraphNode> projectToReturn), "nodes should include solution projects");
+                        return projectToReturn;
                     }).ToArray();
-
-                var referencingNodes = projectsByPath[referencingProjectPath];
 
                 foreach (var referencingNode in referencingNodes)
                 {
@@ -310,12 +307,12 @@ namespace Microsoft.Build.Graph
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
             {
-                var solutionConfiguration = globalProperties.ContainsKey("Configuration")
-                    ? globalProperties["Configuration"]
+                var solutionConfiguration = globalProperties.TryGetValue("Configuration", out string configuration)
+                    ? configuration
                     : solutionFile.GetDefaultConfigurationName();
 
-                var solutionPlatform = globalProperties.ContainsKey("Platform")
-                    ? globalProperties["Platform"]
+                var solutionPlatform = globalProperties.TryGetValue("Platform", out string platform)
+                    ? platform
                     : solutionFile.GetDefaultPlatformName();
 
                 return new SolutionConfigurationInSolution(solutionConfiguration, solutionPlatform);
@@ -329,9 +326,9 @@ namespace Microsoft.Build.Graph
 
                 var solutionConfigFullName = solutionConfig.FullName;
 
-                if (projectConfigs.ContainsKey(solutionConfigFullName))
+                if (projectConfigs.TryGetValue(solutionConfigFullName, out ProjectConfigurationInSolution projectConfiguration))
                 {
-                    return projectConfigs[solutionConfigFullName];
+                    return projectConfiguration;
                 }
 
                 var partiallyMarchedConfig = projectConfigs.FirstOrDefault(pc => pc.Value.ConfigurationName.Equals(solutionConfig.ConfigurationName, StringComparison.OrdinalIgnoreCase)).Value;
@@ -417,14 +414,14 @@ namespace Microsoft.Build.Graph
 
             foreach (var entryPointNode in entryPointNodes)
             {
-                if (!nodeStates.ContainsKey(entryPointNode))
+                if (!nodeStates.TryGetValue(entryPointNode, out NodeVisitationState state))
                 {
                     VisitNode(entryPointNode, nodeStates);
                 }
                 else
                 {
                     ErrorUtilities.VerifyThrow(
-                        nodeStates[entryPointNode] == NodeVisitationState.Processed,
+                        state == NodeVisitationState.Processed,
                         "entrypoints should get processed after a call to detect cycles");
                 }
             }
@@ -616,8 +613,8 @@ namespace Microsoft.Build.Graph
             {
                 get
                 {
-                    ErrorUtilities.VerifyThrow(ReferenceItems.ContainsKey(key), "All requested keys should exist");
-                    return ReferenceItems[key];
+                    ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
+                    return referenceItem;
                 }
 
                 // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
@@ -626,9 +623,7 @@ namespace Microsoft.Build.Graph
 
             public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
             {
-                ErrorUtilities.VerifyThrow(ReferenceItems.ContainsKey(key), "All requested keys should exist");
-
-                ReferenceItems.TryRemove(key, out _);
+                ErrorUtilities.VerifyThrow(ReferenceItems.TryRemove(key, out _), "All requested keys should exist");
             }
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);

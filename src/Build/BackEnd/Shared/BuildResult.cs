@@ -470,9 +470,9 @@ namespace Microsoft.Build.Execution
                 _resultsByTarget ??= CreateTargetResultDictionary(1);
             }
 
-            if (_resultsByTarget.ContainsKey(target))
+            if (_resultsByTarget.TryGetValue(target, out TargetResult targetResult))
             {
-                ErrorUtilities.VerifyThrow(_resultsByTarget[target].ResultCode == TargetResultCode.Skipped, "Items already exist for target {0}.", target);
+                ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, "Items already exist for target {0}.", target);
             }
 
             _resultsByTarget[target] = result;

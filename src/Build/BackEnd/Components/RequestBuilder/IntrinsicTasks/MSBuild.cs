@@ -661,10 +661,8 @@ namespace Microsoft.Build.BackEnd
 
                         foreach (string targetName in nonNullTargetList)
                         {
-                            if (targetOutputsPerProject[i].ContainsKey(targetName))
+                            if (targetOutputsPerProject[i].TryGetValue(targetName, out ITaskItem[] outputItemsFromTarget))
                             {
-                                ITaskItem[] outputItemsFromTarget = targetOutputsPerProject[i][targetName];
-
                                 foreach (ITaskItem outputItemFromTarget in outputItemsFromTarget)
                                 {
                                     // No need to rebase if the calling project is the same as the callee project 

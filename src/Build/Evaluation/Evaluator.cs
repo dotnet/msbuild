@@ -849,14 +849,10 @@ namespace Microsoft.Build.Evaluation
                             _itemDefinitionGroupElements.Add(itemDefinitionGroup);
                             break;
                         case ProjectTargetElement target:
-                            if (_projectSupportsReturnsAttribute.ContainsKey(currentProjectOrImport))
-                            {
-                                _projectSupportsReturnsAttribute[currentProjectOrImport] |= (target.Returns != null);
-                            }
-                            else
-                            {
-                                _projectSupportsReturnsAttribute[currentProjectOrImport] = (target.Returns != null);
-                            }
+                            // Defaults to false
+                            _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out NGen<bool> projectSupportsReturnsAttribute);
+
+                            _projectSupportsReturnsAttribute[currentProjectOrImport] = projectSupportsReturnsAttribute || (target.Returns != null);
                             _targetElements.Add(target);
                             break;
                         case ProjectImportElement import:

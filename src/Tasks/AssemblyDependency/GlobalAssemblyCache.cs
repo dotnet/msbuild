@@ -280,9 +280,8 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    if (fusionNameToResolvedPath.ContainsKey(strongName))
+                    if (fusionNameToResolvedPath.TryGetValue(strongName, out string fusionName))
                     {
-                        fusionNameToResolvedPath.TryGetValue(strongName, out string fusionName);
                         return fusionName;
                     }
                 }

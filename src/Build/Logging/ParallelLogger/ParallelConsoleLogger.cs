@@ -429,14 +429,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Check to see if there is a bucket for the warning
                 // If there is no bucket create a new one which contains a list of all the errors which
                 // happened for a given buildEventContext / target
-                if (!groupByProjectEntryPoint.ContainsKey(key))
+                if (!groupByProjectEntryPoint.TryGetValue(key, out var errorWarningEventListByTarget))
                 {
                     // happened for a given buildEventContext / target
-                    var errorWarningEventListByTarget = new List<BuildEventArgs>();
+                    errorWarningEventListByTarget = new List<BuildEventArgs>();
                     groupByProjectEntryPoint.Add(key, errorWarningEventListByTarget);
                 }
                 // Add the error event to the correct bucket
-                groupByProjectEntryPoint[key].Add(errorWarningEventArgs);
+                errorWarningEventListByTarget.Add(errorWarningEventArgs);
             }
 
             BuildEventContext previousEntryPoint = null;
@@ -505,11 +505,11 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // If there were deferred messages then we should show them now, this will cause the project started event to be shown properly
-            if (_deferredMessages.ContainsKey(e.BuildEventContext))
+            if (_deferredMessages.TryGetValue(e.BuildEventContext, out var deferredMessages))
             {
                 if (!showOnlyErrors && !showOnlyWarnings)
                 {
-                    foreach (BuildMessageEventArgs message in _deferredMessages[e.BuildEventContext])
+                    foreach (BuildMessageEventArgs message in deferredMessages)
                     {
                         // This will display the project started event before the messages is shown
                         this.MessageHandler(sender, message);
@@ -1098,12 +1098,7 @@ namespace Microsoft.Build.BackEnd.Logging
                        && IsVerbosityAtLeast(LoggerVerbosity.Normal)
                     )
                 {
-                    List<BuildMessageEventArgs> messageList;
-                    if (_deferredMessages.ContainsKey(e.BuildEventContext))
-                    {
-                        messageList = _deferredMessages[e.BuildEventContext];
-                    }
-                    else
+                    if (!_deferredMessages.TryGetValue(e.BuildEventContext, out List<BuildMessageEventArgs> messageList))
                     {
                         messageList = new List<BuildMessageEventArgs>();
                         _deferredMessages.Add(e.BuildEventContext, messageList);
@@ -1689,11 +1684,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ErrorUtilities.VerifyThrow(_startedEvent != null, "Cannot have finished counter without started counter. ");
 
-                if (_startedEvent.ContainsKey(buildEventContext))
+                if (_startedEvent.TryGetValue(buildEventContext, out object time))
                 {
                     // Calculate the amount of time spent in the event based on the time stamp of when
                     // the started event was created and when the finished event was created
-                    elapsedTime += (TimeSpan.FromTicks(eventTimeStamp.Ticks - (long)_startedEvent[buildEventContext]));
+                    elapsedTime += (TimeSpan.FromTicks(eventTimeStamp.Ticks - (long)time));
                     _startedEvent.Remove(buildEventContext);
                 }
             }

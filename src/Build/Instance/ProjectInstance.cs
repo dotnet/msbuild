@@ -2431,7 +2431,7 @@ namespace Microsoft.Build.Execution
                 parentProjectSupportsReturnsAttribute
                 );
 
-            _actualTargets[target.Name] = target;
+            _actualTargets[targetName] = target;
 
             return target;
         }

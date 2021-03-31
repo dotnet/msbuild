@@ -626,12 +626,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 ProcessLoggingEvent(buildEvent);
 
                 // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (!_projectFileMap.ContainsKey(projectBuildEventContext.ProjectContextId))
+                if (!_projectFileMap.Remove(projectBuildEventContext.ProjectContextId))
                 {
                     ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should be in the ID-to-file mapping!", projectBuildEventContext.ProjectContextId, projectFile);
                 }
-
-                _projectFileMap.Remove(projectBuildEventContext.ProjectContextId);
             }
         }
 

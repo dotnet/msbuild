@@ -116,10 +116,7 @@ namespace Microsoft.Build.Utilities
                 {
                     // The tracking logs are not available, they may have been deleted at some point.
                     // Be safe and remove any references from the cache.
-                    if (DependencyTableCache.DependencyTable.ContainsKey(tLogRootingMarker))
-                    {
-                        DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
-                    }
+                    DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
                 }
                 return;
             }
@@ -246,11 +243,7 @@ namespace Microsoft.Build.Utilities
                 // sure that we essentially force a rebuild of this particular root.
                 if (encounteredInvalidTLogContents)
                 {
-                    if (DependencyTableCache.DependencyTable.ContainsKey(tLogRootingMarker))
-                    {
-                        DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
-                    }
-
+                    DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
                     DependencyTable = new Dictionary<string, Dictionary<string, DateTime>>(StringComparer.OrdinalIgnoreCase);
                 }
                 else
@@ -320,9 +313,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputPathToRemove">The output path to be removed</param>
         public bool RemoveOutputForSourceRoot(string sourceRoot, string outputPathToRemove)
         {
-            if (DependencyTable.ContainsKey(sourceRoot))
+            if (DependencyTable.TryGetValue(sourceRoot, out var outputPaths))
             {
-                bool removed = DependencyTable[sourceRoot].Remove(outputPathToRemove);
+                bool removed = outputPaths.Remove(outputPathToRemove);
                 // If we just removed the last entry for this root, remove the root.
                 if (DependencyTable[sourceRoot].Count == 0)
                 {
@@ -584,10 +577,7 @@ namespace Microsoft.Build.Utilities
                 {
                     // The tracking logs in the cache will be invalidated by this compaction
                     // remove the cached entries to be sure
-                    if (DependencyTableCache.DependencyTable.ContainsKey(tLogRootingMarker))
-                    {
-                        DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
-                    }
+                    DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
                 }
 
                 string firstTlog = _tlogFiles[0].ItemSpec;

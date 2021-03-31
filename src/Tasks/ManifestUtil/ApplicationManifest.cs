@@ -421,25 +421,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                             if (!String.IsNullOrEmpty(comInfo.ClsId))
                             {
                                 string key = comInfo.ClsId.ToLowerInvariant();
-                                if (!clsidList.ContainsKey(key))
+                                if (!clsidList.TryGetValue(key, out ComInfo info))
                                 {
                                     clsidList.Add(key, comInfo);
                                 }
                                 else
                                 {
-                                    OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "clsid", comInfo.ComponentFileName, comInfo.ClsId, comInfo.ManifestFileName, clsidList[key].ManifestFileName);
+                                    OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "clsid", comInfo.ComponentFileName, comInfo.ClsId, comInfo.ManifestFileName, info.ManifestFileName);
                                 }
                             }
                             if (!String.IsNullOrEmpty(comInfo.TlbId))
                             {
                                 string key = comInfo.TlbId.ToLowerInvariant();
-                                if (!tlbidList.ContainsKey(key))
+                                if (!tlbidList.TryGetValue(key, out ComInfo info))
                                 {
                                     tlbidList.Add(key, comInfo);
                                 }
                                 else
                                 {
-                                    OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "tlbid", comInfo.ComponentFileName, comInfo.TlbId, comInfo.ManifestFileName, tlbidList[key].ManifestFileName);
+                                    OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "tlbid", comInfo.ComponentFileName, comInfo.TlbId, comInfo.ManifestFileName, info.ManifestFileName);
                                 }
                             }
                         }
@@ -455,13 +455,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     foreach (ComClass comClass in file.ComClasses)
                     {
                         string key = comClass.ClsId.ToLowerInvariant();
-                        if (!clsidList.ContainsKey(key))
+                        if (!clsidList.TryGetValue(key, out ComInfo info))
                         {
                             clsidList.Add(key, new ComInfo(outputFileName, file.TargetPath, comClass.ClsId, null));
                         }
                         else
                         {
-                            OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "clsid", file.ToString(), comClass.ClsId, outputFileName, clsidList[key].ManifestFileName);
+                            OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "clsid", file.ToString(), comClass.ClsId, outputFileName, info.ManifestFileName);
                         }
                     }
                 }
@@ -470,13 +470,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     foreach (TypeLib typeLib in file.TypeLibs)
                     {
                         string key = typeLib.TlbId.ToLowerInvariant();
-                        if (!tlbidList.ContainsKey(key))
+                        if (!tlbidList.TryGetValue(key, out ComInfo info))
                         {
                             tlbidList.Add(key, new ComInfo(outputFileName, file.TargetPath, null, typeLib.TlbId));
                         }
                         else
                         {
-                            OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "tlbid", file.ToString(), typeLib.TlbId, outputFileName, tlbidList[key].ManifestFileName);
+                            OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "tlbid", file.ToString(), typeLib.TlbId, outputFileName, info.ManifestFileName);
                         }
                     }
                 }

@@ -478,11 +478,11 @@ namespace Microsoft.Build.Internal
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.runtime), "Should always have an explicit runtime when we call this method.");
-                    ErrorUtilities.VerifyThrow(taskHostParameters.ContainsKey(XMakeAttributes.architecture), "Should always have an explicit architecture when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.runtime, out string runtimeVersion), "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.architecture, out string architecture), "Should always have an explicit architecture when we call this method.");
 
-                    clrVersion = taskHostParameters[XMakeAttributes.runtime].Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ? 4 : 2;
-                    is64Bit = taskHostParameters[XMakeAttributes.architecture].Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
+                    clrVersion = runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) ? 4 : 2;
+                    is64Bit = architecture.Equals(XMakeAttributes.MSBuildArchitectureValues.x64);
                 }
             }
 
