@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Runtime"
+        ExcludeAssets="all"
         Version="$(MicrosoftBuildRuntimePackageVersion)"
         Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'"
         GeneratePathProperty="true" />
@@ -32,9 +33,8 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
 
-    <Reference Include="$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net5.0\ref\MSBuild.dll"
-        Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'"
-        Private="True" />
+    <Reference Include="$(PkgMicrosoft_Build_Runtime)\contentFiles\any\net5.0\MSBuild.dll"
+        Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'" />
   </ItemGroup>
 
   <ItemGroup>
