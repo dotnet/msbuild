@@ -1899,7 +1899,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
@@ -1924,7 +1924,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
             {
-                _cache.SerializeCache(_stateFile, Log);
+                _cache.SerializeCacheByTranslator(_stateFile, Log);
             }
         }
         #endregion
