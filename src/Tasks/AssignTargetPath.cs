@@ -73,11 +73,11 @@ namespace Microsoft.Build.Tasks
                 {
                     AssignedFiles[i] = new TaskItem(Files[i]);
 
-                    // TargetPathOverride takes priority.
+                    // If TargetPath is already set, it takes priority.
                     // https://github.com/dotnet/msbuild/issues/2795
-                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPathOverride);
+                    string targetPath =  ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10) ? Files[i].GetMetadata(ItemMetadataNames.targetPath) : null;
 
-                    // If TargetPathOverride not set, fall back to default behavior.
+                    // If TargetPath not already set, fall back to default behavior.
                     if (string.IsNullOrEmpty(targetPath))
                     {
                         targetPath = Files[i].GetMetadata(ItemMetadataNames.link);
