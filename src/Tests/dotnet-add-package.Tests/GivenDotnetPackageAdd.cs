@@ -12,6 +12,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.Cli.Package.Add.Tests
 {
@@ -63,12 +64,12 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
                 TargetFrameworks = targetFramework,
             };
 
-            var packages = inputVersions.Select(e => GetPackagePath(targetFramework, "A", e)).ToArray(); 
+            var packages = inputVersions.Select(e => GetPackagePath(targetFramework, "A", e, identifier: expectedVersion + e +  inputVersions.GetHashCode().ToString())).ToArray(); 
 
             testProject.AdditionalProperties.Add("RestoreSources",
-                                     "$(RestoreSources);" + Path.GetDirectoryName(packages[0]));
+                                     "$(RestoreSources);" + string.Join(";", packages.Select(package => Path.GetDirectoryName(package))));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: inputVersions.GetHashCode().ToString());
 
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(Path.Combine(testAsset.TestRoot, testProject.Name))
@@ -249,10 +250,10 @@ namespace Microsoft.DotNet.Cli.Package.Add.Tests
             return project;
         }
 
-        private string GetPackagePath(string targetFramework, string packageName, string version)
+        private string GetPackagePath(string targetFramework, string packageName, string version, [CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var project = GetProject(targetFramework, packageName, version);
-            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project).TestRoot, packageName);
+            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
 
             packCommand
                 .Execute()

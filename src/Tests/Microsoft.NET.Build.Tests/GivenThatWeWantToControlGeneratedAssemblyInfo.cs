@@ -610,7 +610,7 @@ namespace Microsoft.NET.Build.Tests
                 testProject.AdditionalProperties["RepositoryUrl"] = fakeUrl;
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: privateRepo.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
@@ -635,7 +635,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties["RepositoryUrl"] = fakeUrl;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
             buildCommand.Execute()

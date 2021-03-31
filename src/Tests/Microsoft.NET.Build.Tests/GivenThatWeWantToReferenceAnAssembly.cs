@@ -448,7 +448,7 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProject = new TestProject()
             {
@@ -533,7 +533,7 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProject = new TestProject()
             {
@@ -673,7 +673,7 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()
             {
@@ -775,7 +775,7 @@ public static class Program
                 return;
             }
 
-            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString();
+            string identifier = referencerTarget.ToString() + "_" + dependencyTarget.ToString() + "_" + dllDependencyTarget.ToString();
 
             TestProject dllDependencyProjectDependency = new TestProject()
             {

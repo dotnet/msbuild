@@ -139,7 +139,14 @@ namespace Microsoft.NET.TestFramework
                 }
             }
 
-            return Path.Combine(baseDirectory, directoryName.ToString());
+            var directoryPath = Path.Combine(baseDirectory, directoryName.ToString());
+
+            if (Directory.Exists(directoryPath))
+            {
+                throw new Exception($"Test dir {directoryPath} already exists");
+            }
+
+            return directoryPath;
         }
     }
 }

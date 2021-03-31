@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             using var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling);
 
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             var testFileFullPath = Path.Combine(dir, "foo");
             File.WriteAllText(testFileFullPath, string.Empty);
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
             var srcFile = Path.Combine(dir, "foo");
             var dstFile = Path.Combine(dir, "foo2");
 
@@ -207,7 +207,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             using var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling);
 
@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
             var changedEv = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling))
             {
@@ -275,7 +275,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             File.WriteAllText(Path.Combine(dir, "foo1"), string.Empty);
             File.WriteAllText(Path.Combine(dir, "foo2"), string.Empty);
@@ -325,7 +325,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             using var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling);
 
@@ -391,7 +391,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return;
             }
 
-            var dir = _testAssetManager.CreateTestDirectory().Path;
+            var dir = _testAssetManager.CreateTestDirectory(usePolling.ToString()).Path;
 
             var subdir = Path.Combine(dir, "subdir");
             Directory.CreateDirectory(subdir);

@@ -40,7 +40,7 @@ namespace Microsoft.NET.Publish.Tests
             };
             testProject.PackageReferences.Add(new TestPackageReference("NewtonSoft.Json", "9.0.1"));
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: publishSingleFile.ToString());
 
             var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
             var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");

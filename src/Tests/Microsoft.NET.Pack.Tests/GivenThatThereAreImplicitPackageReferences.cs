@@ -167,7 +167,7 @@ namespace Microsoft.NET.Pack.Tests
 
             testProject.PackageReferences.Add(new TestPackageReference(packageId, ""));
 
-            var dependencies = PackAndGetDependencies(testProject);
+            var dependencies = PackAndGetDependencies(testProject, packageId);
 
             dependencies.Should().BeEmpty();
 
@@ -265,9 +265,9 @@ namespace Microsoft.NET.Pack.Tests
                 .ToList();
         }
 
-        private XDocument PackAndGetNuspec(TestProject testProject)
+        private XDocument PackAndGetNuspec(TestProject testProject, string identifier = null)
         {
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier);
 
             var packCommand = new PackCommand(Log, testProjectInstance.TestRoot, testProject.Name);
 
@@ -280,9 +280,9 @@ namespace Microsoft.NET.Pack.Tests
             return nuspec;
         }
 
-        private List<XElement> PackAndGetDependencies(TestProject testProject)
+        private List<XElement> PackAndGetDependencies(TestProject testProject, string identifier = null)
         {
-            var dependencyGroups = GetDependencyGroups(PackAndGetNuspec(testProject), out var ns);
+            var dependencyGroups = GetDependencyGroups(PackAndGetNuspec(testProject, identifier), out var ns);
 
             //  There should be only one dependency group for these tests
             dependencyGroups.Count().Should().Be(1);

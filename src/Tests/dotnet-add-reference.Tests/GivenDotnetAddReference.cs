@@ -65,7 +65,7 @@ Commands:
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
-                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod + nameof(GivenDotnetAddReference), identifier, testAssetSubdirectory: TestSetup.TestGroup)
+                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod + nameof(GivenDotnetAddReference), identifier: identifier + callingMethod, testAssetSubdirectory: TestSetup.TestGroup)
                     .WithSource()
                     .Path);
         }
@@ -144,7 +144,7 @@ Commands:
         [InlineData("ihave?inv@lid/char\\acters")]
         public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
         {
-            var setup = Setup();
+            var setup = Setup(identifier: projName);
 
             var cmd = new DotnetCommand(Log, "add", projName, "reference")
                     .WithWorkingDirectory(setup.TestRoot)
@@ -681,7 +681,7 @@ Commands:
         [InlineData(true)]
         public void WhenIncompatibleFrameworkDetectedItPrintsError(bool useFrameworkArg)
         {
-            var setup = Setup();
+            var setup = Setup(useFrameworkArg.ToString());
             var lib = new ProjDir(setup.LibDir);
             var net45lib = new ProjDir(Path.Combine(setup.TestRoot, "Net45Lib"));
 

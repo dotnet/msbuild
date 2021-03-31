@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
                     TargetFrameworks = "net5.0"
                 };
 
-                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+                var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: runningInVS.ToString());
                 var globalJsonPath = Path.Combine(testAsset.Path, testProject.Name, "global.json");
                 File.WriteAllText(globalJsonPath, @"{
     ""sdk"": {

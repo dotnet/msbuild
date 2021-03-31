@@ -58,7 +58,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_successfully_builds_when_referencing_winmds(string targetFramework)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("WinMDClassLibrary")
+                .CopyTestAsset("WinMDClassLibrary", identifier: targetFramework)
                 .WithSource()
                 .WithTargetFramework(targetFramework);
 

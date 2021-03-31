@@ -24,6 +24,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Microsoft.NET.Build.Tasks;
 using NuGet.Versioning;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -33,10 +34,10 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        private BuildCommand GetBuildCommand()
+        private BuildCommand GetBuildCommand([CallerMemberName] string callingMethod = "")
         {
             var testAsset = _testAssetsManager
-               .CopyTestAsset("HelloWorldWithSubDirs")
+               .CopyTestAsset("HelloWorldWithSubDirs", callingMethod)
                .WithSource();
 
             return new BuildCommand(testAsset);
@@ -217,7 +218,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties["RuntimeIdentifiers"] = runtimeIdentifier;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: allowMismatch.ToString())
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -454,7 +455,7 @@ public static class Program
                 RuntimeIdentifier = runtimeIdentifier
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(project);
+            var testAsset = _testAssetsManager.CreateTestProject(project, identifier: isSelfContained.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
