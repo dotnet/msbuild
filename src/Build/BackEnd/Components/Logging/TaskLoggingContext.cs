@@ -148,7 +148,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal ICollection<string> GetWarningsAsErrors()
         {
-            return LoggingService.GetWarningsToBeLoggedAsErrorsByProject(BuildEventContext);
+            return LoggingService.GetWarningsAsErrors(BuildEventContext);
+        }
+
+        internal ICollection<string> GetWarningsAsMessages()
+        {
+            return LoggingService.GetWarningsAsMessages(BuildEventContext);
         }
     }
 }

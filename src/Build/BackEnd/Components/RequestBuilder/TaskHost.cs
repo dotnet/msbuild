@@ -704,14 +704,35 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private ICollection<string> _warningsAsMessages;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsAsMessages
+        {
+            get
+            {
+                // Test compatibility
+                if (_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsAsMessages ??= _taskLoggingContext.GetWarningsAsMessages();
+            }
+        }
+
         /// <summary>
         /// Determines if the given warning should be treated as an error.
         /// </summary>
         /// <param name="warningCode"></param>
-        /// <returns>True if WarningsAsErrors is an empty set or contains the given warning code.</returns>
+        /// <returns>True if the warning should not be treated as a message and WarningsAsErrors is an empty set or contains the given warning code.</returns>
         public bool ShouldTreatWarningAsError(string warningCode)
         {
-            if (WarningsAsErrors == null)
+            // Warnings as messages overrides warnings as errors.
+            if (WarningsAsErrors == null || WarningsAsMessages?.Contains(warningCode) == true)
             {
                 return false;
             }

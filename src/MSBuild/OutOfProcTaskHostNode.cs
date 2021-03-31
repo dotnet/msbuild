@@ -275,9 +275,17 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ICollection<string> WarningsAsErrors { get; set; }
 
+        private ICollection<string> WarningsAsMessages { get; set; }
+
         public bool ShouldTreatWarningAsError(string warningCode)
         {
-            return WarningsAsErrors != null && (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode));
+            // Warnings as messages overrides warnings as errors.
+            if (WarningsAsErrors == null || WarningsAsMessages?.Contains(warningCode) == true)
+            {
+                return false;
+            }
+
+            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
         }
         #endregion
 
@@ -824,6 +832,7 @@ namespace Microsoft.Build.CommandLine
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
             WarningsAsErrors = taskConfiguration.WarningsAsErrors;
+            WarningsAsMessages = taskConfiguration.WarningsAsMessages;
             try
             {
                 // Change to the startup directory
