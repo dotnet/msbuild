@@ -113,6 +113,13 @@ namespace Microsoft.Build.Tasks
         private bool _unresolveFrameworkAssembliesFromHigherFrameworks = false;
 
         /// <summary>
+        /// Storage for names of all files writen to disk.
+        /// </summary>
+        private List<ITaskItem> _filesWritten = new List<ITaskItem>();
+
+        private TaskExecutionContext _concurrencyExecutionContext;
+
+        /// <summary>
         /// If set to true, it forces to unresolve framework assemblies with versions higher or equal the version of the target framework, regardless of the target framework
         /// </summary>
         public bool UnresolveFrameworkAssembliesFromHigherFrameworks
@@ -241,6 +248,8 @@ namespace Microsoft.Build.Tasks
         /// or strong names like
         ///
         ///     System, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+        ///
+        /// or (full ? TODO - check) path to the assembly.
         ///
         /// These names will be resolved into full paths and all dependencies will be found.
         ///
@@ -778,6 +787,16 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Execution context used when task is supposed to run concurrently in multiple threads.
+        /// If null hosting process do not run this task concurrently and set it execution context on process level.
+        /// </summary>
+        public TaskExecutionContext ConcurrencyExecutionContext
+        {
+            get { return _concurrencyExecutionContext; }
+            set { _concurrencyExecutionContext = value; }
+        }
+
+        /// <summary>
         /// This is a list of all primary references resolved to full paths.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         ///     string FusionName - the fusion name for this dependency.
@@ -885,17 +904,6 @@ namespace Microsoft.Build.Tasks
         {
             get { return _suggestedRedirects; }
         }
-
-        /// <summary>
-        /// Storage for names of all files writen to disk.
-        /// </summary>
-        private List<ITaskItem> _filesWritten = new List<ITaskItem>();
-
-        /// <summary>
-        /// Execution context used when task is supposed to run concurrently in multiple threads.
-        /// If null hosting process do not run this task concurrently and set it execution context on process level.
-        /// </summary>
-        private TaskExecutionContext _concurrencyExecutionContext;
 
         /// <summary>
         /// The names of all files written to disk.
@@ -1997,10 +2005,20 @@ namespace Microsoft.Build.Tasks
         )
         {
             bool success = true;
+
             MSBuildEventSource.Log.RarOverallStart();
             {
                 try
                 {
+                    if (_concurrencyExecutionContext is object)
+                    {
+                        AbsolutizePathsInInputs();
+                    }
+                    else
+                    {
+                        _concurrencyExecutionContext = new TaskExecutionContext();
+                    }
+
                     FrameworkNameVersioning frameworkMoniker = null;
                     if (!String.IsNullOrEmpty(_targetedFrameworkMoniker))
                     {
@@ -2226,7 +2244,8 @@ namespace Microsoft.Build.Tasks
                         _warnOrErrorOnTargetArchitectureMismatch,
                         _ignoreTargetFrameworkAttributeVersionMismatch,
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
-                        assemblyMetadataCache
+                        assemblyMetadataCache,
+                        _concurrencyExecutionContext
                         );
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
@@ -2931,7 +2950,7 @@ namespace Microsoft.Build.Tasks
         private void FilterBySubtypeAndTargetFramework()
         {
             var assembliesLeft = new List<ITaskItem>();
-            foreach (ITaskItem assembly in Assemblies)
+            foreach (ITaskItem assembly in _assemblyNames)
             {
                 string subType = assembly.GetMetadata(ItemMetadataNames.subType);
                 if (!string.IsNullOrEmpty(subType))
@@ -3060,5 +3079,55 @@ namespace Microsoft.Build.Tasks
         {
             _concurrencyExecutionContext = executionContext;
         }
+        
+        void AbsolutizePathsInInputs()
+        {
+
+            for (int i = 0; i < _candidateAssemblyFiles.Length; i++)
+            {
+                _candidateAssemblyFiles[i] = _concurrencyExecutionContext.GetFullPath(_candidateAssemblyFiles[i]);
+            }
+
+            for (int i = 0; i < _targetFrameworkDirectories.Length; i++)
+            {
+                _targetFrameworkDirectories[i] = _concurrencyExecutionContext.GetFullPath(_targetFrameworkDirectories[i]);
+            }
+
+            for (int i = 0; i < _fullFrameworkFolders.Length; i++)
+            {
+                _fullFrameworkFolders[i] = _concurrencyExecutionContext.GetFullPath(_fullFrameworkFolders[i]);
+            }
+
+            for (int i = 0; i < _latestTargetFrameworkDirectories.Length; i++)
+            {
+                _latestTargetFrameworkDirectories[i] = _concurrencyExecutionContext.GetFullPath(_latestTargetFrameworkDirectories[i]);
+            }
+
+            _appConfigFile = _concurrencyExecutionContext.GetFullPath(_appConfigFile);
+            _stateFile = _concurrencyExecutionContext.GetFullPath(_stateFile);
+
+            for (int i = 0; i < _installedAssemblyTables.Length; i++)
+            {
+                // TODO: check if it could be URI.
+                // It is said that it's on disk in docu, but code does not prohibit URI.
+                _installedAssemblyTables[i].ItemSpec = _concurrencyExecutionContext.GetFullPath(_installedAssemblyTables[i].ItemSpec);
+            }
+
+            for (int i = 0; i < _installedAssemblySubsetTables.Length; i++)
+            {
+                _installedAssemblySubsetTables[i].ItemSpec = _concurrencyExecutionContext.GetFullPath(_installedAssemblySubsetTables[i].ItemSpec);
+            }
+
+            for (int i = 0; i < _fullFrameworkAssemblyTables.Length; i++)
+            {
+                _fullFrameworkAssemblyTables[i].ItemSpec = _concurrencyExecutionContext.GetFullPath(_fullFrameworkAssemblyTables[i].ItemSpec);
+            }
+
+            for (int i = 0; i < _resolvedSDKReferences.Length; i++)
+            {
+                _resolvedSDKReferences[i].ItemSpec = _concurrencyExecutionContext.GetFullPath(_resolvedSDKReferences[i].ItemSpec);
+            }
+        }
+
     }
 }
