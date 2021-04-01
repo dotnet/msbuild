@@ -1043,7 +1043,7 @@ namespace Microsoft.Build.Execution
         SkipNonexistentTargets = 16,
         ProvideSubsetOfStateAfterBuild = 32,
         IgnoreMissingEmptyAndInvalidImports = 64,
-        SkipNonexistentNonTopLevelTargets = 128,
+        SkipNonexistentNonEntryTargets = 128,
         FailOnUnresolvedSdk = 256,
     }
     public partial class BuildResult

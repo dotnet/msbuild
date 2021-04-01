@@ -2128,10 +2128,10 @@ $@"<Project>
         }
 
         /// <summary>
-        /// Verifies a non-existent target doesn't fail restore as long as its not considered "top-level" or a target that we're directly executing, in this case Restore.
+        /// Verifies a non-existent target doesn't fail restore as long as its not considered an entry target, in this case Restore.
         /// </summary>
         [Fact]
-        public void RestoreSkipsNonExistentNonTopLevelTargets()
+        public void RestoreSkipsNonExistentNonEntryTargets()
         {
             string restoreFirstProps = $"{Guid.NewGuid():N}.props";
 
@@ -2164,10 +2164,10 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
         }
 
         /// <summary>
-        /// Verifies restore will fail if the "top-level" target doesn't exist, in this case Restore.
+        /// Verifies restore will fail if the entry target doesn't exist, in this case Restore.
         /// </summary>
         [Fact]
-        public void RestoreFailsWhenTopLevelTargetIsNonExistent()
+        public void RestoreFailsWhenEntryTargetIsNonExistent()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(
 @"<Project DefaultTargets=""Build"">
@@ -2179,6 +2179,33 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
             string logContents = ExecuteMSBuildExeExpectFailure(projectContents, arguments: "/t:restore");
             
             logContents.ShouldContain("error MSB4057: The target \"Restore\" does not exist in the project.");
+        }
+
+        /// <summary>
+        /// Verifies restore will run InitialTargets.
+        /// </summary>
+        [Fact]
+        public void RestoreRunsInitialTargets()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project DefaultTargets=""Build"" InitialTargets=""InitialTarget"">
+  <Target Name=""InitialTarget"">
+    <Message Text=""InitialTarget target ran&quot;"" />
+  </Target>
+
+  <Target Name=""Restore"">
+    <Message Text=""Restore target ran&quot;"" />
+  </Target>
+
+  <Target Name=""Build"">
+    <Message Text=""Build target ran&quot;"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:restore");
+
+            logContents.ShouldContain("InitialTarget target ran");
+            logContents.ShouldContain("Restore target ran");
         }
 
         /// <summary>

@@ -1422,7 +1422,7 @@ namespace Microsoft.Build.CommandLine
 
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
-            //  - BuildRequestDataFlags.SkipNonexistentNonTopLevelTargets to ignore missing non-top-level targets since Restore does not require that all targets
+            //  - BuildRequestDataFlags.SkipNonexistentNonEntryTargets to ignore missing non-entry targets since Restore does not require that all targets
             //      exist, only top-level ones like Restore itself
             //  - BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports to ignore imports that don't exist, are empty, or are invalid because restore might
             //     make available an import that doesn't exist yet and the <Import /> might be missing a condition.
@@ -1434,7 +1434,7 @@ namespace Microsoft.Build.CommandLine
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentNonTopLevelTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk);
+                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentNonEntryTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }
