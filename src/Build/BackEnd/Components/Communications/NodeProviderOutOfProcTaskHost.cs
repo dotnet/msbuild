@@ -594,7 +594,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Connection successful, use this node.
                 CommunicationsUtilities.Trace("Successfully connected to existed RAR node {0} by its pipe name {1}", nodeId, rarNodePipeName);
-                return new NodeContext(nodeId, -1, nodeStream, factory, terminateNode);
+                return new NodeContext(nodeId, null, nodeStream, factory, terminateNode, ProcessRelation.NotOwned);
             }
 
             // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
@@ -609,7 +609,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("For a RAR node of context '{0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation);
 
-            return LaunchNodeProcess(msbuildLocation, commandLineArgs, nodeId, factory, hostHandshake, terminateNode, rarNodePipeName);
+            return LaunchNodeProcess(msbuildLocation, commandLineArgs, nodeId, factory, hostHandshake, terminateNode, rarNodePipeName, ProcessRelation.NotOwned);
         }
 
         private static string RarNodePipeName(Handshake hostHandshake)

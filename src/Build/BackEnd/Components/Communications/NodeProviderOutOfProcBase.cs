@@ -157,19 +157,19 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(PipeNameByProcessId(nodeProcess.Id), timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
+                Stream nodeStream = TryConnectToProcess(GetPipeName(nodeProcess.Id), timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
 
                 if (nodeStream == null)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(PipeNameByProcessId(nodeProcess.Id), timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
+                    nodeStream = TryConnectToProcess(GetPipeName(nodeProcess.Id), timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
                 }
 
                 if (nodeStream != null)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
+                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode, ProcessRelation.Owned);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
                     nodeStream.Dispose();
                 }
@@ -232,21 +232,21 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.Add(nodeLookupKey);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(PipeNameByProcessId(nodeProcess.Id), 0 /* poll, don't wait for connections */, hostHandshake);
+                    Stream nodeStream = TryConnectToProcess(GetPipeName(nodeProcess.Id), 0 /* poll, don't wait for connections */, hostHandshake);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
-                        return new NodeContext(nodeId, nodeProcess, nodeStream, factory, terminateNode);
+                        return new NodeContext(nodeId, nodeProcess, nodeStream, factory, terminateNode, ProcessRelation.Owned);
                     }
                 }
             }
 #endif
-            return LaunchNodeProcess(msbuildLocation, commandLineArgs, nodeId, factory, hostHandshake, terminateNode);
+            return LaunchNodeProcess(msbuildLocation, commandLineArgs, nodeId, factory, hostHandshake, terminateNode, pipeNameFormat: default, ProcessRelation.Owned);
         }
 
         protected NodeContext LaunchNodeProcess(string msbuildLocation, string commandLineArgs,  int nodeId, INodePacketFactory factory, Handshake hostHandshake,
-            NodeContextTerminateDelegate terminateNode, string pipeName = null)
+            NodeContextTerminateDelegate terminateNode, string pipeNameFormat, ProcessRelation processRelation)
         {
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
@@ -288,12 +288,12 @@ namespace Microsoft.Build.BackEnd
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                 // Now try to connect to it.
-                Stream nodeStream = TryConnectToProcess(PipeNameByProcessId(msbuildProcess.Id, pipeName), TimeoutForNewNodeCreation, hostHandshake);
+                Stream nodeStream = TryConnectToProcess(GetPipeName(msbuildProcess.Id, pipeNameFormat), TimeoutForNewNodeCreation, hostHandshake);
                 if (nodeStream != null)
                 {
                     // Connection successful, use this node.
                     CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
-                    return new NodeContext(nodeId, msbuildProcess, nodeStream, factory, terminateNode);
+                    return new NodeContext(nodeId, msbuildProcess, nodeStream, factory, terminateNode, processRelation);
                 }
             }
 
@@ -357,7 +357,13 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-        protected static string PipeNameByProcessId(int nodeProcessId, string pipeNameFormat = null)
+        /// <summary>
+        /// Get pipe name
+        /// </summary>
+        /// <param name="nodeProcessId">id of process, is used for parameter {0} in pipeNameFormat</param>
+        /// <param name="pipeNameFormat">format string for pipename, if null default pipe name 'MSBuild{process.Id}' is used</param>
+        /// <returns></returns>
+        protected static string GetPipeName(int nodeProcessId, string pipeNameFormat = null)
         {
             return string.Format(pipeNameFormat ?? "MSBuild{0}", nodeProcessId);
         }
@@ -621,6 +627,12 @@ namespace Microsoft.Build.BackEnd
 #endif
         }
 
+        internal enum ProcessRelation
+        {
+            Owned = 0,
+            NotOwned
+        }
+
         /// <summary>
         /// Class which wraps up the communications infrastructure for a given node.
         /// </summary>
@@ -649,8 +661,15 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// The node process.
+            /// If null process is unknown as we might have connected to existing process by its pipename (RAR service).
             /// </summary>
             private readonly Process _process;
+
+            /// <summary>
+            /// Relation to process ownership. Lifetime of not owned processes shall not be controlled.
+            /// For example RAR Service task host could have longer life time than build or reusable nodes.
+            /// </summary>
+            private readonly ProcessRelation _processRelation;
 
             /// <summary>
             /// An array used to store the header byte for each packet when read.
@@ -699,9 +718,12 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, Process process,
+            public NodeContext(int nodeId,
+                Process process,
                 Stream nodePipe,
-                INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
+                INodePacketFactory factory,
+                NodeContextTerminateDelegate terminateDelegate,
+                ProcessRelation processRelation)
             {
                 _nodeId = nodeId;
                 _process = process;
@@ -712,6 +734,7 @@ namespace Microsoft.Build.BackEnd
                 _readBufferMemoryStream = new MemoryStream();
                 _writeBufferMemoryStream = new MemoryStream();
                 _terminateDelegate = terminateDelegate;
+                _processRelation = processRelation;
                 _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
             }
 
@@ -919,6 +942,10 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public async Task WaitForExitAsync(ILoggingService loggingService)
             {
+                // do not terminate not owned process
+                if (_process == null || _processRelation != ProcessRelation.Owned)
+                    return;
+
                 if (_exitPacketState == ExitPacketState.ExitPacketQueued)
                 {
                     // Wait up to 100ms until all remaining packets are sent.
@@ -981,16 +1008,27 @@ namespace Microsoft.Build.BackEnd
             {
                 if (bytesRead != _headerByte.Length)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _process.Id, bytesRead, _headerByte.Length);
+                    CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _process?.Id, bytesRead, _headerByte.Length);
                     try
                     {
-                        if (_process.HasExited)
+                        if (_process == null)
                         {
-                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _process.Id);
+                            CommunicationsUtilities.Trace(_nodeId, "   Not owned unknown process. Connected Node {0} process is not owned.", _nodeId);
                         }
                         else
                         {
-                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _process.Id);
+                            if (_processRelation != ProcessRelation.Owned)
+                            {
+                                CommunicationsUtilities.Trace(_nodeId, "   Not owned Child Process. Connected Node {0} process {1} is not owned.", _nodeId, _process.Id);
+                            }
+                            else if (_process.HasExited)
+                            {
+                                CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _process.Id);
+                            }
+                            else
+                            {
+                                CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _process.Id);
+                            }
                         }
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
