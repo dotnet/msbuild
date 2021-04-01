@@ -1034,6 +1034,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
       </note>
       </trans-unit>
+      <trans-unit id="InvalidPipeName">
+        <source>MSBUILD : error MSB1060: PipeName '{0}' is not valid. Argument pipename can include any character other than a backslash,
+      including numbers and special characters. The entire pipe name string can be up to 256 characters long.</source>
+        <target state="new">MSBUILD : error MSB1060: PipeName '{0}' is not valid. Argument pipename can include any character other than a backslash,
+      including numbers and special characters. The entire pipe name string can be up to 256 characters long.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This is an internal error when argument PipeName, required by for resolve assembly reference (NodeMode: 3). For example, -nodeMode:3 -pipeName:"\a-name".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidPropertyError">
         <source>MSBUILD : error MSB1006: Property is not valid.</source>
         <target state="translated">MSBUILD : error MSB1006: недопустимое свойство.</target>

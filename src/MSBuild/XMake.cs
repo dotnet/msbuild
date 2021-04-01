@@ -2656,7 +2656,12 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if (nodeModeNumber == 3)
                     {
-                        shutdownReason = RarServiceTaskHostNode.RunMultiClient(100, out nodeException);
+                        string pipeName = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.PipeName].FirstOrDefault();
+
+                        CommandLineSwitchException.VerifyThrow(!string.IsNullOrWhiteSpace(pipeName) && pipeName.Length < 256 && pipeName.IndexOf('\\') == -1,
+                            "InvalidPipeName", pipeName);
+
+                        shutdownReason = RarServiceTaskHostNode.StartRarService(pipeName, out nodeException);
                     }
                     else
                     {
