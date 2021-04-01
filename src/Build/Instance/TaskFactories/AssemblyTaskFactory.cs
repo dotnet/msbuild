@@ -324,7 +324,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             bool isOutOfProc)
         {
-            bool useTaskFactory = false;
+            bool useTaskHost = false;
             IDictionary<string, string> mergedParameters = null;
             _taskLoggingContext = taskLoggingContext;
 
@@ -337,7 +337,7 @@ namespace Microsoft.Build.BackEnd
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
-                useTaskFactory = !NativeMethodsShared.IsMono
+                useTaskHost  = !NativeMethodsShared.IsMono
                                  && (_taskHostFactoryExplicitlyRequested
                                      || !TaskHostParametersMatchCurrentProcess(mergedParameters));
             }
@@ -345,11 +345,14 @@ namespace Microsoft.Build.BackEnd
             {
                 // if we don't have any task host parameters specified on either the using task or the 
                 // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
-                // as the task factory.  
-                useTaskFactory = _taskHostFactoryExplicitlyRequested;
+                // as the task factory.
+                useTaskHost  = _taskHostFactoryExplicitlyRequested;
             }
 
-            if (useTaskFactory)
+            bool hostInRarService = _taskName == "Microsoft.Build.Tasks.ResolveAssemblyReference" && Environment.GetEnvironmentVariable("MSBUILDRARSERVICE") != "0";
+            useTaskHost |= hostInRarService;
+
+            if (useTaskHost )
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, nameof(buildComponentHost));
 
@@ -372,6 +375,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif
+                    , hostInRarService
                     );
                 return task;
             }

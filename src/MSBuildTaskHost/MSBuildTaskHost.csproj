@@ -45,6 +45,9 @@
     <Compile Include="..\Framework\BuildEngineResult.cs">
       <Link>BuildEngineResult.cs</Link>
     </Compile>
+    <Compile Include="..\Framework\TaskExecutionContext.cs">
+      <Link>TaskExecutionContext.cs</Link>
+    </Compile>
     <Compile Include="..\Framework\IBuildEngine3.cs">
       <Link>IBuildEngine3.cs</Link>
     </Compile>

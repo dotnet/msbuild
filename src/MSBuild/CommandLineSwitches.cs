@@ -76,6 +76,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ConsoleLoggerParameters,
             NodeMode,
+            PipeName,
             MaxCPUCount,
             IgnoreProjectExtensions,
             ToolsVersion,
@@ -245,6 +246,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false  ),
+            new ParameterizedSwitchInfo(  new string[] { "pipename", "pname" },                 ParameterizedSwitch.PipeName,                   null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true,   false  ),

@@ -168,6 +168,7 @@ namespace Microsoft.Build.Tasks
                         _assemblyFoldersCache = _buildEngine.GetRegisteredTaskObject(key, RegisteredTaskObjectLifetime.Build) as AssemblyFoldersExCache;
                     }
 
+                    // TODO: although thread safe, there is risk of multiple initialization; consider it to rework into GetOrAdd Pattern
                     if (_assemblyFoldersCache == null)
                     {
                         AssemblyFoldersEx assemblyFolders = new AssemblyFoldersEx(_registryKeyRoot, _targetRuntimeVersion, _registryKeySuffix, _osVersion, _platform, _getRegistrySubKeyNames, _getRegistrySubKeyDefaultValue, this.targetProcessorArchitecture, _openBaseKey);

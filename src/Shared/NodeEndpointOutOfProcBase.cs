@@ -185,11 +185,12 @@ namespace Microsoft.Build.BackEnd
 
 #region Construction
 
-        /// <summary>
-        /// Instantiates an endpoint to act as a client
-        /// </summary>
-        /// <param name="pipeName">The name of the pipe to which we should connect.</param>
-        internal void InternalConstruct(string pipeName)
+/// <summary>
+/// Instantiates an endpoint to act as a client
+/// </summary>
+/// <param name="pipeName">The name of the pipe to which we should connect.</param>
+/// <param name="multiClient"></param>
+internal void InternalConstruct(string pipeName, bool multiClient = false)
         {
             ErrorUtilities.VerifyThrowArgumentLength(pipeName, nameof(pipeName));
 
@@ -213,7 +214,7 @@ namespace Microsoft.Build.BackEnd
                 // SIDs or the client will reject this server.  This is used to avoid attacks where a
                 // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
                 // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite | PipeAccessRights.CreateNewInstance, AccessControlType.Allow);
                 security.AddAccessRule(rule);
                 security.SetOwner(identifier);
 
@@ -221,7 +222,7 @@ namespace Microsoft.Build.BackEnd
                     (
                     pipeName,
                     PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
+                    multiClient ? -1 : 1, // Only allow one connection at a time or unlimited for multi client
                     PipeTransmissionMode.Byte,
                     PipeOptions.Asynchronous | PipeOptions.WriteThrough,
                     PipeBufferSize, // Default input buffer
@@ -237,13 +238,13 @@ namespace Microsoft.Build.BackEnd
                     (
                     pipeName,
                     PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
+                    multiClient ? -1 : 1, // Only allow one connection at a time or unlimited for multi client
                     PipeTransmissionMode.Byte,
                     PipeOptions.Asynchronous | PipeOptions.WriteThrough,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize  // Default output buffer
                 );
-             }
+            }
         }
 
 #endregion

@@ -187,6 +187,8 @@
     </Compile>
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="LogMessagePacket.cs" />
+    <Compile Include="NodeEndpointRarTaskHost.cs" />
+    <Compile Include="RarServiceTaskHostNode.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

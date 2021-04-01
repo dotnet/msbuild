@@ -157,12 +157,12 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
+                Stream nodeStream = TryConnectToProcess(PipeNameByProcessId(nodeProcess.Id), timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
 
                 if (nodeStream == null)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
+                    nodeStream = TryConnectToProcess(PipeNameByProcessId(nodeProcess.Id), timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
                 }
 
                 if (nodeStream != null)
@@ -174,6 +174,8 @@ namespace Microsoft.Build.BackEnd
                     nodeStream.Dispose();
                 }
             }
+
+            // TODO: shtudown RAR node somehow
         }
 
         /// <summary>
@@ -230,7 +232,7 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.Add(nodeLookupKey);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake);
+                    Stream nodeStream = TryConnectToProcess(PipeNameByProcessId(nodeProcess.Id), 0 /* poll, don't wait for connections */, hostHandshake);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
@@ -240,7 +242,12 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 #endif
+            return LaunchNodeProcess(msbuildLocation, commandLineArgs, nodeId, factory, hostHandshake, terminateNode);
+        }
 
+        protected NodeContext LaunchNodeProcess(string msbuildLocation, string commandLineArgs,  int nodeId, INodePacketFactory factory, Handshake hostHandshake,
+            NodeContextTerminateDelegate terminateNode, string pipeName = null)
+        {
             // None of the processes we tried to connect to allowed a connection, so create a new one.
             // We try this in a loop because it is possible that there is another MSBuild multiproc
             // host process running somewhere which is also trying to create nodes right now.  It might
@@ -281,7 +288,7 @@ namespace Microsoft.Build.BackEnd
                 // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                 // Now try to connect to it.
-                Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake);
+                Stream nodeStream = TryConnectToProcess(PipeNameByProcessId(msbuildProcess.Id, pipeName), TimeoutForNewNodeCreation, hostHandshake);
                 if (nodeStream != null)
                 {
                     // Connection successful, use this node.
@@ -326,7 +333,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
         {
-            return hostHandshake.ToString() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
+            return $"{hostHandshake.ToString()}|{nodeProcessId}";
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -350,20 +357,26 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
+        protected static string PipeNameByProcessId(int nodeProcessId, string pipeNameFormat = null)
+        {
+            return string.Format(pipeNameFormat ?? "MSBuild{0}", nodeProcessId);
+        }
+
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
+        protected Stream TryConnectToProcess(string pipeName, int timeout, Handshake handshake)
         {
             // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + nodeProcessId);
+            pipeName = NamedPipeUtil.GetPipeNameOrPath(pipeName);
+
+            CommunicationsUtilities.Trace("Attempting connect to process by pipe {0} with timeout {1} ms", pipeName, timeout);
 
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                                                                          | PipeOptions.CurrentUserOnly
 #endif
                                                                          );
-            CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
             try
             {

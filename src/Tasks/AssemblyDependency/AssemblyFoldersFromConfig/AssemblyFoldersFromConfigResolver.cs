@@ -122,6 +122,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                         _assemblyFoldersCache = _buildEngine.GetRegisteredTaskObject(key, RegisteredTaskObjectLifetime.Build) as AssemblyFoldersFromConfigCache;
                     }
 
+                    // TODO: although thread safe, there is risk of multiple initialization; consider it to rework into GetOrAdd Pattern
                     if (_assemblyFoldersCache == null)
                     {
                         // This should never happen. Microsoft.Common.CurrentVersion.targets will not specify a AssemblyFoldersFromConfig search path

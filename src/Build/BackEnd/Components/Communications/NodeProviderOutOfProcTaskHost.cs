@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
@@ -73,7 +74,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private Dictionary<HandshakeOptions, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<HandshakeOptions, NodeContext> _nodeContexts;
 
         /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
@@ -88,7 +89,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Keeps track of the set of nodes for which we have not yet received shutdown notification.
         /// </summary>
-        private HashSet<int> _activeNodes;
+        private ConcurrentDictionary<int, NodeContext> _activeNodes;
 
         /// <summary>
         /// Packet factory we use if there's not already one associated with a particular context.
@@ -183,13 +184,8 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            List<NodeContext> contextsToShutDown;
 
-            lock (_nodeContexts)
-            {
-                contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
-            }
-
+            var contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
             _noNodesActiveEvent.WaitOne();
@@ -213,10 +209,10 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             this.ComponentHost = host;
-            _nodeContexts = new Dictionary<HandshakeOptions, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<HandshakeOptions, NodeContext>();
             _nodeIdToPacketFactory = new Dictionary<int, INodePacketFactory>();
             _nodeIdToPacketHandler = new Dictionary<int, INodePacketHandler>();
-            _activeNodes = new HashSet<int>();
+            _activeNodes = new ConcurrentDictionary<int, NodeContext>();
 
             _noNodesActiveEvent = new ManualResetEvent(true);
             _localPacketFactory = new NodePacketFactory();
@@ -300,30 +296,24 @@ namespace Microsoft.Build.BackEnd
         /// This method is invoked by the NodePacketRouter when a packet is received and is intended for
         /// this recipient.
         /// </summary>
-        /// <param name="node">The node from which the packet was received.</param>
+        /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet.</param>
-        public void PacketReceived(int node, INodePacket packet)
+        public void PacketReceived(int nodeId, INodePacket packet)
         {
-            if (_nodeIdToPacketHandler.TryGetValue(node, out INodePacketHandler packetHandler))
+            if (_nodeIdToPacketHandler.TryGetValue(nodeId, out INodePacketHandler packetHandler))
             {
-                packetHandler.PacketReceived(node, packet);
+                packetHandler.PacketReceived(nodeId, packet);
             }
             else
             {
                 ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
 
                 // May also be removed by unnatural termination, so don't assume it's there
-                lock (_activeNodes)
-                {
-                    if (_activeNodes.Contains(node))
-                    {
-                        _activeNodes.Remove(node);
-                    }
+                _activeNodes.TryRemove(nodeId, out _);
 
-                    if (_activeNodes.Count == 0)
-                    {
-                        _noNodesActiveEvent.Set();
-                    }
+                if (_activeNodes.IsEmpty)
+                {
+                    _noNodesActiveEvent.Set();
                 }
             }
         }
@@ -453,21 +443,24 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            NodeContext context;
-            bool nodeCreationSucceeded;
-            if (!_nodeContexts.TryGetValue(hostContext, out context))
+            bool nodeContextExists = _nodeContexts.TryGetValue(hostContext, out var context);
+
+            if (!nodeContextExists)
             {
-                nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
-            }
-            else
-            {
-                // node already exists, so "creation" automatically succeeded
-                nodeCreationSucceeded = true;
+                bool isRarService = (hostContext & HandshakeOptions.RarService) != 0;
+                nodeContextExists = isRarService ?
+                    CreateRarNode(hostContext, factory, handler, configuration) :
+                    CreateNode(hostContext, factory, handler, configuration);
+                if (nodeContextExists)
+                {
+                    // get just created node context
+                    context = _nodeContexts[hostContext];
+                }
             }
 
-            if (nodeCreationSucceeded)
+            if (nodeContextExists)
             {
-                context = _nodeContexts[hostContext];
+                // TODO: consider concurrent dict for those too
                 _nodeIdToPacketFactory[(int)hostContext] = factory;
                 _nodeIdToPacketHandler[(int)hostContext] = handler;
 
@@ -498,6 +491,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
+            // TODO: hmmm, need to exclude RAR node here, also it looks like a bug as gen node can connect to already created node
             if (AvailableNodes == 0)
             {
                 ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
@@ -516,7 +510,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? "MSBuild.exe");
+            CommunicationsUtilities.Trace("For a host context of '{0}', spawning executable from {1}.", hostContext.ToString(), msbuildLocation);
 
             // Make it here.
             NodeContext context = GetNode
@@ -536,7 +530,9 @@ namespace Microsoft.Build.BackEnd
                 // Start the asynchronous read.
                 context.BeginAsyncPacketRead();
 
-                _activeNodes.Add((int)hostContext);
+                bool added = _activeNodes.TryAdd((int) hostContext, context);
+                ErrorUtilities.VerifyThrow(added, "Internal error: node context for out of process task host of given node id already exist");
+
                 _noNodesActiveEvent.Reset();
 
                 return true;
@@ -546,27 +542,95 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Connect to or instantiate the RAR service node
+        /// </summary>
+        internal bool CreateRarNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context! Did we forget to call DisconnectFromHost somewhere?");
+
+            NodeContext context = GetRarNode
+            (
+                hostContext,
+                this,
+                new Handshake(hostContext),
+                NodeContextTerminated
+            );
+
+            if (context != null)
+            {
+                bool added = _nodeContexts.TryAdd(hostContext, context);
+                ErrorUtilities.VerifyThrow(added, "Internal error: node context for RAR node of given node id already exist in _nodeContexts");
+
+                _nodeContexts[hostContext] = context;
+
+                // Start the asynchronous read.
+                context.BeginAsyncPacketRead();
+
+                added = _activeNodes.TryAdd((int)hostContext, context);
+                ErrorUtilities.VerifyThrow(added, "Internal error: node context for RAR node of given node id already exist in _activeNodes");
+
+                _noNodesActiveEvent.Reset();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Finds or creates a child process which can act as a node.
+        /// </summary>
+        /// <returns>The pipe stream representing the node.</returns>
+        protected NodeContext GetRarNode(HandshakeOptions hostContext, INodePacketFactory factory, Handshake hostHandshake, NodeContextTerminateDelegate terminateNode)
+        {
+            int nodeId = (int) hostContext;
+
+            // Attempt to connect to RAR service process by its pipe name
+            string rarNodePipeName = RarNodePipeName(hostHandshake);
+
+            Stream nodeStream = TryConnectToProcess(rarNodePipeName, 0 /* poll, don't wait for connections */, hostHandshake);
+            if (nodeStream != null)
+            {
+                // Connection successful, use this node.
+                CommunicationsUtilities.Trace("Successfully connected to existed RAR node {0} by its pipe name {1}", nodeId, rarNodePipeName);
+                return new NodeContext(nodeId, -1, nodeStream, factory, terminateNode);
+            }
+
+            // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
+            string commandLineArgs = $" /nologo /nodemode:3 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /pipename:{rarNodePipeName} ";
+            string msbuildLocation = GetMSBuildLocationFromHostContext(hostContext);
+
+            // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
+            if (msbuildLocation == null)
+            {
+                return null;
+            }
+
+            CommunicationsUtilities.Trace("For a RAR node of context '{0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation);
+
+            return LaunchNodeProcess(msbuildLocation, commandLineArgs, nodeId, factory, hostHandshake, terminateNode, rarNodePipeName);
+        }
+
+        private static string RarNodePipeName(Handshake hostHandshake)
+        {
+            // TODO: consider using longer hash (sha) to lower conflict possibility
+            return $"MSBuildRAR-{CommunicationsUtilities.GetHashCode(hostHandshake.ToString()):x}";
+        }
+
+        /// <summary>
         /// Method called when a context terminates.
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
-            lock (_nodeContexts)
-            {
-                _nodeContexts.Remove((HandshakeOptions)nodeId);
-            }
+            _nodeContexts.TryRemove((HandshakeOptions)nodeId, out _);
 
             // May also be removed by unnatural termination, so don't assume it's there
-            lock (_activeNodes)
-            {
-                if (_activeNodes.Contains(nodeId))
-                {
-                    _activeNodes.Remove(nodeId);
-                }
+            _activeNodes.TryRemove(nodeId, out _);
 
-                if (_activeNodes.Count == 0)
-                {
-                    _noNodesActiveEvent.Set();
-                }
+            if (_activeNodes.IsEmpty)
+            {
+                _noNodesActiveEvent.Set();
             }
         }
     }

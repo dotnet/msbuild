@@ -653,7 +653,7 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] Inputs { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
-    public partial class ResolveAssemblyReference : Microsoft.Build.Tasks.TaskExtension
+    public partial class ResolveAssemblyReference : Microsoft.Build.Tasks.TaskExtension, Microsoft.Build.Framework.IConcurrentTask
     {
         public ResolveAssemblyReference() { }
         public string[] AllowedAssemblyExtensions { get { throw null; } set { } }
@@ -724,6 +724,7 @@ namespace Microsoft.Build.Tasks
         public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
         public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
         public override bool Execute() { throw null; }
+        void Microsoft.Build.Framework.IConcurrentTask.ConfigureForConcurrentExecution(Microsoft.Build.Framework.TaskExecutionContext executionContext) { }
     }
     public sealed partial class ResolveCodeAnalysisRuleSet : Microsoft.Build.Tasks.TaskExtension
     {

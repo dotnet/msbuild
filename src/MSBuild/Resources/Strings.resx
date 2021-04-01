@@ -1263,6 +1263,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       logger could not be created -- this message comes from the CLR/FX and is localized.
     </comment>
   </data>
+  <data name="InvalidPipeName" UESanitized="true" Visibility="Public">
+    <value>MSBUILD : error MSB1060: PipeName '{0}' is not valid. Argument pipename can include any character other than a backslash,
+      including numbers and special characters. The entire pipe name string can be up to 256 characters long.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1060: "}
+      UE: This is an internal error when argument PipeName, required by for resolve assembly reference (NodeMode: 3). For example, -nodeMode:3 -pipeName:"\a-name".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+
   <data name="Process" UESanitized="true" Visibility="Public">
     <value>Process = "{0}"</value>
   </data>
@@ -1281,7 +1291,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1060.
+        Next error code should be MSB1061.
 
         Don't forget to update this comment after using the new code.
   -->

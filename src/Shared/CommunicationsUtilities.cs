@@ -56,7 +56,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Building with administrator privileges
         /// </summary>
-        Administrator = 32
+        Administrator = 32,
+
+        /// <summary>
+        /// RAR service
+        /// </summary>
+        RarService = 64
     }
 
     internal readonly struct Handshake
@@ -90,7 +95,7 @@ namespace Microsoft.Build.Internal
         // This is used as a key, so it does not need to be human readable.
         public override string ToString()
         {
-            return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
+            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
         }
 
         internal int[] RetrieveHandshakeComponents()
@@ -137,6 +142,11 @@ namespace Microsoft.Build.Internal
         /// Place to dump trace
         /// </summary>
         private static string s_debugDumpPath;
+
+        /// <summary>
+        /// exclusive lock to folder write access
+        /// </summary>
+        private static Object s_traceLock = new();
 
         /// <summary>
         /// Ticks at last time logged
@@ -574,18 +584,29 @@ namespace Microsoft.Build.Internal
 
                     fileName += ".txt";
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
+                    lock (s_traceLock)
                     {
-                        string message = String.Format(CultureInfo.CurrentCulture, format, args);
-                        long now = DateTime.UtcNow.Ticks;
-                        float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
-                        s_lastLoggedTicks = now;
-                        file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog, message);
+                        using (StreamWriter file =
+                            FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId),
+                                append: true))
+                        {
+                            string message = String.Format(CultureInfo.CurrentCulture, format, args);
+                            long now = DateTime.UtcNow.Ticks;
+                            float millisecondsSinceLastLog = (float) (now - s_lastLoggedTicks) / 10000L;
+                            s_lastLoggedTicks = now;
+                            file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog,
+                                message);
+                        }
                     }
                 }
                 catch (IOException)
                 {
                     // Ignore
+                }
+                catch (Exception)
+                {
+                    // Tracing shall never throw in production
+                    Debug.Assert(false, "Exception during CommunicationsUtilities.Trace");
                 }
             }
         }
@@ -629,6 +650,292 @@ namespace Microsoft.Build.Internal
         internal static int AvoidEndOfHandshakeSignal(int x)
         {
             return x == EndOfHandshakeSignal ? ~x : x;
+        }
+
+        internal static IServerMutex OpenOrCreateMutex(string name, out bool createdNew)
+        {
+            if (PlatformInformation.IsRunningOnMono)
+            {
+                return new ServerFileMutexPair(name, initiallyOwned: true, out createdNew);
+            }
+            else
+            {
+                return new ServerNamedMutex(name, out createdNew);
+            }
+        }
+
+        internal interface IServerMutex : IDisposable
+        {
+            bool TryLock(int timeoutMs);
+            bool IsDisposed { get; }
+        }
+
+        /// <summary>
+        /// An interprocess mutex abstraction based on OS advisory locking (FileStream.Lock/Unlock).
+        /// If multiple processes running as the same user create FileMutex instances with the same name,
+        ///  those instances will all point to the same file somewhere in a selected temporary directory.
+        /// The TryLock method can be used to attempt to acquire the mutex, with Unlock or Dispose used to release.
+        /// Unlike Win32 named mutexes, there is no mechanism for detecting an abandoned mutex. The file
+        ///  will simply revert to being unlocked but remain where it is.
+        /// </summary>
+        internal sealed class FileMutex : IDisposable
+        {
+            public readonly FileStream Stream;
+            public readonly string FilePath;
+
+            public bool IsLocked { get; private set; }
+
+            internal static string GetMutexDirectory()
+            {
+                var tempPath = GetTempPath(null);
+                var result = Path.Combine(tempPath!, ".msbuild");
+                Directory.CreateDirectory(result);
+                return result;
+            }
+
+            public FileMutex(string name)
+            {
+                FilePath = Path.Combine(GetMutexDirectory(), name);
+                Stream = new FileStream(FilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            }
+
+            public bool TryLock(int timeoutMs)
+            {
+                if (IsLocked)
+                    throw new InvalidOperationException("Lock already held");
+
+                var sw = Stopwatch.StartNew();
+                do
+                {
+                    try
+                    {
+                        Stream.Lock(0, 0);
+                        IsLocked = true;
+                        return true;
+                    }
+                    catch (IOException)
+                    {
+                        // Lock currently held by someone else.
+                        // We want to sleep for a short period of time to ensure that other processes
+                        //  have an opportunity to finish their work and relinquish the lock.
+                        // Spinning here (via Yield) would work but risks creating a priority
+                        //  inversion if the lock is held by a lower-priority process.
+                        Thread.Sleep(1);
+                    }
+                    catch (Exception)
+                    {
+                        // Something else went wrong.
+                        return false;
+                    }
+                } while (sw.ElapsedMilliseconds < timeoutMs);
+
+                return false;
+            }
+
+            public void Unlock()
+            {
+                if (!IsLocked)
+                    return;
+                Stream.Unlock(0, 0);
+                IsLocked = false;
+            }
+
+            public void Dispose()
+            {
+                var wasLocked = IsLocked;
+                if (wasLocked)
+                    Unlock();
+                Stream.Dispose();
+                // We do not delete the lock file here because there is no reliable way to perform a
+                //  'delete if no one has the file open' operation atomically on *nix. This is a leak.
+            }
+        }
+
+        internal sealed class ServerNamedMutex : IServerMutex
+        {
+            public readonly Mutex ServerMutex;
+
+            public bool IsDisposed { get; private set; }
+            public bool IsLocked { get; private set; }
+
+            public ServerNamedMutex(string mutexName, out bool createdNew)
+            {
+                ServerMutex = new Mutex(
+                    initiallyOwned: true,
+                    name: mutexName,
+                    createdNew: out createdNew
+                );
+                if (createdNew)
+                    IsLocked = true;
+            }
+
+            public static bool WasOpen(string mutexName)
+            {
+                try
+                {
+                    // we can't use TryOpenExisting as it is not supported in net3.5
+                    using var m = Mutex.OpenExisting(mutexName);
+                    return true;
+                }
+                catch
+                {
+                    // In the case an exception occurred trying to open the Mutex then 
+                    // the assumption is that it's not open.
+                    return false;
+                }
+            }
+
+            public bool TryLock(int timeoutMs)
+            {
+                if (IsDisposed)
+                    throw new ObjectDisposedException("Mutex");
+                if (IsLocked)
+                    throw new InvalidOperationException("Lock already held");
+                return IsLocked = ServerMutex.WaitOne(timeoutMs);
+            }
+
+            public void Dispose()
+            {
+                if (IsDisposed)
+                    return;
+                IsDisposed = true;
+
+                try
+                {
+                    if (IsLocked)
+                        ServerMutex.ReleaseMutex();
+                }
+                finally
+                {
+                    (ServerMutex as IDisposable).Dispose();
+                    IsLocked = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Approximates a named mutex with 'locked', 'unlocked' and 'abandoned' states.
+        /// There is no reliable way to detect whether a mutex has been abandoned on some target platforms,
+        ///  so we use the AliveMutex to manually track whether the creator of a mutex is still running,
+        ///  while the HeldMutex represents the actual lock state of the mutex.
+        /// </summary>
+        internal sealed class ServerFileMutexPair : IServerMutex
+        {
+            public readonly FileMutex AliveMutex;
+            public readonly FileMutex HeldMutex;
+
+            public bool IsDisposed { get; private set; }
+
+            public ServerFileMutexPair(string mutexName, bool initiallyOwned, out bool createdNew)
+            {
+                AliveMutex = new FileMutex(mutexName + "-alive");
+                HeldMutex = new FileMutex(mutexName + "-held");
+                createdNew = AliveMutex.TryLock(0);
+                if (initiallyOwned && createdNew)
+                {
+                    if (!TryLock(0))
+                        throw new Exception("Failed to lock mutex after creating it");
+                }
+            }
+
+            public bool TryLock(int timeoutMs)
+            {
+                if (IsDisposed)
+                    throw new ObjectDisposedException("Mutex");
+                return HeldMutex.TryLock(timeoutMs);
+            }
+
+            public void Dispose()
+            {
+                if (IsDisposed)
+                    return;
+                IsDisposed = true;
+
+                try
+                {
+                    HeldMutex.Unlock();
+                    AliveMutex.Unlock();
+                }
+                finally
+                {
+                    AliveMutex.Dispose();
+                    HeldMutex.Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of the temporary path for the current environment assuming the working directory
+        /// is <paramref name="workingDir"/>.  This function must emulate <see cref="Path.GetTempPath"/> as 
+        /// closely as possible.
+        /// </summary>
+        public static string GetTempPath(string workingDir)
+        {
+            if (PlatformInformation.IsUnix)
+            {
+                // Unix temp path is fine: it does not use the working directory
+                // (it uses ${TMPDIR} if set, otherwise, it returns /tmp)
+                return Path.GetTempPath();
+            }
+
+            var tmp = Environment.GetEnvironmentVariable("TMP");
+            if (Path.IsPathRooted(tmp))
+            {
+                return tmp;
+            }
+
+            var temp = Environment.GetEnvironmentVariable("TEMP");
+            if (Path.IsPathRooted(temp))
+            {
+                return temp;
+            }
+
+            if (!string.IsNullOrEmpty(workingDir))
+            {
+                if (!string.IsNullOrEmpty(tmp))
+                {
+                    return Path.Combine(workingDir, tmp);
+                }
+
+                if (!string.IsNullOrEmpty(temp))
+                {
+                    return Path.Combine(workingDir, temp);
+                }
+            }
+
+            var userProfile = Environment.GetEnvironmentVariable("USERPROFILE");
+            if (Path.IsPathRooted(userProfile))
+            {
+                return userProfile;
+            }
+
+            return Environment.GetEnvironmentVariable("SYSTEMROOT");
+        }
+
+        /// <summary>
+        /// This class provides simple properties for determining whether the current platform is Windows or Unix-based.
+        /// We intentionally do not use System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(...) because
+        /// it incorrectly reports 'true' for 'Windows' in desktop builds running on Unix-based platforms via Mono.
+        /// </summary>
+        internal static class PlatformInformation
+        {
+            public static bool IsWindows => Path.DirectorySeparatorChar == '\\';
+            public static bool IsUnix => Path.DirectorySeparatorChar == '/';
+            public static bool IsRunningOnMono
+            {
+                get
+                {
+                    try
+                    {
+                        return !(Type.GetType("Mono.Runtime") is null);
+                    }
+                    catch
+                    {
+                        // Arbitrarily assume we're not running on Mono.
+                        return false;
+                    }
+                }
+            }
         }
     }
 }
