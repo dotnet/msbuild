@@ -62,6 +62,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <AvailablePlatforms Condition="'$(VisualStudioVersion)' != '' and '$(VisualStudioVersion)' > '10.0'">Any CPU,x86,x64</AvailablePlatforms>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('linux'))">$(AvailablePlatforms),ARM32</AvailablePlatforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(AvailablePlatforms),ARM32</AvailablePlatforms>
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('linux'))">$(AvailablePlatforms),ARM32,ARM64</AvailablePlatforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0'))">
+    <!-- Need to check console and windows here. -->
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(AvailablePlatforms),ARM32,ARM64</AvailablePlatforms>
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('linux'))">$(AvailablePlatforms),ARM32,ARM64</AvailablePlatforms>
+  </PropertyGroup>
+
   <!-- Import depends on if it is .NETCore. Imports for .NETFramework is a superset of that for .NETCore-->
   <Import Project="Microsoft.NETFramework.props" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' or '$(TargetFrameworkIdentifier)' == 'Silverlight'"/>
   <Import Project="Microsoft.NET.props" Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' or '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"/>
