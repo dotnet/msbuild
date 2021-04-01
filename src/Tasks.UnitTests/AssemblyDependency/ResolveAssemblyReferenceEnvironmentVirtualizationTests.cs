@@ -53,9 +53,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem(_test_assembly_name)
             };
             rarTask.SearchPaths = new string[] {
-                "{AssemblyFolders}",
-                "{HintPathFromItem}",
-                "{RawFileName}",
                 "./"
             };
 
@@ -101,54 +98,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Single(rarTask.ResolvedFiles);
             Assert.Equal(0, String.Compare(_test_assembly_path, rarTask.ResolvedFiles[0].ItemSpec, StringComparison.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Finding assembly in a specified absolute path.
-        /// </summary>
-        [Fact]
-        public void FindAssemblyInSpecifiedAbsoluteDirectory()
-        {
-            ResolveAssemblyReference rarTask = new ResolveAssemblyReference();
-
-            rarTask.BuildEngine = new MockEngine(_output);
-            rarTask.Assemblies = new ITaskItem[] {
-                new TaskItem(_test_assembly_name)
-            };
-            rarTask.SearchPaths = new string[] {
-                "{AssemblyFolders}",
-                "{HintPathFromItem}",
-                "{RawFileName}",
-                _temp_directory
-            };
-            rarTask.Execute();
-            Assert.Single(rarTask.ResolvedFiles);
-            Assert.Equal(0, String.Compare(_test_assembly_path, rarTask.ResolvedFiles[0].ItemSpec, StringComparison.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Make sure that nonexistent path in SearchPaths are eliminated.
-        /// </summary>
-        [Fact]
-        public void RunWithNonExistentPath()
-        {
-            ResolveAssemblyReference rarTask = new ResolveAssemblyReference();
-
-            string cur_path = Directory.GetCurrentDirectory();
-            rarTask.BuildEngine = new MockEngine(_output);
-            rarTask.Assemblies = new ITaskItem[] {
-                new TaskItem("System.Xml"), new TaskItem("System.Nonexistent")
-            };
-            rarTask.SearchPaths = new string[] {
-                Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
-                "{AssemblyFolders}",
-                "{HintPathFromItem}",
-                "{RawFileName}",
-                "C:\\NonExistentPath"
-            };
-            rarTask.Execute();
-            Assert.Single(rarTask.ResolvedFiles);
-            Assert.Equal(0, String.Compare(ToolLocationHelper.GetPathToDotNetFrameworkFile("System.Xml.dll", TargetDotNetFrameworkVersion.Version45), rarTask.ResolvedFiles[0].ItemSpec, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
