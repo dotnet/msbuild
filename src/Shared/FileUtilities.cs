@@ -1034,8 +1034,8 @@ namespace Microsoft.Build.Shared
             string fullBase = Path.GetFullPath(basePath);
             string fullPath = Path.GetFullPath(path);
 
-            string[] splitBase = fullBase.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
-            string[] splitPath = fullPath.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+            string[] splitBase = fullBase.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            string[] splitPath = fullPath.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
             ErrorUtilities.VerifyThrow(splitPath.Length > 0, "Cannot call MakeRelative on a path of only slashes.");
 
@@ -1053,38 +1053,24 @@ namespace Microsoft.Build.Shared
 
             int baseI = 0;
             int pathI = 0;
-            while (true)
+            while (baseI < splitBase.Length && pathI < splitPath.Length && splitBase[baseI].Equals(splitPath[pathI], PathComparison))
             {
-                if (baseI == splitBase.Length)
-                {
-                    if (pathI == splitPath.Length)
-                    {
-                        return ".";
-                    }
-                    break;
-                }
-                else if (pathI == splitPath.Length)
-                {
-                    break;
-                }
-                else if (splitBase[baseI].Equals(splitPath[pathI], PathComparison))
-                {
-                    baseI++;
-                    pathI++;
-                }
-                else
-                {
-                    break;
-                }
+                baseI++;
+                pathI++;
             }
 
-            StringBuilder sb = StringBuilderCache.Acquire();
-
+            if (baseI == splitBase.Length && pathI == splitPath.Length)
+            {
+                return ".";
+            }
             // If the paths have no component in common, the only valid relative path is the full path.
             if (baseI == 0)
             {
                 return fullPath;
             }
+
+            StringBuilder sb = StringBuilderCache.Acquire();
+
             while (baseI < splitBase.Length)
             {
                 sb.Append("..").Append(Path.DirectorySeparatorChar);
@@ -1095,7 +1081,7 @@ namespace Microsoft.Build.Shared
                 sb.Append(splitPath[pathI]).Append(Path.DirectorySeparatorChar);
                 pathI++;
             }
-            sb.Remove(sb.Length - 1, 1);
+            sb.Length--;
             return StringBuilderCache.GetStringAndRelease(sb);
         }
 
