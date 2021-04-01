@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal abstract class IWorkloadUnitInstaller : IWorkloadInstaller
+    internal abstract class WorkloadUnitInstallerBase : IWorkloadInstaller
     {
         public InstallationUnit GetInstallationUnit()
         {

@@ -6,7 +6,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal abstract class IPackWorkloadInstaller : IWorkloadInstaller
+    internal abstract class PackWorkloadInstallerBase : IWorkloadInstaller
     {
         public InstallationUnit GetInstallationUnit()
         {

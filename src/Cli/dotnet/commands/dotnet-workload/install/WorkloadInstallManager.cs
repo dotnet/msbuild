@@ -43,6 +43,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             InstallWorkloadComponents(workloadIds, featureBand);
 
+            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+            {
+                (_workloadInstaller as PackWorkloadInstallerBase).GarbageCollectInstalledWorkloadPacks();
+            }
+
             _reporter.WriteLine();
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallationSucceeded, string.Join(", ", workloadIds)));
             _reporter.WriteLine();
@@ -52,7 +57,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
-                var installer = _workloadInstaller as IPackWorkloadInstaller;
+                var installer = _workloadInstaller as PackWorkloadInstallerBase;
 
                 var workloadPacksMap = workloadIds
                     .Select(workloadId => (workloadId, _workloadResolver.GetPacksInWorkload(workloadId).Select(packId => _workloadResolver.TryGetPackInfo(packId))));
@@ -84,7 +89,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                var installer = _workloadInstaller as IWorkloadUnitInstaller;
+                var installer = _workloadInstaller as WorkloadUnitInstallerBase;
                 foreach (var workloadId in workloadIds)
                 {
                     installer.InstallWorkload(workloadId);

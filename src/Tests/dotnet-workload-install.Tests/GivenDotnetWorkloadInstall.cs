@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var installManager = new WorkloadInstallManager(_reporter, installer, workloadResolver, "6.0.100");
             installManager.InstallWorkloads(mockWorkloadIds, true);
 
+            installer.GarbageCollectionCalled.Should().BeTrue();
             installer.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
             installer.InstalledPacks.Count.Should().Be(8);
             installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);

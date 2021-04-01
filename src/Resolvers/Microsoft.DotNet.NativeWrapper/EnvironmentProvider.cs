@@ -89,51 +89,5 @@ namespace Microsoft.DotNet.NativeWrapper
             var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
             return environmentProvider.GetDotnetExeDirectory();
         }
-
-        public string GetUserHomeDirectory()
-        {
-            var home = _getEnvironmentVariable("DOTNET_CLI_HOME");
-            if (string.IsNullOrEmpty(home))
-            {
-                home = _getEnvironmentVariable(Interop.RunningOnWindows ? "USERPROFILE" : "HOME");
-                if (string.IsNullOrEmpty(home))
-                {
-                    throw new Exception("Unable to resolve user home");
-                }
-            }
-
-            return home;
-        }
-
-        public static string GetUserHomeDirectory(Func<string, string> getEnvironmentVariable = null)
-        {
-            if (getEnvironmentVariable == null)
-            {
-                getEnvironmentVariable = Environment.GetEnvironmentVariable;
-            }
-            var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
-            return environmentProvider.GetUserHomeDirectory();
-        }
-
-        public string GetTempDirectory()
-        {
-            var tmp = _getEnvironmentVariable(Interop.RunningOnWindows ? "TEMP" : "TMPDIR");
-            if (string.IsNullOrEmpty(tmp))
-            {
-                throw new Exception("Unable to resolve user temp");
-            }
-
-            return tmp;
-        }
-
-        public static string GetTempDirectory(Func<string, string> getEnvironmentVariable = null)
-        {
-            if (getEnvironmentVariable == null)
-            {
-                getEnvironmentVariable = Environment.GetEnvironmentVariable;
-            }
-            var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
-            return environmentProvider.GetTempDirectory();
-        }
     }
 }

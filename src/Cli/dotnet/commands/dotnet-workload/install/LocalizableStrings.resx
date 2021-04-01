@@ -198,4 +198,7 @@
   <data name="WritingWorkloadInstallRecordMessage" xml:space="preserve">
     <value>Writing workload installation record for {0}...</value>
   </data>
+  <data name="GarbageCollectingSdkFeatureBandsMessage" xml:space="preserve">
+    <value>Garbage collecting for SDK feature bands {0}...</value>
+  </data>
 </root>

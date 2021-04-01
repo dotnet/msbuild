@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
 
             if (!success)
             {
-                throw new Exception($"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed.");
+                throw new Exception($"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed");
             }
 
             return nupkgPath;

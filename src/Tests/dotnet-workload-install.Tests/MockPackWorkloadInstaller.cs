@@ -8,7 +8,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
-    internal class MockPackWorkloadInstaller : IPackWorkloadInstaller
+    internal class MockPackWorkloadInstaller : PackWorkloadInstallerBase
     {
         public IList<PackInfo> InstalledPacks = new List<PackInfo>();
         public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
@@ -45,7 +45,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             WorkloadInstallRecord.Remove(workloadId);
         }
 
-        public override void GarbageCollectInstalledWorkloadPacks() => throw new System.NotImplementedException();
+        public override void GarbageCollectInstalledWorkloadPacks()
+        {
+            GarbageCollectionCalled = true;
+        }
+
         public override void DownloadToOfflineCache(IReadOnlyCollection<string> manifests) => throw new System.NotImplementedException();
         public override IReadOnlyCollection<string> GetFeatureBandsWithInstallationRecords() => throw new System.NotImplementedException();
         public override IReadOnlyCollection<string> GetInstalledWorkloads(string featureBand) => throw new System.NotImplementedException();

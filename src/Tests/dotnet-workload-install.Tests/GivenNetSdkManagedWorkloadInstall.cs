@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.NuGetPackageInstaller;
 using Microsoft.DotNet.ToolPackage;
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void ManagedInstallerInsallationUnitIsPacks()
         {
-            var (_, installer, _) = GetTestInstaller(MethodBase.GetCurrentMethod().Name);
+            var (_, installer, _) = GetTestInstaller();
             installer.GetInstallationUnit().Should().Be(InstallationUnit.Packs);
         }
 
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void ManagedInstallerCanGetFeatureBands()
         {
             var versions = new string[] { "6.0.100", "6.0.300", "7.0.100" };
-            var (dotnetRoot, installer, _) = GetTestInstaller(MethodBase.GetCurrentMethod().Name);
+            var (dotnetRoot, installer, _) = GetTestInstaller();
 
             // Write fake workloads
             foreach (var version in versions)
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var version = "6.0.100";
             var workloads = new string[] { "test-workload-1", "test-workload-2", "test-workload3" };
-            var (dotnetRoot, installer, _) = GetTestInstaller(MethodBase.GetCurrentMethod().Name);
+            var (dotnetRoot, installer, _) = GetTestInstaller();
 
             // Write fake workloads
             var path = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads");
@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var workloadId = "test-workload";
             var version = "6.0.100";
-            var (dotnetRoot, installer, _) = GetTestInstaller(MethodBase.GetCurrentMethod().Name);
+            var (dotnetRoot, installer, _) = GetTestInstaller();
             installer.WriteWorkloadInstallationRecord(workloadId, version);
             var expectedPath = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads", workloadId);
             File.Exists(expectedPath).Should().BeTrue();
@@ -83,8 +83,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void ManagedInstallerCanInstallPacks()
         {
-            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller(MethodBase.GetCurrentMethod().Name);
-            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
             var version = "6.0.100";
             installer.InstallWorkloadPack(packInfo, version);
 
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             (nugetInstaller as MockNuGetPackageInstaller).ExtractCallParams.Count.Should().Be(1);
             (nugetInstaller as MockNuGetPackageInstaller).ExtractCallParams[0].ShouldBeEquivalentTo(("Mock/path", Path.Combine(dotnetRoot, "packs", packInfo.Id, packInfo.Version)));
 
-            var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledPacks", packInfo.Id, packInfo.Version);
+            var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", packInfo.Id, packInfo.Version, version);
             File.Exists(installationRecordPath).Should().BeTrue();
         }
 
@@ -101,8 +101,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void ManagedInstallerCanRollBackInstallFailures()
         {
             var version = "6.0.100";
-            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller(MethodBase.GetCurrentMethod().Name, true);
-            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller(failingInstaller: true);
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
             try
             {
                 installer.InstallWorkloadPack(packInfo, version);
@@ -116,18 +116,57 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
                 e.Message.Should().Be("Test Failure");
                 // Nupkgs should be removed
-                Directory.EnumerateFileSystemEntries(failingNugetInstaller.MockPackageDir).Should().BeEmpty();
+                Directory.Exists(failingNugetInstaller.MockPackageDir).Should().BeFalse();
                 // Packs should be removed
                 Directory.EnumerateFileSystemEntries(Path.Combine(dotnetRoot, "packs")).Should().BeEmpty();
             }
         }
 
-        private (string, NetSdkManagedInstaller, INuGetPackageInstaller) GetTestInstaller(string identifier, bool failingInstaller = false)
+        [Fact]
+        public void ManagedInstallerGarbageCollect()
+        {
+            var (dotnetRoot, installer, _) = GetTestInstaller();
+            var packs = new PackInfo[]
+            {
+                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7")),
+                new PackInfo("Xamarin.Android.Framework", "8.4", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.4"))
+            };
+            var sdkVersions = new string[] { "6.0.100", "6.0.300" };
+
+            // Write fake packs
+            var installedPacksPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks");
+            foreach (var sdkVersion in sdkVersions)
+            {
+                Directory.CreateDirectory(Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersion, "InstalledWorkloads"));
+                foreach (var pack in packs)
+                {
+                    var packRecordPath = Path.Combine(installedPacksPath, pack.Id, pack.Version, sdkVersion);
+                    Directory.CreateDirectory(Path.GetDirectoryName(packRecordPath));
+                    File.WriteAllText(packRecordPath, string.Empty);
+                    Directory.CreateDirectory(pack.Path);
+                }
+            }
+
+            installer.GarbageCollectInstalledWorkloadPacks();
+
+            Directory.EnumerateFileSystemEntries(installedPacksPath)
+                .Should()
+                .BeEmpty();
+            foreach (var pack in packs)
+            {
+                Directory.Exists(pack.Path)
+                    .Should()
+                    .BeFalse();
+            }
+        }
+
+        private (string, NetSdkManagedInstaller, INuGetPackageInstaller) GetTestInstaller([CallerMemberName] string identifier = "", bool failingInstaller = false)
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory(identifier).Path;
+            var manifestDir = Path.Combine(_testAssetsManager.GetTestManifestsDirectory(), "SampleManifest", "Sample.json");
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             INuGetPackageInstaller nugetInstaller = failingInstaller ? new FailingNuGetPackageInstaller(testDirectory) :  new MockNuGetPackageInstaller();
-            return (dotnetRoot, new NetSdkManagedInstaller(_reporter, nugetInstaller, dotnetRoot), nugetInstaller);
+            return (dotnetRoot, new MockManagedInstaller(_reporter, nugetInstaller, dotnetRoot, manifestDir), nugetInstaller);
         }
     }
 }
