@@ -451,6 +451,10 @@
     <value>MSB3101: Could not write state file "{0}". {1}</value>
     <comment>{StrBegin="MSB3101: "}</comment>
   </data>
+  <data name="General.StateFileAlreadyPresent">
+    <value>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</value>
+    <comment>{StrBegin="MSB3667: "}</comment>
+  </data>
   <data name="General.DuplicateItemsNotSupported">
     <value>MSB3105: The item "{0}" was specified more than once in the "{1}" parameter.  Duplicate items are not supported by the "{1}" parameter.</value>
     <comment>{StrBegin="MSB3105: "}</comment>

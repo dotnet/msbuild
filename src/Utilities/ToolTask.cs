@@ -183,6 +183,14 @@ namespace Microsoft.Build.Utilities
         public string ToolPath { set; get; }
 
         /// <summary>
+        /// Whether or not to use UTF8 encoding for the cmd file and console window.
+        /// Values: Always, Never, Detect
+        /// If set to Detect, the current code page will be used unless it cannot represent 
+        /// the Command string. In that case, UTF-8 is used.
+        /// </summary>
+        public string UseUtf8Encoding { get; set; } = EncodingUtilities.UseUtf8Detect;
+
+        /// <summary>
         /// Array of equals-separated pairs of environment
         /// variables that should be passed to the spawned executable,
         /// in addition to (or selectively overriding) the regular environment block.
@@ -949,7 +957,6 @@ namespace Microsoft.Build.Utilities
                         timeout = result;
                     }
                 }
-
                 proc.KillTree(timeout);
             }
         }
@@ -1373,7 +1380,7 @@ namespace Microsoft.Build.Utilities
                         }
                         else
                         {
-                            encoding = EncodingUtilities.BatchFileEncoding(commandLineCommands + _temporaryBatchFile, EncodingUtilities.UseUtf8Detect);
+                            encoding = EncodingUtilities.BatchFileEncoding(commandLineCommands + _temporaryBatchFile, UseUtf8Encoding);
 
                             if (encoding.CodePage != EncodingUtilities.CurrentSystemOemEncoding.CodePage)
                             {

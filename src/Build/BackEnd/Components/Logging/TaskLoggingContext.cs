@@ -1,10 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -143,6 +144,16 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(IsValid, "must be valid");
             LoggingService.LogTaskWarningFromException(BuildEventContext, exception, file, taskName);
+        }
+
+        internal ICollection<string> GetWarningsAsErrors()
+        {
+            return LoggingService.GetWarningsAsErrors(BuildEventContext);
+        }
+
+        internal ICollection<string> GetWarningsAsMessages()
+        {
+            return LoggingService.GetWarningsAsMessages(BuildEventContext);
         }
     }
 }

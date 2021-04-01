@@ -769,7 +769,7 @@
       </trans-unit>
       <trans-unit id="FatalTaskError">
         <source>MSB4018: The "{0}" task failed unexpectedly.</source>
-        <target state="translated">MSB4018: непредвиденная ошибка при выполнении задачи {0}".</target>
+        <target state="translated">MSB4018: непредвиденная ошибка при выполнении задачи "{0}".</target>
         <note>{StrBegin="MSB4018: "}UE: This message is shown when a task terminates because of an unhandled exception. The cause is most likely a
     programming error in the task; however, it is also possible that the unhandled exception originated in the engine, and was
     surfaced through the task when the task called into the engine.</note>

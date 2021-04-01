@@ -901,23 +901,23 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public void Resolve(Dictionary<string, ITaskItem> sdks, string targetConfiguration, string targetArchitecture, HashSet<string> sdkNamesOnReferenceItems, bool treatErrorsAsWarnings, bool prefer32Bit, string identifierTargetPlatform, Version versionTargetPlatform, string projectName, bool enableMaxPlatformVersionEmptyWarning)
             {
-                if (sdks.ContainsKey(SDKName))
+                if (sdks.TryGetValue(SDKName, out ITaskItem sdk))
                 {
                     _prefer32BitFromProject = prefer32Bit;
 
                     // There must be a trailing slash or else the ExpandSDKReferenceAssemblies will not work.
-                    ResolvedPath = FileUtilities.EnsureTrailingSlash(sdks[SDKName].ItemSpec);
+                    ResolvedPath = FileUtilities.EnsureTrailingSlash(sdk.ItemSpec);
 
-                    System.Version.TryParse(sdks[SDKName].GetMetadata(SDKPlatformVersion), out Version targetPlatformVersionFromItem);
+                    System.Version.TryParse(sdk.GetMetadata(SDKPlatformVersion), out Version targetPlatformVersionFromItem);
 
                     GetSDKManifestAttributes();
 
                     CreateResolvedReferenceItem(targetConfiguration, targetArchitecture, sdkNamesOnReferenceItems, identifierTargetPlatform, versionTargetPlatform, targetPlatformVersionFromItem, projectName, enableMaxPlatformVersionEmptyWarning);
 
                     // Need to pass these along so we can unroll the platform via GetMatchingPlatformSDK when we get reference files
-                    ResolvedItem.SetMetadata(GetInstalledSDKLocations.DirectoryRootsMetadataName, sdks[SDKName].GetMetadata(GetInstalledSDKLocations.DirectoryRootsMetadataName));
-                    ResolvedItem.SetMetadata(GetInstalledSDKLocations.ExtensionDirectoryRootsMetadataName, sdks[SDKName].GetMetadata(GetInstalledSDKLocations.ExtensionDirectoryRootsMetadataName));
-                    ResolvedItem.SetMetadata(GetInstalledSDKLocations.RegistryRootMetadataName, sdks[SDKName].GetMetadata(GetInstalledSDKLocations.RegistryRootMetadataName));
+                    ResolvedItem.SetMetadata(GetInstalledSDKLocations.DirectoryRootsMetadataName, sdk.GetMetadata(GetInstalledSDKLocations.DirectoryRootsMetadataName));
+                    ResolvedItem.SetMetadata(GetInstalledSDKLocations.ExtensionDirectoryRootsMetadataName, sdk.GetMetadata(GetInstalledSDKLocations.ExtensionDirectoryRootsMetadataName));
+                    ResolvedItem.SetMetadata(GetInstalledSDKLocations.RegistryRootMetadataName, sdk.GetMetadata(GetInstalledSDKLocations.RegistryRootMetadataName));
 
                     if (!treatErrorsAsWarnings && ResolutionErrors.Count > 0)
                     {
@@ -1377,7 +1377,7 @@ namespace Microsoft.Build.Tasks
                                         continue;
                                 }
 
-                                bool containsKey = architectureLocations.ContainsKey(architectureComponent);
+                                bool containsKey = architectureLocations.TryGetValue(architectureComponent, out string architectureLocation);
 
                                 // If we have not seen this architecture before (and it has a compatible configuration with what we are targeting) then add it. 
                                 // Also, replace the entry if we have already added an entry for a non configuration specific entry and we now have a configuration specific entry that matches what we are targeting.
@@ -1387,7 +1387,7 @@ namespace Microsoft.Build.Tasks
 
                                     if (containsKey)
                                     {
-                                        AddStatusMessage("ResolveSDKReference.ReplaceAppxLocation", architectureComponent, architectureLocations[architectureComponent], appxLocation.Value);
+                                        AddStatusMessage("ResolveSDKReference.ReplaceAppxLocation", architectureComponent, architectureLocation, appxLocation.Value);
                                     }
 
                                     architectureLocations[architectureComponent] = appxLocation.Value;
@@ -1517,10 +1517,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private string FindFrameworkIdentity(string frameworkIdentityKey)
             {
-                string frameworkIdentityValue = null;
-                if (FrameworkIdentitiesFromManifest.ContainsKey(frameworkIdentityKey))
+                if (FrameworkIdentitiesFromManifest.TryGetValue(frameworkIdentityKey, out string frameworkIdentityValue))
                 {
-                    frameworkIdentityValue = FrameworkIdentitiesFromManifest[frameworkIdentityKey];
                     AddStatusMessage("ResolveSDKReference.FoundFrameworkIdentity", frameworkIdentityValue);
                 }
                 else

@@ -129,7 +129,12 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">"使用 SharingPolicy.Isolated 建立的 EvaluationContext 物件不支援以 MSBuildFileSystemBase 檔案系統傳遞。"</target>
+        <target state="translated">使用 SharingPolicy.Isolated 建立的 EvaluationContext 物件不支援以 MSBuildFileSystemBase 檔案系統傳遞。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KillingProcessWithPid">
+        <source>Killing process with pid = {0}.</source>
+        <target state="translated">正在終止 pid = {0} 的處理序。</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -184,9 +189,9 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
-      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="translated">使用 MatchOnMetadata 移除時，只能參考一個項目類型。</target>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
+        <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
+        <target state="translated">使用 MatchOnMetadata 移除時，只能參考項目類型。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
@@ -237,6 +242,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
+        <target state="translated">因為運算式評估為空字串，所以專案 "{0}" 未在 ({2},{3}) 由 "{1}" 匯入。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
@@ -263,7 +273,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
-        <target state="needs-review-translation">"在 {0} 秒內載入的靜態圖形: {1} 個節點、{2} 個邊緣"</target>
+        <target state="translated">在 {0} 秒內載入的靜態圖形: {1} 個節點、{2} 個邊緣</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -287,6 +297,21 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="TaskAcquiredCores">
+        <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCores">
+        <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
+        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCoresWarning">
+        <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
@@ -1671,7 +1696,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
-        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
+        <target state="translated">MSB4064: 從路徑 {3} 中組件 {2} 所載入的 "{1}" 工作不支援 "{0}" 參數。請確認該參數存在於該工作中、&lt;UsingTask&gt; 指向正確的組件，且為可設定的公用執行個體屬性。</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

@@ -302,10 +302,7 @@ namespace Microsoft.Build.Utilities
                 _submissionProjectsInProgress.Remove(e.BuildEventContext.SubmissionId);
                 lock (_submissionRecords)
                 {
-                    if (_submissionRecords.ContainsKey(e.BuildEventContext.SubmissionId))
-                    {
-                        _submissionRecords.Remove(e.BuildEventContext.SubmissionId);
-                    }
+                    _submissionRecords.Remove(e.BuildEventContext.SubmissionId);
                 }
             }
             else

@@ -242,11 +242,11 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+        <source>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </source>
         <target state="translated">Przełączniki:            Należy pamiętać, że przełączniki można określać
-                     zarówno za pomocą składni „-przełącznik”, jak i „/przełącznik”.
+                     za pomocą składni „-przełącznik”, „/przełącznik” i „--przełącznik”.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -969,7 +969,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
-        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid.</target>
+        <target state="translated">MSBUILD : error MSB1057: Wartość kompilacji grafu jest nieprawidłowa.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

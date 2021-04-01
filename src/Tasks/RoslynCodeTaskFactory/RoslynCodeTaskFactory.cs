@@ -113,7 +113,6 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ITaskFactory.FactoryName"/>
         public string FactoryName => "Roslyn Code Task Factory";
 
-        /// <inheritdoc />
         /// <summary>
         /// Gets the <see cref="T:System.Type" /> of the compiled task.
         /// </summary>
@@ -468,11 +467,11 @@ namespace Microsoft.Build.Tasks
                     bool foundValidCodeLanguage = false;
 
                     // Attempt to map the user specified value as an alias to our vernacular for code languages
-                    foreach (string validLanguage in ValidCodeLanguages.Keys)
+                    foreach (KeyValuePair<string, ISet<string>> validLanguage in ValidCodeLanguages)
                     {
-                        if (ValidCodeLanguages[validLanguage].Contains(languageAttribute.Value))
+                        if (validLanguage.Value.Contains(languageAttribute.Value))
                         {
-                            taskInfo.CodeLanguage = validLanguage;
+                            taskInfo.CodeLanguage = validLanguage.Key;
                             foundValidCodeLanguage = true;
                             break;
                         }

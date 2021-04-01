@@ -5,6 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -30,6 +32,17 @@ namespace Microsoft.Build.BackEnd
         internal static string ItemGroupRemoveLogMessage = ResourceUtilities.GetResourceString("ItemGroupRemoveLogMessage");
         internal static string OutputItemParameterMessagePrefix = ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix");
         internal static string TaskParameterPrefix = ResourceUtilities.GetResourceString("TaskParameterPrefix");
+
+        /// <summary>
+        /// <see cref="TaskParameterEventArgs"/> by itself doesn't have the implementation
+        /// to materialize the Message as that's a declaration assembly. We inject the logic
+        /// here.
+        /// </summary>
+        static ItemGroupLoggingHelper()
+        {
+            TaskParameterEventArgs.MessageGetter = GetTaskParameterText;
+            TaskParameterEventArgs.DictionaryFactory = ArrayDictionary<string, string>.Create;
+        }
 
         /// <summary>
         /// Gets a text serialized value of a parameter for logging.
@@ -202,6 +215,63 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.ThrowInternalErrorUnreachable();
             }
+        }
+
+        internal static void LogTaskParameter(
+            LoggingContext loggingContext,
+            TaskParameterMessageKind messageKind,
+            string itemType,
+            IList items,
+            bool logItemMetadata)
+        {
+            var args = CreateTaskParameterEventArgs(
+                loggingContext.BuildEventContext,
+                messageKind,
+                itemType,
+                items,
+                logItemMetadata,
+                DateTime.UtcNow);
+            loggingContext.LogBuildEvent(args);
+        }
+
+        internal static TaskParameterEventArgs CreateTaskParameterEventArgs(
+            BuildEventContext buildEventContext,
+            TaskParameterMessageKind messageKind,
+            string itemType,
+            IList items,
+            bool logItemMetadata,
+            DateTime timestamp)
+        {
+            var args = new TaskParameterEventArgs(
+                messageKind,
+                itemType,
+                items,
+                logItemMetadata,
+                timestamp);
+            args.BuildEventContext = buildEventContext;
+            return args;
+        }
+
+        internal static string GetTaskParameterText(TaskParameterEventArgs args)
+            => GetTaskParameterText(args.Kind, args.ItemType, args.Items, args.LogItemMetadata);
+
+        internal static string GetTaskParameterText(TaskParameterMessageKind messageKind, string itemType, IList items, bool logItemMetadata)
+        {
+            var resourceText = messageKind switch
+            {
+                TaskParameterMessageKind.AddItem => ItemGroupIncludeLogMessagePrefix,
+                TaskParameterMessageKind.RemoveItem => ItemGroupRemoveLogMessage,
+                TaskParameterMessageKind.TaskInput => TaskParameterPrefix,
+                TaskParameterMessageKind.TaskOutput => OutputItemParameterMessagePrefix,
+                _ => throw new NotImplementedException($"Unsupported {nameof(TaskParameterMessageKind)} value: {messageKind}")
+            };
+
+            var itemGroupText = GetParameterText(
+                resourceText,
+                itemType,
+                items,
+                logItemMetadata);
+            return itemGroupText;
         }
     }
 }

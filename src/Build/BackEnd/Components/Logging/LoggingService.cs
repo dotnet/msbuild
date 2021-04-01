@@ -285,6 +285,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 CreateLoggingEventQueue();
             }
 
+            // Ensure the static constructor of ItemGroupLoggingHelper runs.
+            // It is important to ensure the Message delegate on TaskParameterEventArgs is set.
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+
             _serviceState = LoggingServiceState.Instantiated;
         }
 
@@ -513,6 +517,50 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
+        }
+
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as errors for the specified build context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns>
+        /// </returns>
+        public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            int key = GetWarningsAsErrorOrMessageKey(context);
+
+            if (_warningsAsErrorsByProject != null && _warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrors))
+            {
+                if (WarningsAsErrors != null)
+                {
+                    warningsAsErrors.UnionWith(WarningsAsErrors);
+                }
+
+                return warningsAsErrors;
+            }
+            else
+            {
+                return WarningsAsErrors;
+            }
+        }
+
+        public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
+        {
+            int key = GetWarningsAsErrorOrMessageKey(context);
+
+            if (_warningsAsMessagesByProject != null && _warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
+            {
+                if (WarningsAsMessages != null)
+                {
+                    warningsAsMessages.UnionWith(WarningsAsMessages);
+                }
+
+                return warningsAsMessages;
+            }
+            else
+            {
+                return WarningsAsMessages;
+            }
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)

@@ -49,7 +49,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
-        private SystemState _cache = null;
+        internal SystemState _cache = null;
 
         /// <summary>
         /// Construct
@@ -1575,7 +1575,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (itemError is BadImageReferenceException)
                 {
-                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.Message);
+                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.InnerException?.ToString() ?? itemError.ToString());
                     helpKeyword = "MSBuild.ResolveAssemblyReference.FailedWithException";
                     dependencyProblem = false;
                 }
@@ -1584,8 +1584,7 @@ namespace Microsoft.Build.Tasks
                     Debug.Assert(false, "Unexpected exception type.");
                 }
 
-                string messageOnly;
-                string warningCode = Log.ExtractMessageCode(message, out messageOnly);
+                string warningCode = Log.ExtractMessageCode(message, out string messageOnly);
 
                 // Treat as warning if this is primary and the problem wasn't with a dependency, otherwise, make it a comment.
                 if (reference.IsPrimary && !dependencyProblem)
@@ -1890,11 +1889,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the state file (if present) into the cache.
         /// </summary>
-        private void ReadStateFile()
+        internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
 
-            // Construct the cache if necessary.
+            // Construct the cache only if we can't find any caches.
+            if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
+            {
+                _cache = SystemState.DeserializePrecomputedCachesByTranslator(AssemblyInformationCachePaths, Log, fileExists);
+            }
+
             if (_cache == null)
             {
                 _cache = new SystemState();
@@ -1904,11 +1908,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Write out the state file if a state name was supplied and the cache is dirty.
         /// </summary>
-        private void WriteStateFile()
+        internal void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            if (!String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializeCache(_stateFile, Log);
+                _cache.SerializePrecomputedCacheByTranslator(AssemblyInformationCacheOutputPath, Log);
+            }
+            else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            {
+                _cache.SerializeCacheByTranslator(_stateFile, Log);
             }
         }
         #endregion
@@ -2138,7 +2146,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
-                    ReadStateFile();
+                    ReadStateFile(fileExists);
                     _cache.SetGetLastWriteTime(getLastWriteTime);
                     _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 

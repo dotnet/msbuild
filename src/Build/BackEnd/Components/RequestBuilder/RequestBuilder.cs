@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -19,7 +18,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Experimental.ProjectCache;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
@@ -49,6 +47,11 @@ namespace Microsoft.Build.BackEnd
         /// The results used when a build request entry continues.
         /// </summary>
         private IDictionary<int, BuildResult> _continueResults;
+
+        /// <summary>
+        /// Queue of actions to call when a resource request is responded to.
+        /// </summary>
+        private ConcurrentQueue<Action<ResourceResponse>> _pendingResourceRequests;
 
         /// <summary>
         /// The task representing the currently-executing build request.
@@ -107,6 +110,7 @@ namespace Microsoft.Build.BackEnd
         {
             _terminateEvent = new ManualResetEvent(false);
             _continueEvent = new AutoResetEvent(false);
+            _pendingResourceRequests = new ConcurrentQueue<Action<ResourceResponse>>();
         }
 
         /// <summary>
@@ -123,6 +127,11 @@ namespace Microsoft.Build.BackEnd
         /// The event raised when the build request has completed.
         /// </summary>
         public event BuildRequestBlockedDelegate OnBuildRequestBlocked;
+
+        /// <summary>
+        /// The event raised when resources are requested.
+        /// </summary>
+        public event ResourceRequestDelegate OnResourceRequest;
 
         /// <summary>
         /// The current block type
@@ -218,6 +227,19 @@ namespace Microsoft.Build.BackEnd
 
             // Setting the continue event will wake up the build thread, which is suspended in StartNewBuildRequests.
             _continueEvent.Set();
+        }
+
+        /// <summary>
+        /// Continues a build request after receiving a resource response.
+        /// </summary>
+        public void ContinueRequestWithResources(ResourceResponse response)
+        {
+            ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
+            ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
+            ErrorUtilities.VerifyThrow(!_pendingResourceRequests.IsEmpty, "No pending resource requests");
+            VerifyEntryInActiveOrWaitingState();
+
+            _pendingResourceRequests.Dequeue()(response);
         }
 
         /// <summary>
@@ -460,6 +482,61 @@ namespace Microsoft.Build.BackEnd
             _inMSBuildCallback = false;
         }
 
+        /// <summary>
+        /// Requests CPU resources from the scheduler.
+        /// </summary>
+        public int RequestCores(object monitorLockObject, int requestedCores, bool waitForCores)
+        {
+            ErrorUtilities.VerifyThrow(Monitor.IsEntered(monitorLockObject), "Not running under the given lock");
+            VerifyIsNotZombie();
+
+            // The task may be calling RequestCores from multiple threads and the call may be blocking, so in general, we have to maintain
+            // a queue of pending requests.
+            ResourceResponse responseObject = null;
+            using AutoResetEvent responseEvent = new AutoResetEvent(false);
+            _pendingResourceRequests.Enqueue((ResourceResponse response) =>
+            {
+                responseObject = response;
+                responseEvent.Set();
+            });
+
+            RaiseResourceRequest(ResourceRequest.CreateAcquireRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
+
+            // Wait for one of two events to be signaled: 1) The build was canceled, 2) The response to our request was received.
+            WaitHandle[] waitHandles = new WaitHandle[] { _terminateEvent, responseEvent };
+            int waitResult;
+
+            // Drop the lock so that the same task can call ReleaseCores from other threads to unblock itself.
+            Monitor.Exit(monitorLockObject);
+            try
+            {
+                waitResult = WaitHandle.WaitAny(waitHandles);
+            }
+            finally
+            {
+                // Now re-take the lock before continuing.
+                Monitor.Enter(monitorLockObject);
+            }
+
+            if (waitResult == 0)
+            {
+                // We've been aborted.
+                throw new BuildAbortedException();
+            }
+
+            VerifyEntryInActiveOrWaitingState();
+            return responseObject.NumCores;
+        }
+
+        /// <summary>
+        /// Returns CPU resources to the scheduler.
+        /// </summary>
+        public void ReleaseCores(int coresToRelease)
+        {
+            VerifyIsNotZombie();
+            RaiseResourceRequest(ResourceRequest.CreateReleaseRequest(_requestEntry.Request.GlobalRequestId, coresToRelease));
+        }
+
         #endregion
 
         #region IBuildComponent Members
@@ -674,6 +751,15 @@ namespace Microsoft.Build.BackEnd
         private void VerifyEntryInActiveState()
         {
             ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active, "Entry is not in the Active state, it is in the {0} state.", _requestEntry.State);
+        }
+
+        /// <summary>
+        /// Asserts that the entry is in the active or waiting state.
+        /// </summary>
+        private void VerifyEntryInActiveOrWaitingState()
+        {
+            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active || _requestEntry.State == BuildRequestEntryState.Waiting,
+                "Entry is not in the Active or Waiting state, it is in the {0} state.", _requestEntry.State);
         }
 
         /// <summary>
@@ -984,6 +1070,15 @@ namespace Microsoft.Build.BackEnd
         private void RaiseOnBlockedRequest(int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
         {
             OnBuildRequestBlocked?.Invoke(_requestEntry, blockingGlobalRequestId, blockingTarget, partialBuildResult);
+        }
+
+        /// <summary>
+        /// Invokes the OnResourceRequest event
+        /// </summary>
+        /// <param name="request"></param>
+        private void RaiseResourceRequest(ResourceRequest request)
+        {
+            OnResourceRequest?.Invoke(request);
         }
 
         /// <summary>

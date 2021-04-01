@@ -72,10 +72,10 @@
   <!-- GenAPI settings -->
   <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
     <!-- Disable reference assembly source when building for Mono, as some APIs are excluded when compiling for Mono -->
-    <GenerateReferenceAssemblySources>false</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>false</GenerateReferenceAssemblySource>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('net4'))">net</GenAPIShortFrameworkIdentifier>
@@ -85,7 +85,7 @@
     <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
+  <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
     <PackageReference Include="Microsoft.DotNet.GenAPI" PrivateAssets="All" />
   </ItemGroup>
 

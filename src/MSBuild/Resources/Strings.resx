@@ -135,8 +135,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </comment>
   </data>
   <data name="HelpMessage_3_SwitchesHeader" UESanitized="true" Visibility="Public">
-    <value>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+    <value>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:

@@ -327,6 +327,59 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Creates a ProjectInstance from an external created <see cref="Project"/>.
+        /// Properties and items are cloned immediately and only the instance data is stored.
+        /// </summary>
+        public ProjectInstance(Project project, ProjectInstanceSettings settings)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+
+            var projectPath = project.FullPath;
+            _directory = Path.GetDirectoryName(projectPath);
+            _projectFileLocation = ElementLocation.Create(projectPath);
+            _hostServices = project.ProjectCollection.HostServices;
+
+            EvaluationId = project.EvaluationCounter;
+
+            var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
+            this.CreatePropertiesSnapshot(project.Properties, immutable);
+            this.CreateItemDefinitionsSnapshot(project.ItemDefinitions);
+
+            var keepEvaluationCache = (settings & ProjectInstanceSettings.ImmutableWithFastItemLookup) == ProjectInstanceSettings.ImmutableWithFastItemLookup;
+            var projectItemToInstanceMap = this.CreateItemsSnapshot(project.Items, project.ItemTypes.Count, keepEvaluationCache);
+
+            this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, project.Items, projectItemToInstanceMap);
+
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
+            foreach (var property in project.GlobalProperties)
+            {
+                _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
+            }
+
+            this.CreateEnvironmentVariablePropertiesSnapshot(project.ProjectCollection.EnvironmentProperties);
+            this.CreateTargetsSnapshot(project.Targets, null, null, null, null);
+            this.CreateImportsSnapshot(project.Imports, project.ImportsIncludingDuplicates);
+
+            this.Toolset = project.ProjectCollection.GetToolset(project.ToolsVersion);
+            this.SubToolsetVersion = project.SubToolsetVersion;
+            this.TaskRegistry = new TaskRegistry(Toolset, project.ProjectCollection.ProjectRootElementCache);
+
+            this.ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
+
+            this.EvaluatedItemElements = new List<ProjectItemElement>(project.Items.Count);
+            foreach (var item in project.Items)
+            {
+                this.EvaluatedItemElements.Add(item.Xml);
+            }
+
+            _usingDifferentToolsVersionFromProjectFile = false;
+            _originalProjectToolsVersion = project.ToolsVersion;
+            _explicitToolsVersionSpecified = project.SubToolsetVersion != null;
+
+            _isImmutable = immutable;
+        }
+
+        /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.
         /// This is ideal if the project is simply going to be built, and not displayed or edited.
@@ -461,18 +514,18 @@ namespace Microsoft.Build.Execution
             EvaluationId = data.EvaluationId;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
-            this.CreatePropertiesSnapshot(data, immutable);
+            this.CreatePropertiesSnapshot(new ReadOnlyCollection<ProjectProperty>(data.Properties), immutable);
 
-            this.CreateItemDefinitionsSnapshot(data);
+            this.CreateItemDefinitionsSnapshot(data.ItemDefinitions);
 
             var keepEvaluationCache = (settings & ProjectInstanceSettings.ImmutableWithFastItemLookup) == ProjectInstanceSettings.ImmutableWithFastItemLookup;
-            var projectItemToInstanceMap = this.CreateItemsSnapshot(data, keepEvaluationCache);
+            var projectItemToInstanceMap = this.CreateItemsSnapshot(new ReadOnlyCollection<ProjectItem>(data.Items), data.ItemTypes.Count, keepEvaluationCache);
 
-            this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, data, projectItemToInstanceMap);
-            this.CreateGlobalPropertiesSnapshot(data);
+            this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, new ReadOnlyCollection<ProjectItem>(data.Items), projectItemToInstanceMap);
+            this.CreateGlobalPropertiesSnapshot(data.GlobalPropertiesDictionary);
             this.CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
-            this.CreateTargetsSnapshot(data);
-            this.CreateImportsSnapshot(data);
+            this.CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
+            this.CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
 
             this.Toolset = data.Toolset; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
             this.SubToolsetVersion = data.SubToolsetVersion;
@@ -548,13 +601,13 @@ namespace Microsoft.Build.Execution
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>) this).BeforeTargets = CreateCloneDictionary(
+                    ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>) that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
+                        ProjectItemDefinitionInstance>)that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>) this).AfterTargets = CreateCloneDictionary(
+                    ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>) that).AfterTargets, StringComparer.OrdinalIgnoreCase);
+                        ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
                 this.TaskRegistry =
                     that.TaskRegistry; // UNDONE: This isn't immutable, should be cloned or made immutable; it currently has a pointer to project collection
 
@@ -2023,7 +2076,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            var globalPropertiesToTreatAsLocal = (HashSet<string>) _globalPropertiesToTreatAsLocal;
+            var globalPropertiesToTreatAsLocal = (HashSet<string>)_globalPropertiesToTreatAsLocal;
             translator.Translate(ref globalPropertiesToTreatAsLocal);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
@@ -2378,7 +2431,7 @@ namespace Microsoft.Build.Execution
                 parentProjectSupportsReturnsAttribute
                 );
 
-            _actualTargets[target.Name] = target;
+            _actualTargets[targetName] = target;
 
             return target;
         }
@@ -2583,7 +2636,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                return new RetrievableEntryHashSet<TValue>(dictionary, StringComparer.OrdinalIgnoreCase, readOnly: true);
+                return new ObjectModel.ReadOnlyDictionary<string, TValue>(dictionary);
             }
         }
 
@@ -2727,24 +2780,29 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Create various target snapshots
         /// </summary>
-        private void CreateTargetsSnapshot(Evaluation.Project.Data data)
+        private void CreateTargetsSnapshot(
+            IDictionary<string, ProjectTargetInstance> targets,
+            List<string> defaultTargets,
+            List<string> initialTargets,
+            IDictionary<string, List<TargetSpecification>> beforeTargets,
+            IDictionary<string, List<TargetSpecification>> afterTargets)
         {
-            this.DefaultTargets = new List<string>(data.DefaultTargets);
-            this.InitialTargets = new List<string>(data.InitialTargets);
-            ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(data.BeforeTargets, StringComparer.OrdinalIgnoreCase);
-            ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(data.AfterTargets, StringComparer.OrdinalIgnoreCase);
-
             // ProjectTargetInstances are immutable so only the dictionary must be cloned
-            _targets = CreateCloneDictionary(data.Targets);
+            _targets = CreateCloneDictionary(targets);
+
+            this.DefaultTargets = defaultTargets == null ? new List<string>(0) : new List<string>(defaultTargets);
+            this.InitialTargets = defaultTargets == null ? new List<string>(0) : new List<string>(initialTargets);
+            ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(beforeTargets, StringComparer.OrdinalIgnoreCase);
+            ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(afterTargets, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
         /// Create various imports snapshots
         /// </summary>
-        private void CreateImportsSnapshot(Evaluation.Project.Data data)
+        private void CreateImportsSnapshot(IList<ResolvedImport> importClosure, IList<ResolvedImport> importClosureWithDuplicates)
         {
-            _importPaths = new List<string>(data.ImportClosure.Count - 1 /* outer project */);
-            foreach (var resolvedImport in data.ImportClosure)
+            _importPaths = new List<string>(importClosure.Count - 1 /* outer project */);
+            foreach (var resolvedImport in importClosure)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
@@ -2755,8 +2813,8 @@ namespace Microsoft.Build.Execution
 
             ImportPaths = _importPaths.AsReadOnly();
 
-            _importPathsIncludingDuplicates = new List<string>(data.ImportClosureWithDuplicates.Count - 1 /* outer project */);
-            foreach (var resolvedImport in data.ImportClosureWithDuplicates)
+            _importPathsIncludingDuplicates = new List<string>(importClosureWithDuplicates.Count - 1 /* outer project */);
+            foreach (var resolvedImport in importClosureWithDuplicates)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
@@ -2784,11 +2842,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Create global properties snapshot
         /// </summary>
-        private void CreateGlobalPropertiesSnapshot(Evaluation.Project.Data data)
+        private void CreateGlobalPropertiesSnapshot(PropertyDictionary<ProjectPropertyInstance> globalPropertiesDictionary)
         {
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(data.GlobalPropertiesDictionary.Count);
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(globalPropertiesDictionary.Count);
 
-            foreach (ProjectPropertyInstance globalProperty in data.GlobalPropertiesDictionary)
+            foreach (ProjectPropertyInstance globalProperty in globalPropertiesDictionary)
             {
                 _globalProperties.Set(globalProperty.DeepClone());
             }
@@ -2797,7 +2855,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Create evaluated include cache snapshot
         /// </summary>
-        private void CreateEvaluatedIncludeSnapshotIfRequested(bool keepEvaluationCache, Evaluation.Project.Data data, Dictionary<ProjectItem, ProjectItemInstance> projectItemToInstanceMap)
+        private void CreateEvaluatedIncludeSnapshotIfRequested(bool keepEvaluationCache, ICollection<ProjectItem> items, Dictionary<ProjectItem, ProjectItemInstance> projectItemToInstanceMap)
         {
             if (!keepEvaluationCache)
             {
@@ -2805,26 +2863,22 @@ namespace Microsoft.Build.Execution
             }
 
             _itemsByEvaluatedInclude = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
-            foreach (var key in data.ItemsByEvaluatedIncludeCache.Keys)
+            foreach (var item in items)
             {
-                var projectItems = data.ItemsByEvaluatedIncludeCache[key];
-                foreach (var projectItem in projectItems)
-                {
-                    _itemsByEvaluatedInclude.Add(key, projectItemToInstanceMap[projectItem]);
-                }
+                _itemsByEvaluatedInclude.Add(item.EvaluatedInclude, projectItemToInstanceMap[item]);
             }
         }
 
         /// <summary>
         /// Create Items snapshot
         /// </summary>
-        private Dictionary<ProjectItem, ProjectItemInstance> CreateItemsSnapshot(Evaluation.Project.Data data, bool keepEvaluationCache)
+        private Dictionary<ProjectItem, ProjectItemInstance> CreateItemsSnapshot(ICollection<ProjectItem> items, int itemTypeCount, bool keepEvaluationCache)
         {
-            _items = new ItemDictionary<ProjectItemInstance>(data.ItemTypes.Count);
+            _items = new ItemDictionary<ProjectItemInstance>(itemTypeCount);
 
-            var projectItemToInstanceMap = keepEvaluationCache ? new Dictionary<ProjectItem, ProjectItemInstance>(data.Items.Count) : null;
+            var projectItemToInstanceMap = keepEvaluationCache ? new Dictionary<ProjectItem, ProjectItemInstance>(items.Count) : null;
 
-            foreach (ProjectItem item in data.Items)
+            foreach (ProjectItem item in items)
             {
                 List<ProjectItemDefinitionInstance> inheritedItemDefinitions = null;
 
@@ -2852,7 +2906,13 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, ((IItem)item).EvaluatedIncludeEscaped, item.EvaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
+                // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
+                var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
+                evaluatedIncludeEscaped ??= item.EvaluatedInclude;
+                var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
+                evaluatedIncludeBeforeWildcardExpansionEscaped ??= item.EvaluatedInclude;
+
+                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
 
                 _items.Add(instance);
 
@@ -2865,11 +2925,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Create ItemDefinitions snapshot
         /// </summary>
-        private void CreateItemDefinitionsSnapshot(Evaluation.Project.Data data)
+        private void CreateItemDefinitionsSnapshot(IDictionary<string, ProjectItemDefinition> itemDefinitions)
         {
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
 
-            foreach (ProjectItemDefinition definition in data.ItemDefinitions.Values)
+            foreach (ProjectItemDefinition definition in itemDefinitions.Values)
             {
                 _itemDefinitions.Add(new ProjectItemDefinitionInstance(definition));
             }
@@ -2878,11 +2938,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// create property snapshot
         /// </summary>
-        private void CreatePropertiesSnapshot(Evaluation.Project.Data data, bool isImmutable)
+        private void CreatePropertiesSnapshot(ICollection<ProjectProperty> properties, bool isImmutable)
         {
-            _properties = new PropertyDictionary<ProjectPropertyInstance>(data.Properties.Count);
+            _properties = new PropertyDictionary<ProjectPropertyInstance>(properties.Count);
 
-            foreach (ProjectProperty property in data.Properties)
+            foreach (ProjectProperty property in properties)
             {
                 // Allow reserved property names, since this is how they are added to the project instance. 
                 // The caller has prevented users setting them themselves.

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -28,7 +28,13 @@ namespace Microsoft.Build.Execution
     /// and evaluation has already been performed, so it is unnecessary bulk.
     /// </remarks>
     [DebuggerDisplay("{ItemType}={EvaluatedInclude} #DirectMetadata={DirectMetadataCount})")]
-    public class ProjectItemInstance : IItem<ProjectMetadataInstance>, ITaskItem2, IMetadataTable, ITranslatable, IDeepCloneable<ProjectItemInstance>
+    public class ProjectItemInstance :
+        IItem<ProjectMetadataInstance>,
+        ITaskItem2,
+        IMetadataTable,
+        ITranslatable,
+        IDeepCloneable<ProjectItemInstance>,
+        IMetadataContainer
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -515,6 +521,8 @@ namespace Microsoft.Build.Execution
             return ((ITaskItem2)_taskItem).CloneCustomMetadataEscaped();
         }
 
+        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => _taskItem.EnumerateMetadata();
+
         #region IMetadataTable Members
 
         /// <summary>
@@ -723,7 +731,11 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
-            ITaskItem2, IItem<ProjectMetadataInstance>, ITranslatable, IEquatable<TaskItem>
+            ITaskItem2,
+            IItem<ProjectMetadataInstance>,
+            ITranslatable,
+            IEquatable<TaskItem>,
+            IMetadataContainer
         {
             /// <summary>
             /// The source file that defined this item.
@@ -1043,6 +1055,36 @@ namespace Microsoft.Build.Execution
             internal int DirectMetadataCount
             {
                 get { return (_directMetadata == null) ? 0 : _directMetadata.Count; }
+            }
+
+            /// <summary>
+            /// Efficient way to retrieve metadata used by packet serialization
+            /// and binary logger.
+            /// </summary>
+            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
+            {
+                // If we have item definitions, call the expensive property that does the right thing.
+                // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
+                var list = _itemDefinitions != null ? MetadataCollection : _directMetadata;
+                if (list != null)
+                {
+                    return EnumerateMetadata(list);
+                }
+                else
+                {
+                    return Array.Empty<KeyValuePair<string, string>>();
+                }
+            }
+
+            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(CopyOnWritePropertyDictionary<ProjectMetadataInstance> list)
+            {
+                foreach (var projectMetadataInstance in list)
+                {
+                    if (projectMetadataInstance != null)
+                    {
+                        yield return new KeyValuePair<string, string>(projectMetadataInstance.Name, projectMetadataInstance.EvaluatedValue);
+                    }
+                }
             }
 
             /// <summary>

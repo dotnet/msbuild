@@ -4,17 +4,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-#if FEATURE_SYSTEM_CONFIGURATION
-using System.Configuration;
-#endif
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
 
-#if FEATURE_SYSTEM_CONFIGURATION
-using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElement;
-#endif
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
@@ -1074,14 +1068,14 @@ namespace Microsoft.Build.Shared
 
         private static VisualStudioSpec GetVisualStudioSpec(Version version)
         {
-            ErrorUtilities.VerifyThrowArgument(s_visualStudioSpecDict.ContainsKey(version), "FrameworkLocationHelper.UnsupportedVisualStudioVersion", version);
-            return s_visualStudioSpecDict[version];
+            ErrorUtilities.VerifyThrowArgument(s_visualStudioSpecDict.TryGetValue(version, out VisualStudioSpec spec), "FrameworkLocationHelper.UnsupportedVisualStudioVersion", version);
+            return spec;
         }
 
         private static DotNetFrameworkSpec GetDotNetFrameworkSpec(Version version)
         {
-            ErrorUtilities.VerifyThrowArgument(s_dotNetFrameworkSpecDict.ContainsKey(version), "FrameworkLocationHelper.UnsupportedFrameworkVersion", version);
-            return s_dotNetFrameworkSpecDict[version];
+            ErrorUtilities.VerifyThrowArgument(s_dotNetFrameworkSpecDict.TryGetValue(version, out DotNetFrameworkSpec spec), "FrameworkLocationHelper.UnsupportedFrameworkVersion", version);
+            return spec;
         }
 
         /// <summary>

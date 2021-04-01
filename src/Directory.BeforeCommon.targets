@@ -129,7 +129,7 @@
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' != 'true'">
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' != 'true'">
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <DocumentationFile/>
   </PropertyGroup>

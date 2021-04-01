@@ -129,7 +129,12 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">"Объекты EvaluationContext, созданные с помощью SharingPolicy.Isolated, не поддерживают передачу в файловую систему MSBuildFileSystemBase."</target>
+        <target state="translated">Объекты EvaluationContext, созданные с помощью SharingPolicy.Isolated, не поддерживают передачу в файловую систему MSBuildFileSystemBase.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KillingProcessWithPid">
+        <source>Killing process with pid = {0}.</source>
+        <target state="translated">Завершение процесса с идентификатором {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -184,9 +189,9 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
-      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="translated">При удалении с помощью MatchOnMetadata можно ссылаться только на один тип элемента.</target>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
+        <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
+        <target state="translated">При удалении с помощью MatchOnMetadata можно ссылаться только на типы элементов.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
@@ -237,6 +242,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
+        <target state="translated">Проект "{0}" не был импортирован "{1}" в ({2},{3}), так как результатом вычисления выражения была пустая строка.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Начальное значение свойства: $({0})="{1}" Источник: {2}</target>
@@ -263,7 +273,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
-        <target state="needs-review-translation">"Статический граф загружен за {0} с: узлов — {1}, ребер — {2}."</target>
+        <target state="translated">Статический граф загружен за {0} с: узлов — {1}, ребер — {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -287,6 +297,21 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="TaskAcquiredCores">
+        <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCores">
+        <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
+        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCoresWarning">
+        <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
@@ -1671,7 +1696,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
-        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
+        <target state="translated">MSB4064: параметр "{0}" не поддерживается задачей "{1}", загруженной из сборки {2} (путь: {3}). Убедитесь, что параметр существует в задаче, что &lt;UsingTask&gt; указывает на правильную сборку и что этот параметр является устанавливаемым свойством открытого экземпляра.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

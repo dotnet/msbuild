@@ -416,10 +416,7 @@ namespace Microsoft.Build.Tasks.Xaml
             }
 
             // generate the list of parameters in order
-            if (!switchRelationsList.ContainsKey(switchRelationsToAdd.SwitchValue))
-            {
-                switchRelationsList.Remove(switchRelationsToAdd.SwitchValue);
-            }
+            switchRelationsList.Remove(switchRelationsToAdd.SwitchValue);
 
             // build the dependencies and the values for a parameter
             XmlNode child = node.FirstChild;
@@ -463,14 +460,14 @@ namespace Microsoft.Build.Tasks.Xaml
                         }
                         else
                         {
-                            if (!switchRelationsToAdd.ExternalRequires.ContainsKey(tool))
+                            if (!switchRelationsToAdd.ExternalRequires.TryGetValue(tool, out List<string> switches))
                             {
-                                var switches = new List<string> { Switch };
+                                switches = new List<string> { Switch };
                                 switchRelationsToAdd.ExternalRequires.Add(tool, switches);
                             }
                             else
                             {
-                                switchRelationsToAdd.ExternalRequires[tool].Add(Switch);
+                                switches.Add(Switch);
                             }
                         }
                     }

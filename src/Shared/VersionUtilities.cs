@@ -39,9 +39,8 @@ namespace Microsoft.Build.Shared
 
                     if (candidateVersion != null && (targetPlatformVersion == null || (candidateVersion <= targetPlatformVersion)))
                     {
-                        if (versionValues.ContainsKey(candidateVersion))
+                        if (versionValues.TryGetValue(candidateVersion, out List<string> versionList))
                         {
-                            List<string> versionList = versionValues[candidateVersion];
                             if (!versionList.Contains(version))
                             {
                                 versionList.Add(version);

@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -71,6 +72,16 @@ namespace Microsoft.Build.BackEnd
         private int _nodeLimitOffset;
 
         /// <summary>
+        /// The result of calling NativeMethodsShared.GetLogicalCoreCount() unless overriden with MSBUILDCORELIMIT.
+        /// </summary>
+        private int _coreLimit;
+
+        /// <summary>
+        /// The weight of busy nodes in GetAvailableCoresForExplicitRequests().
+        /// </summary>
+        private int _nodeCoreAllocationWeight;
+
+        /// <summary>
         /// { nodeId -> NodeInfo }
         /// A list of nodes we know about.  For the non-distributed case, there will be no more nodes than the
         /// maximum specified on the command-line.
@@ -93,6 +104,11 @@ namespace Microsoft.Build.BackEnd
         /// The collection of all requests currently known to the system.
         /// </summary>
         private SchedulingData _schedulingData;
+
+        /// <summary>
+        /// A queue of RequestCores requests waiting for at least one core to become available.
+        /// </summary>
+        private Queue<TaskCompletionSource<int>> _pendingRequestCoresCallbacks;
 
         #endregion
 
@@ -179,6 +195,23 @@ namespace Microsoft.Build.BackEnd
                         _nodeLimitOffset = 0;
                     }
                 }
+            }
+
+            // Resource management tuning knobs:
+            // 1) MSBUILDCORELIMIT is the maximum number of cores we hand out via IBuildEngine9.RequestCores.
+            //    Note that it is independent of build parallelism as given by /m on the command line.
+            if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDCORELIMIT"), out _coreLimit) || _coreLimit <= 0)
+            {
+                _coreLimit = NativeMethodsShared.GetLogicalCoreCount();
+            }
+            // 1) MSBUILDNODECOREALLOCATIONWEIGHT is the weight with which executing nodes reduce the number of available cores.
+            //    Example: If the weight is 50, _coreLimit is 8, and there are 4 nodes that are busy executing build requests,
+            //    then the number of cores available via IBuildEngine9.RequestCores is 8 - (0.5 * 4) = 6.
+            if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDNODECOREALLOCATIONWEIGHT"), out _nodeCoreAllocationWeight)
+                || _nodeCoreAllocationWeight <= 0
+                || _nodeCoreAllocationWeight > 100)
+            {
+                _nodeCoreAllocationWeight = 0;
             }
 
             if (String.IsNullOrEmpty(_debugDumpPath))
@@ -487,6 +520,7 @@ namespace Microsoft.Build.BackEnd
             _schedulingPlan = null;
             _schedulingData = new SchedulingData();
             _availableNodes = new Dictionary<int, NodeInfo>(8);
+            _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
             _currentInProcNodeCount = 0;
             _currentOutOfProcNodeCount = 0;
 
@@ -514,6 +548,53 @@ namespace Microsoft.Build.BackEnd
             }
 
             WriteNodeUtilizationGraph(loggingService, context, false /* useConfigurations */);
+        }
+
+        /// <summary>
+        /// Requests CPU resources.
+        /// </summary>
+        public Task<int> RequestCores(int requestId, int requestedCores, bool waitForCores)
+        {
+            if (requestedCores == 0)
+            {
+                return Task.FromResult(0);
+            }
+
+            Func<int, int> grantCores = (int availableCores) =>
+            {
+                int grantedCores = Math.Min(requestedCores, availableCores);
+                if (grantedCores > 0)
+                {
+                    _schedulingData.GrantCoresToRequest(requestId, grantedCores);
+                }
+                return grantedCores;
+            };
+
+            int grantedCores = grantCores(GetAvailableCoresForExplicitRequests());
+            if (grantedCores > 0 || !waitForCores)
+            {
+                return Task.FromResult(grantedCores);
+            }
+            else
+            {
+                // We have no cores to grant at the moment, queue up the request.
+                TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
+                _pendingRequestCoresCallbacks.Enqueue(completionSource);
+                return completionSource.Task.ContinueWith((Task<int> task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
+            }
+        }
+
+        /// <summary>
+        /// Returns CPU resources.
+        /// </summary>
+        public List<ScheduleResponse> ReleaseCores(int requestId, int coresToRelease)
+        {
+            _schedulingData.RemoveCoresFromRequest(requestId, coresToRelease);
+
+            // Releasing cores means that we may be able to schedule more work.
+            List<ScheduleResponse> responses = new List<ScheduleResponse>();
+            ScheduleUnassignedRequests(responses);
+            return responses;
         }
 
         #endregion
@@ -588,7 +669,8 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // Nodes still have work, but we have no requests.  Let them proceed.
+                    // Nodes still have work, but we have no requests.  Let them proceed and only handle resource requests.
+                    HandlePendingResourceRequests();
                     TraceScheduler("{0}: Waiting for existing work to proceed.", schedulingTime);
                 }
 
@@ -1270,6 +1352,21 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Returns the maximum number of cores that can be returned from a RequestCores() call at the moment.
+        /// </summary>
+        private int GetAvailableCoresForExplicitRequests()
+        {
+            // At least one core is always implicitly granted to the node making the request.
+            // If _nodeCoreAllocationWeight is more than zero, it can increase this value by the specified fraction of executing nodes.
+            int implicitlyGrantedCores = Math.Max(1, (_schedulingData.ExecutingRequestsCount * _nodeCoreAllocationWeight) / 100);
+
+            // The number of explicitly granted cores is a sum of everything we've granted via RequestCores() so far across all nodes.
+            int explicitlyGrantedCores = _schedulingData.ExplicitlyGrantedCores;
+
+            return Math.Max(0, _coreLimit - (implicitlyGrantedCores + explicitlyGrantedCores));
+        }
+
+        /// <summary>
         /// Returns true if we are at the limit of work we can schedule.
         /// </summary>
         private bool AtSchedulingLimit()
@@ -1279,6 +1376,15 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
+            // We're at our limit of schedulable requests if: 
+            // (1) MaxNodeCount requests are currently executing
+            if (_schedulingData.ExecutingRequestsCount >= _componentHost.BuildParameters.MaxNodeCount)
+            {
+                return true;
+            }
+
+            // (2) Fewer than MaxNodeCount requests are currently executing but the sum of executing request,
+            //     yielding requests, and explicitly granted cores exceeds the limit set out below.
             int limit = _componentHost.BuildParameters.MaxNodeCount switch
             {
                 1 => 1,
@@ -1286,12 +1392,9 @@ namespace Microsoft.Build.BackEnd
                 _ => _componentHost.BuildParameters.MaxNodeCount + 2 + _nodeLimitOffset,
             };
 
-            // We're at our limit of schedulable requests if: 
-            // (1) MaxNodeCount requests are currently executing
-            // (2) Fewer than MaxNodeCount requests are currently executing but the sum of executing 
-            //     and yielding requests exceeds the limit set out above.  
-            return _schedulingData.ExecutingRequestsCount + _schedulingData.YieldingRequestsCount >= limit ||
-                   _schedulingData.ExecutingRequestsCount >= _componentHost.BuildParameters.MaxNodeCount;
+            return _schedulingData.ExecutingRequestsCount +
+                   _schedulingData.YieldingRequestsCount +
+                   _schedulingData.ExplicitlyGrantedCores >= limit;
         }
 
         /// <summary>
@@ -1717,12 +1820,34 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Satisfies pending resource requests. Requests are pulled from the queue in FIFO fashion and granted as many cores
+        /// as possible, optimizing for maximum number of cores granted to a single request, not for maximum number of satisfied
+        /// requests.
+        /// </summary>
+        private void HandlePendingResourceRequests()
+        {
+            while (_pendingRequestCoresCallbacks.Count > 0)
+            {
+                int availableCores = GetAvailableCoresForExplicitRequests();
+                if (availableCores == 0)
+                {
+                    return;
+                }
+                TaskCompletionSource<int> completionSource = _pendingRequestCoresCallbacks.Dequeue();
+                completionSource.SetResult(availableCores);
+            }
+        }
+
+        /// <summary>
         /// Determines which work is available which must be assigned to the nodes.  This includes:
         /// 1. Ready requests - those requests which can immediately resume executing.
         /// 2. Requests which can continue because results are now available but we haven't distributed them.
         /// </summary>
         private void ResumeRequiredWork(List<ScheduleResponse> responses)
         {
+            // If we have pending RequestCore calls, satisfy those first.
+            HandlePendingResourceRequests();
+
             // Resume any ready requests on the existing nodes.
             foreach (int nodeId in _availableNodes.Keys)
             {

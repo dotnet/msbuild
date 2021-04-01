@@ -52,10 +52,8 @@ namespace Microsoft.Build.Tasks
             if (assemblyName != null)
             {
                 // We have found a resolved SDK item that matches the one on the reference items.
-                if (_resolvedSDKs.ContainsKey(sdkName))
+                if (_resolvedSDKs.TryGetValue(sdkName, out ITaskItem resolvedSDK))
                 {
-                    ITaskItem resolvedSDK = _resolvedSDKs[sdkName];
-
                     string sdkDirectory = resolvedSDK.ItemSpec;
                     string configuration = resolvedSDK.GetMetadata("TargetedSDKConfiguration");
                     string architecture = resolvedSDK.GetMetadata("TargetedSDKArchitecture");

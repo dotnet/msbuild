@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <NoWarn>$(NoWarn);618</NoWarn>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <EnableDefaultItems>false</EnableDefaultItems>
     <CreateTlb>true</CreateTlb>
     <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>

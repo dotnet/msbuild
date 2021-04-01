@@ -206,10 +206,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public object GetPropertyValue(TaskPropertyInfo property)
         {
-            if (_setParameters.ContainsKey(property.Name))
+            if (_setParameters.TryGetValue(property.Name, out object value))
             {
-                object value = _setParameters[property.Name];
-
                 // If we returned an exception, then we want to throw it when we 
                 // do the get.  
                 if (value is Exception)
@@ -217,7 +215,7 @@ namespace Microsoft.Build.BackEnd
                     throw (Exception)value;
                 }
 
-                return _setParameters[property.Name];
+                return value;
             }
             else
             {
@@ -280,7 +278,10 @@ namespace Microsoft.Build.BackEnd
                         _taskType.Type.FullName,
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
                         _setParameters,
-                        new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties)
+                        new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
+                        _taskLoggingContext.GetWarningsAsErrors(),
+                        _taskLoggingContext.GetWarningsAsMessages()
+                        
                     );
 
             try

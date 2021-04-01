@@ -1,9 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
@@ -30,7 +31,8 @@ namespace Microsoft.Build.Utilities
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        ITaskItem2
+        ITaskItem2,
+        IMetadataContainer // expose direct underlying metadata for fast access in binary logger
     {
         #region Member Data
 
@@ -460,5 +462,19 @@ namespace Microsoft.Build.Utilities
             : _metadata.Clone();
 
         #endregion
+
+        IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata()
+        {
+            if (_metadata == null)
+            {
+                yield break;
+            }
+
+            foreach (var kvp in _metadata)
+            {
+                var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                yield return unescaped;
+            }
+        }
     }
 }

@@ -129,7 +129,12 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">"SharingPolicy.Isolated로 만든 EvaluationContext 개체는 MSBuildFileSystemBase 파일 시스템 전달을 지원하지 않습니다."</target>
+        <target state="translated">SharingPolicy.Isolated로 만든 EvaluationContext 개체는 MSBuildFileSystemBase 파일 시스템 전달을 지원하지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KillingProcessWithPid">
+        <source>Killing process with pid = {0}.</source>
+        <target state="translated">pid가 {0}인 프로세스를 종료하는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -184,8 +189,8 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
-      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
+        <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
         <target state="translated">MatchOnMetadata를 사용하여 제거하는 경우 항목 종류를 하나만 참조할 수 있습니다.</target>
         <note />
       </trans-unit>
@@ -237,6 +242,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
+        <target state="translated">빈 문자열로 평가되는 식 때문에 ({2},{3})의 "{1}"이(가) 프로젝트 "{0}"을(를) 가져오지 않았습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
@@ -263,7 +273,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
-        <target state="needs-review-translation">"정적 그래프가 {0}초 안에 로드됨: {1}개 노드, {2}개 에지"</target>
+        <target state="translated">정적 그래프가 {0}초 안에 로드됨: {1}개 노드, {2}개 에지</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -287,6 +297,21 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="TaskAcquiredCores">
+        <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCores">
+        <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
+        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCoresWarning">
+        <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
@@ -1671,7 +1696,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
-        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
+        <target state="translated">MSB4064: "{0}" 매개 변수는 경로: {3}의 어셈블리: {2} 어셈블리에서 로드한 "{1}" 작업에서 지원되지 않습니다. 작업에 매개 변수가 있고, &lt;UsingTask&gt;가 올바른 어셈블리를 가리키며, 설정 가능한 public 인스턴스 속성인지 확인하세요.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

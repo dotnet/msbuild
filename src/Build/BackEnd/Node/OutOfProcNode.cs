@@ -171,6 +171,7 @@ namespace Microsoft.Build.Execution
             _buildRequestEngine.OnNewConfigurationRequest += OnNewConfigurationRequest;
             _buildRequestEngine.OnRequestBlocked += OnNewRequest;
             _buildRequestEngine.OnRequestComplete += OnRequestComplete;
+            _buildRequestEngine.OnResourceRequest += OnResourceRequest;
 
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.BuildRequest, BuildRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.BuildRequestConfiguration, BuildRequestConfiguration.FactoryForDeserialization, this);
@@ -178,6 +179,7 @@ namespace Microsoft.Build.Execution
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.BuildRequestUnblocker, BuildRequestUnblocker.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeConfiguration, NodeConfiguration.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ResourceResponse, ResourceResponse.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ResolveSdkResponse, SdkResult.FactoryForDeserialization, _sdkResolverService as INodePacketHandler);
         }
 
@@ -399,6 +401,17 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Event handler for the BuildEngine's OnResourceRequest event.
+        /// </summary>
+        private void OnResourceRequest(ResourceRequest request)
+        {
+            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
+            {
+                _nodeEndpoint.SendData(request);
+            }
+        }
+
+        /// <summary>
         /// Event handler for the LoggingService's OnLoggingThreadException event.
         /// </summary>
         private void OnLoggingThreadException(Exception e)
@@ -594,6 +607,10 @@ namespace Microsoft.Build.Execution
                     HandleBuildRequestUnblocker(packet as BuildRequestUnblocker);
                     break;
 
+                case NodePacketType.ResourceResponse:
+                    HandleResourceResponse(packet as ResourceResponse);
+                    break;
+
                 case NodePacketType.NodeConfiguration:
                     HandleNodeConfiguration(packet as NodeConfiguration);
                     break;
@@ -634,6 +651,15 @@ namespace Microsoft.Build.Execution
         private void HandleBuildRequestUnblocker(BuildRequestUnblocker unblocker)
         {
             _buildRequestEngine.UnblockBuildRequest(unblocker);
+        }
+
+        /// <summary>
+        /// Handles the ResourceResponse packet.
+        /// </summary>
+        /// <param name="response"></param>
+        private void HandleResourceResponse(ResourceResponse response)
+        {
+            _buildRequestEngine.GrantResources(response);
         }
 
         /// <summary>

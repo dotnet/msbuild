@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.BackEnd
@@ -68,5 +69,15 @@ namespace Microsoft.Build.BackEnd
         /// Writes a detailed summary of the build state which includes informaiton about the scheduling plan.
         /// </summary>
         void WriteDetailedSummary(int submissionId);
+
+        /// <summary>
+        /// Requests CPU resources.
+        /// </summary>
+        Task<int> RequestCores(int requestId, int requestedCores, bool waitForCores);
+
+        /// <summary>
+        /// Returns CPU resources.
+        /// </summary>
+        List<ScheduleResponse> ReleaseCores(int requestId, int coresToRelease);
     }
 }

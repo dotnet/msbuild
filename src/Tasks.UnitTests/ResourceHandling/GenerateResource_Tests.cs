@@ -15,6 +15,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
@@ -2316,7 +2317,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t.Execute();
 
                 // "cannot read state file (opening for read/write)"
-                Utilities.AssertLogContains(t, "MSB3088");
+                Utilities.AssertLogContainsResourceWithUnspecifiedReplacements(t, "General.CouldNotReadStateFileMessage");
                 // "cannot write state file (opening for read/write)"
                 Utilities.AssertLogContains(t, "MSB3101");
             }
@@ -3395,8 +3396,42 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             Assert.Contains(
                 String.Format(AssemblyResources.GetString(messageID), replacements),
-                ((MockEngine)t.BuildEngine).Log
-                );
+                ((MockEngine) t.BuildEngine).Log
+            );
+        }
+
+        /// <summary>
+        /// Looks for a formatted message in the output log for the task execution, with unknown formatted parameters.
+        /// If verifies that all constant segments of unformatted message are present.
+        /// </summary>
+        public static void AssertLogContainsResourceWithUnspecifiedReplacements(GenerateResource t, string messageID)
+        {
+            var unformattedMessage = AssemblyResources.GetString(messageID);
+            var matches = Regex.Matches(unformattedMessage, @"\{\d+.*?\}");
+            if (matches.Count > 0)
+            {
+                var sb = new StringBuilder();
+                int i = 0;
+
+                foreach (Match match in matches)
+                {
+                    string segment = unformattedMessage.Substring(i, match.Index - i);
+                    sb.Append(Regex.Escape(segment));
+                    sb.Append(".*");
+
+                    i = match.Index + match.Length;
+                }
+                if (i < unformattedMessage.Length)
+                {
+                    sb.Append(Regex.Escape(unformattedMessage.Substring(i)));
+                }
+
+                Assert.Matches(sb.ToString(), ((MockEngine)t.BuildEngine).Log);
+            }
+            else
+            {
+                Assert.Contains(unformattedMessage, ((MockEngine)t.BuildEngine).Log);
+            }
         }
 
         /// <summary>

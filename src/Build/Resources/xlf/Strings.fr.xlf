@@ -129,7 +129,12 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="needs-review-translation">"Les objets EvaluationContext créés avec SharingPolicy.Isolated ne prennent pas en charge le passage d'un système de fichiers MSBuildFileSystemBase."</target>
+        <target state="translated">Les objets EvaluationContext créés avec SharingPolicy.Isolated ne prennent pas en charge le passage d'un système de fichiers MSBuildFileSystemBase.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KillingProcessWithPid">
+        <source>Killing process with pid = {0}.</source>
+        <target state="translated">Arrêt du processus ayant le PID = {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
@@ -184,9 +189,9 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
-      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="translated">Un seul type d'élément peut être référencé pour la suppression à l'aide de MatchOnMetadata.</target>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
+        <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
+        <target state="translated">Seuls les types d'élément peuvent être référencés pour la suppression à l'aide de MatchOnMetadata.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
@@ -237,6 +242,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
+        <target state="translated">Le projet "{0}" n'a pas été importé par "{1}" sur ({2},{3}), car l'expression a la valeur d'une chaîne vide.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Valeur initiale de la propriété : $({0})="{1}" Source : {2}</target>
@@ -263,7 +273,7 @@
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
-        <target state="needs-review-translation">"Graphe statique chargé en {0} secondes : {1} nœuds, {2} arêtes"</target>
+        <target state="translated">Graphe statique chargé en {0} secondes : {1} nœuds, {2} arêtes</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -287,6 +297,21 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="TaskAcquiredCores">
+        <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCores">
+        <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
+        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCoresWarning">
+        <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
@@ -1671,7 +1696,7 @@
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
         <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
-        <target state="new">MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</target>
+        <target state="translated">MSB4064: le paramètre "{0}" n'est pas pris en charge par la tâche "{1}" chargée à partir de l'assembly {2} depuis le chemin {3}. Vérifiez que le paramètre existe pour la tâche, que &lt;UsingTask&gt; pointe vers l'assembly approprié et qu'il s'agit d'une propriété d'instance publique définissable.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

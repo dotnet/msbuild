@@ -210,13 +210,13 @@ namespace Microsoft.Build.BackEnd
 
                     string propertyName = property.Name;
                     // If the hash contains the property name, output a messages that displays the previous property value and the new property value
-                    if (lookupHash.ContainsKey(propertyName))
+                    if (lookupHash.TryGetValue(propertyName, out string propertyValue))
                     {
                         if (errorMessages == null)
                         {
                             errorMessages = new List<string>();
                         }
-                        errorMessages.Add(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyOutputOverridden", propertyName, EscapingUtilities.UnescapeAll(lookupHash[propertyName]), property.EvaluatedValue));
+                        errorMessages.Add(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyOutputOverridden", propertyName, EscapingUtilities.UnescapeAll(propertyValue), property.EvaluatedValue));
                     }
 
                     // Set the value of the hash to the new property value
@@ -945,10 +945,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeInTable(ItemTypeToItemsMetadataUpdateDictionary table, ProjectItemInstance item)
         {
-            if (table?.ContainsKey(item.ItemType) == true)
+            ItemsMetadataUpdateDictionary tableOfItemsOfSameType = null;
+            if (table?.TryGetValue(item.ItemType, out tableOfItemsOfSameType) == true)
             {
-                ItemsMetadataUpdateDictionary tableOfItemsOfSameType = table[item.ItemType];
-                if (tableOfItemsOfSameType != null)
+                if (tableOfItemsOfSameType is not null)
                 {
                     ErrorUtilities.VerifyThrow(!tableOfItemsOfSameType.ContainsKey(item), "Item should not be in table");
                 }

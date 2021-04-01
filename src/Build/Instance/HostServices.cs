@@ -181,15 +181,8 @@ After:
         {
             if (projectFullPath != null)
             {
-                if (_hostObjectMap?.ContainsKey(projectFullPath) == true)
-                {
-                    _hostObjectMap.Remove(projectFullPath);
-                }
-
-                if (_projectAffinities?.ContainsKey(projectFullPath) == true)
-                {
-                    _projectAffinities.Remove(projectFullPath);
-                }
+                _hostObjectMap?.Remove(projectFullPath);
+                _projectAffinities?.Remove(projectFullPath);
             }
         }
 
@@ -323,14 +316,15 @@ After:
                     var hostObjectMapPairKeyTaskName = translator.Reader.ReadString();
                     var hostObjectMapPairValueMonikerName = translator.Reader.ReadString();
                     var targetTaskKey = new HostObjects.TargetTaskKey(hostObjectMapPairKeyTargetName, hostObjectMapPairKeyTaskName);
-                    if (!hostObjectMap.ContainsKey(pairKey))
+                    if (!hostObjectMap.TryGetValue(pairKey, out HostObjects hostObject))
                     {
-                        hostObjectMap[pairKey] = new HostObjects();
+                        hostObject = new HostObjects();
+                        hostObjectMap[pairKey] = hostObject;
                     }
 
-                    if (!hostObjectMap[pairKey]._hostObjects.ContainsKey(targetTaskKey))
+                    if (!hostObject._hostObjects.ContainsKey(targetTaskKey))
                     {
-                        hostObjectMap[pairKey]._hostObjects.Add(targetTaskKey, new MonikerNameOrITaskHost(hostObjectMapPairValueMonikerName));
+                        hostObject._hostObjects.Add(targetTaskKey, new MonikerNameOrITaskHost(hostObjectMapPairValueMonikerName));
                     }
                 }
                 _hostObjectMap = hostObjectMap;

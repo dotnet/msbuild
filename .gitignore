@@ -222,3 +222,4 @@ stage1/
 
 # ETL traces    
 *.etl.zip
+*.etl
