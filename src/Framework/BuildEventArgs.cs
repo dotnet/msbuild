@@ -116,7 +116,7 @@ namespace Microsoft.Build.Framework
         /// Used for serialization. Avoids the side effects of calling the
         /// <see cref="Timestamp"/> getter.
         /// </summary>
-        protected DateTime RawTimestamp
+        protected internal DateTime RawTimestamp
         {
             get => timestamp;
             set => timestamp = value;

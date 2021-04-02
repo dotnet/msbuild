@@ -43,7 +43,9 @@ namespace Microsoft.Build.Logging
         //                        where a list used to be written in-place
         // version 11:
         //   - new record kind: TaskParameterEventArgs
-        internal const int FileFormatVersion = 11;
+        // version 12:
+        //   - add GlobalProperties, Properties and Items on ProjectEvaluationFinished
+        internal const int FileFormatVersion = 12;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -103,6 +105,7 @@ namespace Microsoft.Build.Logging
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
             Traits.Instance.EscapeHatches.LogProjectImports = true;
+            bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters();
 
@@ -134,6 +137,11 @@ namespace Microsoft.Build.Logging
                 if (eventSource is IEventSource3 eventSource3)
                 {
                     eventSource3.IncludeEvaluationMetaprojects();
+                }
+
+                if (logPropertiesAndItemsAfterEvaluation && eventSource is IEventSource4 eventSource4)
+                {
+                    eventSource4.IncludeEvaluationPropertiesAndItems();
                 }
             }
             catch (Exception e)

@@ -11,22 +11,27 @@ namespace Microsoft.Build.BackEnd
     {
         private bool _includeEvaluationMetaprojects;
         private bool _includeEvaluationProfiles;
+        private bool _includeEvaluationPropertiesAndItems;
         private bool _includeTaskInputs;
 
         public bool IncludeEvaluationMetaprojects => _includeEvaluationMetaprojects;
-
         public bool IncludeEvaluationProfiles => _includeEvaluationProfiles;
-
+        public bool IncludeEvaluationPropertiesAndItems => _includeEvaluationPropertiesAndItems;
         public bool IncludeTaskInputs => _includeTaskInputs;
 
         public LoggingNodeConfiguration()
         {
         }
 
-        public LoggingNodeConfiguration(bool includeEvaluationMetaprojects, bool includeEvaluationProfiles, bool includeTaskInputs)
+        public LoggingNodeConfiguration(
+            bool includeEvaluationMetaprojects,
+            bool includeEvaluationProfiles,
+            bool includeEvaluationPropertiesAndItems,
+            bool includeTaskInputs)
         {
             _includeEvaluationMetaprojects = includeEvaluationMetaprojects;
             _includeEvaluationProfiles = includeEvaluationProfiles;
+            _includeEvaluationPropertiesAndItems = includeEvaluationPropertiesAndItems;
             _includeTaskInputs = includeTaskInputs;
         }
 
@@ -34,6 +39,7 @@ namespace Microsoft.Build.BackEnd
         {
             translator.Translate(ref _includeEvaluationMetaprojects);
             translator.Translate(ref _includeEvaluationProfiles);
+            translator.Translate(ref _includeEvaluationPropertiesAndItems);
             translator.Translate(ref _includeTaskInputs);
         }
     }

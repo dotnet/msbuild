@@ -343,7 +343,9 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
             var projectFile = ReadDeduplicatedString();
 
-            var e = new ProjectEvaluationStartedEventArgs(fields.Message)
+            var e = new ProjectEvaluationStartedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationStarted"),
+                projectFile)
             {
                 ProjectFile = projectFile
             };
@@ -356,11 +358,29 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
             var projectFile = ReadDeduplicatedString();
 
-            var e = new ProjectEvaluationFinishedEventArgs(fields.Message)
+            var e = new ProjectEvaluationFinishedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationFinished"),
+                projectFile)
             {
                 ProjectFile = projectFile
             };
             SetCommonFields(e, fields);
+
+            if (fileFormatVersion >= 12)
+            {
+                IEnumerable globalProperties = null;
+                if (ReadBoolean())
+                {
+                    globalProperties = ReadStringDictionary();
+                }
+
+                var propertyList = ReadPropertyList();
+                var itemList = ReadProjectItems();
+
+                e.GlobalProperties = globalProperties;
+                e.Properties = propertyList;
+                e.Items = itemList;
+            }
 
             // ProfilerResult was introduced in version 5
             if (fileFormatVersion > 4)
@@ -451,7 +471,7 @@ namespace Microsoft.Build.Logging
             var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
             // BuildReason was introduced in version 4
-            var buildReason = fileFormatVersion > 3 ? (TargetBuiltReason) ReadInt32() : TargetBuiltReason.None;
+            var buildReason = fileFormatVersion > 3 ? (TargetBuiltReason)ReadInt32() : TargetBuiltReason.None;
 
             var e = new TargetStartedEventArgs(
                 fields.Message,
@@ -617,15 +637,15 @@ namespace Microsoft.Build.Logging
             ReadInt32();
 
             var kind = (TaskParameterMessageKind)ReadInt32();
-            var itemName = ReadDeduplicatedString();
+            var itemType = ReadDeduplicatedString();
             var items = ReadTaskItemList() as IList;
 
             var e = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 fields.BuildEventContext,
                 kind,
-                itemName,
+                itemType,
                 items,
-                true,
+                logItemMetadata: true,
                 fields.Timestamp);
             e.ProjectFile = fields.ProjectFile;
             return e;
@@ -845,23 +865,25 @@ namespace Microsoft.Build.Logging
 
             if ((fields.Flags & BuildEventArgsFieldFlags.Timestamp) != 0)
             {
-                buildEventArgsFieldTimestamp.SetValue(buildEventArgs, fields.Timestamp);
+                buildEventArgs.RawTimestamp = fields.Timestamp;
             }
         }
 
-        private ArrayList ReadPropertyList()
+        private IEnumerable ReadPropertyList()
         {
             var properties = ReadStringDictionary();
-            if (properties == null)
+            if (properties == null || properties.Count == 0)
             {
                 return null;
             }
 
-            var list = new ArrayList();
+            int count = properties.Count;
+            var list = new DictionaryEntry[count];
+            int i = 0;
             foreach (var property in properties)
             {
-                var entry = new DictionaryEntry(property.Key, property.Value);
-                list.Add(entry);
+                list[i] = new DictionaryEntry(property.Key, property.Value);
+                i++;
             }
 
             return list;
@@ -942,13 +964,7 @@ namespace Microsoft.Build.Logging
 
         private IEnumerable ReadProjectItems()
         {
-            int count = ReadInt32();
-            if (count == 0)
-            {
-                return null;
-            }
-
-            List<DictionaryEntry> list;
+            IList<DictionaryEntry> list;
 
             // starting with format version 10 project items are grouped by name
             // so we only have to write the name once, and then the count of items
@@ -956,25 +972,67 @@ namespace Microsoft.Build.Logging
             // old style flat list where the name is duplicated for each item.
             if (fileFormatVersion < 10)
             {
-                list = new List<DictionaryEntry>(count);
+                int count = ReadInt32();
+                if (count == 0)
+                {
+                    return null;
+                }
+
+                list = new DictionaryEntry[count];
                 for (int i = 0; i < count; i++)
                 {
                     string itemName = ReadString();
                     ITaskItem item = ReadTaskItem();
-                    list.Add(new DictionaryEntry(itemName, item));
+                    list[i] = new DictionaryEntry(itemName, item);
+                }
+            }
+            else if (fileFormatVersion < 12)
+            {
+                int count = ReadInt32();
+                if (count == 0)
+                {
+                    return null;
+                }
+
+                list = new List<DictionaryEntry>();
+                for (int i = 0; i < count; i++)
+                {
+                    string itemType = ReadDeduplicatedString();
+                    var items = ReadTaskItemList();
+                    if (items != null)
+                    {
+                        foreach (var item in items)
+                        {
+                            list.Add(new DictionaryEntry(itemType, item));
+                        }
+                    }
                 }
             }
             else
             {
                 list = new List<DictionaryEntry>();
-                for (int i = 0; i < count; i++)
+
+                while (true)
                 {
-                    string itemName = ReadDeduplicatedString();
-                    var items = ReadTaskItemList();
-                    foreach (var item in items)
+                    string itemType = ReadDeduplicatedString();
+                    if (string.IsNullOrEmpty(itemType))
                     {
-                        list.Add(new DictionaryEntry(itemName, item));
+                        break;
                     }
+
+                    var items = ReadTaskItemList();
+                    if (items != null)
+                    {
+                        foreach (var item in items)
+                        {
+                            list.Add(new DictionaryEntry(itemType, item));
+                        }
+                    }
+                }
+
+                if (list.Count == 0)
+                {
+                    list = null;
                 }
             }
 
@@ -989,12 +1047,12 @@ namespace Microsoft.Build.Logging
                 return null;
             }
 
-            var list = new List<ITaskItem>(count);
+            var list = new ITaskItem[count];
 
             for (int i = 0; i < count; i++)
             {
                 ITaskItem item = ReadTaskItem();
-                list.Add(item);
+                list[i] = item;
             }
 
             return list;
@@ -1109,7 +1167,7 @@ namespace Microsoft.Build.Logging
             var hasLine = ReadBoolean();
             if (hasLine)
             {
-                line = ReadInt32(); 
+                line = ReadInt32();
             }
 
             // Id and parent Id were introduced in version 6

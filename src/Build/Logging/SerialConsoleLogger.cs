@@ -571,24 +571,35 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public override void StatusEventHandler(object sender, BuildStatusEventArgs e)
         {
-            if (showPerfSummary)
+            if (e is ProjectEvaluationStartedEventArgs projectEvaluationStarted)
             {
-                ProjectEvaluationStartedEventArgs projectEvaluationStarted = e as ProjectEvaluationStartedEventArgs;
-
-                if (projectEvaluationStarted != null)
+                if (showPerfSummary)
                 {
                     PerformanceCounter counter = GetPerformanceCounter(projectEvaluationStarted.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.InScope = true;
-
-                    return;
                 }
-
-                ProjectEvaluationFinishedEventArgs projectEvaluationFinished = e as ProjectEvaluationFinishedEventArgs;
-
-                if (projectEvaluationFinished != null)
+            }
+            else if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinished)
+            {
+                if (showPerfSummary)
                 {
                     PerformanceCounter counter = GetPerformanceCounter(projectEvaluationFinished.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.InScope = false;
+                }
+
+                if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
+                {
+                    if (projectEvaluationFinished.Properties != null)
+                    {
+                        var propertyList = ExtractPropertyList(projectEvaluationFinished.Properties);
+                        WriteProperties(propertyList);
+                    }
+
+                    if (projectEvaluationFinished.Items != null)
+                    {
+                        SortedList itemList = ExtractItemList(projectEvaluationFinished.Items);
+                        WriteItems(itemList);
+                    }
                 }
             }
         }

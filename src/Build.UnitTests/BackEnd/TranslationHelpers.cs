@@ -2,10 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Text;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -103,6 +106,65 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             return CompareExceptions(left.InnerException, right.InnerException);
+        }
+
+        internal static string GetPropertiesString(IEnumerable properties)
+        {
+            var dictionary = properties
+                .OfType<DictionaryEntry>()
+                .ToDictionary(
+                    (Func<DictionaryEntry, string>)(d => d.Key.ToString()),
+                    (Func<DictionaryEntry, string>)(d => d.Value.ToString()));
+            return ToString(dictionary);
+        }
+
+        internal static string GetMultiItemsString(IEnumerable items)
+        {
+            var list = items
+                .OfType<DictionaryEntry>()
+                .Select(i => i.Key.ToString() + GetTaskItemString(i.Value));
+            var text = string.Join("\n", list);
+            return text;
+        }
+
+        internal static string GetItemsString(IEnumerable items)
+        {
+            var list = items
+                .OfType<object>()
+                .Select(i => GetTaskItemString(i));
+            var text = string.Join("\n", list);
+            return text;
+        }
+
+        internal static string GetTaskItemString(object item)
+        {
+            var sb = new StringBuilder();
+
+            if (item is ITaskItem taskItem)
+            {
+                sb.Append(taskItem.ItemSpec);
+                foreach (string name in taskItem.MetadataNames)
+                {
+                    var value = taskItem.GetMetadata(name);
+                    sb.Append($";{name}={value}");
+                }
+            }
+            else
+            {
+                sb.Append(Convert.ToString(item));
+            }
+
+            return sb.ToString();
+        }
+
+        internal static string ToString(IDictionary<string, string> dictionary)
+        {
+            if (dictionary == null)
+            {
+                return "null";
+            }
+
+            return string.Join(";", dictionary.Select(kvp => kvp.Key + "=" + kvp.Value));
         }
     }
 }
