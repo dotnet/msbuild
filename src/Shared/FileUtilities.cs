@@ -1075,7 +1075,7 @@ namespace Microsoft.Build.Shared
             }
             for (int i = index; i < splitPath.Length; i++)
             {
-                sb.Append(splitPath[index]).Append(Path.DirectorySeparatorChar);
+                sb.Append(splitPath[i]).Append(Path.DirectorySeparatorChar);
             }
             sb.Length--;
             return StringBuilderCache.GetStringAndRelease(sb);
