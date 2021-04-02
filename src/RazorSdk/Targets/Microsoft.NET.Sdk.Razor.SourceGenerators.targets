@@ -19,6 +19,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RazorSdkToolsDirectoryRoot>$(RazorSdkDirectoryRoot)\tools\</_RazorSdkToolsDirectoryRoot>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <RazorEncConfigFile>$(_RazorSdkSourceGeneratorDirectoryRoot)RazorSourceGenerator.razorencconfig</RazorEncConfigFile>
+    </PropertyGroup>
+
+    <EditorConfigFiles Include="$(RazorEncConfigFile)" Condition="'$(DesignTimeBuild)' == 'true' AND '$(BuildingInsideVisualStudio)' == 'true'"/>
+
     <!-- Configure analyzers -->
     <ItemGroup>
       <_RazorAnalyzer Include="$(_RazorSdkToolsDirectoryRoot)Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />

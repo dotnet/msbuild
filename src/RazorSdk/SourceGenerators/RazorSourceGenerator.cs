@@ -49,6 +49,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 return;
             }
 
+            if (razorContext.SuppressRazorSourceGenerator)
+            {
+                return;
+            }
+
             HandleDebugSwitch(razorContext.WaitForDebugger);
 
             var tagHelpers = ResolveTagHelperDescriptors(context, razorContext);
