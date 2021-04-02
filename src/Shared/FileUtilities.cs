@@ -1061,6 +1061,7 @@ namespace Microsoft.Build.Shared
             {
                 return ".";
             }
+            
             // If the paths have no component in common, the only valid relative path is the full path.
             if (index == 0)
             {
