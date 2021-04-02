@@ -50,28 +50,17 @@ namespace Microsoft.Build.CommandLine
                 // we if we do this work in the constructor, and don't get an opportunity to call Dispose, the
                 // EventSources will remain enabled even if there aren't any consuming EventListeners.
 
-                Console.WriteLine("!!! Creating PerformanceLogEventListener");
-
                 // Check to see if we should enable the event listener.
                 string logDirectory = Environment.GetEnvironmentVariable(PerfLogDirEnvVar);
-                Console.WriteLine("!!! DOTNET_PERFLOG_DIR: {0}", logDirectory);
 
                 if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(logDirectory).Exists)
                 {
                     eventListener = new PerformanceLogEventListener();
                     eventListener.Initialize(logDirectory);
-                    Console.WriteLine("!!! PerfLogEventListener will log to: {0}", logDirectory);
-                }
-                else
-                {
-                    Console.WriteLine("!!! PerfLogEventListener failed to initialize.");
-                    Console.WriteLine("!!! LogDirectory: {0}", logDirectory);
-                    Console.WriteLine("!!! DOTNET_PERFLOG_DIR: {0}", Environment.GetEnvironmentVariable(PerfLogDirEnvVar));
                 }
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine("!!! We threw!\nInner Exception: {0}\nMessage: {1}", e.InnerException, e.Message);
                 if (eventListener != null)
                 {
                     eventListener.Dispose();
