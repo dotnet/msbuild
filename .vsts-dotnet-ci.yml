@@ -37,6 +37,7 @@ jobs:
   - powershell: | 
       taskkill /f /im msbuild.exe
       taskkill /f /im vbcscompiler.exe
+    displayName: Kill hanging processes
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -85,6 +86,7 @@ jobs:
   - powershell: | 
       taskkill /f /im msbuild.exe
       taskkill /f /im vbcscompiler.exe
+    displayName: Kill hanging processes
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
