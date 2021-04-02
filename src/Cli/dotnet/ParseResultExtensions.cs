@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli
         {
             if (parseResult.Errors.Any())
             {
-                var unrecognizedTokenErrors = parseResult.Errors.Where(error => 
+                var unrecognizedTokenErrors = parseResult.Errors.Where(error =>
                     error.Message.Contains(Parser.Instance.Configuration.ValidationMessages.UnrecognizedCommandOrArgument(string.Empty).Replace("'", string.Empty)));
                 if (parseResult.CommandResult.Command.TreatUnmatchedTokensAsErrors ||
                     parseResult.Errors.Except(unrecognizedTokenErrors).Any())
@@ -51,6 +51,18 @@ namespace Microsoft.DotNet.Cli
         public static bool IsTopLevelDotnetCommand(this ParseResult parseResult)
         {
             return parseResult.CommandResult.Command.Equals(RootCommand) && string.IsNullOrEmpty(parseResult.RootSubCommandResult());
+        }
+
+        public static string[] GetSubArguments(this string[] args)
+        {
+            var subargs = args.ToList();
+            subargs.RemoveAll(arg => DiagOption.Aliases.Contains(arg));
+            if (subargs[0].Equals("dotnet"))
+            {
+                subargs.RemoveAt(0);
+            }
+            subargs.RemoveAt(0); // remove top level command (ex build or publish)
+            return subargs.ToArray();
         }
 
         private static string GetSymbolResultValue(ParseResult parseResult, SymbolResult symbolResult)

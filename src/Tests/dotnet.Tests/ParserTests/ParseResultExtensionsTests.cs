@@ -33,5 +33,20 @@ namespace Microsoft.DotNet.Tests.ParserTests
                 .Should()
                 .Be(expected);
         }
+
+        [Theory]
+        [InlineData(new string[] { "dotnet", "build" }, new string[] { })]
+        [InlineData(new string[] { "build" }, new string[] { })]
+        [InlineData(new string[] { "dotnet", "test", "-d" }, new string[] { })]
+        [InlineData(new string[] { "dotnet", "publish", "-o", "foo" }, new string[] { "-o", "foo" })]
+        [InlineData(new string[] { "publish", "-o", "foo" }, new string[] { "-o", "foo" })]
+        [InlineData(new string[] { "dotnet", "add", "package", "-h" }, new string[] { "package", "-h" })]
+        [InlineData(new string[] { "add", "package", "-h" }, new string[] { "package", "-h" })]
+        [InlineData(new string[] { "dotnet", "-d", "help" }, new string[] { })]
+        public void GetSubArgumentsRemovesTopLevelCommands(string[] input, string[] expected)
+        {
+            input.GetSubArguments()
+                .ShouldBeEquivalentTo(expected);
+        }
     }
 }
