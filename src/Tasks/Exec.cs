@@ -628,7 +628,7 @@ namespace Microsoft.Build.Tasks
                     {
                         char c = batchFileForCommandLine[i];
 
-                        if (c == '&' || (ShouldEscapeCharacter(c)) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
+                        if ((c == '&' || ShouldEscapeCharacter(c)) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
                         {
                             fileName.Append('^');
                         }
