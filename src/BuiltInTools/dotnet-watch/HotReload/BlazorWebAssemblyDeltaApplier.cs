@@ -39,8 +39,8 @@ namespace Microsoft.DotNet.Watcher.Tools
                 Deltas = solutionUpdate.Select(c => new UpdateDelta
                 {
                     ModuleId = c.ModuleId,
-                    MetadataDelta = c.MetadataDelta,
-                    ILDelta = c.ILDelta,
+                    MetadataDelta = c.MetadataDelta.ToArray(),
+                    ILDelta = c.ILDelta.ToArray(),
                 }),
             };
 
@@ -49,7 +49,18 @@ namespace Microsoft.DotNet.Watcher.Tools
             return true;
         }
 
-        public ValueTask ReportDiagnosticsAsync(DotNetWatchContext context, IEnumerable<string> diagnostics, CancellationToken cancellationToken) => throw new NotImplementedException();
+        public async ValueTask ReportDiagnosticsAsync(DotNetWatchContext context, IEnumerable<string> diagnostics, CancellationToken cancellationToken)
+        {
+            if (context.BrowserRefreshServer != null)
+            {
+                var message = new HotReloadDiagnostics
+                {
+                    Diagnostics = diagnostics
+                };
+
+                await context.BrowserRefreshServer.SendJsonSerlialized(message, cancellationToken);
+            }
+        }
 
         public void Dispose()
         {
@@ -65,8 +76,15 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly struct UpdateDelta
         {
             public Guid ModuleId { get; init; }
-            public ImmutableArray<byte> MetadataDelta { get; init; }
-            public ImmutableArray<byte> ILDelta { get; init; }
+            public byte[] MetadataDelta { get; init; }
+            public byte[] ILDelta { get; init; }
+        }
+
+        public readonly struct HotReloadDiagnostics
+        {
+            public string Type => "HotReloadDiagnosticsv1";
+
+            public IEnumerable<string> Diagnostics { get; init; }
         }
     }
 }

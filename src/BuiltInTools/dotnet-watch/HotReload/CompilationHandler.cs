@@ -37,9 +37,12 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             if (_deltaApplier is null)
             {
-                _deltaApplier = context.DefaultLaunchSettingsProfile.HotReloadProfile == "blazorwasm" ?
-                    new BlazorWebAssemblyDeltaApplier(_reporter) :
-                    new AspNetCoreDeltaApplier(_reporter);
+                _deltaApplier = context.DefaultLaunchSettingsProfile.HotReloadProfile switch
+                {
+                    "blazorwasm" => new BlazorWebAssemblyDeltaApplier(_reporter),
+                    "blazorwasmhosted" => new BlazorWebAssemblyHostedDeltaApplier(_reporter),
+                    _ => new AspNetCoreDeltaApplier(_reporter),
+                };
             }
 
             await _deltaApplier.InitializeAsync(context, cancellationToken);

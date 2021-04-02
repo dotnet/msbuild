@@ -99,6 +99,7 @@ setTimeout(function () {
 
   function applyBlazorDeltas(deltas) {
     deltas.forEach(d => window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta));
+    notifyHotReloadApplied();
   }
 
   function displayDiagnostics(diagnostics) {

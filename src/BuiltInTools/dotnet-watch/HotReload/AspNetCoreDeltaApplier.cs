@@ -26,6 +26,8 @@ namespace Microsoft.DotNet.Watcher.Tools
             _reporter = reporter;
         }
 
+        public bool SuppressBrowserRefreshAfterApply { get; init; }
+
         public async ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
             if (_pipe is not null)
@@ -104,7 +106,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            if (context.BrowserRefreshServer != null)
+            if (!SuppressBrowserRefreshAfterApply && context.BrowserRefreshServer is not null)
             {
                 if (result == ApplyResult.Success_RefreshBrowser)
                 {
