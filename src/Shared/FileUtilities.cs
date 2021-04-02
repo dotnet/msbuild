@@ -1051,35 +1051,31 @@ namespace Microsoft.Build.Shared
                 return FixFilePath(path);
             }
 
-            int baseI = 0;
-            int pathI = 0;
-            while (baseI < splitBase.Length && pathI < splitPath.Length && splitBase[baseI].Equals(splitPath[pathI], PathComparison))
+            int index = 0;
+            while (index < splitBase.Length && index < splitPath.Length && splitBase[index].Equals(splitPath[index], PathComparison))
             {
-                baseI++;
-                pathI++;
+                index++;
             }
 
-            if (baseI == splitBase.Length && pathI == splitPath.Length)
+            if (index == splitBase.Length && index == splitPath.Length)
             {
                 return ".";
             }
             // If the paths have no component in common, the only valid relative path is the full path.
-            if (baseI == 0)
+            if (index == 0)
             {
                 return fullPath;
             }
 
             StringBuilder sb = StringBuilderCache.Acquire();
 
-            while (baseI < splitBase.Length)
+            for (int i = index; i < splitBase.Length; i++)
             {
                 sb.Append("..").Append(Path.DirectorySeparatorChar);
-                baseI++;
             }
-            while (pathI < splitPath.Length)
+            for (int i = index; i < splitPath.Length; i++)
             {
-                sb.Append(splitPath[pathI]).Append(Path.DirectorySeparatorChar);
-                pathI++;
+                sb.Append(splitPath[index]).Append(Path.DirectorySeparatorChar);
             }
             sb.Length--;
             return StringBuilderCache.GetStringAndRelease(sb);
