@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Now run the Exec task on a simple command.
                 Exec exec = PrepareExec("echo Hello World!");
-                exec.CharactersToEscape = "()]";
+                exec.EscapeSpecialCharacters = true;
                 exec.Execute().ShouldBeTrue();
             }
         }
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Now run the Exec task on a simple command.
                 Exec exec = PrepareExec("echo Hello World!");
-                exec.CharactersToEscape = "()()";
+                exec.EscapeSpecialCharacters = true;
                 exec.Execute().ShouldBeTrue();
             }
         }
@@ -969,7 +969,7 @@ echo line 3"" />
             {
                 var testProject = env.CreateTestProjectWithFiles(@"<Project>
 <Target Name=""ExecCommand"">
-  <Exec CharactersToEscape=""()"" Command=""echo Hello, World!"" />
+  <Exec EscapeSpecialCharacters=""true"" Command=""echo Hello, World!"" />
    </Target>
 </Project>");
 

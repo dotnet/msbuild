@@ -54,6 +54,9 @@ namespace Microsoft.Build.Tasks
         private Encoding _standardOutputEncoding;
         private string _command;
 
+        // '^' before _any_ character escapes that character. Don't escape '^'.
+        private char[] _charactersToEscape = { '(', ')', ' ', '&', '=', ';', '!', ','};
+
         #endregion
 
         #region Properties
@@ -188,18 +191,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
 
-        private HashSet<char> _charactersToEscape;
-
-        public string CharactersToEscape
-        {
-            set
-            {
-                if (!string.IsNullOrEmpty(value))
-                {
-                    _charactersToEscape = new HashSet<char>(value);
-                }
-            }
-        }
+        public bool EscapeSpecialCharacters { get; set; } = false;
 
         #endregion
 
@@ -631,12 +623,12 @@ namespace Microsoft.Build.Tasks
 
                     StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
 
-                    // Escape any characters specified by the CharactersToEscape metadata, or '&'
+                    // Escape any '&' or special characters when the user specifies EscapeSpecialCharacters.
                     for (int i = 0; i < batchFileForCommandLine.Length; i++)
                     {
                         char c = batchFileForCommandLine[i];
 
-                        if (ShouldEscapeCharacter(c) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
+                        if (c == '&' || (ShouldEscapeCharacter(c)) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
                         {
                             fileName.Append('^');
                         }
@@ -652,8 +644,20 @@ namespace Microsoft.Build.Tasks
 
         private bool ShouldEscapeCharacter(char c)
         {
-            // Escape '&' to preserve previous functionality
-            return c == '&' || (_charactersToEscape != null && _charactersToEscape.Contains(c));
+            if (!EscapeSpecialCharacters)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _charactersToEscape.Length; i++)
+            {
+                if ((c | _charactersToEscape[i]) == c)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion

@@ -313,7 +313,6 @@ namespace Microsoft.Build.Tasks
     public partial class Exec : Microsoft.Build.Tasks.ToolTaskExtension
     {
         public Exec() { }
-        public string CharactersToEscape { set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public string Command { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
@@ -321,6 +320,7 @@ namespace Microsoft.Build.Tasks
         public bool ConsoleToMSBuild { get { throw null; } set { } }
         public string CustomErrorRegularExpression { get { throw null; } set { } }
         public string CustomWarningRegularExpression { get { throw null; } set { } }
+        public bool EscapeSpecialCharacters { get { throw null; } set { } }
         public bool IgnoreExitCode { get { throw null; } set { } }
         public bool IgnoreStandardErrorWarningFormat { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
