@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -927,7 +928,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if (!string.IsNullOrEmpty(cacheFile))
                     {
-                        return SDKInfo.Deserialize(cacheFile);
+                        using FileStream fs = new FileStream(cacheFile, FileMode.Open);
+                        var translator = BinaryTranslator.GetReadTranslator(fs, buffer: null);
+                        SDKInfo sdkInfo = new SDKInfo();
+                        sdkInfo.Translate(translator);
+                        return sdkInfo;
                     }
                 }
                 catch (Exception e)
@@ -977,19 +982,14 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    var formatter = new BinaryFormatter();
                     using (var fs = new FileStream(referencesCacheFile, FileMode.Create))
                     {
-                        formatter.Serialize(fs, cacheFileInfo);
+                        var translator = BinaryTranslator.GetWriteTranslator(fs);
+                        cacheFileInfo.Translate(translator);
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the cache got written
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemWritingCacheFile", referencesCacheFile, e.Message));
                 }
@@ -1219,24 +1219,10 @@ namespace Microsoft.Build.Tasks
             }
 
             #region Properties
-            /// <summary>
-            /// The fusionName
-            /// </summary>
+
             public string FusionName { get; }
-
-            /// <summary>
-            /// Is the file a winmd or not
-            /// </summary>
             public bool IsWinMD { get; }
-
-            /// <summary>
-            /// Is the file a managed winmd or not
-            /// </summary>
             public bool IsManagedWinmd { get; }
-
-            /// <summary>
-            /// What is the imageruntime information on it.
-            /// </summary>
             public string ImageRuntime { get; }
 
             #endregion
@@ -1246,56 +1232,64 @@ namespace Microsoft.Build.Tasks
         /// Structure that contains the on disk representation of the SDK in memory.
         /// </summary>
         /// <remarks>This is a serialization format. Do not change member naming.</remarks>
-        [Serializable]
-        private class SDKInfo
+        private class SDKInfo : ITranslatable
         {
-            // Current version for serialization. This should be changed when breaking changes
-            // are made to this class.
-            private const byte CurrentSerializationVersion = 1;
+            private ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata;
+            private ConcurrentDictionary<string, List<string>> directoryToFileList;
+            private int hash;
 
-            // Version this instance is serialized with.
-            private byte _serializedVersion = CurrentSerializationVersion;
+            internal SDKInfo() { }
+
+            public SDKInfo(ITranslator translator) : this()
+            {
+                Translate(translator);
+            }
 
             /// <summary>
             /// Constructor
             /// </summary>
             public SDKInfo(ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata, ConcurrentDictionary<string, List<string>> directoryToFileList, int cacheHash)
             {
-                PathToReferenceMetadata = pathToReferenceMetadata;
-                DirectoryToFileList = directoryToFileList;
-                Hash = cacheHash;
+                this.pathToReferenceMetadata = pathToReferenceMetadata;
+                this.directoryToFileList = directoryToFileList;
+                this.hash = cacheHash;
             }
 
             /// <summary>
             /// A dictionary which maps a file path to a structure that contain some metadata information about that file.
             /// </summary>
-            public ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get; }
+            public ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
 
             /// <summary>
             /// Dictionary which maps a directory to a list of file names within that directory. This is used to shortcut hitting the disk for the list of files inside of it.
             /// </summary>
-            public ConcurrentDictionary<string, List<string>> DirectoryToFileList { get; }
+            public ConcurrentDictionary<string, List<string>> DirectoryToFileList { get { return directoryToFileList; } }
 
             /// <summary>
             /// Hashset
             /// </summary>
-            public int Hash { get; }
+            public int Hash { get { return hash; } }
 
-            public static SDKInfo Deserialize(string cacheFile)
+            public void Translate(ITranslator translator)
             {
-                using (var fs = new FileStream(cacheFile, FileMode.Open))
+                translator.TranslateConcurrentDictionary<SdkReferenceInfo>(ref pathToReferenceMetadata, (ITranslator t, ref SdkReferenceInfo info) =>
                 {
-                    var formatter = new BinaryFormatter();
-                    var info = (SDKInfo)formatter.Deserialize(fs);
+                    string fusionName = info.FusionName;
+                    string imageRuntime = info.ImageRuntime;
+                    bool isManagedWinmd = info.IsManagedWinmd;
+                    bool isWinmd = info.IsWinMD;
+                    t.Translate(ref fusionName);
+                    t.Translate(ref imageRuntime);
+                    t.Translate(ref isManagedWinmd);
+                    t.Translate(ref isWinmd);
+                });
 
-                    // If the serialization versions don't match, don't use the cache
-                    if (info != null && info._serializedVersion != CurrentSerializationVersion)
-                    {
-                        return null;
-                    }
+                translator.TranslateConcurrentDictionary<List<string>>(ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
+                {
+                    t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
+                });
 
-                    return info;
-                }
+                translator.Translate(ref hash);
             }
         }
 
