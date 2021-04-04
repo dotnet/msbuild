@@ -489,9 +489,19 @@ namespace Microsoft.Build.Tasks
                         return allStringParameters;
                     }
 
-                    // There isn't a constructor where all parameters are strings, so we are free
-                    // to pick one of the candidates. To ensure that we always select the same
-                    // constructor, sort the candidates by type names, then pick the first one.
+                    // There isn't a constructor where all parameters are strings, so we can pick any
+                    // of the constructors. This code path is very unlikely to be hit because we can only
+                    // infer parameter types for attributes in mscorlib (or System.Private.CoreLib).
+                    // The attribute type is loaded using `Type.GetType()`, and when you specify just a
+                    // type name and not an assembly-qualified type name, only types in this assembly
+                    // or mscorlib will be found.
+                    //
+                    // There are only about five attributes that would result in this code path being
+                    // reached due to those attributes having multiple constructors with the same number
+                    // of parameters. For that reason, it's not worth putting too much effort into picking
+                    // the best constructor. We will use the simple solution of sorting the constructors
+                    // (so that we always pick the same constructor, regardless of the order they are
+                    // returned from `Type.GetConstructors()`), and choose the first constructor.
                     return candidates
                         .OrderBy(c => string.Join(",", c.Select(t => t.FullName)))
                         .First();
