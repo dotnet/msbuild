@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -31,6 +31,7 @@ namespace Microsoft.Build.Tasks
         private const string TypeNameSuffix = "_TypeName";
         private const string IsLiteralSuffix = "_IsLiteral";
         private static readonly IEnumerable<string> NamespaceImports = new string[] { "System", "System.Reflection" };
+        private static readonly IReadOnlyDictionary<string, ParameterType> EmptyParameterTypes = new Dictionary<string, ParameterType>();
 
         /// <summary>
         /// Language of code to generate.
@@ -181,7 +182,7 @@ namespace Microsoft.Build.Tasks
 
                 // Some metadata may indicate the types of parameters. Use that metadata to determine
                 // the parameter types. Those metadata items will be removed from the dictionary.
-                Dictionary<string, ParameterType> parameterTypes = ExtractParameterTypes(customMetadata);
+                IReadOnlyDictionary<string, ParameterType> parameterTypes = ExtractParameterTypes(customMetadata);
 
                 var orderedParameters = new List<AttributeParameter?>(new AttributeParameter?[customMetadata.Count + 1] /* max possible slots needed */);
                 var namedParameters = new List<AttributeParameter>();
@@ -280,10 +281,10 @@ namespace Microsoft.Build.Tasks
         /// parameters, and removes those items from the given dictionary.
         /// Returns a dictionary that maps parameter names to their declared types.
         /// </summary>
-        private Dictionary<string, ParameterType> ExtractParameterTypes(IDictionary customMetadata)
+        private IReadOnlyDictionary<string, ParameterType> ExtractParameterTypes(IDictionary customMetadata)
         {
-            Dictionary<string, ParameterType> parameterTypes = new();
-            List<string> keysToRemove = new();
+            Dictionary<string, ParameterType> parameterTypes = null;
+            List<string> keysToRemove = null;
 
             foreach (DictionaryEntry entry in customMetadata)
             {
@@ -301,6 +302,14 @@ namespace Microsoft.Build.Tasks
                     // type indicator when it was previously being used as a named attribute parameter.
                     if (customMetadata.Contains(parameterNameKey))
                     {
+                        // Delay-create the collections to avoid allocations
+                        // when no parameter types are specified.
+                        if (parameterTypes == null)
+                        {
+                            parameterTypes = new();
+                            keysToRemove = new();
+                        }
+
                         // Remove this metadata item so that
                         // we don't use it as a parameter name.
                         keysToRemove.Add(key);
@@ -322,6 +331,14 @@ namespace Microsoft.Build.Tasks
                     // metadata item for the parameter for backward-compatibility reasons.
                     if (customMetadata.Contains(parameterNameKey))
                     {
+                        // Delay-create the collections to avoid allocations
+                        // when no parameter types are specified.
+                        if (parameterTypes == null)
+                        {
+                            parameterTypes = new();
+                            keysToRemove = new();
+                        }
+
                         // Remove this metadata item so that
                         // we don't use it as a parameter name.
                         keysToRemove.Add(key);
@@ -340,12 +357,15 @@ namespace Microsoft.Build.Tasks
 
             // Remove any metadata items that we used
             // for type names or literal flags.
-            foreach (var key in keysToRemove)
+            if (keysToRemove != null)
             {
-                customMetadata.Remove(key);
+                foreach (var key in keysToRemove)
+                {
+                    customMetadata.Remove(key);
+                }
             }
 
-            return parameterTypes;
+            return parameterTypes ?? EmptyParameterTypes;
         }
 
         /// <summary>
