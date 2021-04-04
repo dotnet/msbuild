@@ -23,7 +23,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RazorEncConfigFile>$(_RazorSdkSourceGeneratorDirectoryRoot)RazorSourceGenerator.razorencconfig</RazorEncConfigFile>
     </PropertyGroup>
 
-    <EditorConfigFiles Include="$(RazorEncConfigFile)" Condition="'$(DesignTimeBuild)' == 'true' AND '$(BuildingInsideVisualStudio)' == 'true'"/>
+    <ItemGroup>
+      <EditorConfigFiles Include="$(RazorEncConfigFile)" Condition="'$(DesignTimeBuild)' == 'true' AND '$(BuildingInsideVisualStudio)' == 'true'"/>
+    </ItemGroup>
 
     <!-- Configure analyzers -->
     <ItemGroup>
