@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Tasks
                 // types of the parameters. Search for it by the given type name,
                 // as well as within the namespaces that we automatically import.
                 Lazy<Type> attributeType = new(
-                    () => Type.GetType(attribute.Name) ?? NamespaceImports.Select(x => Type.GetType($"{x}.{attribute.Name}")).FirstOrDefault(),
+                    () => Type.GetType(attribute.Name, throwOnError: false) ?? NamespaceImports.Select(x => Type.GetType($"{x}.{attribute.Name}", throwOnError: false)).FirstOrDefault(),
                     System.Threading.LazyThreadSafetyMode.None
                 );
 
@@ -443,11 +443,9 @@ namespace Microsoft.Build.Tasks
             // The attribute type might not be known.
             if (attributeType is not null)
             {
-                List<Type[]> candidates;
-
                 // Find the constructors with the same number
                 // of parameters as we will be specifying.
-                candidates = attributeType
+                List<Type[]> candidates = attributeType
                     .GetConstructors()
                     .Select(c => c.GetParameters().Select(p => p.ParameterType).ToArray())
                     .Where(t => t.Length == positionalParameters.Count)
@@ -462,8 +460,8 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources("WriteCodeFragment.MultipleConstructorsFound");
 
                     // Before parameter types could be specified, all parameter values were
-                    // treated as strings. To be backward-compatible, we need prefer the
-                    // constructor that has all string parameters, if it exists.
+                    // treated as strings. To be backward-compatible, we need to prefer 
+                    // the constructor that has all string parameters, if it exists.
                     var allStringParameters = candidates.FirstOrDefault(c => c.All(t => t == typeof(string)));
 
                     if (allStringParameters is not null)
@@ -492,7 +490,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool TryConvertParameterValue(string typeName, string rawValue, out CodeExpression value)
         {
-            var parameterType = Type.GetType(typeName);
+            var parameterType = Type.GetType(typeName, throwOnError: false);
 
             if (parameterType is null)
             {
