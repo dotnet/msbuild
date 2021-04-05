@@ -34,10 +34,12 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - publish: artifacts/log/Debug
-    artifact: FullOnWindows Build Logs
-    displayName: 'Publish Artifact: Logs'
-    parallel: true
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: 'artifacts/log/Debug'
+      artifactName: 'FullOnWindows Build Logs'
+      displayName: 'Publish Artifact: Logs'
+      parallel: true
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
@@ -78,10 +80,12 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - publish: artifacts/log/Debug
-    artifact: WindowsOnCore Build Logs
-    displayName: 'Publish Artifact: Logs'
-    parallel: true
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: 'artifacts/log/Debug'
+      artifactName: 'FullOnWindows Build Logs'
+      displayName: 'Publish Artifact: Logs'
+      parallel: true
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
