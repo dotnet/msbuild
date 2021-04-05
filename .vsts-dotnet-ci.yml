@@ -40,6 +40,7 @@ jobs:
       artifactName: 'FullOnWindows Build Logs'
       displayName: 'Publish Artifact: Logs'
       parallel: true
+    timeOutInMinutes: 5
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
@@ -86,6 +87,7 @@ jobs:
       artifactName: 'FullOnWindows Build Logs'
       displayName: 'Publish Artifact: Logs'
       parallel: true
+    timeOutInMinutes: 5
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
