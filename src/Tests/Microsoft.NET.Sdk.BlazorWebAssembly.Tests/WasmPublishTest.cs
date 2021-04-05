@@ -250,7 +250,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         {
             // Arrange
             var testAppName = "BlazorWasmWithLibrary";
-            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: basePath);
 
             testInstance.WithProjectChanges((path, project) =>
             {
@@ -311,7 +311,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
         public void Publish_Hosted_WithStaticWebBasePathWorks(string basePath)
         {
             var testAppName = "BlazorHosted";
-            var testInstance = CreateAspNetSdkTestAsset(testAppName);
+            var testInstance = CreateAspNetSdkTestAsset(testAppName, identifier: basePath);
 
             testInstance.WithProjectChanges((path, project) =>
             {

@@ -91,7 +91,7 @@ Commands:
         [InlineData("ihave?inv@lid/char\\acters")]
         public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
         {
-            var setup = Setup();
+            var setup = Setup(identifier: projName);
 
             var cmd = new ListReferenceCommand(Log)
                     .WithProject(projName)
