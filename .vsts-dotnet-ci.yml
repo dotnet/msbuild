@@ -40,8 +40,7 @@ jobs:
         Write-Host "Checking Process ID: $s"
         (Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s").CommandLine
       }
-      taskkill /f /im msbuild.exe
-      taskkill /f /im vbcscompiler.exe
+      dotnet build-server shutdown
     displayName: Kill Hanging Processes
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -94,8 +93,7 @@ jobs:
         Write-Host "Checking Process ID: $s"
         (Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s").CommandLine
       }
-      taskkill /f /im msbuild.exe
-      taskkill /f /im vbcscompiler.exe
+      dotnet build-server shutdown
     displayName: Kill Hanging Processes
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
