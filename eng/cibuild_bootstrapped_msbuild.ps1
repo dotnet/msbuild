@@ -126,6 +126,7 @@ try {
 
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
+  $env:MSBUILDDISABLENODEREUSE="1"
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
