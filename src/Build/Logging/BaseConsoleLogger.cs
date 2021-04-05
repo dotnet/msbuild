@@ -908,13 +908,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="eventSource">Available events.</param>
         public virtual void Initialize(IEventSource eventSource)
         {
-            ParseParameters();
-
             // Always show perf summary for diagnostic verbosity.
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
                 this.showPerfSummary = true;
             }
+
+            ParseParameters();
 
             showTargetOutputs = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING"));
 
@@ -974,6 +974,9 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 case "PERFORMANCESUMMARY":
                     showPerfSummary = true;
+                    return true;
+                case "NOPERFORMANCESUMMARY":
+                    showPerfSummary = false;
                     return true;
                 case "NOSUMMARY":
                     ShowSummary = false;
