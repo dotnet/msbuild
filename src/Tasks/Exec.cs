@@ -651,7 +651,7 @@ namespace Microsoft.Build.Tasks
 
             for (int i = 0; i < _charactersToEscape.Length; i++)
             {
-                if ((c | _charactersToEscape[i]) == c)
+                if (c == _charactersToEscape[i])
                 {
                     return true;
                 }
