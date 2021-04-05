@@ -26,8 +26,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly bool _skipManifestUpdate;
         private readonly string _fromCacheOption;
         private readonly bool _printDownloadLinkOnly;
-        private IReadOnlyCollection<string> _workloadIds;
-        private WorkloadInstallManager _workloadInstallManager;
+        private readonly IReadOnlyCollection<string> _workloadIds;
+        private readonly WorkloadInstallManager _workloadInstallManager;
 
         public readonly string MockInstallDirectory = Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath,
             "DEV_mockworkloads");

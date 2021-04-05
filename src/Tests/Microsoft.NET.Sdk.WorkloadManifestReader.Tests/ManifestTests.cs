@@ -18,7 +18,7 @@ namespace ManifestReaderTests
 
         public ManifestTests(ITestOutputHelper log) : base(log)
         {
-            ManifestPath = Path.Combine(_testAssetsManager.GetTestManifestsDirectory(), "SampleManifest", "Sample.json");
+            ManifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
         }
 
         [Fact]

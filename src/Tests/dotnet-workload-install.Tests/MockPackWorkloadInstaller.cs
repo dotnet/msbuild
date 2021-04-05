@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public override void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
         {
             WorkloadInstallRecord.Add(workloadId);
-            if (workloadId.Equals(FailingWorkload))
+            if (workloadId.ToString().Equals(FailingWorkload))
             {
                 throw new Exception($"Failing workload: {workloadId}");
             }

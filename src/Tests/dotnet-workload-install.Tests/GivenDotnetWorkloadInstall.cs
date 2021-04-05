@@ -23,11 +23,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public GivenDotnetWorkloadInstall(ITestOutputHelper log) : base(log)
         {
             _reporter = new BufferedReporter();
-            _manifestPath = Path.Combine(_testAssetsManager.GetTestManifestsDirectory(), "SampleManifest", "Sample.json");
+            _manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
         }
 
         [Fact]
-        public void WorkloadInstallManagerOrchestratesPackInstallation()
+        public void GivenWorkloadInstallItCanInstallPacks()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Fact]
-        public void WorkloadInstallManagerCanRollBackPackInstallation()
+        public void GivenWorkloadInstallItCanRollBackPackInstallation()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;

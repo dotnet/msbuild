@@ -15,9 +15,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     internal class WorkloadInstallManager
     {
         private readonly IReporter _reporter;
-        private IWorkloadInstaller _workloadInstaller;
-        private IWorkloadResolver _workloadResolver;
-        private ReleaseVersion _sdkVersion;
+        private readonly IWorkloadInstaller _workloadInstaller;
+        private readonly IWorkloadResolver _workloadResolver;
+        private readonly ReleaseVersion _sdkVersion;
 
         public WorkloadInstallManager(
             IReporter reporter,
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 throw new NotImplementedException();
             }
 
-            InstallWorkloadComponents(workloadIds, featureBand);
+            InstallWorkloadsWithInstallRecord(workloadIds, featureBand);
 
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter.WriteLine();
         }
 
-        private void InstallWorkloadComponents(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
+        private void InstallWorkloadsWithInstallRecord(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
