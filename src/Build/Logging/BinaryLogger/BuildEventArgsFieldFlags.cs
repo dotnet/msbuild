@@ -22,6 +22,8 @@ namespace Microsoft.Build.Logging
         LineNumber = 1 << 10,
         ColumnNumber = 1 << 11,
         EndLineNumber = 1 << 12,
-        EndColumnNumber = 1 << 13
+        EndColumnNumber = 1 << 13,
+        Arguments = 1 << 14,
+        Importance = 1 << 15
     }
 }

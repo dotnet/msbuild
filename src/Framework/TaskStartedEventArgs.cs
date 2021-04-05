@@ -122,5 +122,24 @@ namespace Microsoft.Build.Framework
         /// MSBuild file where this task was defined.   
         /// </summary>
         public string TaskFile => taskFile;
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    lock (locker)
+                    {
+                        if (RawMessage == null)
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskStarted", TaskName);
+                        }
+                    }
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }

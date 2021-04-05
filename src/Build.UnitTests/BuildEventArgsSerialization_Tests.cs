@@ -16,6 +16,12 @@ namespace Microsoft.Build.UnitTests
 {
     public class BuildEventArgsSerializationTests
     {
+        public BuildEventArgsSerializationTests()
+        {
+            // touch the type so that static constructor runs
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+        }
+
         [Fact]
         public void RoundtripBuildStartedEventArgs()
         {
@@ -62,7 +68,7 @@ namespace Microsoft.Build.UnitTests
         {
             var args = new ProjectStartedEventArgs(
                 projectId: 42,
-                message: "Project started message",
+                message: "Project \"test.proj\" (Build target(s)):",
                 helpKeyword: "help",
                 projectFile: "C:\\test.proj",
                 targetNames: "Build",
@@ -431,7 +437,7 @@ namespace Microsoft.Build.UnitTests
         public void RoundtripTargetSkippedEventArgs()
         {
             var args = new TargetSkippedEventArgs(
-                "Message")
+                "Target \"target\" skipped. Previously built unsuccessfully.")
             {
                 BuildEventContext = BuildEventContext.Invalid,
                 ProjectFile = "foo.csproj",
@@ -473,13 +479,13 @@ namespace Microsoft.Build.UnitTests
         public void RoundTripPropertyReassignmentEventArgs()
         {
             var args = new PropertyReassignmentEventArgs(
-                propertyName: Guid.NewGuid().ToString(),
-                previousValue: Guid.NewGuid().ToString(),
-                newValue: Guid.NewGuid().ToString(),
-                location: Guid.NewGuid().ToString(),
-                message: Guid.NewGuid().ToString(),
-                helpKeyword: Guid.NewGuid().ToString(),
-                senderName: Guid.NewGuid().ToString());
+                propertyName: "a",
+                previousValue: "b",
+                newValue: "c",
+                location: "d",
+                message: "Property reassignment: $(a)=\"c\" (previous value: \"b\") at d",
+                helpKeyword: "e",
+                senderName: "f");
 
             Roundtrip(args,
                 e => e.PropertyName,

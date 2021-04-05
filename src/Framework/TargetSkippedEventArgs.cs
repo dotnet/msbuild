@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -26,7 +28,20 @@ namespace Microsoft.Build.Framework
             string message,
             params object[] messageArgs
         )
-            : base(null, null, null, 0, 0, 0, 0, message, null, null, MessageImportance.Low, DateTime.UtcNow, messageArgs)
+            : base(
+                  subcategory: null,
+                  code: null,
+                  file: null,
+                  lineNumber: 0,
+                  columnNumber: 0,
+                  endLineNumber: 0,
+                  endColumnNumber: 0,
+                  message: message,
+                  helpKeyword: null,
+                  senderName: null,
+                  importance: MessageImportance.Low,
+                  eventTimestamp: DateTime.UtcNow,
+                  messageArgs: messageArgs)
         {
         }
 
@@ -49,5 +64,71 @@ namespace Microsoft.Build.Framework
         /// Why the parent target built this target.
         /// </summary>
         public TargetBuiltReason BuildReason { get; set; }
+
+        public bool OriginallySucceeded { get; set; }
+
+        public string Condition { get; set; }
+
+        public string EvaluatedCondition { get; set; }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            writer.WriteOptionalString(TargetName);
+            writer.WriteOptionalString(ParentTarget);
+            writer.WriteOptionalString(TargetFile);
+            writer.WriteOptionalString(Condition);
+            writer.WriteOptionalString(EvaluatedCondition);
+            writer.Write7BitEncodedInt((int)BuildReason);
+            writer.Write(OriginallySucceeded);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            TargetName = reader.ReadOptionalString();
+            ParentTarget = reader.ReadOptionalString();
+            TargetFile = reader.ReadOptionalString();
+            Condition = reader.ReadOptionalString();
+            EvaluatedCondition = reader.ReadOptionalString();
+            BuildReason = (TargetBuiltReason)reader.Read7BitEncodedInt();
+            OriginallySucceeded = reader.ReadBoolean();
+        }
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    lock (locker)
+                    {
+                        if (RawMessage == null)
+                        {
+                            if (Condition != null)
+                            {
+                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword(
+                                    "TargetSkippedFalseCondition",
+                                    TargetName,
+                                    Condition,
+                                    EvaluatedCondition);
+                            }
+                            else
+                            {
+                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword(
+                                    OriginallySucceeded
+                                    ? "TargetAlreadyCompleteSuccess"
+                                    : "TargetAlreadyCompleteFailure",
+                                    TargetName);
+                            }
+                        }
+                    }
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }

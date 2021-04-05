@@ -38,6 +38,7 @@ namespace Microsoft.Build.Framework
         public Microsoft.Build.Framework.BuildEventContext BuildEventContext { get { throw null; } set { } }
         public string HelpKeyword { get { throw null; } }
         public virtual string Message { get { throw null; } protected set { } }
+        protected internal string RawMessage { get { throw null; } set { } }
         protected internal System.DateTime RawTimestamp { get { throw null; } set { } }
         public string SenderName { get { throw null; } }
         public int ThreadId { get { throw null; } }
@@ -340,6 +341,8 @@ namespace Microsoft.Build.Framework
     }
     public partial class LazyFormattedBuildEventArgs : Microsoft.Build.Framework.BuildEventArgs
     {
+        [System.NonSerializedAttribute]
+        protected object locker;
         protected LazyFormattedBuildEventArgs() { }
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName) { }
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
@@ -408,6 +411,7 @@ namespace Microsoft.Build.Framework
         protected ProjectFinishedEventArgs() { }
         public ProjectFinishedEventArgs(string message, string helpKeyword, string projectFile, bool succeeded) { }
         public ProjectFinishedEventArgs(string message, string helpKeyword, string projectFile, bool succeeded, System.DateTime eventTimestamp) { }
+        public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public bool Succeeded { get { throw null; } }
     }
@@ -431,6 +435,7 @@ namespace Microsoft.Build.Framework
         public ProjectStartedEventArgs(string message, string helpKeyword, string projectFile, string targetNames, System.Collections.IEnumerable properties, System.Collections.IEnumerable items, System.DateTime eventTimestamp) { }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } }
         public System.Collections.IEnumerable Items { get { throw null; } }
+        public override string Message { get { throw null; } }
         public Microsoft.Build.Framework.BuildEventContext ParentProjectBuildEventContext { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public int ProjectId { get { throw null; } }
@@ -452,6 +457,7 @@ namespace Microsoft.Build.Framework
         public PropertyReassignmentEventArgs() { }
         public PropertyReassignmentEventArgs(string propertyName, string previousValue, string newValue, string location, string message, string helpKeyword = null, string senderName = null, Microsoft.Build.Framework.MessageImportance importance = Microsoft.Build.Framework.MessageImportance.Low) { }
         public string Location { get { throw null; } set { } }
+        public override string Message { get { throw null; } }
         public string NewValue { get { throw null; } set { } }
         public string PreviousValue { get { throw null; } set { } }
         public string PropertyName { get { throw null; } set { } }
@@ -558,6 +564,7 @@ namespace Microsoft.Build.Framework
         public TargetFinishedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, bool succeeded) { }
         public TargetFinishedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, bool succeeded, System.Collections.IEnumerable targetOutputs) { }
         public TargetFinishedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, bool succeeded, System.DateTime eventTimestamp, System.Collections.IEnumerable targetOutputs) { }
+        public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public bool Succeeded { get { throw null; } }
         public string TargetFile { get { throw null; } }
@@ -570,6 +577,10 @@ namespace Microsoft.Build.Framework
         public TargetSkippedEventArgs() { }
         public TargetSkippedEventArgs(string message, params object[] messageArgs) { }
         public Microsoft.Build.Framework.TargetBuiltReason BuildReason { get { throw null; } set { } }
+        public string Condition { get { throw null; } set { } }
+        public string EvaluatedCondition { get { throw null; } set { } }
+        public override string Message { get { throw null; } }
+        public bool OriginallySucceeded { get { throw null; } set { } }
         public string ParentTarget { get { throw null; } set { } }
         public string TargetFile { get { throw null; } set { } }
         public string TargetName { get { throw null; } set { } }
@@ -581,6 +592,7 @@ namespace Microsoft.Build.Framework
         public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, string parentTarget, Microsoft.Build.Framework.TargetBuiltReason buildReason, System.DateTime eventTimestamp) { }
         public TargetStartedEventArgs(string message, string helpKeyword, string targetName, string projectFile, string targetFile, string parentTarget, System.DateTime eventTimestamp) { }
         public Microsoft.Build.Framework.TargetBuiltReason BuildReason { get { throw null; } }
+        public override string Message { get { throw null; } }
         public string ParentTarget { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public string TargetFile { get { throw null; } }
@@ -600,6 +612,7 @@ namespace Microsoft.Build.Framework
         protected TaskFinishedEventArgs() { }
         public TaskFinishedEventArgs(string message, string helpKeyword, string projectFile, string taskFile, string taskName, bool succeeded) { }
         public TaskFinishedEventArgs(string message, string helpKeyword, string projectFile, string taskFile, string taskName, bool succeeded, System.DateTime eventTimestamp) { }
+        public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public bool Succeeded { get { throw null; } }
         public string TaskFile { get { throw null; } }
@@ -621,6 +634,8 @@ namespace Microsoft.Build.Framework
         TaskOutput = 1,
         AddItem = 2,
         RemoveItem = 3,
+        SkippedTargetInputs = 4,
+        SkippedTargetOutputs = 5,
     }
     public partial class TaskPropertyInfo
     {
@@ -637,6 +652,7 @@ namespace Microsoft.Build.Framework
         protected TaskStartedEventArgs() { }
         public TaskStartedEventArgs(string message, string helpKeyword, string projectFile, string taskFile, string taskName) { }
         public TaskStartedEventArgs(string message, string helpKeyword, string projectFile, string taskFile, string taskName, System.DateTime eventTimestamp) { }
+        public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public string TaskFile { get { throw null; } }
         public string TaskName { get { throw null; } }

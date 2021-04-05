@@ -17,6 +17,8 @@ namespace Microsoft.Build.Framework
         TaskOutput,
         AddItem,
         RemoveItem,
+        SkippedTargetInputs,
+        SkippedTargetOutputs
     }
 
     /// <summary>
@@ -84,7 +86,7 @@ namespace Microsoft.Build.Framework
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             Kind = (TaskParameterMessageKind)reader.Read7BitEncodedInt();
-            ItemType = reader.ReadString();
+            ItemType = reader.ReadOptionalString();
             Items = ReadItems(reader);
         }
 
@@ -131,7 +133,7 @@ namespace Microsoft.Build.Framework
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.Write7BitEncodedInt((int)Kind);
-            writer.Write(ItemType);
+            writer.WriteOptionalString(ItemType);
             WriteItems(writer, Items);
         }
 
