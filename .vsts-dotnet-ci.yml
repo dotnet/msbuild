@@ -34,15 +34,10 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - powershell: | 
-      taskkill /f /im msbuild.exe
-      taskkill /f /im vbcscompiler.exe
-    displayName: Kill Hanging Processes
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs'
-    inputs:
-      PathtoPublish: 'artifacts/log/Debug'
-      ArtifactName: 'FullOnWindows build logs'
+  - publish: artifacts/log/Debug
+    artifact: FullOnWindows Build Logs
+    displayName: 'Publish Artifact: Logs'
+    parallel: true
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
@@ -83,15 +78,10 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: always()
-  - powershell: | 
-      taskkill /f /im msbuild.exe
-      taskkill /f /im vbcscompiler.exe
-    displayName: Kill Hanging Processes
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs'
-    inputs:
-      PathtoPublish: 'artifacts/log/Debug'
-      ArtifactName: 'CoreOnWindows build logs'
+  - publish: artifacts/log/Debug
+    artifact: WindowsOnCore Build Logs
+    displayName: 'Publish Artifact: Logs'
+    parallel: true
     continueOnError: true
     condition: always()
   - task: PublishBuildArtifacts@1
