@@ -253,8 +253,8 @@ namespace Microsoft.Build.Tasks
                 );
 
                 if (
-                    !AddArguments(attribute, attributeType, providedOrderedParameters, true)
-                    || !AddArguments(attribute, attributeType, namedParameters, false))
+                    !AddArguments(attribute, attributeType, providedOrderedParameters, isPositional: true)
+                    || !AddArguments(attribute, attributeType, namedParameters, isPositional: false))
                 {
                     return null;
                 }
