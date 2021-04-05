@@ -9,7 +9,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -1238,7 +1237,12 @@ namespace Microsoft.Build.Tasks
             private ConcurrentDictionary<string, List<string>> directoryToFileList;
             private int hash;
 
-            internal SDKInfo() { }
+            internal SDKInfo()
+            {
+                pathToReferenceMetadata = new();
+                directoryToFileList = new();
+                hash = 0;
+            }
 
             public SDKInfo(ITranslator translator) : this()
             {
@@ -1295,12 +1299,25 @@ namespace Microsoft.Build.Tasks
 
         private static void TranslateConcurrentDictionary<T>(ITranslator translator, ref ConcurrentDictionary<string, T> dictionary, ObjectTranslator<T> objTranslator)
         {
-            foreach (KeyValuePair<string, T> kvp in dictionary)
+            int count = dictionary.Count;
+            translator.Translate(ref count);
+            string[] keys = dictionary.Keys.ToArray();
+            for (int i = 0; i < count; i++)
             {
-                string key = kvp.Key;
-                T value = kvp.Value;
-                translator.Translate(ref key);
-                objTranslator(translator, ref value);
+                if (i < keys.Length)
+                {
+                    translator.Translate(ref keys[i]);
+                    T value = dictionary[keys[i]];
+                    objTranslator(translator, ref value);
+                }
+                else
+                {
+                    string key = null;
+                    translator.Translate(ref key);
+                    T value = default;
+                    objTranslator(translator, ref value);
+                    dictionary[key] = value;
+                }                
             }
         }
 
