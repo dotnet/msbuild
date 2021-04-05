@@ -35,11 +35,11 @@ jobs:
     continueOnError: true
     condition: always()
   - powershell: | 
-        Get-ChildItem -Path "artifacts\log\Debug\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
-          $s = $_.BaseName.Split('-')[1];
-          Write-Host "Checking Process ID: $s"
-          (Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s").CommandLine
-        }
+      Get-ChildItem -Path "artifacts\log\Debug\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
+        $s = $_.BaseName.Split('-')[1];
+        Write-Host "Checking Process ID: $s"
+        (Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s").CommandLine
+      }
       taskkill /f /im msbuild.exe
       taskkill /f /im vbcscompiler.exe
     displayName: Kill Hanging Processes
@@ -89,11 +89,11 @@ jobs:
     continueOnError: true
     condition: always()
   - powershell: | 
-        Get-ChildItem -Path "artifacts\log\Debug\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
-          $s = $_.BaseName.Split('-')[1];
-          Write-Host "Checking Process ID: $s"
-          (Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s").CommandLine
-        }
+      Get-ChildItem -Path "artifacts\log\Debug\PerformanceLogs\*" | Where-Object {$_.Extension -eq '.log'} | ForEach-Object {
+        $s = $_.BaseName.Split('-')[1];
+        Write-Host "Checking Process ID: $s"
+        (Get-WmiObject -Query "SELECT CommandLine FROM Win32_Process WHERE ProcessID = $s").CommandLine
+      }
       taskkill /f /im msbuild.exe
       taskkill /f /im vbcscompiler.exe
     displayName: Kill Hanging Processes
