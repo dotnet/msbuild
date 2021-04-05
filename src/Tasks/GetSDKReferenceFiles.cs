@@ -1272,7 +1272,7 @@ namespace Microsoft.Build.Tasks
 
             public void Translate(ITranslator translator)
             {
-                translator.TranslateConcurrentDictionary<SdkReferenceInfo>(ref pathToReferenceMetadata, (ITranslator t, ref SdkReferenceInfo info) =>
+                TranslateConcurrentDictionary<SdkReferenceInfo>(translator, ref pathToReferenceMetadata, (ITranslator t, ref SdkReferenceInfo info) =>
                 {
                     string fusionName = info.FusionName;
                     string imageRuntime = info.ImageRuntime;
@@ -1284,12 +1284,23 @@ namespace Microsoft.Build.Tasks
                     t.Translate(ref isWinmd);
                 });
 
-                translator.TranslateConcurrentDictionary<List<string>>(ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
+                TranslateConcurrentDictionary<List<string>>(translator, ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
                 });
 
                 translator.Translate(ref hash);
+            }
+        }
+
+        private static void TranslateConcurrentDictionary<T>(ITranslator translator, ref ConcurrentDictionary<string, T> dictionary, ObjectTranslator<T> objTranslator)
+        {
+            foreach (KeyValuePair<string, T> kvp in dictionary)
+            {
+                string key = kvp.Key;
+                T value = kvp.Value;
+                translator.Translate(ref key);
+                objTranslator(translator, ref value);
             }
         }
 

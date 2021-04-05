@@ -111,23 +111,6 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), collectionCreator);
         }
 
-#if NET40_OR_GREATER
-        public static void TranslateConcurrentDictionary<T>(
-            this ITranslator translator,
-            ref ConcurrentDictionary<string, T> dictionary,
-            ObjectTranslator<T> objTranslator)
-        {
-            foreach (KeyValuePair<string, T> kvp in dictionary)
-            {
-                string key = kvp.Key;
-                T value = kvp.Value;
-                translator.Translate(ref key);
-                objTranslator(translator, ref value);
-
-            }
-        }
-#endif
-
         public static void TranslateHashSet<T>(
             this ITranslator translator,
             ref HashSet<T> hashSet,
