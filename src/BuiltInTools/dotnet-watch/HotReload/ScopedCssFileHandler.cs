@@ -5,18 +5,18 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Watcher.Internal;
+using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
     internal sealed class ScopedCssFileHandler
     {
-        private static readonly string _muxerPath = new Muxer().MuxerPath;
+        private static readonly string _muxerPath = DotnetMuxer.MuxerPath;
         private readonly ProcessRunner _processRunner;
-        private readonly Extensions.Tools.Internal.IReporter _reporter;
+        private readonly IReporter _reporter;
 
-        public ScopedCssFileHandler(ProcessRunner processRunner, Extensions.Tools.Internal.IReporter reporter)
+        public ScopedCssFileHandler(ProcessRunner processRunner, IReporter reporter)
         {
             _processRunner = processRunner;
             _reporter = reporter;

@@ -209,7 +209,7 @@ namespace Microsoft.DotNet.Watcher
             var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
             if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(rootVariableName)))
             {
-                processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(new Muxer().MuxerPath);
+                processSpec.EnvironmentVariables[rootVariableName] = Path.GetDirectoryName(DotnetMuxer.MuxerPath);
             }
 
             if (context.DefaultLaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
