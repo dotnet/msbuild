@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
                 projectId: 42,
                 message: "Project \"test.proj\" (Build target(s)):",
                 helpKeyword: "help",
-                projectFile: "C:\\test.proj",
+                projectFile: Path.Combine("a", "test.proj"),
                 targetNames: "Build",
                 properties: new List<DictionaryEntry>() { new DictionaryEntry("Key", "Value") },
                 items: new List<DictionaryEntry>() { new DictionaryEntry("Key", new MyTaskItem() { ItemSpec = "TestItemSpec" }) },
