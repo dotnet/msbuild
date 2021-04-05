@@ -13,9 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal class MSBuildForwardingAppWithoutLogging
     {
-        private static readonly bool ExecuteMSBuildOutOfProcByDefault = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_EXEC_MSBUILD");
-
-        private const string MSBuildAppClassName = "Microsoft.Build.CommandLine.MSBuildApp";
+        private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_EXEC_MSBUILD");
 
         private const string MSBuildExeName = "MSBuild.dll";
 
@@ -24,13 +22,16 @@ namespace Microsoft.DotNet.Cli.Utils
         // Null if we're running MSBuild in-proc.
         private ForwardingAppImplementation _forwardingApp;
 
-        private IEnumerable<string> _argsToForward;
-
-        private string _msbuildPath;
+        // Command line arguments we're asked to forward to MSBuild.
+        private readonly IEnumerable<string> _argsToForward;
 
         internal static string MSBuildExtensionsPathTestHook = null;
 
-        internal bool ExecuteMSBuildOutOfProc => _forwardingApp != null;
+        // Path to the MSBuild binary to use.
+        public string MSBuildPath { get; }
+
+        // True if, given current state of the class, MSBuild would be executed in its own process.
+        public bool ExecuteMSBuildOutOfProc => _forwardingApp != null;
 
         private readonly Dictionary<string, string> _msbuildRequiredEnvironmentVariables =
             new Dictionary<string, string>
@@ -43,15 +44,18 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly IEnumerable<string> _msbuildRequiredParameters =
             new List<string> { "-maxcpucount", "-verbosity:m" };
 
-        public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null, bool? executeOutOfProc = null)
+        public MSBuildForwardingAppWithoutLogging(IEnumerable<string> argsToForward, string msbuildPath = null)
         {
-            _argsToForward = argsToForward;
-            _msbuildPath = msbuildPath ?? GetMSBuildExePath();
+            string defaultMSBuildPath = GetMSBuildExePath();
 
-            if (executeOutOfProc == true || (executeOutOfProc == null && ExecuteMSBuildOutOfProcByDefault))
+            _argsToForward = argsToForward;
+            MSBuildPath = msbuildPath ?? defaultMSBuildPath;
+
+            // If DOTNET_CLI_EXEC_MSBUILD is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
+            if (AlwaysExecuteMSBuildOutOfProc || string.Compare(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase) != 0)
             {
                 _forwardingApp = new ForwardingAppImplementation(
-                    _msbuildPath,
+                    MSBuildPath,
                     _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
                     environmentVariables: _msbuildRequiredEnvironmentVariables);
             }
@@ -82,10 +86,10 @@ namespace Microsoft.DotNet.Cli.Utils
             if (value == string.Empty || value == "\0")
             {
                 // Unlike ProcessStartInfo.EnvironmentVariables, Environment.SetEnvironmentVariable can't set a variable
-                // to an empty value, so we just fall back to calling MSBuild out-of-proc if we encounter this.
-                // https://github.com/dotnet/runtime/issues/34446
+                // to an empty value, so we just fall back to calling MSBuild out-of-proc if we encounter this case.
+                // https://github.com/dotnet/runtime/issues/50554
                 _forwardingApp = new ForwardingAppImplementation(
-                    _msbuildPath,
+                    MSBuildPath,
                     _msbuildRequiredParameters.Concat(_argsToForward.Select(Escape)),
                     environmentVariables: _msbuildRequiredEnvironmentVariables);
             }
@@ -117,10 +121,14 @@ namespace Microsoft.DotNet.Cli.Utils
 
                 try
                 {
+                    // Execute MSBuild in the current process by calling its Main method.
                     return Microsoft.Build.CommandLine.MSBuildApp.Main(arguments);
                 }
                 catch (Exception exception)
                 {
+                    // MSBuild, like all well-behaved CLI tools, handles all exceptions. In the unlikely case
+                    // that something still escapes, we print the exception and fail the call. Non-localized
+                    // string is OK here.
                     Console.Error.Write("Unhandled exception: ");
                     Console.Error.WriteLine(exception.ToString());
 

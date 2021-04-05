@@ -412,6 +412,7 @@ namespace Microsoft.DotNet.CommandFactory
             }
             else
             {
+                // Execute and capture output of MSBuild running in-process.
                 var outWriter = new StringWriter();
                 var errWriter = new StringWriter();
                 var savedOutWriter = Console.Out;
@@ -422,12 +423,12 @@ namespace Microsoft.DotNet.CommandFactory
                     Console.SetError(errWriter);
 
                     result = forwardingAppWithoutLogging.Execute();
+
+                    stdOut = outWriter.ToString();
+                    stdErr = errWriter.ToString();
                 }
                 finally
                 {
-                    stdOut = outWriter.ToString();
-                    stdErr = errWriter.ToString();
-
                     Console.SetOut(savedOutWriter);
                     Console.SetError(savedErrWriter);
                 }

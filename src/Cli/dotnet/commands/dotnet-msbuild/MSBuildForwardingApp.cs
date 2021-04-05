@@ -44,12 +44,11 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return argsToForward;
         }
 
-        public MSBuildForwardingApp(IEnumerable<string> argsToForward, string msbuildPath = null, bool? executeOutOfProc = null)
+        public MSBuildForwardingApp(IEnumerable<string> argsToForward, string msbuildPath = null)
         {
             _forwardingAppWithoutLogging = new MSBuildForwardingAppWithoutLogging(
                 ConcatTelemetryLogger(argsToForward),
-                msbuildPath,
-                executeOutOfProc);
+                msbuildPath);
 
             // Add the performance log location to the environment of the target process.
             if (PerformanceLogManager.Instance != null && !string.IsNullOrEmpty(PerformanceLogManager.Instance.CurrentLogDirectory))
@@ -78,14 +77,13 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public virtual int Execute()
         {
-            int exitCode;
+            // Ignore Ctrl-C for the remainder of the command's execution
+            // Forwarding commands will just spawn the child process and exit
+            Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
 
+            int exitCode;
             if (_forwardingAppWithoutLogging.ExecuteMSBuildOutOfProc)
             {
-                // Ignore Ctrl-C for the remainder of the command's execution
-                // Forwarding commands will just spawn the child process and exit
-                Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
-
                 ProcessStartInfo startInfo = GetProcessStartInfo();
 
                 PerformanceLogEventSource.Log.LogMSBuildStart(startInfo.FileName, startInfo.Arguments);
@@ -97,7 +95,9 @@ namespace Microsoft.DotNet.Tools.MSBuild
                 string[] arguments = _forwardingAppWithoutLogging.GetAllArgumentsUnescaped();
                 if (PerformanceLogEventSource.Log.IsEnabled())
                 {
-                    PerformanceLogEventSource.Log.LogMSBuildStart(string.Empty, ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(arguments));
+                    PerformanceLogEventSource.Log.LogMSBuildStart(
+                        _forwardingAppWithoutLogging.MSBuildPath,
+                        ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(arguments));
                 }
                 exitCode = _forwardingAppWithoutLogging.ExecuteInProc(arguments);
                 PerformanceLogEventSource.Log.MSBuildStop(exitCode);
