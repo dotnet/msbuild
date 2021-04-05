@@ -59,7 +59,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     </Target>
                 </Project>");
 
-                MockLogger logger = project1.BuildProjectExpectFailure();
+                MockLogger logger = project1.BuildProjectExpectFailure(validateLoggerRoundtrip: false);
 
                 VerifyBuildErrorEvent(logger);
             }
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     </Target>
                 </Project>");
 
-                MockLogger logger = project1.BuildProjectExpectSuccess();
+                MockLogger logger = project1.BuildProjectExpectSuccess(validateLoggerRoundtrip: false);
 
                 VerifyBuildMessageEvent(logger);
             }
