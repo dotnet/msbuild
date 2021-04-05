@@ -14,23 +14,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         // Workload pack installer unique methods:
-        public abstract void InstallWorkloadPack(PackInfo packInfo, string featureBand, bool useOfflineCache = false);
+        public abstract void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false);
 
-        public abstract void RollBackWorkloadPackInstall(PackInfo packInfo, string featureBand);
+        public abstract void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand);
 
         public abstract void DownloadToOfflineCache(IReadOnlyCollection<string> manifests);
 
         public abstract void GarbageCollectInstalledWorkloadPacks();
 
         // Common workload installer methods:
-        public abstract void DeleteWorkloadInstallationRecord(string workloadId, string featureBand);
+        public abstract void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
         
-        public abstract IReadOnlyCollection<string> GetFeatureBandsWithInstallationRecords();
+        public abstract IReadOnlyCollection<SdkFeatureBand> GetFeatureBandsWithInstallationRecords();
 
-        public abstract IReadOnlyCollection<string> GetInstalledWorkloads(string featureBand);
+        public abstract IReadOnlyCollection<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand);
 
-       public abstract void InstallWorkloadManifest(string manifestId, string manifestVersion, string sdkFeatureBand);
+       public abstract void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand);
 
-        public abstract void WriteWorkloadInstallationRecord(string workloadId, string featureBand);
+        public abstract void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
     }
 }

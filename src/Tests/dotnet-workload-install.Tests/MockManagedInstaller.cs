@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             _manifestPath = manifestPath;
         }
 
-        protected override WorkloadResolver GetWorkloadResolver(string featureBand)
+        protected override WorkloadResolver GetWorkloadResolver(SdkFeatureBand sdkFeatureBand)
         {
             return WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { _dotnetDir });
         }

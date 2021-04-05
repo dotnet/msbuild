@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter = reporter;
         }
 
-        public override void InstallWorkloadPack(PackInfo packInfo, string featureBand, bool useOfflineCache = false)
+        public override void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
         {
             if (useOfflineCache)
             {
@@ -71,10 +71,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadPackAlreadyInstalledMessage, packInfo.Id, packInfo.Version));
                         }
 
-                        WritePackInstallationRecord(packInfo, featureBand);
+                        WritePackInstallationRecord(packInfo, sdkFeatureBand);
                     },
                     rollback: () => {
-                        RollBackWorkloadPackInstall(packInfo, featureBand);
+                        RollBackWorkloadPackInstall(packInfo, sdkFeatureBand);
                     });
             }
             finally
@@ -96,13 +96,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public override void RollBackWorkloadPackInstall(PackInfo packInfo, string featureBand)
+        public override void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
         {
             DeletePack(packInfo);
-            DeletePackInstallationRecord(packInfo, featureBand);
+            DeletePackInstallationRecord(packInfo, sdkFeatureBand);
         }
 
-        public override void InstallWorkloadManifest(string manifestId, string manifestVersion, string sdkFeatureBand) => throw new NotImplementedException();
+        public override void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) => throw new NotImplementedException();
 
         public override void DownloadToOfflineCache(IReadOnlyCollection<string> manifests) => throw new NotImplementedException();
 
@@ -119,10 +119,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private IEnumerable<(PackInfo, string)> GetDeletablePacks(IEnumerable<string> sdkFeatureBands)
+        private IEnumerable<(PackInfo, SdkFeatureBand)> GetDeletablePacks(IEnumerable<SdkFeatureBand> sdkFeatureBands)
         {
             var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir);
-            IEnumerable<(PackInfo, string)> deletablePacks = new List<(PackInfo, string)>();
+            IEnumerable<(PackInfo, SdkFeatureBand)> deletablePacks = new List<(PackInfo, SdkFeatureBand)>();
             foreach (var featureBand in sdkFeatureBands)
             {
                 var workloadResolver = GetWorkloadResolver(featureBand);
@@ -156,31 +156,31 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return workloadResolver.TryGetPackInfo(packId);
         }
 
-        protected virtual WorkloadResolver GetWorkloadResolver(string featureBand)
+        protected virtual WorkloadResolver GetWorkloadResolver(SdkFeatureBand featureBand)
         {
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetDir, featureBand);
-            return WorkloadResolver.Create(workloadManifestProvider, _dotnetDir, featureBand);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetDir, featureBand.ToString());
+            return WorkloadResolver.Create(workloadManifestProvider, _dotnetDir, featureBand.ToString());
         }
 
-        public override IReadOnlyCollection<string> GetFeatureBandsWithInstallationRecords()
+        public override IReadOnlyCollection<SdkFeatureBand> GetFeatureBandsWithInstallationRecords()
         {
             if (Directory.Exists(_workloadMetadataDir))
             {
                 var bands = Directory.EnumerateDirectories(_workloadMetadataDir);
                 return bands
                     .Where(band => Directory.Exists(Path.Combine(band, _installedWorkloadDir)))
-                    .Select(path => Path.GetFileName(path))
+                    .Select(path => new SdkFeatureBand(Path.GetFileName(path)))
                     .ToList().AsReadOnly();
             }
             else
             {
-                return new List<string>().AsReadOnly();
+                return new List<SdkFeatureBand>().AsReadOnly();
             }
         }
 
-        public override IReadOnlyCollection<string> GetInstalledWorkloads(string featureBand)
+        public override IReadOnlyCollection<string> GetInstalledWorkloads(SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand, _installedWorkloadDir);
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir);
             if (Directory.Exists(path))
             {
                 return Directory.EnumerateFiles(path)
@@ -193,10 +193,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public override void WriteWorkloadInstallationRecord(string workloadId, string featureBand)
+        public override void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)
         {
             _reporter.WriteLine(string.Format(LocalizableStrings.WritingWorkloadInstallRecordMessage, workloadId));
-            var path = Path.Combine(_workloadMetadataDir, featureBand, _installedWorkloadDir, workloadId);
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
@@ -204,9 +204,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             File.WriteAllText(path, string.Empty);
         }
 
-        public override void DeleteWorkloadInstallationRecord(string workloadId, string featureBand)
+        public override void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)
         {
-            var path = Path.Combine(_workloadMetadataDir, featureBand, _installedWorkloadDir, workloadId);
+            var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
             if (File.Exists(path))
             {
                 File.Delete(path);
@@ -245,10 +245,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private string GetPackInstallRecordPath(PackInfo packInfo, string featureBand) =>
-            Path.Combine(_workloadMetadataDir, _installedPacksDir, packInfo.Id, packInfo.Version, featureBand);
+        private string GetPackInstallRecordPath(PackInfo packInfo, SdkFeatureBand featureBand) =>
+            Path.Combine(_workloadMetadataDir, _installedPacksDir, packInfo.Id, packInfo.Version, featureBand.ToString());
 
-        private void WritePackInstallationRecord(PackInfo packInfo, string featureBand)
+        private void WritePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand)
         {
             _reporter.WriteLine(string.Format(LocalizableStrings.WritingPackInstallRecordMessage, packInfo.Id, packInfo.Version));
             var path = GetPackInstallRecordPath(packInfo, featureBand);
@@ -259,7 +259,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             File.WriteAllText(path, string.Empty);
         }
 
-        private void DeletePackInstallationRecord(PackInfo packInfo, string featureBand)
+        private void DeletePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand)
         {
             var packInstallRecord = GetPackInstallRecordPath(packInfo, featureBand);
             if (File.Exists(packInstallRecord))

@@ -31,10 +31,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter = reporter;
         }
 
-        public void InstallWorkloads(IEnumerable<string> workloadIds, bool skipManifestUpdate = false)
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false)
         {
             _reporter.WriteLine();
-            var featureBand = string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand);
+            var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
             if (!skipManifestUpdate)
             {
@@ -53,14 +53,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter.WriteLine();
         }
 
-        private void InstallWorkloadComponents(IEnumerable<string> workloadIds, string featureBand)
+        private void InstallWorkloadComponents(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
                 var installer = _workloadInstaller as PackWorkloadInstallerBase;
 
                 var workloadPacksMap = workloadIds
-                    .Select(workloadId => (workloadId, _workloadResolver.GetPacksInWorkload(workloadId).Select(packId => _workloadResolver.TryGetPackInfo(packId))));
+                    .Select(workloadId => (workloadId, _workloadResolver.GetPacksInWorkload(workloadId.ToString()).Select(packId => _workloadResolver.TryGetPackInfo(packId))));
                 TransactionalAction.Run(
                     action: () =>
                     {
@@ -68,10 +68,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         {
                             foreach (var packId in packsToInstall)
                             {
-                                installer.InstallWorkloadPack(packId, featureBand);
+                                installer.InstallWorkloadPack(packId, sdkFeatureBand);
                             }
 
-                            _workloadInstaller.WriteWorkloadInstallationRecord(workloadId, featureBand);
+                            _workloadInstaller.WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
 
                     },
@@ -80,10 +80,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         {
                             foreach (var packId in packsToInstall)
                             {
-                                installer.RollBackWorkloadPackInstall(packId, featureBand);
+                                installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
                             }
 
-                            _workloadInstaller.DeleteWorkloadInstallationRecord(workloadId, featureBand);
+                            _workloadInstaller.DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
                     });
             }

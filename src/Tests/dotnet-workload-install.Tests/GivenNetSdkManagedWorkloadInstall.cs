@@ -65,18 +65,18 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 File.WriteAllText(Path.Combine(path, workload), string.Empty);
             }
 
-            var installedWorkloads = installer.GetInstalledWorkloads(version);
+            var installedWorkloads = installer.GetInstalledWorkloads(new SdkFeatureBand(version));
             installedWorkloads.ShouldBeEquivalentTo(workloads);
         }
 
         [Fact]
         public void ManagedInstallerCanWriteInstallationRecord()
         {
-            var workloadId = "test-workload";
+            var workloadId = new WorkloadId("test-workload");
             var version = "6.0.100";
             var (dotnetRoot, installer, _) = GetTestInstaller();
-            installer.WriteWorkloadInstallationRecord(workloadId, version);
-            var expectedPath = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads", workloadId);
+            installer.WriteWorkloadInstallationRecord(workloadId, new SdkFeatureBand(version));
+            var expectedPath = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads", workloadId.ToString());
             File.Exists(expectedPath).Should().BeTrue();
         }
 
@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
             var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
             var version = "6.0.100";
-            installer.InstallWorkloadPack(packInfo, version);
+            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
             (nugetInstaller as MockNuGetPackageInstaller).InstallCallParams.Count.Should().Be(1);
             (nugetInstaller as MockNuGetPackageInstaller).InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
             try
             {
-                installer.InstallWorkloadPack(packInfo, version);
+                installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
                 // Install should have failed
                 true.Should().BeFalse();

@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                _workloadInstallManager.InstallWorkloads(_workloadIds, _skipManifestUpdate);
+                _workloadInstallManager.InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate);
             }
 
             return 0;

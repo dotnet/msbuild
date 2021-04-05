@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void WorkloadInstallManagerOrchestratesPackInstallation()
         {
-            var mockWorkloadIds = new string[] { "xamarin-android" };
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller();
@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void WorkloadInstallManagerCanRollBackPackInstallation()
         {
-            var mockWorkloadIds = new string[] { "xamarin-android", "xamarin-android-build" };
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller(failingWorkload: "xamarin-android-build");
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             {
                 e.Message.Should().Be("Failing workload: xamarin-android-build");
                 var expectedPacks = mockWorkloadIds
-                    .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId))
+                    .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                     .Select(packId => workloadResolver.TryGetPackInfo(packId));
                 installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
                 installer.WorkloadInstallRecord.Should().BeEmpty();

@@ -9,15 +9,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         InstallationUnit GetInstallationUnit();
 
-        void InstallWorkloadManifest(string manifestId, string manifestVersion, string sdkFeatureBand);
+        void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand);
 
-        IReadOnlyCollection<string> GetInstalledWorkloads(string featureBand);
+        IReadOnlyCollection<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand);
 
-        void WriteWorkloadInstallationRecord(string workloadId, string featureBand);
+        void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
 
-        void DeleteWorkloadInstallationRecord(string workloadId, string featureBand);
+        void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
 
-        IReadOnlyCollection<string> GetFeatureBandsWithInstallationRecords();
+        IReadOnlyCollection<SdkFeatureBand> GetFeatureBandsWithInstallationRecords();
     }
 
     internal enum InstallationUnit {
