@@ -1,14 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Win32.Msi;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.Win32.Msi.Tests
 {
     public class EventArgsTests
     {
-        [Fact]
+        [WindowsOnlyFact]
         public void ItParsesProgressMessageFields()
         {
             ProgressEventArgs e = new("1: 2 2: 4 3: 6 4: 9", InstallMessage.PROGRESS, 0);
@@ -18,7 +18,7 @@ namespace Microsoft.Win32.Msi.Tests
             Assert.Equal(ProgressType.ProgressReport, e.ProgressType);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItParsesActionStartMessageFields()
         {
             ActionStartEventArgs e = new("Action 20:08:24: ProcessComponents. Updating component registration",

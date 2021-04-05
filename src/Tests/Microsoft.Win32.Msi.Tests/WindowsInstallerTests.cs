@@ -1,14 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Win32.Msi;
+using Microsoft.NET.TestFramework;
 using Xunit;
 
 namespace Microsoft.Win32.Msi.Tests
 {
     public class WindowsInstallerTests
     {
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("", "", Error.INVALID_PARAMETER)]
         [InlineData("{807215B4-F42F-4E5F-BFEE-9817D7F2CEA5}", "ProductVersion", Error.UNKNOWN_PRODUCT)]
         public void InstallProductReturnsAnError(string productCode, string property, uint expectedError)
@@ -18,7 +18,7 @@ namespace Microsoft.Win32.Msi.Tests
             Assert.Equal(error, expectedError);
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("", InstallState.INVALIDARG)]
         [InlineData("{807215B4-F42F-4E5F-BFEE-9817D7F2CEA5}", InstallState.UNKNOWN)]
         public void QueryProductStateReturnsAnError(string productCode, InstallState expectedState)

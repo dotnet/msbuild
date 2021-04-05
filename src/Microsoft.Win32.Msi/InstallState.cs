@@ -49,9 +49,9 @@ namespace Microsoft.Win32.Msi
         BROKEN = 0,
 
         /// <summary>
-		/// The advertised feature.
-		/// </summary>
-		ADVERTISED = 1,
+        /// The advertised feature.
+        /// </summary>
+        ADVERTISED = 1,
 
         /// <summary>
         /// The component is being removed. In action state and not settable.
