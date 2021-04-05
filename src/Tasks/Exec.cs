@@ -54,9 +54,8 @@ namespace Microsoft.Build.Tasks
         private Encoding _standardOutputEncoding;
         private string _command;
 
-        // '^' before _any_ character escapes that character. Don't escape '^'.
-        // '&' and ' ' also need to be escaped, but that's handled already.
-        private char[] _charactersToEscape = { '(', ')', '=', ';', '!', ','};
+        // '^' before _any_ character escapes that character, don't escape it.
+        private char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' '};
 
         #endregion
 
@@ -191,8 +190,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
-
-        public bool EscapeSpecialCharacters { get; set; } = false;
 
         #endregion
 
@@ -615,28 +612,34 @@ namespace Microsoft.Build.Tasks
                     }
                     commandLine.AppendSwitch("/C"); // run then terminate
 
-                    // If for some crazy reason the path has a & character and a space in it
-                    // then get the short path of the temp path, which should not have spaces in it
-                    if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
                     {
-                        batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                    }
+                        StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
 
-                    StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
-
-                    // Escape any '&' or special characters when the user specifies EscapeSpecialCharacters.
-                    for (int i = 0; i < batchFileForCommandLine.Length; i++)
-                    {
-                        char c = batchFileForCommandLine[i];
-
-                        if ((c == '&' || ShouldEscapeCharacter(c)) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
+                        // Escape special characters that need to be escaped.
+                        for (int i = 0; i < batchFileForCommandLine.Length; i++)
                         {
-                            fileName.Append('^');
-                        }
-                        fileName.Append(c);
-                    }
+                            char c = batchFileForCommandLine[i];
 
-                    batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
+                            if (ShouldEscapeCharacter(c) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
+                            {
+                                fileName.Append('^');
+                            }
+                            fileName.Append(c);
+                        }
+                        batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
+                    }
+                    else
+                    {
+                        // If for some crazy reason the path has a & character and a space in it
+                        // then get the short path of the temp path, which should not have spaces in it
+                        // and then escape the &
+                        if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                        {
+                            batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
+                            batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                        }
+                    }
                 }
 
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
@@ -645,11 +648,6 @@ namespace Microsoft.Build.Tasks
 
         private bool ShouldEscapeCharacter(char c)
         {
-            if (!EscapeSpecialCharacters)
-            {
-                return false;
-            }
-
             for (int i = 0; i < _charactersToEscape.Length; i++)
             {
                 if (c == _charactersToEscape[i])

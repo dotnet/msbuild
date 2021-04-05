@@ -320,7 +320,6 @@ namespace Microsoft.Build.Tasks
         public bool ConsoleToMSBuild { get { throw null; } set { } }
         public string CustomErrorRegularExpression { get { throw null; } set { } }
         public string CustomWarningRegularExpression { get { throw null; } set { } }
-        public bool EscapeSpecialCharacters { get { throw null; } set { } }
         public bool IgnoreExitCode { get { throw null; } set { } }
         public bool IgnoreStandardErrorWarningFormat { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
