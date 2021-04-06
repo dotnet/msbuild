@@ -39,6 +39,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                             $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
     <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' == '' And
+                            '$(PublishTrimmed)' == 'true' And
+                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
+    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And ('$(EnableTrimAnalyzer)' == 'true' Or '$(PublishTrimmed)' == 'true')">
     <!-- Trim analysis warnings are suppressed for .NET < 6. -->

@@ -599,7 +599,7 @@ namespace Microsoft.NET.Publish.Tests
         [Theory]
         [InlineData("net5.0")]
         [InlineData("net6.0")]
-        public void StartupHookSupport_is_false_by_default_on_trimmed_apps(string targetFramework)
+        public void TrimmingOptions_are_defaulted_correctly_on_trimmed_apps(string targetFramework)
         {
             var projectName = "HelloWorld";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
@@ -626,11 +626,15 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfig["runtimeOptions"]["configProperties"]
                     ["System.Resources.ResourceManager.AllowCustomResourceTypes"].Value<bool>()
                     .Should().Be(false);
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"].Value<bool>()
+                    .Should().Be(false);
             }
             else
             {
                 runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
                 runtimeConfigContents.Should().NotContain("System.Resources.ResourceManager.AllowCustomResourceTypes");
+                runtimeConfigContents.Should().NotContain("System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization");
             }
         }
 
