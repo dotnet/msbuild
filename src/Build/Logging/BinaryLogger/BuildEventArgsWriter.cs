@@ -1,13 +1,21 @@
-﻿using System;
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -128,71 +136,33 @@ namespace Microsoft.Build.Logging
 
         private void WriteCore(BuildEventArgs e)
         {
-            // the cases are ordered by most used first for performance
-            if (e is BuildMessageEventArgs)
+            switch (e)
             {
-                Write((BuildMessageEventArgs)e);
-            }
-            else if (e is TaskStartedEventArgs)
-            {
-                Write((TaskStartedEventArgs)e);
-            }
-            else if (e is TaskFinishedEventArgs)
-            {
-                Write((TaskFinishedEventArgs)e);
-            }
-            else if (e is TargetStartedEventArgs)
-            {
-                Write((TargetStartedEventArgs)e);
-            }
-            else if (e is TargetFinishedEventArgs)
-            {
-                Write((TargetFinishedEventArgs)e);
-            }
-            else if (e is BuildErrorEventArgs)
-            {
-                Write((BuildErrorEventArgs)e);
-            }
-            else if (e is BuildWarningEventArgs)
-            {
-                Write((BuildWarningEventArgs)e);
-            }
-            else if (e is ProjectStartedEventArgs)
-            {
-                Write((ProjectStartedEventArgs)e);
-            }
-            else if (e is ProjectFinishedEventArgs)
-            {
-                Write((ProjectFinishedEventArgs)e);
-            }
-            else if (e is BuildStartedEventArgs)
-            {
-                Write((BuildStartedEventArgs)e);
-            }
-            else if (e is BuildFinishedEventArgs)
-            {
-                Write((BuildFinishedEventArgs)e);
-            }
-            else if (e is ProjectEvaluationStartedEventArgs)
-            {
-                Write((ProjectEvaluationStartedEventArgs)e);
-            }
-            else if (e is ProjectEvaluationFinishedEventArgs)
-            {
-                Write((ProjectEvaluationFinishedEventArgs)e);
-            }
-            else
-            {
-                // convert all unrecognized objects to message
-                // and just preserve the message
-                var buildMessageEventArgs = new BuildMessageEventArgs(
-                    e.Message,
-                    e.HelpKeyword,
-                    e.SenderName,
-                    MessageImportance.Normal,
-                    e.Timestamp);
-                buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
-                Write(buildMessageEventArgs);
+                case BuildMessageEventArgs buildMessage: Write(buildMessage); break;
+                case TaskStartedEventArgs taskStarted: Write(taskStarted); break;
+                case TaskFinishedEventArgs taskFinished: Write(taskFinished); break;
+                case TargetStartedEventArgs targetStarted: Write(targetStarted); break;
+                case TargetFinishedEventArgs targetFinished: Write(targetFinished); break;
+                case BuildErrorEventArgs buildError: Write(buildError); break;
+                case BuildWarningEventArgs buildWarning: Write(buildWarning); break;
+                case ProjectStartedEventArgs projectStarted: Write(projectStarted); break;
+                case ProjectFinishedEventArgs projectFinished: Write(projectFinished); break;
+                case BuildStartedEventArgs buildStarted: Write(buildStarted); break;
+                case BuildFinishedEventArgs buildFinished: Write(buildFinished); break;
+                case ProjectEvaluationStartedEventArgs projectEvaluationStarted: Write(projectEvaluationStarted); break;
+                case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: Write(projectEvaluationFinished); break;
+                default:
+                    // convert all unrecognized objects to message
+                    // and just preserve the message
+                    var buildMessageEventArgs = new BuildMessageEventArgs(
+                        e.Message,
+                        e.HelpKeyword,
+                        e.SenderName,
+                        MessageImportance.Normal,
+                        e.Timestamp);
+                    buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
+                    Write(buildMessageEventArgs);
+                    break;
             }
         }
 
@@ -250,7 +220,7 @@ namespace Microsoft.Build.Logging
         private void Write(ProjectEvaluationStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectEvaluationStarted);
-            WriteBuildEventArgsFields(e);
+            WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
         }
 
@@ -258,15 +228,30 @@ namespace Microsoft.Build.Logging
         {
             Write(BinaryLogRecordKind.ProjectEvaluationFinished);
 
-            WriteBuildEventArgsFields(e);
+            WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
 
-            Write(e.ProfilerResult.HasValue);
-            if (e.ProfilerResult.HasValue)
+            if (e.GlobalProperties == null)
             {
-                Write(e.ProfilerResult.Value.ProfiledLocations.Count);
+                Write(false);
+            }
+            else
+            {
+                Write(true);
+                WriteProperties(e.GlobalProperties);
+            }
 
-                foreach (var item in e.ProfilerResult.Value.ProfiledLocations)
+            WriteProperties(e.Properties);
+
+            WriteProjectItems(e.Items);
+
+            var result = e.ProfilerResult;
+            Write(result.HasValue);
+            if (result.HasValue)
+            {
+                Write(result.Value.ProfiledLocations.Count);
+
+                foreach (var item in result.Value.ProfiledLocations)
                 {
                     Write(item.Key);
                     Write(item.Value);
@@ -389,51 +374,57 @@ namespace Microsoft.Build.Logging
 
         private void Write(BuildMessageEventArgs e)
         {
-            if (e is CriticalBuildMessageEventArgs)
+            if (e is TaskParameterEventArgs taskParameter)
             {
-                Write((CriticalBuildMessageEventArgs)e);
+                Write(taskParameter);
                 return;
             }
 
-            if (e is TaskCommandLineEventArgs)
+            if (e is CriticalBuildMessageEventArgs criticalBuildMessage)
             {
-                Write((TaskCommandLineEventArgs)e);
+                Write(criticalBuildMessage);
                 return;
             }
 
-            if (e is ProjectImportedEventArgs)
+            if (e is TaskCommandLineEventArgs taskCommandLine)
             {
-                Write((ProjectImportedEventArgs)e);
+                Write(taskCommandLine);
                 return;
             }
 
-            if (e is TargetSkippedEventArgs)
+            if (e is ProjectImportedEventArgs projectImported)
             {
-                Write((TargetSkippedEventArgs)e);
+                Write(projectImported);
                 return;
             }
 
-            if (e is PropertyReassignmentEventArgs)
+            if (e is TargetSkippedEventArgs targetSkipped)
             {
-                Write((PropertyReassignmentEventArgs)e);
+                Write(targetSkipped);
                 return;
             }
 
-            if (e is UninitializedPropertyReadEventArgs)
+            if (e is PropertyReassignmentEventArgs propertyReassignment)
             {
-                Write((UninitializedPropertyReadEventArgs)e);
+                Write(propertyReassignment);
                 return;
             }
 
-            if (e is EnvironmentVariableReadEventArgs)
+            if (e is UninitializedPropertyReadEventArgs uninitializedPropertyRead)
             {
-                Write((EnvironmentVariableReadEventArgs)e);
+                Write(uninitializedPropertyRead);
                 return;
             }
 
-            if (e is PropertyInitialValueSetEventArgs)
+            if (e is EnvironmentVariableReadEventArgs environmentVariableRead)
             {
-                Write((PropertyInitialValueSetEventArgs)e);
+                Write(environmentVariableRead);
+                return;
+            }
+
+            if (e is PropertyInitialValueSetEventArgs propertyInitialValueSet)
+            {
+                Write(propertyInitialValueSet);
                 return;
             }
 
@@ -507,9 +498,18 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.TaskName);
         }
 
-        private void WriteBuildEventArgsFields(BuildEventArgs e)
+        private void Write(TaskParameterEventArgs e)
         {
-            var flags = GetBuildEventArgsFieldFlags(e);
+            Write(BinaryLogRecordKind.TaskParameter);
+            WriteMessageFields(e, writeMessage: false);
+            Write((int)e.Kind);
+            WriteDeduplicatedString(e.ItemType);
+            WriteTaskItemList(e.Items, e.LogItemMetadata);
+        }
+
+        private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true)
+        {
+            var flags = GetBuildEventArgsFieldFlags(e, writeMessage);
             Write((int)flags);
             WriteBaseFields(e, flags);
         }
@@ -547,9 +547,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteMessageFields(BuildMessageEventArgs e)
+        private void WriteMessageFields(BuildMessageEventArgs e, bool writeMessage = true)
         {
-            var flags = GetBuildEventArgsFieldFlags(e);
+            var flags = GetBuildEventArgsFieldFlags(e, writeMessage);
             flags = GetMessageFlags(e, flags);
 
             Write((int)flags);
@@ -644,7 +644,7 @@ namespace Microsoft.Build.Logging
             return flags;
         }
 
-        private static BuildEventArgsFieldFlags GetBuildEventArgsFieldFlags(BuildEventArgs e)
+        private static BuildEventArgsFieldFlags GetBuildEventArgsFieldFlags(BuildEventArgs e, bool writeMessage = true)
         {
             var flags = BuildEventArgsFieldFlags.None;
             if (e.BuildEventContext != null)
@@ -657,7 +657,7 @@ namespace Microsoft.Build.Logging
                 flags |= BuildEventArgsFieldFlags.HelpHeyword;
             }
 
-            if (!string.IsNullOrEmpty(e.Message))
+            if (writeMessage)
             {
                 flags |= BuildEventArgsFieldFlags.Message;
             }
@@ -681,21 +681,70 @@ namespace Microsoft.Build.Logging
             return flags;
         }
 
-        private void WriteTaskItemList(IEnumerable items)
+        // Both of these are used simultaneously so can't just have a single list
+        private readonly List<object> reusableItemsList = new List<object>();
+        private readonly List<object> reusableProjectItemList = new List<object>();
+
+        private void WriteTaskItemList(IEnumerable items, bool writeMetadata = true)
         {
-            var taskItems = items as IEnumerable<ITaskItem>;
-            if (taskItems == null)
+            if (items == null)
             {
                 Write(false);
                 return;
             }
 
-            Write(taskItems.Count());
-
-            foreach (var item in taskItems)
+            // For target outputs bypass copying of all items to save on performance.
+            // The proxy creates a deep clone of each item to protect against writes,
+            // but since we're not writing we don't need the deep cloning.
+            // Additionally, it is safe to access the underlying List<ITaskItem> as it's allocated
+            // in a single location and noboby else mutates it after that:
+            // https://github.com/dotnet/msbuild/blob/f0eebf2872d76ab0cd43fdc4153ba636232b222f/src/Build/BackEnd/Components/RequestBuilder/TargetEntry.cs#L564
+            if (items is TargetLoggingContext.TargetOutputItemsInstanceEnumeratorProxy proxy)
             {
-                Write(item);
+                items = proxy.BackingItems;
             }
+
+            int count;
+
+            if (items is ICollection arrayList)
+            {
+                count = arrayList.Count;
+            }
+            else if (items is ICollection<ITaskItem> genericList)
+            {
+                count = genericList.Count;
+            }
+            else
+            {
+                // enumerate only once
+                foreach (var item in items)
+                {
+                    if (item != null)
+                    {
+                        reusableItemsList.Add(item);
+                    }
+                }
+
+                items = reusableItemsList;
+                count = reusableItemsList.Count;
+            }
+
+            Write(count);
+
+            foreach (var item in items)
+            {
+                if (item is ITaskItem taskItem)
+                {
+                    Write(taskItem, writeMetadata);
+                }
+                else
+                {
+                    WriteDeduplicatedString(item?.ToString() ?? ""); // itemspec
+                    Write(0); // no metadata
+                }
+            }
+
+            reusableItemsList.Clear();
         }
 
         private void WriteProjectItems(IEnumerable items)
@@ -706,55 +755,100 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            var groups = items
-                .OfType<DictionaryEntry>()
-                .GroupBy(entry => entry.Key as string, entry => entry.Value as ITaskItem)
-                .Where(group => !string.IsNullOrEmpty(group.Key))
-                .ToArray();
-
-            Write(groups.Length);
-
-            foreach (var group in groups)
+            if (items is ItemDictionary<ProjectItemInstance> itemInstanceDictionary)
             {
-                WriteDeduplicatedString(group.Key);
-                WriteTaskItemList(group);
+                // If we have access to the live data from evaluation, it exposes a special method
+                // to iterate the data structure under a lock and return results grouped by item type.
+                // There's no need to allocate or call GroupBy this way.
+                itemInstanceDictionary.EnumerateItemsPerType((itemType, itemList) =>
+                {
+                    WriteDeduplicatedString(itemType);
+                    WriteTaskItemList(itemList);
+                });
+
+                // signal the end
+                Write(0);
+            }
+            // not sure when this can get hit, but best to be safe and support this
+            else if (items is ItemDictionary<ProjectItem> itemDictionary)
+            {
+                itemDictionary.EnumerateItemsPerType((itemType, itemList) =>
+                {
+                    WriteDeduplicatedString(itemType);
+                    WriteTaskItemList(itemList);
+                });
+
+                // signal the end
+                Write(0);
+            }
+            else
+            {
+                string currentItemType = null;
+
+                // Write out a sequence of items for each item type while avoiding GroupBy
+                // and associated allocations. We rely on the fact that items of each type
+                // are contiguous. For each item type, write the item type name and the list
+                // of items. Write 0 at the end (which would correspond to item type null).
+                // This is how the reader will know how to stop. We can't write out the
+                // count of item types at the beginning because we don't know how many there
+                // will be (we'd have to enumerate twice to calculate that). This scheme
+                // allows us to stream in a single pass with no allocations for intermediate
+                // results.
+                Internal.Utilities.EnumerateItems(items, dictionaryEntry =>
+                {
+                    string key = (string)dictionaryEntry.Key;
+
+                    // boundary between item types
+                    if (currentItemType != null && currentItemType != key)
+                    {
+                        WriteDeduplicatedString(currentItemType);
+                        WriteTaskItemList(reusableProjectItemList);
+                        reusableProjectItemList.Clear();
+                    }
+
+                    reusableProjectItemList.Add(dictionaryEntry.Value);
+                    currentItemType = key;
+                });
+
+                // write out the last item type
+                if (reusableProjectItemList.Count > 0)
+                {
+                    WriteDeduplicatedString(currentItemType);
+                    WriteTaskItemList(reusableProjectItemList);
+                    reusableProjectItemList.Clear();
+                }
+
+                // signal the end
+                Write(0);
             }
         }
 
-        private void Write(ITaskItem item)
+        private void Write(ITaskItem item, bool writeMetadata = true)
         {
             WriteDeduplicatedString(item.ItemSpec);
-
-            nameValueListBuffer.Clear();
-
-            IDictionary customMetadata = item.CloneCustomMetadata();
-
-            foreach (string metadataName in customMetadata.Keys)
+            if (!writeMetadata)
             {
-                string valueOrError;
+                Write((byte)0);
+                return;
+            }
 
-                try
-                {
-                    valueOrError = item.GetMetadata(metadataName);
-                }
-                catch (InvalidProjectFileException e)
-                {
-                    valueOrError = e.Message;
-                }
-                // Temporarily try catch all to mitigate frequent NullReferenceExceptions in
-                // the logging code until CopyOnWritePropertyDictionary is replaced with
-                // ImmutableDictionary. Calling into Debug.Fail to crash the process in case
-                // the exception occures in Debug builds.
-                catch (Exception e)
-                {
-                    valueOrError = e.Message;
-                    Debug.Fail(e.ToString());
-                }
+            // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
+            // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
+            // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
+            // CopyOnWriteDictionary doesn't implement it properly.
+            foreach (var kvp in item.EnumerateMetadata())
+            {
+                nameValueListBuffer.Add(kvp);
+            }
 
-                nameValueListBuffer.Add(new KeyValuePair<string, string>(metadataName, valueOrError));
+            if (nameValueListBuffer.Count > 1)
+            {
+                nameValueListBuffer.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
             }
 
             WriteNameValueList();
+
+            nameValueListBuffer.Clear();
         }
 
         private void WriteProperties(IEnumerable properties)
@@ -765,26 +859,11 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            nameValueListBuffer.Clear();
-
-            // there are no guarantees that the properties iterator won't change, so 
-            // take a snapshot and work with the readonly copy
-            var propertiesArray = properties.OfType<DictionaryEntry>().ToArray();
-
-            for (int i = 0; i < propertiesArray.Length; i++)
-            {
-                DictionaryEntry entry = propertiesArray[i];
-                if (entry.Key is string key && entry.Value is string value)
-                {
-                    nameValueListBuffer.Add(new KeyValuePair<string, string>(key, value));
-                }
-                else
-                {
-                    nameValueListBuffer.Add(new KeyValuePair<string, string>(string.Empty, string.Empty));
-                }
-            }
+            Internal.Utilities.EnumerateProperties(properties, kvp => nameValueListBuffer.Add(kvp));
 
             WriteNameValueList();
+
+            nameValueListBuffer.Clear();
         }
 
         private void Write(BuildEventContext buildEventContext)
@@ -800,8 +879,6 @@ namespace Microsoft.Build.Logging
 
         private void Write(IEnumerable<KeyValuePair<string, string>> keyValuePairs)
         {
-            nameValueListBuffer.Clear();
-
             if (keyValuePairs != null)
             {
                 foreach (var kvp in keyValuePairs)
@@ -811,6 +888,8 @@ namespace Microsoft.Build.Logging
             }
 
             WriteNameValueList();
+
+            nameValueListBuffer.Clear();
         }
 
         private void WriteNameValueList()
@@ -893,25 +972,12 @@ namespace Microsoft.Build.Logging
 
         private void Write(int value)
         {
-            Write7BitEncodedInt(binaryWriter, value);
+            BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, value);
         }
 
         private void Write(long value)
         {
             binaryWriter.Write(value);
-        }
-
-        private void Write7BitEncodedInt(BinaryWriter writer, int value)
-        {
-            // Write out an int 7 bits at a time.  The high bit of the byte,
-            // when on, tells reader to continue reading more bytes.
-            uint v = (uint)value;   // support negative numbers
-            while (v >= 0x80)
-            {
-                writer.Write((byte)(v | 0x80));
-                v >>= 7;
-            }
-            writer.Write((byte)v);
         }
 
         private void Write(byte[] bytes)

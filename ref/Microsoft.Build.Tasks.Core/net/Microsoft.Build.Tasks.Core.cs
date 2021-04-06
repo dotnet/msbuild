@@ -333,7 +333,6 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string StdOutEncoding { get { throw null; } set { } }
         protected override string ToolName { get { throw null; } }
-        public string UseUtf8Encoding { get { throw null; } set { } }
         public string WorkingDirectory { get { throw null; } set { } }
         protected internal override void AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands) { throw null; }

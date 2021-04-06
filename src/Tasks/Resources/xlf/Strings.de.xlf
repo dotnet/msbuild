@@ -509,6 +509,11 @@
         <target state="translated">Globale Eigenschaften:</target>
         <note />
       </trans-unit>
+      <trans-unit id="General.StateFileAlreadyPresent">
+        <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
+        <target state="translated">MSB3667: Unter "{0}" ist bereits eine Datei vorhanden. Wenn Sie einen vorab berechneten Cache erstellen möchten, stellen Sie sicher, dass Sie ein einzelnes Projekt erstellen, das von Ihren Assemblys abhängt, statt Ihre Assemblys selbst zu erstellen. Wenn Sie die Aufgabe "ResolveAssemblyReference" normal ausführen, legen Sie den Parameter "AssemblyInformationCacheOutputPath" der Aufgabe "ResolveAssemblyReference" nicht fest.</target>
+        <note>{StrBegin="MSB3667: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">Eigenschaften werden entfernt:</target>
@@ -2482,7 +2487,7 @@
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
         <source>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">Die Datei "{0}" wurde nicht extrahiert, weil sie nicht dem Einschlussfilter entsprach oder weil sie dem Ausschlussfilter entsprach.</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
@@ -2517,12 +2522,12 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternInvalidPath">
         <source>MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB3937: Fehler beim Analysieren des Musters "{0}", weil es ein ungültiges Pfadzeichen enthält.</target>
         <note>{StrBegin="MSB3937: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternPropertyReferences">
         <source>MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB3938: Fehler beim Analysieren des Musters "{0}", weil es einen Eigenschaftsverweis enthält, der nicht unterstützt wird.</target>
         <note>{StrBegin="MSB3938: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.FileComment">

@@ -60,9 +60,8 @@ namespace Microsoft.Build.Utilities
         /// <returns>The cached table entry</returns>
         internal static DependencyTableCacheEntry GetCachedEntry(string tLogRootingMarker)
         {
-            if (DependencyTable.ContainsKey(tLogRootingMarker))
+            if (DependencyTable.TryGetValue(tLogRootingMarker, out DependencyTableCacheEntry cacheEntry))
             {
-                DependencyTableCacheEntry cacheEntry = DependencyTable[tLogRootingMarker];
                 if (DependencyTableIsUpToDate(cacheEntry))
                 {
                     return cacheEntry;

@@ -462,6 +462,7 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
+                _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
                 if (_threadException != null)
                 {
@@ -1537,6 +1538,11 @@ namespace Microsoft.Build.Execution
                         HandleResult(node, result);
                         break;
 
+                    case NodePacketType.ResourceRequest:
+                        ResourceRequest request = ExpectPacketType<ResourceRequest>(packet, NodePacketType.ResourceRequest);
+                        HandleResourceRequest(node, request);
+                        break;
+
                     case NodePacketType.NodeShutdown:
                         // Remove the node from the list of active nodes.  When they are all done, we have shut down fully
                         NodeShutdown shutdownPacket = ExpectPacketType<NodeShutdown>(packet, NodePacketType.NodeShutdown);
@@ -1945,8 +1951,14 @@ namespace Microsoft.Build.Execution
 
                 lock (_buildManager._syncLock)
                 {
-                    _buildManager._projectCacheService?.Result.ShutDown().GetAwaiter().GetResult();
-                    _buildManager._projectCacheService = null;
+                    try
+                    {
+                        _buildManager._projectCacheService?.Result.ShutDown().GetAwaiter().GetResult();
+                    }
+                    finally
+                    {
+                        _buildManager._projectCacheService = null;
+                    }
                 }
             }
         }
@@ -2166,6 +2178,30 @@ namespace Microsoft.Build.Execution
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportRequestBlocked(node, blocker);
             PerformSchedulingActions(response);
+        }
+
+        /// <summary>
+        /// Handles a resource request coming from a node.
+        /// </summary>
+        private void HandleResourceRequest(int node, ResourceRequest request)
+        {
+            if (request.IsResourceAcquire)
+            {
+                // Resource request requires a response and may be blocking. Our continuation is effectively a callback
+                // to be called once at least one core becomes available.
+                _scheduler.RequestCores(request.GlobalRequestId, request.NumCores, request.IsBlocking).ContinueWith((Task<int> task) =>
+                {
+                    var response = new ResourceResponse(request.GlobalRequestId, task.Result);
+                    _nodeManager.SendData(node, response);
+                }, TaskContinuationOptions.ExecuteSynchronously);
+            }
+            else
+            {
+                // Resource release is a one-way call, no response is expected. We release the cores as instructed
+                // and kick the scheduler because there may be work waiting for cores to become available.
+                IEnumerable<ScheduleResponse> response = _scheduler.ReleaseCores(request.GlobalRequestId, request.NumCores);
+                PerformSchedulingActions(response);
+            }
         }
 
         /// <summary>
@@ -2417,10 +2453,8 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 // The build submission has not already been completed.
-                if (_buildSubmissions.ContainsKey(result.SubmissionId))
+                if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission submission))
                 {
-                    BuildSubmission submission = _buildSubmissions[result.SubmissionId];
-
                     /* If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
                      * this submission, therefore set the logging as complete. InternalLoggerExceptions are unhandled exceptions from the logger. If the logger author does
                      * not handle an exception the eventsource wraps all exceptions (except a logging exception) into an internal logging exception.
@@ -2453,9 +2487,8 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 // The build submission has not already been completed.
-                if (_graphBuildSubmissions.ContainsKey(result.SubmissionId))
+                if (_graphBuildSubmissions.TryGetValue(result.SubmissionId, out GraphBuildSubmission submission))
                 {
-                    GraphBuildSubmission submission = _graphBuildSubmissions[result.SubmissionId];
                     submission.CompleteResults(result);
 
                     _overallBuildSuccess &= submission.BuildResult.OverallResult == BuildResultCode.Success;
@@ -2545,7 +2578,11 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                 , AppDomain.CurrentDomain.SetupInformation
 #endif
-                , new LoggingNodeConfiguration(loggingService.IncludeEvaluationMetaprojects, loggingService.IncludeEvaluationProfile, loggingService.IncludeTaskInputs)
+                , new LoggingNodeConfiguration(
+                    loggingService.IncludeEvaluationMetaprojects,
+                    loggingService.IncludeEvaluationProfile,
+                    loggingService.IncludeEvaluationPropertiesAndItems,
+                    loggingService.IncludeTaskInputs)
                 );
             }
 

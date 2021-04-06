@@ -3,11 +3,8 @@
 
 #if FEATURE_WIN32_REGISTRY
 
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Security;
 
 using Microsoft.Build.Shared;
 using error = Microsoft.Build.Shared.ErrorUtilities;

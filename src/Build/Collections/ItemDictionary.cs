@@ -167,6 +167,30 @@ namespace Microsoft.Build.Collections
             return _itemLists.GetEnumerator();
         }
 
+        /// <summary>
+        /// Enumerates item lists per each item type under the lock.
+        /// </summary>
+        /// <param name="itemTypeCallback">
+        /// A delegate that accepts the item type string and a list of items of that type.
+        /// Will be called for each item type in the list.
+        /// </param>
+        internal void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
+        {
+            lock (_itemLists)
+            {
+                foreach (var itemTypeBucket in _itemLists)
+                {
+                    if (itemTypeBucket.Value == null || itemTypeBucket.Value.Count == 0)
+                    {
+                        // skip empty markers
+                        continue;
+                    }
+
+                    itemTypeCallback(itemTypeBucket.Key, itemTypeBucket.Value);
+                }
+            }
+        }
+
         #region ItemDictionary<T> Members
 
         /// <summary>

@@ -327,14 +327,7 @@ namespace Microsoft.Build.Tasks
 
                     if (sdkName.Length > 0)
                     {
-                        if (!_resolvedSDKReferences.ContainsKey(sdkName))
-                        {
-                            _resolvedSDKReferences.Add(sdkName, resolvedSDK);
-                        }
-                        else
-                        {
-                            _resolvedSDKReferences[sdkName] = resolvedSDK;
-                        }
+                        _resolvedSDKReferences[sdkName] = resolvedSDK;
                     }
                 }
             }
@@ -406,9 +399,8 @@ namespace Microsoft.Build.Tasks
         internal void AddReference(AssemblyNameExtension assemblyName, Reference reference)
         {
             ErrorUtilities.VerifyThrow(assemblyName.Name != null, "Got an empty assembly name.");
-            if (References.ContainsKey(assemblyName))
+            if (References.TryGetValue(assemblyName, out Reference referenceGoingToBeReplaced))
             {
-                Reference referenceGoingToBeReplaced = References[assemblyName];
                 foreach (AssemblyRemapping pair in referenceGoingToBeReplaced.RemappedAssemblyNames())
                 {
                     reference.AddRemapping(pair.From, pair.To);
@@ -3197,15 +3189,12 @@ namespace Microsoft.Build.Tasks
                 if (!reference.CheckForSpecificVersionMetadataOnParentsReference(false))
                 {
                     // Check to see if the reference is not in a profile or subset
-                    if (exclusionList != null)
+                    if (exclusionList?.ContainsKey(assemblyFullName) == true)
                     {
-                        if (exclusionList.ContainsKey(assemblyFullName))
-                        {
-                            anyMarkedReference = true;
-                            reference.ExclusionListLoggingProperties.ExclusionReasonLogDelegate = LogProfileExclusionUnresolve;
-                            reference.ExclusionListLoggingProperties.IsInExclusionList = true;
-                            ListOfExcludedAssemblies.Add(assemblyFullName);
-                        }
+                        anyMarkedReference = true;
+                        reference.ExclusionListLoggingProperties.ExclusionReasonLogDelegate = LogProfileExclusionUnresolve;
+                        reference.ExclusionListLoggingProperties.IsInExclusionList = true;
+                        ListOfExcludedAssemblies.Add(assemblyFullName);
                     }
 
                     // Check to see if the reference is in the current target framework but has a higher version than what exists in the target framework

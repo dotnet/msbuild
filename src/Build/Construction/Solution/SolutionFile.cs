@@ -190,6 +190,11 @@ namespace Microsoft.Build.Construction
         public IReadOnlyDictionary<string, ProjectInSolution> ProjectsByGuid => new ReadOnlyDictionary<string, ProjectInSolution>(_projects);
 
         /// <summary>
+        /// This is the read accessor for the solution filter file, if present. Set through FullPath.
+        /// </summary>
+        internal string SolutionFilterFilePath { get => _solutionFilterFile; }
+
+        /// <summary>
         /// This is the read/write accessor for the solution file which we will parse.  This
         /// must be set before calling any other methods on this class.
         /// </summary>
@@ -612,7 +617,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 // Detect collision caused by unique name's normalization
-                if (projectsByUniqueName.ContainsKey(uniqueName))
+                if (projectsByUniqueName.TryGetValue(uniqueName, out ProjectInSolution project))
                 {
                     // Did normalization occur in the current project?
                     if (uniqueName != proj.ProjectName)
@@ -623,16 +628,14 @@ namespace Microsoft.Build.Construction
                         uniqueName = tempUniqueName;
                     }
                     // Did normalization occur in a previous project?
-                    else if (uniqueName != projectsByUniqueName[uniqueName].ProjectName)
+                    else if (uniqueName != project.ProjectName)
                     {
-                        var projTemp = projectsByUniqueName[uniqueName];
-
                         // Generates a new unique name
-                        string tempUniqueName = $"{uniqueName}_{projTemp.GetProjectGuidWithoutCurlyBrackets()}";
-                        projTemp.UpdateUniqueProjectName(tempUniqueName);
+                        string tempUniqueName = $"{uniqueName}_{project.GetProjectGuidWithoutCurlyBrackets()}";
+                        project.UpdateUniqueProjectName(tempUniqueName);
 
                         projectsByUniqueName.Remove(uniqueName);
-                        projectsByUniqueName.Add(tempUniqueName, projTemp);
+                        projectsByUniqueName.Add(tempUniqueName, project);
                     }
                 }
 

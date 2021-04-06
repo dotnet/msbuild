@@ -213,12 +213,12 @@ namespace Microsoft.Build.BackEnd
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
-                var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
-                    ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix,
+                ItemGroupLoggingHelper.LogTaskParameter(
+                    LoggingContext,
+                    TaskParameterMessageKind.AddItem,
                     child.ItemType,
                     itemsToAdd,
                     logItemMetadata: true);
-                LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
             }
 
             // Now add the items we created to the lookup.
@@ -256,12 +256,12 @@ namespace Microsoft.Build.BackEnd
             {
                 if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToRemove.Count > 0)
                 {
-                    var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
-                        ItemGroupLoggingHelper.ItemGroupRemoveLogMessage,
+                    ItemGroupLoggingHelper.LogTaskParameter(
+                        LoggingContext,
+                        TaskParameterMessageKind.RemoveItem,
                         child.ItemType,
                         itemsToRemove,
                         logItemMetadata: true);
-                    LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
                 }
 
                 bucket.Lookup.RemoveItems(itemsToRemove);

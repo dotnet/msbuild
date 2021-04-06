@@ -12,6 +12,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project>
+
    <!--
         We are doing a cross-targeting build if there is a non-empty list of target frameworks specified
         and there is no current target framework being built individually. In that case, a multitargeting

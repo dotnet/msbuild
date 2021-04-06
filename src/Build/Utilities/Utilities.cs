@@ -2,14 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
+using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
@@ -612,6 +614,117 @@ namespace Microsoft.Build.Internal
         public static T[] ToArray<T>(this IEnumerator<T> enumerator)
         {
             return enumerator.ToEnumerable().ToArray();
+        }
+
+        public static void EnumerateProperties(IEnumerable properties, Action<KeyValuePair<string, string>> callback)
+        {
+            if (properties == null)
+            {
+                return;
+            }
+
+            if (properties is PropertyDictionary<ProjectPropertyInstance> propertyInstanceDictionary)
+            {
+                propertyInstanceDictionary.Enumerate((key, value) =>
+                {
+                    callback(new KeyValuePair<string, string>(key, value));
+                });
+            }
+            else if (properties is PropertyDictionary<ProjectProperty> propertyDictionary)
+            {
+                propertyDictionary.Enumerate((key, value) =>
+                {
+                    callback(new KeyValuePair<string, string>(key, value));
+                });
+            }
+            else
+            {
+                foreach (var item in properties)
+                {
+                    if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
+                    {
+                        callback(new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
+                    }
+                    else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
+                    {
+                        callback(new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
+                    }
+                    else if (item is KeyValuePair<string, string> kvp)
+                    {
+                        callback(kvp);
+                    }
+                    else
+                    {
+                        if (item == null)
+                        {
+                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected: property is null");
+                        }
+                        else
+                        {
+                            Debug.Fail($"In {nameof(EnumerateProperties)}(): Unexpected property {item} of type {item?.GetType().ToString()}");
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        {
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                projectItemInstanceDictionary.EnumerateItemsPerType((itemType, itemList) =>
+                {
+                    foreach (var item in itemList)
+                    {
+                        callback(new DictionaryEntry(itemType, item));
+                    }
+                });
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                projectItemDictionary.EnumerateItemsPerType((itemType, itemList) =>
+                {
+                    foreach (var item in itemList)
+                    {
+                        callback(new DictionaryEntry(itemType, item));
+                    }
+                });
+            }
+            else
+            {
+                foreach (var item in items)
+                {
+                    string itemType = default;
+                    object itemValue = null;
+
+                    if (item is IItem iitem)
+                    {
+                        itemType = iitem.Key;
+                        itemValue = iitem;
+                    }
+                    else if (item is DictionaryEntry dictionaryEntry)
+                    {
+                        itemType = dictionaryEntry.Key as string;
+                        itemValue = dictionaryEntry.Value;
+                    }
+                    else
+                    {
+                        if (item == null)
+                        {
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
+                        }
+                        else
+                        {
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                        }
+                    }
+
+                    if (!String.IsNullOrEmpty(itemType))
+                    {
+                        callback(new DictionaryEntry(itemType, itemValue));
+                    }
+                }
+            }
         }
     }
 }

@@ -471,6 +471,14 @@ namespace Microsoft.Build.UnitTests.Definition
         [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
         public void ContextDisambiguatesAFullyQualifiedGlobPointingInAnotherRelativeGlobsCone(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
+            if (policy == EvaluationContext.SharingPolicy.Shared)
+            {
+                // This test case has a dependency on our glob expansion caching policy. If the evaluation context is reused
+                // between evaluations and files are added to the filesystem between evaluations, the cache may be returning
+                // stale results. Run only the Isolated variant.
+                return;
+            }
+
             var project1Directory = _env.DefaultTestDirectory.CreateDirectory("Project1");
             var project1GlobDirectory = project1Directory.CreateDirectory("Glob").CreateDirectory("1").Path;
 

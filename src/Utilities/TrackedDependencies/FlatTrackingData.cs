@@ -359,10 +359,7 @@ namespace Microsoft.Build.Utilities
                 {
                     // The tracking logs are not available, they may have been deleted at some point.
                     // Be safe and remove any references from the cache.
-                    if (DependencyTableCache.DependencyTable.ContainsKey(tLogRootingMarker))
-                    {
-                        DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
-                    }
+                    DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
                 }
                 return;
             }
@@ -480,11 +477,7 @@ namespace Microsoft.Build.Utilities
                 // sure that we essentially force a rebuild of this particular root. 
                 if (encounteredInvalidTLogContents)
                 {
-                    if (DependencyTableCache.DependencyTable.ContainsKey(tLogRootingMarker))
-                    {
-                        DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
-                    }
-
+                    DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
                     DependencyTable = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
                 }
                 else
@@ -619,10 +612,7 @@ namespace Microsoft.Build.Utilities
                 {
                     // The tracking logs in the cache will be invalidated by this write
                     // remove the cached entries to be sure
-                    if (DependencyTableCache.DependencyTable.ContainsKey(tLogRootingMarker))
-                    {
-                        DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
-                    }
+                    DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
                 }
 
                 string firstTlog = TlogFiles[0].ItemSpec;

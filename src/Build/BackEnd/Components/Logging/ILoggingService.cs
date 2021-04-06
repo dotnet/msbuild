@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
@@ -188,6 +189,16 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
+        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItems
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Should task events include task inputs?
         /// </summary>
         bool IncludeTaskInputs
@@ -218,6 +229,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         bool HasBuildSubmissionLoggedErrors(int submissionId);
+
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as errors for the specified project instance ID.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns>A Hashset containing warning codes that should be treated as errors.</returns>
+        ICollection<string> GetWarningsAsErrors(BuildEventContext context);
+
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as messages for the specified project instance ID.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns>A Hashset containing warning codes that should be treated as messages.</returns>
+        ICollection<string> GetWarningsAsMessages(BuildEventContext context);
 
         #region Register
 
@@ -413,8 +438,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="projectEvaluationEventContext">Event context for the project.</param>
         /// <param name="projectFile">Project file being built</param>
+        /// <param name="globalProperties">Global properties used for the evaluation.</param>
+        /// <param name="properties">Properties produced by the evaluation.</param>
+        /// <param name="items">Items produced by the evaluation.</param>
+        /// <param name="profilerResult">Profiler results if evaluation profiling was enabled.</param>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile);
+        void LogProjectEvaluationFinished(
+            BuildEventContext projectEvaluationEventContext,
+            string projectFile,
+            IEnumerable globalProperties,
+            IEnumerable properties,
+            IEnumerable items,
+            ProfilerResult? profilerResult);
 
         /// <summary>
         /// Log that a project has started

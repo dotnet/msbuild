@@ -265,9 +265,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            if (_nodeIdToPacketFactory.ContainsKey(nodeId))
+            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
             {
-                _nodeIdToPacketFactory[nodeId].DeserializeAndRoutePacket(nodeId, packetType, translator);
+                nodePacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
             }
             else
             {
@@ -282,9 +282,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (_nodeIdToPacketFactory.ContainsKey(nodeId))
+            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
             {
-                _nodeIdToPacketFactory[nodeId].RoutePacket(nodeId, packet);
+                nodePacketFactory.RoutePacket(nodeId, packet);
             }
             else
             {
@@ -304,9 +304,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            if (_nodeIdToPacketHandler.ContainsKey(node))
+            if (_nodeIdToPacketHandler.TryGetValue(node, out INodePacketHandler packetHandler))
             {
-                _nodeIdToPacketHandler[node].PacketReceived(node, packet);
+                packetHandler.PacketReceived(node, packet);
             }
             else
             {

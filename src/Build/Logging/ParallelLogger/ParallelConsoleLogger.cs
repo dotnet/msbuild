@@ -6,13 +6,14 @@ using System.Text;
 using System.Collections;
 using System.Globalization;
 using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using Microsoft.Build.Exceptions;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -429,14 +430,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Check to see if there is a bucket for the warning
                 // If there is no bucket create a new one which contains a list of all the errors which
                 // happened for a given buildEventContext / target
-                if (!groupByProjectEntryPoint.ContainsKey(key))
+                if (!groupByProjectEntryPoint.TryGetValue(key, out var errorWarningEventListByTarget))
                 {
                     // happened for a given buildEventContext / target
-                    var errorWarningEventListByTarget = new List<BuildEventArgs>();
+                    errorWarningEventListByTarget = new List<BuildEventArgs>();
                     groupByProjectEntryPoint.Add(key, errorWarningEventListByTarget);
                 }
                 // Add the error event to the correct bucket
-                groupByProjectEntryPoint[key].Add(errorWarningEventArgs);
+                errorWarningEventListByTarget.Add(errorWarningEventArgs);
             }
 
             BuildEventContext previousEntryPoint = null;
@@ -505,11 +506,11 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // If there were deferred messages then we should show them now, this will cause the project started event to be shown properly
-            if (_deferredMessages.ContainsKey(e.BuildEventContext))
+            if (_deferredMessages.TryGetValue(e.BuildEventContext, out var deferredMessages))
             {
                 if (!showOnlyErrors && !showOnlyWarnings)
                 {
-                    foreach (BuildMessageEventArgs message in _deferredMessages[e.BuildEventContext])
+                    foreach (BuildMessageEventArgs message in deferredMessages)
                     {
                         // This will display the project started event before the messages is shown
                         this.MessageHandler(sender, message);
@@ -527,6 +528,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     DisplayDeferredProjectStartedEvent(e.BuildEventContext);
                 }
+
                 if (e.Properties != null)
                 {
                     WriteProperties(e, e.Properties);
@@ -538,30 +540,50 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            if (e.BuildEventContext == null || e.Items == null)
+            ReadProjectConfigurationDescription(e.BuildEventContext, e.Items);
+        }
+
+        private void ReadProjectConfigurationDescription(BuildEventContext buildEventContext, IEnumerable items)
+        {
+            if (buildEventContext == null || items == null)
             {
                 return;
             }
 
             // node and project context ids for the propertyOutputMap key.
-            int nodeID = e.BuildEventContext.NodeId;
-            int projectContextId = e.BuildEventContext.ProjectContextId;
+            int nodeID = buildEventContext.NodeId;
+            int projectContextId = buildEventContext.ProjectContextId;
 
-            // Create the value to be added to the propertyOutputMap.
-            using var projectConfigurationDescription = new ReuseableStringBuilder();
+            ReuseableStringBuilder projectConfigurationDescription = null;
 
-            foreach (DictionaryEntry item in e.Items)
+            Internal.Utilities.EnumerateItems(items, item =>
             {
-                ITaskItem itemVal = (ITaskItem)item.Value;
                 // Determine if the LogOutputProperties item has been used.
                 if (string.Equals((string)item.Key, ItemMetadataNames.ProjectConfigurationDescription, StringComparison.OrdinalIgnoreCase))
                 {
+                    if (projectConfigurationDescription == null)
+                    {
+                        projectConfigurationDescription = new ReuseableStringBuilder();
+                    }
+
+                    string itemSpec = item.Value switch
+                    {
+                        IItem iitem => iitem.EvaluatedInclude, // ProjectItem
+                        ITaskItem taskItem => taskItem.ItemSpec, // ProjectItemInstance
+                        _ => throw new NotSupportedException(Convert.ToString(item.Value))
+                    };
+
                     // Add the item value to the string to be printed in error/warning messages.
-                    projectConfigurationDescription.Append(" ").Append(itemVal.ItemSpec);
+                    projectConfigurationDescription.Append(" ").Append(itemSpec);
                 }
-            }
+            });
+
             // Add the finished dictionary to propertyOutputMap.
-            propertyOutputMap.Add((nodeID, projectContextId), projectConfigurationDescription.ToString());
+            if (projectConfigurationDescription != null)
+            {
+                propertyOutputMap.Add((nodeID, projectContextId), projectConfigurationDescription.ToString());
+                (projectConfigurationDescription as IDisposable)?.Dispose();
+            }
         }
 
         /// <summary>
@@ -1098,12 +1120,7 @@ namespace Microsoft.Build.BackEnd.Logging
                        && IsVerbosityAtLeast(LoggerVerbosity.Normal)
                     )
                 {
-                    List<BuildMessageEventArgs> messageList;
-                    if (_deferredMessages.ContainsKey(e.BuildEventContext))
-                    {
-                        messageList = _deferredMessages[e.BuildEventContext];
-                    }
-                    else
+                    if (!_deferredMessages.TryGetValue(e.BuildEventContext, out List<BuildMessageEventArgs> messageList))
                     {
                         messageList = new List<BuildMessageEventArgs>();
                         _deferredMessages.Add(e.BuildEventContext, messageList);
@@ -1122,25 +1139,36 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public override void StatusEventHandler(object sender, BuildStatusEventArgs e)
         {
-            if (showPerfSummary)
+            if (e is ProjectEvaluationStartedEventArgs projectEvaluationStarted)
             {
-                ProjectEvaluationStartedEventArgs projectEvaluationStarted = e as ProjectEvaluationStartedEventArgs;
-
-                if (projectEvaluationStarted != null)
+                if (showPerfSummary)
                 {
                     MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationStarted.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.AddEventStarted(null, e.BuildEventContext, e.Timestamp, s_compareContextNodeId);
-
-                    return;
                 }
-
-                ProjectEvaluationFinishedEventArgs projectEvaluationFinished = e as ProjectEvaluationFinishedEventArgs;
-
-                if (projectEvaluationFinished != null)
+            }
+            else if (e is ProjectEvaluationFinishedEventArgs projectEvaluationFinished)
+            {
+                if (showPerfSummary)
                 {
                     MPPerformanceCounter counter = GetPerformanceCounter(projectEvaluationFinished.ProjectFile, ref projectEvaluationPerformanceCounters);
                     counter.AddEventFinished(null, e.BuildEventContext, e.Timestamp);
                 }
+
+                if (Verbosity == LoggerVerbosity.Diagnostic && showItemAndPropertyList)
+                {
+                    if (projectEvaluationFinished.Properties != null)
+                    {
+                        WriteProperties(projectEvaluationFinished, projectEvaluationFinished.Properties);
+                    }
+
+                    if (projectEvaluationFinished.Items != null)
+                    {
+                        WriteItems(projectEvaluationFinished, projectEvaluationFinished.Items);
+                    }
+                }
+
+                ReadProjectConfigurationDescription(projectEvaluationFinished.BuildEventContext, projectEvaluationFinished.Items);
             }
         }
 
@@ -1689,11 +1717,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 ErrorUtilities.VerifyThrow(_startedEvent != null, "Cannot have finished counter without started counter. ");
 
-                if (_startedEvent.ContainsKey(buildEventContext))
+                if (_startedEvent.TryGetValue(buildEventContext, out object time))
                 {
                     // Calculate the amount of time spent in the event based on the time stamp of when
                     // the started event was created and when the finished event was created
-                    elapsedTime += (TimeSpan.FromTicks(eventTimeStamp.Ticks - (long)_startedEvent[buildEventContext]));
+                    elapsedTime += (TimeSpan.FromTicks(eventTimeStamp.Ticks - (long)time));
                     _startedEvent.Remove(buildEventContext);
                 }
             }

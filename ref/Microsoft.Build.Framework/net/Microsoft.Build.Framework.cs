@@ -38,6 +38,7 @@ namespace Microsoft.Build.Framework
         public Microsoft.Build.Framework.BuildEventContext BuildEventContext { get { throw null; } set { } }
         public string HelpKeyword { get { throw null; } }
         public virtual string Message { get { throw null; } protected set { } }
+        protected internal System.DateTime RawTimestamp { get { throw null; } set { } }
         public string SenderName { get { throw null; } }
         public int ThreadId { get { throw null; } }
         public System.DateTime Timestamp { get { throw null; } }
@@ -213,6 +214,15 @@ namespace Microsoft.Build.Framework
     {
         bool AllowFailureWithoutError { get; set; }
     }
+    public partial interface IBuildEngine8 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6, Microsoft.Build.Framework.IBuildEngine7
+    {
+        bool ShouldTreatWarningAsError(string warningCode);
+    }
+    public partial interface IBuildEngine9 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6, Microsoft.Build.Framework.IBuildEngine7, Microsoft.Build.Framework.IBuildEngine8
+    {
+        void ReleaseCores(int coresToRelease);
+        int RequestCores(int requestedCores);
+    }
     public partial interface ICancelableTask : Microsoft.Build.Framework.ITask
     {
         void Cancel();
@@ -247,6 +257,10 @@ namespace Microsoft.Build.Framework
         void IncludeEvaluationMetaprojects();
         void IncludeEvaluationProfiles();
         void IncludeTaskInputs();
+    }
+    public partial interface IEventSource4 : Microsoft.Build.Framework.IEventSource, Microsoft.Build.Framework.IEventSource2, Microsoft.Build.Framework.IEventSource3
+    {
+        void IncludeEvaluationPropertiesAndItems();
     }
     public partial interface IForwardingLogger : Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
@@ -377,8 +391,11 @@ namespace Microsoft.Build.Framework
     {
         public ProjectEvaluationFinishedEventArgs() { }
         public ProjectEvaluationFinishedEventArgs(string message, params object[] messageArgs) { }
+        public System.Collections.IEnumerable GlobalProperties { get { throw null; } set { } }
+        public System.Collections.IEnumerable Items { get { throw null; } set { } }
         public Microsoft.Build.Framework.Profiler.ProfilerResult? ProfilerResult { get { throw null; } set { } }
         public string ProjectFile { get { throw null; } set { } }
+        public System.Collections.IEnumerable Properties { get { throw null; } set { } }
     }
     public partial class ProjectEvaluationStartedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {
@@ -589,6 +606,22 @@ namespace Microsoft.Build.Framework
         public string TaskName { get { throw null; } }
     }
     public delegate void TaskFinishedEventHandler(object sender, Microsoft.Build.Framework.TaskFinishedEventArgs e);
+    public partial class TaskParameterEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public TaskParameterEventArgs(Microsoft.Build.Framework.TaskParameterMessageKind kind, string itemType, System.Collections.IList items, bool logItemMetadata, System.DateTime eventTimestamp) { }
+        public System.Collections.IList Items { get { throw null; } }
+        public string ItemType { get { throw null; } }
+        public Microsoft.Build.Framework.TaskParameterMessageKind Kind { get { throw null; } }
+        public bool LogItemMetadata { get { throw null; } }
+        public override string Message { get { throw null; } }
+    }
+    public enum TaskParameterMessageKind
+    {
+        TaskInput = 0,
+        TaskOutput = 1,
+        AddItem = 2,
+        RemoveItem = 3,
+    }
     public partial class TaskPropertyInfo
     {
         public TaskPropertyInfo(string name, System.Type typeOfParameter, bool output, bool required) { }

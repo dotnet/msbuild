@@ -31,6 +31,7 @@
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Text.Json" />
 
@@ -39,7 +40,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.IO.Compression" />
     <PackageReference Include="System.Memory" />
   </ItemGroup>
@@ -333,6 +333,8 @@
     <Compile Include="BackEnd\Shared\BuildRequestBlocker.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestConfiguration.cs" />
     <Compile Include="BackEnd\Shared\BuildResult.cs" />
+    <Compile Include="BackEnd\Shared\ResourceRequest.cs" />
+    <Compile Include="BackEnd\Shared\ResourceResponse.cs" />
     <Compile Include="BackEnd\Shared\CircularDependencyException.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestUnblocker.cs" />
     <Compile Include="BackEnd\Shared\IBuildResults.cs" />
@@ -375,6 +377,7 @@
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
     <!-- ######################## -->
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="Collections\ArrayDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />
     <Compile Include="Construction\ProjectElementContainer.cs" />
@@ -419,8 +422,8 @@
     <Compile Include="Definition\ResolvedImport.cs" />
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <Compile Include="..\Shared\ToolsetElement.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Compile Include="Definition\ToolsetConfigurationReader.cs" />
+    <Compile Include="..\Shared\ToolsetElement.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />

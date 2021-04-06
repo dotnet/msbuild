@@ -481,6 +481,38 @@ namespace Microsoft.Build.Shared
             return shouldAdjust ? newValue.ToString() : value;
         }
 
+        /// <summary>
+        /// If on Unix, convert backslashes to slashes for strings that resemble paths.
+        /// This overload takes and returns ReadOnlyMemory of characters.
+        /// </summary>
+        internal static ReadOnlyMemory<char> MaybeAdjustFilePath(ReadOnlyMemory<char> value, string baseDirectory = "")
+        {
+            if (NativeMethodsShared.IsWindows || value.IsEmpty)
+            {
+                return value;
+            }
+
+            // Don't bother with arrays or properties or network paths.
+            if (value.Length >= 2)
+            {
+                var span = value.Span;
+
+                // The condition is equivalent to span.StartsWith("$(") || span.StartsWith("@(") || span.StartsWith("\\\\")
+                if ((span[1] == '(' && (span[0] == '$' || span[0] == '@')) ||
+                    (span[1] == '\\' && span[0] == '\\'))
+                {
+                    return value;
+                }
+            }
+
+            // For Unix-like systems, we may want to convert backslashes to slashes
+            Span<char> newValue = ConvertToUnixSlashes(value.ToArray());
+
+            // Find the part of the name we want to check, that is remove quotes, if present
+            bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
+            return shouldAdjust ? newValue.ToString().AsMemory() : value;
+        }
+
         private static Span<char> ConvertToUnixSlashes(Span<char> path)
         {
             return path.IndexOf('\\') == -1 ? path : CollapseSlashes(path);
@@ -999,27 +1031,55 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(basePath, nameof(basePath));
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
-            if (basePath.Length == 0)
+            string fullBase = Path.GetFullPath(basePath);
+            string fullPath = Path.GetFullPath(path);
+
+            string[] splitBase = fullBase.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            string[] splitPath = fullPath.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+
+            ErrorUtilities.VerifyThrow(splitPath.Length > 0, "Cannot call MakeRelative on a path of only slashes.");
+
+            // On a mac, the path could start with any number of slashes and still be valid. We have to check them all.
+            int indexOfFirstNonSlashChar = 0;
+            while (path[indexOfFirstNonSlashChar] == Path.DirectorySeparatorChar)
             {
-                return path;
+                indexOfFirstNonSlashChar++;
+            }
+            if (path.IndexOf(splitPath[0]) != indexOfFirstNonSlashChar)
+            {
+                // path was already relative so just return it
+                return FixFilePath(path);
             }
 
-            Uri baseUri = new Uri(EnsureTrailingSlash(basePath), UriKind.Absolute); // May throw UriFormatException
-
-            Uri pathUri = CreateUriFromPath(path);
-
-            if (!pathUri.IsAbsoluteUri)
+            int index = 0;
+            while (index < splitBase.Length && index < splitPath.Length && splitBase[index].Equals(splitPath[index], PathComparison))
             {
-                // the path is already a relative url, we will just normalize it...
-                pathUri = new Uri(baseUri, pathUri);
+                index++;
             }
 
-            Uri relativeUri = baseUri.MakeRelativeUri(pathUri);
-            string relativePath = Uri.UnescapeDataString(relativeUri.IsAbsoluteUri ? relativeUri.LocalPath : relativeUri.ToString());
+            if (index == splitBase.Length && index == splitPath.Length)
+            {
+                return ".";
+            }
+            
+            // If the paths have no component in common, the only valid relative path is the full path.
+            if (index == 0)
+            {
+                return fullPath;
+            }
 
-            string result = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            StringBuilder sb = StringBuilderCache.Acquire();
 
-            return result;
+            for (int i = index; i < splitBase.Length; i++)
+            {
+                sb.Append("..").Append(Path.DirectorySeparatorChar);
+            }
+            for (int i = index; i < splitPath.Length; i++)
+            {
+                sb.Append(splitPath[i]).Append(Path.DirectorySeparatorChar);
+            }
+            sb.Length--;
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         /// <summary>

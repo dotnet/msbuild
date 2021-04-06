@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
 
                         if ((retVal != null) && (!requiredReturnType.IsInstanceOfType(retVal)))
                         {
-                            log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile,
+                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,
                                 log.FormatResourceString("General.IncompatibleStateFileType"));
                             retVal = null;
                         }
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks
                 // any exception imaginable.  Catch them all here.
                 // Not being able to deserialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
-                log.LogWarningWithCodeFromResources("General.CouldNotReadStateFile", stateFile, e.Message);
+                log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, e.Message);
             }
 
             return retVal;

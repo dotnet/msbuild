@@ -10,6 +10,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     ///     Only one plugin instance can exist for a given BuildManager BeginBuild / EndBuild session.
+    ///     Any exceptions thrown by the plugin will cause MSBuild to fail the build.
     /// </summary>
     public abstract class ProjectCachePluginBase
     {

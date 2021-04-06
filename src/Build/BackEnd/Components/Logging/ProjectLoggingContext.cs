@@ -9,6 +9,7 @@ using System.Collections;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -85,7 +86,9 @@ namespace Microsoft.Build.BackEnd.Logging
             string[] propertiesToSerialize = LoggingService.PropertiesToSerialize;
 
             // If we are only logging critical events lets not pass back the items or properties
-            if (!LoggingService.OnlyLogCriticalEvents && (!LoggingService.RunningOnRemoteNode || LoggingService.SerializeAllProperties))
+            if (!LoggingService.OnlyLogCriticalEvents &&
+                !LoggingService.IncludeEvaluationPropertiesAndItems &&
+                (!LoggingService.RunningOnRemoteNode || LoggingService.SerializeAllProperties))
             {
                 if (projectProperties != null)
                 {
@@ -101,7 +104,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 items = new ProjectItemInstanceEnumeratorProxy(projectItemsEnumerator);
             }
 
-            if (projectProperties != null && propertiesToSerialize?.Length > 0 && !LoggingService.SerializeAllProperties)
+            if (projectProperties != null &&
+                !LoggingService.IncludeEvaluationPropertiesAndItems &&
+                propertiesToSerialize?.Length > 0 &&
+                !LoggingService.SerializeAllProperties)
             {
                 PropertyDictionary<ProjectPropertyInstance> projectPropertiesToSerialize = new PropertyDictionary<ProjectPropertyInstance>();
                 foreach (string propertyToGet in propertiesToSerialize)

@@ -28,7 +28,7 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="jnm2.ReferenceAssemblies.net35" />
+    <PackageReference Include="jnm2.ReferenceAssemblies.net35" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">

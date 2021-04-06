@@ -85,6 +85,10 @@ namespace Microsoft.Build.BackEnd
 
         private Dictionary<string, string> _globalParameters;
 
+        private ICollection<string> _warningsAsErrors;
+
+        private ICollection<string> _warningsAsMessages;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Constructor
@@ -103,6 +107,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
         /// <param name="taskParameters">Parameters to apply to the task.</param>
         /// <param name="globalParameters">global properties for the current project.</param>
+        /// <param name="warningsAsErrors">Warning codes to be treated as errors for the current project.</param>
+        /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #else
         /// <summary>
         /// Constructor
@@ -120,6 +126,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
         /// <param name="taskParameters">Parameters to apply to the task.</param>
         /// <param name="globalParameters">global properties for the current project.</param>
+        /// <param name="warningsAsErrors">Warning codes to be logged as errors for the current project.</param>
+        /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #endif
         public TaskHostConfiguration
             (
@@ -138,7 +146,9 @@ namespace Microsoft.Build.BackEnd
                 string taskName,
                 string taskLocation,
                 IDictionary<string, object> taskParameters,
-                Dictionary<string, string> globalParameters
+                Dictionary<string, string> globalParameters,
+                ICollection<string> warningsAsErrors,
+                ICollection<string> warningsAsMessages
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
@@ -168,6 +178,8 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = continueOnError;
             _taskName = taskName;
             _taskLocation = taskLocation;
+            _warningsAsErrors = warningsAsErrors;
+            _warningsAsMessages = warningsAsMessages;
 
             if (taskParameters != null)
             {
@@ -342,6 +354,24 @@ namespace Microsoft.Build.BackEnd
             { return NodePacketType.TaskHostConfiguration; }
         }
 
+        public ICollection<string> WarningsAsErrors
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return _warningsAsErrors;
+            }
+        }
+
+        public ICollection<string> WarningsAsMessages
+        {
+            [DebuggerStepThrough]
+            get
+            {
+                return _warningsAsMessages;
+            }
+        }
+
         /// <summary>
         /// Translates the packet to/from binary form.
         /// </summary>
@@ -364,6 +394,20 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+            translator.Translate(collection: ref _warningsAsErrors,
+                                 objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
+#if CLR2COMPATIBILITY
+                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+#else
+                                 collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+#endif
+            translator.Translate(collection: ref _warningsAsMessages,
+                                 objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
+#if CLR2COMPATIBILITY
+                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+#else
+                                 collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+#endif
         }
 
         /// <summary>

@@ -148,8 +148,7 @@ namespace Microsoft.Build.Tasks
         internal void AddSourceItem(ITaskItem sourceItem)
         {
             string itemSpec = sourceItem.ItemSpec;
-            bool sourceItemAlreadyInList = _sourceItems.ContainsKey(itemSpec);
-            if (!sourceItemAlreadyInList)
+            if (!_sourceItems.ContainsKey(itemSpec))
             {
                 _sourceItems[itemSpec] = sourceItem;
                 PropagateSourceItems(sourceItem);

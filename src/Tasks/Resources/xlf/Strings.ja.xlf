@@ -509,6 +509,11 @@
         <target state="translated">グローバル プロパティ:</target>
         <note />
       </trans-unit>
+      <trans-unit id="General.StateFileAlreadyPresent">
+        <source>MSB3667: There is already a file at "{0}". If you are trying to create a precomputed cache, ensure that you are building a single project that depends on your assemblies rather than building your assemblies themselves. If you are running the ResolveAssemblyReference task normally, do not set the "AssemblyInformationCacheOutputPath" parameter of the ResolveAssemblyReference task.</source>
+        <target state="translated">MSB3667: "{0}" には既にファイルが存在します。事前計算済みキャッシュを作成しようとしている場合は、アセンブリ自体をビルドするのではなく、アセンブリに依存する単一のプロジェクトをビルドしてください。ResolveAssemblyReference タスクを正常に実行している場合は、ResolveAssemblyReference タスクの "AssemblyInformationCacheOutputPath" パラメーターを設定しないでください。</target>
+        <note>{StrBegin="MSB3667: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">プロパティの削除:</target>
@@ -2482,7 +2487,7 @@
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFilter">
         <source>Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not unzip file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">包含フィルターと一致しなかったか、除外フィルターと一致したため、ファイル "{0}" を解凍できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
@@ -2517,12 +2522,12 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternInvalidPath">
         <source>MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB3937: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB3937: 無効なパス文字が含まれているため、パターン "{0}" を解析できませんでした。</target>
         <note>{StrBegin="MSB3937: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorParsingPatternPropertyReferences">
         <source>MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB3938: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB3938: サポートされていないプロパティ参照が含まれているため、パターン "{0}" を解析できませんでした。</target>
         <note>{StrBegin="MSB3938: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.FileComment">

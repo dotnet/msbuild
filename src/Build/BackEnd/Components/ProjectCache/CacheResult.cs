@@ -63,9 +63,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ProxyTargets = proxyTargets;
         }
 
-        internal CacheResultType ResultType { get; }
-        internal BuildResult? BuildResult { get; }
-        internal ProxyTargets? ProxyTargets { get; }
+        public CacheResultType ResultType { get; }
+        public BuildResult? BuildResult { get; }
+        public ProxyTargets? ProxyTargets { get; }
 
         public static CacheResult IndicateCacheHit(BuildResult buildResult)
         {

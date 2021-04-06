@@ -41,7 +41,11 @@ namespace Microsoft.Build.Logging
         //      * NameValueList - deduplicate arrays of name-value pairs such as properties, items and metadata
         //                        in a separate record and refer to those records from regular records
         //                        where a list used to be written in-place
-        internal const int FileFormatVersion = 10;
+        // version 11:
+        //   - new record kind: TaskParameterEventArgs
+        // version 12:
+        //   - add GlobalProperties, Properties and Items on ProjectEvaluationFinished
+        internal const int FileFormatVersion = 12;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -101,6 +105,7 @@ namespace Microsoft.Build.Logging
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
             Traits.Instance.EscapeHatches.LogProjectImports = true;
+            bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters();
 
@@ -132,6 +137,11 @@ namespace Microsoft.Build.Logging
                 if (eventSource is IEventSource3 eventSource3)
                 {
                     eventSource3.IncludeEvaluationMetaprojects();
+                }
+
+                if (logPropertiesAndItemsAfterEvaluation && eventSource is IEventSource4 eventSource4)
+                {
+                    eventSource4.IncludeEvaluationPropertiesAndItems();
                 }
             }
             catch (Exception e)

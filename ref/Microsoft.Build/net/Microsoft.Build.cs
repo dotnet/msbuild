@@ -1126,6 +1126,7 @@ namespace Microsoft.Build.Execution
         public ProjectInstance(Microsoft.Build.Construction.ProjectRootElement xml) { }
         public ProjectInstance(Microsoft.Build.Construction.ProjectRootElement xml, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public ProjectInstance(Microsoft.Build.Construction.ProjectRootElement xml, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
+        public ProjectInstance(Microsoft.Build.Evaluation.Project project, Microsoft.Build.Execution.ProjectInstanceSettings settings) { }
         public ProjectInstance(string projectFile) { }
         public ProjectInstance(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion) { }
         public ProjectInstance(string projectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, string toolsVersion, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
@@ -1426,6 +1427,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
     public partial class CacheResult
     {
         internal CacheResult() { }
+        public Microsoft.Build.Execution.BuildResult BuildResult { get { throw null; } }
+        public Microsoft.Build.Experimental.ProjectCache.ProxyTargets ProxyTargets { get { throw null; } }
+        public Microsoft.Build.Experimental.ProjectCache.CacheResultType ResultType { get { throw null; } }
         public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Execution.BuildResult buildResult) { throw null; }
         public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(Microsoft.Build.Experimental.ProjectCache.ProxyTargets proxyTargets) { throw null; }
         public static Microsoft.Build.Experimental.ProjectCache.CacheResult IndicateCacheHit(System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Experimental.ProjectCache.PluginTargetResult> targetResults) { throw null; }

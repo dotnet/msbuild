@@ -1,11 +1,17 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -29,6 +35,8 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// A list of dictionaries we've encountered so far. Dictionaries are referred to by their order in this list.
         /// </summary>
+        /// <remarks>This is designed to not hold on to strings. We just store the string indices and
+        /// hydrate the dictionary on demand before returning.</remarks>
         private readonly List<(int keyIndex, int valueIndex)[]> nameValueListRecords = new List<(int, int)[]>();
 
         /// <summary>
@@ -146,6 +154,9 @@ namespace Microsoft.Build.Logging
                 case BinaryLogRecordKind.TaskCommandLine:
                     result = ReadTaskCommandLineEventArgs();
                     break;
+                case BinaryLogRecordKind.TaskParameter:
+                    result = ReadTaskParameterEventArgs();
+                    break;
                 case BinaryLogRecordKind.ProjectEvaluationStarted:
                     result = ReadProjectEvaluationStartedEventArgs();
                     break;
@@ -215,14 +226,17 @@ namespace Microsoft.Build.Logging
             {
                 var list = nameValueListRecords[id];
 
-                var dictionary = new Dictionary<string, string>(list.Length);
+                // We can't cache these as they would hold on to strings.
+                // This reader is designed to not hold onto strings,
+                // so that we can fit in a 32-bit process when reading huge binlogs
+                var dictionary = ArrayDictionary<string, string>.Create(list.Length);
                 for (int i = 0; i < list.Length; i++)
                 {
                     string key = GetStringFromRecord(list[i].keyIndex);
                     string value = GetStringFromRecord(list[i].valueIndex);
                     if (key != null)
                     {
-                        dictionary[key] = value;
+                        dictionary.Add(key, value);
                     }
                 }
 
@@ -329,7 +343,9 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
             var projectFile = ReadDeduplicatedString();
 
-            var e = new ProjectEvaluationStartedEventArgs(fields.Message)
+            var e = new ProjectEvaluationStartedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationStarted"),
+                projectFile)
             {
                 ProjectFile = projectFile
             };
@@ -342,11 +358,29 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
             var projectFile = ReadDeduplicatedString();
 
-            var e = new ProjectEvaluationFinishedEventArgs(fields.Message)
+            var e = new ProjectEvaluationFinishedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationFinished"),
+                projectFile)
             {
                 ProjectFile = projectFile
             };
             SetCommonFields(e, fields);
+
+            if (fileFormatVersion >= 12)
+            {
+                IEnumerable globalProperties = null;
+                if (ReadBoolean())
+                {
+                    globalProperties = ReadStringDictionary();
+                }
+
+                var propertyList = ReadPropertyList();
+                var itemList = ReadProjectItems();
+
+                e.GlobalProperties = globalProperties;
+                e.Properties = propertyList;
+                e.Items = itemList;
+            }
 
             // ProfilerResult was introduced in version 5
             if (fileFormatVersion > 4)
@@ -437,7 +471,7 @@ namespace Microsoft.Build.Logging
             var targetFile = ReadOptionalString();
             var parentTarget = ReadOptionalString();
             // BuildReason was introduced in version 4
-            var buildReason = fileFormatVersion > 3 ? (TargetBuiltReason) ReadInt32() : TargetBuiltReason.None;
+            var buildReason = fileFormatVersion > 3 ? (TargetBuiltReason)ReadInt32() : TargetBuiltReason.None;
 
             var e = new TargetStartedEventArgs(
                 fields.Message,
@@ -592,6 +626,27 @@ namespace Microsoft.Build.Logging
                 importance,
                 fields.Timestamp);
             e.BuildEventContext = fields.BuildEventContext;
+            e.ProjectFile = fields.ProjectFile;
+            return e;
+        }
+
+        private BuildEventArgs ReadTaskParameterEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            // Read unused Importance, it defaults to Low
+            ReadInt32();
+
+            var kind = (TaskParameterMessageKind)ReadInt32();
+            var itemType = ReadDeduplicatedString();
+            var items = ReadTaskItemList() as IList;
+
+            var e = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
+                fields.BuildEventContext,
+                kind,
+                itemType,
+                items,
+                logItemMetadata: true,
+                fields.Timestamp);
             e.ProjectFile = fields.ProjectFile;
             return e;
         }
@@ -810,23 +865,25 @@ namespace Microsoft.Build.Logging
 
             if ((fields.Flags & BuildEventArgsFieldFlags.Timestamp) != 0)
             {
-                buildEventArgsFieldTimestamp.SetValue(buildEventArgs, fields.Timestamp);
+                buildEventArgs.RawTimestamp = fields.Timestamp;
             }
         }
 
-        private ArrayList ReadPropertyList()
+        private IEnumerable ReadPropertyList()
         {
             var properties = ReadStringDictionary();
-            if (properties == null)
+            if (properties == null || properties.Count == 0)
             {
                 return null;
             }
 
-            var list = new ArrayList();
+            int count = properties.Count;
+            var list = new DictionaryEntry[count];
+            int i = 0;
             foreach (var property in properties)
             {
-                var entry = new DictionaryEntry(property.Key, property.Value);
-                list.Add(entry);
+                list[i] = new DictionaryEntry(property.Key, property.Value);
+                i++;
             }
 
             return list;
@@ -896,77 +953,18 @@ namespace Microsoft.Build.Logging
             return result;
         }
 
-        private class TaskItem : ITaskItem
-        {
-            private static readonly Dictionary<string, string> emptyMetadata = new Dictionary<string, string>();
-
-            public string ItemSpec { get; set; }
-            public IDictionary<string, string> Metadata { get; }
-
-            public TaskItem()
-            {
-                Metadata = new Dictionary<string, string>();
-            }
-
-            public TaskItem(string itemSpec, IDictionary<string, string> metadata)
-            {
-                ItemSpec = itemSpec;
-                Metadata = metadata ?? emptyMetadata;
-            }
-
-            public int MetadataCount => Metadata.Count;
-
-            public ICollection MetadataNames => (ICollection)Metadata.Keys;
-
-            public IDictionary CloneCustomMetadata()
-            {
-                return (IDictionary)Metadata;
-            }
-
-            public void CopyMetadataTo(ITaskItem destinationItem)
-            {
-                throw new NotImplementedException();
-            }
-
-            public string GetMetadata(string metadataName)
-            {
-                return Metadata[metadataName];
-            }
-
-            public void RemoveMetadata(string metadataName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SetMetadata(string metadataName, string metadataValue)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override string ToString()
-            {
-                return $"{ItemSpec} Metadata: {MetadataCount}";
-            }
-        }
-
         private ITaskItem ReadTaskItem()
         {
             string itemSpec = ReadDeduplicatedString();
             var metadata = ReadStringDictionary();
 
-            var taskItem = new TaskItem(itemSpec, metadata);
+            var taskItem = new TaskItemData(itemSpec, metadata);
             return taskItem;
         }
 
         private IEnumerable ReadProjectItems()
         {
-            int count = ReadInt32();
-            if (count == 0)
-            {
-                return null;
-            }
-
-            List<DictionaryEntry> list;
+            IList<DictionaryEntry> list;
 
             // starting with format version 10 project items are grouped by name
             // so we only have to write the name once, and then the count of items
@@ -974,25 +972,67 @@ namespace Microsoft.Build.Logging
             // old style flat list where the name is duplicated for each item.
             if (fileFormatVersion < 10)
             {
-                list = new List<DictionaryEntry>(count);
+                int count = ReadInt32();
+                if (count == 0)
+                {
+                    return null;
+                }
+
+                list = new DictionaryEntry[count];
                 for (int i = 0; i < count; i++)
                 {
                     string itemName = ReadString();
                     ITaskItem item = ReadTaskItem();
-                    list.Add(new DictionaryEntry(itemName, item));
+                    list[i] = new DictionaryEntry(itemName, item);
+                }
+            }
+            else if (fileFormatVersion < 12)
+            {
+                int count = ReadInt32();
+                if (count == 0)
+                {
+                    return null;
+                }
+
+                list = new List<DictionaryEntry>();
+                for (int i = 0; i < count; i++)
+                {
+                    string itemType = ReadDeduplicatedString();
+                    var items = ReadTaskItemList();
+                    if (items != null)
+                    {
+                        foreach (var item in items)
+                        {
+                            list.Add(new DictionaryEntry(itemType, item));
+                        }
+                    }
                 }
             }
             else
             {
                 list = new List<DictionaryEntry>();
-                for (int i = 0; i < count; i++)
+
+                while (true)
                 {
-                    string itemName = ReadDeduplicatedString();
-                    var items = ReadTaskItemList();
-                    foreach (var item in items)
+                    string itemType = ReadDeduplicatedString();
+                    if (string.IsNullOrEmpty(itemType))
                     {
-                        list.Add(new DictionaryEntry(itemName, item));
+                        break;
                     }
+
+                    var items = ReadTaskItemList();
+                    if (items != null)
+                    {
+                        foreach (var item in items)
+                        {
+                            list.Add(new DictionaryEntry(itemType, item));
+                        }
+                    }
+                }
+
+                if (list.Count == 0)
+                {
+                    list = null;
                 }
             }
 
@@ -1007,12 +1047,12 @@ namespace Microsoft.Build.Logging
                 return null;
             }
 
-            var list = new List<ITaskItem>(count);
+            var list = new ITaskItem[count];
 
             for (int i = 0; i < count; i++)
             {
                 ITaskItem item = ReadTaskItem();
-                list.Add(item);
+                list[i] = item;
             }
 
             return list;
@@ -1079,7 +1119,10 @@ namespace Microsoft.Build.Logging
 
         private int ReadInt32()
         {
-            return Read7BitEncodedInt(binaryReader);
+            // on some platforms (net5) this method was added to BinaryReader
+            // but it's not available on others. Call our own extension method
+            // explicitly to avoid ambiguity.
+            return BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
         }
 
         private long ReadInt64()
@@ -1100,30 +1143,6 @@ namespace Microsoft.Build.Logging
         private TimeSpan ReadTimeSpan()
         {
             return new TimeSpan(binaryReader.ReadInt64());
-        }
-
-        private int Read7BitEncodedInt(BinaryReader reader)
-        {
-            // Read out an Int32 7 bits at a time.  The high bit
-            // of the byte when on means to continue reading more bytes.
-            int count = 0;
-            int shift = 0;
-            byte b;
-            do
-            {
-                // Check for a corrupted stream.  Read a max of 5 bytes.
-                // In a future version, add a DataFormatException.
-                if (shift == 5 * 7)  // 5 bytes max per Int32, shift += 7
-                {
-                    throw new FormatException();
-                }
-
-                // ReadByte handles end of stream cases for us.
-                b = reader.ReadByte();
-                count |= (b & 0x7F) << shift;
-                shift += 7;
-            } while ((b & 0x80) != 0);
-            return count;
         }
 
         private ProfiledLocation ReadProfiledLocation()
@@ -1148,7 +1167,7 @@ namespace Microsoft.Build.Logging
             var hasLine = ReadBoolean();
             if (hasLine)
             {
-                line = ReadInt32(); 
+                line = ReadInt32();
             }
 
             // Id and parent Id were introduced in version 6
