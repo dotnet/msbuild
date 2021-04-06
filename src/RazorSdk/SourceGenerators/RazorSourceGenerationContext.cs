@@ -2,10 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 
@@ -23,7 +21,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
         public RazorConfiguration Configuration { get; private set; }
 
-
         /// <summary>
         /// Gets a flag that determines if the source generator waits for the debugger to attach.
         /// <para>
@@ -34,13 +31,19 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public bool WaitForDebugger { get; private set; }
 
         /// <summary>
-        /// Gets a flag that determine if the source generator should log verbose messages.
+        /// Gets a flag that determines if generated Razor views and Pages includes the <c>RazorSourceChecksumAttribute</c>.
         /// </summary>
+        public bool GenerateMetadataSourceChecksumAttributes { get; private set; }
+
+        /// <summary>
+        /// Gets a flag that determines if the source generator should no-op.
         /// <para>
-        /// To configure this using MSBuild, use the <c>_RazorSourceGeneratorLog</c> property.
-        /// For instance <c>dotnet msbuild /p:_RazorSourceGeneratorLog=true</c>
+        /// This flag exists to support scenarios in VS where design-time and EnC builds need
+        /// to run without invoking the source generator to avoid duplicate types being produced.
+        /// The property is set by the SDK via an editor config.
         /// </para>
-        public bool EnableLogging { get; private set; }
+        /// </summary>
+        public bool SuppressRazorSourceGenerator { get; private set; }
 
         public RazorSourceGenerationContext(GeneratorExecutionContext context)
         {
@@ -67,7 +70,10 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
 
             globalOptions.TryGetValue("build_property._RazorSourceGeneratorDebug", out var waitForDebugger);
-            globalOptions.TryGetValue("build_property._RazorSourceGeneratorLog", out var enableLogging);
+
+            globalOptions.TryGetValue("build_property.SuppressRazorSourceGenerator", out var suppressRazorSourceGenerator);
+
+            globalOptions.TryGetValue("build_property.GenerateRazorMetadataSourceChecksumAttributes", out var generateMetadataSourceChecksumAttributes);
 
             var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>(), true);
             var (razorFiles, cshtmlFiles) = GetRazorInputs(context);
@@ -79,7 +85,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             RazorFiles = razorFiles;
             CshtmlFiles = cshtmlFiles;
             WaitForDebugger = waitForDebugger == "true";
-            EnableLogging = enableLogging == "true";
+            SuppressRazorSourceGenerator = suppressRazorSourceGenerator == "true";
+            GenerateMetadataSourceChecksumAttributes = generateMetadataSourceChecksumAttributes == "true";
         }
 
         private static VirtualRazorProjectFileSystem GetVirtualFileSystem(GeneratorExecutionContext context, IReadOnlyList<RazorInputItem> razorFiles, IReadOnlyList<RazorInputItem> cshtmlFiles)
@@ -142,17 +149,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
                 options.TryGetValue("build_metadata.AdditionalFiles.CssScope", out var cssScope);
 
-                if (!options.TryGetValue("build_metadata.AdditionalFiles.GeneratedOutputFullPath", out var generatedOutputPath))
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        RazorDiagnostics.GeneratedOutputFullPathNotProvided,
-                        Location.None,
-                        item.Path));
-                }
-
                 var fileKind = isComponent ? FileKinds.GetComponentFileKindFromFilePath(item.Path) : FileKinds.Legacy;
 
-                var inputItem = new RazorInputItem(item, relativePath, fileKind, generatedOutputPath, cssScope);
+                var inputItem = new RazorInputItem(item, relativePath, fileKind, cssScope);
 
                 if (isComponent)
                 {

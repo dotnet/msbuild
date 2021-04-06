@@ -472,7 +472,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact]
+        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.Linux)]
         public void ItCreatesCoverageFileInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
@@ -508,7 +508,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [UnixOnlyFact]
+        [PlatformSpecificFact(TestPlatforms.FreeBSD | TestPlatforms.OSX)]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
@@ -523,7 +523,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows.");
+                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Ubuntu and Alpine.");
                 result.StdOut.Should().Contain("Total:     1");
                 result.StdOut.Should().Contain("Passed:     1");
                 result.StdOut.Should().NotContain("Failed!");

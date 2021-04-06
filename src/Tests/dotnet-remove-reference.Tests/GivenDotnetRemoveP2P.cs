@@ -63,7 +63,7 @@ Options:
         private TestSetup Setup([System.Runtime.CompilerServices.CallerMemberName] string callingMethod = nameof(Setup), string identifier = "")
         {
             return new TestSetup(
-                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod: callingMethod + nameof(GivenDotnetRemoveReference), identifier: identifier, testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
+                _testAssetsManager.CopyTestAsset(TestSetup.ProjectName, callingMethod: callingMethod + nameof(GivenDotnetRemoveReference), identifier: identifier + callingMethod, testAssetSubdirectory: TestAssetSubdirectories.NonRestoredTestProjects)
                     .WithSource()
                     .Path);
         }
@@ -179,7 +179,7 @@ Options:
         [InlineData("ihave?inv@lid/char\\acters")]
         public void WhenNonExistingProjectIsPassedItPrintsErrorAndUsage(string projName)
         {
-            var setup = Setup();
+            var setup = Setup(identifier: projName.GetHashCode().ToString());
 
             var cmd = new RemoveReferenceCommand(Log)
                     .WithProject(projName)

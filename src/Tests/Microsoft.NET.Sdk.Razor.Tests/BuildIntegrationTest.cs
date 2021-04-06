@@ -74,15 +74,18 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var filePath = Path.Combine(projectDirectory.Path, "Views", "Home", "Index.cshtml");
+
             File.WriteAllText(filePath, "@{ var foo = \"\".Substring(\"bleh\"); }");
 
             var location = filePath + "(1,27)";
             var build = new BuildCommand(projectDirectory);
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Absolute paths on OSX don't work well.
                 build.Execute().Should().Fail().And.HaveStdOutContaining("CS1503");
-            } else {
+            }
+            else
+            {
                 build.Execute().Should().Fail().And.HaveStdOutContaining("CS1503").And.HaveStdOutContaining(location);
             }
 
@@ -185,7 +188,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         {
             var testAsset = "RazorSimpleMvc";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
-            
+
             var build = new BuildCommand(projectDirectory);
             build.Execute("/p:RazorCompileOnBuild=false", "/p:RazorCompileOnPublish=false").Should().Pass();
 

@@ -151,7 +151,7 @@ namespace Microsoft.NET.ToolPack.Tests
         {
             string shimoutputPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "shimoutput");
             TestAsset helloWorldAsset = _testAssetsManager
-                .CopyTestAsset("PortableTool", "PackagedShimOutputRootDirectory" + multiTarget.ToString())
+                .CopyTestAsset("PortableTool", "PackagedShimOutputRootDirectory" + multiTarget.ToString(), identifier: multiTarget.ToString() + targetFramework)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {

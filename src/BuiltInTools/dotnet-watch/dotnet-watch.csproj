@@ -18,22 +18,15 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(MicrosoftCodeAnalysisCSharpFeaturesPackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion)" />
+  </ItemGroup>
 
+  <ItemGroup>
     <ProjectReference Include="..\..\Cli\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
-
-    <ProjectReference
-      Include="..\BrowserRefresh\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj"
-      PrivateAssets="All"
-      ReferenceOutputAssembly="false"
-      SkipGetTargetFrameworkProperties="true"
-      UndefineProperties="TargetFramework;TargetFrameworks" />
-
-    <ProjectReference
-      Include="..\DotNetWatchTasks\DotNetWatchTasks.csproj"
-      PrivateAssets="All"
-      ReferenceOutputAssembly="false"
-      SkipGetTargetFrameworkProperties="true"
-      UndefineProperties="TargetFramework;TargetFrameworks" />
+    <ProjectReference Include="..\BrowserRefresh\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" UndefineProperties="TargetFramework;TargetFrameworks" />
+    <ProjectReference Include="..\DotNetWatchTasks\DotNetWatchTasks.csproj" PrivateAssets="All" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" UndefineProperties="TargetFramework;TargetFrameworks" />
   </ItemGroup>
 
 </Project>

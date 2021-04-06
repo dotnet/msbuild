@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 
 namespace Microsoft.Extensions.Tools.Internal
 {
@@ -12,6 +13,7 @@ namespace Microsoft.Extensions.Tools.Internal
     /// </summary>
     public interface IConsole
     {
+        CancellationToken ListenForForceReloadRequest();
         event ConsoleCancelEventHandler CancelKeyPress;
         TextWriter Out { get; }
         TextWriter Error { get; }
@@ -21,5 +23,6 @@ namespace Microsoft.Extensions.Tools.Internal
         bool IsErrorRedirected { get; }
         ConsoleColor ForegroundColor { get; set; }
         void ResetColor();
+        void Clear();
     }
 }

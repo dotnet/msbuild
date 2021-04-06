@@ -15,6 +15,12 @@ parameters:
   timeoutInMinutes: 180
 
 jobs:
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+  - template: /eng/common/templates/job/onelocbuild.yml
+    parameters:
+      CreatePr: false
+      LclSource: lclFilesfromPackage
+      LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
 - template: /eng/common/templates/job/job.yml
   parameters:
     name: ${{ parameters.agentOs }}

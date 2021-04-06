@@ -2,11 +2,13 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Tools.Internal;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
@@ -96,7 +98,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                 StartInfo =
                 {
                     FileName = processSpec.Executable,
-                    Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(processSpec.Arguments),
+                    Arguments = processSpec.EscapedArguments != null ? processSpec.EscapedArguments : ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(processSpec.Arguments),
                     UseShellExecute = false,
                     WorkingDirectory = processSpec.WorkingDirectory,
                     RedirectStandardOutput = processSpec.IsOutputCaptured || (processSpec.OnOutput != null),
@@ -109,7 +111,32 @@ namespace Microsoft.DotNet.Watcher.Internal
                 process.StartInfo.Environment.Add(env.Key, env.Value);
             }
 
+            SetEnvironmentVariable(process.StartInfo, "DOTNET_STARTUP_HOOKS", processSpec.EnvironmentVariables.DotNetStartupHooks, Path.PathSeparator);
+            SetEnvironmentVariable(process.StartInfo, "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES", processSpec.EnvironmentVariables.AspNetCoreHostingStartupAssemblies, ';');
+
             return process;
+        }
+
+        private void SetEnvironmentVariable(ProcessStartInfo processStartInfo, string envVarName, List<string> envVarValues, char separator)
+        {
+            if (envVarValues is { Count: 0 })
+            {
+                return;
+            }
+
+            var existing = Environment.GetEnvironmentVariable(envVarName);
+
+            string result;
+            if (!string.IsNullOrEmpty(existing))
+            {
+                result = existing + separator + string.Join(separator, envVarValues);
+            }
+            else
+            {
+                result = string.Join(separator, envVarValues);
+            }
+
+            processStartInfo.EnvironmentVariables[envVarName] = result;
         }
 
         private class ProcessState : IDisposable

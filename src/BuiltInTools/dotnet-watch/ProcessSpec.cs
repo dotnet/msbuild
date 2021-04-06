@@ -13,8 +13,10 @@ namespace Microsoft.DotNet.Watcher
     {
         public string Executable { get; set; }
         public string WorkingDirectory { get; set; }
-        public IDictionary<string, string> EnvironmentVariables { get; } = new Dictionary<string, string>();
-        public IEnumerable<string> Arguments { get; set; }
+        public ProcessSpecEnvironmentVariables EnvironmentVariables { get; } = new();
+
+        public IReadOnlyList<string> Arguments { get; set; }
+        public string EscapedArguments { get; set; }
         public OutputCapture OutputCapture { get; set; }
 
         public string ShortDisplayName()
@@ -25,5 +27,11 @@ namespace Microsoft.DotNet.Watcher
         public DataReceivedEventHandler OnOutput { get; set; }
 
         public CancellationToken CancelOutputCapture { get; set; }
+
+        public sealed class ProcessSpecEnvironmentVariables : Dictionary<string, string>
+        {
+            public List<string> DotNetStartupHooks { get; } = new();
+            public List<string> AspNetCoreHostingStartupAssemblies { get; } = new();
+        }
     }
 }

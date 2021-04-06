@@ -89,7 +89,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_embeds_the_clsidmap_in_the_comhost_when_rid_specified(string rid)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("ComServer")
+                .CopyTestAsset("ComServer", rid)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -165,7 +165,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_fails_to_embed_clsid_when_not_on_windows(string rid)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("ComServer")
+                .CopyTestAsset("ComServer", identifier: rid)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {

@@ -18,6 +18,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="$(MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="RazorSourceGenerator.razorencconfig" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- See https://github.com/dotnet/roslyn/discussions/47517#discussioncomment-64145 -->
   <PropertyGroup>
     <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>

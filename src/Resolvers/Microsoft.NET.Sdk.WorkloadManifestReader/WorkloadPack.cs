@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    internal class WorkloadPack
+    public class WorkloadPack
     {
         public WorkloadPack(WorkloadPackId id, string version, WorkloadPackKind kind, Dictionary<string, WorkloadPackId>? aliasTo)
         {

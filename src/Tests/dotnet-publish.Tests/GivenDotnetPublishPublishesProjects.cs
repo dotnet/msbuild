@@ -316,5 +316,21 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 cmd.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
             }
         }
+
+        [Fact]
+        public void DotnetPublishAllowsPublishOutputDir()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")
+                .WithSource()
+                .Restore(Log);
+
+            var rootDir = testInstance.Path;
+
+            new DotnetPublishCommand(Log)
+                .WithWorkingDirectory(rootDir)
+                .Execute("--no-restore", "-o", "publish")
+                .Should()
+                .Pass();
+        }
     }
 }

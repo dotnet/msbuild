@@ -89,7 +89,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Execute(@"/p:PublishSingleFile=true")
                 .Should()
                 .Pass();
-            CheckPublishOutput(publishDir, expectedSingleExeFileExtensions.Select(ending => newName + ending).Append("UserData.txt").Append(testProject.Name + ".deps.json"), 
+            CheckPublishOutput(publishDir, expectedSingleExeFileExtensions.Select(ending => newName + ending).Append("UserData.txt").Append(testProject.Name + ".deps.json"),
                 expectedSingleExeFileExtensions.Select(ending => testProject.Name + ending));
         }
 
@@ -161,7 +161,7 @@ namespace Microsoft.NET.Publish.Tests
             CheckPublishOutput(publishDir, expectedSingleExeFiles.Append("UserData.txt"), expectedNonSingleExeFiles);
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("16.8.0", Skip = "https://github.com/dotnet/sdk/issues/16456")]
         public void It_cleans_for_mvc_projects()
         {
             // Create new mvc app from template

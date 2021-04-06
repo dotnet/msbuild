@@ -684,7 +684,7 @@ EndGlobal
         public void WhenSolutionFolderExistsItDoesNotGetAdded(string firstComponent)
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndSolutionFolders")
+                .CopyTestAsset("TestAppWithSlnAndSolutionFolders", identifier: firstComponent)
                 .WithSource()
                 .Path;
 

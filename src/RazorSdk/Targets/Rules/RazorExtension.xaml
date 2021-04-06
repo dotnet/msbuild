@@ -24,7 +24,7 @@
     DisplayName="Razor Extension Assembly Name"
     Name="AssemblyName"
     ReadOnly="True"
-    Visible="True" />
+    Visible="False" />
 
   <StringProperty
     Category="General"
@@ -32,6 +32,6 @@
     DisplayName="Razor Extension Assembly File Path"
     Name="AssemblyFilePath"
     ReadOnly="True"
-    Visible="True" />
+    Visible="False" />
 
 </Rule>

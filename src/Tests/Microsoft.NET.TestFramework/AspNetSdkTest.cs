@@ -27,10 +27,11 @@ namespace Microsoft.NET.TestFramework
             string testAsset,
             [CallerMemberName] string callerName = "",
             string subdirectory = "",
-            string overrideTfm = null) 
+            string overrideTfm = null,
+            string identifier = null) 
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset(testAsset, callingMethod: callerName, testAssetSubdirectory: subdirectory)
+                .CopyTestAsset(testAsset, callingMethod: callerName, testAssetSubdirectory: subdirectory, identifier: identifier)
                 .WithSource()
                 .WithProjectChanges(project => 
                 {

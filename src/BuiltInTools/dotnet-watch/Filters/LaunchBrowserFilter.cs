@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,12 +67,8 @@ namespace Microsoft.DotNet.Watcher.Tools
                         context.ProcessSpec.EnvironmentVariables["ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT"] = serverUrl;
 
                         var pathToMiddleware = Path.Combine(AppContext.BaseDirectory, "middleware", "Microsoft.AspNetCore.Watch.BrowserRefresh.dll");
-                        
-                        const string dotnetStartHooksName = "DOTNET_STARTUP_HOOKS";
-                        context.ProcessSpec.EnvironmentVariables[dotnetStartHooksName] = AddOrAppend(dotnetStartHooksName, pathToMiddleware, Path.PathSeparator);
-
-                        const string hostingStartupAssembliesName = "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES";
-                        context.ProcessSpec.EnvironmentVariables[hostingStartupAssembliesName] = AddOrAppend(hostingStartupAssembliesName, "Microsoft.AspNetCore.Watch.BrowserRefresh", ';');
+                        context.ProcessSpec.EnvironmentVariables.DotNetStartupHooks.Add(pathToMiddleware);
+                        context.ProcessSpec.EnvironmentVariables.AspNetCoreHostingStartupAssemblies.Add("Microsoft.AspNetCore.Watch.BrowserRefresh");
                     }
                 }
             }
@@ -81,20 +76,6 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 // We've detected a change. Notify the browser.
                 await (_refreshServer?.SendWaitMessageAsync(cancellationToken) ?? default);
-            }
-        }
-
-        private string AddOrAppend(string envVarName, string envVarValue, char separator)
-        {
-            var existing = Environment.GetEnvironmentVariable(envVarName);
-
-            if (!string.IsNullOrEmpty(existing))
-            {
-                return $"{existing}{separator}{envVarValue}";
-            }
-            else
-            {
-                return envVarValue;
             }
         }
 
@@ -176,7 +157,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             launchUrl = null;
             var reporter = context.Reporter;
 
-            if (!context.FileSet.IsNetCoreApp31OrNewer)
+            if (!context.FileSet.Project.IsNetCoreApp31OrNewer())
             {
                 // Browser refresh middleware supports 3.1 or newer
                 reporter.Verbose("Browser refresh is only supported in .NET Core 3.1 or newer projects.");
@@ -190,41 +171,13 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            // We're executing the run-command. Determine if the launchSettings allows it
-            var launchSettingsPath = Path.Combine(context.ProcessSpec.WorkingDirectory, "Properties", "launchSettings.json");
-            if (!File.Exists(launchSettingsPath))
-            {
-                reporter.Verbose($"No launchSettings.json file found at {launchSettingsPath}. Unable to determine if browser refresh is allowed.");
-                return false;
-            }
-
-            LaunchSettingsJson launchSettings;
-            try
-            {
-                launchSettings = JsonSerializer.Deserialize<LaunchSettingsJson>(
-                    File.ReadAllText(launchSettingsPath),
-                    new JsonSerializerOptions(JsonSerializerDefaults.Web));
-            }
-            catch (Exception ex)
-            {
-                reporter.Verbose($"Error reading launchSettings.json: {ex}.");
-                return false;
-            }
-
-            var defaultProfile = launchSettings.Profiles.FirstOrDefault(f => f.Value.CommandName == "Project").Value;
-            if (defaultProfile is null)
-            {
-                reporter.Verbose("Unable to find default launchSettings profile.");
-                return false;
-            }
-
-            if (!defaultProfile.LaunchBrowser)
+            if (context.DefaultLaunchSettingsProfile is not { LaunchBrowser: true })
             {
                 reporter.Verbose("launchSettings does not allow launching browsers.");
                 return false;
             }
 
-            launchUrl = defaultProfile.LaunchUrl;
+            launchUrl = context.DefaultLaunchSettingsProfile.LaunchUrl;
             return true;
         }
 

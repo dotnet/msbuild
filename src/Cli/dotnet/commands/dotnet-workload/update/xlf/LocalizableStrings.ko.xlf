@@ -57,11 +57,6 @@
         <target state="translated">사용할 NuGet 구성 파일입니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>The target framework to update the workload for.</source>
-        <target state="translated">도구를 업데이트할 대상 프레임워크입니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
         <source>NuGet configuration file '{0}' does not exist.</source>
         <target state="translated">NuGet 구성 파일 '{0}'이(가) 없습니다.</target>
@@ -100,11 +95,6 @@
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
         <target state="translated">FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionName">
-        <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">

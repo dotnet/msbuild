@@ -5,8 +5,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Microsoft.Extensions.Tools.Internal
@@ -43,6 +44,7 @@ namespace Microsoft.Extensions.Tools.Internal
         public bool IsOutputRedirected { get; } = false;
         public bool IsErrorRedirected { get; } = false;
         public ConsoleColor ForegroundColor { get; set; }
+        public void Clear() { }
 
         public ConsoleCancelEventArgs ConsoleCancelKey()
         {
@@ -68,6 +70,8 @@ namespace Microsoft.Extensions.Tools.Internal
         {
             _testWriter.ClearOutput();
         }
+
+        public CancellationToken ListenForForceReloadRequest() => default;
 
         private class TestOutputWriter : TextWriter
         {

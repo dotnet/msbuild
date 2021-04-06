@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.Tools.Internal
 {
@@ -12,12 +14,33 @@ namespace Microsoft.Extensions.Tools.Internal
     /// </summary>
     public class PhysicalConsole : IConsole
     {
+        private CancellationTokenSource _cancellationTokenSource;
+
         private PhysicalConsole()
         {
             Console.CancelKeyPress += (o, e) =>
             {
                 CancelKeyPress?.Invoke(o, e);
             };
+        }
+
+        public CancellationToken ListenForForceReloadRequest()
+        {
+            _cancellationTokenSource ??= new CancellationTokenSource();
+
+            Task.Run(() =>
+            {
+                var key = Console.ReadKey(intercept: true);
+                if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.R)
+                {
+                    var cancellationTokenSource = Interlocked.Exchange(ref _cancellationTokenSource, new CancellationTokenSource());
+
+                    cancellationTokenSource.Cancel();
+                    cancellationTokenSource.Dispose();
+                }
+            });
+
+            return _cancellationTokenSource.Token;
         }
 
         public static IConsole Singleton { get; } = new PhysicalConsole();
@@ -36,5 +59,6 @@ namespace Microsoft.Extensions.Tools.Internal
         }
 
         public void ResetColor() => Console.ResetColor();
+        public void Clear() => Console.Clear();
     }
 }

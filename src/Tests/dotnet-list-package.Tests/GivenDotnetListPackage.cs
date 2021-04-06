@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         {
             var testAssetName = "MSBuildAppWithMultipleFrameworks";
             var testAsset = _testAssetsManager
-                .CopyTestAsset(testAssetName)
+                .CopyTestAsset(testAssetName, identifier: args.GetHashCode().ToString() + shouldInclude)
                 .WithSource();
             var projectDirectory = testAsset.Path;
 

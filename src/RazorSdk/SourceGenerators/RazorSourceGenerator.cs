@@ -27,6 +27,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         // https://github.com/dotnet/roslyn/issues/51257 track the long-term resolution for this.
         private static readonly ConcurrentDictionary<Guid, IReadOnlyList<TagHelperDescriptor>> _tagHelperCache = new();
 
+        private static readonly ConcurrentDictionary<string, (SourceText, SourceText)> _sourceTextCache = new();
+
         private static readonly SourceText ProvideApplicationPartFactoryAttributeSourceText = GetProvideApplicationPartFactorySourceText();
 
         public void Initialize(GeneratorInitializationContext context)
@@ -47,6 +49,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 return;
             }
 
+            if (razorContext.SuppressRazorSourceGenerator)
+            {
+                return;
+            }
+
             HandleDebugSwitch(razorContext.WaitForDebugger);
 
             var tagHelpers = ResolveTagHelperDescriptors(context, razorContext);
@@ -55,6 +62,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             {
                 b.Features.Add(new DefaultTypeNameFeature());
                 b.SetRootNamespace(razorContext.RootNamespace);
+
+                b.Features.Add(new ConfigureRazorCodeGenerationOptions(options =>
+                {
+                    options.SuppressMetadataSourceChecksumAttributes = !razorContext.GenerateMetadataSourceChecksumAttributes;
+                }));
 
                 b.Features.Add(new StaticTagHelperFeature { TagHelpers = tagHelpers, });
                 b.Features.Add(new DefaultTagHelperDescriptorProvider());
@@ -65,85 +77,84 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 b.SetCSharpLanguageVersion(((CSharpParseOptions)context.ParseOptions).LanguageVersion);
             });
 
-            CodeGenerateRazorComponents(context, razorContext, projectEngine);
-            GenerateViews(context, razorContext, projectEngine);
+            if (razorContext.CshtmlFiles.Count != 0)
+            {
+                context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info", ProvideApplicationPartFactoryAttributeSourceText);
+            }
+
+            RazorGenerateForSourceTexts(razorContext.CshtmlFiles, context, projectEngine);
+            RazorGenerateForSourceTexts(razorContext.RazorFiles, context, projectEngine);
         }
 
-        private void GenerateViews(GeneratorExecutionContext context, RazorSourceGenerationContext razorContext, RazorProjectEngine projectEngine)
+        private void RazorGenerateForSourceTexts(IReadOnlyList<RazorInputItem> files, GeneratorExecutionContext context, RazorProjectEngine projectEngine)
         {
-            var files = razorContext.CshtmlFiles;
-
             if (files.Count == 0)
             {
                 return;
             }
 
-            var arraypool = ArrayPool<(string, SourceText)>.Shared;
+            var arraypool = ArrayPool<(string, SourceText?)>.Shared;
             var outputs = arraypool.Rent(files.Count);
-
-            context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info", ProvideApplicationPartFactoryAttributeSourceText);
 
             Parallel.For(0, files.Count, GetParallelOptions(context), i =>
             {
-                var file = files[i];
-
-                var codeDocument = projectEngine.Process(projectEngine.FileSystem.GetItem(file.NormalizedPath, FileKinds.Legacy));
-                var csharpDocument = codeDocument.GetCSharpDocument();
-                for (var j = 0; j < csharpDocument.Diagnostics.Count; j++)
-                {
-                    var razorDiagnostic = csharpDocument.Diagnostics[j];
-                    var csharpDiagnostic = razorDiagnostic.AsDiagnostic();
-                    context.ReportDiagnostic(csharpDiagnostic);
-                }
-
-                var generatedCode = csharpDocument.GeneratedCode;
-                var hint = GetIdentifierFromPath(file.GeneratedOutputPath ?? file.NormalizedPath);
-                outputs[i] = (hint, SourceText.From(generatedCode, Encoding.UTF8));
+                outputs[i] = ResolveGeneratedSourceTextFromFile(files[i], projectEngine, context);
             });
 
             for (var i = 0; i < files.Count; i++)
             {
                 var (hint, sourceText) = outputs[i];
-                context.AddSource(hint, sourceText);
+                if (sourceText != null)
+                {
+                    context.AddSource(hint, sourceText);
+                }
             }
 
             arraypool.Return(outputs);
         }
 
-        private static void CodeGenerateRazorComponents(GeneratorExecutionContext context, RazorSourceGenerationContext razorContext, RazorProjectEngine projectEngine)
+        private static (string, SourceText?) ResolveGeneratedSourceTextFromFile(RazorInputItem file, RazorProjectEngine projectEngine, GeneratorExecutionContext context)
         {
-            var files = razorContext.RazorFiles;
+            var hint = GetIdentifierFromPath(file.NormalizedPath);
 
-            var arraypool = ArrayPool<(string, SourceText)>.Shared;
-            var outputs = arraypool.Rent(files.Count);
+            var entryFound = _sourceTextCache.TryGetValue(hint, out (SourceText cachedSourceText, SourceText cachedGeneratedSourceText) cachedValues);
 
-            Parallel.For(0, files.Count, GetParallelOptions(context), i =>
+            var sourceText = file.AdditionalText.GetText();
+
+            if (sourceText is null)
             {
-                var file = files[i];
-                var projectItem = projectEngine.FileSystem.GetItem(file.NormalizedPath, FileKinds.Component);
-
-                var codeDocument = projectEngine.Process(projectItem);
-                var csharpDocument = codeDocument.GetCSharpDocument();
-                for (var j = 0; j < csharpDocument.Diagnostics.Count; j++)
-                {
-                    var razorDiagnostic = csharpDocument.Diagnostics[j];
-                    var csharpDiagnostic = razorDiagnostic.AsDiagnostic();
-                    context.ReportDiagnostic(csharpDiagnostic);
-                }
-
-                var hint = GetIdentifierFromPath(file.NormalizedPath);
-
-                var generatedCode = csharpDocument.GeneratedCode;
-                outputs[i] = (hint, SourceText.From(generatedCode, Encoding.UTF8));
-            });
-
-            for (var i = 0; i < files.Count; i++)
-            {
-                var (hint, sourceText) = outputs[i];
-                context.AddSource(hint, sourceText);
+                context.ReportDiagnostic(Diagnostic.Create(RazorDiagnostics.SourceTextNotFoundDescriptor, Location.None, hint));
+                return (hint, null);
             }
 
-            arraypool.Return(outputs);
+            var checksum = sourceText.GetChecksum();
+            var cachedSourceText = cachedValues.cachedSourceText;
+            if (entryFound && cachedSourceText.GetChecksum().Equals(checksum))
+            {
+                return (hint, cachedValues.cachedGeneratedSourceText);
+            }
+
+            var projectItem = projectEngine.FileSystem.GetItem(file.NormalizedPath, file.FileKind);
+            var codeDocument = projectEngine.Process(projectItem);
+            var csharpDocument = codeDocument.GetCSharpDocument();
+
+            for (var j = 0; j < csharpDocument.Diagnostics.Count; j++)
+            {
+                var razorDiagnostic = csharpDocument.Diagnostics[j];
+                var csharpDiagnostic = razorDiagnostic.AsDiagnostic();
+                context.ReportDiagnostic(csharpDiagnostic);
+            }
+
+            var generatedCode = csharpDocument.GeneratedCode;
+            var generatedSourceText = SourceText.From(generatedCode, Encoding.UTF8);
+
+            if (_sourceTextCache.Count > 200)
+            {
+                _sourceTextCache.Clear();
+            }
+                    
+            _sourceTextCache[hint] = (sourceText, generatedSourceText);
+            return (hint, generatedSourceText);
         }
 
         private static IReadOnlyList<TagHelperDescriptor> ResolveTagHelperDescriptors(GeneratorExecutionContext GeneratorExecutionContext, RazorSourceGenerationContext razorContext)

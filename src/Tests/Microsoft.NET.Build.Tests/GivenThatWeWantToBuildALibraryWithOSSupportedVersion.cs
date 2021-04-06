@@ -102,7 +102,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestProject testProject = SetUpProject(targetFramework);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var runCommand = new DotnetCommand(Log, "run");
             runCommand.WorkingDirectory = Path.Combine(testAsset.TestRoot, testProject.Name);
@@ -226,7 +226,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties["TargetPlatformMinVersion"] = "10.0.18362.0";
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             new BuildCommand(testAsset)
                 .Execute()

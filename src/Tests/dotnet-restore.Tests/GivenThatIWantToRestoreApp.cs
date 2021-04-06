@@ -28,14 +28,14 @@ namespace Microsoft.DotNet.Restore.Test
         [InlineData(false)]
         public void ItRestoresAppToSpecificDirectory(bool useStaticGraphEvaluation)
         {
-            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+            var rootPath = _testAssetsManager.CreateTestDirectory(identifier: useStaticGraphEvaluation.ToString()).Path;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
 
             var sln = "TestAppWithSlnAndSolutionFolders";
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset(sln)
+                .CopyTestAsset(sln, identifier: useStaticGraphEvaluation.ToString())
                 .WithSource()
                 .Path;
 
@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Restore.Test
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.3"));
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: useStaticGraphEvaluation.ToString(), targetExtension: extension);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: useStaticGraphEvaluation.ToString() + extension, targetExtension: extension);
 
             var rootPath = Path.Combine(testAsset.TestRoot, testProject.Name);
 
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Restore.Test
         [InlineData(false)]
         public void ItRestoresTestAppToSpecificDirectory(bool useStaticGraphEvaluation)
         {
-            var rootPath = _testAssetsManager.CopyTestAsset("VSTestCore")
+            var rootPath = _testAssetsManager.CopyTestAsset("VSTestCore", identifier: useStaticGraphEvaluation.ToString())
                 .WithSource()
                 .WithVersionVariables()
                 .Path;
@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Restore.Test
         [InlineData(false)]
         public void ItRestoresWithTheSpecifiedVerbosity(bool useStaticGraphEvaluation)
         {
-            var rootPath = _testAssetsManager.CreateTestDirectory().Path;
+            var rootPath = _testAssetsManager.CreateTestDirectory(identifier: useStaticGraphEvaluation.ToString()).Path;
 
             string dir = "pkgs";
             string fullPath = Path.GetFullPath(Path.Combine(rootPath, dir));
