@@ -1,7 +1,4 @@
-using Microsoft.TemplateEngine.Abstractions.Installer;
-using Microsoft.TemplateEngine.Edge.Installers.NuGet;
 using NuGet.Common;
-using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.TemplateEngine.Cli.NuGet

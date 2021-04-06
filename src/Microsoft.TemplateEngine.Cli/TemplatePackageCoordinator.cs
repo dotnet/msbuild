@@ -160,7 +160,7 @@ namespace Microsoft.TemplateEngine.Cli
             List<InstallRequest> installRequests = new List<InstallRequest>();
             foreach (string unexpandedInstallRequest in commandInput.ToInstallList)
             {
-                foreach (var expandedInstallRequest in InstallRequestPathResolution.Expand(unexpandedInstallRequest, _engineEnvironmentSettings))
+                foreach (var expandedInstallRequest in InstallRequestPathResolution.ExpandMaskedPath(unexpandedInstallRequest, _engineEnvironmentSettings))
                 {
                     var splitByColons = expandedInstallRequest.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
                     string identifier = splitByColons[0];
@@ -249,7 +249,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     Reporter.Output.WriteLine();
 
-                    IReadOnlyList<UpdateResult> updateResults = await provider.UpdateAsync(updatesToApply.Select(update => UpdateRequest.FromCheckUpdateResult(update)), cancellationToken).ConfigureAwait(false);
+                    IReadOnlyList<UpdateResult> updateResults = await provider.UpdateAsync(updatesToApply.Select(update => new UpdateRequest(update.TemplatePackage, update.LatestVersion)), cancellationToken).ConfigureAwait(false);
                     foreach (var updateResult in updateResults)
                     {
                         if (!updateResult.Success)

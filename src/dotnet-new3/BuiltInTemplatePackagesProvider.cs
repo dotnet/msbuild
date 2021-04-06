@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace dotnet_new3
 {
+    /// <summary>
+    /// Factory responsible for adding "console", "library" and other templates contained in "template_feed" to "dotnet new3".
+    /// </summary>
     class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
         public string DisplayName => "new3 BuiltIn";
@@ -69,7 +72,7 @@ namespace dotnet_new3
                     foreach (string sourceLocation in paths.ReadAllText(paths.Global.DefaultInstallTemplateList).Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         string expandedPath = Environment.ExpandEnvironmentVariables(sourceLocation).Replace('\\', Path.DirectorySeparatorChar);
-                        IEnumerable<string> expandedPaths = InstallRequestPathResolution.Expand(expandedPath, _settings);
+                        IEnumerable<string> expandedPaths = InstallRequestPathResolution.ExpandMaskedPath(expandedPath, _settings);
                         templatePackages.AddRange(expandedPaths.Select(path => new TemplatePackage(this, path, fileSystem?.GetLastWriteTimeUtc(path) ?? File.GetLastWriteTime(path))));
                     }
                 }
