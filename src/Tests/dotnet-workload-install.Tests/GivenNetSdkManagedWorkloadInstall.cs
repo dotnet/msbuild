@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.NuGetPackageInstaller;
@@ -81,20 +82,41 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Fact]
-        public void GivenManagedInstallItCanInstallPacks()
+        public void GivenManagedInstallItCanInstallDirectoryPacks()
         {
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
             var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
             var version = "6.0.100";
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
-            (nugetInstaller as MockNuGetPackageInstaller).InstallCallParams.Count.Should().Be(1);
-            (nugetInstaller as MockNuGetPackageInstaller).InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
-            (nugetInstaller as MockNuGetPackageInstaller).ExtractCallParams.Count.Should().Be(1);
-            (nugetInstaller as MockNuGetPackageInstaller).ExtractCallParams[0].ShouldBeEquivalentTo(("Mock/path", Path.Combine(dotnetRoot, "metadata", "temp", packInfo.Id + "-extracted")));
+            var mockNugetInstaller = nugetInstaller as MockNuGetPackageInstaller;
+            mockNugetInstaller.InstallCallParams.Count.Should().Be(1);
+            mockNugetInstaller.InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
+            mockNugetInstaller.ExtractCallParams.Count.Should().Be(1);
+            mockNugetInstaller.ExtractCallParams[0].ShouldBeEquivalentTo((mockNugetInstaller.InstallCallResult[0], Path.Combine(dotnetRoot, "metadata", "temp", packInfo.Id + "-extracted")));
 
             var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", packInfo.Id, packInfo.Version, version);
             File.Exists(installationRecordPath).Should().BeTrue();
+
+            Directory.Exists(packInfo.Path).Should().BeTrue();
+        }
+
+        [Fact]
+        public void GivenManagedInstallItCanInstallSingleFilePacks()
+        {
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Template, Path.Combine(dotnetRoot, "template-packs", "Xamarin.Android.Sdk.8.4.7.nupkg"));
+            var version = "6.0.100";
+            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
+
+            (nugetInstaller as MockNuGetPackageInstaller).InstallCallParams.Count.Should().Be(1);
+            (nugetInstaller as MockNuGetPackageInstaller).InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
+            (nugetInstaller as MockNuGetPackageInstaller).ExtractCallParams.Count.Should().Be(0);
+
+            var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", packInfo.Id, packInfo.Version, version);
+            File.Exists(installationRecordPath).Should().BeTrue();
+
+            File.Exists(packInfo.Path).Should().BeTrue();
         }
 
         [Fact]
@@ -133,7 +155,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 // Nupkgs should be removed
                 Directory.Exists(failingNugetInstaller.MockPackageDir).Should().BeFalse();
                 // Packs should be removed
-                Directory.Exists(Path.Combine(dotnetRoot, "packs")).Should().BeFalse();
+                Directory.Exists(packInfo.Path).Should().BeFalse();
             }
         }
 
@@ -175,12 +197,58 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             }
         }
 
+        [Fact]
+        public void GivenManagedInstallItDoesNotRemovePacksWithInstallRecords()
+        {
+            var (dotnetRoot, installer, _) = GetTestInstaller();
+            var packs = new PackInfo[]
+            {
+                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7")),
+                new PackInfo("Xamarin.Android.Framework", "8.4", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.4"))
+            };
+            var sdkVersions = new string[] { "6.0.100", "6.0.300" };
+
+            // Write fake packs
+            var installedPacksPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks");
+            foreach (var sdkVersion in sdkVersions)
+            {
+                Directory.CreateDirectory(Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersion, "InstalledWorkloads"));
+                foreach (var pack in packs)
+                {
+                    var packRecordPath = Path.Combine(installedPacksPath, pack.Id, pack.Version, sdkVersion);
+                    Directory.CreateDirectory(Path.GetDirectoryName(packRecordPath));
+                    File.WriteAllText(packRecordPath, string.Empty);
+                    Directory.CreateDirectory(pack.Path);
+                }
+            }
+            // Write fake workload install record for 6.0.100
+            var installedWorkloadsPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersions.First(), "InstalledWorkloads", "xamarin-android-build");
+            File.WriteAllText(installedWorkloadsPath, string.Empty);
+
+            installer.GarbageCollectInstalledWorkloadPacks();
+
+            Directory.EnumerateFileSystemEntries(installedPacksPath)
+                .Should()
+                .NotBeEmpty();
+            foreach (var pack in packs)
+            {
+                Directory.Exists(pack.Path)
+                    .Should()
+                    .BeTrue();
+
+                var expectedRecordPath = Path.Combine(installedPacksPath, pack.Id, pack.Version, sdkVersions.First());
+                File.Exists(expectedRecordPath)
+                    .Should()
+                    .BeTrue();
+            }
+        }
+
         private (string, NetSdkManagedInstaller, INuGetPackageInstaller) GetTestInstaller([CallerMemberName] string identifier = "", bool failingInstaller = false)
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory(identifier).Path;
             var manifestDir = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            INuGetPackageInstaller nugetInstaller = failingInstaller ? new FailingNuGetPackageInstaller(testDirectory) :  new MockNuGetPackageInstaller();
+            INuGetPackageInstaller nugetInstaller = failingInstaller ? new FailingNuGetPackageInstaller(testDirectory) :  new MockNuGetPackageInstaller(dotnetRoot);
             return (dotnetRoot, new MockManagedInstaller(_reporter, nugetInstaller, dotnetRoot, manifestDir), nugetInstaller);
         }
     }

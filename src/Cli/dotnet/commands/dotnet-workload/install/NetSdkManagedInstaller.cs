@@ -55,23 +55,26 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         if (!PackIsInstalled(packInfo))
                         {
                             var packagePath = _nugetPackageInstaller.InstallPackageAsync(new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)).Result;
-                            var tempExtractionDir = isSingleFilePack(packInfo) ? packagePath : Path.Combine(_tempPackagesDir, $"{packInfo.Id}-extracted");
-                            var packDir = isSingleFilePack(packInfo) ? Path.GetDirectoryName(packInfo.Path) : packInfo.Path;
                             tempsToDelete.Add(packagePath);
-                            tempsToDelete.Add(tempExtractionDir);
 
-                            if (!isSingleFilePack(packInfo))
+                            if (!Directory.Exists(Path.GetDirectoryName(packInfo.Path)))
                             {
+                                Directory.CreateDirectory(Path.GetDirectoryName(packInfo.Path));
+                            }
+
+                            if (isSingleFilePack(packInfo))
+                            {
+                                File.Copy(packagePath, packInfo.Path);
+                            }
+                            else
+                            {
+                                var tempExtractionDir = Path.Combine(_tempPackagesDir, $"{packInfo.Id}-extracted");
+                                tempsToDelete.Add(tempExtractionDir);
                                 Directory.CreateDirectory(tempExtractionDir);
                                 var packFiles = _nugetPackageInstaller.ExtractPackageAsync(packagePath, tempExtractionDir).Result;
-                            }
 
-                            if (!Directory.Exists(Path.GetDirectoryName(packDir)))
-                            {
-                                Directory.CreateDirectory(Path.GetDirectoryName(packDir));
+                                FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, packInfo.Path));
                             }
-
-                            FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, packDir));
                         }
                         else
                         {
@@ -105,8 +108,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
         {
-            DeletePack(packInfo);
             DeletePackInstallationRecord(packInfo, sdkFeatureBand);
+            if (!PackHasInstallRecords(packInfo))
+            {
+                DeletePack(packInfo);
+            }
         }
 
         public override void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) => throw new NotImplementedException();
@@ -122,7 +128,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             foreach (var (deletablePack, featureBand) in deletablePacks)
             {
                 DeletePackInstallationRecord(deletablePack, featureBand);
-                DeletePack(deletablePack);
+                if (!PackHasInstallRecords(deletablePack))
+                {
+                    DeletePack(deletablePack);
+                }
             }
         }
 
@@ -285,6 +294,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
                 }
             }
+        }
+
+        private bool PackHasInstallRecords(PackInfo packInfo)
+        {
+            var packInstallRecordDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, packInfo.Id, packInfo.Version);
+            return Directory.Exists(packInstallRecordDir) && Directory.EnumerateFileSystemEntries(packInstallRecordDir).Any();
         }
 
         private bool isSingleFilePack(PackInfo packInfo) => packInfo.Kind.Equals(WorkloadPackKind.Library) || packInfo.Kind.Equals(WorkloadPackKind.Template);
