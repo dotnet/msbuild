@@ -1226,7 +1226,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForLanguageAndPublishFeatureCombinationSupport"
         BeforeTargets="Publish;PrepareForPublish">
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+    <NETSdkError Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true') and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
                  ResourceName="NoSupportCppPublishDotnetCore" />
 
   </Target>

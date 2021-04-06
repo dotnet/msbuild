@@ -54,7 +54,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
 
     <PropertyGroup>
-      <_NuGetRestoreSupported Condition="'$(Language)' == 'C++'">false</_NuGetRestoreSupported>
+      <_NuGetRestoreSupported Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true')">false</_NuGetRestoreSupported>
     </PropertyGroup>
 
     <ItemGroup>
