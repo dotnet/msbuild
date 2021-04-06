@@ -158,19 +158,20 @@ namespace Microsoft.TemplateEngine.Cli
             // In future we might want give user ability to pick IManagerSourceProvider by Name or GUID
             var managedSourceProvider = _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetBuiltInManagedProvider(InstallationScope.Global);
             List<InstallRequest> installRequests = new List<InstallRequest>();
-            foreach (string unexpandedInstallRequest in commandInput.ToInstallList)
-            {
-                foreach (var expandedInstallRequest in InstallRequestPathResolution.ExpandMaskedPath(unexpandedInstallRequest, _engineEnvironmentSettings))
-                {
-                    var splitByColons = expandedInstallRequest.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
-                    string identifier = splitByColons[0];
-                    string version = null;
-                    if (splitByColons.Length > 1)
-                    {
-                        version = splitByColons[1];
-                    }
 
-                    installRequests.Add(new InstallRequest(identifier, version, details: details));
+            foreach (string installArg in commandInput.ToInstallList)
+            {
+                string[] splitByColons = installArg.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
+                string identifier = splitByColons[0];
+                string version = null;
+                //'*' is placeholder for the latest version
+                if (splitByColons.Length > 1 && splitByColons[1] != "*")
+                {
+                    version = splitByColons[1];
+                }
+                foreach (string expandedIdentifier in InstallRequestPathResolution.ExpandMaskedPath(identifier, _engineEnvironmentSettings))
+                {
+                    installRequests.Add(new InstallRequest(expandedIdentifier, version, details: details));
                 }
             }
 

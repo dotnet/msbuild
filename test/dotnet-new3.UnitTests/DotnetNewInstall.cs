@@ -40,6 +40,41 @@ namespace dotnet_new3.UnitTests
         }
 
         [Fact]
+        public void CanInstallRemoteNuGetPackage_LatestVariations()
+        {
+            var command1 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "--quiet")
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            var command2 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::", "--quiet")
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            var command3 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::*", "--quiet")
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, TestUtils.CreateTemporaryFolder())
+                .Execute();
+
+            foreach (var commandResult in new[] { command1, command2, command3 })
+            {
+                commandResult.Should()
+                    .ExitWith(0)
+                    .And
+                    .NotHaveStdErr()
+                    .And.NotHaveStdOutContaining("Determining projects to restore...")
+                    .And.HaveStdOutContaining("The following template packages will be installed:")
+                    .And.HaveStdOutMatching($"Success: Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ installed the following templates:")
+                    .And.HaveStdOutContaining("console")
+                    .And.NotHaveStdOutContaining("web");
+            }
+
+            Assert.True(command1.StdOut.Equals(command2.StdOut));
+            Assert.True(command1.StdOut.Equals(command3.StdOut));
+        }
+
+        [Fact]
         public void CanInstallRemoteNuGetPackageWithVersion()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
