@@ -71,25 +71,6 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void EscapeParenthesesInPathToGeneratedBatchFile_DuplicateCharactersToEscapeDontGetEscapedMultipleTimes()
-        {
-            using (var testEnvironment = TestEnvironment.Create())
-            {
-                var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
-
-                string tempPath = Path.GetTempPath();
-                Assert.StartsWith(newTempPath, tempPath);
-
-                // Now run the Exec task on a simple command.
-                Exec exec = PrepareExec("echo Hello World!");
-                exec.Execute().ShouldBeTrue();
-            }
-        }
-
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile_DisabledUnderChangeWave16_10()
         {
             using (var testEnvironment = TestEnvironment.Create())
