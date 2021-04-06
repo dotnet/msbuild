@@ -614,7 +614,7 @@ namespace Microsoft.Build.Tasks
 
                     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
                     {
-                        StringBuilder fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
+                        StringBuilder fileName = null;
 
                         // Escape special characters that need to be escaped.
                         for (int i = 0; i < batchFileForCommandLine.Length; i++)
@@ -623,11 +623,23 @@ namespace Microsoft.Build.Tasks
 
                             if (ShouldEscapeCharacter(c) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
                             {
+                                // Avoid allocating a new string until we know we have something to escape.
+                                if (fileName == null)
+                                {
+                                    fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
+                                    fileName.Append(batchFileForCommandLine, 0, i);
+                                }
+
                                 fileName.Append('^');
                             }
-                            fileName.Append(c);
+
+                            fileName?.Append(c);
                         }
-                        batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
+
+                        if (fileName != null)
+                        {
+                            batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
+                        }
                     }
                     else
                     {
