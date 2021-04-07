@@ -79,7 +79,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             if (razorContext.CshtmlFiles.Count != 0)
             {
-                context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info", ProvideApplicationPartFactoryAttributeSourceText);
+                context.AddSource($"{context.Compilation.AssemblyName}.UnifiedAssembly.Info.g.cs", ProvideApplicationPartFactoryAttributeSourceText);
             }
 
             RazorGenerateForSourceTexts(razorContext.CshtmlFiles, context, projectEngine);
