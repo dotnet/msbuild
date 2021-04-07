@@ -445,7 +445,7 @@ namespace Microsoft.Build.Tasks
 
             if (!Path.IsPathRooted(assemblyFileName))
             {
-                reference.FullPath = Path.GetFullPath(assemblyFileName);
+                reference.FullPath = Path.GetFullPath(_executionContext.GetFullPath(assemblyFileName));
             }
             else
             {
