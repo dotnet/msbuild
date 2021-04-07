@@ -2010,9 +2010,6 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    // test absolutization of inputs. TODO: remove.
-                    _concurrencyExecutionContext = new TaskExecutionContext(Directory.GetCurrentDirectory(), null, null, null);
-
                     if (_concurrencyExecutionContext is object)
                     {
                         AbsolutizePathsInInputs();
