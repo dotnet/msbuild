@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     public class DotNetBuildFilter : IWatchFilter
     {
-        private readonly string _muxer = new Cli.Utils.Muxer().MuxerPath;
+        private readonly string _muxer = DotnetMuxer.MuxerPath;
         private readonly ProcessRunner _processRunner;
         private readonly IReporter _reporter;
 

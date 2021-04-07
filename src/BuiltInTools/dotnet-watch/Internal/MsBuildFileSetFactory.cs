@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             string projectFile,
             bool waitOnError,
             bool trace)
-            : this(dotNetWatchOptions, new Muxer().MuxerPath, reporter, projectFile, new OutputSink(), waitOnError, trace)
+            : this(dotNetWatchOptions, DotnetMuxer.MuxerPath, reporter, projectFile, new OutputSink(), waitOnError, trace)
         {
         }
 

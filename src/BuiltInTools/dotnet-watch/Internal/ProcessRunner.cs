@@ -5,10 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.Tools.Internal;
 using IReporter = Microsoft.Extensions.Tools.Internal.IReporter;
 
@@ -98,13 +96,24 @@ namespace Microsoft.DotNet.Watcher.Internal
                 StartInfo =
                 {
                     FileName = processSpec.Executable,
-                    Arguments = processSpec.EscapedArguments != null ? processSpec.EscapedArguments : ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(processSpec.Arguments),
                     UseShellExecute = false,
                     WorkingDirectory = processSpec.WorkingDirectory,
                     RedirectStandardOutput = processSpec.IsOutputCaptured || (processSpec.OnOutput != null),
                     RedirectStandardError = processSpec.IsOutputCaptured,
                 }
             };
+
+            if (processSpec.EscapedArguments is not null)
+            {
+                process.StartInfo.Arguments = processSpec.EscapedArguments;
+            }
+            else
+            {
+                for (var i = 0; i < processSpec.Arguments.Count; i++)
+                {
+                    process.StartInfo.ArgumentList.Add(processSpec.Arguments[i]);
+                }
+            }
 
             foreach (var env in processSpec.EnvironmentVariables)
             {
