@@ -88,14 +88,14 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         public void It_does_not_error_on_duplicate_package_names()
         {
             string projectAssetsJsonPath = Path.GetTempFileName();
-            var assetsContent =  @"{
+            var assetsContent = @"{
   `version`: 3,
   `targets`: {
     `net5.0`: {
-      `Humanizer.Core/2.2.0`: {
+      `Humanizer.Core/2.8.25`: {
         `type`: `package`
       },
-      `Humanizer.Core/2.2.1`: {
+      `Humanizer.Core/2.8.26`: {
         `type`: `package`
       }
     }

@@ -115,7 +115,7 @@ namespace Microsoft.NET.Build.Tests
             };
 
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
-            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
@@ -128,7 +128,7 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand.GetValues()
                 .Should()
-                .BeEquivalentTo("Newtonsoft.Json/12.0.2", "Humanizer/2.6.2");
+                .BeEquivalentTo("Newtonsoft.Json/12.0.2", "Humanizer/2.8.26");
         }
 
         [Theory]
@@ -199,7 +199,7 @@ namespace Microsoft.NET.Build.Tests
 
             //  Add some package references to test more code paths (such as in ResolvePackageAssets)
             testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.2", privateAssets: "All"));
-            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.6.2"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
 
             //  Use a test-specific packages folder
             testProject.AdditionalProperties["RestorePackagesPath"] = @"$(MSBuildProjectDirectory)\packages";
