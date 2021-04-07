@@ -1736,7 +1736,7 @@ namespace Microsoft.Build.Execution
                     var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
                     var targetListTask = Task.Run(() => projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames));
 
-                    using var cacheService = cacheServiceTask.Result;
+                    using DisposablePluginService cacheService = cacheServiceTask.Result;
 
                     resultsPerNode = BuildGraph(projectGraph, targetListTask.Result, submission.BuildRequestData);
                 }
@@ -1867,14 +1867,14 @@ namespace Microsoft.Build.Execution
             return resultsPerNode;
         }
 
-        private DisposePluginService SearchAndInitializeProjectCachePluginFromGraph(ProjectGraph projectGraph)
+        private DisposablePluginService SearchAndInitializeProjectCachePluginFromGraph(ProjectGraph projectGraph)
         {
             // TODO: Consider allowing parallel graph submissions, each with its own separate cache plugin. Right now the second graph submission with a cache will fail.
 
             if (_buildParameters.ProjectCacheDescriptor != null)
             {
                 // Build parameter specified project cache takes precedence.
-                return new DisposePluginService(null);
+                return new DisposablePluginService(null);
             }
 
             var nodeToCacheItems = projectGraph.ProjectNodes.ToDictionary(
@@ -1899,7 +1899,7 @@ namespace Microsoft.Build.Execution
 
             if (cacheItems.Count == 0)
             {
-                return new DisposePluginService(null);
+                return new DisposablePluginService(null);
             }
 
             ErrorUtilities.VerifyThrowInvalidOperation(
@@ -1930,14 +1930,14 @@ namespace Microsoft.Build.Execution
                     _graphSchedulingCancellationSource.Token);
             }
 
-            return new DisposePluginService(this);
+            return new DisposablePluginService(this);
         }
 
-        private class DisposePluginService : IDisposable
+        private class DisposablePluginService : IDisposable
         {
             private readonly BuildManager _buildManager;
 
-            public DisposePluginService(BuildManager buildManager)
+            public DisposablePluginService(BuildManager buildManager)
             {
                 _buildManager = buildManager;
             }
