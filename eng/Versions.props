@@ -103,7 +103,6 @@
     <!-- Dependencies from https://github.com/dotnet/templating -->
     <MicrosoftTemplateEngineCliPackageVersion>6.0.100-preview.4.21206.2</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>6.0.100-preview.4.21206.2</MicrosoftTemplateEngineAbstractionsPackageVersion>
-    <MicrosoftTemplateEngineCliLocalizationPackageVersion>6.0.100-preview.3.21153.3</MicrosoftTemplateEngineCliLocalizationPackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>6.0.100-preview.4.21206.2</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
     <MicrosoftTemplateEngineUtilsPackageVersion>6.0.100-preview.4.21206.2</MicrosoftTemplateEngineUtilsPackageVersion>
     <MicrosoftTemplateSearchCommonPackageVersion>6.0.100-preview.4.21206.2</MicrosoftTemplateSearchCommonPackageVersion>
