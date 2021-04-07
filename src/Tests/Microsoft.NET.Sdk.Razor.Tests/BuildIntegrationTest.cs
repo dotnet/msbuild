@@ -117,7 +117,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
         }
 
         [Fact]
-        public void Build_WithViews_ProducesDepsFileWithCompilationContext_ButNoReferences()
+        public void Build_CompilationContextAndRefsDirectoryAreNotPreserved()
         {
             var testAsset = "RazorSimpleMvc";
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
@@ -132,14 +132,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var depsFilePath = Path.Combine(outputPath, "SimpleMvc.deps.json");
             var dependencyContext = ReadDependencyContext(depsFilePath);
 
-            // Pick a couple of libraries and ensure they have some compile references
-            var packageReference = dependencyContext.CompileLibraries.First(l => l.Name == "System.Diagnostics.DiagnosticSource");
-            packageReference.Assemblies.Should().NotBeEmpty();
-
-            var projectReference = dependencyContext.CompileLibraries.First(l => l.Name == "SimpleMvc");
-            projectReference.Assemblies.Should().NotBeEmpty();
-
-            dependencyContext.CompilationOptions.Defines.Should().Contain(customDefine);
+            var library = Assert.Single(dependencyContext.CompileLibraries);
+            Assert.Empty(library.Assemblies);
+            Assert.Empty(dependencyContext.CompilationOptions.Defines);
 
             // Verify no refs folder is produced
             new DirectoryInfo(Path.Combine(outputPath, "publish", "refs")).Should().NotExist();

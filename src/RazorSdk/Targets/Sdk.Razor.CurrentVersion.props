@@ -67,12 +67,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
     <RazorGenerateOutputFileExtension>.g.cs</RazorGenerateOutputFileExtension>
 
-    <!-- Determines if the deps file includes complication context -->
-    <PreserveCompilationContext>true</PreserveCompilationContext>
-
-    <!-- Determines if the refs folder is produced as part of build \ publish -->
-    <PreserveCompilationReferences>false</PreserveCompilationReferences>
-
     <!--
     List of file extensions that will cause VS to restart the application when RazorSDK is effective.
     This property affects C# projects targeting 3.0 or later.
