@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Build.Tasks
     {
         private static string _messageWhenMismatch =
             "{0} version {1} does not match BundledNETCoreAppPackageVersion {2}. " +
-            "The schema of https://github.com/dotnet/installer/blob/master/src/redist/targets/GenerateBundledVersions.targets might change. " +
+            "The schema of https://github.com/dotnet/installer/blob/main/src/redist/targets/GenerateBundledVersions.targets might change. " +
             "We need to ensure we can swap the runtime version from what's in stage0 to what dotnet/sdk used successfully";
 
         [Required] public string Stage0MicrosoftNETCoreAppRefPackageVersionPath { get; set; }
