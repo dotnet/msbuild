@@ -223,7 +223,7 @@ static class Program
             //  framework installed.  So we get the RuntimeFrameworkVersion of an app
             //  that targets .NET Core 2.1, and then use the --fx-version parameter to the host
             //  to force the .NET Core 2.0 app to run on that version
-            string rollForwardVersion = GetRollForwardNetCoreAppVersion();
+            string rollForwardVersion = GetRollForwardNetCoreAppVersion(callingMethod);
 
             var runAppCommand = new DotnetCommand(Log, "exec", "--fx-version", rollForwardVersion, exePath );
 
@@ -243,7 +243,7 @@ static class Program
 
         }
 
-        string GetRollForwardNetCoreAppVersion()
+        string GetRollForwardNetCoreAppVersion([CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var testProject = new TestProject()
             {
@@ -253,7 +253,7 @@ static class Program
             };
             testProject.AdditionalProperties.Add("TargetLatestRuntimePatch", "true");
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier)
                 .Restore(Log, testProject.Name);
 
             LockFile lockFile = LockFileUtilities.GetLockFile(Path.Combine(testAsset.TestRoot, testProject.Name,

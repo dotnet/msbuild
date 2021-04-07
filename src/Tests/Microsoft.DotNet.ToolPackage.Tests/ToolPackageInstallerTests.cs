@@ -101,7 +101,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
-                writeLocalFeedToNugetConfig: nugetConfigPath);
+                writeLocalFeedToNugetConfig: nugetConfigPath,
+                identiifer: testMockBehaviorIsInSync.ToString());
 
             var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath),
                 packageId: TestPackageId,
@@ -511,7 +512,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
-                feeds: GetMockFeedsForSource(source));
+                feeds: GetMockFeedsForSource(source),
+                identiifer: testMockBehaviorIsInSync.ToString());
 
             var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
@@ -875,9 +877,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 FilePath? tempProject = null,
                 DirectoryPath? offlineFeed = null,
                 FilePath? writeLocalFeedToNugetConfig = null,
-                [CallerMemberName] string callingMethod = "")
+                [CallerMemberName] string callingMethod = "",
+                string identiifer = null)
         {
-            var root = new DirectoryPath(_testAssetsManager.CreateTestDirectory(callingMethod, identifier: useMock.ToString()).Path);
+            var root = new DirectoryPath(_testAssetsManager.CreateTestDirectory(callingMethod, identifier: useMock.ToString() + identiifer).Path);
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;
