@@ -6,7 +6,10 @@
         <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
         <OutputPath>$(TemplatesDir)</OutputPath>
         <EnableDefaultItems>False</EnableDefaultItems>
-        <IsPackable>true</IsPackable>
+        <!-- do not do package for preview and servicing, do package for rtm release-->
+        <!-- if the package should be shipped for preview or servicing, set <IsPackable> to true for explicit version here -->
+        <IsPackable>false</IsPackable>
+        <IsPackable Condition="'$(PreReleaseVersionLabel)' == 'rtm'">true</IsPackable>
         <NoWarn>$(NoWarn);2008;NU5105</NoWarn>
         <NoPackageAnalysis>true</NoPackageAnalysis>
         <PackageId>Microsoft.DotNet.Common.ProjectTemplates.1.x</PackageId>
