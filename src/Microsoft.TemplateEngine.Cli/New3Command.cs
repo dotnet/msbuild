@@ -235,7 +235,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // TODO: make sure help / usage works right in these cases.
-        private async Task<CreationResultStatus> EnterMaintenanceFlow()
+        private async Task<CreationResultStatus> EnterMaintenanceFlowAsync()
         {
             if (!TemplateResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
             {
@@ -278,7 +278,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                return await HelpForTemplateResolution.CoordinateAmbiguousTemplateResolutionDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _defaultLanguage).ConfigureAwait(false);
+                return await HelpForTemplateResolution.CoordinateAmbiguousTemplateResolutionDisplayAsync(templateResolutionResult, EnvironmentSettings, _commandInput, _defaultLanguage).ConfigureAwait(false);
             }
         }
 
@@ -359,7 +359,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (string.IsNullOrWhiteSpace(TemplateName))
                 {
-                    return await EnterMaintenanceFlow().ConfigureAwait(false);
+                    return await EnterMaintenanceFlowAsync().ConfigureAwait(false);
                 }
 
                 return await EnterTemplateManipulationFlowAsync().ConfigureAwait(false);

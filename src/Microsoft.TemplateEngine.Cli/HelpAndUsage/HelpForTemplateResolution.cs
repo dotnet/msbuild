@@ -59,7 +59,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="commandInput">command input used in CLI</param>
         /// <param name="defaultLanguage">default language for the host</param>
         /// <returns></returns>
-        internal static Task<CreationResultStatus> CoordinateAmbiguousTemplateResolutionDisplay(
+        internal static Task<CreationResultStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
             TemplateResolutionResult resolutionResult,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
                 case TemplateResolutionResult.Status.AmbiguousTemplateChoice:
                     environmentSettings.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousBestPrecedence, "Authoring");
-                    return DisplayAmbiguousPrecedenceError(resolutionResult.UnambiguousTemplateGroup, environmentSettings, commandInput);
+                    return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, environmentSettings, commandInput);
                 case TemplateResolutionResult.Status.InvalidParameter:
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
             }
@@ -257,7 +257,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/></exception>
         /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/></exception>
-        private static async Task<CreationResultStatus> DisplayAmbiguousPrecedenceError(
+        private static async Task<CreationResultStatus> DisplayAmbiguousPrecedenceErrorAsync(
             TemplateGroup unambiguousTemplateGroup,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput)

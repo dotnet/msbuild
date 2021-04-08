@@ -38,11 +38,7 @@ namespace dotnet_new3
 
             public ITemplatePackageProviderFactory Factory { get; }
 
-            event Action ITemplatePackageProvider.TemplatePackagesChanged
-            {
-                add { }
-                remove { }
-            }
+            public event Action TemplatePackagesChanged;
 
             public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
             {
