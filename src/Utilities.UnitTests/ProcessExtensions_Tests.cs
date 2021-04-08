@@ -15,6 +15,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public async Task KillTree()
         {
+            // On Windows this uses the sleep.exe that comes from the Sleep NuGet package
             Process p = Process.Start("sleep", "600"); // sleep 10m.
 
             // Verify the process is running.
@@ -22,7 +23,7 @@ namespace Microsoft.Build.UnitTests
             p.HasExited.ShouldBe(false);
 
             // Kill the process.
-            p.KillTree(timeout: 5000);
+            p.KillTree(timeoutMilliseconds: 5000);
             p.HasExited.ShouldBe(true);
             p.ExitCode.ShouldNotBe(0);
         }
