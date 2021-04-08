@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli
         // Argument
         public static readonly Argument DotnetSubCommand = new Argument<string>() { Arity = ArgumentArity.ExactlyOne, IsHidden = true };
 
-        private static Command ConfigureCommandLine(Command rootCommand)
+        private static Command ConfigureCommandLine(Command rootCommand, bool includeWorkloadCommands = false)
         {
             // Add subcommands
             foreach (var subcommand in Subcommands)
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Cli
             }
 
             // Workload command is behind a feature flag during development
-            if (Env.GetEnvironmentVariableAsBool("DEVENABLEWORKLOADCOMMAND", defaultValue: false))
+            if (includeWorkloadCommands || Env.GetEnvironmentVariableAsBool("DEVENABLEWORKLOADCOMMAND", defaultValue: false))
             {
                 rootCommand.AddCommand(WorkloadCommandParser.GetCommand());
             }
@@ -105,6 +105,16 @@ namespace Microsoft.DotNet.Cli
         }
 
         public static System.CommandLine.Parsing.Parser Instance { get; } = new CommandLineBuilder(ConfigureCommandLine(RootCommand))
+            .UseExceptionHandler(ExceptionHandler)
+            .UseHelp()
+            .UseHelpBuilder(context => new DotnetHelpBuilder(context.Console))
+            .UseValidationMessages(new CommandLineValidationMessages())
+            .UseParseDirective()
+            .UseSuggestDirective()
+            .DisablePosixBinding()
+            .Build();
+
+        public static System.CommandLine.Parsing.Parser GetWorkloadsInstance { get; } = new CommandLineBuilder(ConfigureCommandLine(new RootCommand(), true))
             .UseExceptionHandler(ExceptionHandler)
             .UseHelp()
             .UseHelpBuilder(context => new DotnetHelpBuilder(context.Console))

@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller();
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
-            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--skip-manifest-update" });
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--skip-manifest-update" });
             var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
 
             installManager.InstallWorkloads(mockWorkloadIds, true);
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installer = new MockPackWorkloadInstaller(failingWorkload: "xamarin-android-build");
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
-            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
             var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
 
             try
