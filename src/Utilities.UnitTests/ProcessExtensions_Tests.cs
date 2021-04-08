@@ -32,9 +32,9 @@ namespace Microsoft.Build.UnitTests
         {
             Process p = Process.Start("sleep", "600"); // sleep 10m.
 
-            var processes = ProcessInformation.GetProcesses();
-            var found = processes.Where(process => process.Id == p.Id).First();
-            output.WriteLine(found.ExecutablePath);
+#if NET472
+            Print(p);
+#endif
 
             // Verify the process is running.
             await Task.Delay(500);
@@ -45,8 +45,16 @@ namespace Microsoft.Build.UnitTests
             p.HasExited.ShouldBe(true);
             p.ExitCode.ShouldNotBe(0);
         }
+
+        private void Print(Process p)
+        {
+            var processes = ProcessInformation.GetProcesses();
+            var found = processes.Where(process => process.Id == p.Id).First();
+            output.WriteLine(found.ExecutablePath);
+        }
     }
 
+#if NET472
     public class ProcessInformation
     {
         public int Id { get; private set; }
@@ -132,4 +140,5 @@ namespace Microsoft.Build.UnitTests
             return !isWow64Process;
         }
     }
+#endif
 }

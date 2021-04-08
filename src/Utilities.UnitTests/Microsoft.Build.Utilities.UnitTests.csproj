@@ -9,8 +9,15 @@
     <RootNamespace>Microsoft.Build.Utilities.UnitTests</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
+  <PropertyGroup Condition="$(TargetFramework) == 'net472'">
+    <DefineConstants>$(DefineConstants);NET472</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net472'">
     <Reference Include="System.Management" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Shouldly" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
 
