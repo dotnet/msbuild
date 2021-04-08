@@ -359,7 +359,7 @@ namespace dotnet_new3.IntegrationTests
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             using var packageManager = new PackageManager();
-            string packageLocation = packageManager.PackProjectTemplatesNuGetPackage("Microsoft.DotNet.Common.ProjectTemplates.5.0");
+            string packageLocation = packageManager.GetNuGetPackage("Microsoft.DotNet.Common.ProjectTemplates.5.0");
 
             new DotnetNewCommand(_log, "-i", packageLocation)
                 .WithCustomHive(home)
