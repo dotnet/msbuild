@@ -71,7 +71,7 @@ namespace dotnet_new3
             var builtIns = new AssemblyComponentCatalog(new[]
             {
                 // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
-                typeof(RunnableProjectGenerator).GetTypeInfo().Assembly,
+                typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly,
                 // for assembly: Microsoft.TemplateEngine.Edge
                 typeof(Microsoft.TemplateEngine.Edge.Paths).GetTypeInfo().Assembly,
                 // for assembly: Microsoft.TemplateEngine.Cli

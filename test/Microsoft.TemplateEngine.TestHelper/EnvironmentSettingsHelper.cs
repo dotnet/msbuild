@@ -32,8 +32,8 @@ namespace Microsoft.TemplateEngine.TestHelper
                 Version = "1.0.0.0",
                 BuiltInComponents = new AssemblyComponentCatalog(new List<Assembly>()
                 {
-                    typeof(RunnableProjectGenerator).Assembly,//RunnableProject
-                    typeof(SettingsLoader).Assembly//Edge
+                    typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).Assembly,   //RunnableProject
+                    typeof(SettingsLoader).Assembly   //Edge
                 }),
                 FileSystem = new MonitoredFileSystem(new PhysicalFileSystem()),
                 FallbackHostTemplateConfigNames = new[] { "dotnetcli" }
