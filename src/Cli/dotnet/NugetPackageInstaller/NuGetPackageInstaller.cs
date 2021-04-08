@@ -13,22 +13,22 @@ using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
-namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
+namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
-    internal class NuGetPackageInstaller : INuGetPackageInstaller
+    internal class NuGetPackageDownloader : INuGetPackageDownloader
     {
         private readonly string _sourceUrl;
         private readonly ILogger _logger;
         private readonly string _packageInstallDir;
 
-        public NuGetPackageInstaller(string packageInstallDir, string sourceUrl = null, ILogger logger = null)
+        public NuGetPackageDownloader(string packageInstallDir, string sourceUrl = null, ILogger logger = null)
         {
             _packageInstallDir = packageInstallDir;
             _sourceUrl = sourceUrl ?? "https://api.nuget.org/v3/index.json";
             _logger = logger ?? new NullLogger();
         }
 
-        public async Task<string> InstallPackageAsync(PackageId packageId, NuGetVersion packageVersion)
+        public async Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion)
         {
             var cancellationToken = CancellationToken.None;
             var cache = new SourceCacheContext() { DirectDownload = true, NoCache = true };

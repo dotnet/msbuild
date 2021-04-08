@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.ToolPackage;
 using NuGet.Versioning;
 
-namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
+namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
-    internal class FailingNuGetPackageInstaller : INuGetPackageInstaller
+    internal class FailingNuGetPackageDownloader : INuGetPackageDownloader
     {
         public readonly string MockPackageDir;
 
-        public FailingNuGetPackageInstaller(string testDir)
+        public FailingNuGetPackageDownloader(string testDir)
         {
             MockPackageDir = Path.Combine(testDir, "MockPackages");
             Directory.CreateDirectory(MockPackageDir);
         }
 
-        public Task<string> InstallPackageAsync(PackageId packageId, NuGetVersion packageVersion)
+        public Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion)
         {
             var mockPackagePath = Path.Combine(MockPackageDir, $"{packageId}.{packageVersion}.nupkg");
             File.WriteAllText(mockPackagePath, string.Empty);

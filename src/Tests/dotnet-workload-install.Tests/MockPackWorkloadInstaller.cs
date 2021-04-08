@@ -8,7 +8,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
-    internal class MockPackWorkloadInstaller : PackWorkloadInstallerBase
+    internal class MockPackWorkloadInstaller : IWorkloadPackInstaller
     {
         public IList<PackInfo> InstalledPacks = new List<PackInfo>();
         public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
@@ -21,17 +21,17 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingWorkload = failingWorkload;
         }
 
-        public override void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
+        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
         {
             InstalledPacks.Add(packInfo);
         }
 
-        public override void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
+        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
         {
             RolledBackPacks.Add(packInfo);
         }
 
-        public override void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
+        public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
         {
             WorkloadInstallRecord.Add(workloadId);
             if (workloadId.ToString().Equals(FailingWorkload))
@@ -40,19 +40,30 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             }
         }
 
-        public override void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
+        public void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
         {
             WorkloadInstallRecord.Remove(workloadId);
         }
 
-        public override void GarbageCollectInstalledWorkloadPacks()
+        public void GarbageCollectInstalledWorkloadPacks()
         {
             GarbageCollectionCalled = true;
         }
 
-        public override void DownloadToOfflineCache(IReadOnlyCollection<string> manifests) => throw new System.NotImplementedException();
-        public override IReadOnlyCollection<SdkFeatureBand> GetFeatureBandsWithInstallationRecords() => throw new System.NotImplementedException();
-        public override IReadOnlyCollection<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand) => throw new System.NotImplementedException();
-        public override void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) => throw new System.NotImplementedException();
+        public InstallationUnit GetInstallationUnit()
+        {
+            return InstallationUnit.Packs;
+        }
+
+        public IWorkloadPackInstaller GetPackInstaller()
+        {
+            return this;
+        }
+
+        public void DownloadToOfflineCache(IEnumerable<string> manifests) => throw new System.NotImplementedException();
+        public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords() => throw new System.NotImplementedException();
+        public IEnumerable<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand) => throw new System.NotImplementedException();
+        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) => throw new System.NotImplementedException();
+        public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();
     }
 }

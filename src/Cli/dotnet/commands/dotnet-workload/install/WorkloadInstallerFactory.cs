@@ -8,9 +8,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class WorkloadInstallerFactory
     {
-        public static IWorkloadInstaller GetWorkloadInstaller(IReporter reporter)
+        public static IInstaller GetWorkloadInstaller(IReporter reporter, SdkFeatureBand sdkFeatureBand, IWorkloadResolver workloadResolver)
         {
-            return new NetSdkManagedInstaller(reporter);
+            return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver);
         }
     }
 }

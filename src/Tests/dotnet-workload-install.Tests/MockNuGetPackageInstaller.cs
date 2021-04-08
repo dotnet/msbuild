@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.ToolPackage;
 using NuGet.Versioning;
 
-namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
+namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
-    internal class MockNuGetPackageInstaller : INuGetPackageInstaller
+    internal class MockNuGetPackageDownloader : INuGetPackageDownloader
     {
         private readonly string _installPath;
 
@@ -19,13 +19,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
 
         public List<(string, string)> ExtractCallParams = new List<(string, string)>();
 
-        public MockNuGetPackageInstaller(string dotnetRoot)
+        public MockNuGetPackageDownloader(string dotnetRoot)
         {
             _installPath = Path.Combine(dotnetRoot, "metadata", "temp");
             Directory.CreateDirectory(_installPath);
         }
 
-        public Task<string> InstallPackageAsync(PackageId packageId, NuGetVersion packageVersion)
+        public Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion)
         {
             InstallCallParams.Add((packageId, packageVersion));
             var path = Path.Combine(_installPath, "mock.nupkg");

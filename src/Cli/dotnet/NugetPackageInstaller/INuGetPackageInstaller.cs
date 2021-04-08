@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.ToolPackage;
 using NuGet.Versioning;
 
-namespace Microsoft.DotNet.Cli.NuGetPackageInstaller
+namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
-    internal interface INuGetPackageInstaller
+    internal interface INuGetPackageDownloader
     {
-        Task<string> InstallPackageAsync(PackageId packageId, NuGetVersion packageVersion);
+        Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion);
 
         Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder);
     }

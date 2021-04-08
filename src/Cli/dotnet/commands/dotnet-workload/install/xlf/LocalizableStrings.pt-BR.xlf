@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
-        <source>Workload(s) {0} was successfully installed.</source>
-        <target state="new">Workload(s) {0} was successfully installed.</target>
+        <source>Successfully installed workload(s) {0}.</source>
+        <target state="new">Successfully installed workload(s) {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallingPackVersionMessage">

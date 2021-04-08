@@ -26,15 +26,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly bool _skipManifestUpdate;
         private readonly string _fromCacheOption;
         private readonly bool _printDownloadLinkOnly;
-        private readonly IReadOnlyCollection<string> _workloadIds;
-        private readonly WorkloadInstallManager _workloadInstallManager;
+        private readonly IReadOnlyCollection<string> _workloadIds; 
+        private readonly IInstaller _workloadInstaller;
+        private readonly IWorkloadResolver _workloadResolver;
+        private readonly ReleaseVersion _sdkVersion;
 
         public readonly string MockInstallDirectory = Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath,
             "DEV_mockworkloads");
 
         public WorkloadInstallCommand(
             ParseResult parseResult,
-            IReporter reporter = null)
+            IReporter reporter = null,
+            IWorkloadResolver workloadResolver = null,
+            IInstaller workloadInstaller = null,
+            string version = null)
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
@@ -42,13 +47,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _printDownloadLinkOnly = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
             _workloadIds = parseResult.ValueForArgument<IReadOnlyCollection<string>>(WorkloadInstallCommandParser.WorkloadIdArgument);
+            _sdkVersion = new ReleaseVersion(version ?? Product.Version);
 
             var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
-            var sdkVersion = new ReleaseVersion(Product.Version);
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion.ToString());
-            var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion.ToString());
-            var workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter);
-            _workloadInstallManager = new WorkloadInstallManager(_reporter, workloadInstaller, workloadResolver);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            var sdkFeatureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
+            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver);
         }
 
         public override int Execute()
@@ -112,7 +117,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                _workloadInstallManager.InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate);
+                InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate);
             }
 
             return 0;
@@ -132,5 +137,73 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             baseUri + id.ToLowerInvariant() + "/" + version.ToNormalizedString() + "/" + id.ToLowerInvariant() +
             "." +
             version.ToNormalizedString() + ".nupkg";
+
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false)
+        {
+            _reporter.WriteLine();
+            var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
+
+            if (!skipManifestUpdate)
+            {
+                throw new NotImplementedException();
+            }
+
+            InstallWorkloadsWithInstallRecord(workloadIds, featureBand);
+
+            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+            {
+                _workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
+            }
+
+            _reporter.WriteLine();
+            _reporter.WriteLine(string.Format(LocalizableStrings.InstallationSucceeded, string.Join(" ", workloadIds)));
+            _reporter.WriteLine();
+        }
+
+        private void InstallWorkloadsWithInstallRecord(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
+        {
+            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+            {
+                var installer = _workloadInstaller.GetPackInstaller();
+
+                var workloadPackToInstall = workloadIds
+                    .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                    .Distinct()
+                    .Select(packId => _workloadResolver.TryGetPackInfo(packId));
+                TransactionalAction.Run(
+                    action: () =>
+                    {
+                        foreach (var packId in workloadPackToInstall)
+                        {
+                            installer.InstallWorkloadPack(packId, sdkFeatureBand);
+                        }
+
+                        foreach (var workloadId in workloadIds)
+                        {
+                            _workloadInstaller.WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
+                        }
+
+                    },
+                    rollback: () => {
+                        foreach (var packId in workloadPackToInstall)
+                        {
+                            installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
+                        }
+
+                        foreach (var workloadId in workloadIds)
+                        {
+                            _workloadInstaller.DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
+                        }
+                    });
+            }
+            else
+            {
+                var installer = _workloadInstaller.GetWorkloadInstaller();
+                foreach (var workloadId in workloadIds)
+                {
+                    installer.InstallWorkload(workloadId);
+                }
+            }
+        }
     }
 }

@@ -7,11 +7,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal struct ManifestVersion : IEquatable<ManifestVersion>, IComparable<ManifestVersion>
     {
-        private Version _version;
+        private string _version;
 
         public ManifestVersion(string version)
         {
-            _version = new Version(version) ?? throw new ArgumentNullException(nameof(version));
+            _version = version ?? throw new ArgumentNullException(nameof(version));
         }
 
         public bool Equals(ManifestVersion other)
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override string ToString()
         {
-            return _version.ToString();
+            return _version;
         }
     }
 }

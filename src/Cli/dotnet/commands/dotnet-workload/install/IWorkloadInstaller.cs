@@ -5,23 +5,14 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal interface IWorkloadInstaller
+    internal interface IWorkloadInstaller : IInstaller
     {
-        InstallationUnit GetInstallationUnit();
+        void InstallWorkload(WorkloadId workloadId, bool useOfflineCache = false);
 
-        void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand);
+        void DownloadToOfflineCache(IEnumerable<string> manifests);
 
-        IReadOnlyCollection<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand);
+        void UninstallWorkload(WorkloadId workloadId);
 
-        void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
-
-        void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
-
-        IReadOnlyCollection<SdkFeatureBand> GetFeatureBandsWithInstallationRecords();
-    }
-
-    internal enum InstallationUnit {
-        Workload,
-        Packs
+        IEnumerable<string> ListInstalledWorkloads();
     }
 }

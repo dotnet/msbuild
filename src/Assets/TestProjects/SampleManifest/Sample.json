@@ -83,7 +83,13 @@
                 "xamarin-android",
                 "xamarin-android-aot"
             ]
-        }
+        },
+        "xamarin-empty-mock": {
+            "description": "Empty mock workload for testing",
+            "kind": "dev",
+            "packs": [],
+            "extends": []
+        },
     },
     "packs": {
         // this has the bits for compiling an APK, generating interop code, etc
