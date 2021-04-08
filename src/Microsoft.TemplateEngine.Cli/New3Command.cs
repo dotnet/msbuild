@@ -79,12 +79,18 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings> onFirstRun, string[] args)
-        {
-            return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, null);
-        }
-
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings> onFirstRun, string[] args, string? hivePath)
+        /// <summary>
+        /// Runs the command using <paramref name="host"/> and <paramref name="args"/>.
+        /// </summary>
+        /// <param name="commandName">Command name that is being executed.</param>
+        /// <param name="host">The <see cref="ITemplateEngineHost"/> that executes the command.</param>
+        /// <param name="telemetryLogger"><see cref="ITelemetryLogger"/> to use to track events.</param>
+        /// <param name="onFirstRun">actions to be run on the first run.</param>
+        /// <param name="args">arguments to be run using template engine.</param>
+        /// <param name="hivePath">(optional) the path to template engine settings to use.</param>
+        /// <returns>exit code: 0 on success, other on error.</returns>
+        /// <exception cref="CommandParserException">when <paramref name="args"/> cannot be parsed.</exception>
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings> onFirstRun, string[] args, string? hivePath = null)
         {
             return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, hivePath);
         }
