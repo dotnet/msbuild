@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -801,7 +801,7 @@ namespace Microsoft.Build.Logging
                 result.ThreadId = ReadInt32();
             }
 
-            if ((flags & BuildEventArgsFieldFlags.HelpHeyword) != 0)
+            if ((flags & BuildEventArgsFieldFlags.HelpKeyword) != 0)
             {
                 result.HelpKeyword = ReadDeduplicatedString();
             }

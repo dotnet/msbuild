@@ -10,7 +10,7 @@ namespace Microsoft.Build.Logging
     {
         None = 0,
         BuildEventContext = 1 << 0,
-        HelpHeyword = 1 << 1,
+        HelpKeyword = 1 << 1,
         Message = 1 << 2,
         SenderName = 1 << 3,
         ThreadId = 1 << 4,

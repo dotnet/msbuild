@@ -531,7 +531,7 @@ Build
                 Write(e.ThreadId);
             }
 
-            if ((flags & BuildEventArgsFieldFlags.HelpHeyword) != 0)
+            if ((flags & BuildEventArgsFieldFlags.HelpKeyword) != 0)
             {
                 WriteDeduplicatedString(e.HelpKeyword);
             }
@@ -677,7 +677,7 @@ Build
 
             if (e.HelpKeyword != null)
             {
-                flags |= BuildEventArgsFieldFlags.HelpHeyword;
+                flags |= BuildEventArgsFieldFlags.HelpKeyword;
             }
 
             if (writeMessage)
