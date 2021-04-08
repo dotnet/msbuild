@@ -81,8 +81,8 @@ namespace dotnet_new3.UnitTests
                 .And
                 .NotHaveStdErr();
 
-            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0", BaseWorkingDirectory, "https://api.nuget.org/v3/index.json");
-            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.3.1", BaseWorkingDirectory, "https://api.nuget.org/v3/index.json");
+            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.5.0", BaseWorkingDirectory);
+            InstallPackage("Microsoft.DotNet.Web.ProjectTemplates.3.1", BaseWorkingDirectory);
         }
 
         internal string BaseWorkingDirectory { get; private set; }
