@@ -6,13 +6,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public class ChmodPostActionProcessor : IPostActionProcessor
+    internal class ChmodPostActionProcessor : IPostActionProcessor
     {
         private static readonly Guid ActionProcessorId = new Guid("cb9a6cf3-4f5c-4860-b9d2-03a574959774");
 
         public Guid Id => ActionProcessorId;
 
-        public ChmodPostActionProcessor()
+        internal ChmodPostActionProcessor()
         {
         }
 

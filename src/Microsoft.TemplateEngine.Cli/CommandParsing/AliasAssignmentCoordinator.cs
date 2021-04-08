@@ -4,7 +4,7 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
-    public class AliasAssignmentCoordinator
+    internal class AliasAssignmentCoordinator
     {
         private IReadOnlyList<ITemplateParameter> _parameterDefinitions;
         private IDictionary<string, string> _longNameOverrides;
@@ -15,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         private HashSet<string> _invalidParams;
         private bool _calculatedAssignments;
 
-        public AliasAssignmentCoordinator(IReadOnlyList<ITemplateParameter> parameterDefinitions, IDictionary<string, string> longNameOverrides, IDictionary<string, string> shortNameOverrides, HashSet<string> takenAliases)
+        internal AliasAssignmentCoordinator(IReadOnlyList<ITemplateParameter> parameterDefinitions, IDictionary<string, string> longNameOverrides, IDictionary<string, string> shortNameOverrides, HashSet<string> takenAliases)
         {
             _parameterDefinitions = parameterDefinitions;
             _longNameOverrides = longNameOverrides;
@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             _calculatedAssignments = false;
         }
 
-        public IReadOnlyDictionary<string, string> LongNameAssignments
+        internal IReadOnlyDictionary<string, string> LongNameAssignments
         {
             get
             {
@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
-        public IReadOnlyDictionary<string, string> ShortNameAssignments
+        internal IReadOnlyDictionary<string, string> ShortNameAssignments
         {
             get
             {
@@ -45,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
-        public HashSet<string> InvalidParams
+        internal HashSet<string> InvalidParams
         {
             get
             {
@@ -54,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
-        public HashSet<string> TakenAliases
+        internal HashSet<string> TakenAliases
         {
             get
             {

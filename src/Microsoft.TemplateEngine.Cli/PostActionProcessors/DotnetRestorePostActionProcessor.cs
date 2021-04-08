@@ -7,13 +7,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public class DotnetRestorePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor, IPostActionProcessor2
+    internal class DotnetRestorePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor, IPostActionProcessor2
     {
         private static readonly Guid ActionProcessorId = new Guid("210D431B-A78B-4D2F-B762-4ED3E3EA9025");
 
         public Guid Id => ActionProcessorId;
 
-        public DotnetRestorePostActionProcessor()
+        internal DotnetRestorePostActionProcessor()
         {
         }
 

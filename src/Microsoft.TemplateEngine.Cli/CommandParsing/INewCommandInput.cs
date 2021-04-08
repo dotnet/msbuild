@@ -9,7 +9,7 @@ using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
-    public interface INewCommandInput
+    internal interface INewCommandInput
     {
         string Alias { get; }
         string AllowScriptsToRun { get; }

@@ -11,15 +11,15 @@ using Microsoft.TemplateEngine.Cli.CommandParsing;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    public class HelpFormatter
+    internal class HelpFormatter
     {
-        public static HelpFormatter<T> For<T>(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator = null, bool blankLineBetweenRows = false)
+        internal static HelpFormatter<T> For<T>(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator = null, bool blankLineBetweenRows = false)
         {
             return new HelpFormatter<T>(environmentSettings, commandInput, rows, columnPadding, headerSeparator, blankLineBetweenRows);
         }
     }
 
-    public class HelpFormatter<T>
+    internal class HelpFormatter<T>
     {
         private readonly bool _blankLineBetweenRows;
         private readonly int _columnPadding;
@@ -31,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli
         private const string ShrinkReplacement = "...";
         private readonly INewCommandInput _commandInput;
 
-        public HelpFormatter(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
+        internal HelpFormatter(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
         {
             _rowDataItems = rows ?? Enumerable.Empty<T>();
             _columnPadding = columnPadding;
@@ -41,12 +41,12 @@ namespace Microsoft.TemplateEngine.Cli
             _commandInput = commandInput;
         }
 
-        public HelpFormatter<T> DefineColumn(Func<T, string> binder,  string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal HelpFormatter<T> DefineColumn(Func<T, string> binder,  string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
             return DefineColumn(binder, out object c,  header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
         }
 
-        public HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
             column = null;
             if ((_commandInput.Columns.Count == 0  && defaultColumn) || showAlways || (!string.IsNullOrWhiteSpace(columnName) && _commandInput.Columns.Contains(columnName)) || _commandInput.ShowAllColumns)
@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli
             return text.Substring(0, Math.Max(0, maxLength - ShrinkReplacement.Length)) + ShrinkReplacement;
         }
 
-        public string Layout()
+        internal string Layout()
         {
             Dictionary<int, int> columnWidthLookup = new Dictionary<int, int>();
             Dictionary<int, int> rowHeightForRow = new Dictionary<int, int>();
@@ -280,7 +280,7 @@ namespace Microsoft.TemplateEngine.Cli
             private readonly Func<T, string> _binder;
             private readonly IEngineEnvironmentSettings _environmentSettings;
 
-            public ColumnDefinition(IEngineEnvironmentSettings environmentSettings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
+            internal ColumnDefinition(IEngineEnvironmentSettings environmentSettings, string header, Func<T, string> binder, int minWidth = 2, int maxWidth = -1, bool shrinkIfNeeded = false, bool rightAlign = false)
             {
                 Header = header;
                 MaxWidth = maxWidth > 0 ? maxWidth : int.MaxValue;
@@ -291,19 +291,19 @@ namespace Microsoft.TemplateEngine.Cli
                 RightAlign = rightAlign;
             }
 
-            public string Header { get; }
+            internal string Header { get; }
 
-            public int CalculatedWidth { get; set; }
+            internal int CalculatedWidth { get; set; }
 
-            public int MinWidth { get; }
+            internal int MinWidth { get; }
 
-            public int MaxWidth { get; }
+            internal int MaxWidth { get; }
 
-            public bool ShrinkIfNeeded { get; }
+            internal bool ShrinkIfNeeded { get; }
 
-            public bool RightAlign { get; }
+            internal bool RightAlign { get; }
 
-            public TextWrapper GetCell(T value)
+            internal TextWrapper GetCell(T value)
             {
                 return new TextWrapper(_environmentSettings, _binder(value), MaxWidth);
             }
@@ -313,7 +313,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             private readonly IReadOnlyList<string> _lines;
 
-            public TextWrapper(IEngineEnvironmentSettings environmentSettings, string text, int maxWidth)
+            internal TextWrapper(IEngineEnvironmentSettings environmentSettings, string text, int maxWidth)
             {
                 List<string> lines = new List<string>();
                 int position = 0;
@@ -351,11 +351,11 @@ namespace Microsoft.TemplateEngine.Cli
                 RawText = text;
             }
 
-            public int LineCount => _lines.Count;
+            internal int LineCount => _lines.Count;
 
-            public int MaxWidth { get; }
+            internal int MaxWidth { get; }
 
-            public string GetTextWithPadding(int line, int maxColumnWidth, bool rightAlign = false)
+            internal string GetTextWithPadding(int line, int maxColumnWidth, bool rightAlign = false)
             {
                 var text = _lines.Count > line ? _lines[line] : string.Empty;
                 var abbreviatedText = ShrinkTextToLength(text, maxColumnWidth);
@@ -399,10 +399,10 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            public string RawText { get; }
+            internal string RawText { get; }
         }
 
-        public HelpFormatter<T> OrderBy(object columnToken, IComparer<string> comparer = null)
+        internal HelpFormatter<T> OrderBy(object columnToken, IComparer<string> comparer = null)
         {
             comparer = comparer ?? StringComparer.Ordinal;
             int index = _columns.IndexOf(columnToken as ColumnDefinition);
@@ -416,7 +416,7 @@ namespace Microsoft.TemplateEngine.Cli
             return this;
         }
 
-        public HelpFormatter<T> OrderByDescending(object columnToken, IComparer<string> comparer = null)
+        internal HelpFormatter<T> OrderByDescending(object columnToken, IComparer<string> comparer = null)
         {
             comparer = comparer ?? StringComparer.Ordinal;
             int index = _columns.IndexOf(columnToken as ColumnDefinition);

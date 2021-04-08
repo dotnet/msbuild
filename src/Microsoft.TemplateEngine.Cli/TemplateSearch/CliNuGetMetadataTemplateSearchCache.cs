@@ -8,7 +8,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
     {
         protected IReadOnlyDictionary<string, HostSpecificTemplateData> _cliHostSpecificData;
 
-        public CliNuGetMetadataTemplateSearchCache(IEngineEnvironmentSettings environmentSettings, string pathToMetadata)
+        internal CliNuGetMetadataTemplateSearchCache(IEngineEnvironmentSettings environmentSettings, string pathToMetadata)
             : base(environmentSettings, pathToMetadata)
         {
         }
@@ -49,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             _cliHostSpecificData = new Dictionary<string, HostSpecificTemplateData>();
         }
 
-        public IReadOnlyDictionary<string, HostSpecificTemplateData> GetHostDataForTemplateIdentities(IReadOnlyList<string> identities)
+        internal IReadOnlyDictionary<string, HostSpecificTemplateData> GetHostDataForTemplateIdentities(IReadOnlyList<string> identities)
         {
             EnsureInitialized();
 
@@ -66,7 +66,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             return map;
         }
 
-        public bool TryGetHostDataForTemplateIdentity(string identity, out HostSpecificTemplateData hostData)
+        internal bool TryGetHostDataForTemplateIdentity(string identity, out HostSpecificTemplateData hostData)
         {
             EnsureInitialized();
 

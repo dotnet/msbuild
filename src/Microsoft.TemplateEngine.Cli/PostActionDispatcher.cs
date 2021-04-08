@@ -6,14 +6,14 @@ using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    public enum AllowPostActionsSetting
+    internal enum AllowPostActionsSetting
     {
         No,
         Yes,
         Prompt
     };
 
-    public class PostActionDispatcher
+    internal class PostActionDispatcher
     {
         private readonly TemplateCreationResult _creationResult;
         private readonly IEngineEnvironmentSettings _environment;
@@ -21,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly AllowPostActionsSetting _canRunScripts;
         private readonly bool _isDryRun;
 
-        public PostActionDispatcher(IEngineEnvironmentSettings environment, New3Callbacks callbacks, TemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus, bool isDryRun)
+        internal PostActionDispatcher(IEngineEnvironmentSettings environment, New3Callbacks callbacks, TemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus, bool isDryRun)
         {
             _environment = environment;
             _callbacks = callbacks;
@@ -30,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli
             _isDryRun = isDryRun;
         }
 
-        public void Process(Func<string> inputGetter)
+        internal void Process(Func<string> inputGetter)
         {
             IReadOnlyList<IPostAction> postActions = _creationResult.ResultInfo?.PostActions ?? _creationResult.CreationEffects.CreationResult.PostActions;
             if (postActions.Count > 0)

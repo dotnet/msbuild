@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
@@ -10,12 +13,11 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public class HostSpecificDataLoader : IHostSpecificDataLoader
     {
+        private readonly ISettingsLoader _settingsLoader;
         public HostSpecificDataLoader(ISettingsLoader settingsLoader)
         {
             _settingsLoader = settingsLoader;
         }
-
-        private ISettingsLoader _settingsLoader;
 
         public HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
         {

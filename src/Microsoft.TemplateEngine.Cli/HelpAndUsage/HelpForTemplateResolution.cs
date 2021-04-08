@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class HelpForTemplateResolution
     {
-        public static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string defaultLanguage, bool showUsageHelp = true)
+        internal static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string defaultLanguage, bool showUsageHelp = true)
         {
             if (showUsageHelp)
             {
@@ -364,7 +364,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             reporter.WriteLine(formatter.Layout());
         }
 
-        public static void DisplayInvalidParameters(IReadOnlyList<string> invalidParams)
+        internal static void DisplayInvalidParameters(IReadOnlyList<string> invalidParams)
         {
             if (invalidParams.Count > 0)
             {
@@ -425,7 +425,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns a list of the parameter names that are invalid for every template in the input group.
-        public static void GetParametersInvalidForTemplatesInList(IReadOnlyCollection<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
+        internal static void GetParametersInvalidForTemplatesInList(IReadOnlyCollection<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
         {
             IDictionary<string, int> invalidCounts = new Dictionary<string, int>();
 
@@ -458,7 +458,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        public static void ShowUsageHelp(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
+        internal static void ShowUsageHelp(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
         {
             if (commandInput.IsHelpFlagSpecified)
             {
@@ -469,7 +469,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine();
         }
 
-        public static CreationResultStatus HandleParseError(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
+        internal static CreationResultStatus HandleParseError(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
         {
             TemplateResolver.ValidateRemainingParameters(commandInput, out IReadOnlyList<string> invalidParams);
             DisplayInvalidParameters(invalidParams);

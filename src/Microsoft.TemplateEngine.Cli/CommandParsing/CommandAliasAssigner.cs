@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
-    public static class CommandAliasAssigner
+    internal static class CommandAliasAssigner
     {
-        public static bool TryAssignAliasesForParameter(Func<string, bool> isAliasTaken, string parameterName, string longNameOverride, string shortNameOverride, out IReadOnlyList<string> assignedAliases)
+        internal static bool TryAssignAliasesForParameter(Func<string, bool> isAliasTaken, string parameterName, string longNameOverride, string shortNameOverride, out IReadOnlyList<string> assignedAliases)
         {
             List<string> aliasAssignments = new List<string>();
             HashSet<string> invalidParams = new HashSet<string>();

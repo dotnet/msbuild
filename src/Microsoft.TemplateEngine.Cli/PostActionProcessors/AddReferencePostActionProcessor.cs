@@ -8,9 +8,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public class AddReferencePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor, IPostActionProcessor2
+    internal class AddReferencePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor, IPostActionProcessor2
     {
-        public static readonly Guid ActionProcessorId = new Guid("B17581D1-C5C9-4489-8F0A-004BE667B814");
+        internal static readonly Guid ActionProcessorId = new Guid("B17581D1-C5C9-4489-8F0A-004BE667B814");
 
         public Guid Id => ActionProcessorId;
 

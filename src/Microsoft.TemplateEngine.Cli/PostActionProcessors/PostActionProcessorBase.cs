@@ -7,7 +7,7 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public abstract class PostActionProcessor2Base
+    internal abstract class PostActionProcessor2Base
     {
         protected internal New3Callbacks Callbacks { get; set; }
 

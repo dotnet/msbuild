@@ -13,9 +13,9 @@ using Microsoft.TemplateEngine.Cli.TemplateResolution;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
-    public static class TemplateDetailsDisplay
+    internal static class TemplateDetailsDisplay
     {
-        public static void ShowTemplateGroupHelp(IReadOnlyCollection<ITemplateMatchInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
+        internal static void ShowTemplateGroupHelp(IReadOnlyCollection<ITemplateMatchInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
         {
             if (templateGroup.Count == 0 || !TemplateResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
             {
@@ -393,14 +393,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         private struct TemplateGroupParameterDetails
         {
-            public IParameterSet AllParams;
-            public string AdditionalInfo;       // TODO: rename (probably)
-            public IReadOnlyList<string> InvalidParams;
-            public HashSet<string> ExplicitlyHiddenParams;
-            public IReadOnlyDictionary<string, IReadOnlyList<string>> GroupVariantsForCanonicals;
-            public HashSet<string> GroupUserParamsWithDefaultValues;
-            public bool HasPostActionScriptRunner;
-            public HashSet<string> ParametersToAlwaysShow;
+            internal IParameterSet AllParams;
+            internal string AdditionalInfo;       // TODO: rename (probably)
+            internal IReadOnlyList<string> InvalidParams;
+            internal HashSet<string> ExplicitlyHiddenParams;
+            internal IReadOnlyDictionary<string, IReadOnlyList<string>> GroupVariantsForCanonicals;
+            internal HashSet<string> GroupUserParamsWithDefaultValues;
+            internal bool HasPostActionScriptRunner;
+            internal HashSet<string> ParametersToAlwaysShow;
         }
     }
 }

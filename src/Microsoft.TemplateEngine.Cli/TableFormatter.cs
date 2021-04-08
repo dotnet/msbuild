@@ -9,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal class TableFormatter
     {
-        public static void Print<T>(IEnumerable<T> items, string noItemsMessage, string columnPad, char header, Dictionary<string, Func<T, object>> dictionary)
+        internal static void Print<T>(IEnumerable<T> items, string noItemsMessage, string columnPad, char header, Dictionary<string, Func<T, object>> dictionary)
         {
             List<string>[] columns = new List<string>[dictionary.Count];
 

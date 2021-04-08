@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal static class AppExtensions
     {
-        public static IReadOnlyList<string> CreateArgListFromAdditionalFiles(IList<string> extraArgFileNames)
+        internal static IReadOnlyList<string> CreateArgListFromAdditionalFiles(IList<string> extraArgFileNames)
         {
             IReadOnlyDictionary<string, IReadOnlyList<string>> argsDict = ParseArgsFromFile(extraArgFileNames);
 
@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli
             return argsFlattened;
         }
 
-        public static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseArgsFromFile(IList<string> extraArgFileNames)
+        internal static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseArgsFromFile(IList<string> extraArgFileNames)
         {
             Dictionary<string, IReadOnlyList<string>> parameters = new Dictionary<string, IReadOnlyList<string>>();
 

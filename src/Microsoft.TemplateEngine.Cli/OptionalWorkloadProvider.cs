@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Utils
         {
             private IEngineEnvironmentSettings EnvironmentSettings;
 
-            public OptionalWorkloadProvider(ITemplatePackageProviderFactory factory, IEngineEnvironmentSettings settings)
+            internal OptionalWorkloadProvider(ITemplatePackageProviderFactory factory, IEngineEnvironmentSettings settings)
             {
                 this.Factory = factory;
                 this.EnvironmentSettings = settings;

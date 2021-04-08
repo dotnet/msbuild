@@ -5,7 +5,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class InMemoryHostSpecificDataLoader : IHostSpecificDataLoader
     {
-        public InMemoryHostSpecificDataLoader(IReadOnlyDictionary<string, HostSpecificTemplateData> hostSpecificData)
+        internal InMemoryHostSpecificDataLoader(IReadOnlyDictionary<string, HostSpecificTemplateData> hostSpecificData)
         {
             _hostSpecificData = hostSpecificData;
         }

@@ -1,6 +1,5 @@
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using Microsoft.TemplateEngine.Edge.Mount.Archive;
 using System;
 
 namespace Microsoft.TemplateEngine.Utils

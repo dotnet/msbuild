@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    public class AnsiConsole
+    internal class AnsiConsole
     {
         private AnsiConsole(TextWriter writer)
         {
@@ -14,19 +14,19 @@ namespace Microsoft.TemplateEngine.Cli
 
         private int _boldRecursion;
 
-        public static AnsiConsole GetOutput()
+        internal static AnsiConsole GetOutput()
         {
             return new AnsiConsole(Console.Out);
         }
 
-        public static AnsiConsole GetError()
+        internal static AnsiConsole GetError()
         {
             return new AnsiConsole(Console.Error);
         }
 
-        public TextWriter Writer { get; }
+        internal TextWriter Writer { get; }
 
-        public ConsoleColor OriginalForegroundColor { get; }
+        internal ConsoleColor OriginalForegroundColor { get; }
 
         private void SetColor(ConsoleColor color)
         {
@@ -51,14 +51,14 @@ namespace Microsoft.TemplateEngine.Cli
             SetColor(Console.ForegroundColor);
         }
 
-        public void WriteLine(string message)
+        internal void WriteLine(string message)
         {
             Write(message);
             Writer.WriteLine();
         }
 
 
-        public void Write(string message)
+        internal void Write(string message)
         {
             var escapeScan = 0;
             for (;;)

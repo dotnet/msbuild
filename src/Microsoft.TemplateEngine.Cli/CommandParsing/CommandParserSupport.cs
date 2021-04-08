@@ -7,9 +7,9 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
-    public static class CommandParserSupport
+    internal static class CommandParserSupport
     {
-        public static Command CreateNewCommandWithoutTemplateInfo(string commandName) => GetNewCommand(commandName, NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
+        internal static Command CreateNewCommandWithoutTemplateInfo(string commandName) => GetNewCommand(commandName, NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
 
         private static Command GetNewCommand(string commandName, params Option[][] args)
         {
@@ -23,7 +23,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         // Final parser for when there is no template name provided.
         // Unmatched args are errors.
-        public static Command CreateNewCommandForNoTemplateName(string commandName)
+        internal static Command CreateNewCommandForNoTemplateName(string commandName)
         {
             Option[] combinedArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
 
@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                            combinedArgs);
         }
 
-        public static HashSet<string> ArgsForBuiltInCommands
+        internal static HashSet<string> ArgsForBuiltInCommands
         {
             get
             {
@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         private static HashSet<string> _argsForBuiltInCommands = null;
 
         // Creates a command setup with the args for "new", plus args for the input template parameters.
-        public static Command CreateNewCommandWithArgsForTemplate(string commandName, string templateName,
+        internal static Command CreateNewCommandWithArgsForTemplate(string commandName, string templateName,
                     IReadOnlyList<ITemplateParameter> parameterDefinitions,
                     IDictionary<string, string> longNameOverrides,
                     IDictionary<string, string> shortNameOverrides,

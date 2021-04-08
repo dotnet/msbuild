@@ -4,9 +4,9 @@ using Microsoft.DotNet.Cli.CommandLine;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
-    public static class ParseResultExtensions
+    internal static class ParseResultExtensions
     {
-        public static bool HasAppliedOption(this ParseResult parseResult, params string[] optionPath)
+        internal static bool HasAppliedOption(this ParseResult parseResult, params string[] optionPath)
         {
             if (optionPath.Length == 0)
             {
@@ -37,7 +37,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         // If the argument has a value, set it to the out param.
         // This allows checking for args existence whose type is not known, which makes it safe to check for bool flags without values
         // in addition to checking for string value args.
-        public static bool TryGetArgumentValueAtPath(this ParseResult parseResult, out string argValue, params string[] optionsPath)
+        internal static bool TryGetArgumentValueAtPath(this ParseResult parseResult, out string argValue, params string[] optionsPath)
         {
             if (parseResult.TryTraversePath(out AppliedOption option, optionsPath))
             {
@@ -57,7 +57,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return false;
         }
 
-        public static string GetArgumentValueAtPath(this ParseResult parseResult, params string[] optionsPath)
+        internal static string GetArgumentValueAtPath(this ParseResult parseResult, params string[] optionsPath)
         {
             if (parseResult.TryTraversePath(out AppliedOption option, optionsPath) && (option.Arguments.Count > 0))
             {
@@ -67,7 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return null;
         }
 
-        public static IReadOnlyCollection<string> GetArgumentListAtPath(this ParseResult parseResult, params string[] optionPath)
+        internal static IReadOnlyCollection<string> GetArgumentListAtPath(this ParseResult parseResult, params string[] optionPath)
         {
             if (parseResult.TryTraversePath(out AppliedOption option, optionPath))
             {

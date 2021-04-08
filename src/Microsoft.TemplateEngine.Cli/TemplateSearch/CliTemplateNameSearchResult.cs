@@ -3,14 +3,14 @@ using Microsoft.TemplateSearch.Common;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
-    public class CliTemplateNameSearchResult : TemplateNameSearchResult
+    internal class CliTemplateNameSearchResult : TemplateNameSearchResult
     {
-        public CliTemplateNameSearchResult(ITemplateInfo template, PackInfo packInfo, HostSpecificTemplateData hostSpecificData)
+        internal CliTemplateNameSearchResult(ITemplateInfo template, PackInfo packInfo, HostSpecificTemplateData hostSpecificData)
             : base(template, packInfo)
         {
             HostSpecificTemplateData = hostSpecificData;
         }
 
-        public HostSpecificTemplateData HostSpecificTemplateData { get; }
+        internal HostSpecificTemplateData HostSpecificTemplateData { get; }
     }
 }

@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class LocalizableStrings {
+    internal class LocalizableStrings {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.TemplateEngine.Cli.LocalizableStrings", typeof(LocalizableStrings).Assembly);
@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Action would have been taken automatically:.
         /// </summary>
-        public static string ActionWouldHaveBeenTakenAutomatically {
+        internal static string ActionWouldHaveBeenTakenAutomatically {
             get {
                 return ResourceManager.GetString("ActionWouldHaveBeenTakenAutomatically", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to add project(s) {0} to solution file {1}, solution folder {2}..
         /// </summary>
-        public static string AddProjToSlnPostActionFailed {
+        internal static string AddProjToSlnPostActionFailed {
             get {
                 return ResourceManager.GetString("AddProjToSlnPostActionFailed", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add..
         /// </summary>
-        public static string AddProjToSlnPostActionNoProjFiles {
+        internal static string AddProjToSlnPostActionNoProjFiles {
             get {
                 return ResourceManager.GetString("AddProjToSlnPostActionNoProjFiles", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Adding project reference(s) to solution file. Running {0}.
         /// </summary>
-        public static string AddProjToSlnPostActionRunning {
+        internal static string AddProjToSlnPostActionRunning {
             get {
                 return ResourceManager.GetString("AddProjToSlnPostActionRunning", resourceCulture);
             }
@@ -102,7 +102,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///    to solution file: {1}
         ///    solution folder: {2}.
         /// </summary>
-        public static string AddProjToSlnPostActionSucceeded {
+        internal static string AddProjToSlnPostActionSucceeded {
             get {
                 return ResourceManager.GetString("AddProjToSlnPostActionSucceeded", resourceCulture);
             }
@@ -111,7 +111,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to determine which solution file to add the reference to..
         /// </summary>
-        public static string AddProjToSlnPostActionUnresolvedSlnFile {
+        internal static string AddProjToSlnPostActionUnresolvedSlnFile {
             get {
                 return ResourceManager.GetString("AddProjToSlnPostActionUnresolvedSlnFile", resourceCulture);
             }
@@ -120,7 +120,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1}.
         /// </summary>
-        public static string AddRefPostActionAddPackageRef {
+        internal static string AddRefPostActionAddPackageRef {
             get {
                 return ResourceManager.GetString("AddRefPostActionAddPackageRef", resourceCulture);
             }
@@ -129,7 +129,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Adding a package reference. Running dotnet add {0} package {1} --version {2}.
         /// </summary>
-        public static string AddRefPostActionAddPackageRefWithVersion {
+        internal static string AddRefPostActionAddPackageRefWithVersion {
             get {
                 return ResourceManager.GetString("AddRefPostActionAddPackageRefWithVersion", resourceCulture);
             }
@@ -138,7 +138,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Adding a project reference. Running dotnet add {0} reference {1}.
         /// </summary>
-        public static string AddRefPostActionAddProjectRef {
+        internal static string AddRefPostActionAddProjectRef {
             get {
                 return ResourceManager.GetString("AddRefPostActionAddProjectRef", resourceCulture);
             }
@@ -147,7 +147,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to add reference {0} to project file {1}.
         /// </summary>
-        public static string AddRefPostActionFailed {
+        internal static string AddRefPostActionFailed {
             get {
                 return ResourceManager.GetString("AddRefPostActionFailed", resourceCulture);
             }
@@ -156,7 +156,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it..
         /// </summary>
-        public static string AddRefPostActionFrameworkNotSupported {
+        internal static string AddRefPostActionFrameworkNotSupported {
             get {
                 return ResourceManager.GetString("AddRefPostActionFrameworkNotSupported", resourceCulture);
             }
@@ -165,7 +165,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Add reference action is not configured correctly in the template..
         /// </summary>
-        public static string AddRefPostActionMisconfigured {
+        internal static string AddRefPostActionMisconfigured {
             get {
                 return ResourceManager.GetString("AddRefPostActionMisconfigured", resourceCulture);
             }
@@ -174,7 +174,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Project files found:.
         /// </summary>
-        public static string AddRefPostActionProjFileListHeader {
+        internal static string AddRefPostActionProjFileListHeader {
             get {
                 return ResourceManager.GetString("AddRefPostActionProjFileListHeader", resourceCulture);
             }
@@ -185,7 +185,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///    reference: {0}
         ///    to project file: {1}.
         /// </summary>
-        public static string AddRefPostActionSucceeded {
+        internal static string AddRefPostActionSucceeded {
             get {
                 return ResourceManager.GetString("AddRefPostActionSucceeded", resourceCulture);
             }
@@ -194,7 +194,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to determine which project file to add the reference to..
         /// </summary>
-        public static string AddRefPostActionUnresolvedProjFile {
+        internal static string AddRefPostActionUnresolvedProjFile {
             get {
                 return ResourceManager.GetString("AddRefPostActionUnresolvedProjFile", resourceCulture);
             }
@@ -203,7 +203,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Adding reference type {0} is not supported..
         /// </summary>
-        public static string AddRefPostActionUnsupportedRefType {
+        internal static string AddRefPostActionUnsupportedRefType {
             get {
                 return ResourceManager.GetString("AddRefPostActionUnsupportedRefType", resourceCulture);
             }
@@ -212,7 +212,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Alias &apos;{0}&apos; is a template short name, and therefore cannot be aliased..
         /// </summary>
-        public static string AliasCannotBeShortName {
+        internal static string AliasCannotBeShortName {
             get {
                 return ResourceManager.GetString("AliasCannotBeShortName", resourceCulture);
             }
@@ -222,7 +222,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   Looks up a localized string similar to After expanding aliases, the command is:
         ///    dotnet {0}.
         /// </summary>
-        public static string AliasCommandAfterExpansion {
+        internal static string AliasCommandAfterExpansion {
             get {
                 return ResourceManager.GetString("AliasCommandAfterExpansion", resourceCulture);
             }
@@ -231,7 +231,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Successfully created alias named &apos;{0}&apos; with value &apos;{1}&apos;.
         /// </summary>
-        public static string AliasCreated {
+        internal static string AliasCreated {
             get {
                 return ResourceManager.GetString("AliasCreated", resourceCulture);
             }
@@ -240,7 +240,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Alias not created. It would have created an alias cycle, resulting in infinite expansion..
         /// </summary>
-        public static string AliasCycleError {
+        internal static string AliasCycleError {
             get {
                 return ResourceManager.GetString("AliasCycleError", resourceCulture);
             }
@@ -249,7 +249,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Command is invalid after expanding aliases..
         /// </summary>
-        public static string AliasExpandedCommandParseError {
+        internal static string AliasExpandedCommandParseError {
             get {
                 return ResourceManager.GetString("AliasExpandedCommandParseError", resourceCulture);
             }
@@ -258,7 +258,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Error expanding aliases on input params..
         /// </summary>
-        public static string AliasExpansionError {
+        internal static string AliasExpansionError {
             get {
                 return ResourceManager.GetString("AliasExpansionError", resourceCulture);
             }
@@ -267,7 +267,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Alias Name.
         /// </summary>
-        public static string AliasName {
+        internal static string AliasName {
             get {
                 return ResourceManager.GetString("AliasName", resourceCulture);
             }
@@ -276,7 +276,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Alias names can only contain letters, numbers, underscores, and periods..
         /// </summary>
-        public static string AliasNameContainsInvalidCharacters {
+        internal static string AliasNameContainsInvalidCharacters {
             get {
                 return ResourceManager.GetString("AliasNameContainsInvalidCharacters", resourceCulture);
             }
@@ -285,7 +285,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Alias not created. The input was invalid..
         /// </summary>
-        public static string AliasNotCreatedInvalidInput {
+        internal static string AliasNotCreatedInvalidInput {
             get {
                 return ResourceManager.GetString("AliasNotCreatedInvalidInput", resourceCulture);
             }
@@ -294,7 +294,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Successfully removed alias named &apos;{0}&apos; whose value was &apos;{1}&apos;..
         /// </summary>
-        public static string AliasRemoved {
+        internal static string AliasRemoved {
             get {
                 return ResourceManager.GetString("AliasRemoved", resourceCulture);
             }
@@ -303,7 +303,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to remove alias &apos;{0}&apos;. It did not exist..
         /// </summary>
-        public static string AliasRemoveNonExistentFailed {
+        internal static string AliasRemoveNonExistentFailed {
             get {
                 return ResourceManager.GetString("AliasRemoveNonExistentFailed", resourceCulture);
             }
@@ -312,7 +312,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to All Aliases:.
         /// </summary>
-        public static string AliasShowAllAliasesHeader {
+        internal static string AliasShowAllAliasesHeader {
             get {
                 return ResourceManager.GetString("AliasShowAllAliasesHeader", resourceCulture);
             }
@@ -322,7 +322,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   Looks up a localized string similar to Unknown alias name &apos;{0}&apos;.
         ///Run &apos;dotnet {1} --show-aliases&apos; with no args to show all aliases..
         /// </summary>
-        public static string AliasShowErrorUnknownAlias {
+        internal static string AliasShowErrorUnknownAlias {
             get {
                 return ResourceManager.GetString("AliasShowErrorUnknownAlias", resourceCulture);
             }
@@ -331,7 +331,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Successfully updated alias named &apos;{0}&apos; to value &apos;{1}&apos;..
         /// </summary>
-        public static string AliasUpdated {
+        internal static string AliasUpdated {
             get {
                 return ResourceManager.GetString("AliasUpdated", resourceCulture);
             }
@@ -340,7 +340,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Alias Value.
         /// </summary>
-        public static string AliasValue {
+        internal static string AliasValue {
             get {
                 return ResourceManager.GetString("AliasValue", resourceCulture);
             }
@@ -349,7 +349,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to First argument of an alias value must begin with a letter or digit..
         /// </summary>
-        public static string AliasValueFirstArgError {
+        internal static string AliasValueFirstArgError {
             get {
                 return ResourceManager.GetString("AliasValueFirstArgError", resourceCulture);
             }
@@ -358,7 +358,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Do not allow scripts to run.
         /// </summary>
-        public static string AllowScriptsNoChoice {
+        internal static string AllowScriptsNoChoice {
             get {
                 return ResourceManager.GetString("AllowScriptsNoChoice", resourceCulture);
             }
@@ -367,7 +367,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Ask before running each script.
         /// </summary>
-        public static string AllowScriptsPromptChoice {
+        internal static string AllowScriptsPromptChoice {
             get {
                 return ResourceManager.GetString("AllowScriptsPromptChoice", resourceCulture);
             }
@@ -376,7 +376,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Allow scripts to run.
         /// </summary>
-        public static string AllowScriptsYesChoice {
+        internal static string AllowScriptsYesChoice {
             get {
                 return ResourceManager.GetString("AllowScriptsYesChoice", resourceCulture);
             }
@@ -385,7 +385,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Re-run the command specifying the language to use with --language option..
         /// </summary>
-        public static string AmbiguousLanguageHint {
+        internal static string AmbiguousLanguageHint {
             get {
                 return ResourceManager.GetString("AmbiguousLanguageHint", resourceCulture);
             }
@@ -394,7 +394,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The value &apos;{1}&apos; is ambiguous for option {0}..
         /// </summary>
-        public static string AmbiguousParameterDetail {
+        internal static string AmbiguousParameterDetail {
             get {
                 return ResourceManager.GetString("AmbiguousParameterDetail", resourceCulture);
             }
@@ -403,7 +403,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to resolve the template to instantiate, these templates matched your input:.
         /// </summary>
-        public static string AmbiguousTemplateGroupListHeader {
+        internal static string AmbiguousTemplateGroupListHeader {
             get {
                 return ResourceManager.GetString("AmbiguousTemplateGroupListHeader", resourceCulture);
             }
@@ -412,7 +412,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Re-run the command using the template&apos;s exact short name..
         /// </summary>
-        public static string AmbiguousTemplateGroupListHint {
+        internal static string AmbiguousTemplateGroupListHint {
             get {
                 return ResourceManager.GetString("AmbiguousTemplateGroupListHint", resourceCulture);
             }
@@ -421,7 +421,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to resolve the template to instantiate, the following installed templates are conflicting:.
         /// </summary>
-        public static string AmbiguousTemplatesHeader {
+        internal static string AmbiguousTemplatesHeader {
             get {
                 return ResourceManager.GetString("AmbiguousTemplatesHeader", resourceCulture);
             }
@@ -430,7 +430,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Uninstall the templates or the packages to keep only one template from the list..
         /// </summary>
-        public static string AmbiguousTemplatesMultiplePackagesHint {
+        internal static string AmbiguousTemplatesMultiplePackagesHint {
             get {
                 return ResourceManager.GetString("AmbiguousTemplatesMultiplePackagesHint", resourceCulture);
             }
@@ -439,7 +439,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The package {0} is not correct, uninstall it and report the issue to the package author..
         /// </summary>
-        public static string AmbiguousTemplatesSamePackageHint {
+        internal static string AmbiguousTemplatesSamePackageHint {
             get {
                 return ResourceManager.GetString("AmbiguousTemplatesSamePackageHint", resourceCulture);
             }
@@ -448,7 +448,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The specified extra args file does not exist: {0}..
         /// </summary>
-        public static string ArgsFileNotFound {
+        internal static string ArgsFileNotFound {
             get {
                 return ResourceManager.GetString("ArgsFileNotFound", resourceCulture);
             }
@@ -457,7 +457,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Extra args file {0} is not formatted properly..
         /// </summary>
-        public static string ArgsFileWrongFormat {
+        internal static string ArgsFileWrongFormat {
             get {
                 return ResourceManager.GetString("ArgsFileWrongFormat", resourceCulture);
             }
@@ -466,7 +466,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Assembly.
         /// </summary>
-        public static string Assembly {
+        internal static string Assembly {
             get {
                 return ResourceManager.GetString("Assembly", resourceCulture);
             }
@@ -475,7 +475,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Author: {0}.
         /// </summary>
-        public static string Author {
+        internal static string Author {
             get {
                 return ResourceManager.GetString("Author", resourceCulture);
             }
@@ -484,7 +484,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke..
         /// </summary>
-        public static string Authoring_AmbiguousBestPrecedence {
+        internal static string Authoring_AmbiguousBestPrecedence {
             get {
                 return ResourceManager.GetString("Authoring_AmbiguousBestPrecedence", resourceCulture);
             }
@@ -493,7 +493,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to An ambiguous choice parameter value prevented unambiguously choosing a template to invoke..
         /// </summary>
-        public static string Authoring_AmbiguousChoiceParameterValue {
+        internal static string Authoring_AmbiguousChoiceParameterValue {
             get {
                 return ResourceManager.GetString("Authoring_AmbiguousChoiceParameterValue", resourceCulture);
             }
@@ -502,7 +502,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Change.
         /// </summary>
-        public static string Change {
+        internal static string Change {
             get {
                 return ResourceManager.GetString("Change", resourceCulture);
             }
@@ -511,7 +511,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Author.
         /// </summary>
-        public static string ColumnNameAuthor {
+        internal static string ColumnNameAuthor {
             get {
                 return ResourceManager.GetString("ColumnNameAuthor", resourceCulture);
             }
@@ -520,7 +520,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Identity.
         /// </summary>
-        public static string ColumnNameIdentity {
+        internal static string ColumnNameIdentity {
             get {
                 return ResourceManager.GetString("ColumnNameIdentity", resourceCulture);
             }
@@ -529,7 +529,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Language.
         /// </summary>
-        public static string ColumnNameLanguage {
+        internal static string ColumnNameLanguage {
             get {
                 return ResourceManager.GetString("ColumnNameLanguage", resourceCulture);
             }
@@ -538,7 +538,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Package.
         /// </summary>
-        public static string ColumnNamePackage {
+        internal static string ColumnNamePackage {
             get {
                 return ResourceManager.GetString("ColumnNamePackage", resourceCulture);
             }
@@ -547,7 +547,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Precedence.
         /// </summary>
-        public static string ColumnNamePrecedence {
+        internal static string ColumnNamePrecedence {
             get {
                 return ResourceManager.GetString("ColumnNamePrecedence", resourceCulture);
             }
@@ -556,7 +556,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The column {0} is/are not supported, the supported columns are: {1}..
         /// </summary>
-        public static string ColumnNamesAreNotSupported {
+        internal static string ColumnNamesAreNotSupported {
             get {
                 return ResourceManager.GetString("ColumnNamesAreNotSupported", resourceCulture);
             }
@@ -565,7 +565,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Short Name.
         /// </summary>
-        public static string ColumnNameShortName {
+        internal static string ColumnNameShortName {
             get {
                 return ResourceManager.GetString("ColumnNameShortName", resourceCulture);
             }
@@ -574,7 +574,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Tags.
         /// </summary>
-        public static string ColumnNameTags {
+        internal static string ColumnNameTags {
             get {
                 return ResourceManager.GetString("ColumnNameTags", resourceCulture);
             }
@@ -583,7 +583,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Template Name.
         /// </summary>
-        public static string ColumnNameTemplateName {
+        internal static string ColumnNameTemplateName {
             get {
                 return ResourceManager.GetString("ColumnNameTemplateName", resourceCulture);
             }
@@ -592,7 +592,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Downloads.
         /// </summary>
-        public static string ColumnNameTotalDownloads {
+        internal static string ColumnNameTotalDownloads {
             get {
                 return ResourceManager.GetString("ColumnNameTotalDownloads", resourceCulture);
             }
@@ -601,7 +601,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
-        public static string ColumnNameType {
+        internal static string ColumnNameType {
             get {
                 return ResourceManager.GetString("ColumnNameType", resourceCulture);
             }
@@ -610,7 +610,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Template Instantiation Commands for .NET Core CLI.
         /// </summary>
-        public static string CommandDescription {
+        internal static string CommandDescription {
             get {
                 return ResourceManager.GetString("CommandDescription", resourceCulture);
             }
@@ -619,7 +619,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Command failed..
         /// </summary>
-        public static string CommandFailed {
+        internal static string CommandFailed {
             get {
                 return ResourceManager.GetString("CommandFailed", resourceCulture);
             }
@@ -629,7 +629,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   Looks up a localized string similar to Output from command:
         ///{0}.
         /// </summary>
-        public static string CommandOutput {
+        internal static string CommandOutput {
             get {
                 return ResourceManager.GetString("CommandOutput", resourceCulture);
             }
@@ -638,7 +638,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Command succeeded..
         /// </summary>
-        public static string CommandSucceeded {
+        internal static string CommandSucceeded {
             get {
                 return ResourceManager.GetString("CommandSucceeded", resourceCulture);
             }
@@ -647,7 +647,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Commit Hash:.
         /// </summary>
-        public static string CommitHash {
+        internal static string CommitHash {
             get {
                 return ResourceManager.GetString("CommitHash", resourceCulture);
             }
@@ -656,7 +656,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Configured Value: {0}.
         /// </summary>
-        public static string ConfiguredValue {
+        internal static string ConfiguredValue {
             get {
                 return ResourceManager.GetString("ConfiguredValue", resourceCulture);
             }
@@ -665,7 +665,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Couldn&apos;t determine files to restore..
         /// </summary>
-        public static string CouldntDetermineFilesToRestore {
+        internal static string CouldntDetermineFilesToRestore {
             get {
                 return ResourceManager.GetString("CouldntDetermineFilesToRestore", resourceCulture);
             }
@@ -675,7 +675,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   Looks up a localized string similar to Template &quot;{0}&quot; could not be created.
         ///{1}.
         /// </summary>
-        public static string CreateFailed {
+        internal static string CreateFailed {
             get {
                 return ResourceManager.GetString("CreateFailed", resourceCulture);
             }
@@ -684,7 +684,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The template &quot;{0}&quot; was created successfully..
         /// </summary>
-        public static string CreateSuccessful {
+        internal static string CreateSuccessful {
             get {
                 return ResourceManager.GetString("CreateSuccessful", resourceCulture);
             }
@@ -693,7 +693,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Current configuration:.
         /// </summary>
-        public static string CurrentConfiguration {
+        internal static string CurrentConfiguration {
             get {
                 return ResourceManager.GetString("CurrentConfiguration", resourceCulture);
             }
@@ -702,7 +702,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Default if option is provided without a value: {0}.
         /// </summary>
-        public static string DefaultIfOptionWithoutValue {
+        internal static string DefaultIfOptionWithoutValue {
             get {
                 return ResourceManager.GetString("DefaultIfOptionWithoutValue", resourceCulture);
             }
@@ -711,7 +711,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Default: {0}.
         /// </summary>
-        public static string DefaultValue {
+        internal static string DefaultValue {
             get {
                 return ResourceManager.GetString("DefaultValue", resourceCulture);
             }
@@ -720,7 +720,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
-        public static string Delete {
+        internal static string Delete {
             get {
                 return ResourceManager.GetString("Delete", resourceCulture);
             }
@@ -729,7 +729,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Description: {0}.
         /// </summary>
-        public static string Description {
+        internal static string Description {
             get {
                 return ResourceManager.GetString("Description", resourceCulture);
             }
@@ -738,7 +738,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Creating this template will make changes to existing files:.
         /// </summary>
-        public static string DestructiveChangesNotification {
+        internal static string DestructiveChangesNotification {
             get {
                 return ResourceManager.GetString("DestructiveChangesNotification", resourceCulture);
             }
@@ -747,7 +747,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Displays help for this command..
         /// </summary>
-        public static string DisplaysHelp {
+        internal static string DisplaysHelp {
             get {
                 return ResourceManager.GetString("DisplaysHelp", resourceCulture);
             }
@@ -756,7 +756,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Displays a summary of what would happen if the given command line were run if it would result in a template creation..
         /// </summary>
-        public static string DryRunDescription {
+        internal static string DryRunDescription {
             get {
                 return ResourceManager.GetString("DryRunDescription", resourceCulture);
             }
@@ -766,7 +766,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   Looks up a localized string similar to After expanding the extra args files, the command is:
         ///    dotnet {0}.
         /// </summary>
-        public static string ExtraArgsCommandAfterExpansion {
+        internal static string ExtraArgsCommandAfterExpansion {
             get {
                 return ResourceManager.GetString("ExtraArgsCommandAfterExpansion", resourceCulture);
             }
@@ -775,7 +775,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to File actions would have been taken:.
         /// </summary>
-        public static string FileActionsWouldHaveBeenTaken {
+        internal static string FileActionsWouldHaveBeenTaken {
             get {
                 return ResourceManager.GetString("FileActionsWouldHaveBeenTaken", resourceCulture);
             }
@@ -784,7 +784,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Forces content to be generated even if it would change existing files..
         /// </summary>
-        public static string ForcesTemplateCreation {
+        internal static string ForcesTemplateCreation {
             get {
                 return ResourceManager.GetString("ForcesTemplateCreation", resourceCulture);
             }
@@ -793,7 +793,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Generators.
         /// </summary>
-        public static string Generators {
+        internal static string Generators {
             get {
                 return ResourceManager.GetString("Generators", resourceCulture);
             }
@@ -802,7 +802,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Error: {0}.
         /// </summary>
-        public static string GenericError {
+        internal static string GenericError {
             get {
                 return ResourceManager.GetString("GenericError", resourceCulture);
             }
@@ -811,7 +811,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Warning: {0}.
         /// </summary>
-        public static string GenericWarning {
+        internal static string GenericWarning {
             get {
                 return ResourceManager.GetString("GenericWarning", resourceCulture);
             }
@@ -820,7 +820,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Getting ready....
         /// </summary>
-        public static string GettingReady {
+        internal static string GettingReady {
             get {
                 return ResourceManager.GetString("GettingReady", resourceCulture);
             }
@@ -829,7 +829,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Installs a source or a template package..
         /// </summary>
-        public static string InstallHelp {
+        internal static string InstallHelp {
             get {
                 return ResourceManager.GetString("InstallHelp", resourceCulture);
             }
@@ -838,7 +838,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication)..
         /// </summary>
-        public static string InteractiveHelp {
+        internal static string InteractiveHelp {
             get {
                 return ResourceManager.GetString("InteractiveHelp", resourceCulture);
             }
@@ -847,7 +847,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Invalid input switch:.
         /// </summary>
-        public static string InvalidInputSwitch {
+        internal static string InvalidInputSwitch {
             get {
                 return ResourceManager.GetString("InvalidInputSwitch", resourceCulture);
             }
@@ -856,7 +856,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Name cannot contain any of the following characters {0} or character codes {1}.
         /// </summary>
-        public static string InvalidNameParameter {
+        internal static string InvalidNameParameter {
             get {
                 return ResourceManager.GetString("InvalidNameParameter", resourceCulture);
             }
@@ -865,7 +865,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The default value &apos;{1}&apos; is not a valid value for {0}..
         /// </summary>
-        public static string InvalidParameterDefault {
+        internal static string InvalidParameterDefault {
             get {
                 return ResourceManager.GetString("InvalidParameterDefault", resourceCulture);
             }
@@ -874,7 +874,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to &apos;{1}&apos; is not a valid value for {0}..
         /// </summary>
-        public static string InvalidParameterDetail {
+        internal static string InvalidParameterDetail {
             get {
                 return ResourceManager.GetString("InvalidParameterDetail", resourceCulture);
             }
@@ -883,7 +883,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid option.
         /// </summary>
-        public static string InvalidParameterNameDetail {
+        internal static string InvalidParameterNameDetail {
             get {
                 return ResourceManager.GetString("InvalidParameterNameDetail", resourceCulture);
             }
@@ -892,7 +892,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to For more information, run &apos;{0}&apos;..
         /// </summary>
-        public static string InvalidParameterTemplateHint {
+        internal static string InvalidParameterTemplateHint {
             get {
                 return ResourceManager.GetString("InvalidParameterTemplateHint", resourceCulture);
             }
@@ -901,7 +901,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Error: Invalid option(s):.
         /// </summary>
-        public static string InvalidTemplateParameterValues {
+        internal static string InvalidTemplateParameterValues {
             get {
                 return ResourceManager.GetString("InvalidTemplateParameterValues", resourceCulture);
             }
@@ -910,7 +910,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Filters templates based on language and specifies the language of the template to create..
         /// </summary>
-        public static string LanguageParameter {
+        internal static string LanguageParameter {
             get {
                 return ResourceManager.GetString("LanguageParameter", resourceCulture);
             }
@@ -919,7 +919,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Lists templates containing the specified template name. If no name is specified, lists all templates..
         /// </summary>
-        public static string ListsTemplates {
+        internal static string ListsTemplates {
             get {
                 return ResourceManager.GetString("ListsTemplates", resourceCulture);
             }
@@ -928,7 +928,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to To list installed templates, run &apos;dotnet {0} --list&apos;..
         /// </summary>
-        public static string ListTemplatesCommand {
+        internal static string ListTemplatesCommand {
             get {
                 return ResourceManager.GetString("ListTemplatesCommand", resourceCulture);
             }
@@ -937,7 +937,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Mandatory option {0} missing for template {1}..
         /// </summary>
-        public static string MissingRequiredParameter {
+        internal static string MissingRequiredParameter {
             get {
                 return ResourceManager.GetString("MissingRequiredParameter", resourceCulture);
             }
@@ -946,7 +946,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to locate the specified template content, the template cache may be corrupted. Try running &apos;dotnet {0} --debug:reinit&apos; to fix the issue..
         /// </summary>
-        public static string MissingTemplateContentDetected {
+        internal static string MissingTemplateContentDetected {
             get {
                 return ResourceManager.GetString("MissingTemplateContentDetected", resourceCulture);
             }
@@ -955,7 +955,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Mount Point Factories.
         /// </summary>
-        public static string MountPointFactories {
+        internal static string MountPointFactories {
             get {
                 return ResourceManager.GetString("MountPointFactories", resourceCulture);
             }
@@ -964,7 +964,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The name for the output being created. If no name is specified, the name of the output directory is used..
         /// </summary>
-        public static string NameOfOutput {
+        internal static string NameOfOutput {
             get {
                 return ResourceManager.GetString("NameOfOutput", resourceCulture);
             }
@@ -973,7 +973,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to (No Items).
         /// </summary>
-        public static string NoItems {
+        internal static string NoItems {
             get {
                 return ResourceManager.GetString("NoItems", resourceCulture);
             }
@@ -982,7 +982,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to     (No Parameters).
         /// </summary>
-        public static string NoParameters {
+        internal static string NoParameters {
             get {
                 return ResourceManager.GetString("NoParameters", resourceCulture);
             }
@@ -991,7 +991,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to No Primary Outputs to restore..
         /// </summary>
-        public static string NoPrimaryOutputsToRestore {
+        internal static string NoPrimaryOutputsToRestore {
             get {
                 return ResourceManager.GetString("NoPrimaryOutputsToRestore", resourceCulture);
             }
@@ -1000,7 +1000,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to No templates found matching: {0}..
         /// </summary>
-        public static string NoTemplatesMatchingInputParameters {
+        internal static string NoTemplatesMatchingInputParameters {
             get {
                 return ResourceManager.GetString("NoTemplatesMatchingInputParameters", resourceCulture);
             }
@@ -1009,7 +1009,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Specifies a NuGet source to use during install..
         /// </summary>
-        public static string NuGetSourceHelp {
+        internal static string NuGetSourceHelp {
             get {
                 return ResourceManager.GetString("NuGetSourceHelp", resourceCulture);
             }
@@ -1018,7 +1018,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Error during synchronization with the Optional SDK Workloads..
         /// </summary>
-        public static string OptionalWorkloadsSyncFailed {
+        internal static string OptionalWorkloadsSyncFailed {
             get {
                 return ResourceManager.GetString("OptionalWorkloadsSyncFailed", resourceCulture);
             }
@@ -1027,7 +1027,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Filters the templates based on the template author. Applicable only with --search or --list | -l option..
         /// </summary>
-        public static string OptionDescriptionAuthorFilter {
+        internal static string OptionDescriptionAuthorFilter {
             get {
                 return ResourceManager.GetString("OptionDescriptionAuthorFilter", resourceCulture);
             }
@@ -1037,7 +1037,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///   Looks up a localized string similar to Comma separated list of columns to display in --list and --search output. 
         ///The supported columns are: language, tags, author, type..
         /// </summary>
-        public static string OptionDescriptionColumns {
+        internal static string OptionDescriptionColumns {
             get {
                 return ResourceManager.GetString("OptionDescriptionColumns", resourceCulture);
             }
@@ -1046,7 +1046,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Display all columns in --list and --search output..
         /// </summary>
-        public static string OptionDescriptionColumnsAll {
+        internal static string OptionDescriptionColumnsAll {
             get {
                 return ResourceManager.GetString("OptionDescriptionColumnsAll", resourceCulture);
             }
@@ -1055,7 +1055,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Filters the templates based on NuGet package ID. Applies to --search..
         /// </summary>
-        public static string OptionDescriptionPackageFilter {
+        internal static string OptionDescriptionPackageFilter {
             get {
                 return ResourceManager.GetString("OptionDescriptionPackageFilter", resourceCulture);
             }
@@ -1064,7 +1064,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Searches for the templates on NuGet.org..
         /// </summary>
-        public static string OptionDescriptionSearch {
+        internal static string OptionDescriptionSearch {
             get {
                 return ResourceManager.GetString("OptionDescriptionSearch", resourceCulture);
             }
@@ -1073,7 +1073,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Filters the templates based on the tag. Applies to --search and --list..
         /// </summary>
-        public static string OptionDescriptionTagFilter {
+        internal static string OptionDescriptionTagFilter {
             get {
                 return ResourceManager.GetString("OptionDescriptionTagFilter", resourceCulture);
             }
@@ -1082,7 +1082,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Options:.
         /// </summary>
-        public static string Options {
+        internal static string Options {
             get {
                 return ResourceManager.GetString("Options", resourceCulture);
             }
@@ -1091,7 +1091,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Location to place the generated output..
         /// </summary>
-        public static string OutputPath {
+        internal static string OutputPath {
             get {
                 return ResourceManager.GetString("OutputPath", resourceCulture);
             }
@@ -1100,7 +1100,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Overwrite.
         /// </summary>
-        public static string Overwrite {
+        internal static string Overwrite {
             get {
                 return ResourceManager.GetString("Overwrite", resourceCulture);
             }
@@ -1109,7 +1109,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Some partially matched templates may not support these input switches:.
         /// </summary>
-        public static string PartialTemplateMatchSwitchesNotValidForAllMatches {
+        internal static string PartialTemplateMatchSwitchesNotValidForAllMatches {
             get {
                 return ResourceManager.GetString("PartialTemplateMatchSwitchesNotValidForAllMatches", resourceCulture);
             }
@@ -1118,7 +1118,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The possible values are:.
         /// </summary>
-        public static string PossibleValuesHeader {
+        internal static string PossibleValuesHeader {
             get {
                 return ResourceManager.GetString("PossibleValuesHeader", resourceCulture);
             }
@@ -1127,7 +1127,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Actual command: {0}.
         /// </summary>
-        public static string PostActionCommand {
+        internal static string PostActionCommand {
             get {
                 return ResourceManager.GetString("PostActionCommand", resourceCulture);
             }
@@ -1136,7 +1136,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Description: {0}.
         /// </summary>
-        public static string PostActionDescription {
+        internal static string PostActionDescription {
             get {
                 return ResourceManager.GetString("PostActionDescription", resourceCulture);
             }
@@ -1145,7 +1145,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Post action failed..
         /// </summary>
-        public static string PostActionFailedInstructionHeader {
+        internal static string PostActionFailedInstructionHeader {
             get {
                 return ResourceManager.GetString("PostActionFailedInstructionHeader", resourceCulture);
             }
@@ -1154,7 +1154,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Manual instructions: {0}.
         /// </summary>
-        public static string PostActionInstructions {
+        internal static string PostActionInstructions {
             get {
                 return ResourceManager.GetString("PostActionInstructions", resourceCulture);
             }
@@ -1163,7 +1163,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Invalid input &quot;{0}&quot;. Please enter one of [{1}(yes)|{2}(no)]..
         /// </summary>
-        public static string PostActionInvalidInputRePrompt {
+        internal static string PostActionInvalidInputRePrompt {
             get {
                 return ResourceManager.GetString("PostActionInvalidInputRePrompt", resourceCulture);
             }
@@ -1172,7 +1172,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Template is configured to run the following action:.
         /// </summary>
-        public static string PostActionPromptHeader {
+        internal static string PostActionPromptHeader {
             get {
                 return ResourceManager.GetString("PostActionPromptHeader", resourceCulture);
             }
@@ -1181,7 +1181,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Do you want to run this action [{0}(yes)|{1}(no)]?.
         /// </summary>
-        public static string PostActionPromptRequest {
+        internal static string PostActionPromptRequest {
             get {
                 return ResourceManager.GetString("PostActionPromptRequest", resourceCulture);
             }
@@ -1190,7 +1190,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Processing post-creation actions....
         /// </summary>
-        public static string ProcessingPostActions {
+        internal static string ProcessingPostActions {
             get {
                 return ResourceManager.GetString("ProcessingPostActions", resourceCulture);
             }
@@ -1199,7 +1199,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Rerun the command and pass --force to accept and create..
         /// </summary>
-        public static string RerunCommandAndPassForceToCreateAnyway {
+        internal static string RerunCommandAndPassForceToCreateAnyway {
             get {
                 return ResourceManager.GetString("RerunCommandAndPassForceToCreateAnyway", resourceCulture);
             }
@@ -1208,7 +1208,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Restore failed..
         /// </summary>
-        public static string RestoreFailed {
+        internal static string RestoreFailed {
             get {
                 return ResourceManager.GetString("RestoreFailed", resourceCulture);
             }
@@ -1217,7 +1217,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Restore succeeded..
         /// </summary>
-        public static string RestoreSucceeded {
+        internal static string RestoreSucceeded {
             get {
                 return ResourceManager.GetString("RestoreSucceeded", resourceCulture);
             }
@@ -1226,7 +1226,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Run dotnet {0} --help for usage information..
         /// </summary>
-        public static string RunHelpForInformationAboutAcceptedParameters {
+        internal static string RunHelpForInformationAboutAcceptedParameters {
             get {
                 return ResourceManager.GetString("RunHelpForInformationAboutAcceptedParameters", resourceCulture);
             }
@@ -1235,7 +1235,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Running command &apos;{0}&apos;....
         /// </summary>
-        public static string RunningCommand {
+        internal static string RunningCommand {
             get {
                 return ResourceManager.GetString("RunningCommand", resourceCulture);
             }
@@ -1244,7 +1244,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Running &apos;dotnet restore&apos; on {0}....
         /// </summary>
-        public static string RunningDotnetRestoreOn {
+        internal static string RunningDotnetRestoreOn {
             get {
                 return ResourceManager.GetString("RunningDotnetRestoreOn", resourceCulture);
             }
@@ -1258,7 +1258,7 @@ namespace Microsoft.TemplateEngine.Cli {
         ///        dotnet {1} --search --author Microsoft
         ///        dotnet {1} &lt;template name&gt; --search --author Microsoft.
         /// </summary>
-        public static string SearchOnlineErrorNoTemplateNameOrFilter {
+        internal static string SearchOnlineErrorNoTemplateNameOrFilter {
             get {
                 return ResourceManager.GetString("SearchOnlineErrorNoTemplateNameOrFilter", resourceCulture);
             }
@@ -1267,7 +1267,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Search failed: template name is too short, minimum 2 characters are required..
         /// </summary>
-        public static string SearchOnlineErrorTemplateNameIsTooShort {
+        internal static string SearchOnlineErrorTemplateNameIsTooShort {
             get {
                 return ResourceManager.GetString("SearchOnlineErrorTemplateNameIsTooShort", resourceCulture);
             }
@@ -1276,7 +1276,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to No remoted sources defined to search for the templates..
         /// </summary>
-        public static string SearchOnlineNoSources {
+        internal static string SearchOnlineNoSources {
             get {
                 return ResourceManager.GetString("SearchOnlineNoSources", resourceCulture);
             }
@@ -1285,7 +1285,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Searching for the templates....
         /// </summary>
-        public static string SearchOnlineNotification {
+        internal static string SearchOnlineNotification {
             get {
                 return ResourceManager.GetString("SearchOnlineNotification", resourceCulture);
             }
@@ -1294,7 +1294,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Template &apos;{0}&apos; was not found..
         /// </summary>
-        public static string SearchOnlineTemplateNotFound {
+        internal static string SearchOnlineTemplateNotFound {
             get {
                 return ResourceManager.GetString("SearchOnlineTemplateNotFound", resourceCulture);
             }
@@ -1303,7 +1303,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to         dotnet {0} -i {1}.
         /// </summary>
-        public static string SearchResultInstallCommand {
+        internal static string SearchResultInstallCommand {
             get {
                 return ResourceManager.GetString("SearchResultInstallCommand", resourceCulture);
             }
@@ -1312,7 +1312,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;.
         /// </summary>
-        public static string SearchResultInstallHeader {
+        internal static string SearchResultInstallHeader {
             get {
                 return ResourceManager.GetString("SearchResultInstallHeader", resourceCulture);
             }
@@ -1321,7 +1321,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Matches from template source: {0}.
         /// </summary>
-        public static string SearchResultSourceIndicator {
+        internal static string SearchResultSourceIndicator {
             get {
                 return ResourceManager.GetString("SearchResultSourceIndicator", resourceCulture);
             }
@@ -1330,7 +1330,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to To search for the templates on NuGet.org, run &apos;dotnet {0} {1} --search&apos;..
         /// </summary>
-        public static string SearchTemplatesCommand {
+        internal static string SearchTemplatesCommand {
             get {
                 return ResourceManager.GetString("SearchTemplatesCommand", resourceCulture);
             }
@@ -1339,7 +1339,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit&apos; flag.
         /// </summary>
-        public static string SettingsReadError {
+        internal static string SettingsReadError {
             get {
                 return ResourceManager.GetString("SettingsReadError", resourceCulture);
             }
@@ -1348,7 +1348,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Shows all templates..
         /// </summary>
-        public static string ShowsAllTemplates {
+        internal static string ShowsAllTemplates {
             get {
                 return ResourceManager.GetString("ShowsAllTemplates", resourceCulture);
             }
@@ -1357,7 +1357,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Filters templates based on available types. Predefined values are &quot;project&quot; and &quot;item&quot;..
         /// </summary>
-        public static string ShowsFilteredTemplates {
+        internal static string ShowsFilteredTemplates {
             get {
                 return ResourceManager.GetString("ShowsFilteredTemplates", resourceCulture);
             }
@@ -1366,7 +1366,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The following option(s) or their value(s) are not valid in combination with other supplied options or their values:.
         /// </summary>
-        public static string SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches {
+        internal static string SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches {
             get {
                 return ResourceManager.GetString("SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches", resourceCulture);
             }
@@ -1375,7 +1375,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Templates.
         /// </summary>
-        public static string Templates {
+        internal static string Templates {
             get {
                 return ResourceManager.GetString("Templates", resourceCulture);
             }
@@ -1384,7 +1384,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to These templates matched your input: {0}..
         /// </summary>
-        public static string TemplatesFoundMatchingInputParameters {
+        internal static string TemplatesFoundMatchingInputParameters {
             get {
                 return ResourceManager.GetString("TemplatesFoundMatchingInputParameters", resourceCulture);
             }
@@ -1393,7 +1393,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to {0} template(s) partially matched, but failed on {1}..
         /// </summary>
-        public static string TemplatesNotValidGivenTheSpecifiedFilter {
+        internal static string TemplatesNotValidGivenTheSpecifiedFilter {
             get {
                 return ResourceManager.GetString("TemplatesNotValidGivenTheSpecifiedFilter", resourceCulture);
             }
@@ -1402,7 +1402,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Error_PackageForTemplateNotFound {
+        internal static string TemplatesPackageCoordinator_Error_PackageForTemplateNotFound {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Error_PackageForTemplateNotFound", resourceCulture);
             }
@@ -1411,7 +1411,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to   {0} (contains {1} templates).
         /// </summary>
-        public static string TemplatesPackageCoordinator_Error_PackageNameContainsTemplates {
+        internal static string TemplatesPackageCoordinator_Error_PackageNameContainsTemplates {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Error_PackageNameContainsTemplates", resourceCulture);
             }
@@ -1420,7 +1420,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The template package &apos;{0}&apos; is not found.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Error_PackageNotFound {
+        internal static string TemplatesPackageCoordinator_Error_PackageNotFound {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Error_PackageNotFound", resourceCulture);
             }
@@ -1429,7 +1429,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The template &apos;{0}&apos; is included to the packages:.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Error_TemplateIncludedToPackages {
+        internal static string TemplatesPackageCoordinator_Error_TemplateIncludedToPackages {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Error_TemplateIncludedToPackages", resourceCulture);
             }
@@ -1438,7 +1438,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to   {0}.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Info_PackageName {
+        internal static string TemplatesPackageCoordinator_Info_PackageName {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Info_PackageName", resourceCulture);
             }
@@ -1447,7 +1447,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to   {0}, version: {1}.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Info_PackageNameVersion {
+        internal static string TemplatesPackageCoordinator_Info_PackageNameVersion {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Info_PackageNameVersion", resourceCulture);
             }
@@ -1456,7 +1456,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Found no template packages to install.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall {
+        internal static string TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall", resourceCulture);
             }
@@ -1465,7 +1465,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The command is attempting to install the template package &apos;{0}&apos; twice, check the arguments and retry..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Install_Error_SameInstallRequests {
+        internal static string TemplatesPackageCoordinator_Install_Error_SameInstallRequests {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Install_Error_SameInstallRequests", resourceCulture);
             }
@@ -1474,7 +1474,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The following template packages will be installed:.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled {
+        internal static string TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled", resourceCulture);
             }
@@ -1483,7 +1483,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to {0} is already installed.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled", resourceCulture);
             }
@@ -1492,7 +1492,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to {0} could not be installed, download failed.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_DownloadFailed {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_DownloadFailed {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_DownloadFailed", resourceCulture);
             }
@@ -1501,7 +1501,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to {0} could not be installed.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_GenericError {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_GenericError {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_GenericError", resourceCulture);
             }
@@ -1510,7 +1510,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to {0} could not be installed, no NuGet feeds are configured or they are invalid.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds", resourceCulture);
             }
@@ -1519,7 +1519,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to install {0}, failed to uninstall previous version of the template package.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_InvalidPackage {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_InvalidPackage {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_InvalidPackage", resourceCulture);
             }
@@ -1528,7 +1528,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to {0} could not be installed, the package does not exist.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_PackageNotFound {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_PackageNotFound {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_PackageNotFound", resourceCulture);
             }
@@ -1537,7 +1537,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to install {0}, the template package is invalid.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_UninstallFailed {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_UninstallFailed {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_UninstallFailed", resourceCulture);
             }
@@ -1546,7 +1546,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to {0} is not supported.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest {
+        internal static string TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest", resourceCulture);
             }
@@ -1555,7 +1555,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Success: {0} installed the following templates:.
         /// </summary>
-        public static string TemplatesPackageCoordinator_lnstall_Info_Success {
+        internal static string TemplatesPackageCoordinator_lnstall_Info_Success {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Info_Success", resourceCulture);
             }
@@ -1564,7 +1564,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to uninstall {0}, reason: {1}..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Uninstall_Error_GenericError {
+        internal static string TemplatesPackageCoordinator_Uninstall_Error_GenericError {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Error_GenericError", resourceCulture);
             }
@@ -1573,7 +1573,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to To list installed template packages, use dotnet {0} -u.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint {
+        internal static string TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint", resourceCulture);
             }
@@ -1582,7 +1582,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to To uninstall the template package, use dotnet {0} -u {1}.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint {
+        internal static string TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint", resourceCulture);
             }
@@ -1591,7 +1591,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Details:.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader {
+        internal static string TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader", resourceCulture);
             }
@@ -1600,7 +1600,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Currently installed items:.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Uninstall_Info_InstalledItems {
+        internal static string TemplatesPackageCoordinator_Uninstall_Info_InstalledItems {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_InstalledItems", resourceCulture);
             }
@@ -1609,7 +1609,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Success: {0} was uninstalled..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Uninstall_Info_Success {
+        internal static string TemplatesPackageCoordinator_Uninstall_Info_Success {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_Success", resourceCulture);
             }
@@ -1618,7 +1618,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Uninstall Command:.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint {
+        internal static string TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint", resourceCulture);
             }
@@ -1627,7 +1627,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to check update for {0}: {1}..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Error_GenericError {
+        internal static string TemplatesPackageCoordinator_Update_Error_GenericError {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_GenericError", resourceCulture);
             }
@@ -1636,7 +1636,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to check update for {0}: no NuGet feeds are configured or they are invalid..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds {
+        internal static string TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds", resourceCulture);
             }
@@ -1645,7 +1645,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to check update for {0}: the package is not available in configured NuGet feeds..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Error_PackageNotFound {
+        internal static string TemplatesPackageCoordinator_Update_Error_PackageNotFound {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_PackageNotFound", resourceCulture);
             }
@@ -1654,7 +1654,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to check update for {0}: the package is not supported..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Error_PackageNotSupported {
+        internal static string TemplatesPackageCoordinator_Update_Error_PackageNotSupported {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_PackageNotSupported", resourceCulture);
             }
@@ -1663,7 +1663,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to All template packages are up-to-date..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate {
+        internal static string TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate", resourceCulture);
             }
@@ -1672,7 +1672,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to     install command: dotnet {0} -i {1}.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Info_InstallCommand {
+        internal static string TemplatesPackageCoordinator_Update_Info_InstallCommand {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_InstallCommand", resourceCulture);
             }
@@ -1681,7 +1681,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to The following template packages will be updated:.
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated {
+        internal static string TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated", resourceCulture);
             }
@@ -1690,7 +1690,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to An update for template package &apos;{0}&apos; is available..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Update_Info_UpdateAvailable {
+        internal static string TemplatesPackageCoordinator_Update_Info_UpdateAvailable {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_UpdateAvailable", resourceCulture);
             }
@@ -1699,7 +1699,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Failed to initialize NuGet credential service, details: {0}..
         /// </summary>
-        public static string TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError {
+        internal static string TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError {
             get {
                 return ResourceManager.GetString("TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError", resourceCulture);
             }
@@ -1708,7 +1708,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to This template contains technologies from parties other than Microsoft, see {0} for details..
         /// </summary>
-        public static string ThirdPartyNotices {
+        internal static string ThirdPartyNotices {
             get {
                 return ResourceManager.GetString("ThirdPartyNotices", resourceCulture);
             }
@@ -1717,7 +1717,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
-        public static string Type {
+        internal static string Type {
             get {
                 return ResourceManager.GetString("Type", resourceCulture);
             }
@@ -1726,7 +1726,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unable to apply permissions {0} to &quot;{1}&quot;..
         /// </summary>
-        public static string UnableToSetPermissions {
+        internal static string UnableToSetPermissions {
             get {
                 return ResourceManager.GetString("UnableToSetPermissions", resourceCulture);
             }
@@ -1735,7 +1735,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Uninstalls a source or a template package..
         /// </summary>
-        public static string UninstallHelp {
+        internal static string UninstallHelp {
             get {
                 return ResourceManager.GetString("UninstallHelp", resourceCulture);
             }
@@ -1744,7 +1744,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Unknown Change.
         /// </summary>
-        public static string UnknownChangeKind {
+        internal static string UnknownChangeKind {
             get {
                 return ResourceManager.GetString("UnknownChangeKind", resourceCulture);
             }
@@ -1753,7 +1753,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Check the currently installed template packages for update, and install the updates..
         /// </summary>
-        public static string UpdateApplyCommandHelp {
+        internal static string UpdateApplyCommandHelp {
             get {
                 return ResourceManager.GetString("UpdateApplyCommandHelp", resourceCulture);
             }
@@ -1762,7 +1762,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Check the currently installed template packages for updates..
         /// </summary>
-        public static string UpdateCheckCommandHelp {
+        internal static string UpdateCheckCommandHelp {
             get {
                 return ResourceManager.GetString("UpdateCheckCommandHelp", resourceCulture);
             }
@@ -1771,7 +1771,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Version:.
         /// </summary>
-        public static string Version {
+        internal static string Version {
             get {
                 return ResourceManager.GetString("Version", resourceCulture);
             }
@@ -1780,7 +1780,7 @@ namespace Microsoft.TemplateEngine.Cli {
         /// <summary>
         ///   Looks up a localized string similar to Specify if post action scripts should run..
         /// </summary>
-        public static string WhetherToAllowScriptsToRun {
+        internal static string WhetherToAllowScriptsToRun {
             get {
                 return ResourceManager.GetString("WhetherToAllowScriptsToRun", resourceCulture);
             }

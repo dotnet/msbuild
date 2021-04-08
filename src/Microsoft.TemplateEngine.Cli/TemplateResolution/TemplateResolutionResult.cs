@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// --- in case at least one template in the group has more than 1 choice value which starts with specified value in the command<br/>
     /// --- in case at least two templates in the group have 1 choice value which starts with specified value in the command.<br/>
     /// </summary>
-    public class TemplateResolutionResult
+    internal class TemplateResolutionResult
     {
         private readonly IReadOnlyCollection<ITemplateMatchInfo> _coreMatchedTemplates;
 
@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         private UnambiguousTemplateGroupStatus _unambigiousTemplateGroupStatus = UnambiguousTemplateGroupStatus.NotEvaluated;
 
-        public TemplateResolutionResult(string userInputLanguage, IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates)
+        internal TemplateResolutionResult(string userInputLanguage, IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates)
         {
             _hasUserInputLanguage = !string.IsNullOrEmpty(userInputLanguage);
             _coreMatchedTemplates = coreMatchedTemplates;
@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Enum defines possible statuses for resolving template to invoke.<br />
         /// </summary>
-        public enum Status
+        internal enum Status
         {
             /// <summary>
             /// the status is not evaluated yet

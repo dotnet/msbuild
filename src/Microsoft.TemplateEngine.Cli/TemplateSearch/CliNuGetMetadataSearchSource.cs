@@ -6,11 +6,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliNuGetMetadataSearchSource : NuGetMetadataSearchSource
     {
-        public CliNuGetMetadataSearchSource()
-            : base()
-        {
-        }
-
         public override Guid Id => new Guid("6EA368C4-8A56-444C-91D1-55150B296BF2");
 
         protected override IFileMetadataTemplateSearchCache CreateSearchCache(IEngineEnvironmentSettings environmentSettings)

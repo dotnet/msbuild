@@ -24,11 +24,14 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public class New3Command
     {
+        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
+        private static Mutex? _entryMutex;
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly TemplateCreator _templateCreator;
         private readonly ISettingsLoader _settingsLoader;
         private readonly AliasRegistry _aliasRegistry;
         private readonly Paths _paths;
+
         /// <summary>
         /// It's safe to access template agnostic information anytime after the first parse.
         /// But there is never a guarantee which template the parse is in the context of.
@@ -39,12 +42,12 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly New3Callbacks _callbacks;
         private readonly Func<string> _inputGetter = () => Console.ReadLine();
 
-        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput)
+        internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput)
             : this(commandName, host, telemetryLogger, callbacks, commandInput, null)
         {
         }
 
-        public New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string? hivePath)
+        internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string? hivePath)
         {
             _telemetryLogger = telemetryLogger;
             host = new ExtendedTemplateEngineHost(host, this);
@@ -68,42 +71,17 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public string CommandName { get; }
+        internal string CommandName { get; }
 
-        public string TemplateName => _commandInput.TemplateName;
+        internal string TemplateName => _commandInput.TemplateName;
 
-        public string OutputPath => _commandInput.OutputPath;
+        internal string OutputPath => _commandInput.OutputPath;
 
-        public EngineEnvironmentSettings EnvironmentSettings { get; private set; }
+        internal EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings> onFirstRun, string[] args)
         {
             return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, null);
-        }
-
-        private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
-        private static Mutex? _entryMutex;
-
-        private static Mutex EnsureEntryMutex(string? hivePath, ITemplateEngineHost host)
-        {
-            if (_entryMutex == null)
-            {
-                string _entryMutexIdentity;
-
-                // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
-                if (!string.IsNullOrEmpty(hivePath))
-                {
-                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_").Replace("/", "_");
-                }
-                else
-                {
-                    _entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_").Replace("/", "_");
-                }
-
-                _entryMutex = new Mutex(false, _entryMutexIdentity);
-            }
-
-            return _entryMutex;
         }
 
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, Action<IEngineEnvironmentSettings> onFirstRun, string[] args, string? hivePath)
@@ -111,7 +89,29 @@ namespace Microsoft.TemplateEngine.Cli
             return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, hivePath);
         }
 
-        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath)
+        private static Mutex EnsureEntryMutex(string? hivePath, ITemplateEngineHost host)
+        {
+            if (_entryMutex == null)
+            {
+                string entryMutexIdentity;
+
+                // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
+                if (!string.IsNullOrEmpty(hivePath))
+                {
+                    entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_").Replace("/", "_");
+                }
+                else
+                {
+                    entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_").Replace("/", "_");
+                }
+
+                _entryMutex = new Mutex(false, entryMutexIdentity);
+            }
+
+            return _entryMutex;
+        }
+
+        private static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath)
         {
             if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
@@ -221,6 +221,15 @@ namespace Microsoft.TemplateEngine.Cli
             return result;
         }
 
+        private static void ShowVersion()
+        {
+            Reporter.Output.WriteLine(LocalizableStrings.CommandDescription);
+            Reporter.Output.WriteLine();
+            int targetLength = Math.Max(LocalizableStrings.Version.Length, LocalizableStrings.CommitHash.Length);
+            Reporter.Output.WriteLine($" {LocalizableStrings.Version.PadRight(targetLength)} {GitInfo.PackageVersion}");
+            Reporter.Output.WriteLine($" {LocalizableStrings.CommitHash.PadRight(targetLength)} {GitInfo.CommitHash}");
+        }
+
         private void ConfigureEnvironment()
         {
             // delete everything from previous attempts for this install when doing first run setup.
@@ -260,8 +269,6 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
-
-
         private async Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
         {
             if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
@@ -282,7 +289,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-
         private async Task<CreationResultStatus> ExecuteAsync()
         {
             // this is checking the initial parse, which is template agnostic.
@@ -302,7 +308,8 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             if (_commandInput.ExpandedExtraArgsFiles && string.IsNullOrEmpty(_commandInput.Alias))
-            {   // Only show this if there was no alias expansion.
+            {
+                // Only show this if there was no alias expansion.
                 // ExpandedExtraArgsFiles must be checked before alias expansion - it'll get reset if there's an alias.
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.ExtraArgsCommandAfterExpansion, string.Join(" ", _commandInput.Tokens)));
             }
@@ -434,26 +441,17 @@ namespace Microsoft.TemplateEngine.Cli
 
             TableFormatter.Print(EnvironmentSettings.SettingsLoader.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
             {
-                {LocalizableStrings.MountPointFactories, x => x.Id},
-                {LocalizableStrings.Type, x => x.GetType().FullName},
-                {LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName}
+                { LocalizableStrings.MountPointFactories, x => x.Id },
+                { LocalizableStrings.Type, x => x.GetType().FullName },
+                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName }
             });
 
             TableFormatter.Print(EnvironmentSettings.SettingsLoader.Components.OfType<IGenerator>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IGenerator, object>>
             {
-                {LocalizableStrings.Generators, x => x.Id},
-                {LocalizableStrings.Type, x => x.GetType().FullName},
-                {LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName}
+                { LocalizableStrings.Generators, x => x.Id },
+                { LocalizableStrings.Type, x => x.GetType().FullName },
+                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName }
             });
-        }
-
-        private static void ShowVersion()
-        {
-            Reporter.Output.WriteLine(LocalizableStrings.CommandDescription);
-            Reporter.Output.WriteLine();
-            int targetLength = Math.Max(LocalizableStrings.Version.Length, LocalizableStrings.CommitHash.Length);
-            Reporter.Output.WriteLine($" {LocalizableStrings.Version.PadRight(targetLength)} {GitInfo.PackageVersion}");
-            Reporter.Output.WriteLine($" {LocalizableStrings.CommitHash.PadRight(targetLength)} {GitInfo.CommitHash}");
         }
     }
 }

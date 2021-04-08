@@ -15,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
+        internal static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
         {
             return string.Join(" ", EscapeArgArray(args));
         }

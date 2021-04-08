@@ -5,15 +5,15 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class ParameterMatchDisposition
     {
-        public string Name { get; private set; }
+        internal string Name { get; private set; }
 
-        public string Value { get; private set; }
+        internal string Value { get; private set; }
 
-        public ParameterNameDisposition NameDisposition { get; private set; }
+        internal ParameterNameDisposition NameDisposition { get; private set; }
 
-        public ParameterValueDisposition ValueDisposition { get; private set; }
+        internal ParameterValueDisposition ValueDisposition { get; private set; }
 
-        public static IReadOnlyList<ParameterMatchDisposition> FromTemplateMatchInfo(ITemplateMatchInfo templateMatchInfo)
+        internal static IReadOnlyList<ParameterMatchDisposition> FromTemplateMatchInfo(ITemplateMatchInfo templateMatchInfo)
         {
             List<ParameterMatchDisposition> parameterMatchDispositions = new List<ParameterMatchDisposition>();
 

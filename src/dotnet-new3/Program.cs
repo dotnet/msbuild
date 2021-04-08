@@ -6,13 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
-using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Utils;
@@ -59,7 +56,7 @@ namespace dotnet_new3
 
             try
             {
-                string versionString = Dotnet.Version().CaptureStdOut().Execute().StdOut;
+                string? versionString = Dotnet.Version().CaptureStdOut().Execute().StdOut;
                 if (!string.IsNullOrWhiteSpace(versionString))
                 {
                     preferences["dotnet-cli-version"] = versionString.Trim();
@@ -75,9 +72,7 @@ namespace dotnet_new3
                 // for assembly: Microsoft.TemplateEngine.Edge
                 typeof(Microsoft.TemplateEngine.Edge.Paths).GetTypeInfo().Assembly,
                 // for assembly: Microsoft.TemplateEngine.Cli
-                typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly,
-                // for assembly: Microsoft.TemplateSearch.Common
-                typeof(Microsoft.TemplateSearch.Common.TemplateToPackMap).GetTypeInfo().Assembly,
+                typeof(Microsoft.TemplateEngine.Cli.New3Command).GetTypeInfo().Assembly,
                 // for this assembly
                 typeof(Program).GetTypeInfo().Assembly
             });

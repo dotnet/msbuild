@@ -13,9 +13,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// The class represents the template resolution result for listing purposes.
     /// The resolution result is the list of templates to use.
     /// </summary>
-    public sealed class TemplateListResolutionResult
+    internal sealed class TemplateListResolutionResult
     {
-        public TemplateListResolutionResult(IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates)
+        internal TemplateListResolutionResult(IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates)
         {
             _coreMatchedTemplates = coreMatchedTemplates;
         }
@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Returns list of exact or partially matched templates by name and exact match by language, filter, baseline (if specified in command paramaters).
         /// </summary>
-        public IReadOnlyCollection<ITemplateMatchInfo> ExactMatchedTemplates
+        internal IReadOnlyCollection<ITemplateMatchInfo> ExactMatchedTemplates
         {
             get
             {
@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Returns list of exact or partially matched templates by name and mismatch in any of the following: language, filter, baseline (if specified in command paramaters).
         /// </summary>
-        public IReadOnlyCollection<ITemplateMatchInfo> PartiallyMatchedTemplates
+        internal IReadOnlyCollection<ITemplateMatchInfo> PartiallyMatchedTemplates
         {
             get
             {
@@ -108,22 +108,22 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Returns true when at least one template in unambiguous matches default language.
         /// </summary>
-        public bool HasUnambiguousTemplateGroupForDefaultLanguage => UnambiguousTemplatesForDefaultLanguage.Any();
+        internal bool HasUnambiguousTemplateGroupForDefaultLanguage => UnambiguousTemplatesForDefaultLanguage.Any();
 
         /// <summary>
         /// Returns collecion of templates from unamgibuous group that matches default language.
         /// </summary>
-        public IReadOnlyCollection<ITemplateMatchInfo> UnambiguousTemplatesForDefaultLanguage => UnambiguousTemplateGroup.Where(t => t.HasDefaultLanguageMatch()).ToList();
+        internal IReadOnlyCollection<ITemplateMatchInfo> UnambiguousTemplatesForDefaultLanguage => UnambiguousTemplateGroup.Where(t => t.HasDefaultLanguageMatch()).ToList();
 
         /// <summary>
         /// Returns true when at least one template exactly or partially matched templates by name and exactly matched language, filter, baseline (if specified in command paramaters).
         /// </summary>
-        public bool HasExactMatches => ExactMatchedTemplates.Any();
+        internal bool HasExactMatches => ExactMatchedTemplates.Any();
 
         /// <summary>
         /// Returns true when at least one template exactly or partially matched templates by name but has mismatch in any of the following: language, filter, baseline (if specified in command paramaters).
         /// </summary>
-        public bool HasPartialMatches => PartiallyMatchedTemplates.Any();
+        internal bool HasPartialMatches => PartiallyMatchedTemplates.Any();
 
         /// <summary>
         /// Returns true when at least one template has mismatch in language.
@@ -131,42 +131,42 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         // as we need to count errors per template group: for language we need to check template groups as templates in single group may have different language
         // and if one of them can match the filter, then the whole group matches the filter
         // if all templates in the group has language mismatch, then group has language mismatch
-        public bool HasLanguageMismatch => PartiallyMatchedTemplateGroups.Any(g => g.Templates.All(t => t.HasLanguageMismatch()));
+        internal bool HasLanguageMismatch => PartiallyMatchedTemplateGroups.Any(g => g.Templates.All(t => t.HasLanguageMismatch()));
 
         /// <summary>
         /// Returns true when at least one template has mismatch in context (type).
         /// </summary>
-        public bool HasContextMismatch => PartiallyMatchedTemplates.Any(t => t.HasContextMismatch());
+        internal bool HasContextMismatch => PartiallyMatchedTemplates.Any(t => t.HasContextMismatch());
 
         /// <summary>
         /// Returns true when at least one template has mismatch in baseline.
         /// </summary>
-        public bool HasBaselineMismatch => PartiallyMatchedTemplates.Any(t => t.HasBaselineMismatch());
+        internal bool HasBaselineMismatch => PartiallyMatchedTemplates.Any(t => t.HasBaselineMismatch());
 
         /// <summary>
         /// Returns true when at least one template has mismatch in author.
         /// </summary>
-        public bool HasAuthorMismatch => PartiallyMatchedTemplates.Any(t => t.HasAuthorMismatch());
+        internal bool HasAuthorMismatch => PartiallyMatchedTemplates.Any(t => t.HasAuthorMismatch());
 
         /// <summary>
         /// Returns true when at least one template has mismatch in tags.
         /// </summary>
-        public bool HasTagsMismatch => PartiallyMatchedTemplates.Any(t => t.HasTagsMismatch());
+        internal bool HasTagsMismatch => PartiallyMatchedTemplates.Any(t => t.HasTagsMismatch());
 
         /// <summary>
         /// Returns true when one and only one template has exact match.
         /// </summary>
-        public bool HasUnambiguousTemplateGroup => ExactMatchedTemplateGroups.Count == 1;
+        internal bool HasUnambiguousTemplateGroup => ExactMatchedTemplateGroups.Count == 1;
 
         /// <summary>
         /// Returns list of templates for unambiguous template group, otherwise empty list.
         /// </summary>
-        public IReadOnlyCollection<ITemplateMatchInfo> UnambiguousTemplateGroup => HasUnambiguousTemplateGroup ? ExactMatchedTemplates : new List<ITemplateMatchInfo>();
+        internal IReadOnlyCollection<ITemplateMatchInfo> UnambiguousTemplateGroup => HasUnambiguousTemplateGroup ? ExactMatchedTemplates : new List<ITemplateMatchInfo>();
 
         /// <summary>
         /// Returns true if all the templates in unambiguous group have templates in same language.
         /// </summary>
-        public bool AllTemplatesInUnambiguousTemplateGroupAreSameLanguage
+        internal bool AllTemplatesInUnambiguousTemplateGroupAreSameLanguage
         {
             get
             {

@@ -6,11 +6,11 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    public class TemplateGroupParameterSet : IParameterSet
+    internal class TemplateGroupParameterSet : IParameterSet
     {
         private readonly IReadOnlyList<IParameterSet> _parameterSetList;
 
-        public TemplateGroupParameterSet(IReadOnlyList<IParameterSet> parameterSetList)
+        internal TemplateGroupParameterSet(IReadOnlyList<IParameterSet> parameterSetList)
         {
             _parameterSetList = parameterSetList;
         }

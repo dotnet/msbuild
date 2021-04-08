@@ -8,16 +8,16 @@ using Microsoft.TemplateSearch.Common;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
-    public class CliHostSpecificDataMatchFilterFactory
+    internal class CliHostSpecificDataMatchFilterFactory
     {
-        public CliHostSpecificDataMatchFilterFactory(INewCommandInput commandInput)
+        internal CliHostSpecificDataMatchFilterFactory(INewCommandInput commandInput)
         {
             _commandInput = commandInput;
         }
 
         private readonly INewCommandInput _commandInput;
 
-        public Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<ITemplateMatchInfo>> MatchFilter => (foundPackages) =>
+        internal Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<ITemplateMatchInfo>> MatchFilter => (foundPackages) =>
         {
             Dictionary<string, HostSpecificTemplateData> hostDataLookup = new Dictionary<string, HostSpecificTemplateData>();
             foreach (ITemplateNameSearchResult result in foundPackages)

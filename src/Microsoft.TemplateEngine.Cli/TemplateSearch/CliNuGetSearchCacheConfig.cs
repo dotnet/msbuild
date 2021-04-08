@@ -7,9 +7,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliNuGetSearchCacheConfig : NuGetSearchCacheConfig
     {
-        public static readonly string CliHostDataName = "cliHostData";
+        internal static readonly string CliHostDataName = "cliHostData";
 
-        public CliNuGetSearchCacheConfig(string templateDiscoveryFileName)
+        internal CliNuGetSearchCacheConfig(string templateDiscoveryFileName)
             : base(templateDiscoveryFileName)
         {
             _additionalDataReaders[CliHostDataName] = CliHostDataReader;

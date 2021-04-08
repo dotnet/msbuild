@@ -9,10 +9,10 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
-    public static class TemplateParameterHelpBase
+    internal static class TemplateParameterHelpBase
     {
         // Note: This method explicitly filters out "type" and "language", in addition to other filtering.
-        public static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false, bool hasPostActionScriptRunner = false, HashSet<string> parametersToAlwaysShow = null)
+        internal static IEnumerable<ITemplateParameter> FilterParamsForHelp(IEnumerable<ITemplateParameter> parameterDefinitions, HashSet<string> hiddenParams, bool showImplicitlyHiddenParams = false, bool hasPostActionScriptRunner = false, HashSet<string> parametersToAlwaysShow = null)
         {
             IList<ITemplateParameter> filteredParams = parameterDefinitions
                 .Where(x => x.Priority != TemplateParameterPriority.Implicit

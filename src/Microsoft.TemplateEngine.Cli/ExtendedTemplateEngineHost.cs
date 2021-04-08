@@ -12,7 +12,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly New3Command _new3Command;
         private readonly ITemplateEngineHost _baseHost;
 
-        public ExtendedTemplateEngineHost(ITemplateEngineHost baseHost, New3Command new3Command)
+        internal ExtendedTemplateEngineHost(ITemplateEngineHost baseHost, New3Command new3Command)
         {
             _baseHost = baseHost;
             _new3Command = new3Command;
@@ -50,7 +50,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         public virtual void OnSymbolUsed(string symbol, object value) => _baseHost.OnSymbolUsed(symbol, value);
-        
+
         public virtual bool TryGetHostParamDefault(string paramName, out string value)
         {
             switch (paramName)

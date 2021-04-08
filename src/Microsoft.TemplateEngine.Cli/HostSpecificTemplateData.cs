@@ -1,5 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -9,28 +11,25 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public class HostSpecificTemplateData
     {
-        private static readonly string IsHiddenKey = "isHidden";
-        private static readonly string LongNameKey = "longName";
-        private static readonly string ShortNameKey = "shortName";
-        private static readonly string AlwaysShowKey = "alwaysShow";
+        private const string IsHiddenKey = "isHidden";
+        private const string LongNameKey = "longName";
+        private const string ShortNameKey = "shortName";
+        private const string AlwaysShowKey = "alwaysShow";
 
-        public static HostSpecificTemplateData Default { get; } = new HostSpecificTemplateData();
+        private readonly Dictionary<string, IReadOnlyDictionary<string, string>> _symbolInfo;
 
-        protected readonly Dictionary<string, IReadOnlyDictionary<string, string>> _symbolInfo;
-
-        public HostSpecificTemplateData()
+        internal HostSpecificTemplateData()
         {
             _symbolInfo = new Dictionary<string, IReadOnlyDictionary<string, string>>();
         }
 
-        // for unit tests
-        protected HostSpecificTemplateData(Dictionary<string, IReadOnlyDictionary<string, string>> symbolInfo)
+        internal HostSpecificTemplateData(Dictionary<string, IReadOnlyDictionary<string, string>> symbolInfo)
         {
             _symbolInfo = symbolInfo;
         }
 
         [JsonProperty]
-        public List<string> UsageExamples { get; set; }
+        public List<string>? UsageExamples { get; set; }
 
         [JsonProperty]
         public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> SymbolInfo => _symbolInfo;
@@ -64,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli
                 HashSet<string> parametersToAlwaysShow = new HashSet<string>(StringComparer.Ordinal);
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
-                    if(paramInfo.Value.TryGetValue(AlwaysShowKey, out string alwaysShowValue)
+                    if (paramInfo.Value.TryGetValue(AlwaysShowKey, out string alwaysShowValue)
                         && bool.TryParse(alwaysShowValue, out bool alwaysShowBoolValue)
                         && alwaysShowBoolValue)
                     {
@@ -112,7 +111,9 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public string DisplayNameForParameter(string parameterName)
+        internal static HostSpecificTemplateData Default { get; } = new HostSpecificTemplateData();
+
+        internal string DisplayNameForParameter(string parameterName)
         {
             if (SymbolInfo.TryGetValue(parameterName, out IReadOnlyDictionary<string, string> configForParam)
                 && configForParam.TryGetValue(LongNameKey, out string longName))

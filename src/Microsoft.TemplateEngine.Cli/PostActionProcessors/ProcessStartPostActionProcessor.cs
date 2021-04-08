@@ -7,9 +7,9 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public class ProcessStartPostActionProcessor : IPostActionProcessor
+    internal class ProcessStartPostActionProcessor : IPostActionProcessor
     {
-        public static readonly Guid ActionProcessorId = PostActionInfo.ProcessStartPostActionProcessorId;
+        internal static readonly Guid ActionProcessorId = PostActionInfo.ProcessStartPostActionProcessorId;
 
         public Guid Id => ActionProcessorId;
 

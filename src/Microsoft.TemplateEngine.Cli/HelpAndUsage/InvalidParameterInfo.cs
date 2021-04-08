@@ -66,7 +66,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="invalidParameterList">the invalid parameters collection to prepare output for</param>
         /// <param name="templateGroup">the template group to use to get more information about parameters. Optional - if not provided the possible value for the parameters won't be included to the output.</param>
         /// <returns>the error string for the output</returns>
-        public static string InvalidParameterListToString(IEnumerable<InvalidParameterInfo> invalidParameterList, TemplateGroup templateGroup = null)
+        internal static string InvalidParameterListToString(IEnumerable<InvalidParameterInfo> invalidParameterList, TemplateGroup templateGroup = null)
         {
             if (!invalidParameterList.Any())
             {

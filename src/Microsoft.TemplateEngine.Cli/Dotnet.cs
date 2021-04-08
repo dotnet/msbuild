@@ -1,54 +1,91 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Microsoft.TemplateEngine.Cli
 {
     public class Dotnet
     {
         private ProcessStartInfo _info;
-        private DataReceivedEventHandler _errorDataReceived;
-        private StringBuilder _stderr;
-        private StringBuilder _stdout;
-        private DataReceivedEventHandler _outputDataReceived;
+        private DataReceivedEventHandler? _errorDataReceived;
+        private StringBuilder? _stderr;
+        private StringBuilder? _stdout;
+        private DataReceivedEventHandler? _outputDataReceived;
         private bool _anyNonEmptyStderrWritten;
 
-        public string Command => string.Concat(_info.FileName, " ", _info.Arguments);
-
-
-        public static Dotnet Restore(params string[] args)
+        private Dotnet(ProcessStartInfo info)
         {
-            return new Dotnet
-            {
-                _info = new ProcessStartInfo("dotnet", ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "restore" }.Concat(args)))
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                }
-            };
+            _info = info;
         }
 
-        public static Dotnet AddProjectToProjectReference(string projectFile, params string[] args)
+        internal string Command => string.Concat(_info.FileName, " ", _info.Arguments);
+        public Result Execute()
         {
-            return new Dotnet
-            {
-                _info = new ProcessStartInfo("dotnet", ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "reference" }.Concat(args)))
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                }
-            };
+            Process p = Process.Start(_info);
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+            p.ErrorDataReceived += OnErrorDataReceived;
+            p.OutputDataReceived += OnOutputDataReceived;
+            p.WaitForExit();
+
+            return new Result(_stdout?.ToString(), _stderr?.ToString(), p.ExitCode);
         }
 
-        public static Dotnet AddPackageReference(string projectFile, string packageName, string version = null)
+        public static Dotnet Version()
+        {
+            return new Dotnet(new ProcessStartInfo("dotnet", "--version")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            });
+        }
+
+        public Dotnet CaptureStdOut()
+        {
+            _stdout = new StringBuilder();
+            _outputDataReceived += CaptureStreamStdOut;
+            return this;
+        }
+
+        public Dotnet CaptureStdErr()
+        {
+            _stderr = new StringBuilder();
+            _errorDataReceived += CaptureStreamStdErr;
+            return this;
+        }
+
+        internal static Dotnet Restore(params string[] args)
+        {
+            return new Dotnet (new ProcessStartInfo("dotnet", ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "restore" }.Concat(args)))
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            });
+        }
+
+        internal static Dotnet AddProjectToProjectReference(string projectFile, params string[] args)
+        {
+            return new Dotnet(new ProcessStartInfo("dotnet", ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "reference" }.Concat(args)))
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            });
+        }
+
+        internal static Dotnet AddPackageReference(string projectFile, string packageName, string? version = null)
         {
             string argString;
             if (version == null)
@@ -60,19 +97,16 @@ namespace Microsoft.TemplateEngine.Cli
                 argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(new[] { "add", projectFile, "package", packageName, "--version", version });
             }
 
-            return new Dotnet
+            return new Dotnet(new ProcessStartInfo("dotnet", argString)
             {
-                _info = new ProcessStartInfo("dotnet", argString)
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                }
-            };
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            });
         }
 
-        public static Dotnet AddProjectsToSolution(string solutionFile, IReadOnlyList<string> projects, string solutionFolder = "")
+        internal static Dotnet AddProjectsToSolution(string solutionFile, IReadOnlyList<string> projects, string solutionFolder = "")
         {
             List<string> allArgs = new List<string>()
             {
@@ -90,25 +124,22 @@ namespace Microsoft.TemplateEngine.Cli
             allArgs.AddRange(projects);
             string argString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(allArgs);
 
-            return new Dotnet
+            return new Dotnet(new ProcessStartInfo("dotnet", argString)
             {
-                _info = new ProcessStartInfo("dotnet", argString)
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                }
-            };
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            });
         }
 
-        public Dotnet ForwardStdErr()
+        internal Dotnet ForwardStdErr()
         {
             _errorDataReceived = ForwardStreamStdErr;
             return this;
         }
 
-        public Dotnet ForwardStdOut()
+        internal Dotnet ForwardStdOut()
         {
             _outputDataReceived = ForwardStreamStdOut;
             return this;
@@ -134,40 +165,14 @@ namespace Microsoft.TemplateEngine.Cli
             Console.Error.WriteLine(e.Data);
         }
 
-        public Dotnet CaptureStdOut()
-        {
-            _stdout = new StringBuilder();
-            _outputDataReceived += CaptureStreamStdOut;
-            return this;
-        }
-
         private void CaptureStreamStdOut(object sender, DataReceivedEventArgs e)
         {
-            _stdout.AppendLine(e.Data);
-        }
-
-        public Dotnet CaptureStdErr()
-        {
-            _stderr = new StringBuilder();
-            _errorDataReceived += CaptureStreamStdErr;
-            return this;
+            _stdout?.AppendLine(e.Data);
         }
 
         private void CaptureStreamStdErr(object sender, DataReceivedEventArgs e)
         {
-            _stderr.AppendLine(e.Data);
-        }
-
-        public Result Execute()
-        {
-            Process p = Process.Start(_info);
-            p.BeginOutputReadLine();
-            p.BeginErrorReadLine();
-            p.ErrorDataReceived += OnErrorDataReceived;
-            p.OutputDataReceived += OnOutputDataReceived;
-            p.WaitForExit();
-
-            return new Result(_stdout?.ToString(), _stderr?.ToString(), p.ExitCode);
+            _stderr?.AppendLine(e.Data);
         }
 
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -182,32 +187,18 @@ namespace Microsoft.TemplateEngine.Cli
 
         public class Result
         {
-            public Result(string stdout, string stderr, int exitCode)
+            internal Result(string? stdout, string? stderr, int exitCode)
             {
                 StdErr = stderr;
                 StdOut = stdout;
                 ExitCode = exitCode;
             }
 
-            public string StdErr { get; }
+            public string? StdErr { get; }
 
-            public string StdOut { get; }
+            public string? StdOut { get; }
 
             public int ExitCode { get; }
-        }
-
-        public static Dotnet Version()
-        {
-            return new Dotnet
-            {
-                _info = new ProcessStartInfo("dotnet", "--version")
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                }
-            };
         }
     }
 }

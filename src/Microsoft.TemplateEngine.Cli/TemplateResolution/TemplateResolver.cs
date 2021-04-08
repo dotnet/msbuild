@@ -12,7 +12,7 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
-    public static class TemplateResolver
+    internal static class TemplateResolver
     {
         private static readonly IReadOnlyCollection<MatchLocation> NameFields = new HashSet<MatchLocation>
         {
@@ -20,13 +20,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             MatchLocation.ShortName
         };
 
-        public static void ParseTemplateArgs(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
+        internal static void ParseTemplateArgs(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
             HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
             commandInput.ReparseForTemplate(templateInfo, hostData);
         }
 
-        public static bool AreAllTemplatesSameGroupIdentity(IEnumerable<ITemplateMatchInfo> templateList)
+        internal static bool AreAllTemplatesSameGroupIdentity(IEnumerable<ITemplateMatchInfo> templateList)
         {
             if (!templateList.Any())
             {
@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         // for what wants to be validated, either:
         //  - not in the context of any template
         //  - in the context of a specific template.
-        public static bool ValidateRemainingParameters(INewCommandInput commandInput, out IReadOnlyList<string> invalidParams)
+        internal static bool ValidateRemainingParameters(INewCommandInput commandInput, out IReadOnlyList<string> invalidParams)
         {
             List<string> badParams = new List<string>();
 
@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         // This version is preferred, its clear which template the results are in the context of.
-        public static bool ValidateRemainingParameters(ITemplateMatchInfo template, out IReadOnlyList<string> invalidParams)
+        internal static bool ValidateRemainingParameters(ITemplateMatchInfo template, out IReadOnlyList<string> invalidParams)
         {
             invalidParams = template.GetInvalidParameterNames();
 
@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         // Lists all the templates, unfiltered - except the ones hidden by their host file.
-        public static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
 
@@ -85,13 +85,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return templates;
         }
 
-        public static TemplateResolutionResult GetTemplateResolutionResult(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static TemplateResolutionResult GetTemplateResolutionResult(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates = PerformCoreTemplateQuery(templateInfo, hostDataLoader, commandInput, defaultLanguage);
             return new TemplateResolutionResult(commandInput.Language, coreMatchedTemplates);
         }
 
-        public static TemplateListResolutionResult GetTemplateResolutionResultForListOrHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static TemplateListResolutionResult GetTemplateResolutionResultForListOrHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates;
 
@@ -109,7 +109,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return new TemplateListResolutionResult(coreMatchedTemplates);
         }
 
-        public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForList(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForList(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
 
@@ -135,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return coreMatchedTemplates;
         }
 
-        public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
             IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo(
@@ -173,7 +173,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <param name="hostDataLoader">data of the host.</param>
         /// <param name="commandInput">new command data used in CLI.</param>
         /// <returns>filtered list of templates.</returns>
-        public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForSearch(IEnumerable<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForSearch(IEnumerable<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo.ToList());
             List<Func<ITemplateInfo, MatchInfo?>> searchFilters = new List<Func<ITemplateInfo, MatchInfo?>>()
@@ -201,7 +201,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <param name="commandInput">new command data used in CLI.</param>
         /// <param name="defaultLanguage"></param>
         /// <returns>the collection of the templates with their match dispositions (<seealso cref="ITemplateMatchInfo"/>). The templates that do not match are not added to the collection.</returns>
-        public static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
         {
             IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
 

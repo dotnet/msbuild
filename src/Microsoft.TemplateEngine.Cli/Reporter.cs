@@ -19,14 +19,14 @@ namespace Microsoft.TemplateEngine.Cli
             _console = console;
         }
 
-        public static Reporter Output { get; private set; }
-        public static Reporter Error { get; private set; }
-        public static Reporter Verbose { get; private set; }
+        internal static Reporter Output { get; private set; }
+        internal static Reporter Error { get; private set; }
+        internal static Reporter Verbose { get; private set; }
 
         /// <summary>
         /// Resets the Reporters to write to the current Console Out/Error.
         /// </summary>
-        public static void Reset()
+        internal static void Reset()
         {
             lock (_lock)
             {
@@ -38,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public void WriteLine(string message)
+        internal void WriteLine(string message)
         {
             lock (_lock)
             {
@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public void WriteLine()
+        internal void WriteLine()
         {
             lock (_lock)
             {
@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public void Write(string message)
+        internal void Write(string message)
         {
             lock (_lock)
             {

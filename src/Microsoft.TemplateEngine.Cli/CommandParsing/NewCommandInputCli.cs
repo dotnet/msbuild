@@ -12,7 +12,7 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
-    public class NewCommandInputCli : INewCommandInput
+    internal class NewCommandInputCli : INewCommandInput
     {
         internal const string AuthorColumnFilter = "author";
         internal const string LanguageColumnFilter = "language";
@@ -39,7 +39,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         private IReadOnlyDictionary<string, string> _templateParamValues;
         private IReadOnlyDictionary<string, string> _templateParamVariantToCanonicalMap;
 
-        public NewCommandInputCli(string commandName)
+        internal NewCommandInputCli(string commandName)
         {
             _commandName = commandName;
             _noTemplateCommand = CommandParserSupport.CreateNewCommandWithoutTemplateInfo(_commandName);

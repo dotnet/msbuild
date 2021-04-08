@@ -204,7 +204,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             {
                 typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
                 typeof(Microsoft.TemplateEngine.Edge.Paths).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
-                typeof(DotnetRestorePostActionProcessor).GetTypeInfo().Assembly,    // for assembly: Microsoft.TemplateEngine.Cli
+                typeof(New3Command).GetTypeInfo().Assembly,    // for assembly: Microsoft.TemplateEngine.Cli
                 typeof(Microsoft.TemplateSearch.Common.NuGetSearchCacheConfig).GetTypeInfo().Assembly,// for assembly: Microsoft.TemplateSearch.Common
                 typeof(Program).GetTypeInfo().Assembly
             });

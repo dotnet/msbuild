@@ -3,13 +3,13 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public class InstructionDisplayPostActionProcessor : IPostActionProcessor
+    internal class InstructionDisplayPostActionProcessor : IPostActionProcessor
     {
         private static readonly Guid ActionProcessorId = new Guid("AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C");
 
         public Guid Id => ActionProcessorId;
 
-        public InstructionDisplayPostActionProcessor()
+        internal InstructionDisplayPostActionProcessor()
         {
         }
 

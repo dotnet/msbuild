@@ -8,11 +8,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal struct TemplateUsageInformation
     {
-        public IReadOnlyList<InvalidParameterInfo> InvalidParameters;
-        public IParameterSet AllParameters;
-        public IReadOnlyList<string> UserParametersWithInvalidValues;
-        public HashSet<string> UserParametersWithDefaultValues;
-        public IReadOnlyDictionary<string, IReadOnlyList<string>> VariantsForCanonicals;
-        public bool HasPostActionScriptRunner;
+        internal IReadOnlyList<InvalidParameterInfo> InvalidParameters;
+        internal IParameterSet AllParameters;
+        internal IReadOnlyList<string> UserParametersWithInvalidValues;
+        internal HashSet<string> UserParametersWithDefaultValues;
+        internal IReadOnlyDictionary<string, IReadOnlyList<string>> VariantsForCanonicals;
+        internal bool HasPostActionScriptRunner;
     }
 }

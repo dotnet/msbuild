@@ -21,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly Func<string> _inputGetter;
         private readonly New3Callbacks _callbacks;
 
-        public TemplateInvocationCoordinator(ISettingsLoader settingsLoader, INewCommandInput commandInput, ITelemetryLogger telemetryLogger,  string commandName, Func<string> inputGetter, New3Callbacks callbacks)
+        internal TemplateInvocationCoordinator(ISettingsLoader settingsLoader, INewCommandInput commandInput, ITelemetryLogger telemetryLogger,  string commandName, Func<string> inputGetter, New3Callbacks callbacks)
         {
             _settingsLoader = settingsLoader;
             _environment = _settingsLoader.EnvironmentSettings;
@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli
             _callbacks = callbacks;
         }
 
-        public async Task<CreationResultStatus> CoordinateInvocationOrAcquisitionAsync(ITemplateMatchInfo templateToInvoke, CancellationToken cancellationToken)
+        internal async Task<CreationResultStatus> CoordinateInvocationOrAcquisitionAsync(ITemplateMatchInfo templateToInvoke, CancellationToken cancellationToken)
         {
             // invoke and then check for updates
             CreationResultStatus creationResult = await InvokeTemplateAsync(templateToInvoke).ConfigureAwait(false);

@@ -10,16 +10,16 @@ namespace Microsoft.TemplateEngine.Cli
     /// These callbacks provide a mechanism for the template engine to invoke these operations without
     /// requiring a built-time dependency on the actual implementation.
     /// </summary>
-    public sealed class New3Callbacks
+    internal sealed class New3Callbacks
     {
         /// <summary>
         /// Callback to be executed on first run of the template engine.
         /// </summary>
-        public Action<IEngineEnvironmentSettings> OnFirstRun { get; set; }
+        internal Action<IEngineEnvironmentSettings> OnFirstRun { get; set; }
 
         /// <summary>
         /// Callback to be executed to restore a project.
         /// </summary>
-        public Func<string, bool> RestoreProject { get; set; }
+        internal Func<string, bool> RestoreProject { get; set; }
     }
 }

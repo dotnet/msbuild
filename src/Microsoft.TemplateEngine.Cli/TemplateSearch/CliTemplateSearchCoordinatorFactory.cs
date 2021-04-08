@@ -6,7 +6,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal static class CliTemplateSearchCoordinatorFactory
     {
-        public static TemplateSearchCoordinator CreateCliTemplateSearchCoordinator(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage)
+        internal static TemplateSearchCoordinator CreateCliTemplateSearchCoordinator(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage)
         {
             return new TemplateSearchCoordinator(environmentSettings,
                                             commandInput.TemplateName,

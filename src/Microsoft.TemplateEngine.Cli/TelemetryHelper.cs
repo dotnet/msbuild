@@ -10,14 +10,14 @@ using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    public static class TelemetryHelper
+    internal static class TelemetryHelper
     {
         // Checks if the input parameter value is a valid choice for the parameter, and returns the canonical value, or defaultValue if there is no appropriate canonical value.
         // If the parameter or value is null, return defaultValue.
         // For this to return other than the defaultValue, one of these must occur:
         //  - the input value must either exactly match one of the choices (case-insensitive)
         //  - there must be exactly one choice value starting with the input value (case-insensitive).
-        public static string GetCanonicalValueForChoiceParamOrDefault(ITemplateInfo template, string paramName, string inputParamValue, string defaultValue = null)
+        internal static string GetCanonicalValueForChoiceParamOrDefault(ITemplateInfo template, string paramName, string inputParamValue, string defaultValue = null)
         {
             if (string.IsNullOrEmpty(paramName) || string.IsNullOrEmpty(inputParamValue))
             {
@@ -49,13 +49,13 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// // The hashed mac address needs to be the same hashed value as produced by the other distinct sources given the same input. (e.g. VsCode)
         /// </summary>
-        public static string Hash(string text)
+        internal static string Hash(string text)
         {
             var sha256 = SHA256.Create();
             return HashInFormat(sha256, text);
         }
 
-        public static string HashWithNormalizedCasing(string text)
+        internal static string HashWithNormalizedCasing(string text)
         {
             if (text == null)
             {

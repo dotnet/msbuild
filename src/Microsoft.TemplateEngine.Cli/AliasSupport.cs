@@ -10,9 +10,9 @@ using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    public static class AliasSupport
+    internal static class AliasSupport
     {
-        public static CreationResultStatus CoordinateAliasExpansion(INewCommandInput commandInput, AliasRegistry aliasRegistry, ITelemetryLogger telemetryLogger)
+        internal static CreationResultStatus CoordinateAliasExpansion(INewCommandInput commandInput, AliasRegistry aliasRegistry, ITelemetryLogger telemetryLogger)
         {
             AliasExpansionStatus aliasExpansionStatus = AliasSupport.TryExpandAliases(commandInput, aliasRegistry);
             if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
@@ -35,7 +35,7 @@ namespace Microsoft.TemplateEngine.Cli
             return CreationResultStatus.Success;
         }
 
-        public static AliasExpansionStatus TryExpandAliases(INewCommandInput commandInput, AliasRegistry aliasRegistry)
+        internal static AliasExpansionStatus TryExpandAliases(INewCommandInput commandInput, AliasRegistry aliasRegistry)
         {
             List<string> inputTokens = commandInput.Tokens.ToList();
             inputTokens.RemoveAt(0);    // remove the command name
@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli
         // TODO: make this test more robust.
         private static readonly Regex ValidFirstTokenRegex = new Regex("^[a-z0-9]", RegexOptions.IgnoreCase);
 
-        public static CreationResultStatus ManipulateAliasIfValid(AliasRegistry aliasRegistry, string aliasName, List<string> inputTokens, HashSet<string> reservedAliasNames)
+        internal static CreationResultStatus ManipulateAliasIfValid(AliasRegistry aliasRegistry, string aliasName, List<string> inputTokens, HashSet<string> reservedAliasNames)
         {
             if (reservedAliasNames.Contains(aliasName))
             {
@@ -157,7 +157,7 @@ namespace Microsoft.TemplateEngine.Cli
             return aliasTokens;
         }
 
-        public static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
+        internal static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
         {
             IReadOnlyDictionary<string, IReadOnlyList<string>> aliasesToShow;
 
