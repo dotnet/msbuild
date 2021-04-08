@@ -38,7 +38,9 @@ namespace dotnet_new3
 
             public ITemplatePackageProviderFactory Factory { get; }
 
+#pragma warning disable CS0067
             public event Action TemplatePackagesChanged;
+#pragma warning restore CS0067
 
             public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
             {
