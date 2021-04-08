@@ -115,6 +115,21 @@ Copyright (c) .NET Foundation. All rights reserved.
                   ('$(TargetFrameworkIdentifier)' == '.NETStandard' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1'))">true</EmbeddedResourceUseDependentUponConvention>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1'">
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('linux'))">$(AvailablePlatforms),ARM32</AvailablePlatforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.1'">
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(AvailablePlatforms),ARM32</AvailablePlatforms>
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('linux'))">$(AvailablePlatforms),ARM32,ARM64</AvailablePlatforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '5.0'">
+    <!-- Need to check console and windows here. -->
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(AvailablePlatforms),ARM32,ARM64</AvailablePlatforms>
+    <AvailablePlatforms Condition="$([MSBuild]::IsOSPlatform('linux'))">$(AvailablePlatforms),ARM32,ARM64</AvailablePlatforms>
+  </PropertyGroup>
+
   <PropertyGroup>
     <CoreBuildDependsOn>
       _CheckForBuildWithNoBuild;
