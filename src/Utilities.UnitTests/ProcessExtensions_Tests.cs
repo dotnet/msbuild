@@ -7,15 +7,25 @@ using Xunit;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
     public class ProcessExtensions_Tests
     {
+        private readonly ITestOutputHelper output;
+
+        public ProcessExtensions_Tests(ITestOutputHelper output)
+        {
+            this.output = output;
+        }
+
         [Fact]
         public async Task KillTree()
         {
             Process p = Process.Start("sleep", "600"); // sleep 10m.
+
+            output.WriteLine(p.MainModule.FileName);
 
             // Verify the process is running.
             await Task.Delay(500);
