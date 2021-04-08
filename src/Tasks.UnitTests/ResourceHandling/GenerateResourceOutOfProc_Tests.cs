@@ -3015,7 +3015,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             GenerateResource t = CreateTask(output);
             t.ExecuteAsTool = true;
-            t.SdkToolsPath = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest);
+            t.SdkToolsPath = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest, output.WriteLine);
+            output.WriteLine("KIRILL: Tests.cs:3019 " + t.SdkToolsPath);
 
             return t;
         }

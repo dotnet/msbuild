@@ -1712,7 +1712,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="version">Version of the targeted .NET Framework</param>
         /// <returns>Path string.</returns>
-        public static string GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion version) => GetPathToDotNetFrameworkSdk(version, VisualStudioVersion.VersionLatest);
+        public static string GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion version, Action<string> output = null) => GetPathToDotNetFrameworkSdk(version, VisualStudioVersion.VersionLatest, output);
 
         /// <summary>
         /// Returns the path to the .NET Framework SDK.
@@ -1720,11 +1720,11 @@ namespace Microsoft.Build.Utilities
         /// <param name="version">The <see cref="TargetDotNetFrameworkVersion"/> of the .NET Framework.</param>
         /// <param name="visualStudioVersion">The <see cref="VisualStudioVersion"/> of Visual Studio.</param>
         /// <returns></returns>
-        public static string GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion)
+        public static string GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, Action<string> output = null)
         {
             var dotNetFrameworkVersion = TargetDotNetFrameworkVersionToSystemVersion(version);
             var vsVersion = VisualStudioVersionToSystemVersion(visualStudioVersion);
-            return FrameworkLocationHelper.GetPathToDotNetFrameworkSdk(dotNetFrameworkVersion, vsVersion);
+            return FrameworkLocationHelper.GetPathToDotNetFrameworkSdk(dotNetFrameworkVersion, vsVersion, output);
         }
 
         /// <summary>

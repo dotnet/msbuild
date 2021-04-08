@@ -595,24 +595,24 @@ namespace Microsoft.Build.Shared
             return GetDotNetFrameworkSpec(dotNetFrameworkVersion).GetPathToDotNetFrameworkReferenceAssemblies();
         }
 
-        internal static string GetPathToDotNetFrameworkSdkTools(Version dotNetFrameworkVersion, Version visualStudioVersion)
+        internal static string GetPathToDotNetFrameworkSdkTools(Version dotNetFrameworkVersion, Version visualStudioVersion, Action<string> output = null)
         {
             RedirectVersionsIfNecessary(ref dotNetFrameworkVersion, ref visualStudioVersion);
 
             var dotNetFrameworkSpec = GetDotNetFrameworkSpec(dotNetFrameworkVersion);
             var visualStudioSpec = GetVisualStudioSpec(visualStudioVersion);
             ErrorUtilities.VerifyThrowArgument(visualStudioSpec.SupportedDotNetFrameworkVersions.Contains(dotNetFrameworkVersion), "FrameworkLocationHelper.UnsupportedFrameworkVersion", dotNetFrameworkVersion);
-            return dotNetFrameworkSpec.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
+            return dotNetFrameworkSpec.GetPathToDotNetFrameworkSdkTools(visualStudioSpec, output);
         }
 
-        internal static string GetPathToDotNetFrameworkSdk(Version dotNetFrameworkVersion, Version visualStudioVersion)
+        internal static string GetPathToDotNetFrameworkSdk(Version dotNetFrameworkVersion, Version visualStudioVersion, Action<string> output = null)
         {
             RedirectVersionsIfNecessary(ref dotNetFrameworkVersion, ref visualStudioVersion);
 
             var dotNetFrameworkSpec = GetDotNetFrameworkSpec(dotNetFrameworkVersion);
             var visualStudioSpec = GetVisualStudioSpec(visualStudioVersion);
             ErrorUtilities.VerifyThrowArgument(visualStudioSpec.SupportedDotNetFrameworkVersions.Contains(dotNetFrameworkVersion), "FrameworkLocationHelper.UnsupportedFrameworkVersion", dotNetFrameworkVersion);
-            return dotNetFrameworkSpec.GetPathToDotNetFrameworkSdk(visualStudioSpec);
+            return dotNetFrameworkSpec.GetPathToDotNetFrameworkSdk(visualStudioSpec, output);
         }
 
         internal static string GetPathToDotNetFrameworkV11(DotNetFrameworkArchitecture architecture)
@@ -1356,7 +1356,7 @@ namespace Microsoft.Build.Shared
             /// Gets the full path of .net framework sdk tools for the given visual studio version.
             /// i.e. "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools\" for .net v4.5 on VS11.
             /// </summary>
-            public virtual string GetPathToDotNetFrameworkSdkTools(VisualStudioSpec visualStudioSpec)
+            public virtual string GetPathToDotNetFrameworkSdkTools(VisualStudioSpec visualStudioSpec, Action<string> output = null)
             {
                 string cachedPath;
                 if (this._pathsToDotNetFrameworkSdkTools.TryGetValue(visualStudioSpec.Version, out cachedPath))
@@ -1398,6 +1398,8 @@ namespace Microsoft.Build.Shared
                         this.DotNetFrameworkSdkRegistryInstallationFolderName,
                         registryView);
 
+                    output?.Invoke($"KIRILL: FrameworkLocationHelper.cs:1401: generatedPathToDotNetFrameworkSdkTools={generatedPathToDotNetFrameworkSdkTools} registryPath={registryPath} DotNetFrameworkSdkRegistryInstallationFolderName={DotNetFrameworkSdkRegistryInstallationFolderName}");
+
                     if (string.IsNullOrEmpty(generatedPathToDotNetFrameworkSdkTools))
                     {
                         // Fallback mechanisms.
@@ -1415,6 +1417,7 @@ namespace Microsoft.Build.Shared
                                 generatedPathToDotNetFrameworkSdkTools = FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(
                                     fallback.Item1,
                                     fallback.Item2);
+                                output?.Invoke($"KIRILL: FrameworkLocationHelper.cs:1420: generatedPathToDotNetFrameworkSdkTools={generatedPathToDotNetFrameworkSdkTools} item1={fallback.Item1} Item2={fallback.Item2}");
                                 break;
                             }
                         }
@@ -1431,6 +1434,7 @@ namespace Microsoft.Build.Shared
                                 generatedPathToDotNetFrameworkSdkTools = FallbackToPathToDotNetFrameworkSdkToolsInPreviousVersion(
                                     this.Version,
                                     fallbackVisualStudioSpec.Version);
+                                output?.Invoke($"KIRILL: FrameworkLocationHelper.cs:1437: generatedPathToDotNetFrameworkSdkTools={generatedPathToDotNetFrameworkSdkTools} version={Version} fallbackversion={fallbackVisualStudioSpec.Version}");
                             }
                         }
                     }
@@ -1440,6 +1444,7 @@ namespace Microsoft.Build.Shared
                 {
                     // Fallback to "default" ultimately.
                     generatedPathToDotNetFrameworkSdkTools = FallbackToDefaultPathToDotNetFrameworkSdkTools(this.Version);
+                    output?.Invoke($"KIRILL: FrameworkLocationHelper.cs:1447: generatedPathToDotNetFrameworkSdkTools={generatedPathToDotNetFrameworkSdkTools} version={Version}");
                 }
 
                 if (!string.IsNullOrEmpty(generatedPathToDotNetFrameworkSdkTools))
@@ -1447,6 +1452,7 @@ namespace Microsoft.Build.Shared
                     this._pathsToDotNetFrameworkSdkTools[visualStudioSpec.Version] = generatedPathToDotNetFrameworkSdkTools;
                 }
 
+                output?.Invoke($"KIRILL: FrameworkLocationHelper.cs:1455: generatedPathToDotNetFrameworkSdkTools={generatedPathToDotNetFrameworkSdkTools}");
                 return generatedPathToDotNetFrameworkSdkTools;
             }
 
@@ -1454,14 +1460,15 @@ namespace Microsoft.Build.Shared
             /// Gets the full path of .net framework sdk.
             /// i.e. "C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\" for .net v4.5 on VS11.
             /// </summary>
-            public virtual string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec)
+            public virtual string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec, Action<string> output = null)
             {
-                string pathToBinRoot = this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
+                string pathToBinRoot = this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec, output);
                 if (NativeMethodsShared.IsWindows)
                 {
                     pathToBinRoot = RemoveDirectories(pathToBinRoot, 2);
                 }
 
+                output?.Invoke("KIRILL: FrameworkLocationHelper.cs:1465: pathToBinRoot=" + pathToBinRoot);
                 return pathToBinRoot;
             }
 
@@ -1587,7 +1594,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Gets the full path of .net framework sdk tools for the given visual studio version.
             /// </summary>
-            public override string GetPathToDotNetFrameworkSdkTools(VisualStudioSpec visualStudioSpec)
+            public override string GetPathToDotNetFrameworkSdkTools(VisualStudioSpec visualStudioSpec, Action<string> output)
             {
 #if FEATURE_WIN32_REGISTRY
                 if (_pathToDotNetFrameworkSdkTools == null)
@@ -1595,6 +1602,7 @@ namespace Microsoft.Build.Shared
                     _pathToDotNetFrameworkSdkTools = FindRegistryValueUnderKey(
                         dotNetFrameworkRegistryPath,
                         this.DotNetFrameworkSdkRegistryInstallationFolderName);
+                    output($"KIRILL: FrameworkLocationHelper.cs:1605: _pathToDotNetFrameworkSdkTools={_pathToDotNetFrameworkSdkTools}");
                 }
 
                 return _pathToDotNetFrameworkSdkTools;
@@ -1606,9 +1614,9 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Gets the full path of .net framework sdk, which is the full path of .net framework sdk tools for v1.1 and v2.0.
             /// </summary>
-            public override string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec)
+            public override string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec, Action<string> output = null)
             {
-                return this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
+                return this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec, output);
             }
 
             /// <summary>
@@ -1647,9 +1655,9 @@ namespace Microsoft.Build.Shared
             /// Gets the full path of .net framework sdk.
             /// i.e. "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\" for .net v3.5 on VS11.
             /// </summary>
-            public override string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec)
+            public override string GetPathToDotNetFrameworkSdk(VisualStudioSpec visualStudioSpec, Action<string> output = null)
             {
-                string pathToBinRoot = this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec);
+                string pathToBinRoot = this.GetPathToDotNetFrameworkSdkTools(visualStudioSpec, output);
                 return RemoveDirectories(pathToBinRoot, 1);
             }
 

@@ -47,9 +47,11 @@ namespace Microsoft.Build.UnitTests
 
         private void Print(Process p)
         {
+#if NET472
             var processes = ProcessInformation.GetProcesses();
             var found = processes.Where(process => process.Id == p.Id).First();
             output.WriteLine(found.ExecutablePath);
+#endif
         }
     }
 
