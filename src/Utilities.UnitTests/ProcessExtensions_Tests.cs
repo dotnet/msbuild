@@ -13,7 +13,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Win32.SafeHandles;
-using System.Management;
 using System.Linq;
 
 namespace Microsoft.Build.UnitTests
@@ -73,11 +72,11 @@ namespace Microsoft.Build.UnitTests
         {
             var list = new List<ProcessInformation>();
 
-            var managementClass = new ManagementClass("Win32_Process");
+            var managementClass = new System.Management.ManagementClass("Win32_Process");
 
             foreach (var process in managementClass.GetInstances())
             {
-                var creationDate = ManagementDateTimeConverter.ToDateTime(process["CreationDate"].ToString());
+                var creationDate = System.Management.ManagementDateTimeConverter.ToDateTime(process["CreationDate"].ToString());
                 var processInfo = new ProcessInformation();
                 int id = (int)(uint)process["ProcessId"];
                 processInfo.Id = id;
