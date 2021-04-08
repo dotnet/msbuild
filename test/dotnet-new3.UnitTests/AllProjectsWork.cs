@@ -4,6 +4,7 @@
 using System.IO;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -69,7 +70,7 @@ namespace dotnet_new3.UnitTests
     {
         public AllProjectsWorkFixture(IMessageSink messageSink) : base(messageSink)
         {
-            BaseWorkingDirectory = Helpers.CreateTemporaryFolder(nameof(AllProjectsWork));
+            BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllProjectsWork));
             // create nuget.config file with nuget.org listed
             new DotnetNewCommand(Log, "nugetconfig")
                 .WithWorkingDirectory(BaseWorkingDirectory)

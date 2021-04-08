@@ -25,8 +25,8 @@ namespace dotnet_new3.UnitTests
             Initialize();
         }
 
-        public string HomeDirectory { get; } = Helpers.CreateTemporaryFolder("Home");
-        public string HomeVariable { get; } = Helpers.HomeEnvironmentVariableName;
+        public string HomeDirectory { get; } = TestUtils.CreateTemporaryFolder("Home");
+        public string HomeVariable { get; } = TestUtils.HomeEnvironmentVariableName;
 
         protected ITestOutputHelper Log { get; private set; }
 

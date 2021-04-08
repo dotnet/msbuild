@@ -634,8 +634,9 @@ Examples:
   <data name="GenericWarning" xml:space="preserve">
     <value>Warning: {0}</value>
   </data>
-  <data name="OptionDescriptionTagFilter" xml:space="preserve">
+  <data name="OptionDescriptionTagFilter">
     <value>Filters the templates based on the tag. Applies to --search and --list.</value>
+  </data>
   <data name="TemplatesPackageCoordinator_Error_PackageNameContainsTemplates" xml:space="preserve">
     <value>  {0} (contains {1} templates)</value>
   </data>
@@ -698,9 +699,6 @@ Examples:
   </data>
   <data name="TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError" xml:space="preserve">
     <value>Failed to initialize NuGet credential service, details: {0}.</value>
-  </data>
-  <data name="OptionDescriptionTagFilter" xml:space="preserve">
-    <value>Filters the templates based on the tag. Applies to --search and --list.</value>
   </data>
   <data name="TemplatesPackageCoordinator_Install_Error_SameInstallRequests" xml:space="preserve">
     <value>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</value>
