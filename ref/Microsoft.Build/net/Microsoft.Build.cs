@@ -772,6 +772,7 @@ namespace Microsoft.Build.Evaluation
         DoNotEvaluateElementsWithFalseCondition = 32,
         IgnoreInvalidImports = 64,
         ProfileEvaluation = 128,
+        FailOnUnresolvedSdk = 256,
     }
     public partial class ProjectMetadata : System.IEquatable<Microsoft.Build.Evaluation.ProjectMetadata>
     {
@@ -1047,6 +1048,8 @@ namespace Microsoft.Build.Execution
         SkipNonexistentTargets = 16,
         ProvideSubsetOfStateAfterBuild = 32,
         IgnoreMissingEmptyAndInvalidImports = 64,
+        SkipNonexistentNonEntryTargets = 128,
+        FailOnUnresolvedSdk = 256,
     }
     public partial class BuildResult
     {
