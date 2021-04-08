@@ -804,6 +804,11 @@ Examples:
         <target state="new">Found no template packages to install</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatesPackageCoordinator_Install_Error_SameInstallRequests">
+        <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
+        <target state="new">The command is attempting to install the template package '{0}' twice, check the arguments and retry.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled">
         <source>The following template packages will be installed:</source>
         <target state="new">The following template packages will be installed:</target>

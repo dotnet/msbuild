@@ -1460,6 +1460,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The command is attempting to install the template package &apos;{0}&apos; twice, check the arguments and retry..
+        /// </summary>
+        public static string TemplatesPackageCoordinator_Install_Error_SameInstallRequests {
+            get {
+                return ResourceManager.GetString("TemplatesPackageCoordinator_Install_Error_SameInstallRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The following template packages will be installed:.
         /// </summary>
         public static string TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled {

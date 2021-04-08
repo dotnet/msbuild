@@ -181,6 +181,18 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.NotFound;
             }
 
+            //validate if installation requests have unique identifier
+            HashSet<string> identifiers = new HashSet<string>();
+            foreach (InstallRequest installRequest in installRequests)
+            {
+                if (identifiers.Add(installRequest.PackageIdentifier))
+                {
+                    continue;
+                }
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Install_Error_SameInstallRequests, installRequest.PackageIdentifier));
+                return CreationResultStatus.Cancelled;
+            }
+
             Reporter.Output.WriteLine(LocalizableStrings.TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled);
             foreach (InstallRequest installRequest in installRequests)
             {
@@ -195,7 +207,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             Reporter.Output.WriteLine();
 
-            var installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<InstallResult> installResults = await managedSourceProvider.InstallAsync(installRequests, cancellationToken).ConfigureAwait(false);
             foreach (InstallResult result in installResults)
             {
                 await DisplayInstallResultAsync(commandInput, result.InstallRequest.DisplayName, result, cancellationToken).ConfigureAwait(false);

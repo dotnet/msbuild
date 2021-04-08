@@ -702,4 +702,7 @@ Examples:
   <data name="OptionDescriptionTagFilter" xml:space="preserve">
     <value>Filters the templates based on the tag. Applies to --search and --list.</value>
   </data>
+  <data name="TemplatesPackageCoordinator_Install_Error_SameInstallRequests" xml:space="preserve">
+    <value>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</value>
+  </data>
 </root>
