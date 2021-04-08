@@ -116,6 +116,7 @@
     <Compile Remove="AssemblyDependency\GlobalAssemblyCacheTests.cs" />
     <Compile Remove="AssemblyDependency\InstalledSDKResolverFixture.cs" />
     <Compile Remove="AssemblyDependency\Miscellaneous.cs" />
+    <Compile Remove="AssemblyDependency\ResolveAssemblyReferenceEnvironmentVirtualization.cs" />
     <Compile Remove="AssemblyDependency\NonSpecificVersionStrictPrimary.cs" />
     <Compile Remove="AssemblyDependency\Perf.cs" />
     <Compile Remove="AssemblyDependency\ReferenceTests.cs" />

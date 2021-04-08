@@ -2,19 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Win32;
 using Xunit;
-using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit.Abstractions;
-using Shouldly;
-using System.Text;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -35,25 +28,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void RawFileNameRelativeWithActiveDirectoryVirtualization()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference rarTask = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine(_output);
+            rarTask.BuildEngine = new MockEngine(_output);
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
 
             Directory.CreateDirectory(testPath);
             try
             {
-                t.Assemblies = new ITaskItem[] { new TaskItem(@"..\RawFileNameRelative\System.Xml.dll") };
-                t.SearchPaths = new string[] { "{RawFileName}" };
+                rarTask.Assemblies = new ITaskItem[] { new TaskItem(@"..\RawFileNameRelative\System.Xml.dll") };
+                rarTask.SearchPaths = new string[] { "{RawFileName}" };
 
                 TaskExecutionContext taskExecutionContext = new TaskExecutionContext(testPath, null, null, null);
-                (t as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
+                (rarTask as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
 
-                Execute(t);
+                Execute(rarTask);
 
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.Single(rarTask.ResolvedFiles);
+                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), rarTask.ResolvedFiles[0].ItemSpec);
             }
             finally
             {
@@ -73,9 +66,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void RelativeDirectoryResolverWithActiveDirectoryVirtualization()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference rarTask = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine(_output);
+            rarTask.BuildEngine = new MockEngine(_output);
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
             string previousCurrentDirectory = Directory.GetCurrentDirectory();
@@ -83,16 +76,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Directory.CreateDirectory(testPath);
             try
             {
-                t.Assemblies = new ITaskItem[] { new TaskItem(@"System.Xml.dll") };
-                t.SearchPaths = new string[] { "..\\RawFileNameRelative" };
+                rarTask.Assemblies = new ITaskItem[] { new TaskItem(@"System.Xml.dll") };
+                rarTask.SearchPaths = new string[] { "..\\RawFileNameRelative" };
 
                 TaskExecutionContext taskExecutionContext = new TaskExecutionContext(testPath, null, null, null);
-                (t as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
+                (rarTask as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
 
-                Execute(t);
+                Execute(rarTask);
 
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.Single(rarTask.ResolvedFiles);
+                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), rarTask.ResolvedFiles[0].ItemSpec);
             }
             finally
             {
@@ -111,9 +104,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void HintPathRelativeWithActiveDirectoryVirtualization()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference rarTask = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine(_output);
+            rarTask.BuildEngine = new MockEngine(_output);
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
             string previousCurrentDirectory = Directory.GetCurrentDirectory();
@@ -124,16 +117,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 TaskItem taskItem = new TaskItem(AssemblyRef.SystemXml);
                 taskItem.SetMetadata("HintPath", @"..\RawFileNameRelative\System.Xml.dll");
 
-                t.Assemblies = new ITaskItem[] { taskItem };
-                t.SearchPaths = new string[] { "{HintPathFromItem}" };
+                rarTask.Assemblies = new ITaskItem[] { taskItem };
+                rarTask.SearchPaths = new string[] { "{HintPathFromItem}" };
 
                 TaskExecutionContext taskExecutionContext = new TaskExecutionContext(testPath, null, null, null);
-                (t as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
+                (rarTask as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
 
-                Execute(t);
+                Execute(rarTask);
 
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.Single(rarTask.ResolvedFiles);
+                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), rarTask.ResolvedFiles[0].ItemSpec);
             }
             finally
             {
@@ -167,20 +160,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
                 // Now, pass feed resolved primary references into ResolveAssemblyReference.
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference rarTask = new ResolveAssemblyReference();
 
-                t.BuildEngine = engine;
-                t.AssemblyFiles = assemblyFiles;
-                t.SearchPaths = DefaultPaths;
+                rarTask.BuildEngine = engine;
+                rarTask.AssemblyFiles = assemblyFiles;
+                rarTask.SearchPaths = DefaultPaths;
 
                 TaskExecutionContext taskExecutionContext = new TaskExecutionContext(testPath, null, null, null);
-                (t as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
+                (rarTask as IConcurrentTask).ConfigureForConcurrentExecution(taskExecutionContext);
 
-                bool succeeded = Execute(t);
+                bool succeeded = Execute(rarTask);
 
                 Assert.True(succeeded);
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.Single(rarTask.ResolvedFiles);
+                Assert.Equal(Path.Combine(testPath, "System.Xml.dll"), rarTask.ResolvedFiles[0].ItemSpec);
             }
             finally
             {
