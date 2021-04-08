@@ -1602,7 +1602,7 @@ namespace Microsoft.Build.Shared
                     _pathToDotNetFrameworkSdkTools = FindRegistryValueUnderKey(
                         dotNetFrameworkRegistryPath,
                         this.DotNetFrameworkSdkRegistryInstallationFolderName);
-                    output($"KIRILL: FrameworkLocationHelper.cs:1605: _pathToDotNetFrameworkSdkTools={_pathToDotNetFrameworkSdkTools}");
+                    output?.Invoke($"KIRILL: FrameworkLocationHelper.cs:1605: _pathToDotNetFrameworkSdkTools={_pathToDotNetFrameworkSdkTools}");
                 }
 
                 return _pathToDotNetFrameworkSdkTools;
