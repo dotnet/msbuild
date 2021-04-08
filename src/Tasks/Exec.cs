@@ -54,6 +54,9 @@ namespace Microsoft.Build.Tasks
         private Encoding _standardOutputEncoding;
         private string _command;
 
+        // '^' before _any_ character escapes that character, don't escape it.
+        private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' '};
+
         #endregion
 
         #region Properties
@@ -601,18 +604,63 @@ namespace Microsoft.Build.Tasks
                     }
                     commandLine.AppendSwitch("/C"); // run then terminate
 
-                    // If for some crazy reason the path has a & character and a space in it
-                    // then get the short path of the temp path, which should not have spaces in it
-                    // and then escape the &
-                    if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
                     {
-                        batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                        batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                        StringBuilder fileName = null;
+
+                        // Escape special characters that need to be escaped.
+                        for (int i = 0; i < batchFileForCommandLine.Length; i++)
+                        {
+                            char c = batchFileForCommandLine[i];
+
+                            if (ShouldEscapeCharacter(c) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
+                            {
+                                // Avoid allocating a new string until we know we have something to escape.
+                                if (fileName == null)
+                                {
+                                    fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
+                                    fileName.Append(batchFileForCommandLine, 0, i);
+                                }
+
+                                fileName.Append('^');
+                            }
+
+                            fileName?.Append(c);
+                        }
+
+                        if (fileName != null)
+                        {
+                            batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
+                        }
+                    }
+                    else
+                    {
+                        // If for some crazy reason the path has a & character and a space in it
+                        // then get the short path of the temp path, which should not have spaces in it
+                        // and then escape the &
+                        if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
+                        {
+                            batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
+                            batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
+                        }
                     }
                 }
 
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
             }
+        }
+
+        private bool ShouldEscapeCharacter(char c)
+        {
+            for (int i = 0; i < _charactersToEscape.Length; i++)
+            {
+                if (c == _charactersToEscape[i])
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion
