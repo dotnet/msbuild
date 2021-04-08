@@ -851,7 +851,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (string file in s_existentFiles)
             {
-                if (String.Equals(path, file, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(FileUtilities.FixFilePath(path), FileUtilities.FixFilePath(file), StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
@@ -878,7 +878,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (string dir in existentDirs)
             {
-                if (String.Equals(path, dir, StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(FileUtilities.FixFilePath(path), FileUtilities.FixFilePath(dir), StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
