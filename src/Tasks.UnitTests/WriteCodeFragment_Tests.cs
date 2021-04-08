@@ -655,6 +655,424 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
+        /// <summary>
+        /// A type can be declared for a positional arguments using the metadata
+        /// "_Parameter1_TypeName" where the value is the full type name.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeForPositionalParameter()
+        {
+            TaskItem attribute = new("CLSCompliantAttribute");
+            attribute.SetMetadata("_Parameter1", "True");
+            attribute.SetMetadata("_Parameter1_TypeName", "System.Boolean");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: CLSCompliantAttribute(true)]"
+            );
+        }
+
+        /// <summary>
+        /// A type can be declared for a positional arguments using the metadata
+        /// "Foo_TypeName" where the value is the full type name.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeForNamedParameter()
+        {
+            TaskItem attribute = new TaskItem("TestAttribute");
+            attribute.SetMetadata("BoolArgument", "False");
+            attribute.SetMetadata("BoolArgument_TypeName", "System.Boolean");
+            attribute.SetMetadata("Int32Argument", "42");
+            attribute.SetMetadata("Int32Argument_TypeName", "System.Int32");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: TestAttribute(Int32Argument=42, BoolArgument=false)]"
+            );
+        }
+
+        /// <summary>
+        /// Metadata that looks like a declared type, but doesn't have corresponding named parameter
+        /// metadata should be treated as another named parameter for backward-compatibility.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypedWithoutCorrespondingNamedParameter()
+        {
+            TaskItem attribute = new TaskItem("TestAttribute");
+            attribute.SetMetadata("BoolArgument", "False");
+            attribute.SetMetadata("BoolArgument_TypeName", "System.Boolean");
+            attribute.SetMetadata("Int32Argument_TypeName", "System.Int32");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: TestAttribute(Int32Argument_TypeName=""System.Int32"", BoolArgument=false)]"
+            );
+        }
+
+        /// <summary>
+        /// An unknown type name for a parameter should cause a failure.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeIsUnknown()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("TestParameter", "99");
+            attribute.SetMetadata("TestParameter_TypeName", "Foo.Bar");
+
+            ExecuteAndVerifyFailure(
+                CreateTask("c#", attribute),
+                "MSB3715"
+            );
+        }
+
+        /// <summary>
+        /// A parameter value that cannot be converted to the declared type should cause a failure.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeCausesConversionFailure()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("TestParameter", "99");
+            attribute.SetMetadata("TestParameter_TypeName", "System.Boolean");
+
+            ExecuteAndVerifyFailure(
+                CreateTask("c#", attribute),
+                "MSB3716"
+            );
+        }
+
+        /// <summary>
+        /// Parameter value that is too large for the declared data type should cause a failure.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeCausesOverflow()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("TestParameter", "1000");
+            attribute.SetMetadata("TestParameter_TypeName", "System.Byte");
+
+            ExecuteAndVerifyFailure(
+                CreateTask("c#", attribute),
+                "MSB3716"
+            );
+        }
+
+        /// <summary>
+        /// The metadata value should convert successfully to an enum.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeIsEnum()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("_Parameter1", "Local");
+            attribute.SetMetadata("_Parameter1_TypeName", "System.DateTimeKind");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: TestAttribute(System.DateTimeKind.Local)]"
+            );
+        }
+
+        /// <summary>
+        /// The metadata value should convert successfully to a type name in C#.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeIsTypeInCSharp()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("_Parameter1", "System.Console");
+            attribute.SetMetadata("_Parameter1_TypeName", "System.Type");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: TestAttribute(typeof(System.Console))]"
+            );
+        }
+
+        /// <summary>
+        /// The metadata value should convert successfully to a type name in VB.NET.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeIsTypeInVB()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("_Parameter1", "System.Console");
+            attribute.SetMetadata("_Parameter1_TypeName", "System.Type");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("visualbasic", attribute),
+                @"<Assembly: TestAttribute(GetType(System.Console))>"
+            );
+        }
+
+        /// <summary>
+        /// Arrays are not supported for declared types. Literal arguments need to be used instead.
+        /// This test confirms that it fails instead of falling back to being treated as a string.
+        /// </summary>
+        [Fact]
+        public void DeclaredTypeOfArrayIsNotSupported()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("_Parameter1", "1,2,3");
+            attribute.SetMetadata("_Parameter1_TypeName", "System.Int32[]");
+
+            ExecuteAndVerifyFailure(
+                CreateTask("c#", attribute),
+                "MSB3716"
+            );
+        }
+
+        /// <summary>
+        /// The exact code for a positional argument can be specified using
+        /// the metadata "_Parameter1_IsLiteral" with a value of "true".
+        /// </summary>
+        [Fact]
+        public void LiteralPositionalParameter()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("_Parameter1", "42 /* A comment */");
+            attribute.SetMetadata("_Parameter1_IsLiteral", "true");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: TestAttribute(42 /* A comment */)]"
+            );
+        }
+
+        /// <summary>
+        /// The exact code for a named argument can be specified using
+        /// the metadata "Foo_IsLiteral" with a value of "true".
+        /// </summary>
+        [Fact]
+        public void LiteralNamedParameter()
+        {
+            TaskItem attribute = new("TestAttribute");
+            attribute.SetMetadata("TestParameter", "42 /* A comment */");
+            attribute.SetMetadata("TestParameter_IsLiteral", "true");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: TestAttribute(TestParameter=42 /* A comment */)]"
+            );
+        }
+
+        /// <summary>
+        /// The type of a positional argument can be inferred
+        /// if the type of the attribute is in mscorlib.
+        /// </summary>
+        [Fact]
+        public void InferredTypeForPositionalParameter()
+        {
+            TaskItem attribute = new("CLSCompliantAttribute");
+            attribute.SetMetadata("_Parameter1", "True");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: CLSCompliantAttribute(true)]"
+            );
+        }
+
+        /// <summary>
+        /// The type of a named argument can be inferred
+        /// if the type of the attribute is in mscorlib.
+        /// </summary>
+        [Fact]
+        public void InferredTypeForNamedParameter()
+        {
+            TaskItem attribute = new("System.Runtime.CompilerServices.InternalsVisibleToAttribute");
+            attribute.SetMetadata("_Parameter1", "MyAssembly");
+            attribute.SetMetadata("AllInternalsVisible", "True");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: System.Runtime.CompilerServices.InternalsVisibleToAttribute(""MyAssembly"", AllInternalsVisible=true)]"
+            );
+        }
+
+        /// <summary>
+        /// For backward-compatibility, if multiple constructors are found with the same number 
+        /// of position arguments that was specified in the metadata, then the constructor that
+        /// has strings for every parameter should be used.
+        /// </summary>
+        [Fact]
+        public void InferredTypePrefersStringWhenMultipleConstructorsAreFound()
+        {
+            TaskItem attribute = new("System.Diagnostics.Contracts.ContractOptionAttribute");
+            attribute.SetMetadata("_Parameter1", "a");
+            attribute.SetMetadata("_Parameter2", "b");
+            attribute.SetMetadata("_Parameter3", "false");
+
+            // There are two constructors with three parameters:
+            //   * ContractOptionAttribute(string, string, bool)
+            //   * ContractOptionAttribute(string, string, string)
+            //
+            // The first overload would come first when comparing the type names
+            // ("System.Boolean" comes before "System.String"), but because we
+            // need to remain backward-compatible, the constructor that takes
+            // all strings should be preferred over all other constructors.
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""a"", ""b"", ""false"")]"
+            );
+        }
+
+        /// <summary>
+        /// When multiple constructors are found with the same number of
+        /// position arguments that was specified in the metadata, and none
+        /// of them have parameters of all strings, then the constructors
+        /// should be sorted by the names of the parameter types.
+        /// The first constructor is then selected.
+        /// </summary>
+        [Fact]
+        public void InferredTypeWithMultipleAttributeConstructorsIsDeterministic()
+        {
+            TaskItem attribute = new("System.Reflection.AssemblyFlagsAttribute");
+            attribute.SetMetadata("_Parameter1", "2");
+
+            // There are three constructors with a single parameter:
+            //   * AssemblyFlagsAttribute(int)
+            //   * AssemblyFlagsAttribute(uint)
+            //   * AssemblyFlagsAttribute(System.Reflection.AssemblyNameFlags)
+            //
+            // The int overload should be used, because "System.Int32"
+            // is alphabetically before any of the other types.
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: System.Reflection.AssemblyFlagsAttribute(2)]"
+            );
+
+            // To prove that it's treating the argument as an int,
+            // we can specify an enum value which should fail type
+            // conversion and fall back to being used as a string.
+            attribute.SetMetadata("_Parameter1", "PublicKey");
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: System.Reflection.AssemblyFlagsAttribute(""PublicKey"")]"
+            );
+        }
+
+        /// <summary>
+        /// If the attribute type is not in mscorlib, then the
+        /// parameter should be treated as a string when the parameter
+        /// is not given a declared type or is not marked as a literal.
+        /// </summary>
+        [Fact]
+        public void InferredTypeFallsBackToStringWhenTypeCannotBeInferred()
+        {
+            // Use an attribute that is not in mscorlib. TypeConverterAttribute is in the "System" assembly.
+            TaskItem attribute = new("System.ComponentModel.TypeConverterAttribute");
+            attribute.SetMetadata("_Parameter1", "false");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: System.ComponentModel.TypeConverterAttribute(""false"")]"
+            );
+        }
+
+        /// <summary>
+        /// If the parameter type cannot be converted to the inferred type,
+        /// then the parameter should be treated as a string.
+        /// </summary>
+        [Fact]
+        public void InferredTypeFallsBackToStringWhenTypeConversionFails()
+        {
+            TaskItem attribute = new("System.Diagnostics.DebuggableAttribute");
+            attribute.SetMetadata("_Parameter1", "True"); // Should be a boolean. Will be converted.
+            attribute.SetMetadata("_Parameter2", "42"); // Should be a boolean. Will fail type conversion.
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: System.Diagnostics.DebuggableAttribute(true, ""42"")]"
+            );
+        }
+
+        /// <summary>
+        /// Individual parameters can be typed differently.
+        /// </summary>
+        [Fact]
+        public void UsingInferredDeclaredTypesAndLiteralsInSameAttribute()
+        {
+            TaskItem attribute = new("System.Diagnostics.Contracts.ContractOptionAttribute");
+            attribute.SetMetadata("_Parameter1", "foo");                    // Inferred as string.
+            attribute.SetMetadata("_Parameter2", @"""bar"" /* setting */"); // Literal string.
+            attribute.SetMetadata("_Parameter2_IsLiteral", "true");
+            attribute.SetMetadata("_Parameter3", "False");                  // Typed as boolean.
+            attribute.SetMetadata("_Parameter3_TypeName", "System.Boolean");
+
+            ExecuteAndVerifySuccess(
+                CreateTask("c#", attribute),
+                @"[assembly: System.Diagnostics.Contracts.ContractOptionAttribute(""foo"", ""bar"" /* setting */, false)]"
+            );
+        }
+
+        private WriteCodeFragment CreateTask(string language, params TaskItem[] attributes)
+        {
+            WriteCodeFragment task = new();
+            task.Language = language;
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            task.AssemblyAttributes = attributes;
+            return task;
+        }
+
+        private void ExecuteAndVerifySuccess(WriteCodeFragment task, params string[] expectedAttributes)
+        {
+            MockEngine engine = new(true);
+            task.BuildEngine = engine;
+
+            try
+            {
+                var result = task.Execute();
+
+                // Provide the log output as the user message so that the assertion failure
+                // message is a bit more meaningful than just "Expected false to equal true".
+                Assert.True(result, engine.Log);
+
+                string content = File.ReadAllText(task.OutputFile.ItemSpec);
+                Console.WriteLine(content);
+
+                if (task.Language == "c#")
+                {
+                    CheckContentCSharp(content, expectedAttributes);
+                }
+                else
+                {
+                    CheckContentVB(content, expectedAttributes);
+                }
+            }
+            finally
+            {
+                if ((task.OutputFile is not null) && File.Exists(task.OutputFile.ItemSpec))
+                {
+                    File.Delete(task.OutputFile.ItemSpec);
+                }
+            }
+        }
+
+        private void ExecuteAndVerifyFailure(WriteCodeFragment task, string errorCode)
+        {
+            MockEngine engine = new(true);
+            task.BuildEngine = engine;
+
+            try
+            {
+                var result = task.Execute();
+
+                // Provide the log output as the user message so that the assertion failure
+                // message is a bit more meaningful than just "Expected true to equal false".
+                Assert.False(result, engine.Log);
+
+                engine.AssertLogContains(errorCode);
+
+            }
+            finally
+            {
+                if ((task.OutputFile is not null) && File.Exists(task.OutputFile.ItemSpec))
+                {
+                    File.Delete(task.OutputFile.ItemSpec);
+                }
+            }
+        }
+
         private static void CheckContentCSharp(string actualContent, params string[] expectedAttributes)
         {
             CheckContent(
