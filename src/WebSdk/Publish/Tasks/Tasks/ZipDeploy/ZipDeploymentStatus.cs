@@ -64,14 +64,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.ZipDeploy
 
         private async Task<DeployStatus> GetDeploymentStatusAsync(string deploymentUrl, string userName, string password, int retryCount, TimeSpan retryDelay, CancellationTokenSource cts)
         {
-            Dictionary<string, string> json = await InvokeGetRequestWithRetryAsync<Dictionary<string, string>>(deploymentUrl, userName, password, retryCount, retryDelay, cts);
-            string statusString = null;
-            if (json!= null && !json.TryGetValue("status", out statusString))
+            Dictionary<string, object> json = await InvokeGetRequestWithRetryAsync<Dictionary<string, object>>(deploymentUrl, userName, password, retryCount, retryDelay, cts);
+            object status = null;
+            if (json!= null && !json.TryGetValue("status", out status))
             {
                 return DeployStatus.Unknown;
             }
 
-            if (Enum.TryParse(statusString, out DeployStatus result))
+            if (status != null && Enum.TryParse(status.ToString(), out DeployStatus result))
             {
                 return result;
             }
