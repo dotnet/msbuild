@@ -19,7 +19,8 @@ obj/
 
 *.binlog
 
-sdk.sln.DotSettings.user
+# User specific files
+*.user
 
 # Debian and python stuff
 *.dsc
