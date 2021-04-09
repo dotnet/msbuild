@@ -1196,9 +1196,6 @@ namespace Microsoft.Build.Tasks
         [Serializable]
         internal class SdkReferenceInfo
         {
-            /// <summary>
-            /// Constructor
-            /// </summary>
             public SdkReferenceInfo(string fusionName, string imageRuntime, bool isWinMD, bool isManagedWinmd)
             {
                 FusionName = fusionName;
@@ -1239,9 +1236,6 @@ namespace Microsoft.Build.Tasks
                 Translate(translator);
             }
 
-            /// <summary>
-            /// Constructor
-            /// </summary>
             public SDKInfo(ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata, ConcurrentDictionary<string, List<string>> directoryToFileList, int cacheHash)
             {
                 this.pathToReferenceMetadata = pathToReferenceMetadata;
@@ -1252,11 +1246,8 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// A dictionary which maps a file path to a structure that contain some metadata information about that file.
             /// </summary>
-            internal ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
+            public ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
 
-            /// <summary>
-            /// Dictionary which maps a directory to a list of file names within that directory. This is used to shortcut hitting the disk for the list of files inside of it.
-            /// </summary>
             public ConcurrentDictionary<string, List<string>> DirectoryToFileList { get { return directoryToFileList; } }
 
             /// <summary>
@@ -1297,22 +1288,25 @@ namespace Microsoft.Build.Tasks
             int count = dictionary.Count;
             translator.Translate(ref count);
             string[] keys = dictionary.Keys.ToArray();
-            for (int i = 0; i < count; i++)
+            if (keys.Length == 0)
             {
-                if (i < keys.Length)
-                {
-                    translator.Translate(ref keys[i]);
-                    T value = dictionary[keys[i]];
-                    objTranslator(translator, ref value);
-                }
-                else
+                for (int i = 0; i < count; i++)
                 {
                     string key = null;
                     translator.Translate(ref key);
                     T value = default;
                     objTranslator(translator, ref value);
                     dictionary[key] = value;
-                }                
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    translator.Translate(ref keys[i]);
+                    T value = dictionary[keys[i]];
+                    objTranslator(translator, ref value);
+                }
             }
         }
 
