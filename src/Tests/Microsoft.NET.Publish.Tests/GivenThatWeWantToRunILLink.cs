@@ -142,7 +142,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .WithProjectChanges(project => SetIsTrimmable(project, referenceProjectName));
+                .WithProjectChanges(project => SetMetadata(project, referenceProjectName, "IsTrimmable", "True"));
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
@@ -168,7 +168,7 @@ namespace Microsoft.NET.Publish.Tests
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName, referenceProjectIdentifier: targetFramework);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
-                .WithProjectChanges(project => SetTrimMode(project, referenceProjectName, "link"));
+                .WithProjectChanges(project => SetMetadata(project, referenceProjectName, "TrimMode", "link"));
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
@@ -195,7 +195,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName, referenceProjectIdentifier: targetFramework);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
                 .WithProjectChanges(project => SetGlobalTrimMode(project, trimMode))
-                .WithProjectChanges(project => SetIsTrimmable(project, referenceProjectName))
+                .WithProjectChanges(project => SetMetadata(project, referenceProjectName, "IsTrimmable", "True"))
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
 
             var publishCommand = new PublishCommand(testAsset);
@@ -229,7 +229,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
                 .WithProjectChanges(project => SetGlobalTrimMode(project, "link"))
-                .WithProjectChanges(project => SetIsTrimmable(project, projectName));
+                .WithProjectChanges(project => SetMetadata(project, projectName, "IsTrimmable", "True"));
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true", "/p:PublishTrimmed=true").Should().Pass();
@@ -298,8 +298,8 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testProject = CreateTestProjectWithIsTrimmableAttributes(targetFramework, projectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
-                .WithProjectChanges(project => SetIsTrimmable(project, "UnusedTrimmableAssembly", false))
-                .WithProjectChanges(project => SetIsTrimmable(project, "UnusedNonTrimmableAssembly", true));
+                .WithProjectChanges(project => SetMetadata(project, "UnusedTrimmableAssembly", "IsTrimmable", "false"))
+                .WithProjectChanges(project => SetMetadata(project, "UnusedNonTrimmableAssembly", "IsTrimmable", "true"));
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/v:n").Should().Pass();
@@ -475,6 +475,77 @@ namespace Microsoft.NET.Publish.Tests
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", $"/p:SelfContained=true")
                 .Should().Pass()
                 .And.HaveStdOutMatching("warning IL2026.*Program.IL_2026.*Testing analysis warning IL2026");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_shows_single_warning_for_packagereferences_only(string targetFramework)
+        {
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAssetName = "TrimmedAppWithReferences";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+
+            var publishCommand = new PublishCommand(testAsset, "App");
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}")
+                .Should().Pass()
+                .And.HaveStdOutMatching("IL2026: App.Program.Main.*Program.RUC")
+                .And.HaveStdOutMatching("IL2026: ProjectReference.ProjectReferenceLib.Method.*ProjectReferenceLib.RUC")
+                .And.HaveStdOutMatching("IL2026: TransitiveProjectReference.TransitiveProjectReferenceLib.Method.*TransitiveProjectReferenceLib.RUC")
+                .And.NotHaveStdOutMatching("IL2026:.*PackageReference.PackageReferenceLib")
+                .And.HaveStdOutMatching("IL2104.*'PackageReference'")
+                .And.NotHaveStdOutMatching("IL2104.*'App'")
+                .And.NotHaveStdOutMatching("IL2104.*'ProjectReference'")
+                .And.NotHaveStdOutMatching("IL2104.*'TransitiveProjectReference'");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_accepts_option_to_show_all_warnings(string targetFramework)
+        {
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAssetName = "TrimmedAppWithReferences";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource();
+
+            var publishCommand = new PublishCommand(testAsset, "App");
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:TrimmerSingleWarn=false")
+                .Should().Pass()
+                .And.HaveStdOutMatching("IL2026: App.Program.Main.*Program.RUC")
+                .And.HaveStdOutMatching("IL2026: ProjectReference.ProjectReferenceLib.Method.*ProjectReferenceLib.RUC")
+                .And.HaveStdOutMatching("IL2026: TransitiveProjectReference.TransitiveProjectReferenceLib.Method.*TransitiveProjectReferenceLib.RUC")
+                .And.HaveStdOutMatching("IL2026:.*PackageReference.PackageReferenceLib")
+                .And.NotHaveStdOutContaining("IL2104");
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData("net6.0")]
+        public void ILLink_can_show_single_warning_per_assembly(string targetFramework)
+        {
+            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            var testAssetName = "TrimmedAppWithReferences";
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(testAssetName)
+                .WithSource()
+                .WithProjectChanges(project => {
+                    SetMetadata(project, "PackageReference", "TrimmerSingleWarn", "false");
+                    SetMetadata(project, "ProjectReference", "TrimmerSingleWarn", "true");
+                    SetMetadata(project, "App", "TrimmerSingleWarn", "true");
+                });
+
+            var publishCommand = new PublishCommand(testAsset, "App");
+            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:TrimmerSingleWarn=false")
+                .Should().Pass()
+                .And.NotHaveStdOutMatching("IL2026: App.Program.Main.*Program.RUC")
+                .And.NotHaveStdOutMatching("IL2026: ProjectReference.ProjectReferenceLib.Method.*ProjectReferenceLib.RUC")
+                .And.HaveStdOutMatching("IL2026: TransitiveProjectReference.TransitiveProjectReferenceLib.Method.*TransitiveProjectReferenceLib.RUC")
+                .And.HaveStdOutMatching("IL2026:.*PackageReference.PackageReferenceLib")
+                .And.NotHaveStdOutMatching("IL2104.*'PackageReference'")
+                .And.HaveStdOutMatching("IL2104.*'App'")
+                .And.HaveStdOutMatching("IL2104.*'ProjectReference'")
+                .And.NotHaveStdOutMatching("IL2104.*'TransitiveProjectReference'");
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -1262,39 +1333,25 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining(Strings.PublishTrimmedRequiresVersion30);
         }
 
-        private void SetIsTrimmable(XDocument project, string assemblyName, bool value = true)
+        private void SetMetadata(XDocument project, string assemblyName, string key, string value)
         {
             var ns = project.Root.Name.Namespace;
-
+            var targetName = "SetTrimmerMetadata";
             var target = project.Root.Elements(ns + "Target")
-                .Where(e => e.Attribute("Name")?.Value == "SetIsTrimmable")
+                .Where(e => e.Attribute("Name")?.Value == targetName)
                 .FirstOrDefault();
 
             if (target == null) {
                 target = new XElement(ns + "Target",
-                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
-                                      new XAttribute("Name", "SetIsTrimmable"));
+                    new XAttribute("BeforeTargets", "PrepareForILLink"),
+                    new XAttribute("Name", targetName));
                 project.Root.Add(target);
             }
 
             target.Add(new XElement(ns + "ItemGroup",
-                       new XElement("ManagedAssemblyToLink",
-                                    new XAttribute("Condition", $"'%(FileName)' == '{assemblyName}'"),
-                                    new XElement("IsTrimmable", value.ToString()))));
-        }
-
-        private void SetTrimMode(XDocument project, string assemblyName, string trimMode)
-        {
-            var ns = project.Root.Name.Namespace;
-
-            var target = new XElement(ns + "Target",
-                                      new XAttribute("BeforeTargets", "PrepareForILLink"),
-                                      new XAttribute("Name", "SetTrimMode"));
-            project.Root.Add(target);
-            target.Add(new XElement(ns + "ItemGroup",
-                       new XElement("ManagedAssemblyToLink",
-                                    new XAttribute("Condition", $"'%(FileName)' == '{assemblyName}'"),
-                                    new XElement("TrimMode", trimMode))));
+                new XElement("ManagedAssemblyToLink",
+                    new XAttribute("Condition", $"'%(FileName)' == '{assemblyName}'"),
+                    new XAttribute(key, value))));
         }
 
         private void SetGlobalTrimMode(XDocument project, string trimMode)
