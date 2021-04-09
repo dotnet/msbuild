@@ -865,6 +865,10 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             private void SendDataCore(INodePacket packet)
             {
+#if FEATURE_APM
+                MSBuildEventSource.Log.NodeProviderPacketSendStart(packet.Type.ToString());
+#endif
+
                 MemoryStream writeStream = _writeBufferMemoryStream;
 
                 // clear the buffer but keep the underlying capacity to avoid reallocations
@@ -896,6 +900,9 @@ namespace Microsoft.Build.BackEnd
                     {
                         _exitPacketState = ExitPacketState.ExitPacketSent;
                     }
+#if FEATURE_APM
+                    MSBuildEventSource.Log.NodeProviderPacketSendStop(packet.Type.ToString(), writeStreamLength);
+#endif
                 }
                 catch (IOException e)
                 {
@@ -906,6 +913,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Do nothing here because any exception will be caught by the async read handler
                 }
+
             }
 
             private static bool IsExitPacket(INodePacket packet)
@@ -1082,6 +1090,9 @@ namespace Microsoft.Build.BackEnd
                 int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
                 MSBuildEventSource.Log.PacketReadSize(packetLength);
 
+                NodePacketType packetType = (NodePacketType)_headerByte[0];
+                MSBuildEventSource.Log.NodeProviderPacketReadStart(packetType.ToString());
+
                 // Ensures the buffer is at least this length.
                 // It avoids reallocations if the buffer is already large enough.
                 _readBufferMemoryStream.SetLength(packetLength);
@@ -1142,6 +1153,7 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         bytesRead = _clientToServerStream.EndRead(result);
+                        MSBuildEventSource.Log.NodeProviderPacketReadStop(packetType.ToString(), bytesRead + _headerByte.Length);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async

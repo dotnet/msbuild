@@ -5,7 +5,9 @@ using System;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
 #else
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using Microsoft.Build.Eventing;
 #endif
 using System.IO;
 using System.IO.Pipes;
@@ -573,9 +575,17 @@ internal void InternalConstruct(string pipeName, bool multiClient = false)
 
                             NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
 
+#if !CLR2COMPATIBILITY
+                            MSBuildEventSource.Log.OutOfProcPacketReadStart(packetType.ToString());
+#endif
+
                             try
                             {
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+#if !CLR2COMPATIBILITY
+                                bytesRead += BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
+                                MSBuildEventSource.Log.OutOfProcPacketReadStop(packetType.ToString(), bytesRead);
+#endif
                             }
                             catch (Exception e)
                             {
@@ -604,6 +614,10 @@ internal void InternalConstruct(string pipeName, bool multiClient = false)
                             INodePacket packet;
                             while (localPacketQueue.TryDequeue(out packet))
                             {
+#if !CLR2COMPATIBILITY
+                                MSBuildEventSource.Log.OutOfProcPacketSendStart(packet.Type.ToString());
+#endif
+
                                 var packetStream = _packetStream;
                                 packetStream.SetLength(0);
 
@@ -624,6 +638,10 @@ internal void InternalConstruct(string pipeName, bool multiClient = false)
                                 _binaryWriter.Write(packetStreamLength - 5);
 
                                 localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+
+#if !CLR2COMPATIBILITY
+                                MSBuildEventSource.Log.OutOfProcPacketSendStop(packet.Type.ToString(), packetStreamLength);
+#endif
                             }
                         }
                         catch (Exception e)

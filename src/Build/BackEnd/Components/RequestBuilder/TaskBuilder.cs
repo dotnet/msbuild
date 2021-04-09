@@ -383,10 +383,11 @@ namespace Microsoft.Build.BackEnd
                 return new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null);
             }
 
+            TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+
             // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
             if (MSBuildEventSource.Log.IsEnabled())
             {
-                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
                 MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
             }
 
@@ -414,7 +415,6 @@ namespace Microsoft.Build.BackEnd
                     TaskRequirements? requirements = _taskExecutionHost.FindTask(taskIdentityParameters);
                     if (requirements != null)
                     {
-                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
                         try
@@ -500,7 +500,6 @@ namespace Microsoft.Build.BackEnd
             // Some tests do not provide an actual taskNode; checking if _taskNode == null prevents those tests from failing.
             if (MSBuildEventSource.Log.IsEnabled())
             {
-                TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
                 MSBuildEventSource.Log.ExecuteTaskStop(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
             }
 

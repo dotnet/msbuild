@@ -13,6 +13,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -253,6 +254,7 @@ namespace Microsoft.Build.BackEnd
             string architecture = _taskHostParameters[XMakeAttributes.architecture];
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
 
+            MSBuildEventSource.Log.ExecuteHostTaskStart(_taskType.Type.Name, _taskLoggingContext.BuildEventContext.TaskId);
             // set up the node
             lock (_taskHostLock)
             {
@@ -340,6 +342,8 @@ namespace Microsoft.Build.BackEnd
             {
                 LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, e);
             }
+
+            MSBuildEventSource.Log.ExecuteHostTaskStop(_taskType.Type.Name, _taskLoggingContext.BuildEventContext.TaskId);
 
             return _taskExecutionSucceeded;
         }

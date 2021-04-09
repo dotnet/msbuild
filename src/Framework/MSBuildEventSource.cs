@@ -376,10 +376,22 @@ namespace Microsoft.Build.Eventing
             WriteEvent(47, taskName, taskID);
         }
 
+        [Event(247, Keywords = Keywords.All)]
+        public void ExecuteHostTaskStart(string taskName, int taskID)
+        {
+            WriteEvent(247, taskName, taskID);
+        }
+
         [Event(48, Keywords = Keywords.All)]
         public void ExecuteTaskStop(string taskName, int taskID)
         {
             WriteEvent(48, taskName, taskID);
+        }
+
+        [Event(248, Keywords = Keywords.All)]
+        public void ExecuteHostTaskStop(string taskName, int taskID)
+        {
+            WriteEvent(248, taskName, taskID);
         }
 
         [Event(49, Keywords = Keywords.All)]
@@ -424,5 +436,77 @@ namespace Microsoft.Build.Eventing
             WriteEvent(55, size);
         }
         #endregion
+
+        [Event(203, Keywords = Keywords.All)]
+        public void OutOfProcPacketSendStart(string packetName)
+        {
+            WriteEvent(203, packetName);
+        }
+
+        [Event(204, Keywords = Keywords.All)]
+        public void OutOfProcPacketSendStop(string packetName, int bytesSent)
+        {
+            WriteEvent(204, packetName, bytesSent);
+        }
+
+        [Event(205, Keywords = Keywords.All)]
+        public void OutOfProcPacketReadStart(string packetName)
+        {
+            WriteEvent(205, packetName);
+        }
+
+        [Event(206, Keywords = Keywords.All)]
+        public void OutOfProcPacketReadStop(string packetName, int bytesRead)
+        {
+            WriteEvent(206, packetName, bytesRead);
+        }
+
+        [Event(303, Keywords = Keywords.All)]
+        public void NodeProviderPacketSendStart(string packetName)
+        {
+            WriteEvent(303, packetName);
+        }
+
+        [Event(304, Keywords = Keywords.All)]
+        public void NodeProviderPacketSendStop(string packetName, int bytesSent)
+        {
+            WriteEvent(304, packetName, bytesSent);
+        }
+
+        [Event(305, Keywords = Keywords.All)]
+        public void NodeProviderPacketReadStart(string packetName)
+        {
+            WriteEvent(305, packetName);
+        }
+
+        [Event(306, Keywords = Keywords.All)]
+        public void NodeProviderPacketReadStop(string packetName, int bytesRead)
+        {
+            WriteEvent(306, packetName, bytesRead);
+        }
+
+        [Event(210, Keywords = Keywords.All)]
+        public void RarServiceTaskExecutionStart(string taskName, int ownerNodeId)
+        {
+            WriteEvent(210, taskName, ownerNodeId);
+        }
+
+        [Event(211, Keywords = Keywords.All)]
+        public void RarServiceTaskExecutionStop(string taskName, int ownerNodeId)
+        {
+            WriteEvent(211, taskName, ownerNodeId);
+        }
+
+        [Event(212, Keywords = Keywords.All)]
+        public void RarServiceTaskResultStart(string taskName, int ownerNodeId)
+        {
+            WriteEvent(212, taskName, ownerNodeId);
+        }
+
+        [Event(213, Keywords = Keywords.All)]
+        public void RarServiceTaskResultStop()
+        {
+            WriteEvent(213);
+        }
     }
 }

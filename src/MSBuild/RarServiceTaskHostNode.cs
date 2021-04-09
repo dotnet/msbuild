@@ -11,6 +11,7 @@ using System.Threading;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -674,6 +675,8 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 _nodeEndpoint.SendData(taskCompletePacketToSend);
+
+                MSBuildEventSource.Log.RarServiceTaskResultStop();
             }
 
             _currentConfiguration = null;
@@ -801,6 +804,8 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
+                MSBuildEventSource.Log.RarServiceTaskExecutionStart(taskConfiguration.TaskName, taskConfiguration.NodeId);
+
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
                 Thread.CurrentThread.CurrentUICulture = taskConfiguration.UICulture;
@@ -827,6 +832,8 @@ namespace Microsoft.Build.CommandLine
                     taskParams,
                     taskExecutionContext
                 );
+
+                MSBuildEventSource.Log.RarServiceTaskExecutionStop(taskConfiguration.TaskName, taskConfiguration.NodeId);
             }
             catch (Exception e)
             {
@@ -847,6 +854,8 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                MSBuildEventSource.Log.RarServiceTaskResultStart(taskConfiguration.TaskName, taskConfiguration.NodeId);
+
                 try
                 {
                     _isTaskExecuting = false;
