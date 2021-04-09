@@ -57,23 +57,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
             var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
 
-            try
-            {
-                installManager.InstallWorkloads(mockWorkloadIds, true);
-
-                // Install should have failed
-                true.Should().BeFalse();
-            }
-            catch (Exception e)
-            {
-                e.Message.Should().Be("Failing workload: xamarin-android-build");
-                var expectedPacks = mockWorkloadIds
-                    .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
-                    .Distinct()
-                    .Select(packId => workloadResolver.TryGetPackInfo(packId));
-                installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
-                installer.WorkloadInstallRecord.Should().BeEmpty();
-            }
+            var exceptionThrown = Assert.Throws<Exception>(() => installManager.InstallWorkloads(mockWorkloadIds, true));
+            exceptionThrown.Message.Should().Be("Failing workload: xamarin-android-build");
+            var expectedPacks = mockWorkloadIds
+                .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                .Distinct()
+                .Select(packId => workloadResolver.TryGetPackInfo(packId));
+            installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
+            installer.WorkloadInstallRecord.Should().BeEmpty();
         }
     }
 }
