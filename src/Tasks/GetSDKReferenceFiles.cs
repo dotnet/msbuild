@@ -877,7 +877,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Methods which are used to save and read the cache files per sdk from and to disk.
         /// </summary>
-        private class SDKFilesCache
+        internal class SDKFilesCache
         {
             /// <summary>
             ///  Thread-safe queue which contains exceptions throws during cache file reading and writing.
@@ -934,13 +934,8 @@ namespace Microsoft.Build.Tasks
                         return sdkInfo;
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the file is deleted or not
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemReadingCacheFile", cacheFile, e.ToString()));
                 }
@@ -969,13 +964,8 @@ namespace Microsoft.Build.Tasks
                         {
                             File.Delete(existingCacheFile);
                         }
-                        catch (Exception e)
+                        catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                         {
-                            if (ExceptionHandling.IsCriticalException(e))
-                            {
-                                throw;
-                            }
-
                             // Queue up for later logging, does not matter if the file is deleted or not
                             _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemDeletingCacheFile", existingCacheFile, e.Message));
                         }
@@ -1204,7 +1194,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <remarks>This is a serialization format. Do not change member naming.</remarks>
         [Serializable]
-        private class SdkReferenceInfo
+        internal class SdkReferenceInfo
         {
             /// <summary>
             /// Constructor
@@ -1219,10 +1209,10 @@ namespace Microsoft.Build.Tasks
 
             #region Properties
 
-            public string FusionName { get; }
-            public bool IsWinMD { get; }
-            public bool IsManagedWinmd { get; }
-            public string ImageRuntime { get; }
+            public string FusionName { get; internal set; }
+            public bool IsWinMD { get; internal set; }
+            public bool IsManagedWinmd { get; internal set; }
+            public string ImageRuntime { get; internal set; }
 
             #endregion
         }
@@ -1231,7 +1221,7 @@ namespace Microsoft.Build.Tasks
         /// Structure that contains the on disk representation of the SDK in memory.
         /// </summary>
         /// <remarks>This is a serialization format. Do not change member naming.</remarks>
-        private class SDKInfo : ITranslatable
+        internal class SDKInfo : ITranslatable
         {
             private ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata;
             private ConcurrentDictionary<string, List<string>> directoryToFileList;
@@ -1262,7 +1252,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// A dictionary which maps a file path to a structure that contain some metadata information about that file.
             /// </summary>
-            public ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
+            internal ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
 
             /// <summary>
             /// Dictionary which maps a directory to a list of file names within that directory. This is used to shortcut hitting the disk for the list of files inside of it.
@@ -1278,6 +1268,7 @@ namespace Microsoft.Build.Tasks
             {
                 TranslateConcurrentDictionary<SdkReferenceInfo>(translator, ref pathToReferenceMetadata, (ITranslator t, ref SdkReferenceInfo info) =>
                 {
+                    info ??= new SdkReferenceInfo(null, null, false, false);
                     string fusionName = info.FusionName;
                     string imageRuntime = info.ImageRuntime;
                     bool isManagedWinmd = info.IsManagedWinmd;
@@ -1286,6 +1277,10 @@ namespace Microsoft.Build.Tasks
                     t.Translate(ref imageRuntime);
                     t.Translate(ref isManagedWinmd);
                     t.Translate(ref isWinmd);
+                    info.FusionName = fusionName;
+                    info.ImageRuntime = imageRuntime;
+                    info.IsManagedWinmd = isManagedWinmd;
+                    info.IsWinMD = isWinmd;
                 });
 
                 TranslateConcurrentDictionary<List<string>>(translator, ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
@@ -1324,7 +1319,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// This class represents the context information used by the background cache serialization thread.
         /// </summary>
-        private class SaveContext
+        internal class SaveContext
         {
             /// <summary>
             /// Constructor
