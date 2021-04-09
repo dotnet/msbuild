@@ -47,11 +47,17 @@ namespace Microsoft.Build.Framework
             {
                 // TODO: Does GetFullPath access the file system? If so, find a way to remove internal ../ and ./ without it.
                 // Use URI, perhaps?
-                return Path.GetFullPath(Path.Combine(StartupDirectory, path));
+                return Path.GetFullPath(Path.Combine(StartupDirectory, FixFilePath(path)));
             }
             catch { }
 
             return path;
+        }
+
+        // TODO: consider to use the function from FileUtilities
+        private static string FixFilePath(string path)
+        {
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
         }
     }
 
