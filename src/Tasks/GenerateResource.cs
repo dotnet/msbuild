@@ -1065,13 +1065,14 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(_sdkToolsPath))
             {
-                _resgenPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35);
+                var version = TargetDotNetFrameworkVersion.VersionLatest;
+                _resgenPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", version);
 
                 if (_resgenPath == null && ExecuteAsTool)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "resgen.exe",
-                        ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version35),
-                        ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version35));
+                        ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(version),
+                        ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(version));
                 }
             }
             else
