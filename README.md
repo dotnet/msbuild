@@ -10,19 +10,19 @@ The current development branch is `main`. Changes in `main` will go into a futur
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=main)
 
-We have forked for MSBuild 16.9 in the branch [`vs16.9`](https://github.com/Microsoft/msbuild/tree/vs16.9). Changes to that branch need special approval.
+We have forked for MSBuild 16.9 in the branch [`vs16.9`](https://github.com/dotnet/msbuild/tree/vs16.9). Changes to that branch need special approval.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.9)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.9)
 
-MSBuild 16.7 builds from the branch [`vs16.7`](https://github.com/Microsoft/msbuild/tree/vs16.7). Only high-priority bugfixes will be considered for servicing 16.7.
+MSBuild 16.7 builds from the branch [`vs16.7`](https://github.com/dotnet/msbuild/tree/vs16.7). Only high-priority bugfixes will be considered for servicing 16.7.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.7)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.7)
 
-MSBuild 16.4 builds from the branch [`vs16.4`](https://github.com/Microsoft/msbuild/tree/vs16.4). Only high-priority bugfixes will be considered for servicing 16.4.
+MSBuild 16.4 builds from the branch [`vs16.4`](https://github.com/dotnet/msbuild/tree/vs16.4). Only high-priority bugfixes will be considered for servicing 16.4.
 
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/Microsoft/msbuild/msbuild-pr?branchName=vs16.4)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=86&branchName=vs16.4)
 
-MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
+MSBuild 15.9 builds from the branch [`vs15.9`](https://github.com/dotnet/msbuild/tree/vs15.9). Only very-high-priority bugfixes will be considered for servicing 15.9.
 
 ## Building
 
