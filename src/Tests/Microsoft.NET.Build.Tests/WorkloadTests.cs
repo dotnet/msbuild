@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tests
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0-ios;net5.0-android"
+                TargetFrameworks = "net5.0-foo;net5.0-bar"
             };
 
             var testAsset = _testAssetsManager

@@ -6,11 +6,20 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using Xunit;
 using System.Linq;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace ManifestReaderTests
 {
-    public class ManifestReaderFunctionalTests
+    public class ManifestReaderFunctionalTests : SdkTest
     {
+        private readonly string ManifestPath;
+
+        public ManifestReaderFunctionalTests(ITestOutputHelper log) : base(log)
+        {
+            ManifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
+        }
+
         [Fact]
         public void ItShouldGetAllTemplatesPacks()
         {
@@ -39,10 +48,10 @@ namespace ManifestReaderTests
             androidWorkloads.Path.Should().Be(Path.Combine("fakepath", "packs", "Xamarin.Android.Sdk", "8.4.7"));
         }
 
-        private static WorkloadResolver SetUp()
+        private WorkloadResolver SetUp()
         {
             var workloadResolver =
-                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] { ManifestPath }),
                     new[] { "fakepath" });
 
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
@@ -53,7 +62,7 @@ namespace ManifestReaderTests
         public void GivenTemplateNupkgDoesNotExistOnDiskItShouldReturnEmpty()
         {
             var workloadResolver =
-                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] { ManifestPath }),
                     new[] { "fakepath" });
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => false, directoryExists: (_) => true);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
@@ -64,7 +73,7 @@ namespace ManifestReaderTests
         public void GivenWorkloadSDKsDirectoryNotExistOnDiskItShouldReturnEmpty()
         {
             var workloadResolver =
-                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] {Path.Combine("Manifests", "Sample.json")}),
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(new[] { ManifestPath }),
                     new[] { "fakepath" });
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => false);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);

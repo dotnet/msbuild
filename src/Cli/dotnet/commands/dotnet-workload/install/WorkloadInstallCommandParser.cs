@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
 
@@ -42,6 +41,8 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option FromCacheOption =
             new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription) { };
 
+        public static readonly Option SkipManifestUpdateOption = new Option<bool>("--skip-manifest-update", LocalizableStrings.SkipManifestUpdateOptionDescription);
+
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
 
         public static Command GetCommand()
@@ -52,6 +53,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VersionOption);
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
+            command.AddOption(SkipManifestUpdateOption);
             command.AddOption(PrintDownloadLinkOnlyOption);
             command.AddOption(FromCacheOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
