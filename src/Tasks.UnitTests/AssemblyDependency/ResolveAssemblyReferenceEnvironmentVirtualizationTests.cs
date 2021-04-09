@@ -14,9 +14,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
-    public sealed class ResolveAssemblyReferenceEnvironmentVirtualization : ResolveAssemblyReferenceTestFixture
+    public sealed class ResolveAssemblyReferenceEnvironmentVirtualizationTests : ResolveAssemblyReferenceTestFixture
     {
-        public ResolveAssemblyReferenceEnvironmentVirtualization(ITestOutputHelper output) : base(output)
+        public ResolveAssemblyReferenceEnvironmentVirtualizationTests(ITestOutputHelper output) : base(output)
         {
         }
 
