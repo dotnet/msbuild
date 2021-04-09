@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-#if NET40_OR_GREATER
-using System.Collections.Concurrent;
-#endif
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
