@@ -23,7 +23,7 @@ using System.Runtime.Remoting;
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
-    /// This class represents an implementation of INode for RAR service out-of-proc node for hosting 'resolve assembly reference' tasks.
+    /// This class represents an implementation of INode for RAR service out-of-proc task for hosting 'resolve assembly reference' tasks.
     /// </summary>
     internal class RarServiceTaskHostNode :
 #if FEATURE_APPDOMAIN
@@ -504,7 +504,11 @@ namespace Microsoft.Build.CommandLine
 
         private static NodeEngineShutdownReason StartRarServiceInternal(out Exception shutdownException)
         {
-            const int minListenCapacity = 3;
+            // set thread pool size higher to avoid thread pool saturation delays
+            // 100 threads is equal to about 100 working MSBuild nodes and shall be plenty even for current high end machines
+            ThreadPool.SetMinThreads(100, 100);
+
+            const int minListenCapacity = 12;
             int currentCapacity = 0;
 
             // initiate with two waiting clients
@@ -513,10 +517,9 @@ namespace Microsoft.Build.CommandLine
                 s_waitForConcurrentClient.Add(true);
             }
 
-            // run draining queue
             foreach (var _ in s_waitForConcurrentClient.GetConsumingEnumerable())
             {
-                // rework into threads? or long running tasks?
+                AssertNoThreadPoolSaturation();
                 System.Threading.Tasks.Task.Run(() =>
                 {
                     // TODO: block when max clients is reached
@@ -536,6 +539,13 @@ namespace Microsoft.Build.CommandLine
 
             // TODO: how to do graceful node termination and automatic inactivity timeout termination?
             throw new NotImplementedException("It shall never get here, as cancellation is not implemented yet");
+        }
+
+        [Conditional("DEBUG")]
+        static void AssertNoThreadPoolSaturation()
+        {
+            ThreadPool.GetAvailableThreads(out int workerThreads, out int completionPortThreads);
+            Debug.Assert(workerThreads > 5, "We are getting close to ThreadPool saturation. Consider to increase MinThreads in ThreadPool.SetMinThreads method above.");
         }
 
         /// <summary>
@@ -885,7 +895,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends the requested packet across to the main node. 
+        /// Sends the requested packet across to the caller node. 
         /// </summary>
         private void SendBuildEvent(BuildEventArgs e)
         {
