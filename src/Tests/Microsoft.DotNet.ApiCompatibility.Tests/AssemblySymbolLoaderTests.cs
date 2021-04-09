@@ -273,7 +273,7 @@ namespace MyNamespace
             Assert.Equal(2, symbols.Count());
 
             IEnumerable<string> expected = new[] { "LoadsMultipleAssembliesFromDirectory_First", "LoadsMultipleAssembliesFromDirectory_Second" };
-            IEnumerable<string> actual = symbols.Select(a => a.Name);
+            IEnumerable<string> actual = symbols.Select(a => a.Name).OrderBy(a => a, StringComparer.Ordinal);
 
             Assert.Equal(expected, actual, StringComparer.Ordinal);
         }
