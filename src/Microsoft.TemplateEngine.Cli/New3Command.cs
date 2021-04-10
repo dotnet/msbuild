@@ -95,29 +95,19 @@ namespace Microsoft.TemplateEngine.Cli
             return Run(commandName, host, telemetryLogger, new New3Callbacks() { OnFirstRun = onFirstRun }, args, hivePath);
         }
 
-        private static Mutex EnsureEntryMutex(string? hivePath, ITemplateEngineHost host)
-        {
-            if (_entryMutex == null)
-            {
-                string entryMutexIdentity;
-
-                // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
-                if (!string.IsNullOrEmpty(hivePath))
-                {
-                    entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_").Replace("/", "_");
-                }
-                else
-                {
-                    entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_").Replace("/", "_");
-                }
-
-                _entryMutex = new Mutex(false, entryMutexIdentity);
-            }
-
-            return _entryMutex;
-        }
-
-        private static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath)
+        /// <summary>
+        /// Runs the command using <paramref name="host"/> and <paramref name="args"/>.
+        /// </summary>
+        /// <param name="commandName">Command name that is being executed.</param>
+        /// <param name="host">The <see cref="ITemplateEngineHost"/> that executes the command.</param>
+        /// <param name="telemetryLogger"><see cref="ITelemetryLogger"/> to use to track events.</param>
+        /// <param name="onFirstRun">actions to be run on the first run.</param>
+        /// <param name="callbacks">set of callbacks to be used, <see cref="New3Callbacks"/> for more details.</param>
+        /// <param name="args">arguments to be run using template engine.</param>
+        /// <param name="hivePath">(optional) the path to template engine settings to use.</param>
+        /// <returns>exit code: 0 on success, other on error.</returns>
+        /// <exception cref="CommandParserException">when <paramref name="args"/> cannot be parsed.</exception>
+        public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath = null)
         {
             if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
@@ -140,6 +130,28 @@ namespace Microsoft.TemplateEngine.Cli
                     _entryMutex.ReleaseMutex();
                 }
             }
+        }
+
+        private static Mutex EnsureEntryMutex(string? hivePath, ITemplateEngineHost host)
+        {
+            if (_entryMutex == null)
+            {
+                string entryMutexIdentity;
+
+                // this effectively mimics EngineEnvironmentSettings.BaseDir, which is not initialized when this is needed.
+                if (!string.IsNullOrEmpty(hivePath))
+                {
+                    entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{hivePath}".Replace("\\", "_").Replace("/", "_");
+                }
+                else
+                {
+                    entryMutexIdentity = $"{_entryMutexGuid.ToString()}-{host.HostIdentifier}-{host.Version}".Replace("\\", "_").Replace("/", "_");
+                }
+
+                _entryMutex = new Mutex(false, entryMutexIdentity);
+            }
+
+            return _entryMutex;
         }
 
         private static int ActualRun(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath)
