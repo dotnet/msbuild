@@ -346,13 +346,22 @@ namespace Microsoft.Build.UnitTests
         [InlineData("detailedsummary")]
         [InlineData("DETAILEDSUMMARY")]
         [InlineData("DetailedSummary")]
-        public void DetailedSummarySwitchIndentificationTests(string detailedsummary)
+        public void DetailedSummarySwitchIdentificationTests(string detailedsummary)
         {
-            CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
-            string duplicateSwitchErrorMessage;
-            CommandLineSwitches.IsParameterlessSwitch(detailedsummary, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
-            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
+            CommandLineSwitches.IsParameterizedSwitch(
+                detailedsummary,
+                out var parameterizedSwitch,
+                out var duplicateSwitchErrorMessage,
+                out var multipleParametersAllowed,
+                out var missingParametersErrorMessage,
+                out var unquoteParameters,
+                out var emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.DetailedSummary);
             duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBe(false);
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBe(true);
+            emptyParametersAllowed.ShouldBe(false);
         }
 
         [Theory]
