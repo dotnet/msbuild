@@ -5,9 +5,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
@@ -24,6 +26,7 @@ namespace dotnet_new3
         private const string LanguageOverrideEnvironmentVar = "DOTNET_CLI_UI_LANGUAGE";
         private const string VsLanguageOverrideEnvironmentVar = "VSLANG";
         private const string CompilerLanguageEnvironmentVar = "PreferredUILang";
+        private const string V = "dotnetcli";
 
         public static int Main(string[] args)
         {
@@ -56,7 +59,7 @@ namespace dotnet_new3
 
             try
             {
-                string? versionString = Dotnet.Version().CaptureStdOut().Execute().StdOut;
+                string? versionString = GetCLIVersion();
                 if (!string.IsNullOrWhiteSpace(versionString))
                 {
                     preferences["dotnet-cli-version"] = versionString.Trim();
@@ -79,7 +82,7 @@ namespace dotnet_new3
 
             ConfigureLocale();
 
-            DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { "dotnetcli" });
+            DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { V });
 
             if (emitTimings)
             {
@@ -160,14 +163,34 @@ namespace dotnet_new3
 
         private static void ConfigureLocaleForChildProcesses(CultureInfo language)
         {
-            // Set language for child dotnetcli processes.
+            // Set language for child dotnet CLI processes.
             Environment.SetEnvironmentVariable(LanguageOverrideEnvironmentVar, language.Name);
 
             // Set language for tools following VS guidelines to just work in CLI.
             Environment.SetEnvironmentVariable(VsLanguageOverrideEnvironmentVar, language.LCID.ToString());
 
-            // Set languatefor C#/VB targets that pass $(PreferredUILang) to compiler.
+            // Set language for C#/VB targets that pass $(PreferredUILang) to compiler.
             Environment.SetEnvironmentVariable(CompilerLanguageEnvironmentVar, language.Name);
+        }
+
+        private static string GetCLIVersion()
+        {
+            ProcessStartInfo processInfo = new ProcessStartInfo("dotnet", "--version")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            };
+            StringBuilder version = new StringBuilder();
+            Process? p = Process.Start(processInfo);
+            if (p != null)
+            {
+                p.BeginOutputReadLine();
+                p.OutputDataReceived += (sender, e) => version.AppendLine(e.Data);
+                p.WaitForExit();
+            }
+            return version.ToString();
         }
     }
 }

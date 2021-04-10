@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Cli;
@@ -191,7 +193,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
 
             try
             {
-                string versionString = Dotnet.Version().CaptureStdOut().Execute().StdOut;
+                string versionString = GetCLIVersion();
                 if (!string.IsNullOrWhiteSpace(versionString))
                 {
                     preferences["dotnet-cli-version"] = versionString.Trim();
@@ -210,6 +212,32 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             });
 
             return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { "dotnetcli" });
+        }
+
+        /// <summary>
+        /// Gets dotnet CLI version.
+        /// </summary>
+        /// <remarks>
+        /// do not move to TestHelper, unless absolutely needed - this project will be deprecated soon.
+        /// </remarks>
+        private static string GetCLIVersion()
+        {
+            ProcessStartInfo processInfo = new ProcessStartInfo("dotnet", "--version")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            };
+            StringBuilder version = new StringBuilder();
+            Process p = Process.Start(processInfo);
+            if (p != null)
+            {
+                p.BeginOutputReadLine();
+                p.OutputDataReceived += (sender, e) => version.AppendLine(e.Data);
+                p.WaitForExit();
+            }
+            return version.ToString();
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             Assert.NotNull(host);
 
             ITelemetryLogger telemetryLogger = new TelemetryLogger(null, false);
-            int initializeResult = New3Command.Run(CommandName, host, telemetryLogger, null, new string[] { });
+            int initializeResult = New3Command.Run(CommandName, host, telemetryLogger, new New3Callbacks(), Array.Empty<string>());
             Assert.Equal(0, initializeResult);
 
             string codebase = typeof(NupkgInstallTests).GetTypeInfo().Assembly.Location;
@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             };
 
             // install the test pack
-            int firstInstallResult = New3Command.Run(CommandName, host, telemetryLogger, null, installArgs);
+            int firstInstallResult = New3Command.Run(CommandName, host, telemetryLogger, new New3Callbacks(), installArgs);
             Assert.Equal(0, firstInstallResult);
 
             EngineEnvironmentSettings environemnt = new EngineEnvironmentSettings(host, x => new SettingsLoader(x));
@@ -65,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             Assert.Contains(checkTemplateName, allTemplates.Select(t => t.Info.ShortName));
 
             // install the same test pack again
-            int secondInstallResult = New3Command.Run(CommandName, host, telemetryLogger, null, installArgs);
+            int secondInstallResult = New3Command.Run(CommandName, host, telemetryLogger, new New3Callbacks(), installArgs);
             Assert.NotEqual(0, secondInstallResult);
 
             // check that the template is still installed after the second install.
