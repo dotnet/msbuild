@@ -328,31 +328,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// else could let the item get corrupt (inconsistent values for Filename and FullPath, for example)
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void TasksCanAddRecursiveDirBuiltInMetadata()
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(this._testOutput);
 
-            string projectFileContents = ObjectModelHelpers.CleanupFileContents(@"
-<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents($@"
+<Project>
 <Target Name='t'>
- <CreateItem Include='$(programfiles)\reference assemblies\**\*.dll;'>
+ <CreateItem Include='{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\**\*.dll'>
    <Output TaskParameter='Include' ItemName='x' />
  </CreateItem>
 <Message Text='@(x)'/>
- <Message Text='[%(x.RecursiveDir)]'/>                    
+ <Message Text='[%(x.RecursiveDir)]'/>
 </Target>
 </Project>");
 
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
-            List<ILogger> loggers = new List<ILogger>();
-            loggers.Add(logger);
-            bool result = project.Build("t", loggers);
+            bool result = project.Build("t", new[] { logger });
 
             Assert.True(result);
-            logger.AssertLogDoesntContain("[]");
+
+            // Assuming the current directory of the test .dll has at least one subfolder
+            // such as Roslyn, the log will contain [Roslyn\]
+            logger.AssertLogContains("\\]");
             logger.AssertLogDoesntContain("MSB4118");
             logger.AssertLogDoesntContain("MSB3031");
         }
