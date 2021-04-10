@@ -35,7 +35,7 @@
 
     <ItemGroup>
         <EmbeddedResource Update="LocalizableStrings.resx">
-            <Generator>PublicResXFileCodeGenerator</Generator>
+            <Generator>ResXFileCodeGenerator</Generator>
             <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
         </EmbeddedResource>
     </ItemGroup>
