@@ -349,8 +349,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(result);
 
             // Assuming the current directory of the test .dll has at least one subfolder
-            // such as Roslyn, the log will contain [Roslyn\]
-            logger.AssertLogContains("\\]");
+            // such as Roslyn, the log will contain [Roslyn\] (or [Roslyn/] on Unix)
+            string slashAndBracket = Path.DirectorySeparatorChar.ToString() + "]";
+            logger.AssertLogContains(slashAndBracket);
             logger.AssertLogDoesntContain("MSB4118");
             logger.AssertLogDoesntContain("MSB3031");
         }
