@@ -60,6 +60,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_NugetTargetMonikerAndRID Condition="'$(RuntimeIdentifier)' != ''">$(NuGetTargetMoniker)/$(RuntimeIdentifier)</_NugetTargetMonikerAndRID>
   </PropertyGroup>
 
+  <!-- Embed all project.assets.json files into the binary log when building with /bl -->
+  <ItemGroup>
+    <EmbedInBinlog Include="$(ProjectAssetsFile)" Condition="Exists('$(ProjectAssetsFile)') AND $(EmbedProjectAssetsFile) != false" />
+  </ItemGroup>
+
   <!--
     *************************************
     2. EXTERNAL PROPERTIES and ITEMS
