@@ -50,13 +50,19 @@ namespace Microsoft.NET.Build.Tasks
             options |= IncludeAllContent ? BundleOptions.BundleAllContent : BundleOptions.None;
             options |= IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None;
 
+            Version version = new Version(TargetFrameworkVersion);
+            if (version.Major >= 6)
+            {
+                options |= BundleOptions.EnableCompression;
+            }
+
             var bundler = new Bundler(
                 AppHostName,
                 OutputDir,
                 options,
                 targetOS,
                 targetArch,
-                new Version(TargetFrameworkVersion),
+                version,
                 ShowDiagnosticOutput);
 
             var fileSpec = new List<FileSpec>(FilesToBundle.Length);
