@@ -1226,8 +1226,9 @@ namespace Microsoft.Build.Tasks
 
             internal SDKInfo()
             {
-                pathToReferenceMetadata = new();
-                directoryToFileList = new();
+                IEqualityComparer<string> comparer = FileUtilities.PathComparison == StringComparison.Ordinal ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+                pathToReferenceMetadata = new(comparer);
+                directoryToFileList = new(comparer);
                 hash = 0;
             }
 
@@ -1287,8 +1288,7 @@ namespace Microsoft.Build.Tasks
         {
             int count = dictionary.Count;
             translator.Translate(ref count);
-            string[] keys = dictionary.Keys.ToArray();
-            if (keys.Length == 0)
+            if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -1301,10 +1301,11 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                for (int i = 0; i < count; i++)
+                foreach (KeyValuePair<string, T> kvp in dictionary)
                 {
-                    translator.Translate(ref keys[i]);
-                    T value = dictionary[keys[i]];
+                    string key = kvp.Key;
+                    translator.Translate(ref key);
+                    T value = kvp.Value;
                     objTranslator(translator, ref value);
                 }
             }

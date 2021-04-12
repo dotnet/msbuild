@@ -491,14 +491,14 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             ITaskItem item1 = new TaskItem(_sdkDirectory);
             item1.SetMetadata("ExpandReferenceAssemblies", "true");
             item1.SetMetadata("TargetedSDKConfiguration", "Retail");
-            item1.SetMetadata("TargetedSDKArchitecture", "X86");
+            item1.SetMetadata("TargetedSDKArchitecture", "x86");
             item1.SetMetadata("CopyLocalExpandedReferenceAssemblies", "false");
             item1.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             ITaskItem item2 = new TaskItem(_sdkDirectory);
             item2.SetMetadata("ExpandReferenceAssemblies", "true");
             item2.SetMetadata("TargetedSDKConfiguration", "Retail");
-            item2.SetMetadata("TargetedSDKArchitecture", "X86");
+            item2.SetMetadata("TargetedSDKArchitecture", "x86");
             item2.SetMetadata("CopyLocalExpandedReferenceAssemblies", "false");
             item2.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
             item2.SetMetadata("RuntimeReferenceOnly", "true");
