@@ -116,12 +116,24 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 isEnabledByDefault: true);
 
             var span = razorDiagnostic.Span;
-            var location = Location.Create(
-                span.FilePath,
-                span.AsTextSpan(),
-                new LinePositionSpan(
+
+            Location location;
+            if (span == SourceSpan.Undefined)
+            {
+                // TextSpan.Empty
+                location = Location.None;
+            }
+            else
+            {
+                var linePosition = new LinePositionSpan(
                     new LinePosition(span.LineIndex, span.CharacterIndex),
-                    new LinePosition(span.LineIndex, span.CharacterIndex + span.Length)));
+                    new LinePosition(span.LineIndex, span.CharacterIndex + span.Length));
+
+                location = Location.Create(
+                   span.FilePath,
+                   span.AsTextSpan(),
+                   linePosition);
+            }
 
             return Diagnostic.Create(descriptor, location);
         }

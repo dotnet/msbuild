@@ -6,7 +6,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
  
-namespace Microsoft.NET.Sdk.Razor.SourceGenerators.Tests
+namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     public sealed class TestAdditionalText : AdditionalText
     {
