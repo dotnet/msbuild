@@ -44,8 +44,4 @@
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="MSBuildForwardingAppWithoutLogging.cs" Condition="'$(TargetFramework)' != '$(SdkTargetFramework)'" />
-  </ItemGroup>
-
 </Project>
