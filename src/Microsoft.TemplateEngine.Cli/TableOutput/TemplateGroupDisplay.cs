@@ -93,9 +93,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
             }
 
             ITemplateInfo highestPrecedenceTemplate = templateGroup.OrderByDescending(x => x.Precedence).First();
-            string shortName = highestPrecedenceTemplate is IShortNameList highestWithShortNameList
-                                ? highestWithShortNameList.ShortNameList[0]
-                                : highestPrecedenceTemplate.ShortName;
+            string shortName = highestPrecedenceTemplate.ShortNameList[0];
 
             TemplateGroupTableRow groupDisplayInfo = new TemplateGroupTableRow
             {

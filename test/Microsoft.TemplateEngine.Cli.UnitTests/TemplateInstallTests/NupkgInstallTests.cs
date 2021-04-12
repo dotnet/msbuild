@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
 
             // check that the template was installed from the first install.
             IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default), hostDataLoader);
-            Assert.Contains(checkTemplateName, allTemplates.Select(t => t.Info.ShortName));
+            Assert.Contains(checkTemplateName, allTemplates.SelectMany(t => t.Info.ShortNameList));
 
             // install the same test pack again
             int secondInstallResult = New3Command.Run(CommandName, host, telemetryLogger, new New3Callbacks(), installArgs);
@@ -70,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
 
             // check that the template is still installed after the second install.
             IReadOnlyCollection<ITemplateMatchInfo> allTemplatesAfterSecondInstall = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default), hostDataLoader);
-            Assert.Contains(checkTemplateName, allTemplatesAfterSecondInstall.Select(t => t.Info.ShortName));
+            Assert.Contains(checkTemplateName, allTemplatesAfterSecondInstall.SelectMany(t => t.Info.ShortNameList));
         }
 
         private static ITemplateEngineHost CreateHostWithVirtualizedHive(string hostIdentifier, string hostVersion)

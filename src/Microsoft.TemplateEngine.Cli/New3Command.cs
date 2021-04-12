@@ -423,14 +423,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (ITemplateMatchInfo templateMatchInfo in allTemplates)
             {
-                if (templateMatchInfo.Info is IShortNameList templateWithShortNameList)
-                {
-                    allShortNames.UnionWith(templateWithShortNameList.ShortNameList);
-                }
-                else
-                {
-                    allShortNames.Add(templateMatchInfo.Info.ShortName);
-                }
+                allShortNames.UnionWith(templateMatchInfo.Info.ShortNameList);
             }
 
             return allShortNames;

@@ -26,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
             Assert.True(matchResult.HasExactMatches);
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal("console2", matchResult.UnambiguousTemplateGroup.Single().Info.ShortName);
+            Assert.Equal("console2", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App2", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
             Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
         }
@@ -117,7 +117,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "L1");
             Assert.True(matchResult.HasExactMatches);
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortName);
+            Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.L2", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
             Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.Tags["language"].Choices.Keys.FirstOrDefault());
             Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
@@ -299,7 +299,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
-            Assert.Equal("console1", matchResult.UnambiguousTemplateGroup.Single().Info.ShortName);
+            Assert.Equal("console1", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.T1", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
         }
 
@@ -329,7 +329,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.False(matchResult.HasLanguageMismatch);
             Assert.False(matchResult.HasContextMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
-            Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortName);
+            Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.T1", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
         }
 

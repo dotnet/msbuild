@@ -469,15 +469,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                     shortNames = new HashSet<string>();
                     shortNamesByGroup[effectiveGroupIdentity] = shortNames;
                 }
-
-                if (template is IShortNameList templateWithShortNameList)
-                {
-                    shortNames.UnionWith(templateWithShortNameList.ShortNameList);
-                }
-                else
-                {
-                    shortNames.Add(template.ShortName);
-                }
+                shortNames.UnionWith(template.ShortNameList);
             }
 
             // create the TemplateInfoWithGroupShortNames with the group short names
@@ -553,7 +545,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// In addition to <see cref="ITemplateInfo"/> the class contains <see cref="TemplateInfoWithGroupShortNames.GroupShortNameList"/> property which contains the short names of other templates in the template group.
         /// The class is used for template filtering using specific <see cref="CliNameFilter(string)"/> filter which takes into account the short names of template group when matching names.
         /// </summary>
-        private class TemplateInfoWithGroupShortNames : ITemplateInfo, IShortNameList
+        private class TemplateInfoWithGroupShortNames : ITemplateInfo
         {
             private ITemplateInfo _parent;
             internal TemplateInfoWithGroupShortNames (ITemplateInfo source, IEnumerable<string> groupShortNameList)
@@ -580,19 +572,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             public string Name => _parent.Name;
 
+            [Obsolete]
             public string ShortName => _parent.ShortName;
 
-            public IReadOnlyList<string> ShortNameList
-            {
-                get
-                {
-                    if (_parent is IShortNameList sourceWithShortNameList)
-                    {
-                        return sourceWithShortNameList.ShortNameList;
-                    }
-                    return new List<string>();
-                }
-            }
+            public IReadOnlyList<string> ShortNameList => _parent.ShortNameList;
 
             public IReadOnlyList<string> GroupShortNameList { get; } = new List<string>();
 

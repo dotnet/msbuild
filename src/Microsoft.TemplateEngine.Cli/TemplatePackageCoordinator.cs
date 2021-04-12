@@ -419,14 +419,7 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<ITemplateInfo> templates = await _engineEnvironmentSettings.SettingsLoader.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
             var templatesWithMatchedShortName = templates.Where(template =>
             {
-                if (template is IShortNameList t1)
-                {
-                    return t1.ShortNameList.Contains(sourceIdentifier, StringComparer.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    return template.ShortName.Equals(sourceIdentifier, StringComparison.OrdinalIgnoreCase);
-                }
+                return template.ShortNameList.Contains(sourceIdentifier, StringComparer.OrdinalIgnoreCase);
             });
 
             var templatePackages = await Task.WhenAll(
@@ -448,14 +441,7 @@ namespace Microsoft.TemplateEngine.Cli
             IReadOnlyList<ITemplateInfo> templates = await _engineEnvironmentSettings.SettingsLoader.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
             return templates.Any(template =>
             {
-                if (template is IShortNameList t1)
-                {
-                    return t1.ShortNameList.Contains(sourceIdentifier, StringComparer.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    return template.ShortName.Equals(sourceIdentifier, StringComparison.OrdinalIgnoreCase);
-                }
+                return template.ShortNameList.Contains(sourceIdentifier, StringComparer.OrdinalIgnoreCase);
             });
         }
 
@@ -551,13 +537,14 @@ namespace Microsoft.TemplateEngine.Cli
                     foreach (TemplateInfo info in templates)
                     {
                         string templateLanguage = info.GetLanguage();
+                        string shortNames = string.Join(",", info.ShortNameList);
                         if (!string.IsNullOrWhiteSpace(templateLanguage))
                         {
-                            Reporter.Output.WriteLine($"      {info.Name} ({info.ShortName}) {templateLanguage}");
+                            Reporter.Output.WriteLine($"      {info.Name} ({shortNames}) {templateLanguage}");
                         }
                         else
                         {
-                            Reporter.Output.WriteLine($"      {info.Name} ({info.ShortName})");
+                            Reporter.Output.WriteLine($"      {info.Name} ({shortNames})");
                         }
                     }
                 }

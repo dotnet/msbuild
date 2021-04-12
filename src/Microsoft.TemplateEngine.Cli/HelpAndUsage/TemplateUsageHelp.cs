@@ -1,5 +1,7 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +35,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             foreach (string preferredName in preferredNameList)
             {
-                ITemplateInfo template = templateList.FirstOrDefault(x => string.Equals(x.ShortName, preferredName, StringComparison.OrdinalIgnoreCase));
+                ITemplateInfo template = templateList.FirstOrDefault(x => x.ShortNameList.Contains(preferredName, StringComparer.OrdinalIgnoreCase));
 
                 if (template != null)
                 {
@@ -43,9 +45,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         GenerateUsageForTemplate(template, hostDataLoader, commandName);
                         numShown++;
                     }
+                    templateList.Remove(template);  // remove it so it won't get chosen again
                 }
-
-                templateList.Remove(template);  // remove it so it won't get chosen again
             }
 
             // show up to 2 examples (total, including the above)
@@ -67,8 +68,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine($"    dotnet {commandName} --help");
 
             // show a help example for template
-            Reporter.Output.WriteLine($"    {HelpForTemplateResolution.GetTemplateHelpCommand(commandName, bestMatchedTemplates.First().Info)}");
-            
+            string? templateHelpCommand = HelpForTemplateResolution.GetTemplateHelpCommand(commandName, bestMatchedTemplates.First().Info);
+            if (!string.IsNullOrWhiteSpace(templateHelpCommand))
+            {
+                Reporter.Output.WriteLine($"    {templateHelpCommand}");
+            }
         }
 
         private static bool GenerateUsageForTemplate(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, string commandName)
@@ -82,11 +86,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return false;
                 }
 
-                Reporter.Output.WriteLine($"    dotnet {commandName} {templateInfo.ShortName} {hostTemplateData.UsageExamples[0]}");
+                Reporter.Output.WriteLine($"    dotnet {commandName} {templateInfo.ShortNameList.First()} {hostTemplateData.UsageExamples[0]}");
                 return true;
             }
 
-            Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortName}");
+            Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortNameList.First()}");
             IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames, parametersToAlwaysShow: hostTemplateData.ParametersToAlwaysShow);
 

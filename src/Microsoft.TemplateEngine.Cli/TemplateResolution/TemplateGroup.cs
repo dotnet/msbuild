@@ -51,10 +51,25 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal string GroupIdentity { get; private set; }
 
         /// <summary>
-        /// Default shortname.
-        /// In theory, template group templates can have different short names but they are treated equally
+        /// Returns the list of short names defined for templates in the group.
+        /// In theory, template group templates can have different short names but they are treated equally.
         /// </summary>
-        internal string ShortName => Templates.First().Info.ShortName;
+        internal IReadOnlyList<string> ShortNames
+        {
+            get
+            {
+                if (HasSingleTemplate)
+                {
+                    return Templates.First().Info.ShortNameList;
+                }
+                HashSet<string> shortNames = new HashSet<string>();
+                foreach (ITemplateMatchInfo template in Templates)
+                {
+                    shortNames.UnionWith(template.Info.ShortNameList);
+                }
+                return shortNames.ToList();
+            }
+        }
 
         /// <summary>
         /// Returns true when <see cref="GroupIdentity"/> is not <see cref="null"/> or emply

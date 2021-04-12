@@ -1,23 +1,25 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable enable
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TemplateEngine.Edge.Template;
-using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Utils;
-using Microsoft.TemplateEngine.Cli.TemplateResolution;
-using Microsoft.TemplateEngine.Cli.TableOutput;
-using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using System.Threading.Tasks;
+using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
+using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.TableOutput;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class HelpForTemplateResolution
     {
-        internal static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string defaultLanguage, bool showUsageHelp = true)
+        internal static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string? defaultLanguage, bool showUsageHelp = true)
         {
             if (showUsageHelp)
             {
@@ -63,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             TemplateResolutionResult resolutionResult,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
-            string defaultLanguage)
+            string? defaultLanguage)
         {
             switch (resolutionResult.ResolutionStatus)
             {
@@ -95,7 +97,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return Task.FromResult(CreationResultStatus.CreateFailed);
         }
 
-        private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string defaultLanguage)
+        private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string? defaultLanguage)
         {
             // sanity check: should never happen; as condition for unambiguous template group is checked above
             if (!templateResolutionResult.UnambiguousTemplateGroup.Any())
@@ -150,8 +152,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
             else
             {
-                Reporter.Error.WriteLine(
-                    string.Format(LocalizableStrings.InvalidParameterTemplateHint, GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.First().Info)).Bold().Red());
+                string? templateHelpCommand = GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.First().Info);
+                if (!string.IsNullOrWhiteSpace(templateHelpCommand))
+                {
+                    Reporter.Error.WriteLine(
+                        string.Format(LocalizableStrings.InvalidParameterTemplateHint, templateHelpCommand).Bold().Red());
+                }
             }
 
             return invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0
@@ -159,7 +165,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 : CreationResultStatus.Success;
         }
 
-        private static CreationResultStatus DisplayListOrHelpForAmbiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string defaultLanguage)
+        private static CreationResultStatus DisplayListOrHelpForAmbiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string? defaultLanguage)
         {
             // The following occurs when:
             //      --alias <value> is specifed
@@ -232,8 +238,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 Reporter.Error.WriteLine(string.Format(InvalidParameterInfo.InvalidParameterListToString(invalidParameters, unambiguousTemplateGroup).Bold().Red()));
             }
-            Reporter.Error.WriteLine(
-                    string.Format(LocalizableStrings.InvalidParameterTemplateHint, GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.ShortName)).Bold().Red());
+
+            if (unambiguousTemplateGroup.ShortNames.Any())
+            {
+                Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.InvalidParameterTemplateHint,
+                            GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.ShortNames[0])).Bold().Red());
+            }
             return CreationResultStatus.InvalidParamValues;
         }
 
@@ -241,11 +253,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         {
             internal string TemplateIdentity;
             internal string TemplateName;
-            internal string TemplateShortName;
+            internal IReadOnlyList<string> TemplateShortNames;
             internal string TemplateLanguage;
             internal int TemplatePrecedence;
             internal string TemplateAuthor;
-            internal IManagedTemplatePackage TemplatePackage;
+            internal IManagedTemplatePackage? TemplatePackage;
         }
 
         /// <summary>
@@ -273,7 +285,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     TemplateIdentity = template.Info.Identity,
                     TemplateName = template.Info.Name,
-                    TemplateShortName = template.Info.ShortName,
+                    TemplateShortNames = template.Info.ShortNameList,
                     TemplateLanguage = template.Info.GetLanguage(),
                     TemplatePrecedence = template.Info.Precedence,
                     TemplateAuthor = template.Info.Author,
@@ -292,7 +304,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         blankLineBetweenRows: false)
                     .DefineColumn(t => t.TemplateIdentity, LocalizableStrings.ColumnNameIdentity, showAlways: true)
                     .DefineColumn(t => t.TemplateName, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
-                    .DefineColumn(t => t.TemplateShortName, LocalizableStrings.ColumnNameShortName, showAlways: true)
+                    .DefineColumn(t => string.Join(",", t.TemplateShortNames), LocalizableStrings.ColumnNameShortName, showAlways: true)
                     .DefineColumn(t => t.TemplateLanguage, LocalizableStrings.ColumnNameLanguage, showAlways: true)
                     .DefineColumn(t => t.TemplatePrecedence.ToString(), out object prcedenceColumn, LocalizableStrings.ColumnNamePrecedence, showAlways: true)
                     .DefineColumn(t => t.TemplateAuthor, LocalizableStrings.ColumnNameAuthor, showAlways: true, shrinkIfNeeded: true, minWidth: 10)
@@ -303,7 +315,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             string hintMessage = LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint;
             if (unambiguousTemplateGroup.Templates.AllAreTheSame(t => t.Info.MountPointUri))
             {
-                IManagedTemplatePackage templatePackage = await unambiguousTemplateGroup.Templates.First().Info.GetTemplatePackageAsync(environmentSettings).ConfigureAwait(false) as IManagedTemplatePackage;
+                IManagedTemplatePackage? templatePackage = await unambiguousTemplateGroup.Templates.First().Info.GetTemplatePackageAsync(environmentSettings).ConfigureAwait(false) as IManagedTemplatePackage;
                 if (templatePackage != null)
                 {
                     hintMessage = string.Format(LocalizableStrings.AmbiguousTemplatesSamePackageHint, templatePackage.Identifier);
@@ -323,7 +335,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         // - Short Name: displays the first short name from the highest precedence template in the group.
         // - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
         // - Tags
-        internal static void DisplayTemplateList(IReadOnlyCollection<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage, bool useErrorOutput = false)
+        internal static void DisplayTemplateList(IReadOnlyCollection<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage, bool useErrorOutput = false)
         {
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templateGroups, commandInput.Language, defaultLanguage);
             DisplayTemplateList(groupsForDisplay, environmentSettings, commandInput, useErrorOutput);
@@ -445,17 +457,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             IEnumerable<IGrouping<string, string>> countGroups = invalidCounts.GroupBy(x => x.Value == templateList.Count ? "all" : "some", x => x.Key);
-            invalidForAllTemplates = countGroups.FirstOrDefault(x => string.Equals(x.Key, "all", StringComparison.Ordinal))?.ToList();
-            if (invalidForAllTemplates == null)
-            {
-                invalidForAllTemplates = new List<string>();
-            }
+            invalidForAllTemplates =
+                countGroups.FirstOrDefault(x => string.Equals(x.Key, "all", StringComparison.Ordinal))?.ToList()
+                ?? new List<string>();
 
-            invalidForSomeTemplates = countGroups.FirstOrDefault(x => string.Equals(x.Key, "some", StringComparison.Ordinal))?.ToList();
-            if (invalidForSomeTemplates == null)
-            {
-                invalidForSomeTemplates = new List<string>();
-            }
+            invalidForSomeTemplates =
+                countGroups.FirstOrDefault(x => string.Equals(x.Key, "some", StringComparison.Ordinal))?.ToList()
+                ?? new List<string>();
         }
 
         internal static void ShowUsageHelp(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
@@ -492,13 +500,35 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return CreationResultStatus.InvalidParamValues;
         }
 
-        internal static string GetTemplateHelpCommand(string commandName, ITemplateInfo template)
+        /// <summary>
+        /// Returns the help command for given template; or null in case template does not have short name defined.
+        /// </summary>
+        /// <param name="commandName"></param>
+        /// <param name="template"></param>
+        /// <returns>the help command or null in case template does not have short name defined.</returns>
+        internal static string? GetTemplateHelpCommand(string commandName, ITemplateInfo template)
         {
-            return GetTemplateHelpCommand(commandName, template.ShortName);
+            if (template.ShortNameList.Any())
+            {
+                return GetTemplateHelpCommand(commandName, template.ShortNameList[0]);
+            }
+            return null;
         }
 
-        internal static string GetTemplateHelpCommand(string commandName, string shortName)
+        /// <summary>
+        /// Returns the help command for given command name and short name.
+        /// </summary>
+        private static string GetTemplateHelpCommand(string commandName, string shortName)
         {
+            if (string.IsNullOrWhiteSpace(commandName))
+            {
+                throw new ArgumentException($"{nameof(commandName)} should not be null or empty", nameof(commandName));
+            }
+            if (string.IsNullOrWhiteSpace(shortName))
+            {
+                throw new ArgumentException($"{nameof(shortName)} should not be null or empty", nameof(shortName));
+            }
+
             return $"dotnet {commandName} {shortName} --help";
         }
 
