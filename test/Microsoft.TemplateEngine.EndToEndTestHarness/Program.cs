@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
@@ -108,12 +109,18 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
         {
             string path = Path.Combine(outputPath, config["path"].ToString());
             string text = fs.ReadAllText(path);
-            if (text.Contains(config["text"].ToString()))
+            string expectedText = config["text"].ToString();
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                expectedText = expectedText.Replace("\r\n", "\n");
+            }
+
+            if (text.Contains(expectedText))
             {
                 return true;
             }
 
-            Console.Error.WriteLine($"Expected {path} to contain {config["text"].ToString()} but it did not");
+            Console.Error.WriteLine($"Expected {path} to contain {expectedText} but it did not");
             Console.Error.WriteLine($"Actual content = {text}");
 
             return false;

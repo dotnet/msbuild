@@ -4,9 +4,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class KitchenSinkTests : EndToEndTestBase
     {
-        [Theory(DisplayName = nameof(ConfigurationTest))]
+        [Theory(DisplayName = nameof(KitchenSinkTest))]
         [InlineData("TestAssets.ConfigurationKitchenSink --replaceThings Stuff --replaceThere You", "ConfigurationKitchenSink.json")]
-        public void ConfigurationTest(string args, params string[] scripts)
+        public void KitchenSinkTest(string args, params string[] scripts)
         {
             Run(args, scripts);
         }
