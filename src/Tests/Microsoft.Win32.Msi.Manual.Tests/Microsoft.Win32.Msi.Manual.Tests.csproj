@@ -6,6 +6,7 @@
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <CanRunTestAsTool>false</CanRunTestAsTool>
     <IsTestProject>false</IsTestProject>
+    <IsUnitTestProject>false</IsUnitTestProject>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
