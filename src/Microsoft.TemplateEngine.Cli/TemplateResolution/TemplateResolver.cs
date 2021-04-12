@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,25 +75,25 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         // Lists all the templates, unfiltered - except the ones hidden by their host file.
         internal static IReadOnlyCollection<ITemplateMatchInfo> PerformAllTemplatesQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader)
         {
-            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
+            IReadOnlyList<ITemplateInfo> filterableTemplateInfo = SetupTemplateInfoWithGroupShortNames(templateInfo);
 
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
-                WellKnownSearchFilters.NameFilter(string.Empty)
+                CliNameFilter(string.Empty)
             )
             .Where(x => !IsTemplateHiddenByHostFile(x.Info, hostDataLoader)).ToList();
 
             return templates;
         }
 
-        internal static TemplateResolutionResult GetTemplateResolutionResult(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static TemplateResolutionResult GetTemplateResolutionResult(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string? defaultLanguage)
         {
             IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates = PerformCoreTemplateQuery(templateInfo, hostDataLoader, commandInput, defaultLanguage);
             return new TemplateResolutionResult(commandInput.Language, coreMatchedTemplates);
         }
 
-        internal static TemplateListResolutionResult GetTemplateResolutionResultForListOrHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static TemplateListResolutionResult GetTemplateResolutionResultForListOrHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string? defaultLanguage)
         {
             IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates;
 
@@ -100,7 +102,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             //for help if there is an exact match by shortname or name we need to show help for that exact template and also apply default language mapping in case language is not specified
             if (commandInput.IsListFlagSpecified)
             {
-                coreMatchedTemplates = PerformCoreTemplateQueryForList(templateInfo, hostDataLoader, commandInput, defaultLanguage);
+                coreMatchedTemplates = PerformCoreTemplateQueryForList(templateInfo, hostDataLoader, commandInput);
             }
             else
             {
@@ -109,16 +111,16 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return new TemplateListResolutionResult(coreMatchedTemplates);
         }
 
-        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForList(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForList(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
-            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
+            IReadOnlyList<ITemplateInfo> filterableTemplateInfo = SetupTemplateInfoWithGroupShortNames(templateInfo);
 
             // for list we also try to get match on template name in classification (tags). These matches only will be used if short name and name has a mismatch.
             // filter below only sets the exact or partial match if name matches the tag. If name doesn't match the tag, no match disposition is added to collection.
 
             var listFilters = new List<Func<ITemplateInfo, MatchInfo?>>()
             {
-                WellKnownSearchFilters.NameFilter(commandInput.TemplateName)
+                CliNameFilter(commandInput.TemplateName)
             };
             listFilters.AddRange(SupportedFilterOptions.SupportedListFilters
                                     .OfType<TemplateFilterOption>()
@@ -135,13 +137,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return coreMatchedTemplates;
         }
 
-        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string? defaultLanguage)
         {
-            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
+            IReadOnlyList<ITemplateInfo> filterableTemplateInfo = SetupTemplateInfoWithGroupShortNames(templateInfo);
             IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 TemplateListFilter.PartialMatchFilter,
-                WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
+                CliNameFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.ContextFilter(commandInput.TypeFilter),
                 WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName)
@@ -159,7 +161,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             if (string.IsNullOrEmpty(commandInput.Language) && !string.IsNullOrEmpty(defaultLanguage))
             {
                 // default language matching only makes sense if the user didn't specify a language.
-                AddDefaultLanguageMatchingToTemplates(coreMatchedTemplates, defaultLanguage);
+                AddDefaultLanguageMatchingToTemplates(coreMatchedTemplates, defaultLanguage!);
             }
             AddParameterMatchingToTemplates(coreMatchedTemplates, hostDataLoader, commandInput);
             return coreMatchedTemplates;
@@ -175,10 +177,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <returns>filtered list of templates.</returns>
         internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForSearch(IEnumerable<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
-            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo.ToList());
+            IReadOnlyList<ITemplateInfo> filterableTemplateInfo = SetupTemplateInfoWithGroupShortNames(templateInfo.ToList());
             List<Func<ITemplateInfo, MatchInfo?>> searchFilters = new List<Func<ITemplateInfo, MatchInfo?>>()
             {
-                WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
+                CliNameFilter(commandInput.TemplateName),
             };
             searchFilters.AddRange(SupportedFilterOptions.SupportedSearchFilters
                                     .OfType<TemplateFilterOption>()
@@ -201,14 +203,14 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <param name="commandInput">new command data used in CLI.</param>
         /// <param name="defaultLanguage"></param>
         /// <returns>the collection of the templates with their match dispositions (<seealso cref="ITemplateMatchInfo"/>). The templates that do not match are not added to the collection.</returns>
-        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string defaultLanguage)
+        internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQuery(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string? defaultLanguage)
         {
-            IReadOnlyList<FilterableTemplateInfo> filterableTemplateInfo = SetupFilterableTemplateInfoFromTemplateInfo(templateInfo);
+            IReadOnlyList<ITemplateInfo> filterableTemplateInfo = SetupTemplateInfoWithGroupShortNames(templateInfo);
 
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 TemplateListFilter.ExactMatchFilter,
-                WellKnownSearchFilters.NameFilter(commandInput.TemplateName),
+                CliNameFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.ContextFilter(commandInput.TypeFilter),
                 WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName)
@@ -223,61 +225,17 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 templates = matchesWithExactDispositionsInNameFields;
             }
 
-            if (string.IsNullOrEmpty(commandInput.Language) && !string.IsNullOrEmpty(defaultLanguage))
+            if (!string.IsNullOrEmpty(defaultLanguage) && string.IsNullOrEmpty(commandInput.Language))
             {
                 // add default language matches to the list
                 // default language matching only makes sense if the user didn't specify a language.
-                AddDefaultLanguageMatchingToTemplates(templates, defaultLanguage);
+                AddDefaultLanguageMatchingToTemplates(templates, defaultLanguage!);
             }
 
             //add specific template parameters matches to the list
             AddParameterMatchingToTemplates(templates, hostDataLoader, commandInput);
 
             return templates;
-        }
-
-        private static IReadOnlyList<FilterableTemplateInfo> SetupFilterableTemplateInfoFromTemplateInfo(IReadOnlyList<ITemplateInfo> templateList)
-        {
-            Dictionary<string, HashSet<string>> shortNamesByGroup = new Dictionary<string, HashSet<string>>();
-
-            // get the short names lists for the groups
-            foreach (ITemplateInfo template in templateList)
-            {
-                string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
-                    ? template.GroupIdentity
-                    : template.Identity;
-
-                if (!shortNamesByGroup.TryGetValue(effectiveGroupIdentity, out HashSet<string> shortNames))
-                {
-                    shortNames = new HashSet<string>();
-                    shortNamesByGroup[effectiveGroupIdentity] = shortNames;
-                }
-
-                if (template is IShortNameList templateWithShortNameList)
-                {
-                    shortNames.UnionWith(templateWithShortNameList.ShortNameList);
-                }
-                else
-                {
-                    shortNames.Add(template.ShortName);
-                }
-            }
-
-            // create the FilterableTemplateInfo with the group short names
-            List<FilterableTemplateInfo> filterableTemplateList = new List<FilterableTemplateInfo>();
-
-            foreach (ITemplateInfo template in templateList)
-            {
-                string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
-                    ? template.GroupIdentity
-                    : template.Identity;
-
-                FilterableTemplateInfo filterableTemplate = FilterableTemplateInfo.FromITemplateInfo(template);
-                filterableTemplate.GroupShortNameList = shortNamesByGroup[effectiveGroupIdentity].ToList();
-                filterableTemplateList.Add(filterableTemplate);
-            }
-
-            return filterableTemplateList;
         }
 
         /// <summary>
@@ -483,6 +441,190 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                         AdditionalInformation = $"Unexpected error: {ex.Message}"
                     });
                 }
+            }
+        }
+
+        /// <summary>
+        /// The method makes all short names in template group available for matching for given template (using <see cref="TemplateInfoWithGroupShortNames"/> <see cref="ITemplateInfo"/> implementation).
+        /// TODO: double-check if that is needed. If needed that should be replaced by TemplateGroup logic as:
+        /// - group templates by template groups
+        /// - match templates through filters by template group including this logic of sharing short names
+        /// - create resolution result afterwards.
+        /// </summary>
+        /// <param name="templateList">the list of <see cref="ITemplateInfo"/> to process.</param>
+        /// <returns></returns>
+        private static IReadOnlyList<ITemplateInfo> SetupTemplateInfoWithGroupShortNames(IReadOnlyList<ITemplateInfo> templateList)
+        {
+            Dictionary<string, HashSet<string>> shortNamesByGroup = new Dictionary<string, HashSet<string>>();
+
+            // get the short names lists for the groups
+            foreach (ITemplateInfo template in templateList)
+            {
+                string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
+                    ? template.GroupIdentity
+                    : template.Identity;
+
+                if (!shortNamesByGroup.TryGetValue(effectiveGroupIdentity, out HashSet<string> shortNames))
+                {
+                    shortNames = new HashSet<string>();
+                    shortNamesByGroup[effectiveGroupIdentity] = shortNames;
+                }
+
+                if (template is IShortNameList templateWithShortNameList)
+                {
+                    shortNames.UnionWith(templateWithShortNameList.ShortNameList);
+                }
+                else
+                {
+                    shortNames.Add(template.ShortName);
+                }
+            }
+
+            // create the TemplateInfoWithGroupShortNames with the group short names
+            List<TemplateInfoWithGroupShortNames> templateListWithGroupNames = new List<TemplateInfoWithGroupShortNames>();
+
+            foreach (ITemplateInfo template in templateList)
+            {
+                string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
+                    ? template.GroupIdentity
+                    : template.Identity;
+
+                templateListWithGroupNames.Add(new TemplateInfoWithGroupShortNames(template, shortNamesByGroup[effectiveGroupIdentity]));
+            }
+
+            return templateListWithGroupNames;
+        }
+
+        /// <summary>
+        /// Filter for <see cref="TemplateListFilter.GetTemplateMatchInfo"></see>.
+        /// Filters <see cref="ITemplateInfo"/> by name. Requires <see cref="TemplateInfoWithGroupShortNames"/> implementation.
+        /// The fields to be compared are <see cref="ITemplateInfo.Name"/> and <see cref="TemplateInfoWithGroupShortNames.GroupShortNameList"/>.
+        /// Unlike <see cref="WellKnownSearchFilters.NameFilter(string)"/> the filter also matches other template group short names the template belongs to.
+        /// </summary>
+        /// <param name="name">the name to match with template name or short name.</param>
+        /// <returns></returns>
+        private static Func<ITemplateInfo, MatchInfo?> CliNameFilter(string name)
+        {
+            return (template) =>
+            {
+                var groupAwareTemplate = template as TemplateInfoWithGroupShortNames ?? throw new ArgumentException("CliNameFilter filter supports only TemplateInfoWithGroupShortNames templates");
+
+                if (string.IsNullOrEmpty(name))
+                {
+                    return new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Partial };
+                }
+
+                int nameIndex = groupAwareTemplate.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase);
+
+                if (nameIndex == 0 && groupAwareTemplate.Name.Length == name.Length)
+                {
+                    return new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Exact };
+                }
+
+                bool hasShortNamePartialMatch = false;
+
+                foreach (string shortName in groupAwareTemplate.GroupShortNameList)
+                {
+                    int shortNameIndex = shortName.IndexOf(name, StringComparison.OrdinalIgnoreCase);
+
+                    if (shortNameIndex == 0 && shortName.Length == name.Length)
+                    {
+                        return new MatchInfo { Location = MatchLocation.ShortName, Kind = MatchKind.Exact };
+                    }
+
+                    hasShortNamePartialMatch |= shortNameIndex > -1;
+                }
+
+                if (nameIndex > -1)
+                {
+                    return new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Partial };
+                }
+
+                if (hasShortNamePartialMatch)
+                {
+                    return new MatchInfo { Location = MatchLocation.ShortName, Kind = MatchKind.Partial };
+                }
+
+                return new MatchInfo { Location = MatchLocation.Name, Kind = MatchKind.Mismatch };
+            };
+        }
+
+        /// <summary>
+        /// In addition to <see cref="ITemplateInfo"/> the class contains <see cref="TemplateInfoWithGroupShortNames.GroupShortNameList"/> property which contains the short names of other templates in the template group.
+        /// The class is used for template filtering using specific <see cref="CliNameFilter(string)"/> filter which takes into account the short names of template group when matching names.
+        /// </summary>
+        private class TemplateInfoWithGroupShortNames : ITemplateInfo, IShortNameList
+        {
+            private ITemplateInfo _parent;
+            internal TemplateInfoWithGroupShortNames (ITemplateInfo source, IEnumerable<string> groupShortNameList)
+            {
+                _parent = source;
+                GroupShortNameList = groupShortNameList.ToList();
+            }
+
+            public string Author => _parent.Author;
+
+            public string Description => _parent.Description;
+
+            public IReadOnlyList<string> Classifications => _parent.Classifications;
+
+            public string DefaultName => _parent.DefaultName;
+
+            public string Identity => _parent.Identity;
+
+            public Guid GeneratorId => _parent.GeneratorId;
+
+            public string GroupIdentity => _parent.GroupIdentity;
+
+            public int Precedence => _parent.Precedence;
+
+            public string Name => _parent.Name;
+
+            public string ShortName => _parent.ShortName;
+
+            public IReadOnlyList<string> ShortNameList
+            {
+                get
+                {
+                    if (_parent is IShortNameList sourceWithShortNameList)
+                    {
+                        return sourceWithShortNameList.ShortNameList;
+                    }
+                    return new List<string>();
+                }
+            }
+
+            public IReadOnlyList<string> GroupShortNameList { get; } = new List<string>();
+
+            public IReadOnlyDictionary<string, ICacheTag> Tags => _parent.Tags;
+
+            public IReadOnlyDictionary<string, ICacheParameter> CacheParameters => _parent.CacheParameters;
+
+            public IReadOnlyList<ITemplateParameter> Parameters => _parent.Parameters;
+
+            public string MountPointUri => _parent.MountPointUri;
+
+            public string ConfigPlace => _parent.ConfigPlace;
+
+            public string LocaleConfigPlace => _parent.LocaleConfigPlace;
+
+            public string HostConfigPlace => _parent.HostConfigPlace;
+
+            public string ThirdPartyNotices => _parent.ThirdPartyNotices;
+
+            public IReadOnlyDictionary<string, IBaselineInfo> BaselineInfo => _parent.BaselineInfo;
+
+            public bool HasScriptRunningPostActions
+            {
+                get
+                {
+                    return _parent.HasScriptRunningPostActions;
+                }
+                set
+                {
+                    _parent.HasScriptRunningPostActions = value;
+                }
+
             }
         }
     }
