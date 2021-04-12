@@ -93,6 +93,11 @@ namespace Microsoft.TemplateEngine.Cli
         /// <exception cref="CommandParserException">when <paramref name="args"/> cannot be parsed.</exception>
         public static int Run(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string[] args, string? hivePath = null)
         {
+            _ = host ?? throw new ArgumentNullException(nameof(host));
+            _ = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
+            _ = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
+            _ = args ?? throw new ArgumentNullException(nameof(args));
+
             if (!args.Any(x => string.Equals(x, "--debug:ephemeral-hive")))
             {
                 EnsureEntryMutex(hivePath, host);

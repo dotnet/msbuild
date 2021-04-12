@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             host.VirtualizeDirectory(hivePath);
             host.VirtualizeDirectory(outputPath);
 
-            int result = New3Command.Run(CommandName, host, new TelemetryLogger(null), null, passthroughArgs, hivePath);
+            int result = New3Command.Run(CommandName, host, new TelemetryLogger(null), new New3Callbacks(), passthroughArgs, hivePath);
             bool verificationsPassed = false;
 
             for (int i = 0; i < batteryCount; ++i)
