@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Utils
 {
     internal class MSBuildForwardingAppWithoutLogging
     {
-        private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_EXEC_MSBUILD");
+        private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_RUN_MSBUILD_OUTOFPROC");
 
         private const string MSBuildExeName = "MSBuild.dll";
 
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _argsToForward = argsToForward;
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
-            // If DOTNET_CLI_EXEC_MSBUILD is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
+            // If DOTNET_CLI_RUN_MSBUILD_OUTOFPROC is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
             if (AlwaysExecuteMSBuildOutOfProc || string.Compare(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase) != 0)
             {
                 _forwardingApp = new ForwardingAppImplementation(
