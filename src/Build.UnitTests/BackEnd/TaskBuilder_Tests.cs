@@ -19,6 +19,7 @@ using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
