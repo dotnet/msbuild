@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         public void CanBuildProjectWithPackageReferencesWithConflictingTypes()
         {
             var targetFramework = "net5.0";
-            var packageReferences = GetPackageReferencesWithConflictingTypes(targetFramework, "A", "B");
+            var packageReferences = GetPackageReferencesWithConflictingTypes(targetFramework, packageNames: new string[] { "A", "B" });
 
             TestProject testProject = new TestProject()
             {
@@ -139,18 +140,20 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        private IEnumerable<TestPackageReference> GetPackageReferencesWithConflictingTypes(string targetFramework, params string[] packageNames)
+        private IEnumerable<TestPackageReference> GetPackageReferencesWithConflictingTypes(string targetFramework, string[] packageNames, [CallerMemberName] string callingMethod = "")
         {
+            var result = new List<TestPackageReference>();
             foreach (var packageName in packageNames)
             {
-                yield return GetPackageReference(targetFramework, packageName, ClassLibConflictingMethod);
+                result.Add(GetPackageReference(targetFramework, packageName, ClassLibConflictingMethod, callingMethod, packageName));
             }
+            return result;
         }
 
-        private TestPackageReference GetPackageReference(string targetFramework, string packageName, string projectFileContent)
+        private TestPackageReference GetPackageReference(string targetFramework, string packageName, string projectFileContent, [CallerMemberName] string callingMethod = "", string identifier = null)
         {
             var project = GetProject(targetFramework, packageName, projectFileContent);
-            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project).TestRoot, packageName);
+            var packCommand = new PackCommand(Log, _testAssetsManager.CreateTestProject(project, callingMethod: callingMethod, identifier: identifier).TestRoot, packageName);
 
             packCommand
                 .Execute()

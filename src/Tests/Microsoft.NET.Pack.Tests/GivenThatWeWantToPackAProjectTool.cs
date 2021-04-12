@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
         {
             TestProject toolProject = new TestProject()
             {
-                Name = "TestTool",
+                Name = "TestToolNetCore22",
                 TargetFrameworks = "netcoreapp2.2",
                 IsExe = true
             };

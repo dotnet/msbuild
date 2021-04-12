@@ -79,14 +79,15 @@ namespace Microsoft.NET.Build.Tests
             string[] msbuildArgs = null,
             GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, 
             [CallerMemberName] string callingMethod = "", 
-            Action<XDocument> projectChanges = null)
+            Action<XDocument> projectChanges = null,
+            string identifier = null)
         {
             msbuildArgs = msbuildArgs ?? Array.Empty<string>();
 
             string targetFramework = "netstandard1.5";
 
             var testAsset = testAssetsManager
-                .CopyTestAsset("AppWithLibrary", callingMethod)
+                .CopyTestAsset("AppWithLibrary", callingMethod, identifier: identifier)
                 .WithSource();
 
             if (projectChanges != null)
@@ -325,7 +326,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", identifier: expectedDefines.GetHashCode().ToString())
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -386,7 +387,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework)
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", identifier: expectedDefines.GetHashCode().ToString())
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
@@ -476,7 +477,7 @@ namespace Microsoft.NET.Build.Tests
                 testProj.AdditionalProperties["TargetPlatformIdentifier"] = targetPlatformIdentifier;
                 testProj.AdditionalProperties["TargetPlatformVersion"] = targetPlatformVersion;
             }
-            var testAsset = _testAssetsManager.CreateTestProject(testProj);
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
             File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
 using System;
 class Program
@@ -608,7 +609,7 @@ class Program
                 TargetFrameworks = targetFramework
             };
             testProject.AdditionalProperties["TargetPlatformIdentifier"] = "windows";
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name), targetFramework, "TargetPlatformVersion");
             getValuesCommand
@@ -627,7 +628,7 @@ class Program
                 TargetFrameworks = targetFramework,
             };
 
-            string identifier = useSolution ? "_Solution" : "";
+            string identifier = ((useSolution ? "_Solution" : "") + targetFramework + expectedOutput).GetHashCode().ToString();
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier);
 
             if (targetFramework.Contains(";"))
@@ -857,7 +858,8 @@ class Program
                 testProject.AdditionalProperties["CopyLocalLockFileAssemblies"] = copyLocal.ToString().ToLower();
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var identifier = targetFramework + shouldSetRollForward + shouldCopyLocal +  (rollForwardValue == null? "Null" : rollForwardValue);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
 
             var buildCommand = new BuildCommand(testAsset);
 
@@ -909,7 +911,7 @@ class Program
                 TargetFrameworks = targetFramework,
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             // Overwrite the default file. CreateTestProject uses the defined project name for the namespace.
             // We need a buildable project to extract the property to verify it

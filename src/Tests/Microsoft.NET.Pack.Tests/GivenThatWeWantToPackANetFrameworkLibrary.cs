@@ -56,6 +56,7 @@ namespace Microsoft.NET.Pack.Tests
             };
 
             var nuspecPath = PackAndGetNuspecPath(testProject,
+                "PackImplicitRefs",
                 p =>
                 {
                     var pns = p.Root.Name.Namespace;
@@ -78,9 +79,9 @@ namespace Microsoft.NET.Pack.Tests
             frameworkAssemblies.Should().Contain(i => i.Attribute("assemblyName").Value == "System.Xml.Linq");
         }
 
-        private string PackAndGetNuspecPath(TestProject testProject, Action<XDocument> xmlAction = null)
+        private string PackAndGetNuspecPath(TestProject testProject, string identifier = null, Action<XDocument> xmlAction = null)
         {
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier);
 
             if (xmlAction != null)
             {

@@ -13,6 +13,7 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -29,7 +30,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopSdkTest";
 
-            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty);
+            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty, uiFrameworkProperty);
 
             var command = new BuildCommand(asset);
 
@@ -46,7 +47,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopSdkErrorTest";
 
-            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty);
+            var asset = CreateWindowsDesktopSdkTestAsset(ProjectName, uiFrameworkProperty, uiFrameworkProperty);
 
             var command = new BuildCommand(asset);
 
@@ -66,7 +67,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopReferenceTest";
 
-            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework);
+            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework, desktopFramework);
 
             var command = new BuildCommand(asset);
 
@@ -84,7 +85,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string ProjectName = "WindowsDesktopReferenceErrorTest";
 
-            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework);
+            var asset = CreateWindowsDesktopReferenceTestAsset(ProjectName, desktopFramework, desktopFramework);
 
             var command = new BuildCommand(asset);
 
@@ -111,7 +112,7 @@ namespace Microsoft.NET.Build.Tests
             };
             testProject.AdditionalProperties[propName] = propValue;
 
-            var asset = _testAssetsManager.CreateTestProject(testProject);
+            var asset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework +  propName +  propValue);
 
             var getValuesCommand = new GetValuesCommand(asset, "OutputType");
             getValuesCommand
@@ -291,7 +292,7 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
-        private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty)
+        private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty, string identifier, [CallerMemberName] string callingMethod = "")
         {
             const string tfm = "netcoreapp3.0";
 
@@ -305,10 +306,10 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.AdditionalProperties.Add(uiFrameworkProperty, "true");
 
-            return _testAssetsManager.CreateTestProject(testProject);
+            return _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
         }
 
-        private TestAsset CreateWindowsDesktopReferenceTestAsset(string projectName, string desktopFramework)
+        private TestAsset CreateWindowsDesktopReferenceTestAsset(string projectName, string desktopFramework, string identifier, [CallerMemberName] string callingMethod = "")
         {
             const string tfm = "netcoreapp3.0";
 
@@ -321,7 +322,7 @@ namespace Microsoft.NET.Build.Tests
 
             testProject.FrameworkReferences.Add(desktopFramework);
 
-            return _testAssetsManager.CreateTestProject(testProject);
+            return _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
         }
 
         private readonly string _fileUseWindowsType = @"
