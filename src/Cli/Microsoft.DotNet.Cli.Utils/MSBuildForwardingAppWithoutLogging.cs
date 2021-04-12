@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Utils
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
             // If DOTNET_CLI_RUN_MSBUILD_OUTOFPROC is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
-            if (AlwaysExecuteMSBuildOutOfProc || string.Compare(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase) != 0)
+            if (AlwaysExecuteMSBuildOutOfProc || !string.Equals(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase))
             {
                 _forwardingApp = new ForwardingAppImplementation(
                     MSBuildPath,
