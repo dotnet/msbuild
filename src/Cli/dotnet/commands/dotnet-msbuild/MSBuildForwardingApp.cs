@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
 
         public string GetConcatenatedArguments()
         {
-            var argumentsUnescaped = _forwardingAppWithoutLogging.GetAllArgumentsUnescaped();
+            var argumentsUnescaped = _forwardingAppWithoutLogging.GetAllArguments();
             return Cli.Utils.ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(argumentsUnescaped);
         }
 
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.MSBuild
             }
             else
             {
-                string[] arguments = _forwardingAppWithoutLogging.GetAllArgumentsUnescaped();
+                string[] arguments = _forwardingAppWithoutLogging.GetAllArguments();
                 if (PerformanceLogEventSource.Log.IsEnabled())
                 {
                     PerformanceLogEventSource.Log.LogMSBuildStart(

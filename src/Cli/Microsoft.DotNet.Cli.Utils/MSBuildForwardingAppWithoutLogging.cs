@@ -67,7 +67,7 @@ namespace Microsoft.DotNet.Cli.Utils
             return _forwardingApp.GetProcessStartInfo();
         }
 
-        public string[] GetAllArgumentsUnescaped()
+        public string[] GetAllArguments()
         {
             return _msbuildRequiredParameters.Concat(_argsToForward.Select(Escape)).ToArray();
         }
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Cli.Utils
             }
             else
             {
-                return ExecuteInProc(GetAllArgumentsUnescaped());
+                return ExecuteInProc(GetAllArguments());
             }
         }
 

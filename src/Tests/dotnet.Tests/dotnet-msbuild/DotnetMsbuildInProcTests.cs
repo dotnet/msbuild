@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .GetField("_forwardingAppWithoutLogging", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.GetValue(msBuildForwardingApp) as Cli.Utils.MSBuildForwardingAppWithoutLogging;
 
-            return forwardingAppWithoutLogging?.GetAllArgumentsUnescaped();
+            return forwardingAppWithoutLogging?.GetAllArguments();
         }
     }
     public sealed class MockFirstTimeUseNoticeSentinel : IFirstTimeUseNoticeSentinel
