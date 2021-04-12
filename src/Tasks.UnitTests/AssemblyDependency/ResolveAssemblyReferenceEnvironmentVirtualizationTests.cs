@@ -102,6 +102,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         public void HintPathRelativeWithActiveDirectoryVirtualization()
         {
             ResolveAssemblyReference rarTask = new ResolveAssemblyReference();
