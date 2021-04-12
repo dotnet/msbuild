@@ -21,6 +21,7 @@ using Xunit;
 using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
@@ -35,7 +36,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
-                feeds: GetMockFeedsForSource(source));
+                feeds: GetMockFeedsForSource(source),
+                identifier: testMockBehaviorIsInSync.ToString());
 
             var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
@@ -84,9 +86,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 bool useMock,
                 List<MockFeed> feeds = null,
                 FilePath? tempProject = null,
-                DirectoryPath? offlineFeed = null)
+                DirectoryPath? offlineFeed = null,
+                [CallerMemberName] string testName = "",
+                string identifier = null)
         {
-            var root = new DirectoryPath(_testAssetsManager.CreateTestDirectory("root").Path);
+            var root = new DirectoryPath(_testAssetsManager.CreateTestDirectory(testName, identifier).Path);
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;

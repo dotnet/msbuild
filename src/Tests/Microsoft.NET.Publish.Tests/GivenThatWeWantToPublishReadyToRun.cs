@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.NET.Build.Tasks;
@@ -31,7 +32,7 @@ namespace Microsoft.NET.Publish.Tests
                 projectName,
                 "ClassLib");
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();
@@ -61,7 +62,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
             testProject.AdditionalItems["PublishReadyToRunExclude"] = "Classlib.dll";
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();
@@ -92,14 +93,14 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp3.0")]
         public void It_creates_readytorun_symbols_when_switch_is_used(string targetFramework)
         {
-            TestProjectPublishing_Internal("CrossgenTest3", targetFramework, emitNativeSymbols: true);
+            TestProjectPublishing_Internal("CrossgenTest3", targetFramework, emitNativeSymbols: true, identifier: targetFramework);
         }
 
         [Theory]
         [InlineData("netcoreapp3.0")]
         public void It_supports_framework_dependent_publishing(string targetFramework)
         {
-            TestProjectPublishing_Internal("FrameworkDependent", targetFramework, isSelfContained: false, emitNativeSymbols:true);
+            TestProjectPublishing_Internal("FrameworkDependent", targetFramework, isSelfContained: false, emitNativeSymbols:true, identifier: targetFramework);
         }
 
         [Theory]
@@ -146,7 +147,7 @@ namespace Microsoft.NET.Publish.Tests
 
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testProjectInstance);
 
@@ -182,14 +183,14 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("netcoreapp3.0")]
         public void It_can_publish_readytorun_for_library_projects(string targetFramework)
         {
-            TestProjectPublishing_Internal("LibraryProject1", targetFramework, isSelfContained: false, makeExeProject: false);
+            TestProjectPublishing_Internal("LibraryProject1", targetFramework, isSelfContained: false, makeExeProject: false, identifier: targetFramework);
         }
 
         [Theory]
         [InlineData("netcoreapp3.0")]
         public void It_can_publish_readytorun_for_selfcontained_library_projects(string targetFramework)
         {
-            TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, makeExeProject: false);
+            TestProjectPublishing_Internal("LibraryProject2", targetFramework, isSelfContained:true, makeExeProject: false, identifier: targetFramework);
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -200,7 +201,7 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
                 return;
 
-            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true, composite: false);
+            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true, composite: false, identifier: targetFramework);
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -211,7 +212,7 @@ namespace Microsoft.NET.Publish.Tests
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
                 return;
 
-            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: false, useCrossgen2: true, composite: true);
+            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: false, useCrossgen2: true, composite: true, identifier: targetFramework);
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -233,7 +234,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["PublishReadyToRunUseCrossgen2"] = "True";
             testProject.AdditionalProperties["SelfContained"] = "False";
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, targetFramework);
 
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute()
@@ -242,7 +243,15 @@ namespace Microsoft.NET.Publish.Tests
                 .And.HaveStdOutContainingIgnoreCase("NETSDK1126");
         }
 
-        private void TestProjectPublishing_Internal(string projectName, string targetFramework, bool makeExeProject = true, bool isSelfContained = true, bool emitNativeSymbols = false, bool useCrossgen2 = false, bool composite = true)
+        private void TestProjectPublishing_Internal(string projectName,
+            string targetFramework,
+            bool makeExeProject = true,
+            bool isSelfContained = true,
+            bool emitNativeSymbols = false,
+            bool useCrossgen2 = false,
+            bool composite = true,
+            [CallerMemberName] string callingMethod = "",
+            string identifier = null)
         {
             var testProject = CreateTestProjectForR2RTesting(
                 targetFramework,
@@ -256,7 +265,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["PublishReadyToRunComposite"] = composite ? "True" : "False";
             testProject.AdditionalProperties["SelfContained"] = isSelfContained ? "True" : "False";
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, callingMethod, identifier);
 
             var publishCommand = new PublishCommand(testProjectInstance);
             publishCommand.Execute().Should().Pass();

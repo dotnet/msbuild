@@ -137,7 +137,7 @@ namespace Microsoft.NET.Build.Tests
             var targetFramework = "netcoreapp3.0";
 
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: target)
                 .WithSource();
 
             var buildCommand = new BuildCommand(testAsset);

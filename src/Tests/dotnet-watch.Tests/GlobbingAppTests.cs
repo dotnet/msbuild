@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task ChangeCompiledFile(bool usePollingWatcher)
         {
-            var testAsset = _testAssetsManager.CopyTestAsset(AppName)
+            var testAsset = _testAssetsManager.CopyTestAsset(AppName, identifier: usePollingWatcher.ToString())
                .WithSource()
                .Path;
 
