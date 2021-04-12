@@ -54,11 +54,16 @@ namespace Microsoft.DotNet.Cli.Utils
             // If DOTNET_CLI_RUN_MSBUILD_OUTOFPROC is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
             if (AlwaysExecuteMSBuildOutOfProc || !string.Equals(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase))
             {
-                _forwardingApp = new ForwardingAppImplementation(
-                    MSBuildPath,
-                    _msbuildRequiredParameters.Concat(argsToForward.Select(Escape)),
-                    environmentVariables: _msbuildRequiredEnvironmentVariables);
+                InitializeForOutOfProcForwarding();
             }
+        }
+
+        private void InitializeForOutOfProcForwarding()
+        {
+            _forwardingApp = new ForwardingAppImplementation(
+                MSBuildPath,
+                _msbuildRequiredParameters.Concat(_argsToForward.Select(Escape)),
+                environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
         public virtual ProcessStartInfo GetProcessStartInfo()
@@ -88,10 +93,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 // Unlike ProcessStartInfo.EnvironmentVariables, Environment.SetEnvironmentVariable can't set a variable
                 // to an empty value, so we just fall back to calling MSBuild out-of-proc if we encounter this case.
                 // https://github.com/dotnet/runtime/issues/50554
-                _forwardingApp = new ForwardingAppImplementation(
-                    MSBuildPath,
-                    _msbuildRequiredParameters.Concat(_argsToForward.Select(Escape)),
-                    environmentVariables: _msbuildRequiredEnvironmentVariables);
+                InitializeForOutOfProcForwarding();
             }
         }
 
