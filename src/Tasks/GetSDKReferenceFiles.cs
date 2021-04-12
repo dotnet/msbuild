@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.Tasks
 
                 PopulateRedistDictionaryFromPaths(directoryToFileList, redistDirectories);
 
-                var cacheInfo = new SDKInfo(references, directoryToFileList, FileUtilities.GetPathsHash(directoriesToHash));
+                var cacheInfo = new SDKInfo(references.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase), directoryToFileList.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase), FileUtilities.GetPathsHash(directoriesToHash));
                 return cacheInfo;
             }
 
@@ -1220,15 +1220,14 @@ namespace Microsoft.Build.Tasks
         /// <remarks>This is a serialization format. Do not change member naming.</remarks>
         internal class SDKInfo : ITranslatable
         {
-            private ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata;
-            private ConcurrentDictionary<string, List<string>> directoryToFileList;
+            private Dictionary<string, SdkReferenceInfo> pathToReferenceMetadata;
+            private Dictionary<string, List<string>> directoryToFileList;
             private int hash;
 
             internal SDKInfo()
             {
-                IEqualityComparer<string> comparer = FileUtilities.PathComparison == StringComparison.Ordinal ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
-                pathToReferenceMetadata = new(comparer);
-                directoryToFileList = new(comparer);
+                pathToReferenceMetadata = new(StringComparer.OrdinalIgnoreCase);
+                directoryToFileList = new(StringComparer.OrdinalIgnoreCase);
                 hash = 0;
             }
 
@@ -1237,7 +1236,7 @@ namespace Microsoft.Build.Tasks
                 Translate(translator);
             }
 
-            public SDKInfo(ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata, ConcurrentDictionary<string, List<string>> directoryToFileList, int cacheHash)
+            public SDKInfo(Dictionary<string, SdkReferenceInfo> pathToReferenceMetadata, Dictionary<string, List<string>> directoryToFileList, int cacheHash)
             {
                 this.pathToReferenceMetadata = pathToReferenceMetadata;
                 this.directoryToFileList = directoryToFileList;
@@ -1247,9 +1246,9 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// A dictionary which maps a file path to a structure that contain some metadata information about that file.
             /// </summary>
-            public ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
+            public Dictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
 
-            public ConcurrentDictionary<string, List<string>> DirectoryToFileList { get { return directoryToFileList; } }
+            public Dictionary<string, List<string>> DirectoryToFileList { get { return directoryToFileList; } }
 
             /// <summary>
             /// Hashset
@@ -1258,7 +1257,7 @@ namespace Microsoft.Build.Tasks
 
             public void Translate(ITranslator translator)
             {
-                TranslateConcurrentDictionary<SdkReferenceInfo>(translator, ref pathToReferenceMetadata, (ITranslator t, ref SdkReferenceInfo info) =>
+                translator.TranslateDictionary(ref pathToReferenceMetadata, (ITranslator t, ref SdkReferenceInfo info) =>
                 {
                     info ??= new SdkReferenceInfo(null, null, false, false);
                     string fusionName = info.FusionName;
@@ -1275,39 +1274,16 @@ namespace Microsoft.Build.Tasks
                     info.IsWinMD = isWinmd;
                 });
 
-                TranslateConcurrentDictionary<List<string>>(translator, ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
+                translator.TranslateDictionary(ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
+                {
+                    t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
+                });
+                translator.TranslateDictionary(ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
                 });
 
                 translator.Translate(ref hash);
-            }
-        }
-
-        private static void TranslateConcurrentDictionary<T>(ITranslator translator, ref ConcurrentDictionary<string, T> dictionary, ObjectTranslator<T> objTranslator)
-        {
-            int count = dictionary.Count;
-            translator.Translate(ref count);
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    string key = null;
-                    translator.Translate(ref key);
-                    T value = default;
-                    objTranslator(translator, ref value);
-                    dictionary[key] = value;
-                }
-            }
-            else
-            {
-                foreach (KeyValuePair<string, T> kvp in dictionary)
-                {
-                    string key = kvp.Key;
-                    translator.Translate(ref key);
-                    T value = kvp.Value;
-                    objTranslator(translator, ref value);
-                }
             }
         }
 

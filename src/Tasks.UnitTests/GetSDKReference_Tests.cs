@@ -263,12 +263,12 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Fact]
         public void VerifyGetSdkReferenceTranslator()
         {
-            ConcurrentDictionary<string, GetSDKReferenceFiles.SdkReferenceInfo> pathToReferenceMetadata = new();
-            pathToReferenceMetadata.TryAdd("first", new("dat", "dat2", true, false));
-            pathToReferenceMetadata.TryAdd("second", new("inf", "inf2", false, false));
-            ConcurrentDictionary<string, List<string>> directoryToFileList = new();
-            directoryToFileList.TryAdd("third", new List<string>() { "a", "b", "c" });
-            directoryToFileList.TryAdd("fourth", new List<string>() { "1", "2", "3" });
+            Dictionary<string, GetSDKReferenceFiles.SdkReferenceInfo> pathToReferenceMetadata = new();
+            pathToReferenceMetadata.Add("first", new("dat", "dat2", true, false));
+            pathToReferenceMetadata.Add("second", new("inf", "inf2", false, false));
+            Dictionary<string, List<string>> directoryToFileList = new();
+            directoryToFileList.Add("third", new List<string>() { "a", "b", "c" });
+            directoryToFileList.Add("fourth", new List<string>() { "1", "2", "3" });
             GetSDKReferenceFiles.SDKInfo writeInfo = new(pathToReferenceMetadata, directoryToFileList, 47);
             GetSDKReferenceFiles.SaveContext contextWriter = new("d", "n", writeInfo);
             GetSDKReferenceFiles.SDKInfo readInfo = null;
