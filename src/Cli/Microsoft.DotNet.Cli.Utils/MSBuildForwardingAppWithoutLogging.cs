@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 environmentVariables: _msbuildRequiredEnvironmentVariables);
         }
 
-        public virtual ProcessStartInfo GetProcessStartInfo()
+        public ProcessStartInfo GetProcessStartInfo()
         {
             Debug.Assert(_forwardingApp != null, "Can't get ProcessStartInfo when not executing out-of-proc");
             return _forwardingApp.GetProcessStartInfo();
