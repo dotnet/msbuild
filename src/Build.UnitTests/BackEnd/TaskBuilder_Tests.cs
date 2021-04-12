@@ -344,9 +344,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>");
 
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
-            bool result = project.Build("t", new[] { logger });
-
-            Assert.True(result);
+            project.Build("t", new[] { logger }).ShouldBeTrue();
 
             // Assuming the current directory of the test .dll has at least one subfolder
             // such as Roslyn, the log will contain [Roslyn\] (or [Roslyn/] on Unix)
