@@ -47,7 +47,11 @@ namespace dotnet_new3
                 AddInstallLogger(host);
             }
 
-            return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), FirstRun, args);
+            var callbacks = new New3Callbacks
+            {
+                OnFirstRun = FirstRun
+            };
+            return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), callbacks, args);
         }
 
         private static DefaultTemplateEngineHost CreateHost(bool emitTimings)
