@@ -9,7 +9,7 @@ using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace dotnet_new3.UnitTests
+namespace dotnet_new3.IntegrationTests
 {
     public class DotnetNewInstallTests
     {

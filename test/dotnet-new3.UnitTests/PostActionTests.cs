@@ -10,7 +10,7 @@ using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace dotnet_new3.UnitTests
+namespace dotnet_new3.IntegrationTests
 {
     public class PostActionTests
     {

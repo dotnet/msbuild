@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using dotnet_new3.UnitTests;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;

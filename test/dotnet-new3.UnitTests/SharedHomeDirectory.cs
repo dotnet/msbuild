@@ -8,7 +8,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
-namespace dotnet_new3.UnitTests
+namespace dotnet_new3.IntegrationTests
 {
     /// <summary>
     /// This class represents shared /tmp/RANDOM-GUID/.templateengine/dotnetcli-preview/ folder

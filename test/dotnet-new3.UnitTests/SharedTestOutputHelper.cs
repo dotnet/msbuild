@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace dotnet_new3.UnitTests
+namespace dotnet_new3.IntegrationTests
 {
     /// <summary>
     /// This is so we can pass ITestOutputHelper to TestCommand constructor
