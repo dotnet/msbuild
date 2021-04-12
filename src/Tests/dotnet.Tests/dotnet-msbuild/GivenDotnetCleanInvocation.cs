@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             var msbuildPath = "<msbuildpath>";
             CleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
-                .GetConcatenatedArguments().Should().Be("-maxcpucount -verbosity:m -verbosity:normal <project> -target:Clean");
+                .GetArgumentsToMSBuild().Should().Be("-maxcpucount -verbosity:m -verbosity:normal <project> -target:Clean");
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var msbuildPath = "<msbuildpath>";
                 CleanCommand.FromArgs(args, msbuildPath)
-                    .GetConcatenatedArguments().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                    .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }
     }

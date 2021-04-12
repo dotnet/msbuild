@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Should()
                     .BeNull();
 
-                command.GetConcatenatedArguments()
+                command.GetArgumentsToMSBuild()
                     .Should()
                     .Be($"{ExpectedPrefix} -restore -target:Publish{expectedAdditionalArgs}");
             });
@@ -69,11 +69,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var command = PublishCommand.FromArgs(args, msbuildPath);
 
             command.SeparateRestoreCommand
-                   .GetConcatenatedArguments()
+                   .GetArgumentsToMSBuild()
                    .Should()
                    .Be($"{ExpectedPrefix} -target:Restore");
 
-            command.GetConcatenatedArguments()
+            command.GetArgumentsToMSBuild()
                    .Should()
                    .Be($"{ExpectedPrefix} -nologo -target:Publish{expectedAdditionalArgs}");
         }
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                    .BeNull();
 
             // NOTE --no-build implies no-restore hence no -restore argument to msbuild below.
-            command.GetConcatenatedArguments()
+            command.GetArgumentsToMSBuild()
                    .Should()
                    .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
         }
@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var msbuildPath = "<msbuildpath>";
             var command = PublishCommand.FromArgs(new[] { "/p:Prop1=prop1", "/p:Prop2=prop2" }, msbuildPath);
 
-            command.GetConcatenatedArguments()
+            command.GetArgumentsToMSBuild()
                .Should()
                .Be($"{ExpectedPrefix} -restore -target:Publish -property:Prop1=prop1 -property:Prop2=prop2");
         }

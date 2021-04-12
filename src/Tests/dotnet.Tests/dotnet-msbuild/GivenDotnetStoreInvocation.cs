@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var msbuildPath = "<msbuildpath>";
             string[] args = new string[] { optionName, "<project>" };
             StoreCommand.FromArgs(args, msbuildPath)
-                .GetConcatenatedArguments().Should().Be($"{ExpectedPrefix}");
+                .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}");
         }
 
         [Theory]
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var msbuildPath = "<msbuildpath>";
                 StoreCommand.FromArgs(args, msbuildPath)
-                    .GetConcatenatedArguments().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                    .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }
 
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             var msbuildPath = "<msbuildpath>";
             StoreCommand.FromArgs(args, msbuildPath)
-                .GetConcatenatedArguments().Should().Be($"{ExpectedPrefix} -property:ComposeDir={Path.GetFullPath(path)}");
+                .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix} -property:ComposeDir={Path.GetFullPath(path)}");
         }
     }
 }

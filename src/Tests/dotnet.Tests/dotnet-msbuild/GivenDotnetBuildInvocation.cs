@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 command.SeparateRestoreCommand.Should().BeNull();
 
-                command.GetConcatenatedArguments()
+                command.GetArgumentsToMSBuild()
                     .Should()
                     .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
@@ -76,11 +76,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var msbuildPath = "<msbuildpath>";
                 var command = BuildCommand.FromArgs(args, msbuildPath);
 
-                command.SeparateRestoreCommand.GetConcatenatedArguments()
+                command.SeparateRestoreCommand.GetArgumentsToMSBuild()
                     .Should()
                     .Be($"{ExpectedPrefix} {expectedAdditionalArgsForRestore}");
 
-                command.GetConcatenatedArguments()
+                command.GetArgumentsToMSBuild()
                     .Should()
                     .Be($"{ExpectedPrefix} -nologo -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });

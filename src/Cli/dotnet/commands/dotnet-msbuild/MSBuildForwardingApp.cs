@@ -69,7 +69,10 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return _forwardingAppWithoutLogging.GetProcessStartInfo();
         }
 
-        public string GetConcatenatedArguments()
+        /// <summary>
+        /// Test hook returning concatenated and escaped command line arguments that would be passed to MSBuild.
+        /// </summary>
+        internal string GetArgumentsToMSBuild()
         {
             var argumentsUnescaped = _forwardingAppWithoutLogging.GetAllArguments();
             return Cli.Utils.ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(argumentsUnescaped);

@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var msbuildPath = "<msbuildpath>";
                 RestoreCommand.FromArgs(args, msbuildPath)
-                    .GetConcatenatedArguments()
+                    .GetArgumentsToMSBuild()
                     .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }
