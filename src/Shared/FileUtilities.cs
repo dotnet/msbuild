@@ -176,6 +176,8 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        // There is a duplicate for this function in TaskExecutionContext.cs
+        // The reason for code duplication is that we do not want to bring new dependencies to Microsoft.Build.Framework.
         /// <summary>
         /// If the given path doesn't have a trailing slash then add one.
         /// If the path is an empty string, does not modify it.
