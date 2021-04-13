@@ -5,12 +5,22 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
+    /// <summary>
+    /// Object that represents a mapping between two lists of <see cref="IAssemblySymbol"/>.
+    /// </summary>
     public class AssemblySetMapper : ElementMapper<IEnumerable<IAssemblySymbol>>
     {
         private Dictionary<IAssemblySymbol, AssemblyMapper> _assemblies;
 
-        public AssemblySetMapper(DiffingSettings settings) : base(settings) { }
+        /// <summary>
+        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// </summary>
+        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        public AssemblySetMapper(ComparingSettings settings) : base(settings) { }
 
+        /// <summary>
+        /// Gets the assembly mappers built from the provided lists of <see cref="IAssemblySymbol"/>.
+        /// <returns>The list of <see cref="AssemblyMapper"/> representing the underlying assemblies.</returns>
         public IEnumerable<AssemblyMapper> GetAssemblies()
         {
             if (_assemblies == null)

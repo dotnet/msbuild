@@ -35,7 +35,7 @@ namespace CompatTests
 }
 ";
 
-            ApiDiffer differ = new();
+            ApiComparer differ = new();
             differ.NoWarn = noWarn;
             bool enableNullable = false;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable);
@@ -79,7 +79,7 @@ namespace CompatTests
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntaxWithReferences(leftSyntax, new[] { forwardedTypeSyntax }, includeDefaultReferences: true);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
-            ApiDiffer differ = new();
+            ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
 
             CompatDifference[] expected = new[]
@@ -109,7 +109,7 @@ namespace CompatTests
             IEnumerable<string> references = new[] { forwardedTypeSyntax };
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references, includeDefaultReferences: true);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references, includeDefaultReferences: true);
-            ApiDiffer differ = new();
+            ApiComparer differ = new();
             Assert.Empty(differ.GetDifferences(new[] { left }, new[] { right }));
         }
 
@@ -132,7 +132,7 @@ namespace CompatTests
 }
 ";
 
-            ApiDiffer differ = new();
+            ApiComparer differ = new();
             differ.NoWarn = DiagnosticIds.TypeMustExist;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
@@ -167,7 +167,7 @@ namespace CompatTests
                 (DiagnosticIds.TypeMustExist, "T:CompatTests.MyEnum"),
             };
 
-            ApiDiffer differ = new();
+            ApiComparer differ = new();
             differ.IgnoredDifferences = ignoredDifferences;
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
@@ -204,7 +204,7 @@ namespace CompatTests
 }
 ";
 
-            ApiDiffer differ = new(includeInternalSymbols);
+            ApiComparer differ = new(includeInternalSymbols);
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
@@ -257,7 +257,7 @@ namespace CompatTests
 }
 ";
 
-            ApiDiffer differ = new(includeInternalSymbols);
+            ApiComparer differ = new(includeInternalSymbols);
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });

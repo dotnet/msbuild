@@ -8,33 +8,11 @@ using System.Linq;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
-    public interface IRuleDriverFactory
-    {
-        IRuleDriver GetRuleDriver();
-    }
-
-    public class RuleDriverFactory : IRuleDriverFactory
-    {
-        private RuleDriver _driver;
-        public IRuleDriver GetRuleDriver()
-        {
-            if (_driver == null)
-                _driver = new RuleDriver();
-
-            return _driver;
-        }
-    }
-
-    public interface IRuleDriver
-    {
-        IEnumerable<CompatDifference> Run<T>(ElementMapper<T> mapper);
-    }
-
-    internal class RuleDriver : IRuleDriver
+    internal class RuleRunner : IRuleRunner
     {
         private readonly IEnumerable<Rule> _rules;
 
-        internal RuleDriver()
+        internal RuleRunner()
         {
             _rules = GetRules();
         }
@@ -84,7 +62,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
         private IEnumerable<Rule> GetRules()
         {
-            return this.GetType().Assembly.GetTypes()
+            return GetType().Assembly.GetTypes()
                 .Where(t => !t.IsAbstract && typeof(Rule).IsAssignableFrom(t))
                 .Select(t => (Rule)Activator.CreateInstance(t));
         }

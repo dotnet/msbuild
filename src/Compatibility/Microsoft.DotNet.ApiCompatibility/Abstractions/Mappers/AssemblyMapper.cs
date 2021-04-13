@@ -6,12 +6,25 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
+    /// <summary>
+    /// Object that represents a mapping between two <see cref="IAssemblySymbol"/> objects.
+    /// This also holds a list of <see cref="NamespaceMapper"/> to represent the mapping of namespaces in between
+    /// <see cref="ElementMapper{T}.Left"/> and <see cref="ElementMapper{T}.Right"/>.
+    /// </summary>
     public class AssemblyMapper : ElementMapper<IAssemblySymbol>
     {
         private Dictionary<INamespaceSymbol, NamespaceMapper> _namespaces;
 
-        public AssemblyMapper(DiffingSettings settings) : base(settings) { }
+        /// <summary>
+        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// </summary>
+        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        public AssemblyMapper(ComparingSettings settings) : base(settings) { }
 
+        /// <summary>
+        /// Gets the mappers for the namespaces contained in <see cref="ElementMapper{T}.Left"/> and <see cref="ElementMapper{T}.Right"/>
+        /// </summary>
+        /// <returns>The list of <see cref="NamespaceMapper"/>.</returns>
         public IEnumerable<NamespaceMapper> GetNamespaces()
         {
             if (_namespaces == null)

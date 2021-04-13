@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
-    public class DefaultSymbolsEqualityComparer : IEqualityComparer<ISymbol>
+    internal class DefaultSymbolsEqualityComparer : IEqualityComparer<ISymbol>
     {
         public bool Equals(ISymbol x, ISymbol y) =>
             string.Equals(GetKey(x), GetKey(y), StringComparison.OrdinalIgnoreCase);

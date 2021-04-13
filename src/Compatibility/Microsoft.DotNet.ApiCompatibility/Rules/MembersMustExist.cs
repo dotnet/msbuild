@@ -8,8 +8,17 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
+    /// <summary>
+    /// Rule that evaluates whether a member exists on Left and Right.
+    /// If the member doesn't exist on Right but it does on Left, it adds a <see cref="CompatDifference"/> to the list of differences.
+    /// </summary>
     public class MembersMustExist : Rule
     {
+        /// <summary>
+        /// Evaluates whether a type exists on both sides of the <see cref="TypeMapper"/>.
+        /// </summary>
+        /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
+        /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
         public override void Run(TypeMapper mapper, List<CompatDifference> differences)
         {
             ITypeSymbol left = mapper.Left;
@@ -17,6 +26,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, $"Type '{left.ToDisplayString()}' exists on the contract but not on the implementation", DifferenceType.Removed, left));
         }
 
+        /// <summary>
+        /// Evaluates whether member (Field, Property, Method, Constructor, Event) exists on both sides of the <see cref="MemberMapper"/>.
+        /// </summary>
+        /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
+        /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
         public override void Run(MemberMapper mapper, List<CompatDifference> differences)
         {
             ISymbol left = mapper.Left;

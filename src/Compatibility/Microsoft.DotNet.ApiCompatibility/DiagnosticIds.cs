@@ -3,6 +3,9 @@
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
+    /// <summary>
+    /// Class containing the strings representing the Diagnostic IDs that can be returned in the compatibility differences.
+    /// </summary>
     public static class DiagnosticIds
     {
         public const string TypeMustExist = "CP0001";

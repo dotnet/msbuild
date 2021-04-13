@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
-    internal class AccessibilityFilter : IDiffingFilter
+    internal class AccessibilityFilter : ISymbolFilter
     {
         private readonly bool _includeInternalSymbols;
 

@@ -3,8 +3,16 @@
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
+    /// <summary>
+    /// Class that implements a visitor pattern to visit the tree for a given mapper.
+    /// </summary>
     public class MapperVisitor
     {
+        /// <summary>
+        /// Visits the tree for the given <see cref="ElementMapper{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">Underlying type for the objects that the mapper holds.</typeparam>
+        /// <param name="mapper"><see cref="ElementMapper{T}"/> to visit.</param>
         public void Visit<T>(ElementMapper<T> mapper)
         {
             if (mapper is AssemblySetMapper assemblySetMapper)
@@ -29,6 +37,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             }
         }
 
+        /// <summary>
+        /// Visits the <see cref="AssemblySetMapper"/> and visits each <see cref="AssemblyMapper"/> in the mapper.
+        /// </summary>
+        /// <param name="mapper">The <see cref="AssemblySetMapper"/> to visit.</param>
         public virtual void Visit(AssemblySetMapper mapper)
         {
             foreach (AssemblyMapper assembly in mapper.GetAssemblies())
@@ -37,6 +49,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             }
         }
 
+        /// <summary>
+        /// Visits the <see cref="AssemblyMapper"/> and visits each <see cref="NamespaceMapper"/> in the mapper.
+        /// </summary>
+        /// <param name="mapper">The <see cref="AssemblyMapper"/> to visit.</param>
         public virtual void Visit(AssemblyMapper mapper)
         {
             foreach (NamespaceMapper nsMapper in mapper.GetNamespaces())
@@ -45,6 +61,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             }
         }
 
+        /// <summary>
+        /// Visits the <see cref="NamespaceMapper"/> and visits each <see cref="TypeMapper"/> in the mapper.
+        /// </summary>
+        /// <param name="mapper">The <see cref="NamespaceMapper"/> to visit.</param>
         public virtual void Visit(NamespaceMapper mapper)
         {
             foreach (TypeMapper type in mapper.GetTypes())
@@ -53,6 +73,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             }
         }
 
+        /// <summary>
+        /// Visits the <see cref="TypeMapper"/> and visits the nested types and members in the mapper.
+        /// </summary>
+        /// <param name="mapper">The <see cref="TypeMapper"/> to visit.</param>
         public virtual void Visit(TypeMapper mapper)
         {
             foreach (TypeMapper type in mapper.GetNestedTypes())
@@ -66,6 +90,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             }
         }
 
+        /// <summary>
+        /// Visits the <see cref="MemberMapper"/>.
+        /// </summary>
+        /// <param name="mapper">The <see cref="MemberMapper"/> to visit.</param>
         public virtual void Visit(MemberMapper mapper) { }
     }
 }

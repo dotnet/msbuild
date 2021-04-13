@@ -6,15 +6,31 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
+    /// <summary>
+    /// Object that represents a mapping between two <see cref="ITypeSymbol"/> objects.
+    /// This also holds the nested types as a list of <see cref="TypeMapper"/> and the members defined within the type
+    /// as a list of <see cref="MemberMapper"/>
+    /// </summary>
     public class TypeMapper : ElementMapper<ITypeSymbol>
     {
         private Dictionary<ITypeSymbol, TypeMapper> _nestedTypes;
         private Dictionary<ISymbol, MemberMapper> _members;
 
-        public TypeMapper(DiffingSettings settings) : base(settings) { }
+        /// <summary>
+        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// </summary>
+        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        public TypeMapper(ComparingSettings settings) : base(settings) { }
 
+        /// <summary>
+        /// Indicates whether we have a complete mapper and if the members should be diffed.
+        /// </summary>
         public bool ShouldDiffMembers => Left != null && Right != null;
 
+        /// <summary>
+        /// Gets the nested types within the mapped types.
+        /// </summary>
+        /// <returns>The list of <see cref="TypeMapper"/> representing the nested types.</returns>
         public IEnumerable<TypeMapper> GetNestedTypes()
         {
             if (_nestedTypes == null)
@@ -51,6 +67,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             return _nestedTypes.Values;
         }
 
+        /// <summary>
+        /// Gets the members defined in this type.
+        /// </summary>
+        /// <returns>The list of <see cref="MemberMapper"/> representing the members.</returns>
         public IEnumerable<MemberMapper> GetMembers()
         {
             if (_members == null)

@@ -117,9 +117,10 @@ namespace MyNamespace
         {
             AssemblySymbolLoader loader = new();
             IEnumerable<string> paths = new[] { Guid.NewGuid().ToString("N") };
-            Assert.Throws<FileNotFoundException>(() => loader.LoadAssemblyFromSourceFiles(paths, Array.Empty<string>()));
-            Assert.Throws<ArgumentNullException>("filePaths", () => loader.LoadAssemblyFromSourceFiles(null, Array.Empty<string>()));
-            Assert.Throws<ArgumentNullException>("filePaths", () => loader.LoadAssemblyFromSourceFiles(Array.Empty<string>(), Array.Empty<string>()));
+            Assert.Throws<FileNotFoundException>(() => loader.LoadAssemblyFromSourceFiles(paths, "assembly1", Array.Empty<string>()));
+            Assert.Throws<ArgumentNullException>("filePaths", () => loader.LoadAssemblyFromSourceFiles(null, "assembly1", Array.Empty<string>()));
+            Assert.Throws<ArgumentNullException>("filePaths", () => loader.LoadAssemblyFromSourceFiles(Array.Empty<string>(), "assembly1", Array.Empty<string>()));
+            Assert.Throws<ArgumentNullException>("assemblyName", () => loader.LoadAssemblyFromSourceFiles(paths, null, Array.Empty<string>()));
         }
 
         [Fact]
@@ -333,6 +334,7 @@ namespace MyNamespace
             using FileStream stream = File.OpenRead(Path.Combine(assetInfo.OutputDirectory, testProject.Name + ".dll"));
             IAssemblySymbol symbol = loader.LoadAssembly(testProject.Name, stream);
 
+            Assert.False(loader.HasLoadWarnings(out var _));
             Assert.Equal(testProject.Name, symbol.Name, StringComparer.Ordinal);
 
             IEnumerable<ITypeSymbol> types = symbol.GlobalNamespace

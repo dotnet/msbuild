@@ -5,8 +5,15 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
+    /// <summary>
+    /// Object that represents a mapping between two <see cref="ISymbol"/> objects.
+    /// </summary>
     public class MemberMapper : ElementMapper<ISymbol>
     {
-        public MemberMapper(DiffingSettings settings) : base(settings) { }
+        /// <summary>
+        /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
+        /// </summary>
+        /// <param name="settings">The settings used to diff the elements in the mapper.</param>
+        public MemberMapper(ComparingSettings settings) : base(settings) { }
     }
 }

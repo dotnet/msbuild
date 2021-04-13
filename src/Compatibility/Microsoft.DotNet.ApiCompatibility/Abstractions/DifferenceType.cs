@@ -3,6 +3,9 @@
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
+    /// <summary>
+    /// Enum representing the different type of differences available.
+    /// </summary>
     public enum DifferenceType
     {
         Changed,

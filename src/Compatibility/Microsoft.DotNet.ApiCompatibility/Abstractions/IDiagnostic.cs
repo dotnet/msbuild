@@ -3,9 +3,19 @@
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
+    /// <summary>
+    /// Interface that describes a diagnostic.
+    /// </summary>
     public interface IDiagnostic
     {
+        /// <summary>
+        /// String representing the diagnostic ID.
+        /// </summary>
         string DiagnosticId { get; }
+
+        /// <summary>
+        /// String representing the ID for the object that the diagnostic was created for.
+        /// </summary>
         string ReferenceId { get; }
     }
 }
