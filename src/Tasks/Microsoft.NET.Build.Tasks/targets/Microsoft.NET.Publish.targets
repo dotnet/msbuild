@@ -106,6 +106,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CannotHaveSingleFileWithoutRuntimeIdentifier" />
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(UseAppHost)' != 'true'"
                  ResourceName="CannotHaveSingleFileWithoutAppHost" />
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
+                            '$(EnableCompressionInSingleFile)' == 'true' And
+                            '$(_TargetFrameworkVersionWithoutV)' &lt;= '5.0'"
+                 ResourceName="CannotEnableCompressionInSingleFile" />
 
 
     <PropertyGroup>
@@ -1032,6 +1036,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
       <IncludeAllContentForSelfExtract Condition="'$(IncludeAllContentForSelfExtract)' == ''">false</IncludeAllContentForSelfExtract>
       <IncludeNativeLibrariesForSelfExtract Condition="'$(IncludeNativeLibrariesForSelfExtract)' == ''">$(IncludeAllContentForSelfExtract)</IncludeNativeLibrariesForSelfExtract>
+      <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == '' And
+                                   '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">true</EnableCompressionInSingleFile>
+      <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == ''">false</EnableCompressionInSingleFile>
     </PropertyGroup>
 
     <NETSdkError Condition="'$(IncludeAllContentForSelfExtract)' == 'true' And '$(IncludeNativeLibrariesForSelfExtract)' != 'true'"
@@ -1040,6 +1047,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateBundle FilesToBundle="@(_FilesToBundle)"
                     AppHostName="$(PublishedSingleFileName)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
+                    EnableCompressionInSingleFile="$(EnableCompressionInSingleFile)"
                     IncludeNativeLibraries="$(IncludeNativeLibrariesForSelfExtract)"
                     IncludeAllContent="$(IncludeAllContentForSelfExtract)"
                     TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"

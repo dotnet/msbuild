@@ -29,7 +29,9 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string OutputDir { get; set; }
         [Required]
-        public bool ShowDiagnosticOutput { get; set; }
+        public bool ShowDiagnosticOutput { get; set; }        
+        [Required]
+        public bool EnableCompressionInSingleFile { get; set; }
 
         [Output]
         public ITaskItem[] ExcludedFiles { get; set; }
@@ -49,13 +51,9 @@ namespace Microsoft.NET.Build.Tasks
             options |= IncludeNativeLibraries ? BundleOptions.BundleNativeBinaries : BundleOptions.None;
             options |= IncludeAllContent ? BundleOptions.BundleAllContent : BundleOptions.None;
             options |= IncludeSymbols ? BundleOptions.BundleSymbolFiles : BundleOptions.None;
+            options |= EnableCompressionInSingleFile ? BundleOptions.EnableCompression : BundleOptions.None;
 
             Version version = new Version(TargetFrameworkVersion);
-            if (version.Major >= 6)
-            {
-                options |= BundleOptions.EnableCompression;
-            }
-
             var bundler = new Bundler(
                 AppHostName,
                 OutputDir,
