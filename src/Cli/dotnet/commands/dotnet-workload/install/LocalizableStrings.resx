@@ -210,4 +210,10 @@
   <data name="ManifestDoesNotExist" xml:space="preserve">
     <value>No manifest with id {0} exists.</value>
   </data>
+  <data name="FailedToInstallWorkloadManifest" xml:space="preserve">
+    <value>Failed to install manifest {0} version {1}: {2}.</value>
+  </data>
+  <data name="InstallingWorkloadManifest" xml:space="preserve">
+    <value>Installing workload manifest {0} version {1}.</value>
+  </data>
 </root>

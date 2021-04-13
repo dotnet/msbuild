@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var testDir = _testAssetsManager.CreateTestDirectory().Path;
             var featureBand = "6.0.100";
             var dotnetRoot = Path.Combine(testDir, "dotnet");
-            var installedManifests = new ManifestId[] { new ManifestId("test-manifest-1"), new ManifestId("test-manifest-2"), new ManifestId("test-manifest-2") };
+            var installedManifests = new ManifestId[] { new ManifestId("test-manifest-1"), new ManifestId("test-manifest-2"), new ManifestId("test-manifest-3") };
 
             // Write mock manifests
             var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
         }
 
-        private string GetManifestContent(ManifestVersion version)
+        internal static string GetManifestContent(ManifestVersion version)
         {
             return $@"{{
   ""version"": {version},

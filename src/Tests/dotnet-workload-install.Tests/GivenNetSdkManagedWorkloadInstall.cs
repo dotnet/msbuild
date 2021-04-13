@@ -273,7 +273,16 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenManagedInstallItCanInstallManifestVersion()
         {
-            throw new NotImplementedException();
+            var (_, installer, nugetDownloader) = GetTestInstaller();
+            var featureBand = new SdkFeatureBand("6.0.100");
+            var manifestId = new ManifestId("test-manifest-1");
+            var manifestVersion = new ManifestVersion(5);
+
+            installer.InstallWorkloadManifest(manifestId, manifestVersion, featureBand);
+
+            var mockNugetInstaller = nugetDownloader as MockNuGetPackageDownloader;
+            mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
+            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(manifestId.ToString()), new NuGetVersion(manifestVersion.ToString())));
         }
 
         private (string, NetSdkManagedInstaller, INuGetPackageDownloader) GetTestInstaller([CallerMemberName] string testName = "", bool failingInstaller = false, string identifier = "")

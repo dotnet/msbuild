@@ -12,6 +12,11 @@
         <target state="new">Failed to update the advertising manifest {0}: {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToInstallWorkloadManifest">
+        <source>Failed to install manifest {0} version {1}: {2}.</source>
+        <target state="new">Failed to install manifest {0} version {1}: {2}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FromCacheOptionDescription">
         <source>Complete the operation from cache (offline).</source>
         <target state="new">Complete the operation from cache (offline).</target>
@@ -30,6 +35,11 @@
       <trans-unit id="InstallingPackVersionMessage">
         <source>Installing pack {0} version {1}...</source>
         <target state="new">Installing pack {0} version {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingWorkloadManifest">
+        <source>Installing workload manifest {0} version {1}.</source>
+        <target state="new">Installing workload manifest {0} version {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
