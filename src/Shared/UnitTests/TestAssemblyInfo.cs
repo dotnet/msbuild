@@ -40,6 +40,10 @@ public class MSBuildTestAssemblyFixture : IDisposable
         //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
         _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", string.Empty);
 
+        // Prevent test assemblies from logging any performance info.
+        // https://github.com/dotnet/msbuild/pull/6274
+        _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", string.Empty);
+
         SetDotnetHostPath(_testEnvironment);
 
         //  Use a project-specific temporary path
