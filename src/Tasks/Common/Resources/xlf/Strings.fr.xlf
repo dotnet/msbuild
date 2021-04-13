@@ -710,6 +710,16 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1127: le pack de ciblage {0} n'est pas installé. Effectuez une restauration, puis réessayez.</target>
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
+      <trans-unit id="TrimmingWindowsFormsRequiresCom">
+        <source>NETSDK1164: Trimming Windows Forms is dangerous and requires 'BuiltInComSupport' to be set to 'true' </source>
+        <target state="new">NETSDK1164: Trimming Windows Forms is dangerous and requires 'BuiltInComSupport' to be set to 'true' </target>
+        <note>{StrBegin="NETSDK1164: "}</note>
+      </trans-unit>
+      <trans-unit id="TrimmingWpfIsDangerous">
+        <source>NETSDK1165: Trimming WPF is dangerous and might have issues at runtime </source>
+        <target state="new">NETSDK1165: Trimming WPF is dangerous and might have issues at runtime </target>
+        <note>{StrBegin="NETSDK1165: "}</note>
+      </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
         <target state="translated">NETSDK1016: Chemin résolu introuvable pour '{0}'.</target>
