@@ -74,7 +74,7 @@ After installing that, enable logging and run your build ([more details](https:/
 
 The implementation of the binary logger is here:
 https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BinaryLogger.cs
-https://github.com/Microsoft/msbuild/blob/master/src/Build/Logging/BinaryLogger/BinaryLogger.cs
+https://github.com/dotnet/msbuild/blob/main/src/Build/Logging/BinaryLogger/BinaryLogger.cs
 
 It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` objects. The event args objects are serialized and deserialized using:
  * https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BuildEventArgsWriter.cs
@@ -85,7 +85,7 @@ It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` obj
 Every .binlog file has the first three bytes that indicate the file version. The current file format version is 9 (`00 00 09`).
 
 When incrementing the file format, keep this in mind:
- * Increment the version and add a summary of the changes: https://github.com/Microsoft/msbuild/blob/master/src/Build/Logging/BinaryLogger/BinaryLogger.cs#L22
+ * Increment the version and add a summary of the changes: https://github.com/dotnet/msbuild/blob/main/src/Build/Logging/BinaryLogger/BinaryLogger.cs#L22
  * In BuildEventArgsWriter.cs, just add fields, etc. without worrying. 
  * In BuildEventArgsReader.cs, add exactly the same changes, but wrapped in an `if`-statement like this: `if (fileFormatVersion > version where the field was introduced)
  * Open an issue over at https://github.com/KirillOsenkov/MSBuildStructuredLog/issues/new so I can adapt the Structured Log Viewer to these changes.

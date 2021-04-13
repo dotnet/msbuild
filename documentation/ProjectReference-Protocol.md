@@ -5,8 +5,8 @@ The MSBuild engine doesn't have a notion of a “project reference”—it only 
 That's a powerful tool, but no one would want to have to specify how to build every single reference in every single project. The common targets introduce an item, `ProjectReference`, and a default process for building references declared via that item.
 
 Default protocol implementation:
-- https://github.com/Microsoft/msbuild/blob/master/src/Tasks/Microsoft.Common.CurrentVersion.targets
-- https://github.com/Microsoft/msbuild/blob/master/src/Tasks/Microsoft.Common.CrossTargeting.targets
+- https://github.com/dotnet/msbuild/blob/main/src/Tasks/Microsoft.Common.CurrentVersion.targets
+- https://github.com/dotnet/msbuild/blob/main/src/Tasks/Microsoft.Common.CrossTargeting.targets
 
 ## Projects that have references
 
@@ -73,7 +73,7 @@ If implementing a project with an “outer” (determine what properties to pass
 * `GetTargetPath` should return the path of the project's output, but _not_ build that output.
   * **Conditions**: this is used for builds inside Visual Studio, but not on the command line.
   * It's also used when the property `BuildProjectReferences` is `false`, manually indicating that all `ProjectReferences` are up to date and shouldn't be (re)built.
-  * This should return a single item that is the primary output of the project, with metadata describing that output. See [`TargetPathWithTargetPlatformMoniker`](https://github.com/Microsoft/msbuild/blob/080ef976a428f6ff7bf53ca5dd4ee637b3fe949c/src/Tasks/Microsoft.Common.CurrentVersion.targets#L1834-L1842) for the default metadata.
+  * This should return a single item that is the primary output of the project, with metadata describing that output. See [`TargetPathWithTargetPlatformMoniker`](https://github.com/dotnet/msbuild/blob/080ef976a428f6ff7bf53ca5dd4ee637b3fe949c/src/Tasks/Microsoft.Common.CurrentVersion.targets#L1834-L1842) for the default metadata.
 * **Default** targets should do the full build and return an assembly to be referenced.
   * **Conditions**: this is _not_ called when building inside Visual Studio. Instead, Visual Studio builds each project in isolation but in order, so the path returned from `GetTargetPath` can be assumed to exist at consumption time.
   * If the `ProjectReference` defines the `Targets` metadata, it is used. If not, no target is passed, and the default target of the reference (usually `Build`) is built.
