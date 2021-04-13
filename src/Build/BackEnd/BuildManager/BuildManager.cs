@@ -1132,14 +1132,16 @@ namespace Microsoft.Build.Execution
                             ReportResultsToSubmission(result);
                         }
                     }
+                    // This catch should always be the first one because when this method runs in a separate thread
+                    // and throws an exception there is nobody there to observe the exception.
+                    catch (Exception ex) when (thisMethodIsAsync)
+                    {
+                        HandleExecuteSubmissionException(submission, ex);
+                    }
                     catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                     {
                         HandleExecuteSubmissionException(submission, ex);
                         throw;
-                    }
-                    catch (Exception ex) when (thisMethodIsAsync)
-                    {
-                        OnThreadException(ex);
                     }
                     void SubmitBuildRequest()
                     {
@@ -1269,6 +1271,9 @@ namespace Microsoft.Build.Execution
                     "OnlyOneCachePluginMustBeSpecified",
                     string.Join("; ", ProjectCacheItems.Values.Select(c => c.PluginPath)));
 
+                // Plugin needs the graph root (aka top BuildSubmission path, aka the solution path when in VS) which, under VS, is accessible
+                // only by evaluating the submission and retrieving the 'SolutionPath' property set by VS. This is also the reason why
+                // this method cannot be called from BeginBuild, because no build submissions are available there to extract the solution path from.
                 LoadSubmissionProjectIntoConfiguration(submission, config);
 
                 if (IsDesignTimeBuild(config.Project))
@@ -1741,6 +1746,10 @@ namespace Microsoft.Build.Execution
                     resultsPerNode = BuildGraph(projectGraph, targetListTask.Result, submission.BuildRequestData);
                 }
 
+                ErrorUtilities.VerifyThrow(
+                    submission.BuildResult?.Exception == null,
+                    "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
+
                 // The overall submission is complete, so report it as complete
                 ReportResultsToSubmission(
                     new GraphBuildResult(
@@ -1800,7 +1809,8 @@ namespace Microsoft.Build.Execution
         private Dictionary<ProjectGraphNode, BuildResult> BuildGraph(
             ProjectGraph projectGraph,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
-            GraphBuildRequestData graphBuildRequestData)
+            GraphBuildRequestData graphBuildRequestData
+        )
         {
             var waitHandle = new AutoResetEvent(true);
             var graphBuildStateLock = new object();
@@ -1809,10 +1819,18 @@ namespace Microsoft.Build.Execution
             var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
             var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
+            Exception submissionException = null;
 
             while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
             {
                 waitHandle.WaitOne();
+
+                // When a cache plugin is present, ExecuteSubmission(BuildSubmission) executes on a separate thread whose exceptions do not get observed.
+                // Observe them here to keep the same exception flow with the case when there's no plugins and ExecuteSubmission(BuildSubmission) does not run on a separate thread.
+                if (submissionException != null)
+                {
+                    throw submissionException;
+                }
 
                 lock (graphBuildStateLock)
                 {
@@ -1850,6 +1868,11 @@ namespace Microsoft.Build.Execution
                         {
                             lock (graphBuildStateLock)
                             {
+                                if (submissionException == null && finishedBuildSubmission.BuildResult.Exception != null)
+                                {
+                                    submissionException = finishedBuildSubmission.BuildResult.Exception;
+                                }
+
                                 ProjectGraphNode finishedNode = buildingNodes[finishedBuildSubmission];
 
                                 finishedNodes.Add(finishedNode);
@@ -2600,6 +2623,11 @@ namespace Microsoft.Build.Execution
             {
                 if (_threadException == null)
                 {
+                    if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
+                    {
+                        e = ae.InnerExceptions.First();
+                    }
+
                     _threadException = ExceptionDispatchInfo.Capture(e);
                     var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
                     foreach (BuildSubmission submission in submissions)
