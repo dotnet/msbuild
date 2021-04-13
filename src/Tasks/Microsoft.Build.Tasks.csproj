@@ -302,6 +302,9 @@
     <Compile Include="AssemblyDependency\TaskItemSpecFilenameComparer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="AssemblyDependency\TaskExecutionContextExtension.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="AssemblyDependency\UnificationReason.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>

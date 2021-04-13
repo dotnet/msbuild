@@ -1180,6 +1180,10 @@ namespace Microsoft.Build.Tasks
         public string TimestampUrl { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public static partial class TaskExecutionContextExtension
+    {
+        public static string GetFullPath(this Microsoft.Build.Framework.TaskExecutionContext taskExecutionContext, string path) { throw null; }
+    }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
     {
         internal TaskExtension() { }

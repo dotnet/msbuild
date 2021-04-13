@@ -600,7 +600,6 @@ namespace Microsoft.Build.Framework
         public System.Globalization.CultureInfo Culture { get { throw null; } }
         public string StartupDirectory { get { throw null; } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } }
-        public string GetFullPath(string path) { throw null; }
     }
     public partial class TaskFinishedEventArgs : Microsoft.Build.Framework.BuildStatusEventArgs
     {

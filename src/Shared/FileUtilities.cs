@@ -176,8 +176,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        // There is a duplicate for this function in TaskExecutionContext.cs
-        // The reason for code duplication is that we do not want to bring new dependencies to Microsoft.Build.Framework.
         /// <summary>
         /// If the given path doesn't have a trailing slash then add one.
         /// If the path is an empty string, does not modify it.
@@ -447,6 +445,11 @@ namespace Microsoft.Build.Shared
         }
 #endif // FEATURE_LEGACY_GETFULLPATH
 
+        /// <summary>
+        /// Replaces Windows-style path separators with Unix-style path separators, when performed on unix.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         internal static string FixFilePath(string path)
         {
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");

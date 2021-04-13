@@ -249,7 +249,7 @@ namespace Microsoft.Build.Tasks
         ///
         ///     System, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
         ///
-        /// or (full ? TODO - check) path to the assembly.
+        /// or path to the assembly.
         ///
         /// These names will be resolved into full paths and all dependencies will be found.
         ///
@@ -3108,8 +3108,8 @@ namespace Microsoft.Build.Tasks
 
             for (int i = 0; i < _installedAssemblyTables.Length; i++)
             {
-                // TODO: check if it could be URI.
-                // It is said that it's on disk in docu, but code does not prohibit URI.
+                // Note: it is said that _installedAssemblyTables is a list of XML files. _installedAssemblyTables[i].ItemSpec is passed to XmlReader.
+                // Code itself does not prohibit _installedAssemblyTables[i].ItemSpec to be an URL, however, it does not seem as we need to support the file on web.
                 _installedAssemblyTables[i].ItemSpec = _concurrencyExecutionContext.GetFullPath(_installedAssemblyTables[i].ItemSpec);
             }
 
