@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -11,27 +12,28 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
     internal class MockNuGetPackageDownloader : INuGetPackageDownloader
     {
-        private readonly string _installPath;
+        private readonly string _downloadPath;
 
-        public List<(PackageId, NuGetVersion)> InstallCallParams = new List<(PackageId, NuGetVersion)>();
+        public List<(PackageId, NuGetVersion)> DownloadCallParams = new List<(PackageId, NuGetVersion)>();
 
-        public List<string> InstallCallResult = new List<string>();
+        public List<string> DownloadCallResult = new List<string>();
 
         public List<(string, string)> ExtractCallParams = new List<(string, string)>();
 
         public MockNuGetPackageDownloader(string dotnetRoot)
         {
-            _installPath = Path.Combine(dotnetRoot, "metadata", "temp");
-            Directory.CreateDirectory(_installPath);
+            _downloadPath = Path.Combine(dotnetRoot, "metadata", "temp");
+            Directory.CreateDirectory(_downloadPath);
         }
 
-        public Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion,
+        public Task<string> DownloadPackageAsync(PackageId packageId,
+            NuGetVersion packageVersion = null,
             PackageSourceLocation packageSourceLocation = null,
             bool includePreview = false)
         {
-            InstallCallParams.Add((packageId, packageVersion));
-            var path = Path.Combine(_installPath, "mock.nupkg");
-            InstallCallResult.Add(path);
+            DownloadCallParams.Add((packageId, packageVersion));
+            var path = Path.Combine(_downloadPath, "mock.nupkg");
+            DownloadCallResult.Add(path);
             File.WriteAllText(path, string.Empty);
             return Task.FromResult(path);
         }

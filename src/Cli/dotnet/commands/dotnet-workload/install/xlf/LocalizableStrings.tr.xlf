@@ -52,6 +52,11 @@
         <target state="needs-review-translation">Aracın yükleneceği hedef çerçeve.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestDoesNotExist">
+        <source>No manifest with id {0} exists.</source>
+        <target state="new">No manifest with id {0} exists.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="new">Skip updating the workload manifests.</target>

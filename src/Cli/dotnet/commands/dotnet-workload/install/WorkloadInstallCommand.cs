@@ -18,7 +18,6 @@ using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
-using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
@@ -36,6 +35,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly IWorkloadResolver _workloadResolver;
         private readonly IWorkloadManifestProvider _workloadManifestProvider;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
+        private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly ReleaseVersion _sdkVersion;
 
         public readonly string MockInstallDirectory = Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath,
@@ -46,6 +46,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IReporter reporter = null,
             IWorkloadResolver workloadResolver = null,
             IInstaller workloadInstaller = null,
+            INuGetPackageDownloader nugetPackageDownloader = null,
+            IWorkloadManifestUpdater workloadManifestUpdater = null,
+            string userHome = null,
             string version = null)
             : base(parseResult)
         {
@@ -61,8 +64,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver);
-			var tempPackagesDir = new DirectoryPath(Path.Combine(EnvironmentProvider.GetUserHomeDirectory(), ".dotnet", "sdk-advertising-temp"));
-            _nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir, new NullLogger());
+            userHome = userHome ?? EnvironmentProvider.GetUserHomeDirectory();
+            var tempPackagesDir = new DirectoryPath(Path.Combine(userHome, ".dotnet", "sdk-advertising-temp"));
+            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, new NullLogger());
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, userHome);
         }
 
         public override int Execute()
@@ -152,16 +157,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter.WriteLine();
             var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
+            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestsToUpdate = new List<(ManifestId,  ManifestVersion, ManifestVersion)>();
             if (!skipManifestUpdate)
             {
                 // Update currently installed workloads
                 var installedWorkloads = _workloadInstaller.GetInstalledWorkloads(featureBand);
                 workloadIds = workloadIds.Concat(installedWorkloads);
 
-                UpdateAdvertisingManifests(featureBand);
+                _workloadManifestUpdater.UpdateAdvertisingManifests(featureBand);
+                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates(featureBand);
             }
 
-            InstallWorkloadsWithInstallRecord(workloadIds, featureBand);
+            InstallWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate);
 
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -173,19 +180,31 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter.WriteLine();
         }
 
-        private void InstallWorkloadsWithInstallRecord(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
+        private void InstallWorkloadsWithInstallRecord(
+            IEnumerable<WorkloadId> workloadIds,
+            SdkFeatureBand sdkFeatureBand,
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
                 var installer = _workloadInstaller.GetPackInstaller();
+                IEnumerable<PackInfo> workloadPackToInstall = new List<PackInfo>();
 
-                var workloadPackToInstall = workloadIds
-                    .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
-                    .Distinct()
-                    .Select(packId => _workloadResolver.TryGetPackInfo(packId));
                 TransactionalAction.Run(
                     action: () =>
                     {
+                        foreach (var manifest in manifestsToUpdate)
+                        {
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand);
+                        }
+
+                        _workloadResolver.RefreshWorkloadManifests();
+
+                        workloadPackToInstall = workloadIds
+                            .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                            .Distinct()
+                            .Select(packId => _workloadResolver.TryGetPackInfo(packId));
+
                         foreach (var packId in workloadPackToInstall)
                         {
                             installer.InstallWorkloadPack(packId, sdkFeatureBand);
@@ -199,6 +218,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     },
                     rollback: () => {
+                        foreach (var manifest in manifestsToUpdate)
+                        {
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand);
+                        }
+
                         foreach (var packId in workloadPackToInstall)
                         {
                             installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
@@ -217,64 +241,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 foreach (var workloadId in workloadIds)
                 {
                     installer.InstallWorkload(workloadId);
-                }
-            }
-        }
-
-        private IEnumerable<(ManifestId manifestId, string path)> UpdateAdvertisingManifests(SdkFeatureBand featureBand)
-        {
-            var manifests = GetManifests();
-            foreach (var manifest in manifests)
-            {
-                UpdateAdvertisingManifest(manifest.manifestId, featureBand);
-            }
-
-            return manifests;
-        }
-
-        private IEnumerable<(ManifestId manifestId, string path)> GetManifests()
-        {
-            var manifestDirs = _workloadManifestProvider.GetManifestDirectories();
-
-            var manifests = new List<(ManifestId, string)>();
-            foreach (var manifestDir in manifestDirs)
-            {
-                var manifestId = Path.GetFileName(manifestDir);
-                manifests.Add((new ManifestId(manifestId), manifestDir));
-            }
-            return manifests;
-        }
-
-        private void UpdateAdvertisingManifest(ManifestId manifestId, SdkFeatureBand featureBand)
-        {
-            string packagePath = null;
-            try
-            {
-                var adManifestPath = Path.Combine(EnvironmentProvider.GetUserHomeDirectory(), ".dotnet", "sdk-advertising", featureBand.ToString(), manifestId.ToString());
-                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(manifestId.ToString())).Result;
-                var resultingFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, adManifestPath).Result;
-                _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
-            }
-            catch (Exception e)
-            {
-                _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));
-            }
-            finally
-            {
-                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
-                {
-                    File.Delete(packagePath);
-                }
-
-                var versionDir = Path.GetDirectoryName(packagePath);
-                if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
-                {
-                    Directory.Delete(versionDir);
-                    var idDir = Path.GetDirectoryName(versionDir);
-                    if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
-                    {
-                        Directory.Delete(idDir);
-                    }
                 }
             }
         }

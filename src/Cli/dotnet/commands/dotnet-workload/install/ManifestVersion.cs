@@ -5,23 +5,28 @@ using System;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal struct ManifestVersion : IEquatable<ManifestVersion>, IComparable<ManifestVersion>
+    internal class ManifestVersion : IEquatable<ManifestVersion>, IComparable<ManifestVersion>
     {
-        private string _version;
+        private long _version;
 
         public ManifestVersion(string version)
         {
-            _version = version ?? throw new ArgumentNullException(nameof(version));
+            _version = long.Parse(version);
+        }
+
+        public ManifestVersion(long version)
+        {
+            _version = version;
         }
 
         public bool Equals(ManifestVersion other)
         {
-            return ToString() == other.ToString();
+            return _version == other._version;
         }
 
         public int CompareTo(ManifestVersion other)
         {
-            return string.Compare(ToString(), other.ToString(), StringComparison.Ordinal);
+            return _version.CompareTo(other._version);
         }
 
         public override bool Equals(object obj)
@@ -31,12 +36,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override int GetHashCode()
         {
-            return ToString().GetHashCode();
+            return _version.GetHashCode();
         }
 
         public override string ToString()
         {
-            return _version;
+            return _version.ToString();
         }
     }
 }

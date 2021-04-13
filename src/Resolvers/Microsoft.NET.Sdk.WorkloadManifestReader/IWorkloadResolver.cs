@@ -21,5 +21,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <param name="packId">A workload pack ID</param>
         /// <returns>Information about the workload pack, or null if the specified pack ID isn't found in the manifests</returns>
         WorkloadResolver.PackInfo? TryGetPackInfo(string packId);
+
+        /// <summary>
+        /// Refresh workload and pack information based on the current installed workload manifest files
+        /// </summary>
+        void RefreshWorkloadManifests();
     }
 }

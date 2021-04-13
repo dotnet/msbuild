@@ -13,6 +13,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public IList<PackInfo> InstalledPacks = new List<PackInfo>();
         public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
+        public IList<(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand)> InstalledManifests = 
+            new List<(ManifestId, ManifestVersion, SdkFeatureBand)>();
         public bool GarbageCollectionCalled = false;
         public MockInstallationRecordRepository InstallationRecordRepository;
 
@@ -52,7 +54,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         public void DownloadToOfflineCache(IEnumerable<string> manifests) => throw new System.NotImplementedException();
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand) => throw new System.NotImplementedException();
         public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();
     }
 
