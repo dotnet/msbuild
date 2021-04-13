@@ -1164,11 +1164,6 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void StopOnFirstFailureandBuildInParallelMultipleNode()
         {
-            // Disable nodereuse to prevent the msbuild node from holding onto perf logging data.
-            // https://github.com/dotnet/msbuild/pull/6274
-            using TestEnvironment env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", "1");
-
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
                   <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                       <Target Name='msbuild'>
