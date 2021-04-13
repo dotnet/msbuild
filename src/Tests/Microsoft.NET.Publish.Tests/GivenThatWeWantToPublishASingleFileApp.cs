@@ -695,6 +695,8 @@ class C
                 .Pass();
             var uncompressedSize = new FileInfo(singleFilePath).Length;
 
+            WaitForUtcNowToAdvance();
+
             publishCommand
                 .Execute(PublishSingleFile, RuntimeIdentifier)
                 .Should()
