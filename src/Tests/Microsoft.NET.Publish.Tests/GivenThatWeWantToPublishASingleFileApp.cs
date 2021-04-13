@@ -651,5 +651,57 @@ class C
                 .And
                 .HaveStdOutContaining(Strings.CannotIncludeSymbolsInSingleFile);
         }
+
+        [RequiresMSBuildVersionFact("16.8.0")]
+        public void It_errors_when_enabling_compression_targeting_net5()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net5.0",
+                IsExe = true,
+            };
+
+            testProject.AdditionalProperties.Add("EnableCompressionInSingleFile", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(Strings.CannotEnableCompressionInSingleFile);
+        }
+
+        [RequiresMSBuildVersionFact("16.8.0")]
+        public void It_compresses_single_file_by_default()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(testAsset);
+            var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, "net6.0").FullName, $"SingleFileTest{Constants.ExeSuffix}");
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier, "/p:EnableCompressionInSingleFile=false")
+                .Should()
+                .Pass();
+            var uncompressedSize = new FileInfo(singleFilePath).Length;
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+            var compressedSize = new FileInfo(singleFilePath).Length;
+
+            uncompressedSize.Should().BeGreaterThan(compressedSize);
+        }
     }
 }
