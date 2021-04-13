@@ -1257,7 +1257,7 @@ namespace Microsoft.Build.Tasks
 
             public void Translate(ITranslator translator)
             {
-                translator.TranslateDictionary(ref pathToReferenceMetadata, (ITranslator t, ref SdkReferenceInfo info) =>
+                translator.TranslateDictionary(ref pathToReferenceMetadata, StringComparer.OrdinalIgnoreCase, (ITranslator t, ref SdkReferenceInfo info) =>
                 {
                     info ??= new SdkReferenceInfo(null, null, false, false);
                     string fusionName = info.FusionName;
@@ -1274,11 +1274,11 @@ namespace Microsoft.Build.Tasks
                     info.IsWinMD = isWinmd;
                 });
 
-                translator.TranslateDictionary(ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
+                translator.TranslateDictionary(ref directoryToFileList, StringComparer.OrdinalIgnoreCase, (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
                 });
-                translator.TranslateDictionary(ref directoryToFileList, (ITranslator t, ref List<string> fileList) =>
+                translator.TranslateDictionary(ref directoryToFileList, StringComparer.OrdinalIgnoreCase, (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
                 });
