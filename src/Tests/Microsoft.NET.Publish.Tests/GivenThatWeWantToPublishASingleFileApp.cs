@@ -698,7 +698,7 @@ class C
             WaitForUtcNowToAdvance();
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, "/p:EnableCompressionInSingleFile=true")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent)
                 .Should()
                 .Pass();
             var compressedSize = new FileInfo(singleFilePath).Length;
