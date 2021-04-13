@@ -399,9 +399,40 @@ namespace Microsoft.DotNet.CommandFactory
             Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.MSBuildArgs,
                 ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args)));
 
-            var result = new MSBuildForwardingAppWithoutLogging(args, msBuildExePath)
-                .GetProcessStartInfo()
-                .ExecuteAndCaptureOutput(out string stdOut, out string stdErr);
+            int result;
+            string stdOut;
+            string stdErr;
+
+            var forwardingAppWithoutLogging = new MSBuildForwardingAppWithoutLogging(args, msBuildExePath);
+            if (forwardingAppWithoutLogging.ExecuteMSBuildOutOfProc)
+            {
+                result = forwardingAppWithoutLogging
+                    .GetProcessStartInfo()
+                    .ExecuteAndCaptureOutput(out stdOut, out stdErr);
+            }
+            else
+            {
+                // Execute and capture output of MSBuild running in-process.
+                var outWriter = new StringWriter();
+                var errWriter = new StringWriter();
+                var savedOutWriter = Console.Out;
+                var savedErrWriter = Console.Error;
+                try
+                {
+                    Console.SetOut(outWriter);
+                    Console.SetError(errWriter);
+
+                    result = forwardingAppWithoutLogging.Execute();
+
+                    stdOut = outWriter.ToString();
+                    stdErr = errWriter.ToString();
+                }
+                finally
+                {
+                    Console.SetOut(savedOutWriter);
+                    Console.SetError(savedErrWriter);
+                }
+            }
 
             if (result != 0)
             {

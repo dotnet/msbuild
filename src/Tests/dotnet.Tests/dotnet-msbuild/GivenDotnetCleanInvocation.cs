@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetCleanInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
-        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -verbosity:normal -target:Clean";
+        const string ExpectedPrefix = "-maxcpucount -verbosity:m -verbosity:normal -target:Clean";
 
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetCleanInvocation));
@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             var msbuildPath = "<msbuildpath>";
             CleanCommand.FromArgs(new string[] { "<project>" }, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be("exec <msbuildpath> -maxcpucount -verbosity:m -verbosity:normal <project> -target:Clean");
+                .GetArgumentsToMSBuild().Should().Be("-maxcpucount -verbosity:m -verbosity:normal <project> -target:Clean");
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var msbuildPath = "<msbuildpath>";
                 CleanCommand.FromArgs(args, msbuildPath)
-                    .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                    .GetArgumentsToMSBuild().Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }
     }

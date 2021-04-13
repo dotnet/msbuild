@@ -264,11 +264,11 @@ namespace Microsoft.DotNet.Cli
         }
 
         [NonEvent]
-        internal void LogMSBuildStart(ProcessStartInfo startInfo)
+        internal void LogMSBuildStart(string fileName, string arguments)
         {
             if (IsEnabled())
             {
-                MSBuildStart($"{startInfo.FileName} {startInfo.Arguments}");
+                MSBuildStart($"{fileName} {arguments}");
             }
         }
 
