@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly string _installedPacksDir = "InstalledPacks";
         protected readonly string _dotnetDir;
         protected readonly DirectoryPath _tempPackagesDir;
-        private readonly INuGetPackageDownloader _nugetPackageInstaller;
+        private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly IWorkloadResolver _workloadResolver;
         private readonly SdkFeatureBand _sdkFeatureBand;
         private readonly NetSdkManagedInstallationRecordRepository _installationRecordRepository;
@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _dotnetDir = dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory();
             _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
-            _nugetPackageInstaller = nugetPackageDownloader ?? new NuGetPackageDownloader(_tempPackagesDir);
+            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(_tempPackagesDir);
             _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         if (!PackIsInstalled(packInfo))
                         {
-                            var packagePath = _nugetPackageInstaller.DownloadPackageAsync(new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)).Result;
+                            var packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)).Result;
                             tempFilesToDelete.Add(packagePath);
 
                             if (!Directory.Exists(Path.GetDirectoryName(packInfo.Path)))
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 var tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{packInfo.Id}-{packInfo.Version}-extracted");
                                 tempDirsToDelete.Add(tempExtractionDir);
                                 Directory.CreateDirectory(tempExtractionDir);
-                                var packFiles = _nugetPackageInstaller.ExtractPackageAsync(packagePath, tempExtractionDir).Result;
+                                var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, tempExtractionDir).Result;
 
                                 FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, packInfo.Path));
                             }
@@ -196,7 +196,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var installedWorkloads = _installationRecordRepository.GetInstalledWorkloads(sdkFeatureBand);
             return installedWorkloads
-                .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
+                .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload.ToString()))
                 .Select(pack => _workloadResolver.TryGetPackInfo(pack))
                 .Select(packInfo => GetPackInstallRecordPath(packInfo, sdkFeatureBand));
         }

@@ -17,6 +17,10 @@ using Microsoft.DotNet.Configurer;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.DotNet.ToolPackage;
+using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Common;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -30,6 +34,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly IReadOnlyCollection<string> _workloadIds; 
         private readonly IInstaller _workloadInstaller;
         private readonly IWorkloadResolver _workloadResolver;
+        private readonly IWorkloadManifestProvider _workloadManifestProvider;
+        private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly ReleaseVersion _sdkVersion;
 
         public readonly string MockInstallDirectory = Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath,
@@ -55,6 +61,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver);
+			var tempPackagesDir = new DirectoryPath(Path.Combine(EnvironmentProvider.GetUserHomeDirectory(), ".dotnet", "sdk-advertising-temp"));
+            _nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir, new NullLogger());
         }
 
         public override int Execute()
@@ -146,7 +154,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (!skipManifestUpdate)
             {
-                throw new NotImplementedException();
+                // Update currently installed workloads
+                var installedWorkloads = _workloadInstaller.GetInstalledWorkloads(featureBand);
+                workloadIds = workloadIds.Concat(installedWorkloads);
+
+                UpdateAdvertisingManifests(featureBand);
             }
 
             InstallWorkloadsWithInstallRecord(workloadIds, featureBand);
@@ -205,6 +217,64 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 foreach (var workloadId in workloadIds)
                 {
                     installer.InstallWorkload(workloadId);
+                }
+            }
+        }
+
+        private IEnumerable<(ManifestId manifestId, string path)> UpdateAdvertisingManifests(SdkFeatureBand featureBand)
+        {
+            var manifests = GetManifests();
+            foreach (var manifest in manifests)
+            {
+                UpdateAdvertisingManifest(manifest.manifestId, featureBand);
+            }
+
+            return manifests;
+        }
+
+        private IEnumerable<(ManifestId manifestId, string path)> GetManifests()
+        {
+            var manifestDirs = _workloadManifestProvider.GetManifestDirectories();
+
+            var manifests = new List<(ManifestId, string)>();
+            foreach (var manifestDir in manifestDirs)
+            {
+                var manifestId = Path.GetFileName(manifestDir);
+                manifests.Add((new ManifestId(manifestId), manifestDir));
+            }
+            return manifests;
+        }
+
+        private void UpdateAdvertisingManifest(ManifestId manifestId, SdkFeatureBand featureBand)
+        {
+            string packagePath = null;
+            try
+            {
+                var adManifestPath = Path.Combine(EnvironmentProvider.GetUserHomeDirectory(), ".dotnet", "sdk-advertising", featureBand.ToString(), manifestId.ToString());
+                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(manifestId.ToString())).Result;
+                var resultingFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, adManifestPath).Result;
+                _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
+            }
+            catch (Exception e)
+            {
+                _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
+                {
+                    File.Delete(packagePath);
+                }
+
+                var versionDir = Path.GetDirectoryName(packagePath);
+                if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
+                {
+                    Directory.Delete(versionDir);
+                    var idDir = Path.GetDirectoryName(versionDir);
+                    if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                    {
+                        Directory.Delete(idDir);
+                    }
                 }
             }
         }

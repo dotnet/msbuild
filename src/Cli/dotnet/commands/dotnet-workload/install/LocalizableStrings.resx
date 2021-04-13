@@ -201,4 +201,10 @@
   <data name="GarbageCollectingSdkFeatureBandsMessage" xml:space="preserve">
     <value>Garbage collecting for SDK feature bands {0}...</value>
   </data>
+  <data name="AdManifestUpdated" xml:space="preserve">
+    <value>Updated advertising manifest {0}.</value>
+  </data>
+  <data name="FailedAdManifestUpdate" xml:space="preserve">
+    <value>Failed to update the advertising manifest {0}: {1}</value>
+  </data>
 </root>
