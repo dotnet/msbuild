@@ -87,6 +87,11 @@
         <target state="translated">NETSDK1092: non è possibile incorporare l'elemento CLSIDMap nell'host COM perché per aggiungere risorse è necessario eseguire la compilazione in Windows (escluso Nano Server).</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
+      <trans-unit id="CannotEnableCompressionInSingleFile">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
+      </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
         <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
         <target state="translated">NETSDK1065: non è possibile trovare l'host delle app per {0}. {0} potrebbe essere un identificatore di runtime (RID) non valido. Per altre informazioni sul RID, vedere https://aka.ms/rid-catalog.</target>

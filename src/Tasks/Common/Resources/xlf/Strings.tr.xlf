@@ -87,6 +87,11 @@
         <target state="translated">NETSDK1092: Kaynak eklemek için derleme işleminin (Nano Server hariç) Windows üzerinde gerçekleştirilmesi gerektiğinden CLSIDMap nesnesi COM konağına eklenemiyor.</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
+      <trans-unit id="CannotEnableCompressionInSingleFile">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
+      </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
         <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
         <target state="translated">NETSDK1065: {0} için uygulama konağı bulunamıyor. {0} geçersiz bir çalışma zamanı tanımlayıcısı (RID) olabilir. RID hakkında daha fazla bilgi için bkz. https://aka.ms/rid-catalog.</target>
