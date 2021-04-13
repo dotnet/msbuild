@@ -748,32 +748,33 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if there is no build in progress.</exception>
         public void EndBuild()
         {
-            lock (_syncLock)
-            {
-                ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
-                ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
-                VerifyStateInternal(BuildManagerState.Building);
-
-                // If there are any submissions which never started, remove them now.
-                var submissionsToCheck = new List<BuildSubmission>(_buildSubmissions.Values);
-                foreach (BuildSubmission submission in submissionsToCheck)
-                {
-                    CheckSubmissionCompletenessAndRemove(submission);
-                }
-
-                var graphSubmissionsToCheck = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
-                foreach (GraphBuildSubmission submission in graphSubmissionsToCheck)
-                {
-                    CheckSubmissionCompletenessAndRemove(submission);
-                }
-
-                _buildManagerState = BuildManagerState.WaitingForBuildToComplete;
-            }
-
             ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+            var exceptionsThrownInEndBuild = false;
 
             try
             {
+                lock (_syncLock)
+                {
+                    ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
+                    ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
+                    VerifyStateInternal(BuildManagerState.Building);
+
+                    // If there are any submissions which never started, remove them now.
+                    var submissionsToCheck = new List<BuildSubmission>(_buildSubmissions.Values);
+                    foreach (BuildSubmission submission in submissionsToCheck)
+                    {
+                        CheckSubmissionCompletenessAndRemove(submission);
+                    }
+
+                    var graphSubmissionsToCheck = new List<GraphBuildSubmission>(_graphBuildSubmissions.Values);
+                    foreach (GraphBuildSubmission submission in graphSubmissionsToCheck)
+                    {
+                        CheckSubmissionCompletenessAndRemove(submission);
+                    }
+
+                    _buildManagerState = BuildManagerState.WaitingForBuildToComplete;
+                }
+
                 _noActiveSubmissionsEvent.WaitOne();
                 ShutdownConnectedNodes(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
@@ -797,17 +798,6 @@ namespace Microsoft.Build.Execution
                 }
 
                 projectCacheShutdown?.Wait();
-
-                if (loggingService != null)
-                {
-                    // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
-                    if (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId))
-                    {
-                        _overallBuildSuccess = false;
-                    }
-
-                    loggingService.LogBuildFinished(_overallBuildSuccess);
-                }
 
 #if DEBUG
                 if (_projectStartedEvents.Count != 0)
@@ -839,14 +829,33 @@ namespace Microsoft.Build.Execution
                     _resultsCache.ClearResults();
                 }
             }
-            catch (AggregateException ae) when (ae.InnerExceptions.Count == 1)
+            catch (Exception e)
             {
-                throw ae.InnerExceptions.First();
+                exceptionsThrownInEndBuild = true;
+
+                if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
+                {
+                    e = ae.InnerExceptions.First();
+                }
+
+                throw e;
             }
             finally
             {
                 try
                 {
+                    if (loggingService != null)
+                    {
+                        // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
+                        if (exceptionsThrownInEndBuild ||
+                            _overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId))
+                        {
+                            _overallBuildSuccess = false;
+                        }
+
+                        loggingService.LogBuildFinished(_overallBuildSuccess);
+                    }
+
                     ShutdownLoggingService(loggingService);
                 }
                 finally

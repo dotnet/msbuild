@@ -859,8 +859,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
             finally
             {
-                buildSession.ShouldNotBeNull();
-
                 // These exceptions prevent the creation of a plugin so there's no plugin to shutdown.
                 var exceptionsThatPreventEndBuildFromThrowing = ExceptionLocations.Constructor |
                                                                 ExceptionLocations.BeginBuildAsync;
@@ -868,11 +866,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 if ((exceptionLocations & exceptionsThatPreventEndBuildFromThrowing) != 0 ||
                     !exceptionLocations.HasFlag(ExceptionLocations.EndBuildAsync))
                 {
-                    Should.NotThrow(() => buildSession.Dispose());
+                    Should.NotThrow(() => buildSession!.Dispose());
                 }
                 else if (exceptionLocations.HasFlag(ExceptionLocations.EndBuildAsync))
                 {
-                    var e = Should.Throw<Exception>(() => buildSession.Dispose());
+                    var e = Should.Throw<Exception>(() => buildSession!.Dispose());
                     e.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
                 }
                 else
@@ -880,6 +878,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     throw new NotImplementedException();
                 }
             }
+
+            logger.BuildFinishedEvents.First().Succeeded.ShouldBeFalse();
 
             // Plugin query must happen after plugin init. So if plugin init fails, then the plugin should not get queried.
             var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync;
@@ -897,8 +897,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             // TODO: this ain't right now is it?
             logger.FullLog.ShouldNotContain("Cache plugin exception");
-
-            // TODO: assert Build Failed event
         }
 
         [Theory]
@@ -956,9 +954,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             {
                 // Since all plugin exceptions during a graph build end up in the GraphBuildResult, they should not get rethrown by BM.EndBuild
                 Should.NotThrow(() => buildSession.Dispose());
-
-                // TODO: assert Build Failed event
             }
+
+            logger.BuildFinishedEvents.First().Succeeded.ShouldBeFalse();
 
             var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync;
 
