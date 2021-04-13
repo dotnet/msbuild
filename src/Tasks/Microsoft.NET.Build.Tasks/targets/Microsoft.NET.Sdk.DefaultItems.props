@@ -73,7 +73,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FrameworkReference Include="Microsoft.NETCore.App" IsImplicitlyDefined="true"
                         Pack="false"
                         PrivateAssets="All"
-                    Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
+                        Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.0')"/>
+
+    <!-- Allow opt-in to Mono runtime pack for .NET 6.0 or higher -->
+    <FrameworkReference Update="Microsoft.NETCore.App"
+                        RuntimePackLabels="Mono"
+                        Condition="'$(UseMonoRuntime)' == 'true' And ('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '6.0')" />
 
   </ItemGroup>
 
