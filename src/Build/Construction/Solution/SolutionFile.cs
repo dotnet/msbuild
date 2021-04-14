@@ -415,7 +415,7 @@ namespace Microsoft.Build.Construction
         {
             try
             {
-                JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile));
+                JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile), new JsonDocumentOptions() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip});
                 solution = text.RootElement.GetProperty("solution");
                 return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile));
             }
