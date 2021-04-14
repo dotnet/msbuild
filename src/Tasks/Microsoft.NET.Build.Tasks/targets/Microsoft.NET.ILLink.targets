@@ -30,6 +30,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <StartupHookSupport>false</StartupHookSupport>
   </PropertyGroup>
 
+  <!-- We disable built-in Com support for trimmed apps here so that the feature
+       switch can flow to the runtimeconfig.json. Built-in Com is disabled
+       by default since they may require assemblies, types or members that
+       could be removed by the linker, causing a trimmed app to crash. -->
+  <PropertyGroup Condition="'$(BuiltInComSupport)' == '' And
+                            '$(PublishTrimmed)' == 'true' And
+                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
+    <BuiltInComSupport>false</BuiltInComSupport>
+  </PropertyGroup>
+
   <!-- We disable custom resource types for trimmed apps here so that the feature
        switch can flow to the runtimeconfig.json. Custom resource types are disabled
        by default since they may require assemblies, types or members that

@@ -106,7 +106,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CannotHaveSingleFileWithoutRuntimeIdentifier" />
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(UseAppHost)' != 'true'"
                  ResourceName="CannotHaveSingleFileWithoutAppHost" />
-    <NETSdkError Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true' and '$(BuiltInComSupport)' != 'true'"
+    <NETSdkError Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true' and '$(BuiltInComSupport)' == 'false'"
                  ResourceName="TrimmingWindowsFormsRequiresCom" />
     <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
                  ResourceName="TrimmingWpfIsDangerous" />
