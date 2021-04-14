@@ -1,9 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Utils;
+using Microsoft.TemplateSearch.Common;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -14,10 +17,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
     /// Intention of SupportedFilterOptions and FilterOption classes is to make the filters extendable. In case new filter option is implemented for dotnet new command, it should be enough to:
     /// - implement corresponding FilterOption class
     /// - add filter to required collection in SupportedFilterOptions class to apply it to certain dotnet new --option
-    /// Currenty supported action options and their filter options:
+    /// Currently supported action options and their filter options:
     /// - --list|-l: --author, --language, --type, --baseline, --tag
     /// - --search: --author, --language, --type, --baseline, --package, --tag
-    /// Potentially the approach should be extended to --help and template instatiation actions.
+    /// Potentially the approach should be extended to --help and template instantiation actions.
     /// </remarks>
     internal static class SupportedFilterOptions
     {
@@ -53,67 +56,63 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         /// </summary>
         internal static IReadOnlyCollection<FilterOption> SupportedSearchFilters { get; private set; }
 
-        internal static FilterOption AuthorFilter { get; } = new TemplateFilterOption()
-        {
-            Name = "author",
-            FilterValue = command => command.AuthorFilter,
-            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.AuthorFilter),
-            TemplateMatchFilter = command => WellKnownSearchFilters.AuthorFilter(command.AuthorFilter),
-            MismatchCriteria = resolutionResult => resolutionResult.HasAuthorMismatch
-        };
+        internal static FilterOption AuthorFilter { get; } =
+            new TemplateFilterOption(
+                "author",
+                filterValue: command => command.AuthorFilter,
+                isFilterSet: command => !string.IsNullOrWhiteSpace(command.AuthorFilter),
+                matchFilter: command => WellKnownSearchFilters.AuthorFilter(command.AuthorFilter),
+                mismatchCriteria: resolutionResult => resolutionResult.HasAuthorMismatch);
 
-        internal static FilterOption BaselineFilter { get; } = new TemplateFilterOption()
-        {
-            Name = "baseline",
-            FilterValue = command => command.BaselineName,
-            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.BaselineName),
-            TemplateMatchFilter = command => WellKnownSearchFilters.BaselineFilter(command.BaselineName),
-            MismatchCriteria = resolutionResult => resolutionResult.HasBaselineMismatch
-        };
+        internal static FilterOption BaselineFilter { get; } =
+            new TemplateFilterOption(
+                "baseline",
+                filterValue: command => command.BaselineName,
+                isFilterSet: command => !string.IsNullOrWhiteSpace(command.BaselineName),
+                matchFilter: command => WellKnownSearchFilters.BaselineFilter(command.BaselineName),
+                mismatchCriteria: resolutionResult => resolutionResult.HasBaselineMismatch);
 
-        internal static FilterOption LanguageFilter { get; } = new TemplateFilterOption()
-        {
-            Name = "language",
-            FilterValue = command => command.Language,
-            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.Language),
-            TemplateMatchFilter = command => WellKnownSearchFilters.LanguageFilter(command.Language),
-            MismatchCriteria = resolutionResult => resolutionResult.HasLanguageMismatch
-        };
+        internal static FilterOption LanguageFilter { get; } =
+            new TemplateFilterOption(
+                "language",
+                filterValue: command => command.Language,
+                isFilterSet: command => !string.IsNullOrWhiteSpace(command.Language),
+                matchFilter: command => WellKnownSearchFilters.LanguageFilter(command.Language),
+                mismatchCriteria: resolutionResult => resolutionResult.HasLanguageMismatch);
 
-        internal static FilterOption TagFilter { get; } = new TemplateFilterOption()
-        {
-            Name = "tag",
-            FilterValue = command => command.TagFilter,
-            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.TagFilter),
-            TemplateMatchFilter = command => WellKnownSearchFilters.TagFilter(command.TagFilter),
-            MismatchCriteria = resolutionResult => resolutionResult.HasTagsMismatch
-        };
+        internal static FilterOption TagFilter { get; } =
+            new TemplateFilterOption(
+                "tag",
+                filterValue: command => command.TagFilter,
+                isFilterSet: command => !string.IsNullOrWhiteSpace(command.TagFilter),
+                matchFilter: command => WellKnownSearchFilters.ClassificationFilter(command.TagFilter),
+                mismatchCriteria: resolutionResult => resolutionResult.HasClassificationMismatch);
 
-        internal static FilterOption TypeFilter { get; } = new TemplateFilterOption()
-        {
-            Name = "type",
-            FilterValue = command => command.TypeFilter,
-            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.TypeFilter),
-            TemplateMatchFilter = command => WellKnownSearchFilters.ContextFilter(command.TypeFilter),
-            MismatchCriteria = resolutionResult => resolutionResult.HasContextMismatch
-        };
+        internal static FilterOption TypeFilter { get; } =
+            new TemplateFilterOption(
+                "type",
+                filterValue: command => command.TypeFilter,
+                isFilterSet: command => !string.IsNullOrWhiteSpace(command.TypeFilter),
+                matchFilter: command => WellKnownSearchFilters.TypeFilter(command.TypeFilter),
+                mismatchCriteria: resolutionResult => resolutionResult.HasTypeMismatch);
 
-        internal static FilterOption PackageFilter { get; } = new PackageFilterOption()
+        internal static FilterOption PackageFilter { get; } =
+            new PackageFilterOption(
+                "package",
+                filterValue: command => command.PackageFilter,
+                isFilterSet: command => !string.IsNullOrWhiteSpace(command.PackageFilter),
+                matchFilter: PackageMatchFilter);
+
+        private static Func<PackInfo, bool> PackageMatchFilter(INewCommandInput command)
         {
-            Name = "package",
-            FilterValue = command => command.PackageFilter,
-            IsFilterSet = command => !string.IsNullOrWhiteSpace(command.PackageFilter),
-            PackageMatchFilter = command =>
+            return (pack) =>
             {
-                return (pack) =>
+                if (string.IsNullOrWhiteSpace(command.PackageFilter))
                 {
-                    if (string.IsNullOrWhiteSpace(command.PackageFilter))
-                    {
-                        return true;
-                    }
-                    return pack.Name.IndexOf(command.PackageFilter, StringComparison.OrdinalIgnoreCase) > -1;
-                };
-            }
-        };
+                    return true;
+                }
+                return pack.Name.IndexOf(command.PackageFilter, StringComparison.OrdinalIgnoreCase) > -1;
+            };
+        }
     }
 }
