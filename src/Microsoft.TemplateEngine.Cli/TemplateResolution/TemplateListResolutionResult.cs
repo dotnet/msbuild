@@ -77,7 +77,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             {
                 if (_partiallyMatchedTemplates == null)
                 {
-                    _partiallyMatchedTemplates = _coreMatchedTemplates.Where(t => t.HasNameMatchOrPartialMatch() && t.HasAnyMismatch()).ToList();
+                    _partiallyMatchedTemplates = _coreMatchedTemplates.Where(t => (t.HasNameMatch() || t.HasShortNameMatch())
+                                                                                  && t.MatchDisposition.Any(m => m.Kind == MatchKind.Mismatch)).ToList();
                 }
                 return _partiallyMatchedTemplates;
             }

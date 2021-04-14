@@ -69,15 +69,5 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning restore CS0618 // Type or member is obsolete
                 .ToDictionary(x => x.Name, x => x.Value);
         }
-
-        public static bool HasNameMatchOrPartialMatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any((x => (x.Name == MatchInfo.BuiltIn.Name || x.Name == MatchInfo.BuiltIn.ShortName) && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.Partial)));
-        }
-
-        public static bool HasAnyMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(m => m.Kind == MatchKind.Mismatch);
-        }
     }
 }
