@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        public override void Run(TypeMapper mapper, List<CompatDifference> differences)
+        public override void Run(TypeMapper mapper, IList<CompatDifference> differences)
         {
             ITypeSymbol left = mapper.Left;
             if (left != null && mapper.Right == null)
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        public override void Run(MemberMapper mapper, List<CompatDifference> differences)
+        public override void Run(MemberMapper mapper, IList<CompatDifference> differences)
         {
             ISymbol left = mapper.Left;
             if (left != null && mapper.Right == null)

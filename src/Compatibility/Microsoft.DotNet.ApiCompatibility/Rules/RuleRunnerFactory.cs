@@ -5,7 +5,7 @@ using Microsoft.DotNet.ApiCompatibility.Abstractions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
-    public class RuleDriverFactory : IRuleRunnerFactory
+    public class RuleRunnerFactory : IRuleRunnerFactory
     {
         private RuleRunner _driver;
         public IRuleRunner GetRuleRunner()

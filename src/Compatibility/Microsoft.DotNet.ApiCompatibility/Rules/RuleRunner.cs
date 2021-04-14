@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     internal class RuleRunner : IRuleRunner
     {
-        private readonly IEnumerable<Rule> _rules;
+        private readonly Rule[] _rules;
 
         internal RuleRunner()
         {
@@ -60,11 +60,16 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
             }
         }
 
-        private IEnumerable<Rule> GetRules()
+        private Rule[] GetRules()
         {
-            return GetType().Assembly.GetTypes()
-                .Where(t => !t.IsAbstract && typeof(Rule).IsAssignableFrom(t))
-                .Select(t => (Rule)Activator.CreateInstance(t));
+            List<Rule> rules = new();
+            foreach (Type type in GetType().Assembly.GetTypes())
+            {
+                if (!type.IsAbstract && typeof(Rule).IsAssignableFrom(type))
+                    rules.Add((Rule)Activator.CreateInstance(type));
+            }
+
+            return rules.ToArray();
         }
     }
 }

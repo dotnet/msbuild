@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <param name="mapper">The <see cref="AssemblyMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add any differences to.</param>
-        public virtual void Run(AssemblyMapper mapper, List<CompatDifference> differences)
+        public virtual void Run(AssemblyMapper mapper, IList<CompatDifference> differences)
         {
         }
 
@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add any differences to.</param>
-        public virtual void Run(TypeMapper mapper, List<CompatDifference> differences)
+        public virtual void Run(TypeMapper mapper, IList<CompatDifference> differences)
         {
         }
 
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// </summary>
         /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add any differences to.</param>
-        public virtual void Run(MemberMapper mapper, List<CompatDifference> differences)
+        public virtual void Run(MemberMapper mapper, IList<CompatDifference> differences)
         {
         }
     }

@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="equalityComparer">The comparer to map metadata.</param>
         public ComparingSettings(IRuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null)
         {
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleDriverFactory();
+            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory();
             Filter = filter ?? new AccessibilityFilter(includeInternalSymbols: false);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
         }
