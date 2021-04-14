@@ -23,3 +23,6 @@ testwpf*.dll
 ;; Possibly no longer needed
 kerneltracecontrol*.dll
 msdia140*.dll
+
+;; Javascript files aren't signed
+*.js
