@@ -87,11 +87,6 @@
         <target state="translated">NETSDK1092: CLSIDMap 无法嵌入 COM 主机，因为添加资源要求在 Windows (不包括 Nano 服务器)上执行生成。</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
-      <trans-unit id="CannotEnableCompressionInSingleFile">
-        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
-        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
-        <note>{StrBegin="NETSDK1142: "}</note>
-      </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
         <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
         <target state="translated">NETSDK1065: 无法找到 {0} 的应用主机。{0} 可能是无效的运行时标识符(RID)。有关 RID 的详细信息，请参阅 https://aka.ms/rid-catalog。</target>
@@ -216,6 +211,16 @@
         <target state="translated">NETSDK1090: 提供的程序集“{0}”无效。无法从该程序集生成 CLSIDMap。</target>
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
+      </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequires60">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
+      </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequiresSelfContained">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:

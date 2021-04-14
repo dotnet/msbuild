@@ -109,7 +109,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
                             '$(EnableCompressionInSingleFile)' == 'true' And
                             '$(_TargetFrameworkVersionWithoutV)' &lt; '6.0'"
-                 ResourceName="CannotEnableCompressionInSingleFile" />
+                 ResourceName="CompressionInSingleFileRequires60" />
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
+                            '$(EnableCompressionInSingleFile)' == 'true' And
+                            '$(SelfContained)' != 'true'"
+                 ResourceName="CompressionInSingleFileRequiresSelfContained" />
 
 
     <PropertyGroup>
@@ -1037,7 +1041,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <IncludeAllContentForSelfExtract Condition="'$(IncludeAllContentForSelfExtract)' == ''">false</IncludeAllContentForSelfExtract>
       <IncludeNativeLibrariesForSelfExtract Condition="'$(IncludeNativeLibrariesForSelfExtract)' == ''">$(IncludeAllContentForSelfExtract)</IncludeNativeLibrariesForSelfExtract>
       <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == '' And
-                                   '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">true</EnableCompressionInSingleFile>
+                                   '$(_TargetFrameworkVersionWithoutV)' >= '6.0' And '$(SelfContained)' == 'true' ">true</EnableCompressionInSingleFile>
       <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == ''">false</EnableCompressionInSingleFile>
     </PropertyGroup>
 

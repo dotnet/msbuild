@@ -77,7 +77,7 @@ namespace Microsoft.NET.Publish.Tests
         private string GetNativeDll(string baseName)
         {
             return RuntimeInformation.RuntimeIdentifier.StartsWith("win") ? baseName + ".dll" :
-                   RuntimeInformation.RuntimeIdentifier.StartsWith("osx") ? "lib" + baseName + ".dylib" :  "lib" + baseName + ".so";
+                   RuntimeInformation.RuntimeIdentifier.StartsWith("osx") ? "lib" + baseName + ".dylib" : "lib" + baseName + ".so";
         }
 
         private DirectoryInfo GetPublishDirectory(PublishCommand publishCommand, string targetFramework = "net5.0")
@@ -661,6 +661,7 @@ class C
                 TargetFrameworks = "net5.0",
                 IsExe = true,
             };
+            testProject.AdditionalProperties.Add("SelfContained", "true");
 
             testProject.AdditionalProperties.Add("EnableCompressionInSingleFile", "true");
 
@@ -671,7 +672,29 @@ class C
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(Strings.CannotEnableCompressionInSingleFile);
+                .HaveStdOutContaining(Strings.CompressionInSingleFileRequires60);
+        }
+
+        [RequiresMSBuildVersionFact("16.8.0")]
+        public void It_errors_when_enabling_compression_without_selfcontained()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+
+            testProject.AdditionalProperties.Add("EnableCompressionInSingleFile", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand.Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining(Strings.CompressionInSingleFileRequiresSelfContained);
         }
 
         [RequiresMSBuildVersionFact("16.8.0")]
@@ -690,7 +713,7 @@ class C
             var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, "net6.0").FullName, $"SingleFileTest{Constants.ExeSuffix}");
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, "/p:EnableCompressionInSingleFile=false")
+                .Execute(PublishSingleFile, RuntimeIdentifier, "/p:EnableCompressionInSingleFile=false")
                 .Should()
                 .Pass();
             var uncompressedSize = new FileInfo(singleFilePath).Length;
@@ -698,7 +721,7 @@ class C
             WaitForUtcNowToAdvance();
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, "/p:EnableCompressionInSingleFile=true")
+                .Execute(PublishSingleFile, RuntimeIdentifier, "/p:EnableCompressionInSingleFile=true")
                 .Should()
                 .Pass();
             var compressedSize = new FileInfo(singleFilePath).Length;
@@ -722,7 +745,7 @@ class C
             var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, "net6.0").FullName, $"SingleFileTest{Constants.ExeSuffix}");
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, "/p:EnableCompressionInSingleFile=false")
+                .Execute(PublishSingleFile, RuntimeIdentifier, "/p:EnableCompressionInSingleFile=false")
                 .Should()
                 .Pass();
             var uncompressedSize = new FileInfo(singleFilePath).Length;
@@ -730,7 +753,7 @@ class C
             WaitForUtcNowToAdvance();
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent)
+                .Execute(PublishSingleFile, RuntimeIdentifier)
                 .Should()
                 .Pass();
             var compressedSize = new FileInfo(singleFilePath).Length;

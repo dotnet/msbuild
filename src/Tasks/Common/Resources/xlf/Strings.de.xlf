@@ -87,11 +87,6 @@
         <target state="translated">NETSDK1092: CLSIDMap kann auf dem COM-Host nicht eingebettet werden, weil für das Hinzufügen von Ressourcen eine Ausführung des Builds unter Windows erforderlich ist (Nano Server ausgeschlossen).</target>
         <note>{StrBegin="NETSDK1092: "}</note>
       </trans-unit>
-      <trans-unit id="CannotEnableCompressionInSingleFile">
-        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
-        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
-        <note>{StrBegin="NETSDK1142: "}</note>
-      </trans-unit>
       <trans-unit id="CannotFindApphostForRid">
         <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
         <target state="translated">NETSDK1065: Der App-Host für "{0}" wurde nicht gefunden. "{0}" könnte ein ungültiger Runtimebezeichner (RID) sein. Weitere Informationen zum RID finden Sie unter https://aka.ms/rid-catalog.</target>
@@ -216,6 +211,16 @@
         <target state="translated">NETSDK1090: Die angegebene Assembly "{0}" ist ungültig. Daraus kann keine CLSIDMap generiert werden.</target>
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
+      </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequires60">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
+      </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequiresSelfContained">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:

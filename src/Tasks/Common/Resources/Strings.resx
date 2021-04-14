@@ -758,8 +758,12 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1163: Cannot emit symbols when publishing for .NET 5 with Crossgen2 using composite mode.</value>
     <comment>{StrBegin="NETSDK1163: "}</comment>
   </data>
-  <data name="CannotEnableCompressionInSingleFile" xml:space="preserve">
+  <data name="CompressionInSingleFileRequires60" xml:space="preserve">
     <value>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</value>
+    <comment>{StrBegin="NETSDK1142: "}</comment>
+  </data>
+  <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
+    <value>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
     <comment>{StrBegin="NETSDK1142: "}</comment>
   </data>
 </root>
