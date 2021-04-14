@@ -748,17 +748,21 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if there is no build in progress.</exception>
         public void EndBuild()
         {
-            ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+            lock (_syncLock)
+            {
+                ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
+                ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
+                VerifyStateInternal(BuildManagerState.Building);
+
+                _buildManagerState = BuildManagerState.WaitingForBuildToComplete;
+            }
+
             var exceptionsThrownInEndBuild = false;
 
             try
             {
                 lock (_syncLock)
                 {
-                    ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
-                    ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
-                    VerifyStateInternal(BuildManagerState.Building);
-
                     // If there are any submissions which never started, remove them now.
                     var submissionsToCheck = new List<BuildSubmission>(_buildSubmissions.Values);
                     foreach (BuildSubmission submission in submissionsToCheck)
@@ -771,8 +775,6 @@ namespace Microsoft.Build.Execution
                     {
                         CheckSubmissionCompletenessAndRemove(submission);
                     }
-
-                    _buildManagerState = BuildManagerState.WaitingForBuildToComplete;
                 }
 
                 _noActiveSubmissionsEvent.WaitOne();
@@ -844,6 +846,8 @@ namespace Microsoft.Build.Execution
             {
                 try
                 {
+                    ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+
                     if (loggingService != null)
                     {
                         // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
