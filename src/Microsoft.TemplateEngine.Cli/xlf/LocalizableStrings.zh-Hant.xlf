@@ -437,6 +437,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
         <target state="new">Warning: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="Generic_Details">
+        <source>Details: {0}</source>
+        <target state="new">Details: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GettingReady">
         <source>Getting ready...</source>
         <target state="new">Getting ready...</target>
@@ -752,6 +757,11 @@ Examples:
       <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">
         <source>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</source>
         <target state="new">The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateResolver_Warning_FailedToReparseTemplate">
+        <source>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</source>
+        <target state="new">[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</target>
         <note />
       </trans-unit>
       <trans-unit id="Templates">

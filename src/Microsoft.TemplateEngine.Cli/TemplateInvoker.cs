@@ -1,3 +1,8 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,11 +10,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
+using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
+using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -42,8 +49,8 @@ namespace Microsoft.TemplateEngine.Cli
         {
             templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag language);
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
-            string framework = null;
-            string auth = null;
+            string? framework = null;
+            string? auth = null;
             string templateName = TelemetryHelper.HashWithNormalizedCasing(templateToInvoke.Info.Identity);
 
             if (isMicrosoftAuthored)
@@ -55,10 +62,10 @@ namespace Microsoft.TemplateEngine.Cli
                 auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "auth", inputAuthValue));
             }
 
-            bool argsError = CheckForArgsError(templateToInvoke, out string commandParseFailureMessage);
+            bool argsError = CheckForArgsError(templateToInvoke);
             if (argsError)
             {
-                _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
+                _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                 {
                     { TelemetryConstants.Language, language?.Choices.Keys.FirstOrDefault() },
                     { TelemetryConstants.ArgError, "True" },
@@ -67,11 +74,6 @@ namespace Microsoft.TemplateEngine.Cli
                     { TelemetryConstants.IsTemplateThirdParty, (!isMicrosoftAuthored).ToString() },
                     { TelemetryConstants.Auth, auth }
                 });
-
-                if (commandParseFailureMessage != null)
-                {
-                    Reporter.Error.WriteLine(commandParseFailureMessage.Bold().Red());
-                }
 
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{_commandName} {_commandInput.TemplateName}").Bold().Red());
                 return CreationResultStatus.InvalidParamValues;
@@ -102,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 finally
                 {
-                    _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string>
+                    _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                     {
                         { TelemetryConstants.Language, language?.Choices.Keys.FirstOrDefault() },
                         { TelemetryConstants.ArgError, "False" },
@@ -118,29 +120,19 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        internal static bool CheckForArgsError(ITemplateMatchInfo template, out string commandParseFailureMessage)
+        internal static bool CheckForArgsError(ITemplateMatchInfo template)
         {
             bool argsError;
+            IEnumerable<string> invalidParams = template.GetInvalidParameterNames();
 
-            if (template.HasParseError())
+            if (invalidParams.Any())
             {
-                commandParseFailureMessage = template.GetParseError();
+                HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
                 argsError = true;
             }
             else
             {
-                commandParseFailureMessage = null;
-                IReadOnlyList<string> invalidParams = template.GetInvalidParameterNames();
-
-                if (invalidParams.Count > 0)
-                {
-                    HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
-                    argsError = true;
-                }
-                else
-                {
-                    argsError = false;
-                }
+                argsError = false;
             }
 
             return argsError;
@@ -156,7 +148,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             char[] invalidChars = Path.GetInvalidFileNameChars();
 
-            if (_commandInput?.Name != null && _commandInput.Name.IndexOfAny(invalidChars) > -1)
+            if (_commandInput.Name != null && _commandInput.Name.IndexOfAny(invalidChars) > -1)
             {
                 string printableChars = string.Join(", ", invalidChars.Where(x => !char.IsControl(x)).Select(x => $"'{x}'"));
                 string nonPrintableChars = string.Join(", ", invalidChars.Where(char.IsControl).Select(x => $"char({(int)x})"));
@@ -164,14 +156,15 @@ namespace Microsoft.TemplateEngine.Cli
                 return CreationResultStatus.CreateFailed;
             }
 
-            string fallbackName = new DirectoryInfo(
+            string? fallbackName = new DirectoryInfo(
                 !string.IsNullOrWhiteSpace(_commandInput.OutputPath)
                     ? _commandInput.OutputPath
                     : Directory.GetCurrentDirectory())
                 .Name;
 
             if (string.IsNullOrEmpty(fallbackName) || string.Equals(fallbackName, "/", StringComparison.Ordinal))
-            {   // DirectoryInfo("/").Name on *nix returns "/", as opposed to null or "".
+            {
+                // DirectoryInfo("/").Name on *nix returns "/", as opposed to null or "".
                 fallbackName = null;
             }
             // Name returns <disk letter>:\ for root disk folder on Windows - replace invalid chars
@@ -185,13 +178,20 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            TemplateCreationResult instantiateResult;
+            Edge.Template.TemplateCreationResult instantiateResult;
 
             try
             {
-                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath,
-                            templateMatchDetails.GetValidTemplateParameters(), _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified,
-                            _commandInput.BaselineName, _commandInput.IsDryRun)
+                instantiateResult = await _templateCreator.InstantiateAsync(
+                    template,
+                    _commandInput.Name,
+                    fallbackName,
+                    _commandInput.OutputPath,
+                    templateMatchDetails.GetValidTemplateParameters(),
+                    _commandInput.SkipUpdateCheck,
+                    _commandInput.IsForceFlagSpecified,
+                    _commandInput.BaselineName,
+                    _commandInput.IsDryRun)
                     .ConfigureAwait(false);
             }
             catch (ContentGenerationException cx)
@@ -284,7 +284,7 @@ namespace Microsoft.TemplateEngine.Cli
             return instantiateResult.Status;
         }
 
-        private void HandlePostActions(TemplateCreationResult creationResult)
+        private void HandlePostActions(Edge.Template.TemplateCreationResult creationResult)
         {
             if (creationResult.Status != CreationResultStatus.Success)
             {

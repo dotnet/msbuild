@@ -1,9 +1,14 @@
-using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
-using Microsoft.TemplateEngine.Edge.Template;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
+using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
@@ -19,10 +24,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// </summary>
     internal sealed class TemplateGroup
     {
-
-        /// <param name="templates">the templates of the template group</param>
-        /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <see cref="null"/></exception>
-        /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined</exception>
+        /// <param name="templates">the templates of the template group.</param>
+        /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <see cref="null"/>.</exception>
+        /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined.</exception>
         internal TemplateGroup(IEnumerable<ITemplateMatchInfo> templates)
         {
             _ = templates ?? throw new ArgumentNullException(paramName: nameof(templates));
@@ -46,9 +50,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Group identity of template group. The value can be empty if the template does not have group identity set
+        /// Group identity of template group. The value can be null if the template does not have group identity set.
         /// </summary>
-        internal string GroupIdentity { get; private set; }
+        internal string? GroupIdentity { get; private set; }
 
         /// <summary>
         /// Returns the list of short names defined for templates in the group.
@@ -72,46 +76,53 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Returns true when <see cref="GroupIdentity"/> is not <see cref="null"/> or emply
+        /// Returns true when <see cref="GroupIdentity"/> is not <see cref="null"/> or empty.
         /// </summary>
         internal bool HasGroupIdentity => !string.IsNullOrWhiteSpace(GroupIdentity);
 
         /// <summary>
-        /// Returns true when the template group has single template
+        /// Returns true when the template group has single template.
         /// </summary>
         internal bool HasSingleTemplate => Templates.Count == 1;
 
         /// <summary>
-        /// Returns the enumerator to invokable templates in the group
+        /// Returns the enumerator to invokable templates in the group.
         /// </summary>
         internal IEnumerable<ITemplateMatchInfo> InvokableTemplates => Templates.Where(templates => templates.IsInvokableMatch());
 
         /// <summary>
-        /// Returns the collection of templates in the group
+        /// Returns the collection of templates in the group.
         /// </summary>
         internal IReadOnlyCollection<ITemplateMatchInfo> Templates { get; private set; }
 
         /// <summary>
-        /// Returns the ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates in the template group 
+        /// Returns the ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates in the template group.
         /// </summary>
-        /// <returns>the enumerator for ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates in the template group</returns>
-        /// <remarks>The template group is not valid when there are at least one ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates </remarks>
+        /// <returns>the enumerator for ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates in the template group.</returns>
+        /// <remarks>The template group is not valid when there are at least one ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates.</remarks>
         internal IEnumerable<InvalidParameterInfo> GetAmbiguousSingleStartsWithParameters()
         {
             var invalidParameterList = new List<InvalidParameterInfo>();
             HashSet<string> singleStartsWithParamNames = new HashSet<string>();
             foreach (ITemplateMatchInfo checkTemplate in InvokableTemplates)
             {
-                IEnumerable<MatchInfo> singleStartParams = checkTemplate.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith);
+                //https://github.com/dotnet/templating/issues/2494
+                //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
+                IEnumerable<ParameterMatchInfo> singleStartParams = checkTemplate.MatchDisposition
+                    .OfType<ParameterMatchInfo>()
+#pragma warning disable CS0618 // Type or member is obsolete
+                    .Where(x => x.Kind == MatchKind.SingleStartsWith);
+#pragma warning restore CS0618 // Type or member is obsolete
+
                 foreach (var singleStartParam in singleStartParams)
                 {
-                    if (!singleStartsWithParamNames.Add(singleStartParam.InputParameterName))
+                    if (!singleStartsWithParamNames.Add(singleStartParam.Name))
                     {
                         invalidParameterList.Add(new InvalidParameterInfo(
                                                 InvalidParameterInfo.Kind.AmbiguousParameterValue,
-                                                singleStartParam.InputParameterFormat,
-                                                singleStartParam.ParameterValue,
-                                                singleStartParam.InputParameterName));
+                                                singleStartParam.InputFormat,
+                                                singleStartParam.Value,
+                                                singleStartParam.Name));
                     }
                 }
             }
@@ -120,23 +131,29 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         /// <summary>
         /// Returns the invalid template specific parameters for the template group.
-        /// Invalid parameters can have: invalid name, invalid value (determined only for choice parameter symbols), ambiguous value (determined only for choice parameter symbols)
+        /// Invalid parameters can have: invalid name, invalid value (determined only for choice parameter symbols), ambiguous value (determined only for choice parameter symbols).
         /// </summary>
-        /// <returns>The enumerator for invalid parameters in templates in the template group</returns>
+        /// <returns>The enumerator for invalid parameters in templates in the template group.</returns>
         internal IEnumerable<InvalidParameterInfo> GetInvalidParameterList()
         {
-            List <InvalidParameterInfo> invalidParameterList = new List<InvalidParameterInfo>();
+            List<InvalidParameterInfo> invalidParameterList = new List<InvalidParameterInfo>();
 
             //collect the parameters which have ambiguous value match in all templates in the template group
-            IEnumerable<MatchInfo> ambiguousParametersForTemplates = Templates.SelectMany(template => template.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter
-                                                               && x.Kind == MatchKind.AmbiguousParameterValue)).Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
-            foreach (MatchInfo parameter in ambiguousParametersForTemplates)
+            IEnumerable<ParameterMatchInfo> ambiguousParametersForTemplates = Templates.SelectMany(template => template.MatchDisposition
+                .OfType<ParameterMatchInfo>()
+                //https://github.com/dotnet/templating/issues/2494
+                //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
+#pragma warning disable CS0618 // Type or member is obsolete
+                .Where(x => x.Kind == MatchKind.AmbiguousValue))
+#pragma warning restore CS0618 // Type or member is obsolete
+                .Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
+            foreach (ParameterMatchInfo parameter in ambiguousParametersForTemplates)
             {
                 invalidParameterList.Add(new InvalidParameterInfo(
                                                 InvalidParameterInfo.Kind.AmbiguousParameterValue,
-                                                parameter.InputParameterFormat,
-                                                parameter.ParameterValue,
-                                                parameter.InputParameterName));
+                                                parameter.InputFormat,
+                                                parameter.Value,
+                                                parameter.Name));
             }
 
             if (InvokableTemplates.Any())
@@ -146,21 +163,24 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             }
 
             //collect the parameters with invalid names for all templates in the template group
-            IEnumerable<MatchInfo> parametersWithInvalidNames = Templates.SelectMany(template => template.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter
-                                                                && x.Kind == MatchKind.InvalidParameterName)).Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
+            IEnumerable<ParameterMatchInfo> parametersWithInvalidNames = Templates.SelectMany(
+                template => template.MatchDisposition
+                    .OfType<ParameterMatchInfo>()
+                    .Where(x => x.Kind == MatchKind.InvalidName)).Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
 
-            foreach (MatchInfo parameter in parametersWithInvalidNames)
+            foreach (ParameterMatchInfo parameter in parametersWithInvalidNames)
             {
                 if (Templates.All(
-                    template => template.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter
-                                                                && x.Kind == MatchKind.InvalidParameterName
-                                                                && x.InputParameterName.Equals(parameter.InputParameterName, StringComparison.OrdinalIgnoreCase))))
+                    template => template.MatchDisposition
+                        .OfType<ParameterMatchInfo>()
+                        .Any(x => x.Kind == MatchKind.InvalidName
+                                  && x.Name.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase))))
                 {
                     invalidParameterList.Add(new InvalidParameterInfo(
                                                 InvalidParameterInfo.Kind.InvalidParameterName,
-                                                parameter.InputParameterFormat,
-                                                parameter.ParameterValue,
-                                                parameter.InputParameterName));
+                                                parameter.InputFormat,
+                                                parameter.Value,
+                                                parameter.Name));
                 }
             }
 
@@ -172,20 +192,24 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             }
 
             //collect the choice parameters with invalid values
-            IEnumerable<MatchInfo> invalidParameterValuesForTemplates = filteredTemplates.SelectMany(template => template.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter
-                                                             && x.Kind == MatchKind.InvalidParameterValue)).Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
-            foreach (MatchInfo parameter in invalidParameterValuesForTemplates)
+            IEnumerable<ParameterMatchInfo> invalidParameterValuesForTemplates = filteredTemplates.SelectMany(
+                template => template.MatchDisposition
+                    .OfType<ParameterMatchInfo>()
+                    .Where(x => x.Kind == MatchKind.InvalidValue))
+                .Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
+            foreach (ParameterMatchInfo parameter in invalidParameterValuesForTemplates)
             {
                 if (filteredTemplates.All(
-                   template => template.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter
-                                                               && x.Kind == MatchKind.InvalidParameterValue
-                                                               && x.InputParameterName.Equals(parameter.InputParameterName, StringComparison.OrdinalIgnoreCase))))
+                   template => template.MatchDisposition
+                        .OfType<ParameterMatchInfo>()
+                        .Any(x => x.Kind == MatchKind.InvalidValue
+                                  && x.Name.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase))))
                 {
                     invalidParameterList.Add(new InvalidParameterInfo(
                                                 InvalidParameterInfo.Kind.InvalidParameterValue,
-                                                parameter.InputParameterFormat,
-                                                parameter.ParameterValue,
-                                                parameter.InputParameterName));
+                                                parameter.InputFormat,
+                                                parameter.Value,
+                                                parameter.Name));
                 }
             }
 
@@ -193,15 +217,15 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// The method returns the single invokable template with highest precedence
+        /// The method returns the single invokable template with highest precedence.
         /// </summary>
-        /// <param name="highestPrecedenceTemplate">Contains the invokable template with highest precedence</param>
-        /// <param name="useDefaultLanguage">Defines if default language template should be preferred in case of ambiguity</param>
+        /// <param name="highestPrecedenceTemplate">Contains the invokable template with highest precedence.</param>
+        /// <param name="useDefaultLanguage">Defines if default language template should be preferred in case of ambiguity.</param>
         /// <returns>
-        /// <see cref="true"/> when single invokable template with highest precedence can be defined, 
-        /// <see cref="false"/> otherwise
+        /// <see cref="true"/> when single invokable template with highest precedence can be defined.
+        /// <see cref="false"/> otherwise.
         /// </returns>
-        internal bool TryGetHighestPrecedenceInvokableTemplate(out ITemplateMatchInfo highestPrecedenceTemplate, bool useDefaultLanguage = false)
+        internal bool TryGetHighestPrecedenceInvokableTemplate(out ITemplateMatchInfo? highestPrecedenceTemplate, bool useDefaultLanguage = false)
         {
             highestPrecedenceTemplate = null;
             if (!InvokableTemplates.Any())
@@ -218,11 +242,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// The method returns the invokable templates with highest precedence
+        /// The method returns the invokable templates with highest precedence.
         /// </summary>
-        /// <param name="useDefaultLanguage">Defines if default language template should be preferred in case of ambiguity</param>
+        /// <param name="useDefaultLanguage">Defines if default language template should be preferred in case of ambiguity.</param>
         /// <returns>
-        /// the enumerator of invokable templates with highest precedence
+        /// the enumerator of invokable templates with highest precedence.
         /// </returns>
         internal IEnumerable<ITemplateMatchInfo> GetHighestPrecedenceInvokableTemplates(bool useDefaultLanguage = false)
         {
@@ -247,10 +271,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Gets the list of valid choices for <paramref name="parameter"/>
+        /// Gets the list of valid choices for <paramref name="parameter"/>.
         /// </summary>
-        /// <param name="parameter">parameter canonical name</param>
-        /// <returns>the dictionary of valid choices and descriptions</returns>
+        /// <param name="parameter">parameter canonical name.</param>
+        /// <returns>the dictionary of valid choices and descriptions.</returns>
         internal IDictionary<string, ParameterChoice> GetValidValuesForChoiceParameter(string parameter)
         {
             Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
@@ -268,11 +292,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Gets the list of ambiguous choices for <paramref name="parameter"/> for value <paramref name="value"/>
+        /// Gets the list of ambiguous choices for <paramref name="parameter"/> for value <paramref name="value"/>.
         /// </summary>
-        /// <param name="parameter">parameter canonical name</param>
-        /// <param name="value">ambiguous value for the parameter to return possible choices for</param>
-        /// <returns>the dictionary of possible choices and descriptions that are matching ambiguous input</returns>
+        /// <param name="parameter">parameter canonical name.</param>
+        /// <param name="value">ambiguous value for the parameter to return possible choices for.</param>
+        /// <returns>the dictionary of possible choices and descriptions that are matching ambiguous input.</returns>
         internal Dictionary<string, ParameterChoice> GetAmbiguousValuesForChoiceParameter(string parameter, string value)
         {
             Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
@@ -303,7 +327,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             public int GetHashCode(ParameterMatchInfo obj)
             {
-                return new { a = obj.Name.ToLowerInvariant(), b = obj.Value?.ToLowerInvariant(), obj.Kind }.GetHashCode();
+                return (obj.Name.ToLowerInvariant(), obj.Value?.ToLowerInvariant(), obj.Kind).GetHashCode();
             }
         }
     }

@@ -800,6 +800,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Details: {0}.
+        /// </summary>
+        internal static string Generic_Details {
+            get {
+                return ResourceManager.GetString("Generic_Details", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error: {0}.
         /// </summary>
         internal static string GenericError {
@@ -1369,6 +1378,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches {
             get {
                 return ResourceManager.GetString("SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Warning]: Failed to parse input for template {0}, it will be skipped from further processing..
+        /// </summary>
+        internal static string TemplateResolver_Warning_FailedToReparseTemplate {
+            get {
+                return ResourceManager.GetString("TemplateResolver_Warning_FailedToReparseTemplate", resourceCulture);
             }
         }
         

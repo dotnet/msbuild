@@ -634,7 +634,7 @@ Examples:
   <data name="GenericWarning" xml:space="preserve">
     <value>Warning: {0}</value>
   </data>
-  <data name="OptionDescriptionTagFilter">
+  <data name="OptionDescriptionTagFilter" xml:space="preserve">
     <value>Filters the templates based on the tag. Applies to --search and --list.</value>
   </data>
   <data name="TemplatesPackageCoordinator_Error_PackageNameContainsTemplates" xml:space="preserve">
@@ -702,5 +702,11 @@ Examples:
   </data>
   <data name="TemplatesPackageCoordinator_Install_Error_SameInstallRequests" xml:space="preserve">
     <value>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</value>
+  </data>
+  <data name="Generic_Details" xml:space="preserve">
+    <value>Details: {0}</value>
+  </data>
+  <data name="TemplateResolver_Warning_FailedToReparseTemplate" xml:space="preserve">
+    <value>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</value>
   </data>
 </root>

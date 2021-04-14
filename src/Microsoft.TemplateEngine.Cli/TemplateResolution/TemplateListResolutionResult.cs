@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
@@ -77,11 +77,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             {
                 if (_partiallyMatchedTemplates == null)
                 {
-                    // TODO: clarify if collection should include matching by classification only.
-                    // At the moment defintion of partial match:
-                    // - has exact or partial match by name or short name or classification
-                    // - has mismatch in language, type or baseline
-                    _partiallyMatchedTemplates = _coreMatchedTemplates.Where(t => t.HasNameOrClassificationMatchOrPartialMatch() && t.HasAnyMismatch()).ToList();
+                    _partiallyMatchedTemplates = _coreMatchedTemplates.Where(t => t.HasNameMatchOrPartialMatch() && t.HasAnyMismatch()).ToList();
                 }
                 return _partiallyMatchedTemplates;
             }
@@ -136,7 +132,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Returns true when at least one template has mismatch in context (type).
         /// </summary>
-        internal bool HasContextMismatch => PartiallyMatchedTemplates.Any(t => t.HasContextMismatch());
+        internal bool HasTypeMismatch => PartiallyMatchedTemplates.Any(t => t.HasTypeMismatch());
 
         /// <summary>
         /// Returns true when at least one template has mismatch in baseline.
@@ -151,7 +147,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <summary>
         /// Returns true when at least one template has mismatch in tags.
         /// </summary>
-        internal bool HasTagsMismatch => PartiallyMatchedTemplates.Any(t => t.HasTagsMismatch());
+        internal bool HasClassificationMismatch => PartiallyMatchedTemplates.Any(t => t.HasClassificationMismatch());
 
         /// <summary>
         /// Returns true when one and only one template has exact match.

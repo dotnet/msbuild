@@ -8,18 +8,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TableOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
+using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
+using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class HelpForTemplateResolution
     {
-        internal static CreationResultStatus CoordinateHelpAndUsageDisplay(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, TemplateCreator templateCreator, string? defaultLanguage, bool showUsageHelp = true)
+        internal static CreationResultStatus CoordinateHelpAndUsageDisplay(
+            TemplateListResolutionResult templateResolutionResult,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IHostSpecificDataLoader hostDataLoader,
+            ITelemetryLogger telemetryLogger,
+            TemplateCreator templateCreator,
+            string? defaultLanguage,
+            bool showUsageHelp = true)
         {
             if (showUsageHelp)
             {
@@ -130,11 +140,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (!unambiguousTemplateGroup.Any())
             {
                 return CreationResultStatus.NotFound;
-            }
-            // (scp 2017-09-06): parse errors probably can't happen in this context.
-            foreach (string parseErrorMessage in unambiguousTemplateGroup.Where(x => x.HasParseError()).Select(x => x.GetParseError()).ToList())
-            {
-                Reporter.Error.WriteLine(parseErrorMessage.Bold().Red());
             }
 
             GetParametersInvalidForTemplatesInList(unambiguousTemplateGroup, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
@@ -376,9 +381,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             reporter.WriteLine(formatter.Layout());
         }
 
-        internal static void DisplayInvalidParameters(IReadOnlyList<string> invalidParams)
+        internal static void DisplayInvalidParameters(IEnumerable<string> invalidParams)
         {
-            if (invalidParams.Count > 0)
+            _ = invalidParams ?? throw new ArgumentNullException(nameof(invalidParams));
+
+            if (invalidParams.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 foreach (string flag in invalidParams)
