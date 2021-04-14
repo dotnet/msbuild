@@ -707,12 +707,16 @@ class C
                 IsExe = true,
             };
 
+            // NOTE: this can be removed when we support compressing managed assemblies
+            //       we only have this to add some native library to the bundle
+            testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testAsset);
             var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, "net6.0").FullName, $"SingleFileTest{Constants.ExeSuffix}");
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, "/p:EnableCompressionInSingleFile=false")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:EnableCompressionInSingleFile=false")
                 .Should()
                 .Pass();
             var uncompressedSize = new FileInfo(singleFilePath).Length;
@@ -720,7 +724,7 @@ class C
             WaitForUtcNowToAdvance();
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, "/p:EnableCompressionInSingleFile=true")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:EnableCompressionInSingleFile=true")
                 .Should()
                 .Pass();
             var compressedSize = new FileInfo(singleFilePath).Length;
@@ -738,12 +742,16 @@ class C
                 IsExe = true,
             };
 
+            // NOTE: this can be removed when we support compressing managed assemblies
+            //       we only have this to add some native library to the bundle
+            testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testAsset);
             var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, "net6.0").FullName, $"SingleFileTest{Constants.ExeSuffix}");
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier, "/p:EnableCompressionInSingleFile=false")
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative, "/p:EnableCompressionInSingleFile=false")
                 .Should()
                 .Pass();
             var uncompressedSize = new FileInfo(singleFilePath).Length;
@@ -751,7 +759,7 @@ class C
             WaitForUtcNowToAdvance();
 
             publishCommand
-                .Execute(PublishSingleFile, RuntimeIdentifier)
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeNative)
                 .Should()
                 .Pass();
             var compressedSize = new FileInfo(singleFilePath).Length;
