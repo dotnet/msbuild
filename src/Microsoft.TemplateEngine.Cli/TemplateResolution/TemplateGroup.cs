@@ -291,5 +291,20 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             }
             return validChoices;
         }
+
+        private class OrdinalIgnoreCaseMatchInfoComparer : IEqualityComparer<ParameterMatchInfo>
+        {
+            public bool Equals(ParameterMatchInfo x, ParameterMatchInfo y)
+            {
+                return x.Kind == y.Kind
+                    && string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(x.Value, y.Value, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public int GetHashCode(ParameterMatchInfo obj)
+            {
+                return new { a = obj.Name.ToLowerInvariant(), b = obj.Value?.ToLowerInvariant(), obj.Kind }.GetHashCode();
+            }
+        }
     }
 }
