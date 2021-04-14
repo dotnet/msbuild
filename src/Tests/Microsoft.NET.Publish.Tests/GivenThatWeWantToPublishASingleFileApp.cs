@@ -675,6 +675,38 @@ class C
         }
 
         [RequiresMSBuildVersionFact("16.8.0")]
+        public void It_compresses_single_file_as_directed()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(testAsset);
+            var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, "net6.0").FullName, $"SingleFileTest{Constants.ExeSuffix}");
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, "/p:EnableCompressionInSingleFile=false")
+                .Should()
+                .Pass();
+            var uncompressedSize = new FileInfo(singleFilePath).Length;
+
+            WaitForUtcNowToAdvance();
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier, IncludeAllContent, "/p:EnableCompressionInSingleFile=true")
+                .Should()
+                .Pass();
+            var compressedSize = new FileInfo(singleFilePath).Length;
+
+            uncompressedSize.Should().BeGreaterThan(compressedSize);
+        }
+
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void It_compresses_single_file_by_default()
         {
             var testProject = new TestProject()
