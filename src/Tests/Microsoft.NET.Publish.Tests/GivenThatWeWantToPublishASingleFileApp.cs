@@ -661,7 +661,6 @@ class C
                 TargetFrameworks = "net5.0",
                 IsExe = true,
             };
-            testProject.AdditionalProperties.Add("SelfContained", "true");
 
             testProject.AdditionalProperties.Add("EnableCompressionInSingleFile", "true");
 
@@ -685,6 +684,7 @@ class C
                 IsExe = true,
             };
 
+            testProject.AdditionalProperties.Add("SelfContained", "false");
             testProject.AdditionalProperties.Add("EnableCompressionInSingleFile", "true");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
@@ -706,7 +706,6 @@ class C
                 TargetFrameworks = "net6.0",
                 IsExe = true,
             };
-            testProject.AdditionalProperties.Add("SelfContained", "true");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testAsset);
@@ -738,7 +737,6 @@ class C
                 TargetFrameworks = "net6.0",
                 IsExe = true,
             };
-            testProject.AdditionalProperties.Add("SelfContained", "true");
 
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var publishCommand = new PublishCommand(testAsset);
