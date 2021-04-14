@@ -44,11 +44,11 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Second' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.Second"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyRecord' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.MyRecord"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyStruct' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.MyStruct"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyDelegate' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.MyDelegate"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyEnum' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.MyEnum"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Second' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Second"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyRecord' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyRecord"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyStruct' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyStruct"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyDelegate' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyDelegate"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyEnum' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyEnum"),
             };
 
             Assert.Equal(expected, differences);
@@ -84,7 +84,7 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.ForwardedTestType' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.ForwardedTestType")
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.ForwardedTestType' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.ForwardedTestType")
             };
 
             Assert.Equal(expected, differences);
@@ -176,8 +176,8 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Third' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.Third"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Fourth' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.Fourth")
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Third' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Third"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Fourth' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Fourth")
             };
 
             Assert.Equal(expected, differences);
@@ -217,7 +217,7 @@ namespace CompatTests
             {
                 CompatDifference[] expected = new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.InternalType' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.InternalType")
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.InternalType' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.InternalType")
                 };
 
                 Assert.Equal(expected, differences);
@@ -264,13 +264,13 @@ namespace CompatTests
 
             List<CompatDifference> expected = new()
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
             };
 
             if (includeInternalSymbols)
             {
                 expected.Add(
-                  new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.InternalNested.DoubleNested' exists on the contract but not on the implementation", DifferenceType.Removed, "T:CompatTests.First.InternalNested.DoubleNested")
+                  new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.InternalNested.DoubleNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.InternalNested.DoubleNested")
                 );
             }
 

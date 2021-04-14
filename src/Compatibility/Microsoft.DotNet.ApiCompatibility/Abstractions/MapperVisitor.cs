@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
     /// <summary>
@@ -43,6 +45,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="mapper">The <see cref="AssemblySetMapper"/> to visit.</param>
         public virtual void Visit(AssemblySetMapper mapper)
         {
+            if (mapper == null)
+            {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+
             foreach (AssemblyMapper assembly in mapper.GetAssemblies())
             {
                 Visit(assembly);
@@ -55,6 +62,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="mapper">The <see cref="AssemblyMapper"/> to visit.</param>
         public virtual void Visit(AssemblyMapper mapper)
         {
+            if (mapper == null)
+            {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+
             foreach (NamespaceMapper nsMapper in mapper.GetNamespaces())
             {
                 Visit(nsMapper);
@@ -67,6 +79,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="mapper">The <see cref="NamespaceMapper"/> to visit.</param>
         public virtual void Visit(NamespaceMapper mapper)
         {
+            if (mapper == null)
+            {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+
             foreach (TypeMapper type in mapper.GetTypes())
             {
                 Visit(type);
@@ -79,6 +96,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <param name="mapper">The <see cref="TypeMapper"/> to visit.</param>
         public virtual void Visit(TypeMapper mapper)
         {
+            if (mapper == null)
+            {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+
             foreach (TypeMapper type in mapper.GetNestedTypes())
             {
                 Visit(type);

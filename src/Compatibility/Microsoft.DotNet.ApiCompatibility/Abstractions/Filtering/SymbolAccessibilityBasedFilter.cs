@@ -5,11 +5,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
-    internal class AccessibilityFilter : ISymbolFilter
+    internal class SymbolAccessibilityBasedFilter : ISymbolFilter
     {
         private readonly bool _includeInternalSymbols;
 
-        internal AccessibilityFilter(bool includeInternalSymbols)
+        internal SymbolAccessibilityBasedFilter(bool includeInternalSymbols)
         {
             _includeInternalSymbols = includeInternalSymbols;
         }

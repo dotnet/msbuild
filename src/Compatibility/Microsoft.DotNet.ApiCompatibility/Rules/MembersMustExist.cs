@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             ITypeSymbol left = mapper.Left;
             if (left != null && mapper.Right == null)
-                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, $"Type '{left.ToDisplayString()}' exists on the contract but not on the implementation", DifferenceType.Removed, left));
+                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, $"Type '{left.ToDisplayString()}' exists on the left but not on the right", DifferenceType.Removed, left));
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         return;
                 }
 
-                differences.Add(new CompatDifference(DiagnosticIds.MemberMustExist, $"Member '{left.ToDisplayString()}' exists on the contract but not on the implementation", DifferenceType.Removed, left));
+                differences.Add(new CompatDifference(DiagnosticIds.MemberMustExist, $"Member '{left.ToDisplayString()}' exists on the left but not on the right", DifferenceType.Removed, left));
             }
         }
 

@@ -48,12 +48,12 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMethod(string, string)' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.ShouldReportMethod(System.String,System.String)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingProperty.get' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.get_ShouldReportMissingProperty"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.this[int].get' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.get_Item(System.Int32)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingEvent.add' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.add_ShouldReportMissingEvent(CompatTests.EventHandler)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingEvent.remove' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.remove_ShouldReportMissingEvent(CompatTests.EventHandler)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ReportMissingField' exists on the contract but not on the implementation", DifferenceType.Removed, "F:CompatTests.First.ReportMissingField"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMethod(string, string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.ShouldReportMethod(System.String,System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingProperty.get' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.get_ShouldReportMissingProperty"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.this[int].get' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.get_Item(System.Int32)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingEvent.add' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.add_ShouldReportMissingEvent(CompatTests.EventHandler)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingEvent.remove' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.remove_ShouldReportMissingEvent(CompatTests.EventHandler)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ReportMissingField' exists on the left but not on the right", DifferenceType.Removed, "F:CompatTests.First.ReportMissingField"),
             };
 
             Assert.Equal(expected, differences);
@@ -171,8 +171,8 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, string)' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.String)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, int, string)' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, int, string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.String)"),
             };
 
             Assert.Equal(expected, differences);
@@ -221,8 +221,8 @@ namespace CompatTests
             {
                 CompatDifference[] expected = new[]
                 {
-                    new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, int, int)' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.Int32)"),
-                    new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.InternalProperty.set' exists on the contract but not on the implementation", DifferenceType.Removed, "M:CompatTests.First.set_InternalProperty(System.Int32)"),
+                    new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, int, int)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.Int32)"),
+                    new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.InternalProperty.set' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.set_InternalProperty(System.Int32)"),
                 };
 
                 Assert.Equal(expected, differences);

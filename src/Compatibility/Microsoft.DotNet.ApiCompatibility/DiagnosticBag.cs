@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         private readonly List<T> _differences = new();
 
         /// <summary>
-        /// Instanciates an diagnostic bag with the provided settings to ignore diagnostics.
+        /// Instantiate an diagnostic bag with the provided settings to ignore diagnostics.
         /// </summary>
         /// <param name="noWarn">Comma separated list of diagnostic IDs to ignore.</param>
         /// <param name="ignoredDifferences">An array of differences to ignore based on diagnostic ID and reference ID.</param>

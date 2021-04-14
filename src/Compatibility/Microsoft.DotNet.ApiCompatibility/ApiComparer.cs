@@ -15,12 +15,12 @@ namespace Microsoft.DotNet.ApiCompatibility
         private readonly ComparingSettings _settings;
 
         /// <summary>
-        /// Instanciates an object with the default <see cref="ComparingSettings"/>.
+        /// Instantiate an object with the default <see cref="ComparingSettings"/>.
         /// </summary>
         public ApiComparer() : this(new ComparingSettings()) { }
 
         /// <summary>
-        /// Instanciates an object with the provided <see cref="ComparingSettings"/>
+        /// Instantiate an object with the provided <see cref="ComparingSettings"/>
         /// </summary>
         /// <param name="settings">Settings to use for comparison.</param>
         public ApiComparer(ComparingSettings settings)
@@ -29,12 +29,12 @@ namespace Microsoft.DotNet.ApiCompatibility
         }
 
         /// <summary>
-        /// Instanciates an object that includes comparing internal symbols.
+        /// Instantiate an object that includes comparing internal symbols.
         /// </summary>
         /// <param name="includeInternalSymbols">Indicates whether internal symbols should be included or not.</param>
         public ApiComparer(bool includeInternalSymbols)
         {
-            _settings = new ComparingSettings(filter: new AccessibilityFilter(includeInternalSymbols));
+            _settings = new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(includeInternalSymbols));
         }
 
         /// <summary>

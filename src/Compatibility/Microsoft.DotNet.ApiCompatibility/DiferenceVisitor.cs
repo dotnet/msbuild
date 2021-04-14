@@ -30,6 +30,11 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="assembly">The mapper to visit.</param>
         public override void Visit(AssemblyMapper assembly)
         {
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
             _differenceBag.AddRange(assembly.GetDifferences());
             base.Visit(assembly);
         }
@@ -40,6 +45,11 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="type">The mapper to visit.</param>
         public override void Visit(TypeMapper type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             _differenceBag.AddRange(type.GetDifferences());
 
             if (type.ShouldDiffMembers)
@@ -54,6 +64,11 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="member">The mapper to visit.</param>
         public override void Visit(MemberMapper member)
         {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
             _differenceBag.AddRange(member.GetDifferences());
         }
 

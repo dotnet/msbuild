@@ -31,7 +31,7 @@ namespace MyNamespace
 }
 ";
 
-        // Since we uset typeof(string).Assembly.Location to resolve references
+        // Since we use typeof(string).Assembly.Location to resolve references
         // We need to target a framework compatible with what the test is being
         // built for so that we resolve the references correctly.
 #if NETCOREAPP

@@ -105,14 +105,17 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             IEnumerable<MetadataReference> assembliesToReturn = LoadFromPaths(paths);
 
+            List<IAssemblySymbol> result = new();
             foreach (MetadataReference metadataReference in assembliesToReturn)
             {
                 ISymbol symbol = _cSharpCompilation.GetAssemblyOrModuleSymbol(metadataReference);
                 if (symbol is IAssemblySymbol assemblySymbol)
                 {
-                    yield return symbol;
+                    result.Add(assemblySymbol);
                 }
             }
+
+            return result;
         }
 
         /// <summary>
@@ -221,6 +224,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 throw new ArgumentNullException(nameof(searchPaths));
             }
 
+            List<IAssemblySymbol> matchingAssemblies = new();
             foreach (IAssemblySymbol assembly in fromAssemblies)
             {
                 bool found = false;
@@ -246,7 +250,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                                 continue;
                             }
 
-                            yield return matchingAssembly;
+                            matchingAssemblies.Add(matchingAssembly);
                             found = true;
                             break;
                         }
@@ -259,10 +263,13 @@ namespace Microsoft.DotNet.ApiCompatibility
                     _warnings.Add($"Could not find matching assembly: '{assemblyInfo}' in any of the search directories.");
                 }
             }
+
+            return matchingAssemblies;
         }
 
         private IEnumerable<MetadataReference> LoadFromPaths(IEnumerable<string> paths)
         {
+            List<MetadataReference> result = new();
             foreach (string path in paths)
             {
                 string resolvedPath = Environment.ExpandEnvironmentVariables(path);
@@ -270,13 +277,12 @@ namespace Microsoft.DotNet.ApiCompatibility
                 if (Directory.Exists(resolvedPath))
                 {
                     directory = resolvedPath;
-                    foreach (MetadataReference reference in LoadAssembliesFromDirectory(resolvedPath))
-                        yield return reference;
+                    result.AddRange(LoadAssembliesFromDirectory(resolvedPath));
                 }
                 else if (File.Exists(resolvedPath))
                 {
                     directory = Path.GetDirectoryName(resolvedPath);
-                    yield return CreateOrGetMetadataReferenceFromPath(resolvedPath);
+                    result.Add(CreateOrGetMetadataReferenceFromPath(resolvedPath));
                 }
                 else
                 {
@@ -286,6 +292,8 @@ namespace Microsoft.DotNet.ApiCompatibility
                 if (_resolveReferences && !string.IsNullOrEmpty(directory))
                     _referenceSearchPaths.Add(directory);
             }
+
+            return result;
         }
 
         private IEnumerable<MetadataReference> LoadAssembliesFromDirectory(string directory)

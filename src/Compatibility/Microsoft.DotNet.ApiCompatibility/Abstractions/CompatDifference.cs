@@ -34,30 +34,30 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         private CompatDifference() { }
 
         /// <summary>
-        /// Instanciates a new object representing the compatibility difference.
+        /// Instantiate a new object representing the compatibility difference.
         /// </summary>
         /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
         /// <param name="member"><see cref="ISymbol"/> for which the difference is associated to.</param>
-        public CompatDifference(string id, string message, DifferenceType type, ISymbol member)
-            : this(id, message, type, member.GetDocumentationCommentId())
+        public CompatDifference(string diagnosticId, string message, DifferenceType type, ISymbol member)
+            : this(diagnosticId, message, type, member?.GetDocumentationCommentId())
         {
         }
 
         /// <summary>
-        /// Instanciates a new object representing the compatibility difference.
+        /// Instantiate a new object representing the compatibility difference.
         /// </summary>
         /// <param name="id"><see cref="string"/> representing the diagnostic ID.</param>
         /// <param name="message"><see cref="string"/> message describing the difference.</param>
         /// <param name="type"><see cref="DifferenceType"/> to describe the type of the difference.</param>
         /// <param name="memberId"><see cref="string"/> containing the member ID for which the difference is associated to.</param>
-        public CompatDifference(string id, string message, DifferenceType type, string memberId)
+        public CompatDifference(string diagnosticId, string message, DifferenceType type, string memberId)
         {
-            DiagnosticId = id;
-            Message = message;
+            DiagnosticId = diagnosticId ?? throw new ArgumentNullException(nameof(diagnosticId));
+            Message = message ?? throw new ArgumentNullException(nameof(message));
             Type = type;
-            ReferenceId = memberId;
+            ReferenceId = memberId ?? throw new ArgumentNullException(nameof(memberId));
         }
 
         /// <summary>
