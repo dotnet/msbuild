@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using NuGet.ProjectModel;
 using Xunit;
 
-namespace Microsoft.DotNet.ToolPackage.Tests
+namespace Microsoft.DotNet.PackageInstall.Tests
 {
     public class LockFileMatcherTests
     {

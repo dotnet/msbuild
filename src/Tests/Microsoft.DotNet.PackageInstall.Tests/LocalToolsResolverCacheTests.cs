@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -17,7 +18,7 @@ using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.ToolPackage.Tests
+namespace Microsoft.DotNet.PackageInstall.Tests
 {
     public class LocalToolsResolverCacheTests : SdkTest
     {

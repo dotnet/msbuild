@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using NuGet.Protocol.Core.Types;
 using Xunit;
 
-namespace Microsoft.DotNet.ToolPackage.Tests
+namespace Microsoft.DotNet.PackageInstall.Tests
 {
     public class ToolConfigurationDeserializerTests
     {

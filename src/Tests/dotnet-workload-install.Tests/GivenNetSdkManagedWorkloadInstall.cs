@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
-            _reporter.Lines.Should().Contain(string.Format(LocalizableStrings.WorkloadPackAlreadyInstalledMessage, packInfo.Id, packInfo.Version));
+            _reporter.Lines.Should().Contain(string.Format(Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.WorkloadPackAlreadyInstalledMessage, packInfo.Id, packInfo.Version));
         }
 
         [Fact]

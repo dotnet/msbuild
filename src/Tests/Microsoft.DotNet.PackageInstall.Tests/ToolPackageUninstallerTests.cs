@@ -22,8 +22,9 @@ using Microsoft.NET.TestFramework.Utilities;
 using Microsoft.NET.TestFramework;
 using Xunit.Abstractions;
 using System.Runtime.CompilerServices;
+using Microsoft.DotNet.ToolPackage;
 
-namespace Microsoft.DotNet.ToolPackage.Tests
+namespace Microsoft.DotNet.PackageInstall.Tests
 {
     public class ToolPackageUninstallerTests : SdkTest
     {

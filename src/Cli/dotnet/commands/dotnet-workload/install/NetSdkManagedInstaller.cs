@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
@@ -23,7 +24,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly string _installedWorkloadDir = "InstalledWorkloads";
         private readonly string _installedPacksDir = "InstalledPacks";
         protected readonly string _dotnetDir;
-        protected readonly string _tempPackagesDir;
+        protected readonly DirectoryPath _tempPackagesDir;
         private readonly INuGetPackageDownloader _nugetPackageInstaller;
         private readonly IWorkloadResolver _workloadResolver;
         private readonly SdkFeatureBand _sdkFeatureBand;
@@ -36,8 +37,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string dotnetDir =  null)
         {
             _dotnetDir = dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory();
-            _tempPackagesDir = Path.Combine(_dotnetDir, "metadata", "temp");
-            _nugetPackageInstaller = nugetPackageDownloader ?? new NuGetPackageDownloader(_tempPackagesDir, sourceUrl: "https://pkgs.dev.azure.com/azure-public/vside/_packaging/xamarin-impl/nuget/v3/index.json");
+            _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
+            _nugetPackageInstaller = nugetPackageDownloader ?? new NuGetPackageDownloader(_tempPackagesDir);
             _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
@@ -90,7 +91,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             }
                             else
                             {
-                                var tempExtractionDir = Path.Combine(_tempPackagesDir, $"{packInfo.Id}-{packInfo.Version}-extracted");
+                                var tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{packInfo.Id}-{packInfo.Version}-extracted");
                                 tempDirsToDelete.Add(tempExtractionDir);
                                 Directory.CreateDirectory(tempExtractionDir);
                                 var packFiles = _nugetPackageInstaller.ExtractPackageAsync(packagePath, tempExtractionDir).Result;
