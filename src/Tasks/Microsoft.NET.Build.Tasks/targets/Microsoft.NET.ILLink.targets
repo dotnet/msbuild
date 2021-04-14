@@ -152,7 +152,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimMode Condition=" '$(TrimMode)' == '' ">copyused</TrimMode>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition=" '$(SuppressTrimAnalysisWarnings)' == 'true' ">
       <!-- RequiresUnreferenceCodeAttribute method called -->
       <NoWarn>$(NoWarn);IL2026</NoWarn>

@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -28,18 +28,18 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview'">6.0</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
-    <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And 
+    <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
                                        '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
 
     <!-- EnableNETAnalyzers Allows analyzers to be disabled in bulk via msbuild if the user wants to -->
-    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == '' And 
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == '' And
                                    '$(EffectiveAnalysisLevel)' != '' And
                                     $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
     <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
 
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
-    
+
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
     <WarningLevel Condition="'$(Language)' == 'C#' And

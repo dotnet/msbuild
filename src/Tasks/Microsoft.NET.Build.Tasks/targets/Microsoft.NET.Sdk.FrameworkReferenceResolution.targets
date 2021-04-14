@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project>
@@ -28,21 +28,21 @@ Copyright (c) .NET Foundation. All rights reserved.
     Matches FrameworkReference items with KnownFrameworkReference items to determine the corresponding
     targeting pack and if necessary the runtime pack.  If the packs aren't available in the NetCoreTargetingPackRoot
     folder, then generate PackageDownload items in order to download the packs during restore.
-    
+
     Also resolves app host packs in a similar fashion, and checks for duplicate FrameworkReference items.
     ============================================================
     -->
-  
+
   <Target Name="ProcessFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads"
           Condition="'@(FrameworkReference)' != ''">
-    
+
     <CheckForDuplicateFrameworkReferences
         FrameworkReferences="@(FrameworkReference)"
         MoreInformationLink="https://aka.ms/sdkimplicitrefs">
       <Output TaskParameter="ItemsToRemove" ItemName="_FrameworkReferenceToRemove" />
       <Output TaskParameter="ItemsToAdd" ItemName="_FrameworkReferenceToAdd" />
     </CheckForDuplicateFrameworkReferences>
-    
+
     <ItemGroup>
       <FrameworkReference Remove="@(_FrameworkReferenceToRemove)" />
       <FrameworkReference Include="@(_FrameworkReferenceToAdd)" />
@@ -118,7 +118,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="ComHost" ItemName="ComHostPack" />
       <Output TaskParameter="IjwHost" ItemName="IjwHostPack" />
       <Output TaskParameter="PackAsToolShimAppHostPacks" ItemName="PackAsToolShimAppHostPack" />
-      
+
     </ResolveAppHosts>
 
     <PropertyGroup Condition="'$(UsePackageDownload)' == ''">
@@ -126,7 +126,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <UsePackageDownload Condition="'$(PackageDownloadSupported)' == 'true'">true</UsePackageDownload>
       <UsePackageDownload Condition="'$(UsePackageDownload)' == ''">false</UsePackageDownload>
     </PropertyGroup>
-    
+
     <ItemGroup Condition="'$(UsePackageDownload)' == 'true'">
       <PackageDownload Include="@(_PackageToDownload)">
         <Version>[%(_PackageToDownload.Version)]</Version>
@@ -159,11 +159,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FrameworkReference Include="@(TransitiveFrameworkReference)" Exclude="@(FrameworkReference)"
                           IsTransitiveFrameworkReference="true" />
     </ItemGroup>
-    
+
   </Target>
 
   <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
-  
+
   <!--
     ============================================================
                                         ResolveFrameworkReferences
@@ -299,7 +299,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       ResolvedRuntimePacks="@(ResolvedRuntimePack)">
 
       <Output TaskParameter="ResolvedFrameworkReferences" ItemName="ResolvedFrameworkReference" />
-      
+
     </ResolveFrameworkReferences>
 
   </Target>
@@ -334,9 +334,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
       <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
       <Output TaskParameter="UsedRuntimeFrameworks" ItemName="_UsedRuntimeFramework" />
-      
+
     </ResolveTargetingPackAssets>
-    
+
     <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
       <PackageConflictPlatformManifests Include="@(PlatformManifestsFromTargetingPacks)" />
     </ItemGroup>
@@ -346,7 +346,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <RuntimeFramework Include="@(_UsedRuntimeFramework)" />
     </ItemGroup>
   </Target>
-  
+
   <UsingTask TaskName="ResolveRuntimePackAssets" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
@@ -366,8 +366,8 @@ Copyright (c) .NET Foundation. All rights reserved.
         SuppressNotFoundError="true">
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
     </GetReferenceAssemblyPaths>
-    
-    
+
+
     <ItemGroup>
       <_ExistingReferenceAssembliesPackageReference Include="@(PackageReference)" Condition="'%(PackageReference.Identity)' == 'Microsoft.NETFramework.ReferenceAssemblies'"/>
 
@@ -375,7 +375,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                         Condition="'$(_FullFrameworkReferenceAssemblyPaths)' == '' and '@(_ExistingReferenceAssembliesPackageReference)' == ''"/>
     </ItemGroup>
   </Target>
-  
+
   <!--
     ============================================================
                                         ResolveRuntimePackAssets
@@ -385,7 +385,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <Target Name="ResolveRuntimePackAssets" DependsOnTargets="ResolveFrameworkReferences"
           Condition="'@(RuntimePack)' != ''">
-        
+
     <ResolveRuntimePackAssets FrameworkReferences="@(FrameworkReference)"
                               ResolvedRuntimePacks="@(ResolvedRuntimePack)"
                               UnavailableRuntimePacks="@(UnavailableRuntimePack)"
@@ -393,18 +393,18 @@ Copyright (c) .NET Foundation. All rights reserved.
                               DesignTimeBuild="$(DesignTimeBuild)">
       <Output TaskParameter="RuntimePackAssets" ItemName="RuntimePackAsset" />
     </ResolveRuntimePackAssets>
-    
+
     <ItemGroup>
       <ReferenceCopyLocalPaths Include="@(RuntimePackAsset)"
                                Condition="'$(CopyLocalLockFileAssemblies)' == 'true' and ('$(SelfContained)' == 'true' or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true')" />
     </ItemGroup>
-  
-  
+
+
   </Target>
 
   <!--
     Adds metadata so the SDK will generate the UserSecretsIdAttribute.
-    
+
     This is associated with ASP.NET Core, but may be used in projects that don't use the Web SDK (especially test projects).
     So it is in the base .NET SDK.  (It used to be in the Microsoft.AspNetCore.App package, but now that that's a targeting
     pack we don't support importing build logic from it directly).
@@ -421,12 +421,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       If the Microsoft.Extensions.Configuration.UserSecrets package 2.2 or higher is referenced directly,
       it will also add an AssemblyAttribute item. Since this attribute only allows one per assembly, do not
       duplicate the item.
-      
+
       Also don't add the attribute if there is neither a Microsoft.AspNetCore.App FrameworkReference nor a
       Microsoft.Extensions.Configuration.UserSecrets PackageReference, in order to preserve 2.x SDK behavior
       where projects would successfully build if they define the UserSecretsId property but don't reference
       the corresponding API.
-      
+
     -->
      <ItemGroup Condition=" @(AssemblyAttribute->WithMetadataValue('Identity', 'Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute')->Count()) == 0 And
                             (@(FrameworkReference->WithMetadataValue('Identity', 'Microsoft.AspNetCore.App')->Count()) != 0 Or
