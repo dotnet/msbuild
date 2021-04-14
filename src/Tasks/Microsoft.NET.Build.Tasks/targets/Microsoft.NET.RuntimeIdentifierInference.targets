@@ -115,6 +115,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <SelfContained Condition="'$(SelfContained)' == '' and '$(RuntimeIdentifier)' != ''">true</SelfContained>
     <SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
     <_OnOsx>$(NETCoreSdkRuntimeIdentifier.StartsWith('osx'))</_OnOsx>
+    <_RuntimeIdentifierUsesMonoRuntimeByDefault Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">true</_RuntimeIdentifierUsesMonoRuntimeByDefault>
     <_RuntimeIdentifierUsesAppHost Condition="$(RuntimeIdentifier.StartsWith('ios')) or $(RuntimeIdentifier.StartsWith('tvos')) or $(RuntimeIdentifier.StartsWith('maccatalyst')) or $(RuntimeIdentifier.StartsWith('android')) or $(RuntimeIdentifier.StartsWith('browser'))">false</_RuntimeIdentifierUsesAppHost>
     <_RuntimeIdentifierUsesAppHost Condition="'$(_RuntimeIdentifierUsesAppHost)' == ''">true</_RuntimeIdentifierUsesAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == '' and
@@ -123,6 +124,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                             ('$(RuntimeIdentifier)' != '' and '$(_TargetFrameworkVersionWithoutV)' >= '2.1') or
                             ('$(_TargetFrameworkVersionWithoutV)' >= '3.0' and $(_OnOsx) != 'true'))">true</UseAppHost>
     <UseAppHost Condition="'$(UseAppHost)' == ''">false</UseAppHost>
+    <UseMonoRuntime Condition="'$(UseMonoRuntime)' == '' and '$(_RuntimeIdentifierUsesMonoRuntimeByDefault)' == 'true'">true</UseMonoRuntime>
   </PropertyGroup>
 
   <!-- Only use the default apphost if building without a RID and without a deps file path (used by GenerateDeps.proj for CLI tools). -->
@@ -187,13 +189,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_CheckForLanguageAndFeatureCombinationSupport"
           BeforeTargets="_CheckForInvalidConfigurationAndPlatform;ProcessFrameworkReferences">
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and $(OutputType) != 'library' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
+    <NETSdkError Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true') and $(OutputType) != 'library' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
                  ResourceName="NoSupportCppNonDynamicLibraryDotnetCore" />
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and $(EnableComHosting) == 'true'"
+    <NETSdkError Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true') and $(EnableComHosting) == 'true'"
                  ResourceName="NoSupportCppEnableComHosting" />
 
-    <NETSdkError Condition="'$(Language)' == 'C++' and $(SelfContained) == 'true'"
+    <NETSdkError Condition="('$(Language)' == 'C++' and '$(_EnablePackageReferencesInVCProjects)' != 'true') and $(SelfContained) == 'true'"
                  ResourceName="NoSupportCppSelfContained" />
 
   </Target>

@@ -32,12 +32,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task NewFile(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             using var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling);
@@ -64,12 +58,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task ChangeFile(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             var testFileFullPath = Path.Combine(dir, "foo");
@@ -111,12 +99,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task MoveFile(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
             var srcFile = Path.Combine(dir, "foo");
             var dstFile = Path.Combine(dir, "foo2");
@@ -201,12 +183,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task NoNotificationIfDisabled(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             using var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling);
@@ -236,12 +212,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task DisposedNoEvents(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
             var changedEv = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             using (var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling))
@@ -269,12 +239,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task MultipleFiles(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             File.WriteAllText(Path.Combine(dir, "foo1"), string.Empty);
@@ -319,12 +283,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task MultipleTriggers(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(identifier: usePolling.ToString()).Path;
 
             using var watcher = FileWatcherFactory.CreateWatcher(dir, usePolling);
@@ -385,12 +343,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         [InlineData(false)]
         public async Task DeleteSubfolder(bool usePolling)
         {
-            if (!usePolling && OperatingSystem.IsMacOS())
-            {
-                // Skip on MacOS https://github.com/dotnet/aspnetcore/issues/29141
-                return;
-            }
-
             var dir = _testAssetManager.CreateTestDirectory(usePolling.ToString()).Path;
 
             var subdir = Path.Combine(dir, "subdir");

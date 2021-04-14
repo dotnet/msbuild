@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Microsoft.NET.Sdk.Razor.SourceGenerators.Tests
+namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     public class SourceTextSourceLineCollectionTest
     {

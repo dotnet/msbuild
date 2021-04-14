@@ -72,7 +72,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_BlazorOutputPath>wwwroot\_framework\</_BlazorOutputPath>
 
     <!-- Properties for AOT -->
-    <MicrosoftNetCoreAppRuntimePackRidDir>$(NuGetPackageRoot)microsoft.netcore.app.runtime.browser-wasm\$(BundledNETCoreAppPackageVersion)\runtimes\browser-wasm\</MicrosoftNetCoreAppRuntimePackRidDir>
+    <MicrosoftNetCoreAppRuntimePackRidDir>$(NuGetPackageRoot)microsoft.netcore.app.runtime.mono.browser-wasm\$(BundledNETCoreAppPackageVersion)\runtimes\browser-wasm\</MicrosoftNetCoreAppRuntimePackRidDir>
     <AOTMode>AotInterp</AOTMode>
     <WasmStripAOTAssemblies>false</WasmStripAOTAssemblies>
     <WasmGenerateAppBundle>false</WasmGenerateAppBundle>
@@ -81,7 +81,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Configuration for the platform compatibility analyzer. See https://github.com/dotnet/designs/blob/master/accepted/2020/platform-exclusion/platform-exclusion.md#build-configuration-for-platforms -->
+    <!-- Configuration for the platform compatibility analyzer. See https://github.com/dotnet/designs/blob/main/accepted/2020/platform-exclusion/platform-exclusion.md#build-configuration-for-platforms -->
     <SupportedPlatform Remove="@(SupportedPlatform)" />
     <SupportedPlatform Include="browser" />
   </ItemGroup>

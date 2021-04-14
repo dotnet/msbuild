@@ -11,7 +11,7 @@
       "release-date": "2020-07-21",
       "release-version": "5.0.0-preview.7",
       "security": false,
-      "release-notes": "https://github.com/dotnet/core/blob/master/release-notes/5.0/preview/5.0.0-preview.7.md",
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/5.0/preview/5.0.0-preview.7.md",
       "runtime": {
         "version": "5.0.0-preview.7.20364.11",
         "version-display": "5.0.0-preview.7",
@@ -384,7 +384,7 @@
       "release-date": "2020-06-25",
       "release-version": "5.0.0-preview.6",
       "security": false,
-      "release-notes": "https://github.com/dotnet/core/blob/master/release-notes/5.0/preview/5.0.0-preview.6.md",
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/5.0/preview/5.0.0-preview.6.md",
       "runtime": {
         "version": "5.0.0-preview.6.20305.6",
         "version-display": "5.0.0-preview.6",
@@ -753,7 +753,7 @@
       "release-date": "2020-06-10",
       "release-version": "5.0.0-preview.5",
       "security": false,
-      "release-notes": "https://github.com/dotnet/core/blob/master/release-notes/5.0/preview/5.0.0-preview.5.md",
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/5.0/preview/5.0.0-preview.5.md",
       "runtime": {
         "version": "5.0.0-preview.5.20278.1",
         "version-display": "5.0.0-preview.5",
@@ -1122,7 +1122,7 @@
       "release-date": "2020-05-19",
       "release-version": "5.0.0-preview.4",
       "security": false,
-      "release-notes": "https://github.com/dotnet/core/blob/master/release-notes/5.0/preview/5.0.0-preview.4.md",
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/5.0/preview/5.0.0-preview.4.md",
       "runtime": {
         "version": "5.0.0-preview.4.20251.6",
         "version-display": "5.0.0-preview.4",
@@ -1493,7 +1493,7 @@
       "release-date": "2020-04-23",
       "release-version": "5.0.0-preview.3",
       "security": false,
-      "release-notes": "https://github.com/dotnet/core/blob/master/release-notes/5.0/preview/5.0.0-preview.3.md",
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/5.0/preview/5.0.0-preview.3.md",
       "runtime": {
         "version": "5.0.0-preview.3.20214.6",
         "version-display": "5.0.0-preview.3",
@@ -1846,7 +1846,7 @@
       "release-date": "2020-04-02",
       "release-version": "5.0.0-preview.2",
       "security": false,
-      "release-notes": "https://github.com/dotnet/core/blob/master/release-notes/5.0/preview/5.0.0-preview.2.md",
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/5.0/preview/5.0.0-preview.2.md",
       "runtime": {
         "version": "5.0.0-preview.2.20160.6",
         "version-display": "5.0.0-preview.2",
@@ -2361,7 +2361,7 @@
       "release-date": "2020-03-16",
       "release-version": "5.0.0-preview.1",
       "security": false,
-      "release-notes": "https://github.com/dotnet/core/blob/master/release-notes/5.0/preview/5.0.0-preview.1.md",
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/5.0/preview/5.0.0-preview.1.md",
       "runtime": {
         "version": "5.0.0-preview.1.20120.5",
         "version-display": "5.0.0-preview.1",

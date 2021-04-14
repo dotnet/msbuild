@@ -49,7 +49,7 @@ namespace Microsoft.NET.TestFramework
             return rid;
         }
 
-        //  Encode relevant information from https://github.com/dotnet/core/blob/master/os-lifecycle-policy.md
+        //  Encode relevant information from https://github.com/dotnet/core/blob/main/os-lifecycle-policy.md
         //  so that we can check if a test targeting a particular version of .NET Core should be
         //  able to run on the current OS
         public static bool SupportsTargetFramework(string targetFramework)

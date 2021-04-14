@@ -7,9 +7,19 @@
         <target state="new">Complete the operation from cache (offline).</target>
         <note />
       </trans-unit>
+      <trans-unit id="GarbageCollectingSdkFeatureBandsMessage">
+        <source>Garbage collecting for SDK feature bands {0}...</source>
+        <target state="new">Garbage collecting for SDK feature bands {0}...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallationSucceeded">
-        <source>Workload '{0}' (version '{1}') was successfully installed.</source>
-        <target state="new">Workload '{0}' (version '{1}') was successfully installed.</target>
+        <source>Successfully installed workload(s) {0}.</source>
+        <target state="new">Successfully installed workload(s) {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingPackVersionMessage">
+        <source>Installing pack {0} version {1}...</source>
+        <target state="new">Installing pack {0} version {1}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
@@ -30,6 +40,16 @@
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the workload for.</source>
         <target state="needs-review-translation">A estrutura de destino para a qual instalar a ferramenta.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipManifestUpdateOptionDescription">
+        <source>Skip updating the workload manifests.</source>
+        <target state="new">Skip updating the workload manifests.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnrecognizedPackError">
+        <source>Pack Id {0} unrecognized.</source>
+        <target state="new">Pack Id {0} unrecognized.</target>
         <note />
       </trans-unit>
       <trans-unit id="PrintDownloadLinkOnlyDescription">
@@ -97,6 +117,11 @@
         <target state="new">Workload '{0}' failed to install.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadPackAlreadyInstalledMessage">
+        <source>Pack {0} version {1} is already installed.</source>
+        <target state="new">Pack {0} version {1} is already installed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadPathOptionDescription">
         <source>The directory where the workload will be installed. The directory will be created if it does not exist.</source>
         <target state="new">The directory where the workload will be installed. The directory will be created if it does not exist.</target>
@@ -105,6 +130,16 @@
       <trans-unit id="WorkloadPathOptionName">
         <source>PATH</source>
         <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingPackInstallRecordMessage">
+        <source>Writing workload pack installation record for {0} version {1}...</source>
+        <target state="new">Writing workload pack installation record for {0} version {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WritingWorkloadInstallRecordMessage">
+        <source>Writing workload installation record for {0}...</source>
+        <target state="new">Writing workload installation record for {0}...</target>
         <note />
       </trans-unit>
     </body>

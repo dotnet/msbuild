@@ -122,7 +122,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.2.0"));
+            testProject.PackageReferences.Add(new TestPackageReference("Humanizer", "2.8.26"));
 
             string filenameToSkip = "de/Humanizer.resources.dll";
             string filenameNotToSkip = "es/Humanizer.resources.dll";

@@ -166,7 +166,7 @@ Integration with static web assets:
     <_ScopedCssOutputs Include="%(_ScopedCss.OutputFile)" />
   </ItemGroup>
 
-  <!-- https://github.com/dotnet/project-system/blob/master/docs/up-to-date-check.md -->
+  <!-- https://github.com/dotnet/project-system/blob/main/docs/up-to-date-check.md -->
   <ItemGroup>
     <UpToDateCheckInput Include="%(_ScopedCss.Identity)" />
     <UpToDateCheckBuilt Include="%(_ScopedCss.OutputFile)" Original="%(_ScopedCss.Identity)" />
@@ -301,7 +301,7 @@ Integration with static web assets:
     <_AllScopedCss Include="@(_ScopedCssProjectBundles);@(_DiscoveredScopedCssFiles)" />
   </ItemGroup>
 
-  <!-- https://github.com/dotnet/project-system/blob/master/docs/up-to-date-check.md -->
+  <!-- https://github.com/dotnet/project-system/blob/main/docs/up-to-date-check.md -->
   <ItemGroup>
     <UpToDateCheckInput Include="@(_AllScopedCss)" />
     <UpToDateCheckBuilt Include="$(_ScopedCssOutputFullPath)" />

@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Build.Tasks
     {
         private static string _messageWhenMismatch =
             "{0} version {1} does not match BundledNETCoreAppPackageVersion {2}. " +
-            "The schema of https://github.com/dotnet/installer/blob/master/src/redist/targets/GenerateBundledVersions.targets might change. " +
+            "The schema of https://github.com/dotnet/installer/blob/main/src/redist/targets/GenerateBundledVersions.targets might change. " +
             "We need to ensure we can swap the runtime version from what's in stage0 to what dotnet/sdk used successfully";
 
         [Required] public string Stage0MicrosoftNETCoreAppRefPackageVersionPath { get; set; }
@@ -107,6 +107,25 @@ namespace Microsoft.DotNet.Build.Tasks
                 .Elements(ns + "KnownAppHostPack").First().Attribute("AppHostPackVersion"));
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownCrossgen2Pack").First().Attribute("Crossgen2PackVersion"));
+
+            // TODO: remove this once we're using an SDK that contains https://github.com/dotnet/installer/pull/10206
+            if (itemGroup.Elements(ns + "KnownRuntimePack").FirstOrDefault() == null)
+            {
+                itemGroup.Add(new XElement
+                (
+                    "KnownRuntimePack",
+                    new XAttribute("Include", "Microsoft.NETCore.App"),
+                    new XAttribute("TargetFramework", "net6.0"),
+                    new XAttribute("RuntimeFrameworkName", "Microsoft.NETCore.App"),
+                    new XAttribute("LatestRuntimeFrameworkVersion", originalBundledNETCoreAppPackageVersion),
+                    new XAttribute("RuntimePackNamePatterns", "Microsoft.NETCore.App.Runtime.Mono.**RID**"),
+                    new XAttribute("RuntimePackRuntimeIdentifiers", "browser-wasm"),
+                    new XAttribute("RuntimePackLabels", "Mono"),
+                    new XAttribute("IsTrimmable", "true")
+                ));
+            }
+            CheckAndReplaceAttribute(itemGroup
+                .Elements(ns + "KnownRuntimePack").First().Attribute("LatestRuntimeFrameworkVersion"));
 
             return projectXml.ToString();
         }

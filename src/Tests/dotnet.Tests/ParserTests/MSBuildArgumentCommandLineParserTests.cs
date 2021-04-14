@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
             RestoringCommand command = buildCommand ? 
                 BuildCommand.FromArgs(arguments) : 
                 PublishCommand.FromArgs(arguments);
-            command.GetProcessStartInfo().Arguments.Split(' ')
+            command.GetArgumentsToMSBuild().Split(' ')
                 .Should()
                 .Contain(arguments);
         }
