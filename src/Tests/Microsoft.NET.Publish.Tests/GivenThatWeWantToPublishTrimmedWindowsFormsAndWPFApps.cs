@@ -20,14 +20,13 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
-        public void It_publishes_and_err_windows_forms_app()
+        [WindowsOnlyFact]
+        public void It_errors_on_publishing_winforms_app()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsFailTest",
-                ProjectSdk = "Microsoft.NET.Sdk", 
                 TargetFrameworks = targetFramework
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
@@ -38,17 +37,16 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining(Strings.@TrimmingWindowsFormsRequiresCom);
+                .HaveStdOutContaining("NETSDK1164");
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
+        [WindowsOnlyFact]
         public void It_publishes_windows_forms_app_with_com_support()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WinformsPassTest",
-                ProjectSdk = "Microsoft.NET.Sdk",
                 TargetFrameworks = targetFramework
             };
             testProject.IsWinExe = true;
@@ -65,14 +63,13 @@ namespace Microsoft.NET.Publish.Tests
 
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
-        public void It_publishes_wpf_forms_app_with_warning()
+        [WindowsOnlyFact]
+        public void It_publishes_wpf_app_with_warning()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
                 Name = "WpfPassTest",
-                ProjectSdk = "Microsoft.NET.Sdk",
                 TargetFrameworks = targetFramework
             };
             testProject.IsWinExe = true;
@@ -86,7 +83,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining(Strings.@TrimmingWpfIsDangerous);
+                .HaveStdOutContaining("NETSDK1165");
         }
     }
 }

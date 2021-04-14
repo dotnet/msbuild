@@ -759,11 +759,11 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1163: "}</comment>
   </data>
   <data name="TrimmingWindowsFormsRequiresCom" xml:space="preserve">
-    <value>NETSDK1164: Trimming Windows Forms is dangerous and requires 'BuiltInComSupport' to be set to 'true' </value>
+    <value>NETSDK1164: Trimming Windows Forms is dangerous and requires 'BuiltInComSupport' to be set to 'true'.</value>
     <comment>{StrBegin="NETSDK1164: "}</comment>
   </data>
   <data name="TrimmingWpfIsDangerous" xml:space="preserve">
-    <value>NETSDK1165: Trimming WPF is dangerous and might have issues at runtime </value>
+    <value>NETSDK1165: Trimming WPF is dangerous and might have issues at runtime.</value>
     <comment>{StrBegin="NETSDK1165: "}</comment>
   </data>
 </root>
