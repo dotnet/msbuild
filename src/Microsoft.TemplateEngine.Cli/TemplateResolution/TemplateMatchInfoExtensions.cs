@@ -1,67 +1,32 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
     internal static class TemplateMatchInfoExtensions
     {
-        // True if name is explicitly mismatched.
-        // Partial matches are ok. No disposition on name is also ok.
-        internal static bool HasNameMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Name && x.Kind == MatchKind.Mismatch);
-        }
-
-        internal static bool HasParameterMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter
-                                       && x.Kind != MatchKind.Exact && x.Kind != MatchKind.AmbiguousParameterValue && x.Kind != MatchKind.SingleStartsWith);
-        }
-
-        internal static bool HasContextMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind == MatchKind.Mismatch);
-        }
-
-        internal static bool HasLanguageMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Language && x.Kind == MatchKind.Mismatch);
-        }
-
         internal static bool HasDefaultLanguageMatch(this ITemplateMatchInfo templateMatchInfo)
         {
-            return templateMatchInfo.DispositionOfDefaults.Any(x => x.Location == MatchLocation.DefaultLanguage && x.Kind == MatchKind.Exact);
+            return templateMatchInfo.MatchDisposition.Any(x => x.Name == TemplateResolver.DefaultLanguageMatchParameterName && x.Kind == MatchKind.Exact);
         }
 
-        internal static bool HasInvalidParameterName(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.InvalidParameterName);
-        }
-
-        internal static bool HasBaselineMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Baseline && x.Kind == MatchKind.Mismatch);
-        }
-
-        internal static bool HasAuthorMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Author && x.Kind == MatchKind.Mismatch);
-        }
-
-        internal static bool HasTagsMismatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Classification && x.Kind == MatchKind.Mismatch);
-        }
-
+        //https://github.com/dotnet/templating/issues/2494
+        //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
         internal static bool HasAmbiguousParameterValueMatch(this ITemplateMatchInfo templateMatchInfo)
         {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.AmbiguousParameterValue);
+#pragma warning disable CS0618 // Type or member is obsolete
+            return templateMatchInfo.MatchDisposition.Any(x => x.Kind == MatchKind.AmbiguousValue);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
+        //https://github.com/dotnet/templating/issues/2494
+        //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
         internal static bool IsInvokableMatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Count > 0
@@ -70,158 +35,47 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                                 ||
                                     // these locations can have partial or exact matches.
                                     x.Kind == MatchKind.Partial
-                                    && (x.Location == MatchLocation.Name || x.Location == MatchLocation.ShortName || x.Location == MatchLocation.Classification || x.Location == MatchLocation.Author)
-
-                                ||
-
-                                    x.Location == MatchLocation.OtherParameter && x.Kind == MatchKind.SingleStartsWith
-
-                            );
+                                    && (x.Name == MatchInfo.BuiltIn.Name
+                                        || x.Name == MatchInfo.BuiltIn.ShortName
+                                        || x.Name == MatchInfo.BuiltIn.Classification
+                                        || x.Name == MatchInfo.BuiltIn.Author)
+#pragma warning disable CS0618 // Type or member is obsolete
+                                || x.Kind == MatchKind.SingleStartsWith);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
-        internal static IReadOnlyList<string> GetInvalidParameterNames(this ITemplateMatchInfo templateMatchInfo)
+        internal static bool HasInvalidParameterName (this ITemplateMatchInfo templateMatchInfo)
         {
-            return templateMatchInfo.MatchDisposition.Where(x => x.Kind == MatchKind.InvalidParameterName)
-                                                   .Select(x => x.InputParameterName).ToList();
+            return templateMatchInfo.MatchDisposition.OfType<ParameterMatchInfo>().Any(x => x.Kind == MatchKind.InvalidName);
         }
 
-        internal static bool HasParseError(this ITemplateMatchInfo templateMatchInfo)
+        internal static IEnumerable<string> GetInvalidParameterNames(this ITemplateMatchInfo templateMatchInfo)
         {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Kind == MatchKind.Unspecified);
-        }
-
-        internal static string GetParseError(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Where(x => x.Kind == MatchKind.Unspecified).Select(x => x.AdditionalInformation).FirstOrDefault();
+            return templateMatchInfo.MatchDisposition
+                .OfType<ParameterMatchInfo>()
+                .Where(match => match.Kind == MatchKind.InvalidName)
+                .Select(match => match.Name);
         }
 
         // This is analogous to INewCommandInput.InputTemplateParams
-        internal static IReadOnlyDictionary<string, string> GetValidTemplateParameters(this ITemplateMatchInfo templateMatchInfo)
+        internal static IReadOnlyDictionary<string, string?> GetValidTemplateParameters(this ITemplateMatchInfo templateMatchInfo)
         {
-            return templateMatchInfo.MatchDisposition.Where(x => x.Location == MatchLocation.OtherParameter && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.SingleStartsWith))
-                                    .ToDictionary(x => x.InputParameterName, x => x.ParameterValue);
+            //https://github.com/dotnet/templating/issues/2494
+            //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
+            //the method should be revised as valid parameters should be taken from command and not from match dispositionS
+            return templateMatchInfo.MatchDisposition.OfType<ParameterMatchInfo>().Where(
+#pragma warning disable CS0618 // Type or member is obsolete
+                x => x.Kind == MatchKind.Exact || x.Kind == MatchKind.SingleStartsWith)
+#pragma warning restore CS0618 // Type or member is obsolete
+                .ToDictionary(x => x.Name, x => x.Value);
         }
 
-        internal static bool IsContextOnlyMatch(this ITemplateMatchInfo templateMatchInfo)
+        public static bool HasNameMatchOrPartialMatch(this ITemplateMatchInfo templateMatchInfo)
         {
-            return templateMatchInfo.MatchDisposition.All(x => x.Location == MatchLocation.Context && x.Kind == MatchKind.Exact
-                                                                || x.Kind == MatchKind.Mismatch);
+            return templateMatchInfo.MatchDisposition.Any((x => (x.Name == MatchInfo.BuiltIn.Name || x.Name == MatchInfo.BuiltIn.ShortName) && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.Partial)));
         }
 
-        internal static bool IsNameOnlyMatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.All(x => x.Location == MatchLocation.Name && x.Kind == MatchKind.Exact
-                                                                || x.Kind == MatchKind.Mismatch);
-        }
-
-        internal static bool IsNameOrContextMatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any(x => x.Location == MatchLocation.Name && x.Kind == MatchKind.Exact
-                                                                || x.Location == MatchLocation.Context && x.Kind == MatchKind.Exact);
-        }
-
-        internal static bool IsMatchExceptContext(this ITemplateMatchInfo templateMatchInfo)
-        {
-            if (templateMatchInfo.MatchDisposition.Count == 0)
-            {
-                return false;
-            }
-
-            bool hasContextMismatch = false;
-
-            foreach (MatchInfo disposition in templateMatchInfo.MatchDisposition)
-            {
-                if (disposition.Location == MatchLocation.Context)
-                {
-                    if (disposition.Kind == MatchKind.Exact)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        hasContextMismatch = true;
-                    }
-                }
-                else if (disposition.Kind == MatchKind.Mismatch)
-                {
-                    return false;
-                }
-            }
-
-            return hasContextMismatch;
-        }
-
-        internal static bool IsMatchExceptLanguage(this ITemplateMatchInfo templateMatchInfo)
-        {
-            if (templateMatchInfo.MatchDisposition.Count == 0)
-            {
-                return false;
-            }
-
-            bool hasLanguageMismatch = false;
-
-            foreach (MatchInfo disposition in templateMatchInfo.MatchDisposition)
-            {
-                if (disposition.Location == MatchLocation.Language)
-                {
-                    if (disposition.Kind == MatchKind.Exact)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        hasLanguageMismatch = true;
-                    }
-                }
-                else if (disposition.Kind == MatchKind.Mismatch)
-                {
-                    return false;
-                }
-            }
-
-            return hasLanguageMismatch;
-        }
-
-        // Returns true if there is a context mismatch and no other mismatches, false otherwise.
-        // Note: there must be at least one disposition that is not mismatch, in addition to the context mismatch.
-        internal static bool IsPartialMatchExceptContext(this ITemplateMatchInfo templateMatchInfo)
-        {
-            if (templateMatchInfo.MatchDisposition.Count == 0)
-            {
-                return false;
-            }
-
-            bool hasContextMismatch = false;
-            bool hasOtherThanMismatch = false;
-
-            foreach (MatchInfo disposition in templateMatchInfo.MatchDisposition)
-            {
-                if (disposition.Location == MatchLocation.Context)
-                {
-                    if (disposition.Kind == MatchKind.Exact)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        hasContextMismatch = true;
-                    }
-                }
-                else if (disposition.Kind != MatchKind.Mismatch)
-                {
-                    hasOtherThanMismatch = true;
-                }
-            }
-
-            return hasOtherThanMismatch && hasContextMismatch;
-        }
-
-        internal static bool HasNameOrClassificationMatchOrPartialMatch(this ITemplateMatchInfo templateMatchInfo)
-        {
-            return templateMatchInfo.MatchDisposition.Any((x => (x.Location == MatchLocation.Name || x.Location == MatchLocation.ShortName || x.Location == MatchLocation.Classification) && (x.Kind == MatchKind.Exact || x.Kind == MatchKind.Partial)));
-        }
-
-        internal static bool HasAnyMismatch(this ITemplateMatchInfo templateMatchInfo)
+        public static bool HasAnyMismatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Any(m => m.Kind == MatchKind.Mismatch);
         }
