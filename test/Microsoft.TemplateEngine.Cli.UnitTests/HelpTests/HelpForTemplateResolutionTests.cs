@@ -1,9 +1,13 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
-using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
-using Xunit;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
+using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 {
@@ -16,22 +20,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 
             // template one
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "bar" });
-            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateOneDispositions);
+            templateOneDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
+            templateOneDispositions.Add(new ParameterMatchInfo("bar", "test2", MatchKind.InvalidName));
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
-            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
-            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
+            templateTwoDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
             // template three
             List<MatchInfo> templateThreeDispositions = new List<MatchInfo>();
-            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
-            templateThreeDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "baz" });
-            ITemplateMatchInfo templateThreeMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateThreeDispositions);
+            templateThreeDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
+            templateThreeDispositions.Add(new ParameterMatchInfo("baz", "test3", MatchKind.InvalidName));
+            ITemplateMatchInfo templateThreeMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateThreeDispositions);
             matchInfo.Add(templateThreeMatchInfo);
 
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
@@ -51,14 +55,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 
             // template one
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "bar" });
-            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateOneDispositions);
+            templateOneDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
+            templateOneDispositions.Add(new ParameterMatchInfo("bar", "test2", MatchKind.InvalidName));
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
-            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
@@ -77,14 +81,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 
             // template one
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
-            templateOneDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
-            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateOneDispositions);
+            templateOneDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
-            templateTwoDispositions.Add(new MatchInfo() { Location = MatchLocation.OtherParameter, Kind = MatchKind.InvalidParameterName, InputParameterName = "foo" });
-            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
+            templateTwoDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);

@@ -142,7 +142,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.True(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
@@ -167,7 +167,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.True(matchResult.HasContextMismatch);
+            Assert.True(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
@@ -192,7 +192,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.True(matchResult.HasBaselineMismatch);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
@@ -217,7 +217,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.True(matchResult.HasLanguageMismatch);
-            Assert.True(matchResult.HasContextMismatch);
+            Assert.True(matchResult.HasTypeMismatch);
             Assert.True(matchResult.HasBaselineMismatch);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
@@ -243,9 +243,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(0, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(0, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasTagsMismatch);
+            Assert.False(matchResult.HasClassificationMismatch);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
         }
@@ -268,9 +268,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(1, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasTagsMismatch);
+            Assert.False(matchResult.HasClassificationMismatch);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsIgnoredOnNameMatch))]
@@ -297,7 +297,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(1, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
             Assert.Equal("console1", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.T1", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
@@ -327,7 +327,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
             Assert.Equal(1, matchResult.ExactMatchedTemplates.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
             Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.T1", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
@@ -358,7 +358,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.True(matchResult.HasLanguageMismatch);
-            Assert.True(matchResult.HasContextMismatch);
+            Assert.True(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
         }
 
@@ -408,7 +408,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             }
 
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
         }
 
@@ -450,7 +450,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Assert.False(matchResult.HasPartialMatches);
                 Assert.Equal(0, matchResult.PartiallyMatchedTemplates.Count);
                 Assert.Equal(0, matchResult.PartiallyMatchedTemplateGroups.Count);
-                Assert.False(matchResult.HasTagsMismatch);
+                Assert.False(matchResult.HasClassificationMismatch);
             }
             else
             {
@@ -460,11 +460,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Assert.True(matchResult.HasPartialMatches);
                 Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
                 Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
-                Assert.True(matchResult.HasTagsMismatch);
+                Assert.True(matchResult.HasClassificationMismatch);
             }
 
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasContextMismatch);
+            Assert.False(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
             Assert.False(matchResult.HasAuthorMismatch);
         }
@@ -487,7 +487,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.True(matchResult.HasContextMismatch);
+            Assert.True(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
         }
     }

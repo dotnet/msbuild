@@ -1,12 +1,16 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Mocks;
+using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
@@ -20,12 +24,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             {
                 "aaa", "bbb", "ccc", "ddd", "eee", "fff"
             };
+            string defaultLanguage = "C#";
 
             foreach (string testShortName in shortNamesForGroup)
             {
                 INewCommandInput userInputs = new MockNewCommandInput(testShortName);
 
-                TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
+                TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, defaultLanguage);
                 Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
                 Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Templates.Count);
                 Assert.True(matchResult.UnambiguousTemplateGroup.Templates.All(t => t.IsMatch));
@@ -33,8 +38,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 foreach (ITemplateMatchInfo templateMatchInfo in matchResult.UnambiguousTemplateGroup.Templates)
                 {
                     Assert.Equal("MultiName.Test", templateMatchInfo.Info.GroupIdentity);
-                    Assert.Equal(1, templateMatchInfo.MatchDisposition.Count);
-                    Assert.True(templateMatchInfo.MatchDisposition[0].Location == MatchLocation.ShortName && templateMatchInfo.MatchDisposition[0].Kind == MatchKind.Exact);
+                    if (templateMatchInfo.Info.GetLanguage().Equals(defaultLanguage, StringComparison.OrdinalIgnoreCase))
+                    {
+                        //default language match is part of MatchDisposition collection
+                        Assert.Equal(2, templateMatchInfo.MatchDisposition.Count);
+                    }
+                    else
+                    {
+                        Assert.Equal(1, templateMatchInfo.MatchDisposition.Count);
+                    }
+                    Assert.True(templateMatchInfo.MatchDisposition[0].Name == MatchInfo.BuiltIn.ShortName && templateMatchInfo.MatchDisposition[0].Kind == MatchKind.Exact);
                 }
             }
         }
