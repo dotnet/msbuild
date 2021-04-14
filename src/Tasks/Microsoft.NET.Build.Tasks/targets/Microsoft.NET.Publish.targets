@@ -108,7 +108,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CannotHaveSingleFileWithoutAppHost" />
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
                             '$(EnableCompressionInSingleFile)' == 'true' And
-                            '$(_TargetFrameworkVersionWithoutV)' &lt;= '5.0'"
+                            '$(_TargetFrameworkVersionWithoutV)' &lt; '6.0'"
                  ResourceName="CannotEnableCompressionInSingleFile" />
 
 
