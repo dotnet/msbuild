@@ -126,6 +126,9 @@
   <data name="ExpectedBoolAtOffset" xml:space="preserve">
     <value>Expected boolean value at offset {0}</value>
   </data>
+  <data name="ExpectedIntegerAtOffset" xml:space="preserve">
+    <value>Expected integer value at offset {0}</value>
+  </data>
   <data name="ExpectedStringAtOffset" xml:space="preserve">
     <value>Expected string value at offset {0}</value>
   </data>

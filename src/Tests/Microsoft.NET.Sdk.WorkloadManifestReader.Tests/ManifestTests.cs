@@ -2,10 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using FluentAssertions.Execution;
+
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
+
+using System;
 using System.IO;
 using System.Linq;
+using System.Text;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,8 +30,8 @@ namespace ManifestReaderTests
         {
             using (FileStream fsSource = new FileStream(Path.Combine("Manifests", "Sample.json"), FileMode.Open, FileAccess.Read))
             {
-                var result = WorkloadManifestReader.ReadWorkloadManifest(fsSource);
-                result.Version.Should().Be(5);
+                var result = WorkloadManifestReader.ReadWorkloadManifest("Sample", fsSource);
+                result.Version.Should().Be("5.0.0");
                 var xamAndroidId = new WorkloadPackId("Xamarin.Android.Sdk");
 
                 result.Packs[xamAndroidId].Id.Should().Be(xamAndroidId);
@@ -124,6 +130,60 @@ namespace ManifestReaderTests
             pack.Should().NotBeNull();
 
             pack.Path.Should().Be(defaultPackPath);
+        }
+
+        [Fact]
+        public void ItChecksDependencies ()
+        {
+            string MakeManifest(string version, params (string id, string version)[] dependsOn)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine("{");
+                sb.AppendFormat("  \"version\": \"{0}\"", version);
+                sb.AppendLine(dependsOn.Length > 0? "," : "");
+                if (dependsOn.Length > 0)
+                {
+                    sb.AppendLine("  \"depends-on\": {");
+                    for (int i = 0; i < dependsOn.Length; i++)
+                    {
+                        var dep = dependsOn[i];
+                        sb.AppendFormat("    \"{0}\": \"{1}\"", dep.id, dep.version);
+                        sb.AppendLine(i < dependsOn.Length - 1? "," : "");
+                    }
+                    sb.AppendLine("  }");
+                }
+                sb.AppendLine("}");
+                return sb.ToString();
+            }
+
+            var goodManifestProvider = new InMemoryFakeManifestProvider
+            {
+                {  "AAA", MakeManifest("20.0.0", ("BBB", "5.0.0"), ("CCC", "63.0.0"), ("DDD", "25.0.0")) },
+                {  "BBB", MakeManifest("8.0.0", ("DDD", "22.0.0")) },
+                {  "CCC", MakeManifest("63.0.0") },
+                {  "DDD", MakeManifest("25.0.0") },
+            };
+
+            WorkloadResolver.CreateForTests(goodManifestProvider, new[] { fakeRootPath });
+
+            var missingManifestProvider = new InMemoryFakeManifestProvider
+            {
+                {  "AAA", MakeManifest("20.0.0", ("BBB", "5.0.0"), ("CCC", "63.0.0"), ("DDD", "25.0.0")) }
+            };
+
+            var missingManifestEx = Assert.Throws<Exception>(() => WorkloadResolver.CreateForTests(missingManifestProvider, new[] { fakeRootPath }));
+            Assert.Contains("missing dependency", missingManifestEx.Message);
+
+            var inconsistentManifestProvider = new InMemoryFakeManifestProvider
+            {
+                {  "AAA", MakeManifest("20.0.0", ("BBB", "5.0.0"), ("CCC", "63.0.0"), ("DDD", "25.0.0")) },
+                {  "BBB", MakeManifest("8.0.0", ("DDD", "39.0.0")) },
+                {  "CCC", MakeManifest("63.0.0") },
+                {  "DDD", MakeManifest("30.0.0") },
+            };
+
+            var inconsistentManifestEx = Assert.Throws<Exception>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
+            Assert.Contains("Inconsistency in workload manifest", inconsistentManifestEx.Message);
         }
     }
 }

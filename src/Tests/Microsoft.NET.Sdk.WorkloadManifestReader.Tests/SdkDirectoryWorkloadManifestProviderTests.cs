@@ -216,7 +216,7 @@ namespace ManifestReaderTests
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
-            return manifestProvider.GetManifests().Select(stream => new StreamReader(stream).ReadToEnd());
+            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.manifestStream).ReadToEnd());
         }
 
         private class EnvironmentMock

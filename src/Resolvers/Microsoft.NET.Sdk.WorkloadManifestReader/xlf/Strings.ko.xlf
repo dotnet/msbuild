@@ -17,6 +17,11 @@
         <target state="translated">오프셋 {0}에 부울 값이 필요합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedIntegerAtOffset">
+        <source>Expected integer value at offset {0}</source>
+        <target state="new">Expected integer value at offset {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ExpectedStringAtOffset">
         <source>Expected string value at offset {0}</source>
         <target state="translated">오프셋 {0}에 문자열 값이 필요합니다.</target>
