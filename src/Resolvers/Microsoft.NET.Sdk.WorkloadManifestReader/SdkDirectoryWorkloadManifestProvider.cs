@@ -62,12 +62,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        public IEnumerable<Stream> GetManifests()
+        public IEnumerable<(string manifestId, Stream manifestStream)> GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
             {
                 var workloadManifest = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
-                yield return File.OpenRead(workloadManifest);
+                var id = Path.GetFileName(workloadManifestDirectory);
+                yield return (id, File.OpenRead(workloadManifest));
             }
         }
 
