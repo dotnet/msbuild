@@ -72,14 +72,11 @@ namespace dotnet_new3
             catch
             { }
 
+            // Keep this in sync with dotnet/sdk repo
             var builtIns = new AssemblyComponentCatalog(new[]
             {
                 // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
                 typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly,
-                // for assembly: Microsoft.TemplateEngine.Edge
-                typeof(Microsoft.TemplateEngine.Edge.Paths).GetTypeInfo().Assembly,
-                // for assembly: Microsoft.TemplateEngine.Cli
-                typeof(Microsoft.TemplateEngine.Cli.New3Command).GetTypeInfo().Assembly,
                 // for this assembly
                 typeof(Program).GetTypeInfo().Assembly
             });
