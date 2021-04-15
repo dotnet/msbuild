@@ -1074,6 +1074,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == 'true'">
     <AfterMicrosoftNETSdkTargets>$(AfterMicrosoftNETSdkTargets);$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets</AfterMicrosoftNETSdkTargets>
   </PropertyGroup>
+  
+  <ItemGroup Condition="'$(MicrosoftNETWindowsWorkloadInstalled)' == 'true' and
+                        '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                        $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '5.0'))">
+    <SdkSupportedTargetPlatformIdentifier Include="windows" DisplayName="Windows" />
+  </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.targets" Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
 
