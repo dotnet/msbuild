@@ -227,25 +227,19 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!includePreview)
             {
-                (PackageSource, IPackageSearchMetadata) latestStableVersion = accumulativeSearchResults.Aggregate(
-                    (max, current) =>
-                    {
-                        if (current.package.Identity.Version.IsPrerelease) return max;
-                        if (max == default) return current;
-                        return current.package.Identity.Version > max.package.Identity.Version ? current : max;
-                    });
+                (PackageSource, IPackageSearchMetadata) latestStableVersion = accumulativeSearchResults
+                    .Where(r => !r.package.Identity.Version.IsPrerelease)
+                    .DefaultIfEmpty(default)
+                    .MaxBy(r => r.package.Identity.Version);
+
                 if (latestStableVersion != default)
                 {
                     return latestStableVersion;
                 }
             }
 
-            (PackageSource, IPackageSearchMetadata) latestVersion = accumulativeSearchResults.Aggregate(
-                (max, current) =>
-                {
-                    if (max == default) return current;
-                    return current.package.Identity.Version > max.package.Identity.Version ? current : max;
-                });
+            (PackageSource, IPackageSearchMetadata) latestVersion = accumulativeSearchResults
+                .MaxBy(r => r.package.Identity.Version);
             return latestVersion;
         }
 
