@@ -255,6 +255,30 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionFact("16.8.0")]
+        public void No_runtime_files_6_0()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+
+            string[] expectedFiles = { $"{testProject.Name}{Constants.ExeSuffix}", $"{testProject.Name}.pdb" };
+            GetPublishDirectory(publishCommand, "net6.0")
+                .Should()
+                .OnlyHaveFiles(expectedFiles);
+        }
+
+        [RequiresMSBuildVersionFact("16.8.0")]
         public void It_generates_a_single_file_with_native_binaries_for_framework_dependent_apps()
         {
             var publishCommand = GetPublishCommand();
