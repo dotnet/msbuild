@@ -36,13 +36,6 @@ namespace Microsoft.DotNet.Cli.Utils
             ManagementObjectCollection.ManagementObjectEnumerator enumerator = result.GetEnumerator();
 
             return enumerator.MoveNext() ? Convert.ToInt32(enumerator.Current.GetPropertyValue("ParentProcessId")) : -1;
-
-            //if (enumerator.MoveNext())
-            //{
-            //    return Convert.ToInt32(enumerator.Current.GetPropertyValue("ParentProcessId"));
-            //}
-
-            //return -1;
         }
     }
 }
