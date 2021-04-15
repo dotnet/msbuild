@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -16,7 +16,6 @@ namespace Microsoft.Build.Tasks
     /// 
     /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    [Serializable]
     internal sealed class ResolveComReferenceCache : StateFileBase
     {
         /// <summary>
@@ -24,9 +23,9 @@ namespace Microsoft.Build.Tasks
         /// Key: Component path on disk
         /// Value: DateTime struct
         /// </summary>
-        private Hashtable componentTimestamps;
-        private string tlbImpLocation;
-        private string axImpLocation;
+        internal Dictionary<string, DateTime> componentTimestamps;
+        internal string tlbImpLocation;
+        internal string axImpLocation;
 
         /// <summary>
         /// indicates whether the cache contents have changed since it's been created
@@ -46,7 +45,7 @@ namespace Microsoft.Build.Tasks
 
             tlbImpLocation = tlbImpPath;
             axImpLocation = axImpPath;
-            componentTimestamps = new Hashtable();
+            componentTimestamps = new();
         }
 
         /// <summary>
@@ -69,9 +68,9 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if (componentTimestamps.ContainsKey(componentPath))
+                if (componentTimestamps.TryGetValue(componentPath, out DateTime time))
                 {
-                    return (DateTime)componentTimestamps[componentPath];
+                    return time;
                 }
 
                 // If the entry is not present in the cache, return the current time. Since no component should be timestamped
@@ -81,7 +80,7 @@ namespace Microsoft.Build.Tasks
             set
             {
                 // only set the value and dirty the cache if the timestamp doesn't exist yet or is different than the current one
-                if (DateTime.Compare(this[componentPath], value) != 0)
+                if (!DateTime.Equals(this[componentPath], value))
                 {
                     componentTimestamps[componentPath] = value;
                     _dirty = true;

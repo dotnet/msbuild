@@ -22,18 +22,17 @@ namespace Microsoft.Build.Tasks
     /// 
     /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    [Serializable]
     internal sealed class ResGenDependencies : StateFileBase
     {
         /// <summary>
         /// The list of resx files.
         /// </summary>
-        private Dependencies resXFiles = new Dependencies();
+        internal Dependencies resXFiles = new Dependencies();
 
         /// <summary>
         /// A list of portable libraries and the ResW files they can produce.
         /// </summary>
-        private Dependencies portableLibraries = new Dependencies();
+        internal Dependencies portableLibraries = new Dependencies();
 
         /// <summary>
         /// A newly-created ResGenDependencies is not dirty.
@@ -47,7 +46,7 @@ namespace Microsoft.Build.Tasks
         ///  If this is NULL then we use the directory in which the .resx is in (that should always
         ///  be the default!)
         /// </summary>
-        private string baseLinkedFileDirectory;
+        internal string baseLinkedFileDirectory;
 
         internal string BaseLinkedFileDirectory
         {
@@ -93,8 +92,7 @@ namespace Microsoft.Build.Tasks
         internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)
         {
             // First, try to retrieve the resx information from our hashtable.
-            var retVal = (ResXFile)resXFiles.GetDependencyFile(resxFile);
-            if (retVal == null)
+            if (resXFiles.GetDependencyFile(resxFile) is not ResXFile retVal || retVal == null)
             {
                 // Ok, the file wasn't there.  Add it to our cache and return it to the caller.  
                 retVal = AddResxFile(resxFile, useMSBuildResXReader);
@@ -192,7 +190,7 @@ namespace Microsoft.Build.Tasks
         internal sealed class ResXFile : DependencyFile
         {
             // Files contained within this resx file.
-            private string[] linkedFiles;
+            internal string[] linkedFiles;
 
             internal string[] LinkedFiles => linkedFiles;
 
@@ -207,6 +205,10 @@ namespace Microsoft.Build.Tasks
                 {
                     linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory, useMSBuildResXReader);
                 }
+            }
+
+            internal ResXFile()
+            {
             }
 
             /// <summary>
@@ -284,9 +286,13 @@ namespace Microsoft.Build.Tasks
         [Serializable]
         internal sealed class PortableLibraryFile : DependencyFile
         {
-            private string[] outputFiles;
-            private string neutralResourceLanguage;
-            private string assemblySimpleName;
+            internal string[] outputFiles;
+            internal string neutralResourceLanguage;
+            internal string assemblySimpleName;
+
+            internal PortableLibraryFile()
+            {
+            }
 
             internal PortableLibraryFile(string filename)
                 : base(filename)

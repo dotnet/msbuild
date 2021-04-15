@@ -21,7 +21,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Class is used to cache system state.
     /// </summary>
-    [Serializable]
     internal sealed class SystemState : StateFileBase, ITranslatable
     {
         private static readonly byte[] TranslateContractSignature = { (byte) 'M', (byte) 'B', (byte) 'R', (byte) 'S', (byte) 'C'}; // Microsoft Build RAR State Cache
@@ -112,7 +111,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Class that holds the current file state.
         /// </summary>
-        [Serializable]
         internal sealed class FileState : ITranslatable
         {
             /// <summary>

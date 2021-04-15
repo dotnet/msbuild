@@ -1,32 +1,30 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Represents a cache of inputs to a compilation-style task.
     /// </summary>
-    /// <remarks>On-disk serialization format, don't change field names or types or use readonly.</remarks>
-    [Serializable]
     internal class Dependencies
     {
         /// <summary>
         /// Hashtable of other dependency files.
         /// Key is filename and value is DependencyFile.
         /// </summary>
-        private Hashtable dependencies = new Hashtable();
+        internal Dictionary<string, DependencyFile> dependencies = new();
 
         /// <summary>
-        /// Look up a dependency file. Return null if its not there.
+        /// Look up a dependency file. Return null if it isn't there.
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
         internal DependencyFile GetDependencyFile(string filename)
         {
-            return (DependencyFile)dependencies[filename];
+            dependencies.TryGetValue(filename, out DependencyFile file);
+            return file;
         }
 
         /// <summary>
