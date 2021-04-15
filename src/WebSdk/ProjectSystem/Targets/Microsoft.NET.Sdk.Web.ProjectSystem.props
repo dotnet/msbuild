@@ -29,4 +29,3 @@ Copyright (c) .NET Foundation. All rights reserved.
     Condition="Exists('$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Web.DefaultItems.props')"/>
 
 </Project>
-

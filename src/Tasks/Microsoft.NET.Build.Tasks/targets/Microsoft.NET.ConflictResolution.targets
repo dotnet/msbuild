@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 
@@ -51,7 +51,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Replace Reference / ReferenceCopyLocalPaths with the filtered lists.
          We must remove all and include rather than just remove since removal is based
-         only on ItemSpec and duplicate ItemSpecs may exist with different metadata 
+         only on ItemSpec and duplicate ItemSpecs may exist with different metadata
          (eg: HintPath) -->
     <ItemGroup>
       <Reference Remove="@(Reference)" />

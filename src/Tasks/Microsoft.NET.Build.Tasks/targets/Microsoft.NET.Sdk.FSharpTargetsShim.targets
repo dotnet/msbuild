@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 
@@ -29,7 +29,7 @@ Copyright (c) .NET Foundation. All rights reserved.
          the define will be ignored:
             warning MSB3052: The parameter to the compiler is invalid, '/define:0BAD_DEFINE' will be ignored.
          -->
-    
+
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('-', '_'))</ImplicitConfigurationDefine>
     <ImplicitConfigurationDefine>$(ImplicitConfigurationDefine.Replace('.', '_'))</ImplicitConfigurationDefine>
     <DefineConstants>$(DefineConstants);$(ImplicitConfigurationDefine)</DefineConstants>
@@ -43,15 +43,15 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
      <FSharpDesignTimeTargetsPath Condition="'$(FSharpDesignTimeTargetsPath)' == ''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed\Microsoft.FSharp.DesignTime.targets</FSharpDesignTimeTargetsPath>
   </PropertyGroup>
-  <Import Project="$(FSharpDesignTimeTargetsPath)" 
+  <Import Project="$(FSharpDesignTimeTargetsPath)"
           Condition=" '$(UseBundledFSharpTargets)' == 'true' and '$(FSharpDesignTimeTargetsPath)' != '' and Exists('$(FSharpDesignTimeTargetsPath)') " />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.CrossTargeting.targets"
           Condition=" '$(UseBundledFSharpTargets)' == 'true' and '$(IsCrossTargetingBuild)' == 'true' "/>
 
   <!-- ***************************************************************************************************************
-       Shim to select the correct Microsoft.NET.Sdk.FSharp.targets file when not running 
+       Shim to select the correct Microsoft.NET.Sdk.FSharp.targets file when not running
        under Cross-targeting build and not under FSharp.Sdk
-       If running under desktop select Microsoft.FSharp.targets file from VS deployment, 
+       If running under desktop select Microsoft.FSharp.targets file from VS deployment,
        if running core msbuild select Microsoft.FSharp.targets from dotnet cli deployment
        *************************************************************************************************************** -->
   <PropertyGroup Condition=" '$(IsCrossTargetingBuild)' != 'true' " >

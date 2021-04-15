@@ -26,12 +26,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Condition="'%(Filename)%(Extension)' == 'aspnetcorev2_inprocess.dll'">
         <CopyToPublishDirectory>Never</CopyToPublishDirectory>
       </ResolvedFileToPublish>
-      
+
       <ResolvedFileToPublish Update="@(ResolvedFileToPublish)"
         Condition="'%(Filename)%(Extension)' == 'web.config'">
         <CopyToPublishDirectory>Never</CopyToPublishDirectory>
       </ResolvedFileToPublish>
     </ItemGroup>
-    
+
   </Target>
 </Project>

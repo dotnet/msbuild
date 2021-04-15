@@ -6,12 +6,12 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- 
+  <!--
     Note that this file is only included when $(TargetFramework) is set and so we do not need to check that here.
 
     Common targets require that $(TargetFrameworkIdentifier) and $(TargetFrameworkVersion) are set by static evaluation
@@ -54,7 +54,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetFrameworkIdentifier>$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)'))</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)', 2))</TargetFrameworkVersion>
   </PropertyGroup>
-    
+
   <!--
     Parse TargetPlatform properties.
   -->
@@ -62,13 +62,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == ''">$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'Windows'" >$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 4))</TargetPlatformVersion>
     <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == '' or ('$(TargetPlatformIdentifier)' == 'Windows' and !$([MSBuild]::VersionGreaterThanOrEquals($(TargetPlatformVersion), 10.0)))" >$([MSBuild]::GetTargetPlatformVersion('$(TargetFramework)', 2))</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="$([MSBuild]::VersionEquals($(TargetPlatformVersion), 0.0))" ></TargetPlatformVersion> 
+    <TargetPlatformVersion Condition="$([MSBuild]::VersionEquals($(TargetPlatformVersion), 0.0))" ></TargetPlatformVersion>
     <!-- Normalize casing of windows to Windows -->
     <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == 'Windows'">Windows</TargetPlatformIdentifier>
   </PropertyGroup>
 
-  <!-- 
-    Trigger an error if we're unable to infer the framework identifier and version. 
+  <!--
+    Trigger an error if we're unable to infer the framework identifier and version.
 
     We have to evaluate this here and not in the target because by the time the target runs,
     Microsoft.Common.targets will have defaulted to .NETFramework,Version=v4.0
@@ -78,11 +78,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!--
-    NOTE: We must not validate the TFM before restore target runs as it prevents adding additional TFM 
+    NOTE: We must not validate the TFM before restore target runs as it prevents adding additional TFM
           support from being provided by a nuget package such as MSBuild.Sdk.Extras.
 
           We run before RunResolvePackageDependencies and GetReferenceAssemblyPaths so that design-time builds
-          which do not currently invoke _CheckForInvalidConfigurationAndPlatform, will not trigger spurious 
+          which do not currently invoke _CheckForInvalidConfigurationAndPlatform, will not trigger spurious
           errors that are only consequences of the root cause identified here.
   -->
   <Target Name="_CheckForUnsupportedTargetFramework"
@@ -131,7 +131,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == ''">
     <TargetFrameworkIdentifier>_</TargetFrameworkIdentifier>
   </PropertyGroup>
-  
+
   <!--
     Trigger an error if targeting a higher version of .NET Core or .NET Standard than is supported by the current SDK.
   -->
@@ -158,7 +158,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
     <UseOSWinMdReferences>false</UseOSWinMdReferences>
   </PropertyGroup>
-    
+
   <PropertyGroup  Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' And '$(NETStandardMaximumVersion)' == ''">
     <NETStandardMaximumVersion>2.1</NETStandardMaximumVersion>
   </PropertyGroup>
@@ -169,7 +169,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(_TargetFrameworkVersionWithoutV)' > '$(NETStandardMaximumVersion)'"
                  ResourceName="UnsupportedTargetFrameworkVersion"
                  FormatArguments=".NET Standard;$(_TargetFrameworkVersionWithoutV);$(NETStandardMaximumVersion)"
-      />    
+      />
   </Target>
 
   <Target Name="_CheckForUnsupportedTargetFrameworkAndFeatureCombination" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;Restore;CollectPackageReferences"

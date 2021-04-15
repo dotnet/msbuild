@@ -45,11 +45,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ExecutableExtension Condition=" '$(_ExecutableExtension)' == '' And $(RuntimeIdentifier.StartsWith('win')) ">.exe</_ExecutableExtension>
       <_TransformWebConfigForAzure Condition=" '$(PublishProvider)' == 'AzureWebSite' Or '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1' ">true</_TransformWebConfigForAzure>
     </PropertyGroup>
-    
+
 
     <TransformWebConfig
-        Condition="'$(_IsAspNetCoreProject)' == 'true' 
-        And '$(IsTransformWebConfigDisabled)' != 'true' 
+        Condition="'$(_IsAspNetCoreProject)' == 'true'
+        And '$(IsTransformWebConfigDisabled)' != 'true'
         And '$(IsWebConfigTransformDisabled)' != 'true'
         And '$(PublishIISAssets)' != 'false'"
         TargetPath="$(TargetPath)"
@@ -58,12 +58,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ExecutableExtension="$(_ExecutableExtension)"
         IsAzure="$(_TransformWebConfigForAzure)"
         ProjectGuid="$(ProjectGuid)"
-        IgnoreProjectGuid="$(IgnoreProjectGuid)" 
-        ProjectFullPath="$(MSBuildProjectFullPath)" 
+        IgnoreProjectGuid="$(IgnoreProjectGuid)"
+        ProjectFullPath="$(MSBuildProjectFullPath)"
         SolutionPath="$(SolutionPath)"
         AspNetCoreModuleName="$(AspNetCoreModuleName)"
         AspNetCoreHostingModel="$(AspNetCoreHostingModel)"
-        EnvironmentName="$(EnvironmentName)"/> 
+        EnvironmentName="$(EnvironmentName)"/>
   </Target>
 
 
@@ -79,21 +79,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' == ''">true</TransformXmlStackTraceEnabled>
       <!-- Forcing the property value to be boolean -->
       <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' != 'true'">false</TransformXmlStackTraceEnabled>
-      <_WebConfigTransformCompleted Condition="'$(_IsAspNetCoreProject)' == 'true' 
-                                    And '$(IsTransformWebConfigDisabled)' != 'true' 
-                                    And '$(IsWebConfigTransformDisabled)' != 'true' 
+      <_WebConfigTransformCompleted Condition="'$(_IsAspNetCoreProject)' == 'true'
+                                    And '$(IsTransformWebConfigDisabled)' != 'true'
+                                    And '$(IsWebConfigTransformDisabled)' != 'true'
                                     And '$(PublishIISAssets)' != 'false'">true</_WebConfigTransformCompleted>
       <_WebConfigTransformCompleted Condition="'$(_WebConfigTransformCompleted)' == ''">false</_WebConfigTransformCompleted>
       <RunXdt Condition="'$(RunXdt)' == ''">$(_WebConfigTransformCompleted)</RunXdt>
     </PropertyGroup>
-    
+
   <PropertyGroup Condition="'$(WebPublishProfileFile)' !=''">
     <PublishProfileName>$([System.IO.Path]::GetFileNameWithoutExtension($(WebPublishProfileFile)))</PublishProfileName>
     <PublishProfileDirectory>$([System.IO.Path]::GetDirectoryName($(WebPublishProfileFile)))</PublishProfileDirectory>
   </PropertyGroup>
 
 <!-- PROJECT LEVEL TRANSFORMS -->
-    
+
     <!-- Run the Project transforms first i.e $(MSBuildProjectDirectory)\web.<transform>.config -->
     <ItemGroup>
       <!-- Run the transform at the config level e.g: web.Release.config if the configuration is Release-->
@@ -116,7 +116,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                   TransformRootPath="$(MSBuildProjectDirectory)"/>
 
     <!-- PROFILE LEVEL TRANSFORMS -->
-    
+
     <!-- Run the Profile transforms next i.e $(PublishProfileDirectory)\$(PublishProfileName).transform -->
     <ItemGroup>
       <!-- Run the transform at the profile level e.g: Properties\PublishProfiles\FolderProfile.transform when the profile name is FolderProfile -->
@@ -135,7 +135,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                   TransformRootPath="$(MSBuildProjectDirectory)"/>
 
     <!-- CUSTOM TRANSFORMS -->
-    
+
     <!-- Run the Custom transforms next i.e $(CustomTransformFileName) in the project directory first and then run $(CustomTransformFilePath)\$(CustomTransformFileName) -->
     <ItemGroup>
       <!-- Run the custom transform file e.g: MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml-->
@@ -163,7 +163,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <EnvironmentTransforms Include="$(MSBuildThisFileDirectory)Transforms\EnvironmentWithLocation.transform;$(MSBuildThisFileDirectory)Transforms\EnvironmentNoLocation.transform" />
     </ItemGroup>
-    
+
     <GenerateEnvTransform Condition=" '$(WebConfigEnvironmentVariables)' != '' "
                           WebConfigEnvironmentVariables = "$(WebConfigEnvironmentVariables)"
                           EnvTransformTemplatePaths="@(EnvironmentTransforms)"
@@ -189,7 +189,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   TARGET : _TransformAppSettings
   ***********************************************************************************************
  -->
-  
+
   <Target Name="_TransformAppSettings">
     <PropertyGroup>
       <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
