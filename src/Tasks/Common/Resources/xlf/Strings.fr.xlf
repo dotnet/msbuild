@@ -716,8 +716,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWpfIsDangerous">
-        <source>NETSDK1165: Trimming WPF is dangerous and might have issues at runtime.</source>
-        <target state="new">NETSDK1165: Trimming WPF is dangerous and might have issues at runtime.</target>
+        <source>NETSDK1165: WPF is not supported or recommended with trimming enabled.</source>
+        <target state="new">NETSDK1165: WPF is not supported or recommended with trimming enabled.</target>
         <note>{StrBegin="NETSDK1165: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
