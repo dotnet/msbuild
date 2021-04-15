@@ -711,8 +711,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsRequiresCom">
-        <source>NETSDK1164: Trimming Windows Forms is dangerous and requires 'BuiltInComSupport' to be set to 'true'.</source>
-        <target state="new">NETSDK1164: Trimming Windows Forms is dangerous and requires 'BuiltInComSupport' to be set to 'true'.</target>
+        <source>NETSDK1164: Windows Forms is not supported with trimming enabled. Please go to https://aka.ms/AAby5y8 for more details. To enable trimming and proceed, set `&lt;enableWindowsFormsTrimming&gt;true&lt;/enableWindowsFormsTrimming&gt;`. This configuration is not supported or recommended.</source>
+        <target state="new">NETSDK1164: Windows Forms is not supported with trimming enabled. Please go to https://aka.ms/AAby5y8 for more details. To enable trimming and proceed, set `&lt;enableWindowsFormsTrimming&gt;true&lt;/enableWindowsFormsTrimming&gt;`. This configuration is not supported or recommended.</target>
         <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWpfIsDangerous">
