@@ -38,12 +38,12 @@
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
     <MicrosoftNETCoreAppRefPackageVersion>5.0.0</MicrosoftNETCoreAppRefPackageVersion>
-    <MicrosoftNETCoreAppInternalPackageVersion>5.0.4-servicing.21116.14</MicrosoftNETCoreAppInternalPackageVersion>
-    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>5.0.4</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
+    <MicrosoftNETCoreAppInternalPackageVersion>5.0.5-servicing.21166.9</MicrosoftNETCoreAppInternalPackageVersion>
+    <MicrosoftNETCoreAppRuntimewinx64PackageVersion>5.0.5</MicrosoftNETCoreAppRuntimewinx64PackageVersion>
     <MicrosoftNETCoreAppRuntimePackageVersion>$(MicrosoftNETCoreAppRuntimewinx64PackageVersion)</MicrosoftNETCoreAppRuntimePackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>5.0.0</MicrosoftExtensionsDependencyModelPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>5.0.4</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftNETHostModelVersion>5.0.4-servicing.21116.14</MicrosoftNETHostModelVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>5.0.5</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETHostModelVersion>5.0.5-servicing.21166.9</MicrosoftNETHostModelVersion>
     <MicrosoftExtensionsDependencyModelVersion>$(MicrosoftExtensionsDependencyModelPackageVersion)</MicrosoftExtensionsDependencyModelVersion>
   </PropertyGroup>
   <PropertyGroup>
@@ -117,22 +117,22 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>5.0.4-servicing.21118.15</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>5.0.4</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>5.0.4-servicing.21118.15</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>5.0.4-servicing.21118.15</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>5.0.4-servicing.21118.15</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>5.0.4</MicrosoftAspNetCoreTestHostPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>5.0.4-servicing.21118.15</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkBlazorWebAssemblyPackageVersion>5.0.4-servicing.21118.15</MicrosoftNETSdkBlazorWebAssemblyPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>5.0.5-servicing.21167.8</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>5.0.5</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>5.0.5-servicing.21167.8</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>5.0.5-servicing.21167.8</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>5.0.5-servicing.21167.8</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>5.0.5</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>5.0.5-servicing.21167.8</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkBlazorWebAssemblyPackageVersion>5.0.5-servicing.21167.8</MicrosoftNETSdkBlazorWebAssemblyPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
-    <MicrosoftNETSdkWindowsDesktopPackageVersion>5.0.4-servicing.21117.5</MicrosoftNETSdkWindowsDesktopPackageVersion>
+    <MicrosoftNETSdkWindowsDesktopPackageVersion>5.0.5-servicing.21167.2</MicrosoftNETSdkWindowsDesktopPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/windowsdesktop -->
-    <MicrosoftWindowsDesktopAppVersion>5.0.4-servicing.21117.9</MicrosoftWindowsDesktopAppVersion>
+    <MicrosoftWindowsDesktopAppVersion>5.0.5-servicing.21167.2</MicrosoftWindowsDesktopAppVersion>
   </PropertyGroup>
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
