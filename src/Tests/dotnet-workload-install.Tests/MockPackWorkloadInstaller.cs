@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {

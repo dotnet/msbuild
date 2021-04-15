@@ -4,7 +4,8 @@
 using System;
 using Microsoft.Deployment.DotNet.Releases;
 
-namespace Microsoft.DotNet.Workloads.Workload.Install
+#nullable disable
+namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
     internal struct SdkFeatureBand : IEquatable<SdkFeatureBand>, IComparable<SdkFeatureBand>
     {

@@ -1,11 +1,11 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal interface IInstaller
+    internal interface IInstaller : IWorkloadInstallationRecordInstaller
     {
         InstallationUnit GetInstallationUnit();
 
@@ -14,14 +14,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         IWorkloadInstaller GetWorkloadInstaller();
 
         void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand);
-
-        IEnumerable<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand);
-
-        void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
-
-        void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand);
-
-        IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords();
     }
 
     internal enum InstallationUnit {

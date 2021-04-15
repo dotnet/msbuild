@@ -12,6 +12,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
