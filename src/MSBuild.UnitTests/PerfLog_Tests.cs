@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TestPerfLogDirectoryDoesNotExist()
+        public void TestPerfLogDirectoryGetsCreated()
         {
             using (TestEnvironment testEnv = TestEnvironment.Create(_output))
             {
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
                 RunnerUtilities.ExecMSBuild(msbuildParameters, out bool successfulExit);
                 successfulExit.ShouldBeTrue();
 
-                Directory.Exists(perfLogPath).ShouldBeFalse();
+                Directory.Exists(perfLogPath).ShouldBeTrue();
             }
         }
     }
