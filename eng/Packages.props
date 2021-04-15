@@ -15,7 +15,6 @@
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="PdbGit" Version="3.0.41" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
-    <PackageReference Update="Sleep" Version="1.0.0" />
     <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
     <PackageReference Update="System.CodeDom" Version="4.4.0" />
     <PackageReference Update="System.Collections.Immutable" Version="5.0.0" />

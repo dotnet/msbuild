@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="Sleep" ExcludeAssets="all" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
 
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
@@ -45,9 +44,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="..\Shared\UnitTests\xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(PkgSleep)\tools\sleep.exe" Condition="$([MSBuild]::IsOSPlatform('windows'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

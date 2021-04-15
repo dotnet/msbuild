@@ -15,8 +15,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public async Task KillTree()
         {
-            // On Windows this uses the sleep.exe that comes from the Sleep NuGet package
-            Process p = Process.Start("sleep", "600"); // sleep 10m.
+            var psi =
+                NativeMethodsShared.IsWindows ?
+                    new ProcessStartInfo("powershell", "-NoLogo -NoProfile -command \"Start-Sleep -Seconds 600\"") :
+                    new ProcessStartInfo("sleep", "600");
+
+            Process p = Process.Start(psi); // sleep 10m.
 
             // Verify the process is running.
             await Task.Delay(500);
