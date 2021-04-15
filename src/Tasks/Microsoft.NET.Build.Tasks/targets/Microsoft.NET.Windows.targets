@@ -34,10 +34,10 @@ Copyright (c) .NET Foundation. All rights reserved.
          other value. -->
     <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
-  
+
     <!-- If neither were set, then use the TargetPlatformVersion value for both -->
     <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformVersion)</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(TargetPlatformVersion)</TargetPlatformMinVersion>    
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">$(TargetPlatformVersion)</TargetPlatformMinVersion>
   </PropertyGroup>
 
   <Target Name="_ErrorOnUnresolvedWindowsSDKAssemblyConflict"
@@ -46,7 +46,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_WindowsSDKUnresolvedRef Include="@(ResolveAssemblyReferenceUnresolvedAssemblyConflicts)" Condition="'%(Identity)' == 'Microsoft.Windows.SDK.NET' " />
     </ItemGroup>
-    
+
     <NETSdkError ResourceName="WindowsSDKVersionConflicts"
                  Condition="@(_WindowsSDKUnresolvedRef) != ''"/>
   </Target>
