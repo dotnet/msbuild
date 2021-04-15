@@ -9,10 +9,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public Guid Id => ActionProcessorId;
 
-        internal InstructionDisplayPostActionProcessor()
-        {
-        }
-
         public bool Process(IEngineEnvironmentSettings settings, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
             Console.WriteLine(string.Format(LocalizableStrings.PostActionDescription, actionConfig.Description));

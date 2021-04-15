@@ -13,10 +13,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public Guid Id => ActionProcessorId;
 
-        internal DotnetRestorePostActionProcessor()
-        {
-        }
-
         public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects2 creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
             bool allSucceeded = true;

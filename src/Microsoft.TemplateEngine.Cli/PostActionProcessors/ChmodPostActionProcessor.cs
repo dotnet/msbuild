@@ -12,10 +12,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public Guid Id => ActionProcessorId;
 
-        internal ChmodPostActionProcessor()
-        {
-        }
-
         public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
             bool allSucceeded = true;
