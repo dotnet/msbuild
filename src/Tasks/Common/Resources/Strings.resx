@@ -759,7 +759,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1163: "}</comment>
   </data>
   <data name="TrimmingWindowsFormsRequiresCom" xml:space="preserve">
-    <value>NETSDK1164: Windows Forms is not supported with trimming enabled. Please go to https://aka.ms/AAby5y8 for more details. To enable trimming and proceed, set `&lt;enableWindowsFormsTrimming&gt;true&lt;/enableWindowsFormsTrimming&gt;`. This configuration is not supported or recommended.</value>
+    <value>NETSDK1164: Windows Forms is not supported with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details. To enable trimming and proceed, set `&lt;EnableWindowsFormsTrimming&gt;true&lt;/EnableWindowsFormsTrimming&gt;`. This configuration is not supported or recommended.</value>
     <comment>{StrBegin="NETSDK1164: "}</comment>
   </data>
   <data name="TrimmingWpfIsDangerous" xml:space="preserve">

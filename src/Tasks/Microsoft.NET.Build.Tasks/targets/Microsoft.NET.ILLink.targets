@@ -34,10 +34,10 @@ Copyright (c) .NET Foundation. All rights reserved.
        switch can flow to the runtimeconfig.json. enableWindowsFormsTrimming is disabled
        by default since they may require assemblies, types or members that
        could be removed by the linker, causing a trimmed app to crash. -->
-  <PropertyGroup Condition="'$(enableWindowsFormsTrimming)' == '' And
+  <PropertyGroup Condition="'$(EnableWindowsFormsTrimming)' == '' And
                             '$(PublishTrimmed)' == 'true' And
                             $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <enableWindowsFormsTrimming>false</enableWindowsFormsTrimming>
+    <EnableWindowsFormsTrimming>false</EnableWindowsFormsTrimming>
   </PropertyGroup>
 
   <!-- We disable custom resource types for trimmed apps here so that the feature

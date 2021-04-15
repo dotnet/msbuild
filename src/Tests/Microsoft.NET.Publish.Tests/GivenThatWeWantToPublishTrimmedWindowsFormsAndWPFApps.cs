@@ -51,7 +51,7 @@ namespace Microsoft.NET.Publish.Tests
             };
             testProject.IsWinExe = true;
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["enableWindowsFormsTrimming"] = "true";
+            testProject.AdditionalProperties["EnableWindowsFormsTrimming"] = "true";
             testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
