@@ -109,7 +109,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     if the output semaphore file is out of date with respect to the inputs.
     ============================================================
     -->
-  <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" />
+  <UsingTask TaskName="ILLink" AssemblyFile="$(ILLinkTasksAssembly)" Condition="'$(ILLinkTasksAssembly)' != ''" />
   <Target Name="_RunILLink"
           DependsOnTargets="_ComputeManagedAssemblyToLink;PrepareForILLink"
           Inputs="$(MSBuildAllProjects);@(ManagedAssemblyToLink);@(TrimmerRootDescriptor);@(ReferencePath)"
@@ -326,7 +326,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Compute the set of inputs to the linker.
     ============================================================
     -->
-  <UsingTask TaskName="ComputeManagedAssemblies" AssemblyFile="$(ILLinkTasksAssembly)" />
+  <UsingTask TaskName="ComputeManagedAssemblies" AssemblyFile="$(ILLinkTasksAssembly)" Condition="'$(ILLinkTasksAssembly)' != ''" />
   <Target Name="_ComputeManagedAssemblyToLink" DependsOnTargets="_ComputeAssembliesToPostprocessOnPublish">
 
     <!-- NB: There should not be non-managed assemblies in this list, but we still give the linker a chance to
