@@ -186,7 +186,6 @@ namespace Microsoft.Build.Tasks
         /// 
         /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        [Serializable]
         internal sealed class ResXFile : DependencyFile
         {
             // Files contained within this resx file.
@@ -283,7 +282,6 @@ namespace Microsoft.Build.Tasks
         /// 
         /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        [Serializable]
         internal sealed class PortableLibraryFile : DependencyFile
         {
             internal string[] outputFiles;
