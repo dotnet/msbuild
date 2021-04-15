@@ -141,6 +141,11 @@ namespace Microsoft.Build.Shared
         /// Declares a project cache plugin and its configuration.
         /// </summary>
         internal const string ProjectCachePlugin = nameof(ProjectCachePlugin);
+
+        /// <summary>
+        /// Embed specified files in the binary log
+        /// </summary>
+        internal const string EmbedInBinlog = nameof(EmbedInBinlog);
     }
 
     /// <summary>

@@ -832,11 +832,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private const string EmbedInBinlogItemType = "EmbedInBinlog";
-
         private void CheckForFilesToEmbed(string itemType, object itemList)
         {
-            if (!string.Equals(itemType, EmbedInBinlogItemType, StringComparison.OrdinalIgnoreCase) || itemList is not IEnumerable list)
+            if (!string.Equals(itemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase) || itemList is not IEnumerable list)
             {
                 return;
             }
