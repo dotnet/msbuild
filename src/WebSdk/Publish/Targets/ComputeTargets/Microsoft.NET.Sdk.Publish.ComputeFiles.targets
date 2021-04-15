@@ -48,7 +48,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!--***************************************************************-->
   <!-- Target _IncludePrePublishGeneratedContent                     -->
   <!--***************************************************************-->
-  
+
   <Target Name="_IncludePrePublishGeneratedContent" BeforeTargets="GetCopyToPublishDirectoryItems" Condition=" '$(EnableDefaultItems)' == 'true' And '$(EnableDefaultContentItems)' == 'true' ">
     <ItemGroup>
       <!-- First, clean up previously generated content that may have been removed. -->
@@ -58,5 +58,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ContentWithTargetPath Include="@(_WebProjectGeneratedContent)" TargetPath="%(Identity)" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
   </Target>
-  
+
 </Project>

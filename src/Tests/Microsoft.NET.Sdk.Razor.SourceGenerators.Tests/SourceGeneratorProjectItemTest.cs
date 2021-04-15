@@ -6,7 +6,7 @@ using Moq;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 
-namespace Microsoft.NET.Sdk.Razor.SourceGenerators.Tests
+namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     public class SourceGeneratorProjectItemTest
     {

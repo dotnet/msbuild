@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -44,14 +44,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     Outputs="$(_DesignerDepsFilePath)"
     Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
     >
-    <!-- 
+    <!--
       NOTE: We do not include the main assembly info or non-NuGet dependencies
       in designer deps file as these files may not be built yet at design time.
       Instead, we rely on SetAppPaths in runtimeconfig to allow loading of
       non-NuGet assets from shadow copied app base directory. This further
-      allows loading of designer dll(s) that are not seen by the build. 
+      allows loading of designer dll(s) that are not seen by the build.
     -->
-    <GenerateDepsFile 
+    <GenerateDepsFile
       AssemblyName="_"
       AssemblyExtension="_"
       AssemblyVersion="_"
@@ -72,7 +72,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <!-- Designer will rename to <surface process name>.deps.json -->
-      <DesignerRuntimeImplementationProjectOutputGroupOutput 
+      <DesignerRuntimeImplementationProjectOutputGroupOutput
         Include="$([MSBuild]::NormalizePath($(_DesignerDepsFilePath)))"
         TargetPath="$(_DesignerDepsFileName)"
         />
@@ -91,11 +91,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_DesignerHostConfigurationOption
         Include="Microsoft.NETCore.DotNetHostPolicy.SetAppPaths"
-        Value="true" 
+        Value="true"
         />
     </ItemGroup>
 
-    <GenerateRuntimeConfigurationFiles 
+    <GenerateRuntimeConfigurationFiles
       AdditionalProbingPaths="@(AdditionalProbingPath)"
       AssetsFilePath="$(ProjectAssetsFile)"
       HostConfigurationOptions="@(RuntimeHostConfigurationOption);@(_DesignerHostConfigurationOption)"
@@ -111,7 +111,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <!-- Designer will rename to <surface process name>.runtimeconfig.json -->
-      <DesignerRuntimeImplementationProjectOutputGroupOutput 
+      <DesignerRuntimeImplementationProjectOutputGroupOutput
         Include="$([MSBuild]::NormalizePath($(_DesignerRuntimeConfigFilePath)))"
         TargetPath="$(_DesignerRuntimeConfigFileName)"
         />
@@ -134,7 +134,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"
         />
 
-      <DesignerRuntimeImplementationProjectOutputGroupOutput 
+      <DesignerRuntimeImplementationProjectOutputGroupOutput
         Include="@(_DesignerShadowCopy->'%(FullPath)')"
         TargetPath="%(_DesignerShadowCopy.DestinationSubDirectory)%(_DesignerShadowCopy.Filename)%(_DesignerShadowCopy.Extension)"
         />

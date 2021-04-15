@@ -152,7 +152,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
-            _reporter.Lines.Should().Contain(string.Format(LocalizableStrings.WorkloadPackAlreadyInstalledMessage, packInfo.Id, packInfo.Version));
             (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(0);
         }
 

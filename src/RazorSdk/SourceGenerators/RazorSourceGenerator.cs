@@ -278,11 +278,16 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             for (var i = 0; i < filePath.Length; i++)
             {
-                builder.Append(filePath[i] switch
+                switch (filePath[i])
                 {
-                    ':' or '\\' or '/' => '_',
-                    var @default => @default,
-                });
+                    case ':' or '\\' or '/':
+                    case char ch when !char.IsLetterOrDigit(ch):
+                        builder.Append('_');
+                        break;
+                    default:
+                        builder.Append(filePath[i]);
+                        break;
+                }
             }
 
             return builder.ToString();

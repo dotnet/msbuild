@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -21,7 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         Crossgen
     ============================================================
     -->
-  
+
   <Target Name="PrepOptimizer"
           DependsOnTargets="_RestoreCrossgen;"
           Condition="$(SkipOptimization) != 'true' ">
@@ -79,12 +79,12 @@ Copyright (c) .NET Foundation. All rights reserved.
           UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
-    
+
     <PropertyGroup>
       <Crossgen>$([System.IO.Path]::GetFullPath($([System.IO.Path]::Combine($(_NetCoreRefDir), $([System.IO.Path]::GetFileName($(Crossgen)))))))</Crossgen>
     </PropertyGroup>
   </Target>
-  
+
   <!--
     ============================================================
                                         _RunOptimizer
@@ -92,7 +92,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Start the optimization phase
     ============================================================
     -->
-  
+
   <Target Name="_RunOptimizer"
           DependsOnTargets="_InitializeBasicProps;
                             _ComputeResolvedFilesToStoreTypes;
@@ -115,7 +115,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         </Properties>
       </AssembliestoCrossgen>
     </ItemGroup>
-    
+
     <!-- CrossGen the assemblies  -->
     <MSBuild Projects="@(AssembliestoCrossgen)"
                  Targets="RunCrossGen"
@@ -127,7 +127,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
                                         RunCrossGen
-    Target Encapsulating the crossgen command  
+    Target Encapsulating the crossgen command
     ============================================================
     -->
 
@@ -164,14 +164,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MakeDir Directories="$(CrossgenProfilingSymbolsOutputDirectory)"
              Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" />
     <Exec Command="$(CrossgenExe) -nologo -readytorun -platform_assemblies_paths $(CrossgenPlatformAssembliesPath) -$(CreateProfilingSymbolsOptionName) $(CrossgenProfilingSymbolsOutputDirectory) $(CrossgenOutputAssembly)"
-          Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" 
+          Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))"
           IgnoreStandardErrorWarningFormat="true" />
 
     <ItemGroup>
       <_ProfilingSymbols Include="$(CrossgenProfilingSymbolsOutputDirectory)\*"
                          Condition="'$(CreateProfilingSymbols)' == 'true'" />
     </ItemGroup>
-    
+
     <Copy SourceFiles="@(_ProfilingSymbols)"
           DestinationFolder="$(CrossgenSymbolsStagingDirectory)"
           Condition="'$(CreateProfilingSymbols)' == 'true'"
@@ -188,14 +188,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       <DirectorySeparatorChar>$([System.IO.Path]::DirectorySeparatorChar)</DirectorySeparatorChar>
     </PropertyGroup>
   </Target>
-  
+
   <!--
     ============================================================
                                        _GetCrossgenProps
     Generates props used by Crossgen
     ============================================================
     -->
-  
+
   <Target Name="_GetCrossgenProps"
     Condition="$(SkipOptimization) != 'true' ">
 
@@ -208,7 +208,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_CrossProjAssetsFile>$([System.IO.Path]::Combine($(_CrossProjFileDir),  project.assets.json))</_CrossProjAssetsFile>
     </PropertyGroup>
 
-    
+
   </Target>
 
   <!--
@@ -216,7 +216,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                         _SetupStageForCrossgen
     ============================================================
     -->
-  
+
   <Target Name="_SetupStageForCrossgen"
           DependsOnTargets="_GetCrossgenProps;">
     <PropertyGroup>
@@ -224,15 +224,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RuntimeOptimizedDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimopt"))</_RuntimeOptimizedDir>      <!-- optimized app managed assemblies in nuget cache layout -->
       <_RuntimeSymbolsDir>$([System.IO.Path]::Combine($(StoreWorkerWorkingDir), "runtimesymbols"))</_RuntimeSymbolsDir>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <_ManagedResolvedFilesToOptimize Include="@(_ManagedResolvedFileToPublishCandidates)" />
     </ItemGroup>
-    
+
     <MakeDir Directories="$(_RuntimeOptimizedDir)"/>
     <MakeDir Directories="$(_RuntimeSymbolsDir)"
              Condition="'$(CreateProfilingSymbols)' == 'true'" />
-    
+
     <!-- Copy managed files to  a flat temp directory for passing it as ref -->
     <Copy SourceFiles = "@(_ManagedResolvedFilesToOptimize)"
           DestinationFolder="$(_RuntimeRefDir)"
@@ -253,7 +253,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Restores netcoreapp and publishes it to a temp directory
     ============================================================
     -->
-  
+
   <Target Name="_RestoreCrossgen"
           DependsOnTargets="PrepforRestoreForComposeStore;
                            _SetupStageForCrossgen;
@@ -313,5 +313,5 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
     </Copy>
   </Target>
- 
+
 </Project>

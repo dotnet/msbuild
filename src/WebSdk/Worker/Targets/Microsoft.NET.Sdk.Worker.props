@@ -27,7 +27,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- When ExcludeConfigFilesFromBuildOutput is set, do not copy .,config, .json files to the build output directory. -->
     <Content Include="**\*.config" ExcludeFromSingleFile="true" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition="'$(ExcludeConfigFilesFromBuildOutput)'=='true'" />
     <Content Include="**\*.json" ExcludeFromSingleFile="true" CopyToPublishDirectory="PreserveNewest" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition="'$(ExcludeConfigFilesFromBuildOutput)'=='true'" />
-    
+
     <!-- Set CopyToOutputDirectory and CopyToPublishDirectory to Never for items under AppDesignerFolder ("Properties", by default) to avoid publishing launchSettings.json -->
     <Content Update="$(AppDesignerFolder)\**" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Condition="'$(AppDesignerFolder)' != ''"/>
 
@@ -41,4 +41,3 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="../targets/Microsoft.NET.Sdk.Web.DefaultItems.props" />
 
 </Project>
-

@@ -110,7 +110,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <_UpdatedReference Remove="@(_UpdatedReference)" />
     </ItemGroup>
-    
+
     <!-- Facade assemblies should override simple name references.  However, we want to preserve custom metadata
          on those simple name references (for example for aliases).  That's what this task does. -->
     <AddFacadesToReferences References="@(Reference)"
@@ -131,7 +131,7 @@ Copyright (c) .NET Foundation. All rights reserved.
        4.0.0.0.  However, with the fix to dotnet/sdk#2221, ResolveAssemblyReference now sees a conflicting version for
        the assembly, and suggests a redirect to 4.0.3.0.  With automatic binding redirection, this overrides the redirect
        to 4.0.0.0, which causes a runtime failure.
-       
+
        So here we disable any suggested binding redirect for System.IO.Compression.ZipFile.  Assemblies in the unification
        table generally should not need binding redirects, so it should be OK to do this for 4.7.2 and forward, and on 4.7.1
        the assembly isn't in the unification table so this allows the original workaround redirect to be preserved. -->
@@ -142,7 +142,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <SuggestedBindingRedirects Remove="System.IO.Compression.ZipFile, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     </ItemGroup>
-    
+
   </Target>
-  
+
 </Project>

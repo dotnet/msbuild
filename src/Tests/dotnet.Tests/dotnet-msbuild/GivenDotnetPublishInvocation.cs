@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             this.output = output;
         }
 
-        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
+        const string ExpectedPrefix = "-maxcpucount -verbosity:m";
 
         [Theory]
         [InlineData(new string[] { }, "")]
@@ -52,8 +52,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Should()
                     .BeNull();
 
-                command.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.GetArgumentsToMSBuild()
+                    .Should()
                     .Be($"{ExpectedPrefix} -restore -target:Publish{expectedAdditionalArgs}");
             });
         }
@@ -69,12 +69,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var command = PublishCommand.FromArgs(args, msbuildPath);
 
             command.SeparateRestoreCommand
-                   .GetProcessStartInfo()
-                   .Arguments.Should()
+                   .GetArgumentsToMSBuild()
+                   .Should()
                    .Be($"{ExpectedPrefix} -target:Restore");
 
-            command.GetProcessStartInfo()
-                   .Arguments.Should()
+            command.GetArgumentsToMSBuild()
+                   .Should()
                    .Be($"{ExpectedPrefix} -nologo -target:Publish{expectedAdditionalArgs}");
         }
 
@@ -89,8 +89,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                    .BeNull();
 
             // NOTE --no-build implies no-restore hence no -restore argument to msbuild below.
-            command.GetProcessStartInfo()
-                   .Arguments
+            command.GetArgumentsToMSBuild()
                    .Should()
                    .Be($"{ExpectedPrefix} -target:Publish -property:NoBuild=true");
         }
@@ -101,8 +100,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var msbuildPath = "<msbuildpath>";
             var command = PublishCommand.FromArgs(new[] { "/p:Prop1=prop1", "/p:Prop2=prop2" }, msbuildPath);
 
-            command.GetProcessStartInfo()
-               .Arguments
+            command.GetArgumentsToMSBuild()
                .Should()
                .Be($"{ExpectedPrefix} -restore -target:Publish -property:Prop1=prop1 -property:Prop2=prop2");
         }

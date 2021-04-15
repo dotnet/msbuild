@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetBuildInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
-        const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
+        const string ExpectedPrefix = "-maxcpucount -verbosity:m";
 
         private static readonly string WorkingDirectory =
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetBuildInvocation));
@@ -46,8 +46,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 command.SeparateRestoreCommand.Should().BeNull();
 
-                command.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.GetArgumentsToMSBuild()
+                    .Should()
                     .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
         }
@@ -76,12 +76,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var msbuildPath = "<msbuildpath>";
                 var command = BuildCommand.FromArgs(args, msbuildPath);
 
-                command.SeparateRestoreCommand.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.SeparateRestoreCommand.GetArgumentsToMSBuild()
+                    .Should()
                     .Be($"{ExpectedPrefix} {expectedAdditionalArgsForRestore}");
 
-                command.GetProcessStartInfo()
-                    .Arguments.Should()
+                command.GetArgumentsToMSBuild()
+                    .Should()
                     .Be($"{ExpectedPrefix} -nologo -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
 
