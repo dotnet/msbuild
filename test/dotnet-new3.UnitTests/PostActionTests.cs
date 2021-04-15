@@ -31,8 +31,8 @@ namespace dotnet_new3.UnitTests
             Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, templateName)
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)

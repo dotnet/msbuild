@@ -38,8 +38,8 @@ namespace dotnet_new3.UnitTests
             Directory.CreateDirectory(workingDir);
 
             new DotnetNewCommand(_log, args)
+                .WithCustomHive(_fixture.HomeDirectory)
                 .WithWorkingDirectory(workingDir)
-                .WithEnvironmentVariable(_fixture.HomeVariable, _fixture.HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -73,8 +73,8 @@ namespace dotnet_new3.UnitTests
             BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllProjectsWork));
             // create nuget.config file with nuget.org listed
             new DotnetNewCommand(Log, "nugetconfig")
+                .WithCustomHive(HomeDirectory)
                 .WithWorkingDirectory(BaseWorkingDirectory)
-                .WithEnvironmentVariable(HomeVariable, HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)

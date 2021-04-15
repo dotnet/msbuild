@@ -24,8 +24,8 @@ namespace dotnet_new3.UnitTests
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -39,8 +39,8 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             new DotnetNewCommand(_log, "webapp", "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -58,8 +58,8 @@ namespace dotnet_new3.UnitTests
             Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "basic")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -76,8 +76,8 @@ namespace dotnet_new3.UnitTests
             Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "basic")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -94,8 +94,8 @@ namespace dotnet_new3.UnitTests
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "conf", "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -105,8 +105,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdErrContaining("webconfig").And.HaveStdErrContaining("nugetconfig").And.NotHaveStdErrContaining("classlib");
 
             new DotnetNewCommand(_log, "file")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -123,8 +123,8 @@ namespace dotnet_new3.UnitTests
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             new DotnetNewCommand(_log, "console", "--fake", "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -134,8 +134,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
 
             new DotnetNewCommand(_log, "console", "--framework", "fake")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -147,8 +147,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
 
             new DotnetNewCommand(_log, "console", "--framework", "netcoreapp")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -160,8 +160,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
 
             new DotnetNewCommand(_log, "console", "--framework", "netcoreapp", "--fake")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()
@@ -183,8 +183,8 @@ namespace dotnet_new3.UnitTests
             Helpers.InstallTestTemplate("TemplateResolution/SamePrecedenceGroup/BasicTemplate2", _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "basic")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .Fail()

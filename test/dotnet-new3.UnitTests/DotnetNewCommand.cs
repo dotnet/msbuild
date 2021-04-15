@@ -12,6 +12,8 @@ namespace dotnet_new3.UnitTests
 {
     public class DotnetNewCommand : TestCommand
     {
+        bool _hiveSet = false;
+
         public DotnetNewCommand(ITestOutputHelper log, params string[] args) : base(log)
         {
             // Set dotnet-new3.dll as first Argument to be passed to "dotnet"
@@ -28,12 +30,28 @@ namespace dotnet_new3.UnitTests
                 Arguments = args.ToList(),
                 WorkingDirectory = WorkingDirectory
             };
-            if (!_environment.ContainsKey(TestUtils.HomeEnvironmentVariableName))
+
+            if (!_hiveSet)
             {
-                throw new Exception($"{nameof(TestUtils.HomeEnvironmentVariableName)} is not set, call {nameof(DotnetNewCommand)}{nameof(WithEnvironmentVariable)} to set it.");
+                throw new Exception($"\"--debug:custom-hive\" is not set, call {nameof(WithCustomHive)} to set it or {nameof(WithoutCustomHive)} if it is intentional.");
             }
+
             return sdkCommandSpec;
         }
-    }
 
+        public DotnetNewCommand WithCustomHive(string path = null)
+        {
+            path ??= TestUtils.CreateTemporaryFolder();
+            Arguments.Add("--debug:custom-hive");
+            Arguments.Add(path);
+            _hiveSet = true;
+            return this;
+        }
+
+        public DotnetNewCommand WithoutCustomHive()
+        {
+            _hiveSet = true;
+            return this;
+        }
+    }
 }

@@ -13,32 +13,6 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework.Commands
 {
-    public class DotnetNewCommand : TestCommand
-    {
-        public DotnetNewCommand(ITestOutputHelper log, params string[] args) : base(log)
-        {
-            // Set dotnet-new3.dll as first Argument to be passed to "dotnet"
-            // And use full path since we want to execute in any working directory
-            Arguments.Add(Path.GetFullPath("dotnet-new3.dll"));
-            Arguments.AddRange(args);
-        }
-
-        protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
-        {
-            var sdkCommandSpec = new SdkCommandSpec()
-            {
-                FileName = "dotnet",
-                Arguments = args.ToList(),
-                WorkingDirectory = WorkingDirectory
-            };
-            if (!_environment.ContainsKey(TestUtils.HomeEnvironmentVariableName))
-            {
-                throw new Exception($"{nameof(TestUtils.HomeEnvironmentVariableName)} is not set, call {nameof(DotnetNewCommand)}{nameof(WithEnvironmentVariable)} to set it.");
-            }
-            return sdkCommandSpec;
-        }
-    }
-
     public class DotnetCommand : TestCommand
     {
         private readonly string commandName;

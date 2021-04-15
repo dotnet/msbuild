@@ -26,7 +26,6 @@ namespace dotnet_new3.UnitTests
         }
 
         public string HomeDirectory { get; } = TestUtils.CreateTemporaryFolder("Home");
-        public string HomeVariable { get; } = TestUtils.HomeEnvironmentVariableName;
 
         protected ITestOutputHelper Log { get; private set; }
 
@@ -48,7 +47,7 @@ namespace dotnet_new3.UnitTests
                 args.AddRange(new[] { "--nuget-source", nugetSource });
             }
             new DotnetNewCommand(Log, args.ToArray())
-                .WithEnvironmentVariable(HomeVariable, HomeDirectory)
+                .WithCustomHive(HomeDirectory)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
@@ -71,7 +70,7 @@ namespace dotnet_new3.UnitTests
             }
 
             new DotnetNewCommand(Log)
-                .WithEnvironmentVariable(HomeVariable, HomeDirectory)
+                .WithCustomHive(HomeDirectory)
                 .WithEnvironmentVariable("DN3", dn3Path)
                 .Execute()
                 .Should()

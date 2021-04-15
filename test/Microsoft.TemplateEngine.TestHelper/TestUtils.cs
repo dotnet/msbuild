@@ -10,8 +10,6 @@ namespace Microsoft.TemplateEngine.TestHelper
 {
     public class TestUtils
     {
-        public static string HomeEnvironmentVariableName { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "USERPROFILE" : "HOME";
-
         public static string CreateTemporaryFolder(string name = "")
         {
             string workingDir = Path.Combine(Path.GetTempPath(), "TemplateEngine.Tests", Guid.NewGuid().ToString(), name);

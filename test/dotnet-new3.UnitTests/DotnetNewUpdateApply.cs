@@ -23,8 +23,8 @@ namespace dotnet_new3.UnitTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0", "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -35,8 +35,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("classlib");
 
             new DotnetNewCommand(_log, "--update-check")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -45,8 +45,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("An update for template package 'Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0' is available.");
 
             new DotnetNewCommand(_log, "--update-apply")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -67,8 +67,8 @@ namespace dotnet_new3.UnitTests
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             string templateLocation = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -79,8 +79,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("classlib");
 
             new DotnetNewCommand(_log, "--update-apply")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)

@@ -14,8 +14,8 @@ namespace dotnet_new3.UnitTests
         internal static void InstallNuGetTemplate(string packageName, ITestOutputHelper log, string workingDirectory, string homeDirectory)
         {
             new DotnetNewCommand(log, "-i", packageName)
+                  .WithCustomHive()
                   .WithWorkingDirectory(workingDirectory)
-                  .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, homeDirectory)
                   .Execute()
                   .Should()
                   .ExitWith(0)
@@ -27,8 +27,8 @@ namespace dotnet_new3.UnitTests
         {
             string testTemplate = TestUtils.GetTestTemplateLocation(templateName);
             new DotnetNewCommand(log, "-i", testTemplate)
+                  .WithCustomHive(homeDirectory)
                   .WithWorkingDirectory(workingDirectory)
-                  .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, homeDirectory)
                   .Execute()
                   .Should()
                   .ExitWith(0)

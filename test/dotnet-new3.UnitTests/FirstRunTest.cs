@@ -20,7 +20,7 @@ namespace dotnet_new3.UnitTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log)
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
+                .WithCustomHive(home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -29,7 +29,7 @@ namespace dotnet_new3.UnitTests
                 .And.NotHaveStdOutContaining("Error");
 
             new DotnetNewCommand(_log, "--list")
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
+                .WithCustomHive(home)
                 .Execute()
                 .Should()
                 .ExitWith(0)

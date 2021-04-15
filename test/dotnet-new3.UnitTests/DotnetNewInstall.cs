@@ -23,10 +23,9 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CanInstallRemoteNuGetPackage()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "--quiet")
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -43,18 +42,18 @@ namespace dotnet_new3.UnitTests
         public void CanInstallRemoteNuGetPackage_LatestVariations()
         {
             var command1 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "--quiet")
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             var command2 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::", "--quiet")
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             var command3 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::*", "--quiet")
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, TestUtils.CreateTemporaryFolder())
                 .Execute();
 
             foreach (var commandResult in new[] { command1, command2, command3 })
@@ -77,10 +76,9 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CanInstallRemoteNuGetPackageWithVersion()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", "--quiet")
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -97,10 +95,9 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CanInstallRemoteNuGetPackageWithPrereleaseVersion()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates::0.6.37-beta", "--quiet", "--nuget-source", "https://api.nuget.org/v3/index.json")
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -116,8 +113,8 @@ namespace dotnet_new3.UnitTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--quiet", "--nuget-source", "https://api.nuget.org/v3/index.json")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -128,8 +125,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("blip-console");
 
             new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--quiet", "--add-source", "https://api.nuget.org/v3/index.json")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -143,13 +140,12 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CanInstallLocalNuGetPackage()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
             using var packageManager = new PackageManager();
             string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
 
             new DotnetNewCommand(_log, "-i", packageLocation)
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should().ExitWith(0)
                 .And.NotHaveStdErr()
@@ -162,11 +158,10 @@ namespace dotnet_new3.UnitTests
         [Fact]
         public void CanInstallLocalFolder()
         {
-            var home = TestUtils.CreateTemporaryFolder("Home");
             string basicFSharp = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             new DotnetNewCommand(_log, "-i", basicFSharp)
+                .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -183,8 +178,8 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "--quiet")
+               .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-               .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                .Execute()
                .Should()
                .ExitWith(0)
@@ -194,8 +189,8 @@ namespace dotnet_new3.UnitTests
                .And.HaveStdOutContaining("Console Application");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -212,8 +207,8 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             new DotnetNewCommand(_log, "-i", "BlaBlaBla", "--quiet")
+               .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-               .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                .Execute()
                .Should().Fail()
                .And.HaveStdErrContaining("BlaBlaBla could not be installed, the package does not exist");
@@ -225,8 +220,8 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::16.0.0", "--quiet")
+               .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-               .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                .Execute()
                .Should().Fail()
                .And.HaveStdErrContaining("Microsoft.DotNet.Web.ProjectTemplates.5.0::16.0.0 could not be installed, the package does not exist");
@@ -240,8 +235,8 @@ namespace dotnet_new3.UnitTests
             string basicVB = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicVB");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "-i", basicFSharp, "-i", basicVB, "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -261,8 +256,8 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -272,8 +267,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("classlib");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+                 .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                  .Execute()
                  .Should().Fail()
                  .And.HaveStdErrContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 is already installed");
@@ -285,8 +280,8 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
             string basicFSharp = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             new DotnetNewCommand(_log, "-i", basicFSharp)
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -295,8 +290,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("basic");
 
             new DotnetNewCommand(_log, "-i", basicFSharp)
+                 .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                  .Execute()
                  .Should().Fail()
                  .And.HaveStdErrContaining($"{basicFSharp} is already installed");
@@ -308,8 +303,8 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0", "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -319,8 +314,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("classlib");
 
             new DotnetNewCommand(_log, "-u")
+                 .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                  .Execute()
                  .Should().ExitWith(0)
                  .And.NotHaveStdErr()
@@ -328,11 +323,11 @@ namespace dotnet_new3.UnitTests
                  .And.HaveStdOutContaining("Version: 5.0.0")
                  .And.NotHaveStdOutContaining("Version: 5.0.1");
 
-            Assert.True(File.Exists(Path.Combine(home, ".templateengine", "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.0.nupkg")));
+            Assert.True(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.0.nupkg")));
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.1")
+                 .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                  .Execute()
                  .Should().ExitWith(0)
                  .And.NotHaveStdErr()
@@ -345,8 +340,8 @@ namespace dotnet_new3.UnitTests
                  .And.HaveStdOutContaining("classlib");
 
             new DotnetNewCommand(_log, "-u")
+                 .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                  .Execute()
                  .Should().ExitWith(0)
                  .And.NotHaveStdErr()
@@ -354,8 +349,8 @@ namespace dotnet_new3.UnitTests
                  .And.HaveStdOutContaining("Version: 5.0.1")
                  .And.NotHaveStdOutContaining("Version: 5.0.0");
 
-            Assert.False(File.Exists(Path.Combine(home, ".templateengine", "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.0.nupkg")));
-            Assert.True(File.Exists(Path.Combine(home, ".templateengine", "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.1.nupkg")));
+            Assert.False(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.0.nupkg")));
+            Assert.True(File.Exists(Path.Combine(home, "packages", "Microsoft.DotNet.Common.ProjectTemplates.5.0.5.0.1.nupkg")));
         }
 
         [Fact]
@@ -367,8 +362,8 @@ namespace dotnet_new3.UnitTests
             string packageLocation = packageManager.PackProjectTemplatesNuGetPackage("Microsoft.DotNet.Common.ProjectTemplates.5.0");
 
             new DotnetNewCommand(_log, "-i", packageLocation)
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should().ExitWith(0)
                 .And.NotHaveStdErr()
@@ -377,8 +372,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("classlib");
 
             new DotnetNewCommand(_log, "-u")
+                 .WithCustomHive(home)
                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                 .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                  .Execute()
                  .Should().ExitWith(0)
                  .And.NotHaveStdErr()
@@ -388,8 +383,8 @@ namespace dotnet_new3.UnitTests
                  .And.NotHaveStdOutContaining("Version: 5.0.0");
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should().ExitWith(0)
                 .And.NotHaveStdErr()
@@ -402,8 +397,8 @@ namespace dotnet_new3.UnitTests
                 .And.HaveStdOutContaining("classlib");
 
             new DotnetNewCommand(_log, "-u")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should().ExitWith(0)
                 .And.NotHaveStdErr()
@@ -428,8 +423,8 @@ namespace dotnet_new3.UnitTests
 
 
             new DotnetNewCommand(_log, "-i", pattern)
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should().ExitWith(0)
                 .And.NotHaveStdErr()
@@ -450,14 +445,11 @@ namespace dotnet_new3.UnitTests
             var home = TestUtils.CreateTemporaryFolder("Home");
             string codebase = typeof(Program).GetTypeInfo().Assembly.Location;
             new DotnetNewCommand(_log, "-i", codebase)
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErrContaining($"{codebase} is not supported");
         }
-
-
-
     }
 }

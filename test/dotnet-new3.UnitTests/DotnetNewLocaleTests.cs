@@ -44,8 +44,8 @@ namespace dotnet_new3.UnitTests
                 "TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder, "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", string.Empty)
                 .Execute();
 
@@ -78,8 +78,8 @@ namespace dotnet_new3.UnitTests
                 "TemplateWithLocalization");
 
             var commandResult = new DotnetNewCommand(_log, "-i", testTemplatesFolder, "--quiet")
+                .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable(TestUtils.HomeEnvironmentVariableName, home)
                 .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", dotnetCliEnvVar)
                 .Execute();
 

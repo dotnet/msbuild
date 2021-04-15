@@ -22,7 +22,7 @@ namespace dotnet_new3.UnitTests
         public void BasicTest()
         {
             new DotnetNewCommand(_log, "--list")
-                .WithEnvironmentVariable(_sharedHome.HomeVariable, _sharedHome.HomeDirectory)
+                .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -37,7 +37,7 @@ namespace dotnet_new3.UnitTests
         public void CanShowAllColumns()
         {
             new DotnetNewCommand(_log, "--list", "--columns-all")
-                .WithEnvironmentVariable(_sharedHome.HomeVariable, _sharedHome.HomeDirectory)
+                .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -50,7 +50,7 @@ namespace dotnet_new3.UnitTests
         public void CanFilterTags()
         {
             new DotnetNewCommand(_log, "--list", "--tag", "Common")
-                .WithEnvironmentVariable(_sharedHome.HomeVariable, _sharedHome.HomeDirectory)
+                .WithCustomHive(_sharedHome.HomeDirectory)
                 .Execute()
                 .Should()
                 .ExitWith(0)

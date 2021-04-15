@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             else
             {
                 var tempateEngineRoot = Path.Combine(CreateTemporaryFolder(), ".templateengine");
-                engineEnvironmentSettings = new EngineEnvironmentSettings(host, (x) => new SettingsLoader(x), null, tempateEngineRoot);
+                engineEnvironmentSettings = new EngineEnvironmentSettings(host, (x) => new SettingsLoader(x), tempateEngineRoot);
             }
             engineEnvironmentToDispose.Add(engineEnvironmentSettings);
             return engineEnvironmentSettings;
