@@ -123,8 +123,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     continue;
                 }
 
-                var aliasedPath = GetAliasedPackPath(pack.Value);
-                if (PackExists(aliasedPath, pack.Value.Kind))
+                var aliasedPath = ResolvePackPath(pack.Value);
+                if (aliasedPath != null && PackExists(aliasedPath, pack.Value.Kind))
                 {
                     yield return CreatePackInfo(pack.Value, aliasedPath);
                 }
@@ -161,10 +161,29 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        private string GetAliasedPackPath(WorkloadPack pack)
+
+        /// <summary>
+        /// Resolve the pack path for the host platform.
+        /// </summary>
+        /// <param name="pack">The workload pack</param>
+        /// <returns>The path to the pack, or null if the pack is not available on the host platform.</returns>
+        private string? ResolvePackPath(WorkloadPack pack)
         {
-            var aliasedId = pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers) ?? pack.Id;
-            return GetPackPath(_dotnetRootPaths, aliasedId, pack.Version, pack.Kind);
+            var resolvedId = pack.Id;
+
+            if (pack.IsAlias)
+            {
+                if (pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers) is WorkloadPackId aliasedId)
+                {
+                    resolvedId = aliasedId;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return GetPackPath(_dotnetRootPaths, resolvedId, pack.Version, pack.Kind);
         }
 
         private string GetPackPath(string [] dotnetRootPaths, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind)
@@ -217,9 +236,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             var installedPacks = new HashSet<WorkloadPackId>();
             foreach (var pack in _packs)
             {
-                var packPath = GetAliasedPackPath(pack.Value);
+                var packPath = ResolvePackPath(pack.Value);
 
-                if (PackExists(packPath, pack.Value.Kind))
+                if (packPath != null && PackExists(packPath, pack.Value.Kind))
                 {
                     installedPacks.Add(pack.Key);
                 }
@@ -304,7 +323,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             if (_packs.TryGetValue(new WorkloadPackId (packId), out var pack))
             {
-                return CreatePackInfo(pack, GetAliasedPackPath(pack));
+                if (ResolvePackPath(pack) is string packPath)
+                {
+                    return CreatePackInfo(pack, packPath);
+                }
             }
 
             return null;

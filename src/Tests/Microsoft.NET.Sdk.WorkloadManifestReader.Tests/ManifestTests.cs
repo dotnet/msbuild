@@ -21,11 +21,15 @@ namespace ManifestReaderTests
     {
         private const string fakeRootPath = "fakeRootPath";
         private readonly string ManifestPath;
+        private readonly string SampleProjectPath;
 
         public ManifestTests(ITestOutputHelper log) : base(log)
         {
-            ManifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
+            SampleProjectPath = _testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest");
+            ManifestPath = GetSampleManifestPath("Sample.json");
         }
+
+        string GetSampleManifestPath(string name) => Path.Combine(SampleProjectPath, name);
 
         [Fact]
         public void ItCanDeserialize()
@@ -57,6 +61,19 @@ namespace ManifestReaderTests
             buildToolsPack.Id.Should().Be("Xamarin.Android.BuildTools");
             buildToolsPack.Version.Should().Be("8.4.7");
             buildToolsPack.Path.Should().Be(Path.Combine(fakeRootPath, "packs", "Xamarin.Android.BuildTools.Win64Host", "8.4.7"));
+        }
+
+        [Fact]
+        public void UnresolvedAliasedPackPath()
+        {
+            var manifestProvider = new FakeManifestProvider(ManifestPath);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath }, new[] { "fake-platform" });
+
+            resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
+
+            var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "Xamarin.Android.BuildTools");
+
+            buildToolsPack.Should().BeNull();
         }
 
         [Fact]
@@ -135,14 +152,14 @@ namespace ManifestReaderTests
         }
 
         [Fact]
-        public void ItChecksDependencies ()
+        public void ItChecksDependencies()
         {
             string MakeManifest(string version, params (string id, string version)[] dependsOn)
             {
                 var sb = new StringBuilder();
                 sb.AppendLine("{");
                 sb.AppendFormat("  \"version\": \"{0}\"", version);
-                sb.AppendLine(dependsOn.Length > 0? "," : "");
+                sb.AppendLine(dependsOn.Length > 0 ? "," : "");
                 if (dependsOn.Length > 0)
                 {
                     sb.AppendLine("  \"depends-on\": {");
@@ -150,7 +167,7 @@ namespace ManifestReaderTests
                     {
                         var dep = dependsOn[i];
                         sb.AppendFormat("    \"{0}\": \"{1}\"", dep.id, dep.version);
-                        sb.AppendLine(i < dependsOn.Length - 1? "," : "");
+                        sb.AppendLine(i < dependsOn.Length - 1 ? "," : "");
                     }
                     sb.AppendLine("  }");
                 }
@@ -186,6 +203,15 @@ namespace ManifestReaderTests
 
             var inconsistentManifestEx = Assert.Throws<Exception>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
             Assert.Contains("Inconsistency in workload manifest", inconsistentManifestEx.Message);
+        }
+
+        [Fact]
+        public void WillNotLoadManifestWithNullAlias()
+        {
+            using FileStream fsSource = new FileStream(GetSampleManifestPath("NullAliasError.json"), FileMode.Open, FileAccess.Read);
+
+            var ex = Assert.Throws<WorkloadManifestFormatException> (() => WorkloadManifestReader.ReadWorkloadManifest("NullAliasError", fsSource));
+            Assert.Contains("Expected string value at offset", ex.Message);
         }
     }
 }
