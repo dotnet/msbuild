@@ -113,7 +113,7 @@ setTimeout(function () {
     document.querySelectorAll('#dotnet-compile-error').forEach(el => el.remove());
     const el = document.body.appendChild(document.createElement('div'));
     el.id = 'dotnet-compile-error';
-    el.setAttribute('style', 'z-index:1000000; position:fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); color:black');
+    el.setAttribute('style', 'z-index:1000000; position:fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); color:black; overflow: scroll;');
     diagnostics.forEach(error => {
       const item = el.appendChild(document.createElement('div'));
       item.setAttribute('style', 'border: 2px solid red; padding: 8px; background-color: #faa;')
