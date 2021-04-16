@@ -27,7 +27,7 @@ Run the following command from the root of the repository:
 build.cmd
 ```
 
-The build script will output a `dotnet` installation to `artifacts\tmp\Debug\dotnet` that will include any local changes to the .NET Core CLI.
+The build script will output a `dotnet` installation to `artifacts\bin\redist\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
 To open the solution in Visual Studio, be sure to build with `build.cmd` and run the generated `artifacts\sdk-build-env.bat`. Finally, open Visual Studio with `devenv sdk.sln`.
 
@@ -39,7 +39,7 @@ Run the following command from the root of the repository:
 ./build.sh
 ```
 
-The build script will output a .NET Core installation to `artifacts/tmp/Debug/dotnet` that will include any local changes to the .NET Core CLI.
+The build script will output a .NET Core installation to `artifacts\bin\redist\Debug\dotnet` that will include any local changes to the .NET Core CLI.
 
 ## Running tests
 
@@ -79,7 +79,7 @@ Ensure the `dotnet` being used is from the artifacts directory:
 where dotnet
 ```
 
-This should output `..\artifacts\tmp\Debug\dotnet\dotnet.exe`.
+This should output `..\artifacts\bin\redist\Debug\dotnet\dotnet.exe`.
 
 You can now run `dotnet` commands to test changes.
 
@@ -97,7 +97,7 @@ Ensure the `dotnet` being used is from the artifacts directory:
 which dotnet
 ```
 
-This should output `.../artifacts/tmp/Debug/dotnet/dotnet`.
+This should output `.../artifacts/bin/redist/Debug/dotnet/dotnet`.
 
 You can now run `dotnet` commands to test changes.
 
