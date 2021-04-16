@@ -206,6 +206,7 @@
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21215.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>e76fe48d5eb894e58fe7841f3a2c0bcfa654ee80</Sha>
+      <SourceBuild RepoName="arcade" ManagedOnly="true"/>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="6.0.0-beta.21215.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
