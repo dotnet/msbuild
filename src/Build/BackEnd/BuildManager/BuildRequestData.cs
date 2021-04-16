@@ -75,6 +75,21 @@ namespace Microsoft.Build.Execution
         /// This is especially useful during a restore since some imports might come from packages that haven't been restored yet.
         /// </summary>
         IgnoreMissingEmptyAndInvalidImports = 1 << 6,
+
+        /// <summary>
+        /// When this flag is present, non entry target(s) in the build request will be skipped if those targets
+        /// are not defined in the Project to build. The build will still fail if an entry target does not exist.
+        /// This only applies to this build request (if another target calls the "missing target" at any other point
+        /// this will still result in an error).
+        /// </summary>
+        SkipNonexistentNonEntryTargets = 1 << 7,
+
+        /// <summary>
+        /// When this flag is present, an unresolved MSBuild project SDK will fail the build.  This flag is used to
+        /// change the <see cref="IgnoreMissingEmptyAndInvalidImports" /> behavior to still fail when an SDK is missing
+        /// because those are more fatal.
+        /// </summary>
+        FailOnUnresolvedSdk = 1 << 8,
     }
 
     /// <summary>

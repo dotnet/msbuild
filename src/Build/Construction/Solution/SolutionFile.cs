@@ -415,7 +415,9 @@ namespace Microsoft.Build.Construction
         {
             try
             {
-                JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile));
+                // This is to align MSBuild with what VS permits in loading solution filter files. These are not in them by default but can be added manually.
+                JsonDocumentOptions options = new JsonDocumentOptions() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
+                JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile), options);
                 solution = text.RootElement.GetProperty("solution");
                 return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile));
             }

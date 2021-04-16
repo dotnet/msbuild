@@ -1702,6 +1702,11 @@ namespace Microsoft.Build.Execution
                                 projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
                             }
 
+                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                            {
+                                projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                            }
+
                             return new ProjectInstance(
                                 path,
                                 properties,
@@ -2578,7 +2583,11 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                 , AppDomain.CurrentDomain.SetupInformation
 #endif
-                , new LoggingNodeConfiguration(loggingService.IncludeEvaluationMetaprojects, loggingService.IncludeEvaluationProfile, loggingService.IncludeTaskInputs)
+                , new LoggingNodeConfiguration(
+                    loggingService.IncludeEvaluationMetaprojects,
+                    loggingService.IncludeEvaluationProfile,
+                    loggingService.IncludeEvaluationPropertiesAndItems,
+                    loggingService.IncludeTaskInputs)
                 );
             }
 

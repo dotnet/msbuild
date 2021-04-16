@@ -1052,7 +1052,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets the global properties
+        /// Gets the properties
         /// </summary>
         PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Properties
         {
@@ -1062,7 +1062,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets the global properties
+        /// Gets the item definitions
         /// </summary>
         IEnumerable<ProjectItemDefinitionInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ItemDefinitionsEnumerable
         {

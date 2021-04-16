@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ObjectModel = System.Collections.ObjectModel;
@@ -777,12 +778,19 @@ namespace Microsoft.Build.Evaluation
             }
 
             ErrorUtilities.VerifyThrow(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
-            _evaluationLoggingContext.LogBuildEvent(new ProjectEvaluationFinishedEventArgs(ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile)
+
+            IEnumerable globalProperties = null;
+            IEnumerable properties = null;
+            IEnumerable items = null;
+
+            if (this._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
             {
-                BuildEventContext = _evaluationLoggingContext.BuildEventContext,
-                ProjectFile = projectFile,
-                ProfilerResult = _evaluationProfiler.ProfiledResult
-            });
+                globalProperties = _data.GlobalPropertiesDictionary;
+                properties = _data.Properties;
+                items = _data.Items;
+            }
+
+            _evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, _evaluationProfiler.ProfiledResult);
         }
 
         private void CollectProjectCachePlugins()
@@ -1761,7 +1769,8 @@ namespace Microsoft.Build.Evaluation
 
                 if (!sdkResult.Success)
                 {
-                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports))
+                    // Ignore the missing import if IgnoreMissingImports is set unless FailOnUnresolvedSdk is also set
+                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))
                     {
                         ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                             importElement.Location.Line,

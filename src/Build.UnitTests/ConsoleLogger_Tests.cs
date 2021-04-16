@@ -254,7 +254,6 @@ namespace Microsoft.Build.UnitTests
 
             pc.Collection.RegisterLogger(logger);
 
-
             var p = pc.Collection.LoadProject(project.ProjectFile);
 
             BuildManager.DefaultBuildManager.Build(
@@ -266,12 +265,19 @@ namespace Microsoft.Build.UnitTests
             sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2]");
         }
 
-        [Fact]
-        public void ErrorMessageWithMultiplePropertiesInMessage()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ErrorMessageWithMultiplePropertiesInMessage(bool includeEvaluationPropertiesAndItems)
         {
             using var env = TestEnvironment.Create(_output);
 
             var pc = env.CreateProjectCollection();
+
+            if (includeEvaluationPropertiesAndItems)
+            {
+                pc.Collection.LoggingService.IncludeEvaluationPropertiesAndItems = true;
+            }
 
             var project = env.CreateTestProjectWithFiles(@"
          <Project>
@@ -300,7 +306,6 @@ namespace Microsoft.Build.UnitTests
 
             pc.Collection.RegisterLogger(logger);
 
-
             var p = pc.Collection.LoadProject(project.ProjectFile);
 
             BuildManager.DefaultBuildManager.Build(
@@ -308,8 +313,9 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeFalse();
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1 TargetFramework=netcoreapp2.1]");
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2 TargetFramework=netcoreapp2.1]");
+            string output = sc.ToString();
+            output.ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1 TargetFramework=netcoreapp2.1]");
+            output.ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2 TargetFramework=netcoreapp2.1]");
         }
 
         [Fact]

@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -218,7 +220,7 @@ namespace Microsoft.Build.Logging
         private void Write(ProjectEvaluationStartedEventArgs e)
         {
             Write(BinaryLogRecordKind.ProjectEvaluationStarted);
-            WriteBuildEventArgsFields(e);
+            WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
         }
 
@@ -226,15 +228,30 @@ namespace Microsoft.Build.Logging
         {
             Write(BinaryLogRecordKind.ProjectEvaluationFinished);
 
-            WriteBuildEventArgsFields(e);
+            WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
 
-            Write(e.ProfilerResult.HasValue);
-            if (e.ProfilerResult.HasValue)
+            if (e.GlobalProperties == null)
             {
-                Write(e.ProfilerResult.Value.ProfiledLocations.Count);
+                Write(false);
+            }
+            else
+            {
+                Write(true);
+                WriteProperties(e.GlobalProperties);
+            }
 
-                foreach (var item in e.ProfilerResult.Value.ProfiledLocations)
+            WriteProperties(e.Properties);
+
+            WriteProjectItems(e.Items);
+
+            var result = e.ProfilerResult;
+            Write(result.HasValue);
+            if (result.HasValue)
+            {
+                Write(result.Value.ProfiledLocations.Count);
+
+                foreach (var item in result.Value.ProfiledLocations)
                 {
                     Write(item.Key);
                     Write(item.Value);
@@ -664,7 +681,9 @@ namespace Microsoft.Build.Logging
             return flags;
         }
 
+        // Both of these are used simultaneously so can't just have a single list
         private readonly List<object> reusableItemsList = new List<object>();
+        private readonly List<object> reusableProjectItemList = new List<object>();
 
         private void WriteTaskItemList(IEnumerable items, bool writeMetadata = true)
         {
@@ -736,18 +755,71 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            var groups = items
-                .OfType<DictionaryEntry>()
-                .GroupBy(entry => entry.Key as string, entry => entry.Value as ITaskItem)
-                .Where(group => !string.IsNullOrEmpty(group.Key))
-                .ToArray();
-
-            Write(groups.Length);
-
-            foreach (var group in groups)
+            if (items is ItemDictionary<ProjectItemInstance> itemInstanceDictionary)
             {
-                WriteDeduplicatedString(group.Key);
-                WriteTaskItemList(group);
+                // If we have access to the live data from evaluation, it exposes a special method
+                // to iterate the data structure under a lock and return results grouped by item type.
+                // There's no need to allocate or call GroupBy this way.
+                itemInstanceDictionary.EnumerateItemsPerType((itemType, itemList) =>
+                {
+                    WriteDeduplicatedString(itemType);
+                    WriteTaskItemList(itemList);
+                });
+
+                // signal the end
+                Write(0);
+            }
+            // not sure when this can get hit, but best to be safe and support this
+            else if (items is ItemDictionary<ProjectItem> itemDictionary)
+            {
+                itemDictionary.EnumerateItemsPerType((itemType, itemList) =>
+                {
+                    WriteDeduplicatedString(itemType);
+                    WriteTaskItemList(itemList);
+                });
+
+                // signal the end
+                Write(0);
+            }
+            else
+            {
+                string currentItemType = null;
+
+                // Write out a sequence of items for each item type while avoiding GroupBy
+                // and associated allocations. We rely on the fact that items of each type
+                // are contiguous. For each item type, write the item type name and the list
+                // of items. Write 0 at the end (which would correspond to item type null).
+                // This is how the reader will know how to stop. We can't write out the
+                // count of item types at the beginning because we don't know how many there
+                // will be (we'd have to enumerate twice to calculate that). This scheme
+                // allows us to stream in a single pass with no allocations for intermediate
+                // results.
+                Internal.Utilities.EnumerateItems(items, dictionaryEntry =>
+                {
+                    string key = (string)dictionaryEntry.Key;
+
+                    // boundary between item types
+                    if (currentItemType != null && currentItemType != key)
+                    {
+                        WriteDeduplicatedString(currentItemType);
+                        WriteTaskItemList(reusableProjectItemList);
+                        reusableProjectItemList.Clear();
+                    }
+
+                    reusableProjectItemList.Add(dictionaryEntry.Value);
+                    currentItemType = key;
+                });
+
+                // write out the last item type
+                if (reusableProjectItemList.Count > 0)
+                {
+                    WriteDeduplicatedString(currentItemType);
+                    WriteTaskItemList(reusableProjectItemList);
+                    reusableProjectItemList.Clear();
+                }
+
+                // signal the end
+                Write(0);
             }
         }
 
@@ -787,22 +859,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            // there are no guarantees that the properties iterator won't change, so 
-            // take a snapshot and work with the readonly copy
-            var propertiesArray = properties.OfType<DictionaryEntry>().ToArray();
-
-            for (int i = 0; i < propertiesArray.Length; i++)
-            {
-                DictionaryEntry entry = propertiesArray[i];
-                if (entry.Key is string key && entry.Value is string value)
-                {
-                    nameValueListBuffer.Add(new KeyValuePair<string, string>(key, value));
-                }
-                else
-                {
-                    nameValueListBuffer.Add(new KeyValuePair<string, string>(string.Empty, string.Empty));
-                }
-            }
+            Internal.Utilities.EnumerateProperties(properties, kvp => nameValueListBuffer.Add(kvp));
 
             WriteNameValueList();
 

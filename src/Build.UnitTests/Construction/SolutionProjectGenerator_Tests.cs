@@ -152,9 +152,11 @@ namespace Microsoft.Build.UnitTests.Construction
                     @"
                 {
                   ""solution"": {
+                    // I'm a comment
                     ""path"": "".\\SimpleProject\\SimpleProject.sln"",
                     ""projects"": [
-                      ""SimpleProject\\SimpleProject.csproj""
+                    /* ""..\\ClassLibrary\\ClassLibrary\\ClassLibrary.csproj"", */
+                      ""SimpleProject\\SimpleProject.csproj"",
                     ]
                     }
                 }

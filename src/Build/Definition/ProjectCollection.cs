@@ -1794,7 +1794,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource3
+        internal class ReusableLogger : INodeLogger, IEventSource4
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1891,6 +1891,8 @@ namespace Microsoft.Build.Evaluation
             private bool _includeEvaluationProfiles;
 
             private bool _includeTaskInputs;
+
+            private bool _includeEvaluationPropertiesAndItems;
 
             /// <summary>
             /// Constructor.
@@ -2031,6 +2033,22 @@ namespace Microsoft.Build.Evaluation
 
                 _includeTaskInputs = true;
             }
+
+            public void IncludeEvaluationPropertiesAndItems()
+            {
+                if (_buildTimeEventSource is IEventSource4 buildEventSource4)
+                {
+                    buildEventSource4.IncludeEvaluationPropertiesAndItems();
+                }
+
+                if (_designTimeEventSource is IEventSource4 designTimeEventSource4)
+                {
+                    designTimeEventSource4.IncludeEvaluationPropertiesAndItems();
+                }
+
+                _includeEvaluationPropertiesAndItems = true;
+            }
+
             #endregion
 
             #region ILogger Members
@@ -2163,6 +2181,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         eventSource3.IncludeEvaluationMetaprojects();
                     }
+
                     if (_includeEvaluationProfiles)
                     {
                         eventSource3.IncludeEvaluationProfiles();
@@ -2171,6 +2190,14 @@ namespace Microsoft.Build.Evaluation
                     if (_includeTaskInputs)
                     {
                         eventSource3.IncludeTaskInputs();
+                    }
+                }
+
+                if (eventSource is IEventSource4 eventSource4)
+                {
+                    if (_includeEvaluationPropertiesAndItems)
+                    {
+                        eventSource4.IncludeEvaluationPropertiesAndItems();
                     }
                 }
             }

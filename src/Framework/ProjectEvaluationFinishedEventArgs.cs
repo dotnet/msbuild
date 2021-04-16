@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using Microsoft.Build.Framework.Profiler;
 
 namespace Microsoft.Build.Framework
@@ -23,7 +24,7 @@ namespace Microsoft.Build.Framework
         /// Initializes a new instance of the ProjectEvaluationFinishedEventArgs class.
         /// </summary>
         public ProjectEvaluationFinishedEventArgs(string message, params object[] messageArgs)
-            : base(message, null, null, DateTime.UtcNow, messageArgs)
+            : base(message, helpKeyword: null, senderName: null, DateTime.UtcNow, messageArgs)
         {
         }
 
@@ -33,11 +34,26 @@ namespace Microsoft.Build.Framework
         public string ProjectFile { get; set; }
 
         /// <summary>
+        /// Global properties used during this evaluation.
+        /// </summary>
+        public IEnumerable GlobalProperties { get; set; }
+
+        /// <summary>
+        /// Final set of properties produced by this evaluation.
+        /// </summary>
+        public IEnumerable Properties { get; set; }
+
+        /// <summary>
+        /// Final set of items produced by this evaluation.
+        /// </summary>
+        public IEnumerable Items { get; set; }
+
+        /// <summary>
         /// The result of profiling a project.
         /// </summary>
         /// <remarks>
         /// Null if profiling is not turned on
         /// </remarks>
-        public ProfilerResult? ProfilerResult { get; set; } 
+        public ProfilerResult? ProfilerResult { get; set; }
     }
 }

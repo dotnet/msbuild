@@ -227,6 +227,7 @@ namespace Microsoft.Build.Utilities
         public MuxLogger() { }
         public bool IncludeEvaluationMetaprojects { get { throw null; } set { } }
         public bool IncludeEvaluationProfiles { get { throw null; } set { } }
+        public bool IncludeEvaluationPropertiesAndItems { get { throw null; } set { } }
         public bool IncludeTaskInputs { get { throw null; } set { } }
         public string Parameters { get { throw null; } set { } }
         public Microsoft.Build.Framework.LoggerVerbosity Verbosity { get { throw null; } set { } }

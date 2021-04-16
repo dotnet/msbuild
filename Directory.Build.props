@@ -20,7 +20,7 @@
     <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot).dotnet\</DOTNET_INSTALL_DIR>
 
     <!-- Repository and project URLs (used in nuget packages) -->
-    <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dotnet/msbuild</RepositoryUrl>
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
     <PackageIcon>MSBuild-NuGet-Icon.png</PackageIcon>
     <PackageTags>MSBuild</PackageTags>
