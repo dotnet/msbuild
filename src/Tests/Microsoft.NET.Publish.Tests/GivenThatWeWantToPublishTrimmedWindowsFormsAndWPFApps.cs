@@ -21,27 +21,29 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [WindowsOnlyFact]
-        public void It_errors_on_publishing_winforms_app()
+        public void It_publishes_windows_Forms_app_with_warning()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WinformsFailTest",
+                Name = "WinformsWarnPresentPassTest",
                 TargetFrameworks = targetFramework
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
+            testProject.AdditionalProperties["SelfContained"] = "true";
+            testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:PublishTrimmed=true")
                 .Should()
-                .Fail()
+                .Pass()
                 .And
                 .HaveStdOutContaining("NETSDK1164");
         }
 
         [WindowsOnlyFact]
-        public void It_publishes_windows_forms_app_with_com_support()
+        public void It_publishes_windows_Forms_app_with_warning_suppressed()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
@@ -51,16 +53,18 @@ namespace Microsoft.NET.Publish.Tests
             };
             testProject.IsWinExe = true;
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
-            testProject.AdditionalProperties["EnableWindowsFormsTrimming"] = "true";
             testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1164";
+            testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:PublishTrimmed=true")
                 .Should()
-                .Pass();
-
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1164");
         }
 
         [WindowsOnlyFact]
@@ -69,7 +73,7 @@ namespace Microsoft.NET.Publish.Tests
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WpfPassTest",
+                Name = "WpfWarnPresentPassTest",
                 TargetFrameworks = targetFramework
             };
             testProject.IsWinExe = true;
@@ -84,6 +88,31 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass()
                 .And
                 .HaveStdOutContaining("NETSDK1165");
+        }
+
+        [WindowsOnlyFact]
+        public void It_publishes_wpf_app_with_warning_Suppressed()
+        {
+            var targetFramework = "net6.0-windows";
+            TestProject testProject = new TestProject()
+            {
+                Name = "WpfPassTest",
+                TargetFrameworks = targetFramework
+            };
+            testProject.IsWinExe = true;
+            testProject.AdditionalProperties["UseWPF"] = "true";
+            testProject.AdditionalProperties["SelfContained"] = "true";
+            testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1165";
+            testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";            
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            var publishCommand = new PublishCommand(testAsset);
+            publishCommand.Execute($"/p:PublishTrimmed=true")
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("NETSDK1165");
         }
     }
 }

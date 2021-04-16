@@ -106,10 +106,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CannotHaveSingleFileWithoutRuntimeIdentifier" />
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(UseAppHost)' != 'true'"
                  ResourceName="CannotHaveSingleFileWithoutAppHost" />
-    <NETSdkError Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true' and '$(EnableWindowsFormsTrimming)' == 'false'"
-                 ResourceName="TrimmingWindowsFormsRequiresCom" />
+    <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
+                 ResourceName="TrimmingWindowsFormsIsNotSupported" />
     <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
-                 ResourceName="TrimmingWpfIsDangerous" />
+                 ResourceName="TrimmingWpfIsNotSupported" />
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->

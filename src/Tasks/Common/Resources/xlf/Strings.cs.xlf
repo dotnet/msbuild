@@ -710,14 +710,14 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1127: Targeting Pack {0} není nainstalovaný. Obnovte ho prosím a zkuste to znovu.</target>
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
-      <trans-unit id="TrimmingWindowsFormsRequiresCom">
-        <source>NETSDK1164: Windows Forms is not supported with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details. To enable trimming and proceed, set `&lt;EnableWindowsFormsTrimming&gt;true&lt;/EnableWindowsFormsTrimming&gt;`. This configuration is not supported or recommended.</source>
-        <target state="new">NETSDK1164: Windows Forms is not supported with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details. To enable trimming and proceed, set `&lt;EnableWindowsFormsTrimming&gt;true&lt;/EnableWindowsFormsTrimming&gt;`. This configuration is not supported or recommended.</target>
+      <trans-unit id="TrimmingWindowsFormsIsNotSupported">
+        <source>NETSDK1164: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
+        <target state="new">NETSDK1164: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</target>
         <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
-      <trans-unit id="TrimmingWpfIsDangerous">
-        <source>NETSDK1165: WPF is not supported or recommended with trimming enabled.</source>
-        <target state="new">NETSDK1165: WPF is not supported or recommended with trimming enabled.</target>
+      <trans-unit id="TrimmingWpfIsNotSupported">
+        <source>NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
+        <target state="new">NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
         <note>{StrBegin="NETSDK1165: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
