@@ -87,11 +87,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cached delegate.
         /// </summary>
-        private FileExists fileExists;
-
-        /// <summary>
-        /// Cached delegate.
-        /// </summary>
         private DirectoryExists directoryExists;
 
         /// <summary>
@@ -298,11 +293,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a FileExists delegate. 
         /// </summary>
-        /// <param name="fileExistsValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
-        internal FileExists CacheDelegate(FileExists fileExistsValue)
+        internal FileExists CacheDelegate()
         {
-            fileExists = fileExistsValue;
             return FileExists;
         }
 
