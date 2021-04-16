@@ -73,8 +73,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
                        GetPackagingOutputs
 
-  Stub cross-targeting implementation of GetPackagingOutputs 
-  to allow project references from from projects that pull in 
+  Stub cross-targeting implementation of GetPackagingOutputs
+  to allow project references from from projects that pull in
   Microsoft.AppxPackage.targets (UWP, PCL) to cross-targeted
   projects.
 
@@ -88,12 +88,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   An empty GetPackagingOutputs is sufficient for the common
   case of a library with no special assets to contribute to
   the appx and is also equivalent to what is present in the
-  single-targeted case unless WindowsAppContainer is not set 
+  single-targeted case unless WindowsAppContainer is not set
   to true.
 
   Furthermore, the appx targets currently use continue-on-error
-  such that even without this, clean builds succeed but log an 
-  error and incremental builds silently succeed. As such, this 
+  such that even without this, clean builds succeed but log an
+  error and incremental builds silently succeed. As such, this
   simply removes a confounding error from successful clean
   builds.
 

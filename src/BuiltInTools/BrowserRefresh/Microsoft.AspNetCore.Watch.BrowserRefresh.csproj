@@ -11,6 +11,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <EmbeddedResource Include="WebSocketScriptInjection.js" />
+    <EmbeddedResource Include="BlazorHotReload.js" />
   </ItemGroup>
 
 </Project>

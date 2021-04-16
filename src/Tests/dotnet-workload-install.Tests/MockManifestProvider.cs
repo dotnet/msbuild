@@ -18,11 +18,11 @@ namespace ManifestReaderTests
 
         public IEnumerable<string> GetManifestDirectories() => throw new System.NotImplementedException();
 
-        public IEnumerable<Stream> GetManifests()
+        public IEnumerable<(string manifestId, Stream manifestStream)> GetManifests()
             {
                 foreach (var filePath in _filePaths)
                 {
-                    yield return new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                    yield return (filePath, new FileStream(filePath, FileMode.Open, FileAccess.Read));
                 }
             }
         }

@@ -106,6 +106,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                  ResourceName="CannotHaveSingleFileWithoutRuntimeIdentifier" />
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(UseAppHost)' != 'true'"
                  ResourceName="CannotHaveSingleFileWithoutAppHost" />
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
+                            '$(EnableCompressionInSingleFile)' == 'true' And
+                            '$(_TargetFrameworkVersionWithoutV)' &lt; '6.0'"
+                 ResourceName="CompressionInSingleFileRequires60" />
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' And
+                            '$(EnableCompressionInSingleFile)' == 'true' And
+                            '$(SelfContained)' != 'true'"
+                 ResourceName="CompressionInSingleFileRequiresSelfContained" />
     <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
                  ResourceName="TrimmingWindowsFormsIsNotSupported" />
     <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
@@ -1035,6 +1043,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
       <IncludeAllContentForSelfExtract Condition="'$(IncludeAllContentForSelfExtract)' == ''">false</IncludeAllContentForSelfExtract>
       <IncludeNativeLibrariesForSelfExtract Condition="'$(IncludeNativeLibrariesForSelfExtract)' == ''">$(IncludeAllContentForSelfExtract)</IncludeNativeLibrariesForSelfExtract>
+      <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == '' And
+                                   '$(_TargetFrameworkVersionWithoutV)' >= '6.0' And '$(SelfContained)' == 'true' ">true</EnableCompressionInSingleFile>
+      <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == ''">false</EnableCompressionInSingleFile>
     </PropertyGroup>
 
     <NETSdkError Condition="'$(IncludeAllContentForSelfExtract)' == 'true' And '$(IncludeNativeLibrariesForSelfExtract)' != 'true'"
@@ -1043,6 +1054,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateBundle FilesToBundle="@(_FilesToBundle)"
                     AppHostName="$(PublishedSingleFileName)"
                     IncludeSymbols="$(IncludeSymbolsInSingleFile)"
+                    EnableCompressionInSingleFile="$(EnableCompressionInSingleFile)"
                     IncludeNativeLibraries="$(IncludeNativeLibrariesForSelfExtract)"
                     IncludeAllContent="$(IncludeAllContentForSelfExtract)"
                     TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"

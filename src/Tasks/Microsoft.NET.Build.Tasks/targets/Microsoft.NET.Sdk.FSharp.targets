@@ -6,16 +6,16 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- ***************************************************************************************************************
-       Shim to select the correct Microsoft.FSharp.Overrides.NetSdk.targets file when not running 
+       Shim to select the correct Microsoft.FSharp.Overrides.NetSdk.targets file when not running
        under Cross-targeting build and not under FSharp.Sdk
-       If running under desktop select Microsoft.FSharp.targets file from VS deployment, 
+       If running under desktop select Microsoft.FSharp.targets file from VS deployment,
        if running core msbuild select Microsoft.FSharp.targets from dotnet cli deployment
        *************************************************************************************************************** -->
   <PropertyGroup Condition=" '$(IsCrossTargetingBuild)' != 'true' " >

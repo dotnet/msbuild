@@ -16,11 +16,10 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
     public static class WebSocketScriptInjection
     {
         private const string BodyMarker = "</body>";
-        internal const string WebSocketScriptUrl = "/_framework/aspnetcore-browser-refresh.js";
 
         private static readonly byte[] _bodyBytes = Encoding.UTF8.GetBytes(BodyMarker);
 
-        internal static string InjectedScript { get; } = $"<script src=\"{WebSocketScriptUrl}\"></script>";
+        internal static string InjectedScript { get; } = $"<script src=\"{Urls.BrowserRefreshJS}\"></script>";
 
         private static readonly byte[] _injectedScriptBytes = Encoding.UTF8.GetBytes(InjectedScript);
 

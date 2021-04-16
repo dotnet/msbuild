@@ -212,6 +212,16 @@
         <note>{StrBegin="NETSDK1090: "}
 {0} - The path to the invalid assembly.</note>
       </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequires60">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
+      </trans-unit>
+      <trans-unit id="CompressionInSingleFileRequiresSelfContained">
+        <source>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
+        <note>{StrBegin="NETSDK1142: "}</note>
+      </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
 {1}</source>

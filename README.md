@@ -32,3 +32,9 @@ From that shell your SDK will be available in:
 We welcome you to try things out, [file issues](https://github.com/dotnet/sdk/issues), make feature requests and join us in design conversations. Also be sure to check out our [project documentation](documentation) and [Developer Guide](documentation/project-docs/developer-guide.md).
 
 This project has adopted the [.NET Foundation Code of Conduct](https://dotnetfoundation.org/code-of-conduct) to clarify expected behavior in our community.
+
+## How we triage and review PRs
+
+With the SDK repo being the home for many different areas, we've started trying to label incoming issues for the area they are related to using Area- labels.  Then we rely on the [codeowners](https://github.com/dotnet/sdk/blob/main/CODEOWNERS) to manage and triages issues in their areas.  Feel free to ping the owners listed in that file if you're not getting traction on a particular issue or PR. Please try to label new issues as that'll help us route them faster.
+
+For PRs, we assign out a reviewer once a week on Wednesday looking only at PRs that are green in the build.  If you are contributing, please get the PR green including a test if possible and then ping @dotnet-cli if you want to raise visibility of the PR.

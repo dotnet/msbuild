@@ -70,6 +70,7 @@
     <Compile Include="..\Microsoft.DotNet.SdkResolver\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver" />
     <Compile Include="..\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\**\*.cs" LinkBase="Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver" />
     <Compile Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.NET.Sdk.WorkloadManifestReader" />
+    <Compile Include="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\**\*.cs" LinkBase="WorkloadInstallRecords" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
