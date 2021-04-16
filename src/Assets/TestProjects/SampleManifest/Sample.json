@@ -150,6 +150,14 @@
                 "osx-x64": "Mono.Android.LLVM.Aot.armv7a.MacHost",
                 "win-x64": "Mono.Android.LLVM.Aot.armv7a.Win64Host"
             }
+        },
+        "Test.Pack.A": {
+            "version": "1.0",
+            "kind": "sdk"
+        },
+        "Test.Pack.B": {
+            "version": "2.0",
+            "kind": "framework"
         }
     }
 }

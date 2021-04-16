@@ -3,9 +3,10 @@
 
 using System;
 
-namespace Microsoft.DotNet.Workloads.Workload.Install
+#nullable disable
+namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
-    internal struct WorkloadId : IEquatable<WorkloadId>, IComparable<WorkloadId>
+    internal class WorkloadId : IEquatable<WorkloadId>, IComparable<WorkloadId>
     {
         private string _id;
 

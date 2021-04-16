@@ -12,6 +12,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installManager.InstallWorkloads(mockWorkloadIds, true);
 
             installer.GarbageCollectionCalled.Should().BeTrue();
-            installer.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
+            installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
             installer.InstalledPacks.Count.Should().Be(8);
             installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
             _reporter.Lines.Contains(string.Format(LocalizableStrings.InstallationSucceeded, "xamarin-android"));
@@ -57,23 +58,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
             var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
 
-            try
-            {
-                installManager.InstallWorkloads(mockWorkloadIds, true);
-
-                // Install should have failed
-                true.Should().BeFalse();
-            }
-            catch (Exception e)
-            {
-                e.Message.Should().Be("Failing workload: xamarin-android-build");
-                var expectedPacks = mockWorkloadIds
-                    .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
-                    .Distinct()
-                    .Select(packId => workloadResolver.TryGetPackInfo(packId));
-                installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
-                installer.WorkloadInstallRecord.Should().BeEmpty();
-            }
+            var exceptionThrown = Assert.Throws<Exception>(() => installManager.InstallWorkloads(mockWorkloadIds, true));
+            exceptionThrown.Message.Should().Be("Failing workload: xamarin-android-build");
+            var expectedPacks = mockWorkloadIds
+                .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                .Distinct()
+                .Select(packId => workloadResolver.TryGetPackInfo(packId));
+            installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
+            installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEmpty();
         }
     }
 }

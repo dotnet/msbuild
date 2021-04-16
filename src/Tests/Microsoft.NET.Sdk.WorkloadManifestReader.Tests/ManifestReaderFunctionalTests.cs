@@ -39,7 +39,7 @@ namespace ManifestReaderTests
         {
             WorkloadResolver workloadResolver = SetUp();
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
-            result.Should().HaveCount(4);
+            result.Should().HaveCount(5);
             var androidWorkloads = result.Single(w => w.Id == "Xamarin.Android.Sdk");
             androidWorkloads.Id.Should().Be("Xamarin.Android.Sdk");
             androidWorkloads.IsStillPacked.Should().BeTrue();

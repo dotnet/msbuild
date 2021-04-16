@@ -4,25 +4,29 @@
 using System;
 using Microsoft.Deployment.DotNet.Releases;
 
-namespace Microsoft.DotNet.Workloads.Workload.Install
+#nullable disable
+namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
     internal struct SdkFeatureBand : IEquatable<SdkFeatureBand>, IComparable<SdkFeatureBand>
     {
         private ReleaseVersion _featureBand;
 
-        public SdkFeatureBand(string featureBand)
+        public SdkFeatureBand(string version) : this(new ReleaseVersion(version) ?? throw new ArgumentNullException(nameof(version))) { }
+
+        public SdkFeatureBand(ReleaseVersion version)
         {
-            _featureBand = new ReleaseVersion(featureBand) ?? throw new ArgumentNullException(nameof(featureBand));
+            var fullVersion = version ?? throw new ArgumentNullException(nameof(version));
+            _featureBand = new ReleaseVersion(fullVersion.Major, fullVersion.Minor, fullVersion.SdkFeatureBand);
         }
 
         public bool Equals(SdkFeatureBand other)
         {
-            return ToString() == other.ToString();
+            return _featureBand.Equals(other._featureBand);
         }
 
         public int CompareTo(SdkFeatureBand other)
         {
-            return string.Compare(ToString(), other.ToString(), StringComparison.Ordinal);
+            return _featureBand.CompareTo(other._featureBand);
         }
 
         public override bool Equals(object obj)
