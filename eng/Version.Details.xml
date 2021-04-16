@@ -101,13 +101,13 @@
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>bdf1629e12c05a5fd17bf7de48e7e50a8f739170</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.100-preview.2.21215.2">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.100-preview.2.21216.2">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>1ed6f39a6e716b42fa5e478dcfd30a59f1c8f25e</Sha>
+      <Sha>cd8bd0d1682eee721f99ac648c346d269b93d46f</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="6.0.100-preview.2.21215.2">
+    <Dependency Name="Microsoft.NET.ILLink.Analyzers" Version="6.0.100-preview.2.21216.2">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>1ed6f39a6e716b42fa5e478dcfd30a59f1c8f25e</Sha>
+      <Sha>cd8bd0d1682eee721f99ac648c346d269b93d46f</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="6.0.0-preview.4.21215.2">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -206,7 +206,7 @@
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21215.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>e76fe48d5eb894e58fe7841f3a2c0bcfa654ee80</Sha>
-      <SourceBuild RepoName="arcade" ManagedOnly="true"/>
+      <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="6.0.0-beta.21215.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
