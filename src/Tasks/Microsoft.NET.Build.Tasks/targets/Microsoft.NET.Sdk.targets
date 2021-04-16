@@ -1075,6 +1075,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AfterMicrosoftNETSdkTargets>$(AfterMicrosoftNETSdkTargets);$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets</AfterMicrosoftNETSdkTargets>
   </PropertyGroup>
   
+  <!-- Note: Once WindowsDesktop is a workload this will be moved to WorkloadManifest.targets -->
   <ItemGroup Condition="'$(MicrosoftNETWindowsWorkloadInstalled)' == 'true' and
                         '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                         $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '5.0'))">

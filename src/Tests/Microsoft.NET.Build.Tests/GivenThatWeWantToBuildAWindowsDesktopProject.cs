@@ -346,7 +346,7 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("net5.0-windows10.0.19041.0", true)]
         [InlineData("netcoreapp3.1", false)]
         [InlineData("net472", false)]
-        public void WindowsWorkloadIsInstalledForNet5AndUp(string targetFramework, bool windowsWorkloadInstalled)
+        public void WindowsWorkloadIsInstalledForNet5AndUp(string targetFramework, bool supportsWindowsTargetPlatformIdentifier)
         {
             var testProject = new TestProject()
             {
@@ -359,7 +359,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            if (windowsWorkloadInstalled)
+            if (supportsWindowsTargetPlatformIdentifier)
             {
                 getValueCommand.GetValues()
                     .Should()
