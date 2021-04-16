@@ -19,7 +19,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" />
-        <PackageReference Include="Microsoft.DotNet.TemplateLocator" Version="5.0.100-rc.1.20421.19" />
         <PackageReference Include="NuGet.Credentials" Version="5.8.1" />
         <PackageReference Include="System.Diagnostics.Process" />
         <PackageReference Include="Newtonsoft.Json" />
