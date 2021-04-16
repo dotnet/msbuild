@@ -33,7 +33,8 @@ namespace dotnet_new3
             bool emitTimings = args.Any(x => string.Equals(x, "--debug:emit-timings", StringComparison.OrdinalIgnoreCase));
             bool debugTelemetry = args.Any(x => string.Equals(x, "--debug:emit-telemetry", StringComparison.OrdinalIgnoreCase));
 
-            DefaultTemplateEngineHost host = CreateHost(emitTimings);
+            bool disableSdkTemplates = args.Any(x => string.Equals(x, "--debug:disable-sdk-templates", StringComparison.OrdinalIgnoreCase));
+            DefaultTemplateEngineHost host = CreateHost(emitTimings, disableSdkTemplates);
 
             bool debugAuthoring = args.Any(x => string.Equals(x, "--trace:authoring", StringComparison.OrdinalIgnoreCase));
             bool debugInstall = args.Any(x => string.Equals(x, "--trace:install", StringComparison.OrdinalIgnoreCase));
@@ -51,10 +52,11 @@ namespace dotnet_new3
             {
                 OnFirstRun = FirstRun
             };
+
             return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), callbacks, args);
         }
 
-        private static DefaultTemplateEngineHost CreateHost(bool emitTimings)
+        private static DefaultTemplateEngineHost CreateHost(bool emitTimings, bool disableSdkTemplates)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -73,13 +75,15 @@ namespace dotnet_new3
             { }
 
             // Keep this in sync with dotnet/sdk repo
-            var builtIns = new AssemblyComponentCatalog(new[]
+            var builtIns = new List<KeyValuePair<Guid, Func<Type>>>(new AssemblyComponentCatalog(new[]
             {
-                // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
-                typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly,
-                // for this assembly
-                typeof(Program).GetTypeInfo().Assembly
-            });
+                typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly
+            }));
+
+            if (!disableSdkTemplates)
+            {
+                builtIns.Add(new KeyValuePair<Guid, Func<Type>>(BuiltInTemplatePackagesProviderFactory.FactoryId, () => typeof(BuiltInTemplatePackagesProviderFactory)));
+            }
 
             ConfigureLocale();
 

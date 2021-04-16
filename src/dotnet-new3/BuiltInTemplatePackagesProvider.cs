@@ -17,9 +17,11 @@ namespace dotnet_new3
     /// </summary>
     class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
+        public static readonly Guid FactoryId = new Guid("{3227D09D-C1EA-48F1-A33B-1F132BFD9F06}");
+
         public string DisplayName => "new3 BuiltIn";
 
-        public Guid Id { get; } = new Guid("{3227D09D-C1EA-48F1-A33B-1F132BFD9F06}");
+        public Guid Id => FactoryId;
 
         public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
         {
