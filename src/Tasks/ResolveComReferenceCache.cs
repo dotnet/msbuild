@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -16,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// 
     /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    internal sealed class ResolveComReferenceCache : StateFileBase
+    internal sealed class ResolveComReferenceCache : StateFileBase, ITranslatable
     {
         /// <summary>
         /// Component timestamps. 
@@ -86,6 +87,19 @@ namespace Microsoft.Build.Tasks
                     _dirty = true;
                 }
             }
+        }
+
+        public ResolveComReferenceCache(ITranslator translator)
+        {
+            Translate(translator);
+        }
+
+        public override void Translate(ITranslator translator)
+        {
+            translator.Translate(ref axImpLocation);
+            translator.Translate(ref tlbImpLocation);
+            translator.TranslateDictionary(ref componentTimestamps, StringComparer.Ordinal);
+            translator.Translate(ref _serializedVersion);
         }
     }
 }

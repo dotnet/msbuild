@@ -13,7 +13,7 @@ namespace Microsoft.Build.Tasks
     /// <remarks>
     /// Base class for task state files.
     /// </remarks>
-    internal class StateFileBase
+    internal abstract class StateFileBase
     {
         // Current version for serialization. This should be changed when breaking changes
         // are made to this class.
@@ -21,10 +21,10 @@ namespace Microsoft.Build.Tasks
         // Version 4/5 - VS2017.7:
         //   Unify .NET Core + Full Framework. Custom serialization on some types that are no
         //   longer [Serializable].
-        private const byte CurrentSerializationVersion = 5;
+        private const byte CurrentSerializationVersion = 6;
 
         // Version this instance is serialized with.
-        private byte _serializedVersion = CurrentSerializationVersion;
+        protected byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
         /// Writes the contents of this object out to the specified file.
@@ -43,8 +43,7 @@ namespace Microsoft.Build.Tasks
                     using (var s = new FileStream(stateFile, FileMode.CreateNew))
                     {
                         var translator = BinaryTranslator.GetWriteTranslator(s);
-                        StateFileBase thisCopy = this;
-                        translator.Translate(ref thisCopy, thisCopy.GetType());
+                        Translate(translator);
                     }
                 }
             }
@@ -57,6 +56,8 @@ namespace Microsoft.Build.Tasks
                 log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile, e.Message);
             }
         }
+
+        public abstract void Translate(ITranslator translator);
 
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
@@ -73,7 +74,15 @@ namespace Microsoft.Build.Tasks
                     using (FileStream s = new FileStream(stateFile, FileMode.Open))
                     {
                         var translator = BinaryTranslator.GetReadTranslator(s, buffer: null);
-                        translator.Translate(ref retVal, requiredReturnType);
+                        var constructors = requiredReturnType.GetConstructors();
+                        foreach (var constructor in constructors)
+                        {
+                            var parameters = constructor.GetParameters();
+                            if (parameters.Length == 1 && parameters[0].ParameterType == typeof(ITranslator))
+                            {
+                                retVal = constructor.Invoke(new object[] { translator }) as StateFileBase;
+                            }
+                        }
 
                         // If retVal is still null or the version is wrong, log a message not a warning. This could be a valid cache with the wrong version preventing correct deserialization.
                         // For the latter case, internals may be unexpectedly null.

@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Resources;
 using System.Xml;
-
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks
     /// 
     /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    internal sealed class ResGenDependencies : StateFileBase
+    internal sealed class ResGenDependencies : StateFileBase, ITranslatable
     {
         /// <summary>
         /// The list of resx files.
@@ -87,6 +87,21 @@ namespace Microsoft.Build.Tasks
                 // on the same switch & resolve in the same manner as ResGen.
                 BaseLinkedFileDirectory = value ? null : Directory.GetCurrentDirectory();
             }
+        }
+
+        public ResGenDependencies() { }
+
+        public ResGenDependencies(ITranslator translator)
+        {
+            Translate(translator);
+        }
+
+        public override void Translate(ITranslator translator)
+        {
+            resXFiles.Translate(translator, typeof(ResXFile));
+            portableLibraries.Translate(translator, typeof(PortableLibraryFile));
+            translator.Translate(ref baseLinkedFileDirectory);
+            translator.Translate(ref _serializedVersion);
         }
 
         internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)
@@ -186,7 +201,7 @@ namespace Microsoft.Build.Tasks
         /// 
         /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        internal sealed class ResXFile : DependencyFile
+        internal sealed class ResXFile : DependencyFile, ITranslatable
         {
             // Files contained within this resx file.
             internal string[] linkedFiles;
@@ -208,6 +223,11 @@ namespace Microsoft.Build.Tasks
 
             internal ResXFile()
             {
+            }
+
+            public void Translate(ITranslator translator)
+            {
+                translator.Translate(ref linkedFiles);
             }
 
             /// <summary>
@@ -282,7 +302,7 @@ namespace Microsoft.Build.Tasks
         /// 
         /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        internal sealed class PortableLibraryFile : DependencyFile
+        internal sealed class PortableLibraryFile : DependencyFile, ITranslatable
         {
             internal string[] outputFiles;
             internal string neutralResourceLanguage;
@@ -290,6 +310,13 @@ namespace Microsoft.Build.Tasks
 
             internal PortableLibraryFile()
             {
+            }
+
+            public void Translate(ITranslator translator)
+            {
+                translator.Translate(ref assemblySimpleName);
+                translator.Translate(ref outputFiles);
+                translator.Translate(ref neutralResourceLanguage);
             }
 
             internal PortableLibraryFile(string filename)

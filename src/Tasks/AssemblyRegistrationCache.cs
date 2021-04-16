@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -9,7 +10,7 @@ namespace Microsoft.Build.Tasks
     /// <remarks>
     /// This class is a caching mechanism for the Register/UnregisterAssembly task to keep track of registered assemblies to clean up
     /// </remarks>
-    internal sealed class AssemblyRegistrationCache : StateFileBase
+    internal sealed class AssemblyRegistrationCache : StateFileBase, ITranslatable
     {
         /// <summary>
         /// The list of registered assembly files.
@@ -50,6 +51,21 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrow((index >= 0) && (index < _assemblies.Count), "Invalid index in the call to AssemblyRegistrationCache.GetEntry");
             assemblyPath = _assemblies[index];
             typeLibraryPath = _typeLibraries[index];
+        }
+
+        public AssemblyRegistrationCache(ITranslator translator)
+        {
+            Translate(translator);
+        }
+
+        public AssemblyRegistrationCache() { }
+
+        public override void Translate(ITranslator translator)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(translator, nameof(translator));
+            translator.Translate(ref _assemblies);
+            translator.Translate(ref _typeLibraries);
+            translator.Translate(ref _serializedVersion);
         }
     }
 }
