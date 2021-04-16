@@ -113,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                //cannot check for absence of NETSDK1164 since that is used with /nowarn: in some configurations
+                //cannot check for absence of NETSDK1165 since that is used with /nowarn: in some configurations
                 .NotHaveStdOutContaining(Strings.@TrimmingWpfIsNotSupported);
         }
     }
