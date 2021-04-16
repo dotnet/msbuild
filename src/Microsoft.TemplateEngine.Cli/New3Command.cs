@@ -386,7 +386,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (ephemeralHiveFlag)
             {
-                EnvironmentSettings.Host.VirtualizeDirectory(_paths.User.BaseDir);
+                EnvironmentSettings.Host.VirtualizeDirectory(EnvironmentSettings.Paths.TemplateEngineRootDir);
             }
 
             bool reinitFlag = _commandInput.HasDebuggingFlag("--debug:reinit");
