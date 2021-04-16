@@ -64,7 +64,8 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdOutContaining("NETSDK1164");
+                //cannot check for absence of NETSDK1164 since that is used with /nowarn: in some configurations
+                .NotHaveStdOutContaining(Strings.@TrimmingWindowsFormsIsNotSupported);
         }
 
         [WindowsOnlyFact]
@@ -112,7 +113,8 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdOutContaining("NETSDK1165");
+                //cannot check for absence of NETSDK1164 since that is used with /nowarn: in some configurations
+                .NotHaveStdOutContaining(Strings.@TrimmingWpfIsNotSupported);
         }
     }
 }
