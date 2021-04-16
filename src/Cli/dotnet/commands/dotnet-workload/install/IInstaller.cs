@@ -5,7 +5,7 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal interface IInstaller : IWorkloadInstallationRecordInstaller
+    internal interface IInstaller
     {
         InstallationUnit GetInstallationUnit();
 
@@ -14,6 +14,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         IWorkloadInstaller GetWorkloadInstaller();
 
         void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand);
+
+        IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository();
     }
 
     internal enum InstallationUnit {

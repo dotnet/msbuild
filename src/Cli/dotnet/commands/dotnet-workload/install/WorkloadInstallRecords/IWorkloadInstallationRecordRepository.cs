@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
-    internal interface IWorkloadInstallationRecordInstaller
+    internal interface IWorkloadInstallationRecordRepository
     {
         IEnumerable<string> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand);
 

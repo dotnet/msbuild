@@ -7,13 +7,12 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
-    internal class NetSdkManagedInstallationRecordInstaller
+    internal class NetSdkManagedInstallationRecordRepository : IWorkloadInstallationRecordRepository
     {
         private readonly string _workloadMetadataDir;
         private readonly string _installedWorkloadDir = "InstalledWorkloads";
 
-        public NetSdkManagedInstallationRecordInstaller(
-            string dotnetDir)
+        public NetSdkManagedInstallationRecordRepository(string dotnetDir)
         {
             _workloadMetadataDir = Path.Combine(dotnetDir, "metadata", "workloads");
         }

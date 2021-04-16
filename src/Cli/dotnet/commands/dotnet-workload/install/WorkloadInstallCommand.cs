@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
-            var sdkFeatureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
+            var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver);
         }
 
@@ -181,7 +181,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                         foreach (var workloadId in workloadIds)
                         {
-                            _workloadInstaller.WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
+                            _workloadInstaller.GetWorkloadInstallationRecordRepository()
+                                .WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
 
                     },
@@ -193,7 +194,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                         foreach (var workloadId in workloadIds)
                         {
-                            _workloadInstaller.DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
+                            _workloadInstaller.GetWorkloadInstallationRecordRepository()
+                                .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
                     });
             }

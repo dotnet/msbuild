@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installManager.InstallWorkloads(mockWorkloadIds, true);
 
             installer.GarbageCollectionCalled.Should().BeTrue();
-            installer.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
+            installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
             installer.InstalledPacks.Count.Should().Be(8);
             installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
             _reporter.Lines.Contains(string.Format(LocalizableStrings.InstallationSucceeded, "xamarin-android"));
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .Distinct()
                 .Select(packId => workloadResolver.TryGetPackInfo(packId));
             installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
-            installer.WorkloadInstallRecord.Should().BeEmpty();
+            installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEmpty();
         }
     }
 }

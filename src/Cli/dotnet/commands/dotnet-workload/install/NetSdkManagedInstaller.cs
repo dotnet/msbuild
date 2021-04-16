@@ -18,7 +18,7 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
-    internal class NetSdkManagedInstaller : NetSdkManagedInstallationRecordInstaller, IWorkloadPackInstaller
+    internal class NetSdkManagedInstaller : IWorkloadPackInstaller
     {
         private readonly IReporter _reporter;
         private readonly string _workloadMetadataDir;
@@ -28,13 +28,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly INuGetPackageDownloader _nugetPackageInstaller;
         private readonly IWorkloadResolver _workloadResolver;
         private readonly SdkFeatureBand _sdkFeatureBand;
+        private readonly NetSdkManagedInstallationRecordRepository _installationRecordRepository;
 
         public NetSdkManagedInstaller(
             IReporter reporter,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader = null,
-            string dotnetDir =  null) : base(dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory())
+            string dotnetDir =  null)
         {
             _dotnetDir = dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory();
             _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
@@ -43,6 +44,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
             _workloadResolver = workloadResolver;
+            _installationRecordRepository = new NetSdkManagedInstallationRecordRepository(_dotnetDir);
         }
 
         public InstallationUnit GetInstallationUnit()
@@ -58,6 +60,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public IWorkloadInstaller GetWorkloadInstaller()
         {
             throw new Exception("NetSdkManagedInstaller is not a workload installer.");
+        }
+
+        public IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository()
+        {
+            return _installationRecordRepository;
         }
 
         public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
@@ -146,7 +153,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public void GarbageCollectInstalledWorkloadPacks()
         {
             var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
-            var installedSdkFeatureBands = GetFeatureBandsWithInstallationRecords();
+            var installedSdkFeatureBands = _installationRecordRepository.GetFeatureBandsWithInstallationRecords();
             _reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectingSdkFeatureBandsMessage, string.Join(" ", installedSdkFeatureBands)));
             var currentBandInstallRecords = GetExpectedPackInstallRecords(_sdkFeatureBand);
 
@@ -187,7 +194,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private IEnumerable<string> GetExpectedPackInstallRecords(SdkFeatureBand sdkFeatureBand)
         {
-            var installedWorkloads = GetInstalledWorkloads(sdkFeatureBand);
+            var installedWorkloads = _installationRecordRepository.GetInstalledWorkloads(sdkFeatureBand);
             return installedWorkloads
                 .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
                 .Select(pack => _workloadResolver.TryGetPackInfo(pack))

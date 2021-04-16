@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 }
             }
 
-            var featureBands = installer.GetFeatureBandsWithInstallationRecords();
+            var featureBands = installer.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords();
             if (writeRecords)
             {
                 featureBands.ShouldBeEquivalentTo(versions);
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.CreateDirectory(net7Path);
             File.WriteAllText(Path.Combine(net7Path, workloads.First()), string.Empty);
 
-            var installedWorkloads = installer.GetInstalledWorkloads(new SdkFeatureBand(version));
+            var installedWorkloads = installer.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(new SdkFeatureBand(version));
             installedWorkloads.ShouldBeEquivalentTo(workloads);
         }
 
@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadId = new WorkloadId("test-workload");
             var version = "6.0.100";
             var (dotnetRoot, installer, _) = GetTestInstaller();
-            installer.WriteWorkloadInstallationRecord(workloadId, new SdkFeatureBand(version));
+            installer.GetWorkloadInstallationRecordRepository().WriteWorkloadInstallationRecord(workloadId, new SdkFeatureBand(version));
             var expectedPath = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads", workloadId.ToString());
             File.Exists(expectedPath).Should().BeTrue();
         }
