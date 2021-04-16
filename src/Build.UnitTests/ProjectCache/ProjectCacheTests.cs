@@ -847,7 +847,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 if ((exceptionsThatEndUpInBuildResult & exceptionLocations) != 0)
                 {
                     buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-                    buildResult.Exception.Message.ShouldContain("Cache plugin exception from");
+                    buildResult.Exception.ShouldBeOfType<ProjectCacheException>();
+                    buildResult.Exception.InnerException!.ShouldNotBeNull();
+                    buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from");
                 }
 
                 // BuildManager.EndBuild calls plugin.EndBuild, so if only plugin.EndBuild fails it means everything else passed,
@@ -870,8 +872,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 }
                 else if (exceptionLocations.HasFlag(ExceptionLocations.EndBuildAsync))
                 {
-                    var e = Should.Throw<Exception>(() => buildSession!.Dispose());
-                    e.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
+                    var e = Should.Throw<ProjectCacheException>(() => buildSession!.Dispose());
+                    e.InnerException!.ShouldNotBeNull();
+                    e.InnerException!.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
                 }
                 else
                 {
@@ -945,7 +948,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 // Static graph build initializes and tears down the cache plugin so all cache plugin exceptions should end up in the GraphBuildResult
                 buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-                buildResult.Exception.Message.ShouldContain("Cache plugin exception from");
+                buildResult.Exception.ShouldBeOfType<ProjectCacheException>();
+                buildResult.Exception.InnerException!.ShouldNotBeNull();
+                buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from");
 
                 // TODO: this ain't right now is it?
                 logger.FullLog.ShouldNotContain("Cache plugin exception");
@@ -1014,7 +1019,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 });
 
             buildResult!.OverallResult.ShouldBe(BuildResultCode.Failure);
-            buildResult.Exception.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
+            buildResult.Exception.InnerException!.ShouldNotBeNull();
+            buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
 
             buildSession.Dispose();
 
