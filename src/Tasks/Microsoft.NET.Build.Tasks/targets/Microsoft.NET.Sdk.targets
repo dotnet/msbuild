@@ -333,7 +333,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                       TargetPath="$([System.IO.Path]::GetFileName($(ProjectDepsFilePath)))"
                                       CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-    
+
     <ItemGroup Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'">
       <AllItemsFullPathWithTargetPath Include="$(ProjectRuntimeConfigFilePath)"
                                 TargetPath="$([System.IO.Path]::GetFileName($(ProjectRuntimeConfigFilePath)))"
@@ -342,7 +342,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 TargetPath="$([System.IO.Path]::GetFileName($(ProjectRuntimeConfigDevFilePath)))"
                                 CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-    
+
   </Target>
 
   <Target Name="AddDepsJsonAndRuntimeConfigToPublishItemsForReferencingProjects"
@@ -353,7 +353,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup Condition="'$(GenerateDependencyFile)' == 'true'">
       <AllPublishItemsFullPathWithTargetPath Include="$(ProjectDepsFilePath)"
                                       TargetPath="$([System.IO.Path]::GetFileName($(ProjectDepsFilePath)))"
-                                      CopyToPublishDirectory="PreserveNewest" 
+                                      CopyToPublishDirectory="PreserveNewest"
                                       Condition="'$(_UseBuildDependencyFile)' == 'true'"/>
       <AllPublishItemsFullPathWithTargetPath Include="$(PublishDepsFilePath)"
                                       TargetPath="$([System.IO.Path]::GetFileName($(PublishDepsFilePath)))"
@@ -365,11 +365,11 @@ Copyright (c) .NET Foundation. All rights reserved.
       <AllPublishItemsFullPathWithTargetPath Include="$(ProjectRuntimeConfigFilePath)"
                                 TargetPath="$([System.IO.Path]::GetFileName($(ProjectRuntimeConfigFilePath)))"
                                 CopyToPublishDirectory="PreserveNewest" />
-    
+
 
     </ItemGroup>
-    
-    
+
+
   </Target>
 
   <Target Name="_SdkBeforeClean">
@@ -1031,7 +1031,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
                             GenerateSupportedTargetFrameworkAlias
-    Generate a list of valid TargetFramework aliases for the project 
+    Generate a list of valid TargetFramework aliases for the project
     system to consume for the target framework properties page drop down
     ============================================================
   -->
@@ -1095,7 +1095,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Windows.targets" Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
-  
+
   <!-- TargetPlatformMoniker and TargetPlatformDisplayName would normally be set in Microsoft.Common.CurrentVersion.targets.  However, the
        TargetPlatformVersion may have been set later than that in evaluation by platform-specific targets or Directory.Build.targets.  So fix up those properties here -->
   <PropertyGroup Condition="'$(TargetPlatformMoniker)' == '' and '$(TargetPlatformIdentifier)' != ''">
@@ -1112,6 +1112,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(SupportedOSPlatformVersion)' == ''">
     <SupportedOSPlatformVersion>$(TargetPlatformVersion)</SupportedOSPlatformVersion>
   </PropertyGroup>
-  
+
   <Import Project="$(AfterMicrosoftNETSdkTargets)" Condition="'$(AfterMicrosoftNETSdkTargets)' != ''"/>
 </Project>

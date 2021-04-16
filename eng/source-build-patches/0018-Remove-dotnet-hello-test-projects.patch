@@ -1,0 +1,86 @@
+From ad95c68e357e26246f1ab0ab33a5ec0c25f9f39f Mon Sep 17 00:00:00 2001
+From: dseefeld <dseefeld@microsoft.com>
+Date: Tue, 9 Feb 2021 14:45:52 +0000
+Subject: [PATCH] Remove dotnet-hello test projects
+
+---
+ .../v1/dotnet-hello/dotnet-hello.csproj          | 16 ----------------
+ .../v2/dotnet-hello/dotnet-hello.csproj          | 15 ---------------
+ .../BuildTestPackages.targets                    | 16 ----------------
+ 3 files changed, 47 deletions(-)
+ delete mode 100644 src/Assets/TestPackages/dotnet-hello/v1/dotnet-hello/dotnet-hello.csproj
+ delete mode 100644 src/Assets/TestPackages/dotnet-hello/v2/dotnet-hello/dotnet-hello.csproj
+
+diff --git a/src/Assets/TestPackages/dotnet-hello/v1/dotnet-hello/dotnet-hello.csproj b/src/Assets/TestPackages/dotnet-hello/v1/dotnet-hello/dotnet-hello.csproj
+deleted file mode 100644
+index 48a78a6e7..000000000
+--- a/src/Assets/TestPackages/dotnet-hello/v1/dotnet-hello/dotnet-hello.csproj
++++ /dev/null
+@@ -1,16 +0,0 @@
+-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+-  
+-  <PropertyGroup>
+-    <Version>1.0.0</Version>
+-    <!--Workaround for https://github.com/NuGet/Home/issues/4583-->
+-    <VersionSuffix></VersionSuffix>
+-    <!-- netcoreapp2.2 is the maximum TFM project tools support -->
+-    <TargetFramework>netcoreapp2.2</TargetFramework>
+-    <AssemblyName>dotnet-hello</AssemblyName>
+-    <OutputType>Exe</OutputType>
+-    <RuntimeIdentifiers>win7-x64;win7-x86;osx.10.10-x64;osx.10.11-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.24-x64;opensuse.42.1-x64</RuntimeIdentifiers>
+-    <IsPackable>true</IsPackable>
+-  </PropertyGroup>
+-
+-</Project>
+diff --git a/src/Assets/TestPackages/dotnet-hello/v2/dotnet-hello/dotnet-hello.csproj b/src/Assets/TestPackages/dotnet-hello/v2/dotnet-hello/dotnet-hello.csproj
+deleted file mode 100644
+index 8956d362f..000000000
+--- a/src/Assets/TestPackages/dotnet-hello/v2/dotnet-hello/dotnet-hello.csproj
++++ /dev/null
+@@ -1,15 +0,0 @@
+-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+-  
+-  <PropertyGroup>
+-    <Version>2.0.0</Version>
+-    <!--Workaround for https://github.com/NuGet/Home/issues/4583-->
+-    <VersionSuffix></VersionSuffix>
+-    <!-- netcoreapp2.2 is the maximum TFM project tools support -->
+-    <TargetFramework>netcoreapp2.2</TargetFramework>
+-    <AssemblyName>dotnet-hello</AssemblyName>
+-    <OutputType>Exe</OutputType>
+-    <RuntimeIdentifiers>win7-x64;win7-x86;osx.10.10-x64;osx.10.11-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;ubuntu.16.10-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.24-x64;opensuse.42.1-x64</RuntimeIdentifiers>
+-    <IsPackable>true</IsPackable>
+-  </PropertyGroup>
+-</Project>
+diff --git a/src/Tests/Microsoft.NET.TestFramework/BuildTestPackages.targets b/src/Tests/Microsoft.NET.TestFramework/BuildTestPackages.targets
+index 962c06d35..2a88a2fc2 100644
+--- a/src/Tests/Microsoft.NET.TestFramework/BuildTestPackages.targets
++++ b/src/Tests/Microsoft.NET.TestFramework/BuildTestPackages.targets
+@@ -84,22 +84,6 @@
+         <Version>$(Version)</Version>
+         <Clean>True</Clean>
+       </BaseTestPackageProject>
+-      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-hello/v1/dotnet-hello">
+-        <Name>dotnet-hello</Name>
+-        <ProjectName>dotnet-hello.csproj</ProjectName>
+-        <IsTool>True</IsTool>
+-        <IsApplicable>True</IsApplicable>
+-        <Version>1.0.0</Version>
+-        <Clean>True</Clean>
+-      </BaseTestPackageProject>
+-      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-hello/v2/dotnet-hello">
+-        <Name>dotnet-hello</Name>
+-        <ProjectName>dotnet-hello.csproj</ProjectName>
+-        <IsTool>True</IsTool>
+-        <IsApplicable>True</IsApplicable>
+-        <Version>2.0.0</Version>
+-        <Clean>True</Clean>
+-      </BaseTestPackageProject>
+       <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-outputsframeworkversion/dotnet-outputsframeworkversion-netcoreapp1.0">
+         <Name>dotnet-outputsframeworkversion-netcoreapp1.0</Name>
+         <ProjectName>dotnet-outputsframeworkversion-netcoreapp1.0.csproj</ProjectName>
+-- 
+2.21.3
+

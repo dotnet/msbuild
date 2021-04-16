@@ -5,6 +5,7 @@ using System;
 
 using System.Collections.Generic;
 using Microsoft.NET.Sdk.Localization;
+using FXVersion = Microsoft.DotNet.MSBuildSdkResolver.FXVersion;
 
 #if USE_SYSTEM_TEXT_JSON
 using System.Text.Json;
@@ -35,6 +36,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.ExpectedStringAtOffset, reader.TokenStartIndex);
         }
 
+        private static long ReadInt64(ref Utf8JsonStreamReader reader)
+        {
+            if (reader.Read() && reader.TokenType.IsInt())
+            {
+                if (reader.TryGetInt64 (out long value))
+                {
+                    return value;
+                }
+            }
+
+            throw new WorkloadManifestFormatException(Strings.ExpectedIntegerAtOffset, reader.TokenStartIndex);
+        }
+
         private static bool ReadBool(ref Utf8JsonStreamReader reader)
         {
             if (reader.Read() && reader.TokenType.IsBool())
@@ -48,14 +62,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private static void ThrowDuplicateKeyException<T> (ref Utf8JsonStreamReader reader, T key)
             => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key?.ToString() ?? throw new ArgumentNullException (nameof(key)), reader.TokenStartIndex);
 
-        private static WorkloadManifest ReadWorkloadManifest(ref Utf8JsonStreamReader reader)
+        private static WorkloadManifest ReadWorkloadManifest(string id, ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
-            long? version = null;
+            FXVersion? version = null;
             string? description = null;
             Dictionary<WorkloadDefinitionId, WorkloadDefinition>? workloads = null;
             Dictionary<WorkloadPackId, WorkloadPack>? packs = null;
+            Dictionary<string, FXVersion>? dependsOn = null;
 
             while (reader.Read())
             {
@@ -67,15 +82,40 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (string.Equals("version", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (version != null) ThrowDuplicateKeyException(ref reader, propName);
-                            if (!reader.Read() || !reader.TryGetInt64(out var v)) throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
-                            version = v;
-                            continue;
+                            if (reader.Read())
+                            {
+                                if (reader.TokenType == JsonTokenType.String)
+                                {
+                                    if (FXVersion.TryParse(reader.GetString(), out version))
+                                    {
+                                        continue;
+                                    }
+                                }
+                                else if (reader.TokenType.IsInt())
+                                {
+                                    // older manifests could have an int value
+                                    if (reader.TryGetInt64(out var intVersion) && intVersion < int.MaxValue)
+                                    {
+                                        version = new FXVersion((int)intVersion, 0, 0);
+                                        continue;
+                                    }
+                                }
+                                
+                            }
+                            throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
                         }
 
                         if (string.Equals("description", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (description != null) ThrowDuplicateKeyException(ref reader, propName);
                             description = ReadString(ref reader);
+                            continue;
+                        }
+
+                        if (string.Equals("depends-on", propName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (dependsOn != null) ThrowDuplicateKeyException(ref reader, propName);
+                            dependsOn = ReadDependsOn(ref reader);
                             continue;
                         }
 
@@ -107,16 +147,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         throw new WorkloadManifestFormatException(Strings.UnknownKeyAtOffset, propName, reader.TokenStartIndex);
                     case JsonTokenType.EndObject:
 
-                        if (version == null || version < 0)
+                        if (version == null)
                         {
                             throw new WorkloadManifestFormatException(Strings.MissingOrInvalidManifestVersion);
                         }
 
                         return new WorkloadManifest (
-                            version.Value,
+                            id,
+                            version,
                             description,
                             workloads ?? new Dictionary<WorkloadDefinitionId, WorkloadDefinition> (),
-                            packs ?? new Dictionary<WorkloadPackId, WorkloadPack> ()
+                            packs ?? new Dictionary<WorkloadPackId, WorkloadPack> (),
+                            dependsOn
                         );
                     default:
                         throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
@@ -152,6 +194,38 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             } while (reader.CurrentDepth > depth);
 
             return true;
+        }
+
+        private static Dictionary<string, FXVersion> ReadDependsOn(ref Utf8JsonStreamReader reader)
+        {
+            ConsumeToken(ref reader, JsonTokenType.StartObject);
+
+            var dependsOn = new Dictionary<string, FXVersion>(StringComparer.OrdinalIgnoreCase);
+
+            while (reader.Read())
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.PropertyName:
+                        var dependencyId = reader.GetString();
+                        if (FXVersion.TryParse(ReadString(ref reader), out var dependencyVersion))
+                        {
+                            if (dependsOn.ContainsKey(dependencyId))
+                            {
+                                ThrowDuplicateKeyException(ref reader, dependencyId);
+                            }
+                            dependsOn.Add(dependencyId, dependencyVersion);
+                            continue;
+                        }
+                        goto default;
+                    case JsonTokenType.EndObject:
+                        return dependsOn;
+                    default:
+                        throw new WorkloadManifestFormatException(Strings.UnexpectedTokenAtOffset, reader.TokenType, reader.TokenStartIndex);
+                }
+            }
+
+            throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
         private static Dictionary<WorkloadDefinitionId, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)

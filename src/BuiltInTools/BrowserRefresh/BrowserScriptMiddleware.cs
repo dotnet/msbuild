@@ -19,14 +19,9 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         private readonly byte[] _scriptBytes;
         private readonly string _contentLength;
 
-        public BrowserScriptMiddleware(RequestDelegate next)
-            : this(Environment.GetEnvironmentVariable("ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT")!)
+        public BrowserScriptMiddleware(RequestDelegate next, byte[] scriptBytes)
         {
-        }
-
-        internal BrowserScriptMiddleware(string webSocketUrl)
-        {
-            _scriptBytes = GetWebSocketClientJavaScript(webSocketUrl);
+            _scriptBytes = scriptBytes;
             _contentLength = _scriptBytes.Length.ToString(CultureInfo.InvariantCulture);
         }
 
@@ -38,6 +33,19 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 
             await context.Response.Body.WriteAsync(_scriptBytes.AsMemory(), context.RequestAborted);
         }
+
+        internal static byte[] GetBlazorHotReloadJS()
+        {
+            var jsFileName = "Microsoft.AspNetCore.Watch.BrowserRefresh.BlazorHotReload.js";
+            using var stream = new MemoryStream();
+            var manifestStream = typeof(WebSocketScriptInjection).Assembly.GetManifestResourceStream(jsFileName)!;
+            manifestStream.CopyTo(stream);
+
+            return stream.ToArray();
+        }
+
+        internal static byte[] GetBrowserRefreshJS()
+            => GetWebSocketClientJavaScript(Environment.GetEnvironmentVariable("ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT")!);
 
         internal static byte[] GetWebSocketClientJavaScript(string hostString)
         {

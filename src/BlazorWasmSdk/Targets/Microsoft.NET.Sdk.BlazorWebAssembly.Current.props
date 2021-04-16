@@ -13,6 +13,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <!-- Blazor WASM projects are always browser-wasm -->
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
+    <UseMonoRuntime>true</UseMonoRuntime>
 
     <!-- Avoid having the rid show up in output paths -->
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>

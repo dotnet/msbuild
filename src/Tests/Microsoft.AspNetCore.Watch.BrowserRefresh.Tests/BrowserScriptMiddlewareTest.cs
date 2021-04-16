@@ -12,6 +12,8 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 {
     public class BrowserScriptMiddlewareTest
     {
+        private readonly RequestDelegate _next = (context) => Task.CompletedTask;
+
         [Fact]
         public async Task InvokeAsync_ReturnsScript()
         {
@@ -19,7 +21,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             var context = new DefaultHttpContext();
             var stream = new MemoryStream();
             context.Response.Body = stream;
-            var middleware = new BrowserScriptMiddleware("some-host");
+            var middleware = new BrowserScriptMiddleware(_next, BrowserScriptMiddleware.GetWebSocketClientJavaScript("some-host"));
 
             // Act
             await middleware.InvokeAsync(context);
@@ -37,7 +39,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
             // Arrange
             var context = new DefaultHttpContext();
             context.Response.Body = new MemoryStream();
-            var middleware = new BrowserScriptMiddleware("some-host");
+            var middleware = new BrowserScriptMiddleware(_next, BrowserScriptMiddleware.GetWebSocketClientJavaScript("some-host"));
 
             // Act
             await middleware.InvokeAsync(context);

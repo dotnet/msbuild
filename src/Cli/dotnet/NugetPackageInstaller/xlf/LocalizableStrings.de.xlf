@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="FailedToLoadNuGetSource">
+        <source>Failed to load NuGet source {0}</source>
+        <target state="new">Failed to load NuGet source {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToLoadNuGetSourceSourceIsNotValid">
+        <source>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</source>
+        <target state="new">Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IsNotFoundInNuGetFeeds">
+        <source>{0} is not found in NuGet feeds {1}",</source>
+        <target state="new">{0} is not found in NuGet feeds {1}",</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

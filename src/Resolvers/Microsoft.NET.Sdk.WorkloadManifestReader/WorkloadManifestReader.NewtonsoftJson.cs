@@ -15,14 +15,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     public partial class WorkloadManifestReader
     {
 
-        public static WorkloadManifest ReadWorkloadManifest(Stream manifestStream)
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream)
         {
             using var textReader = new StreamReader(manifestStream, System.Text.Encoding.UTF8, true);
             using var jsonReader = new JsonTextReader(textReader);
 
             var reader = new Utf8JsonStreamReader(jsonReader);
 
-            return ReadWorkloadManifest(ref reader);
+            return ReadWorkloadManifest(manifestId, ref reader);
         }
         // this is a compat wrapper so the source matches the system.text.json impl
         private ref struct Utf8JsonStreamReader
@@ -74,6 +74,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     internal static class JsonTokenTypeExtensions
     {
         public static bool IsBool(this JsonTokenType tokenType) => tokenType == JsonTokenType.Boolean;
+        public static bool IsInt(this JsonTokenType tokenType) => tokenType == JsonTokenType.Integer;
     }
 }
 

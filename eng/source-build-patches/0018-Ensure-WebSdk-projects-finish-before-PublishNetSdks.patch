@@ -1,0 +1,29 @@
+From 4ba8044a223fb7ed001ce777c8112e231bcee7f8 Mon Sep 17 00:00:00 2001
+From: dseefeld <dseefeld@microsoft.com>
+Date: Tue, 2 Feb 2021 09:18:31 -0500
+Subject: [PATCH] Ensure WebSdk projects finish before PublishNetSdks
+
+---
+ src/Layout/redist/targets/GenerateLayout.targets | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/Layout/redist/targets/GenerateLayout.targets b/src/Layout/redist/targets/GenerateLayout.targets
+index 48b0303..d45fda2 100644
+--- a/src/Layout/redist/targets/GenerateLayout.targets
++++ b/src/Layout/redist/targets/GenerateLayout.targets
+@@ -70,6 +70,12 @@
+ 
+   <Target Name="PublishNetSdks"
+           BeforeTargets="Build">
++    <ItemGroup>
++      <WebSdkProjectFile Include="$(RepoRoot)src\WebSdk\**\*.csproj" />
++    </ItemGroup>
++
++    <MSBuild Projects="@(WebSdkProjectFile)" />
++
+     <PropertyGroup>
+       <NETSdkSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk</NETSdkSourceRoot>
+       <NETSdkWebSourceRoot>$(ArtifactsBinDir)$(Configuration)\Sdks\Microsoft.NET.Sdk.Web</NETSdkWebSourceRoot>
+-- 
+1.8.3.1
+

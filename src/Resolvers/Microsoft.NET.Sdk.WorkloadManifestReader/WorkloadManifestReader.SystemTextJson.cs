@@ -12,7 +12,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
-        public static WorkloadManifest ReadWorkloadManifest(Stream manifestStream)
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream)
         {
             var readerOptions = new JsonReaderOptions
             {
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var reader = new Utf8JsonStreamReader(manifestStream, readerOptions);
 
-            return ReadWorkloadManifest(ref reader);
+            return ReadWorkloadManifest(manifestId, ref reader);
         }
 
         private ref struct Utf8JsonStreamReader
@@ -109,6 +109,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     internal static class JsonTokenTypeExtensions
     {
         public static bool IsBool(this JsonTokenType tokenType) => tokenType == JsonTokenType.True || tokenType == JsonTokenType.False;
+        public static bool IsInt(this JsonTokenType tokenType) => tokenType == JsonTokenType.Number;
     }
 }
 

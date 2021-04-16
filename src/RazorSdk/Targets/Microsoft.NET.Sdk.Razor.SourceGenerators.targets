@@ -10,6 +10,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project ToolsVersion="14.0">
 
+  <UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.EncodeRazorInputItem" AssemblyFile="$(RazorSdkBuildTasksAssembly)" />
+
   <Target Name="_PrepareRazorSourceGenerators"
     BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"
     DependsOnTargets="PrepareForRazorGenerate;PrepareForRazorComponentGenerate">
@@ -45,7 +47,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <!-- Additional metadata and properties that we want the compiler to pass to   the compiler we want to pass additional MSBuild properties \ metadata -->
       <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
-      <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="GeneratedOutputFullPath" />
       <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="CssScope" />
       <CompilerVisibleProperty Include="RazorLangVersion" />
       <CompilerVisibleProperty Include="RootNamespace" />
@@ -70,6 +71,15 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <_RazorAdditionalFile Remove="@(_RazorAdditionalFile)" Condition="$([MSBuild]::IsOSPlatform(`Windows`))" />
       <_RazorAdditionalFile Include="@(_RazorOmnisharpWorkAround)" Condition="$([MSBuild]::IsOSPlatform(`Windows`))" />
+    </ItemGroup>
+
+    <EncodeRazorInputItem RazorInputItems="@(_RazorAdditionalFile)">
+      <Output TaskParameter="EncodedRazorInputItems" ItemName="_RazorSpecialCharacterWorkaround" />
+    </EncodeRazorInputItem>
+
+    <ItemGroup>
+      <_RazorAdditionalFile Remove="@(_RazorAdditionalFile)" />
+      <_RazorAdditionalFile Include="@(_RazorSpecialCharacterWorkaround)" />
 
       <AdditionalFiles Include="@(_RazorAdditionalFile)" />
 

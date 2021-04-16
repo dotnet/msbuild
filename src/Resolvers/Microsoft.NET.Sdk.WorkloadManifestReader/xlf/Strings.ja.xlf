@@ -17,6 +17,11 @@
         <target state="translated">オフセット {0} にはブール値が必要です</target>
         <note />
       </trans-unit>
+      <trans-unit id="ExpectedIntegerAtOffset">
+        <source>Expected integer value at offset {0}</source>
+        <target state="new">Expected integer value at offset {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ExpectedStringAtOffset">
         <source>Expected string value at offset {0}</source>
         <target state="translated">オフセット {0} には文字列値が必要です</target>

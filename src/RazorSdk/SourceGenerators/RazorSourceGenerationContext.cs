@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 
@@ -146,6 +147,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                         item.Path));
                     continue;
                 }
+
+                relativePath = Encoding.UTF8.GetString(Convert.FromBase64String(relativePath));
 
                 options.TryGetValue("build_metadata.AdditionalFiles.CssScope", out var cssScope);
 

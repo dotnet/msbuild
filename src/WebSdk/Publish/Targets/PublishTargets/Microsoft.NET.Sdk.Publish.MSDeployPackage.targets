@@ -115,7 +115,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
  -->
 
   <Target Name="_InitMSDeployPackageProperties">
-   
+
     <PropertyGroup>
       <DefaultPackageFileName Condition="'$(DefaultPackageFileName)'==''">$(MSBuildProjectName).zip</DefaultPackageFileName>
       <PackageLocation Condition="'$(PackageLocation)' == ''">$(DesktopBuildPackageLocation)</PackageLocation>
@@ -131,7 +131,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ConvertToAbsolutePath>
 
   </Target>
-  
+
   <!--
   ***********************************************************************************************
   TARGET : _PrepareForMsDeployPackagePublish
@@ -152,7 +152,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_PublishConfigFiles Include="$(_MsDeploySourceManifestPath);$(_MSDeployParametersFilePath);$(_MSDeploySetParametersFilePath);$(_MSDeployScriptFilePath);$(_MSDeployReadMeFilePath)" />
     </ItemGroup>
-    
+
     <MakeDir Directories="$(_destinationFolder)" Condition="!Exists('$(_destinationFolder)')" ContinueOnError="true"/>
     <Delete Files="@(_PublishConfigFiles)" ContinueOnError="true" />
     <Touch AlwaysCreate="true" Files="@(_PublishConfigFiles)" ContinueOnError="true" />
@@ -184,7 +184,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Manifests="@(MsDeploySourceManifest)"
       ManifestFile="$(_MsDeploySourceManifestPath)" />
   </Target>
-  
+
     <!--
   ***********************************************************************************************
   TARGET : _CreateMSDeployScript
@@ -196,9 +196,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <CreateMsDeployScript
       Condition="'$(IsCreateMSDeployScriptDisabled)' != 'true'"
       ProjectName="$(MSBuildProjectName)"
-      ScriptFullPath="$(_MSDeployScriptFilePath)" 
+      ScriptFullPath="$(_MSDeployScriptFilePath)"
       ReadMeFullPath="$(_MSDeployReadMeFilePath)"/>
-      
+
   </Target>
 
   <!--
@@ -240,11 +240,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <ItemGroup>
-      <ParametersXMLFiles Include="$(MSBuildProjectDirectory)\Parameters.xml" 
+      <ParametersXMLFiles Include="$(MSBuildProjectDirectory)\Parameters.xml"
                           Condition="Exists('$(MSBuildProjectDirectory)\Parameters.xml')"/>
     </ItemGroup>
 
-    <ImportParameterFile Condition="'@(ParametersXMLFiles)' != ''" 
+    <ImportParameterFile Condition="'@(ParametersXMLFiles)' != ''"
                          Files="@(ParametersXMLFiles)">
       <Output TaskParameter="Result"
               ItemName="_ImportedMSDeployDeclareParameters" />
@@ -257,7 +257,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Priority></Priority>
       </MsDeployDeclareParameters>
     </ItemGroup>
-    
+
     <CreateParameterFile
       Parameters="@(MsDeployDeclareParameters)"
       DeclareSetParameterFile="$(_MSDeployParametersFilePath)"
@@ -286,7 +286,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <prefetchPayload></prefetchPayload>
     </MsDeploySourceProviderSetting>
   </ItemDefinitionGroup>
-  
+
   <ItemDefinitionGroup>
     <MsDeployDestinationProviderSetting>
       <Path></Path>
@@ -300,7 +300,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <prefetchPayload></prefetchPayload>
     </MsDeployDestinationProviderSetting>
   </ItemDefinitionGroup>
-  
+
   <!--
   DeploymentSkipRule(string skipAction, string objectName, string absolutePath, string XPath);-->
   <ItemDefinitionGroup>

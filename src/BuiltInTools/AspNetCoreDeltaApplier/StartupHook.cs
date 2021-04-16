@@ -28,6 +28,88 @@ internal sealed class StartupHook
         });
     }
 
+    private static (List<Action<Type[]?>> BeforeUpdates, List<Action<Type[]?>> AfterUpdates) GetMetadataUpdateHandlerActions()
+    {
+        var beforeUpdates = new List<Action<Type[]?>>();
+        var afterUpdates = new List<Action<Type[]?>>();
+
+        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            foreach (CustomAttributeData attr in assembly.GetCustomAttributesData())
+            {
+                if (attr.AttributeType.FullName != "System.Reflection.Metadata.MetadataUpdateHandlerAttribute")
+                {
+                    continue;
+                }
+
+                IList<CustomAttributeTypedArgument> ctorArgs = attr.ConstructorArguments;
+                if (ctorArgs.Count != 1 ||
+                    ctorArgs[0].Value is not Type handlerType)
+                {
+                    Log($"'{attr}' found with invalid arguments.");
+                    continue;
+                }
+
+                bool methodFound = false;
+
+                if (GetUpdateMethod(handlerType, "BeforeUpdate") is MethodInfo beforeUpdate)
+                {
+                    beforeUpdates.Add(CreateAction(beforeUpdate));
+                    methodFound = true;
+                }
+
+                if (GetUpdateMethod(handlerType, "AfterUpdate") is MethodInfo afterUpdate)
+                {
+                    afterUpdates.Add(CreateAction(afterUpdate));
+                    methodFound = true;
+                }
+
+                if (!methodFound)
+                {
+                    Log($"No BeforeUpdate or AfterUpdate method found on '{handlerType}'.");
+                }
+
+                static Action<Type[]?> CreateAction(MethodInfo update)
+                {
+                    Action<Type[]?> action = update.CreateDelegate<Action<Type[]?>>();
+                    return types =>
+                    {
+                        try
+                        {
+                            action(types);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log($"Exception from '{action}': {ex}");
+                        }
+                    };
+                }
+
+                static MethodInfo? GetUpdateMethod(Type handlerType, string name)
+                {
+                    if (handlerType.GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(Type[]) }) is MethodInfo updateMethod &&
+                        updateMethod.ReturnType == typeof(void))
+                    {
+                        return updateMethod;
+                    }
+
+                    foreach (MethodInfo method in handlerType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+                    {
+                        if (method.Name == name)
+                        {
+                            Log($"Type '{handlerType}' has method '{method}' that does not match the required signature.");
+                            break;
+                        }
+                    }
+
+                    return null;
+                }
+            }
+        }
+
+        return (beforeUpdates, afterUpdates);
+    }
+
     private static List<Action> GetAssembliesReceivingDeltas()
     {
         var receipients = new List<Action>();
@@ -90,15 +172,23 @@ internal sealed class StartupHook
         }
 
         List<Action>? receiveDeltaNotifications = null;
+        List<Action<Type[]?>>? beforeUpdates = null;
+        List<Action<Type[]?>>? afterUpdates = null;
 
         while (pipeClient.IsConnected)
         {
-
             var update = await UpdatePayload.ReadAsync(pipeClient, default);
             Log("Attempting to apply deltas.");
 
             try
             {
+                if (beforeUpdates is null || afterUpdates is null)
+                {
+                    (beforeUpdates, afterUpdates) = GetMetadataUpdateHandlerActions();
+                }
+
+                beforeUpdates.ForEach(b => b(null)); // TODO: Get types to pass in
+
                 foreach (var item in update.Deltas)
                 {
                     var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.Modules.FirstOrDefault() is Module m && m.ModuleVersionId == item.ModuleId);
@@ -114,10 +204,13 @@ internal sealed class StartupHook
                     ApplyResult.Success_RefreshBrowser;
                 pipeClient.WriteByte((byte)applyResult);
 
+                // TODO: Remove once https://github.com/dotnet/aspnetcore/issues/31806 is addressed
                 // Defer discovering the receiving deltas until the first hot reload delta.
                 // This should give enough opportunity for AppDomain.GetAssemblies() to be sufficiently populated.
                 receiveDeltaNotifications ??= GetAssembliesReceivingDeltas();
                 receiveDeltaNotifications.ForEach(r => r.Invoke());
+
+                afterUpdates.ForEach(a => a(null)); // TODO: Get types to pass in
 
                 Log("Deltas applied.");
             }
@@ -137,4 +230,3 @@ internal sealed class StartupHook
         }
     }
 }
-

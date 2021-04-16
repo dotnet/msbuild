@@ -6,7 +6,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-Copyright (c) .NET Foundation. All rights reserved. 
+Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
@@ -18,8 +18,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PublishProtocolProviderTargets>ClickOncePublish</PublishProtocolProviderTargets>
   </PropertyGroup>
 
-  <!-- 
-    .NET Core ClickOnce manifest generation needs to run after this list of targets so that all 
+  <!--
+    .NET Core ClickOnce manifest generation needs to run after this list of targets so that all
     json files are generated and files to publish are computed.
   -->
   <PropertyGroup>
@@ -33,7 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </DeploymentComputeClickOnceManifestInfoDependsOn>
   </PropertyGroup>
 
-  <Target Name="GetNetCoreRuntimeJsonFilesForClickOnce" 
+  <Target Name="GetNetCoreRuntimeJsonFilesForClickOnce"
           Condition="'$(GenerateDependencyFile)' == 'true'">
 
     <!-- Get correct deps json files based on _UseBuildDependencyFile -->
@@ -50,9 +50,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
        <NetCoreRuntimeJsonFilesForClickOnce Include="@(ProjectRuntimeConfigFilesForClickOnce);@(ProjectDepsFilesForClickOnce)"/>
     </ItemGroup>
-  </Target>  
+  </Target>
 
-  <!-- 
+  <!--
     Add necessary clickonce targets that need to run during publish process.
     These targets are defined in MS.Common.CurrentVersion.targets in the msbuild repo.
   -->

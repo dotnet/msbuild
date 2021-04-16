@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     public class GivenDotnetRestoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private const string ExpectedPrefix =
-            "exec <msbuildpath> -maxcpucount -verbosity:m -nologo -target:Restore";
+            "-maxcpucount -verbosity:m -nologo -target:Restore";
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetRestoreInvocation));
 
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
                 var msbuildPath = "<msbuildpath>";
                 RestoreCommand.FromArgs(args, msbuildPath)
-                    .GetProcessStartInfo().Arguments
+                    .GetArgumentsToMSBuild()
                     .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
             });
         }

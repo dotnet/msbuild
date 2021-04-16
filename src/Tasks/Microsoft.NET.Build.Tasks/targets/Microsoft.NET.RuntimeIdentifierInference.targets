@@ -226,7 +226,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetDefaultPlatformTargetForNetFramework"
            AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-
   <!--
     Switch our default .NETFramework CPU architecture choice back to AnyCPU before
     compiling the exe if no copy-local native dependencies were resolved from NuGet

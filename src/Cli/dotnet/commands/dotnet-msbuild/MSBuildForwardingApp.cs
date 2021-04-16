@@ -69,17 +69,42 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return _forwardingAppWithoutLogging.GetProcessStartInfo();
         }
 
+        /// <summary>
+        /// Test hook returning concatenated and escaped command line arguments that would be passed to MSBuild.
+        /// </summary>
+        internal string GetArgumentsToMSBuild()
+        {
+            var argumentsUnescaped = _forwardingAppWithoutLogging.GetAllArguments();
+            return Cli.Utils.ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(argumentsUnescaped);
+        }
+
         public virtual int Execute()
         {
             // Ignore Ctrl-C for the remainder of the command's execution
             // Forwarding commands will just spawn the child process and exit
             Console.CancelKeyPress += (sender, e) => { e.Cancel = true; };
 
-            ProcessStartInfo startInfo = GetProcessStartInfo();
+            int exitCode;
+            if (_forwardingAppWithoutLogging.ExecuteMSBuildOutOfProc)
+            {
+                ProcessStartInfo startInfo = GetProcessStartInfo();
 
-            PerformanceLogEventSource.Log.LogMSBuildStart(startInfo);
-            int exitCode = startInfo.Execute();
-            PerformanceLogEventSource.Log.MSBuildStop(exitCode);
+                PerformanceLogEventSource.Log.LogMSBuildStart(startInfo.FileName, startInfo.Arguments);
+                exitCode = startInfo.Execute();
+                PerformanceLogEventSource.Log.MSBuildStop(exitCode);
+            }
+            else
+            {
+                string[] arguments = _forwardingAppWithoutLogging.GetAllArguments();
+                if (PerformanceLogEventSource.Log.IsEnabled())
+                {
+                    PerformanceLogEventSource.Log.LogMSBuildStart(
+                        _forwardingAppWithoutLogging.MSBuildPath,
+                        ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(arguments));
+                }
+                exitCode = _forwardingAppWithoutLogging.ExecuteInProc(arguments);
+                PerformanceLogEventSource.Log.MSBuildStop(exitCode);
+            }
 
             return exitCode;
         }
