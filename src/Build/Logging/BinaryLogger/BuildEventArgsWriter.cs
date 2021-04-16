@@ -834,7 +834,9 @@ namespace Microsoft.Build.Logging
 
         private void CheckForFilesToEmbed(string itemType, object itemList)
         {
-            if (!string.Equals(itemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase) || itemList is not IEnumerable list)
+            if (EmbedFile == null ||
+                !string.Equals(itemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase) ||
+                itemList is not IEnumerable list)
             {
                 return;
             }
@@ -843,11 +845,11 @@ namespace Microsoft.Build.Logging
             {
                 if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
                 {
-                    EmbedFile?.Invoke(taskItem.ItemSpec);
+                    EmbedFile.Invoke(taskItem.ItemSpec);
                 }
                 else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
                 {
-                    EmbedFile?.Invoke(itemSpec);
+                    EmbedFile.Invoke(itemSpec);
                 }
             }
         }

@@ -160,7 +160,11 @@ namespace Microsoft.Build.Logging
             stream = new BufferedStream(stream, bufferSize: 32768);
             binaryWriter = new BinaryWriter(stream);
             eventArgsWriter = new BuildEventArgsWriter(binaryWriter);
-            eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
+
+            if (projectImportsCollector != null)
+            {
+                eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
+            }
 
             binaryWriter.Write(FileFormatVersion);
 
