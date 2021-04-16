@@ -1262,21 +1262,17 @@ namespace Microsoft.Build.CommandLine
                         success = false;
 
                         // InvalidProjectFileExceptions and its aggregates have already been logged.
-                        if (exception.GetType() != typeof(InvalidProjectFileException)
+                        if (exception is not InvalidProjectFileException
                             && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
                         {
-                            if
-                                (
-                                exception.GetType() == typeof(LoggerException) ||
-                                exception.GetType() == typeof(InternalLoggerException)
-                                )
+                            if (exception is LoggerException or InternalLoggerException)
                             {
                                 // We will rethrow this so the outer exception handler can catch it, but we don't
                                 // want to log the outer exception stack here.
                                 throw exception;
                             }
 
-                            if (exception.GetType() == typeof(BuildAbortedException))
+                            if (exception is BuildAbortedException)
                             {
                                 // this is not a bug and should not dump stack. It will already have been logged
                                 // appropriately, there is no need to take any further action with it.
