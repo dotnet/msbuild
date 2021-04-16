@@ -23,14 +23,22 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         {
             return app =>
             {
-                app.Map("/_framework/clear-browser-cache", app1 => app1.Run(context =>
+                app.Map(Urls.ClearSiteData, app1 => app1.Run(context =>
                 {
                     // Scoped css files can contain links to other css files. We'll try clearing out the http caches to force the browser to re-download.
                     // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data#directives
-                    context.Response.Headers["Clear-site-data"] = "\"cache\"";
+                    context.Response.Headers["Clear-Site-Data"] = "\"cache\"";
                     return Task.CompletedTask;
                 }));
-                app.Map(WebSocketScriptInjection.WebSocketScriptUrl, app1 => app1.UseMiddleware<BrowserScriptMiddleware>());
+
+                app.Map(Urls.BlazorHotReloadMiddleware, app1 => app1.UseMiddleware<BlazorWasmHotReloadMiddleware>());
+
+                app.Map(Urls.BrowserRefreshJS,
+                    app1 => app1.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBrowserRefreshJS()));
+
+                app.Map(Urls.BlazorHotReloadJS,
+                    app1 => app1.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBlazorHotReloadJS()));
+
                 app.UseMiddleware<BrowserRefreshMiddleware>();
                 next(app);
             };

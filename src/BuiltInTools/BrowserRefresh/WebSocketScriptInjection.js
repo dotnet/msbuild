@@ -47,11 +47,11 @@ setTimeout(function () {
 
   function updateStaticFile(path) {
     if (path && path.endsWith('.css')) {
-        updateCssByPath(path);
+      updateCssByPath(path);
     } else {
-        console.debug(`File change detected to css file ${path}. Reloading page...`);
-        location.reload();
-        return;
+      console.debug(`File change detected to css file ${path}. Reloading page...`);
+      location.reload();
+      return;
     }
   }
 
@@ -99,6 +99,13 @@ setTimeout(function () {
 
   function applyBlazorDeltas(deltas) {
     deltas.forEach(d => window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta));
+    fetch('_framework/blazor-hotreload', { method: 'post', headers: { 'content-type': 'application/json' }, body: JSON.stringify(deltas) })
+      .then(response => {
+        if (response.status == 200) {
+          const etag = response.headers['etag'];
+          window.sessionStorage.setItem('blazor-webasssembly-cache', { etag, deltas });
+        }
+      });
     notifyHotReloadApplied();
   }
 
@@ -108,25 +115,25 @@ setTimeout(function () {
     el.id = 'dotnet-compile-error';
     el.setAttribute('style', 'z-index:1000000; position:fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); color:black');
     diagnostics.forEach(error => {
-        const item = el.appendChild(document.createElement('div'));
-        item.setAttribute('style', 'border: 2px solid red; padding: 8px; background-color: #faa;')
-        const message = item.appendChild(document.createElement('div'));
-        message.setAttribute('style', 'font-weight: bold');
-        message.textContent = error.Message;
-        item.appendChild(document.createElement('div')).textContent = error;
+      const item = el.appendChild(document.createElement('div'));
+      item.setAttribute('style', 'border: 2px solid red; padding: 8px; background-color: #faa;')
+      const message = item.appendChild(document.createElement('div'));
+      message.setAttribute('style', 'font-weight: bold');
+      message.textContent = error.Message;
+      item.appendChild(document.createElement('div')).textContent = error;
     });
   }
 
   function notifyHotReloadApplied() {
-      document.querySelectorAll('#dotnet-compile-error').forEach(el => el.remove());
-      if (document.querySelector('#dotnet-hotreload-toast')) {
-        return;
-      }
-      const el = document.createElement('div');
-      el.id = 'dotnet-hotreload-toast';
-      el.setAttribute('style', 'z-index:1000000; width:100%; height: 30px; font-size: large; text-align:center; position:fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); color:black; transition: 0.5s all ease-in-out;');
-      el.textContent = 'Updated the page';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 520);
+    document.querySelectorAll('#dotnet-compile-error').forEach(el => el.remove());
+    if (document.querySelector('#dotnet-hotreload-toast')) {
+      return;
+    }
+    const el = document.createElement('div');
+    el.id = 'dotnet-hotreload-toast';
+    el.setAttribute('style', 'z-index:1000000; width:100%; height: 30px; font-size: large; text-align:center; position:fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); color:black; transition: 0.5s all ease-in-out;');
+    el.textContent = 'Updated the page';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 520);
   }
 }, 500);

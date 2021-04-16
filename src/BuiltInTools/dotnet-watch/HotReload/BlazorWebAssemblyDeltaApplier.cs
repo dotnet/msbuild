@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal class BlazorWebAssemblyDeltaApplier : IDeltaApplier
     {
         private readonly IReporter _reporter;
+        private int _sequenceId;
 
         public BlazorWebAssemblyDeltaApplier(IReporter reporter)
         {
@@ -23,6 +24,8 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            // Configure the app for EnC
+            context.ProcessSpec.EnvironmentVariables["DOTNET_MODIFIABLE_ASSEMBLIES"] = "debug";
             return default;
         }
 
@@ -38,6 +41,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             {
                 Deltas = solutionUpdate.Select(c => new UpdateDelta
                 {
+                    SequenceId = _sequenceId++,
                     ModuleId = c.ModuleId,
                     MetadataDelta = c.MetadataDelta.ToArray(),
                     ILDelta = c.ILDelta.ToArray(),
@@ -75,6 +79,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private readonly struct UpdateDelta
         {
+            public int SequenceId { get; init; }
             public Guid ModuleId { get; init; }
             public byte[] MetadataDelta { get; init; }
             public byte[] ILDelta { get; init; }
