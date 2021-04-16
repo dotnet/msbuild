@@ -13,9 +13,11 @@ namespace Microsoft.DotNet.Tools.New
     /// </summary>
     internal class BuiltInTemplatePackageProviderFactory : ITemplatePackageProviderFactory
     {
+        public static readonly Guid FactoryId = new Guid("{4B11226E-4594-43A4-B843-EB97447B6455}");
+
         public string DisplayName => "BuiltIn SDK packages";
 
-        public Guid Id { get; } = new Guid("{4B11226E-4594-43A4-B843-EB97447B6455}");
+        public Guid Id { get => FactoryId; }
 
         public ITemplatePackageProvider CreateProvider(IEngineEnvironmentSettings settings)
             => new BuiltInTemplatePackageProvider(this, settings);
