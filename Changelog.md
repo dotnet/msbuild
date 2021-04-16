@@ -1,6 +1,6 @@
 # MSBuild 16.10.0
 
-This version of MSBuild will with Visual Studio 2019 version 16.10.0 and .NET SDK 5.0.300.
+This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .NET SDK 5.0.300.
 
 ## What's new
 
