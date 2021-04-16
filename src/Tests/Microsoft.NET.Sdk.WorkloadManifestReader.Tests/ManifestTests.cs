@@ -64,6 +64,19 @@ namespace ManifestReaderTests
         }
 
         [Fact]
+        public void UnresolvedAliasedPackPath()
+        {
+            var manifestProvider = new FakeManifestProvider(ManifestPath);
+            var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { fakeRootPath }, new[] { "fake-platform" });
+
+            resolver.ReplaceFilesystemChecksForTest(_ => true, _ => true);
+
+            var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "Xamarin.Android.BuildTools");
+
+            buildToolsPack.Should().BeNull();
+        }
+
+        [Fact]
         public void GivenMultiplePackRoots_ItUsesTheLastOneIfThePackDoesntExist()
         {
             TestMultiplePackRoots(false, false);
