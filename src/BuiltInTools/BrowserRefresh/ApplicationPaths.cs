@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Watch.BrowserRefresh
 {
-    internal static class Urls
+    internal static class ApplicationPaths
     {
         /// <summary>
         /// An endpoint that responds with cache-clearing headers. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data#directives.

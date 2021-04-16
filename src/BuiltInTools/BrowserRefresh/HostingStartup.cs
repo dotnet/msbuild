@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         {
             return app =>
             {
-                app.Map(Urls.ClearSiteData, app1 => app1.Run(context =>
+                app.Map(ApplicationPaths.ClearSiteData, app1 => app1.Run(context =>
                 {
                     // Scoped css files can contain links to other css files. We'll try clearing out the http caches to force the browser to re-download.
                     // See https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data#directives
@@ -31,12 +31,12 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
                     return Task.CompletedTask;
                 }));
 
-                app.Map(Urls.BlazorHotReloadMiddleware, app1 => app1.UseMiddleware<BlazorWasmHotReloadMiddleware>());
+                app.Map(ApplicationPaths.BlazorHotReloadMiddleware, app1 => app1.UseMiddleware<BlazorWasmHotReloadMiddleware>());
 
-                app.Map(Urls.BrowserRefreshJS,
+                app.Map(ApplicationPaths.BrowserRefreshJS,
                     app1 => app1.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBrowserRefreshJS()));
 
-                app.Map(Urls.BlazorHotReloadJS,
+                app.Map(ApplicationPaths.BlazorHotReloadJS,
                     app1 => app1.UseMiddleware<BrowserScriptMiddleware>(BrowserScriptMiddleware.GetBlazorHotReloadJS()));
 
                 app.UseMiddleware<BrowserRefreshMiddleware>();
