@@ -481,7 +481,7 @@ EndGlobal
         public void WhenInvalidSolutionIsPassedItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("InvalidSolution")
+                .CopyTestAsset("InvalidSolution", identifier: "GivenDotnetSlnAdd")
                 .WithSource()
                 .Path;
 
@@ -516,7 +516,7 @@ EndGlobal
         public void WhenNoProjectIsPassedItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "GivenDotnetSlnAdd")
                 .WithSource()
                 .Path;
 
@@ -550,7 +550,7 @@ EndGlobal
         public void WhenMoreThanOneSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithMultipleSlnFiles")
+                .CopyTestAsset("TestAppWithMultipleSlnFiles", identifier: "GivenDotnetSlnAdd")
                 .WithSource()
                 .Path;
 
@@ -679,7 +679,7 @@ EndGlobal
         public void WhenSolutionFolderExistsItDoesNotGetAdded(string firstComponent)
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndSolutionFolders")
+                .CopyTestAsset("TestAppWithSlnAndSolutionFolders", identifier: firstComponent)
                 .WithSource()
                 .Path;
 

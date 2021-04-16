@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
                 Name = "TargetPlatformTests",
                 TargetFrameworks = targetFramework
             };
-            var testAsset = _testAssetsManager.CreateTestProject(testProj);
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: targetFramework);
 
             Action<string, string> assertValue = (string valueName, string expected) =>
             {

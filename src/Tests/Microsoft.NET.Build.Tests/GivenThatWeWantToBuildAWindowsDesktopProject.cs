@@ -204,7 +204,7 @@ namespace Microsoft.NET.Build.Tests
                 testProject.AdditionalProperties["TargetPlatformIdentifier"] = "Windows";
                 testProject.AdditionalProperties["TargetPlatformVersion"] = "10.0.18362";
             }
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, setInTargetframework.ToString());
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()

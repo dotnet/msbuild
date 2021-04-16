@@ -37,7 +37,8 @@ namespace Microsoft.NET.Build.Tests
                 defaultProject,
                 expectConflicts: false,
                 references: out List<string> defaultReferences,
-                referenceCopyLocalPaths: out List<string> defaultReferenceCopyLocalPaths);
+                referenceCopyLocalPaths: out List<string> defaultReferenceCopyLocalPaths,
+                targetFramework);
 
             var disableProject = new TestProject()
             {
@@ -50,7 +51,8 @@ namespace Microsoft.NET.Build.Tests
                 disableProject,
                 expectConflicts: true,
                 references: out List<string> disableReferences,
-                referenceCopyLocalPaths: out List<string> disableReferenceCopyLocalPaths);
+                referenceCopyLocalPaths: out List<string> disableReferenceCopyLocalPaths,
+                targetFramework);
 
             Assert.Equal(defaultReferences, disableReferences);
             Assert.Equal(defaultReferenceCopyLocalPaths, disableReferenceCopyLocalPaths);
@@ -64,10 +66,10 @@ namespace Microsoft.NET.Build.Tests
             }
         }
 
-        private void GetReferences(TestProject testProject, bool expectConflicts, out List<string> references, out List<string> referenceCopyLocalPaths)
+        private void GetReferences(TestProject testProject, bool expectConflicts, out List<string> references, out List<string> referenceCopyLocalPaths, string identifier)
         {
             string targetFramework = testProject.TargetFrameworks;
-            TestAsset tempTestAsset = _testAssetsManager.CreateTestProject(testProject);
+            TestAsset tempTestAsset = _testAssetsManager.CreateTestProject(testProject, identifier: identifier);
 
             string projectFolder = Path.Combine(tempTestAsset.TestRoot, testProject.Name);
 

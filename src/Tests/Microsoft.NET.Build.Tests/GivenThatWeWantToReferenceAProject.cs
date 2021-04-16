@@ -177,7 +177,7 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = tfm,
                 Name = "ChildProject",
             };
-            var childAsset = _testAssetsManager.CreateTestProject(childProject)
+            var childAsset = _testAssetsManager.CreateTestProject(childProject, identifier: copyConflictingTransitiveContent.ToString() + explicitlySet.ToString())
                 .WithProjectChanges(project => AddProjectChanges(project));
             File.WriteAllText(Path.Combine(childAsset.Path, childProject.Name, contentName), childProject.Name);
 
@@ -190,7 +190,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 parentProject.AdditionalProperties["CopyConflictingTransitiveContent"] = copyConflictingTransitiveContent.ToString().ToLower();
             }
-            var parentAsset = _testAssetsManager.CreateTestProject(parentProject)
+            var parentAsset = _testAssetsManager.CreateTestProject(parentProject, identifier: copyConflictingTransitiveContent.ToString() + explicitlySet.ToString())
                 .WithProjectChanges(project => AddProjectChanges(project, Path.Combine(childAsset.Path, childProject.Name, childProject.Name + ".csproj")));
             File.WriteAllText(Path.Combine(parentAsset.Path, parentProject.Name, contentName), parentProject.Name);
 

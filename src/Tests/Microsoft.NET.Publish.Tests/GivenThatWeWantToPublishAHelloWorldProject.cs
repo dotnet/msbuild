@@ -443,7 +443,7 @@ public static class Program
                 IsExe = true
             };
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, testProject.Name, identifier: tfm);
 
             var publishCommand = new PublishCommand(testAsset);
 
@@ -579,7 +579,8 @@ public static class Program
                 IsExe = true,
             };
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var identifer = (selfContained == null ? "null" : selfContained.ToString()) + (useAppHost == null ? "null" : useAppHost.ToString());
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: identifer);
 
             var projectDirectory = Path.Combine(testProjectInstance.Path, testProject.Name);
             var publishProfilesDirectory = Path.Combine(projectDirectory, "Properties", "PublishProfiles");

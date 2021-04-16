@@ -37,9 +37,13 @@ jobs:
       - _PublishArgs: ''
       - _SignArgs: ''
       - _InternalRuntimeDownloadArgs: ''
+      - _HelixApiToken: ''
+      # Helix Testing requires a token when internally run
+      - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        - group: DotNet-HelixApi-Access
+        - _HelixApiToken: $(HelixApiAccessToken)
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - group: DotNet-Symbol-Server-PATs
-        - group: DotNet-HelixApi-Access
         - group: dotnet-benchview
         - group: DotNet-Blob-Feed
         - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
@@ -170,7 +174,7 @@ jobs:
         condition: succeededOrFailed()
         env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            HelixAccessToken: ''
+            HelixAccessToken: $(_HelixApiToken)
 
     - task: PublishTestResults@2
       displayName: Publish Test Results	

@@ -90,7 +90,7 @@ namespace FrameworkReferenceTest
 
             testProject.SourceFiles.Add("Program.cs", FrameworkReferenceEmptyProgramSource);
 
-            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject)
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: tfm)
                 .Restore(Log, testProject.Name);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -346,7 +346,7 @@ namespace FrameworkReferenceTest
 
             testProject.AdditionalProperties["RollForward"] = rollForwardValue;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: rollForwardValue + tfm);
 
             var buildCommand = new BuildCommand(testAsset);
 
@@ -395,7 +395,7 @@ namespace FrameworkReferenceTest
 
             testProject.AdditionalProperties["RollForward"] = rollForwardValue;
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: rollForwardValue.GetHashCode().ToString());
 
             var buildCommand = new BuildCommand(testAsset);
 
