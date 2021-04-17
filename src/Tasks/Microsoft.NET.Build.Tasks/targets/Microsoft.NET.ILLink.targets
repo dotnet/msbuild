@@ -226,14 +226,18 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- DynamicallyAccessedMembersAttribute used on unsupported member -->
       <NoWarn>$(NoWarn);IL2097;IL2098;IL2099</NoWarn>
 
-      <!-- Warnings from the framework. Can be removed once https://github.com/dotnet/runtime/issues/40336 is fixed. -->
-      <!-- Framework embedded XML descriptors reference windows-only members. -->
-      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2008</NoWarn> <!-- Unresolved type referenced in XML. -->
-      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2009</NoWarn> <!-- Unresolved member on type referenced in XML. -->
       <!-- Framework has DynamicDependencyAttributes that reference windows-only members. -->
       <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2037</NoWarn> <!-- Unresolved member for DynamicDependencyAttribute -->
       <!-- Framework embedded XML descriptors reference 32-bit-only members. -->
       <NoWarn Condition=" '$(PlatformTarget)' != 'x64' AND '$(PlatformTarget)' != 'arm64'">$(NoWarn);IL2009;IL2012</NoWarn> <!-- Unresolved field referenced in XML -->
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(PublishTrimmed)' == 'true' ">
+      <!-- Temporarily suppress these warnings regardless of SuppressTrimAnalysisWarnings to remove spurious warnings on non-Windows platforms. -->
+      <!-- Warnings from the framework. Can be removed once https://github.com/dotnet/runtime/issues/40336 is fixed. -->
+      <!-- Framework embedded XML descriptors reference windows-only members. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2008</NoWarn> <!-- Unresolved type referenced in XML. -->
+      <NoWarn Condition=" !$(RuntimeIdentifier.StartsWith('win')) ">$(NoWarn);IL2009</NoWarn> <!-- Unresolved member on type referenced in XML. -->
     </PropertyGroup>
 
     <!-- Set a default value for TrimmerRemoveSymbols unless set explicitly. -->
