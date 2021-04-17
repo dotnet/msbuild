@@ -59,6 +59,8 @@ namespace Microsoft.Build.Shared
         /// Determines whether the file system is case sensitive.
         /// Copied from https://github.com/dotnet/runtime/blob/73ba11f3015216b39cb866d9fb7d3d25e93489f2/src/libraries/Common/src/System/IO/PathInternal.CaseSensitivity.cs#L41-L59
         /// </summary>
+        ///
+
         public static bool GetIsFileSystemCaseSensitive()
         {
             try
@@ -133,7 +135,7 @@ namespace Microsoft.Build.Shared
         {
             return stringToHash.GetHashCode().ToString("X", CultureInfo.InvariantCulture);
         }
-
+        
         /// <summary>
         /// Get the hash for the assemblyPaths
         /// </summary>
@@ -266,12 +268,26 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Trims the string and removes any double quotes around it.
         /// </summary>
+        ///
+        public static bool EnsurePathIsSingleQuoted(string path)
+        {
+            int endId = path.Length - 1;
+            char singleQuote = '\'';
+
+            return path[0] == singleQuote && path[endId] == singleQuote;
+        }
         internal static string TrimAndStripAnyQuotes(string path)
         {
-            // Trim returns the same string if trimming isn't needed
-            path = path.Trim();
-            path = path.Trim(new char[] { '"' });
-
+            
+            if (EnsurePathIsSingleQuoted(path))
+            {
+                // Trim returns the same string if trimming isn't needed
+                path = path.Trim(new char[] { '\'' });
+            }
+            else
+            {
+                path = path.Trim(new char[] { '"' });
+            }
             return path;
         }
 
@@ -538,16 +554,14 @@ namespace Microsoft.Build.Shared
 
             return str.Slice(0, sliceLength);
         }
-
+        
         private static Span<char> RemoveQuotes(Span<char> path)
         {
             int endId = path.Length - 1;
-            char singleQuote = '\'';
             char doubleQuote = '\"';
-
             bool hasQuotes = path.Length > 2
-                && ((path[0] == singleQuote && path[endId] == singleQuote)
-                || (path[0] == doubleQuote && path[endId] == doubleQuote));
+            && (EnsurePathIsSingleQuoted(path.ToString())
+            || (path[0] == doubleQuote && path[endId] == doubleQuote));
 
             return hasQuotes ? path.Slice(1, endId - 1) : path;
         }
@@ -1061,7 +1075,7 @@ namespace Microsoft.Build.Shared
             {
                 return ".";
             }
-            
+
             // If the paths have no component in common, the only valid relative path is the full path.
             if (index == 0)
             {

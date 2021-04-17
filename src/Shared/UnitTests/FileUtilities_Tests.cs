@@ -27,6 +27,37 @@ namespace Microsoft.Build.UnitTests
             TestGetItemSpecModifier(null);
         }
 
+        [Fact]
+        public void TestEnsurePathIsSingleQuoted()
+        {
+            string currentDirectory = "\'/file/path/hackathon\'";
+            bool isSingleQuoted = FileUtilities.EnsurePathIsSingleQuoted(currentDirectory);
+            Assert.True(isSingleQuoted);
+        }
+
+        [Fact]
+        public void TestEnsurePathIsNotSingleQuoted()
+        {
+            string currentDirectory = "\"/file/path/hackathon\"";
+            bool isSingleQuoted = FileUtilities.EnsurePathIsSingleQuoted(currentDirectory);
+            Assert.False(isSingleQuoted);
+        }
+
+        [Fact]
+        public void TestTrimAndStripAnyQuotes()
+        {
+            string currentDirectory = "\"/file/path/hackathon\"";
+            string isTrimmed = FileUtilities.TrimAndStripAnyQuotes(currentDirectory);
+            Assert.Equal("/file/path/hackathon", isTrimmed);
+        }
+        [Fact]
+        public void TestTrimAndStripSingleQuotes()
+        {
+            string currentDirectory = "\'/file/path/hackathon\'";
+            string isTrimmed = FileUtilities.TrimAndStripAnyQuotes(currentDirectory);
+            Assert.Equal("/file/path/hackathon", isTrimmed);
+        }
+
         private static void TestGetItemSpecModifier(string currentDirectory)
         {
             string cache = null;

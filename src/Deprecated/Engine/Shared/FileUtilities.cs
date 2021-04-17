@@ -19,6 +19,13 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// <owner>SumedhK</owner>
     static internal class FileUtilities
     {
+        internal static bool EnsurePathIsSingleQuoted(string path)
+        {
+            int endId = path.Length - 1;
+            char singleQuote = '\'';
+
+            return path[0] == singleQuote && path[endId] == singleQuote;
+        }
         #region Item-spec modifiers
 
         /// <summary>
