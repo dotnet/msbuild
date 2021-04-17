@@ -1359,7 +1359,6 @@ namespace Microsoft.Build.Tasks
         public XmlPoke() { }
         public string Namespaces { get { throw null; } set { } }
         public string Query { get { throw null; } set { } }
-        [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem Value { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem XmlInputPath { get { throw null; } set { } }
         public override bool Execute() { throw null; }

@@ -465,6 +465,7 @@ namespace Microsoft.Build.Framework
     public sealed partial class RequiredAttribute : System.Attribute
     {
         public RequiredAttribute() { }
+        public bool AllowEmptyStrings { get { throw null; } set { } }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
     public sealed partial class RequiredRuntimeAttribute : System.Attribute

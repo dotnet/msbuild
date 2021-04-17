@@ -18,5 +18,7 @@ namespace Microsoft.Build.Framework
         public RequiredAttribute()
         {
         }
+
+        public bool AllowEmptyStrings { get; set; }
     }
 }
