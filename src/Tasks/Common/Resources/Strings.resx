@@ -766,4 +766,12 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
     <comment>{StrBegin="NETSDK1142: "}</comment>
   </data>
+  <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
+    <value>NETSDK1164: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
+    <comment>{StrBegin="NETSDK1164: "}</comment>
+  </data>
+  <data name="TrimmingWpfIsNotSupported" xml:space="preserve">
+    <value>NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
+    <comment>{StrBegin="NETSDK1165: "}</comment>
+  </data>
 </root>
