@@ -20,6 +20,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private ProjectCacheException(
             string message,
             Exception innerException,
+            bool hasBeenLogged,
             string errorCode
         )
             : base(message, innerException)
@@ -27,8 +28,15 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
 
+            HasBeenLogged = hasBeenLogged;
             ErrorCode = errorCode;
         }
+
+        /// <summary>
+        /// The project cache has already logged this as an error.
+        /// Should not get logged again.
+        /// </summary>
+        public bool HasBeenLogged { get; }
 
         /// <summary>
         /// Gets the error code associated with this exception's message (not the inner exception).
@@ -36,13 +44,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// <value>The error code string.</value>
         public string ErrorCode { get; }
 
-        /// <summary>
-        /// Throws an instance of this exception using rich error information.
-        /// </summary>
-        /// <param name="innerException"></param>
-        /// <param name="messageResourceName"></param>
-        /// <param name="messageArgs"></param>
-        internal static void Throw
+        internal static void ThrowAsUnhandledException
         (
             Exception innerException,
             string messageResourceName,
@@ -53,7 +55,20 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
 
-            throw new ProjectCacheException(message, innerException, errorCode);
+            throw new ProjectCacheException(message, innerException, hasBeenLogged: false, errorCode);
+        }
+
+        internal static void ThrowForLoggedError
+        (
+            string messageResourceName,
+            params string[] messageArgs
+        )
+        {
+            ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
+
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
+
+            throw new ProjectCacheException(message: message, innerException: null, hasBeenLogged: true, errorCode: errorCode);
         }
     }
 }
