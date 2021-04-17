@@ -66,11 +66,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <RemoveDir
       Directories="$(PublishUrl)"
-      Condition="'$(DeleteExistingFiles)' == 'true' And Exists('$(PublishUrl)')" />
+      Condition="'$(DeleteExistingFiles)' == 'true' And '$(PreserveDestinationFolder)' != 'true' And Exists('$(PublishUrl)')" />
 
     <MakeDir
       Directories="$(PublishUrl)"
-      Condition="'$(DeleteExistingFiles)' == 'true' And !Exists('$(PublishUrl)')"/>
+      Condition="'$(DeleteExistingFiles)' == 'true' And '$(PreserveDestinationFolder)' != 'true' And !Exists('$(PublishUrl)')"/>
   </Target>
 
   <!--
