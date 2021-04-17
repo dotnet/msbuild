@@ -20,6 +20,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
@@ -81,7 +82,11 @@ namespace Microsoft.Build.CommandLine
             /// The build stopped unexpectedly, for example,
             /// because a child died or hung.
             /// </summary>
-            Unexpected
+            Unexpected,
+            /// <summary>
+            /// A project cache failed unexpectedly.
+            /// </summary>
+            ProjectCacheFailure
         }
 
         /// <summary>
@@ -786,6 +791,21 @@ namespace Microsoft.Build.CommandLine
                     exitType = ExitType.InitializationError;
                 }
             }
+            catch (ProjectCacheException e) when (!e.HasBeenLogged)
+            {
+                Console.WriteLine($"MSBUILD : error {e.ErrorCode}: {e.Message}");
+
+#if DEBUG
+                Console.WriteLine("This is an unhandled exception from a project cache -- PLEASE OPEN A BUG AGAINST THE PROJECT CACHE OWNER.");
+#endif
+
+                if (e.InnerException is not null)
+                {
+                    Console.WriteLine(e.InnerException.ToString());
+                }
+
+                exitType = ExitType.ProjectCacheFailure;
+            }
             catch (BuildAbortedException e)
             {
                 Console.WriteLine(
@@ -1265,9 +1285,9 @@ namespace Microsoft.Build.CommandLine
                         if (exception is not InvalidProjectFileException
                             && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
                         {
-                            if (exception is LoggerException or InternalLoggerException)
+                            if (exception is LoggerException or InternalLoggerException or ProjectCacheException)
                             {
-                                // We will rethrow this so the outer exception handler can catch it, but we don't
+                                // We will rethrow these so the outer exception handler can catch them, but we don't
                                 // want to log the outer exception stack here.
                                 throw exception;
                             }

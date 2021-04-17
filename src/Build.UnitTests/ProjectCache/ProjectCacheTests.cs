@@ -898,7 +898,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 StringShouldContainSubstring(logger.FullLog, $"{AssemblyMockCache}: EndBuildAsync", expectedOccurrences: 1);
             }
 
-            // TODO: this ain't right now is it?
             logger.FullLog.ShouldNotContain("Cache plugin exception");
         }
 
@@ -952,7 +951,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 buildResult.Exception.InnerException!.ShouldNotBeNull();
                 buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from");
 
-                // TODO: this ain't right now is it?
                 logger.FullLog.ShouldNotContain("Cache plugin exception");
             }
             finally

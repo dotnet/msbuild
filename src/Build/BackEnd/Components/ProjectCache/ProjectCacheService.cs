@@ -70,7 +70,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             if (logger.HasLoggedErrors)
             {
-                ProjectCacheException.Throw(null, "ProjectCacheInitializationFailed");
+                ProjectCacheException.ThrowForLoggedError("ProjectCacheInitializationFailed");
             }
 
             return new ProjectCacheService(plugin, buildManager, logger, pluginDescriptor, cancellationToken);
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             if (type == null)
             {
-                ProjectCacheException.Throw(null, "NoProjectCachePluginFoundInAssembly", pluginAssemblyPath);
+                ProjectCacheException.ThrowAsUnhandledException(null, "NoProjectCachePluginFoundInAssembly", pluginAssemblyPath);
             }
 
             return type!;
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             if (_logger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
             {
-                ProjectCacheException.Throw(null, "ProjectCacheQueryFailed", queryDescription);
+                ProjectCacheException.ThrowForLoggedError("ProjectCacheQueryFailed", queryDescription);
             }
 
             var message = $"Plugin result: {cacheResult.ResultType}.";
@@ -208,7 +208,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             if (_logger.HasLoggedErrors)
             {
-                ProjectCacheException.Throw(null, "ProjectCacheShutdownFailed");
+                ProjectCacheException.ThrowForLoggedError("ProjectCacheShutdownFailed");
             }
         }
 
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 throw e;
             }
 
-            ProjectCacheException.Throw(
+            ProjectCacheException.ThrowAsUnhandledException(
                 e,
                 "ProjectCacheException",
                 apiExceptionWasThrownFrom);
