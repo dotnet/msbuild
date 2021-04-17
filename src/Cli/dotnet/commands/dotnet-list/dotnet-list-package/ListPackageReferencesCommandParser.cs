@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option FrameworkOption = new ForwardedOption<IEnumerable<string>>("--framework", LocalizableStrings.CmdFrameworkDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdFramework
-        }.ForwardAsMany(o => ForwardedArguments("--framework", o))
+        }.ForwardAsManyArgumentsEachPrefixedByOption("--framework")
         .AllowSingleArgPerToken();
 
         public static readonly Option TransitiveOption = new ForwardedOption<bool>("--include-transitive", LocalizableStrings.CmdTransitiveDescription)
@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option SourceOption = new ForwardedOption<IEnumerable<string>>("--source", LocalizableStrings.CmdSourceDescription)
         {
             ArgumentHelpName = LocalizableStrings.CmdSource
-        }.ForwardAsMany(o => ForwardedArguments("--source", o))
+        }.ForwardAsManyArgumentsEachPrefixedByOption("--source")
         .AllowSingleArgPerToken();
 
         public static readonly Option InteractiveOption = new ForwardedOption<bool>("--interactive", CommonLocalizableStrings.CommandInteractiveOptionDescription)
@@ -69,15 +69,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(InteractiveOption);
 
             return command;
-        }
-
-        public static IEnumerable<string> ForwardedArguments(string token, IEnumerable<string> arguments)
-        {
-            foreach (var arg in arguments)
-            {
-                yield return token;
-                yield return arg;
-            }
         }
     }
 }
