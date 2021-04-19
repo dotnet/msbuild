@@ -192,7 +192,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
 
         [Flags]
-        public enum ExceptionLocations
+        public enum ErrorLocations
         {
             Constructor = 1 << 0,
             BeginBuildAsync = 1 << 1,
@@ -791,27 +791,27 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             get
             {
-                yield return new object[]{ExceptionLocations.Constructor};
+                yield return new object[]{ErrorLocations.Constructor};
 
-                yield return new object[]{ExceptionLocations.BeginBuildAsync};
-                yield return new object[]{ExceptionLocations.BeginBuildAsync | ExceptionLocations.GetCacheResultAsync};
-                yield return new object[]{ExceptionLocations.BeginBuildAsync | ExceptionLocations.GetCacheResultAsync | ExceptionLocations.EndBuildAsync};
-                yield return new object[]{ExceptionLocations.BeginBuildAsync | ExceptionLocations.EndBuildAsync};
+                yield return new object[]{ErrorLocations.BeginBuildAsync};
+                yield return new object[]{ErrorLocations.BeginBuildAsync | ErrorLocations.GetCacheResultAsync};
+                yield return new object[]{ErrorLocations.BeginBuildAsync | ErrorLocations.GetCacheResultAsync | ErrorLocations.EndBuildAsync};
+                yield return new object[]{ErrorLocations.BeginBuildAsync | ErrorLocations.EndBuildAsync};
 
-                yield return new object[]{ExceptionLocations.GetCacheResultAsync};
-                yield return new object[]{ExceptionLocations.GetCacheResultAsync | ExceptionLocations.EndBuildAsync};
+                yield return new object[]{ErrorLocations.GetCacheResultAsync};
+                yield return new object[]{ErrorLocations.GetCacheResultAsync | ErrorLocations.EndBuildAsync};
 
-                yield return new object[]{ExceptionLocations.EndBuildAsync};
+                yield return new object[]{ErrorLocations.EndBuildAsync};
             }
         }
 
         [Theory]
         [MemberData(nameof(CacheExceptionLocationsTestData))]
-        public void EngineShouldHandleExceptionsFromCachePluginViaBuildParameters(ExceptionLocations exceptionLocations)
+        public void EngineShouldHandleExceptionsFromCachePluginViaBuildParameters(ErrorLocations errorLocations)
         {
             _env.DoNotLaunchDebugger();
 
-            SetEnvironmentForExceptionLocations(exceptionLocations);
+            SetEnvironmentForErrorLocations(errorLocations);
 
             var project = _env.CreateFile("1.proj", @$"
                     <Project>
@@ -842,9 +842,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // Plugin construction, initialization, and query all end up throwing in BuildManager.ExecuteSubmission and thus
                 // mark the submission as failed with exception.
                 var exceptionsThatEndUpInBuildResult =
-                    ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync | ExceptionLocations.GetCacheResultAsync;
+                    ErrorLocations.Constructor | ErrorLocations.BeginBuildAsync | ErrorLocations.GetCacheResultAsync;
 
-                if ((exceptionsThatEndUpInBuildResult & exceptionLocations) != 0)
+                if ((exceptionsThatEndUpInBuildResult & errorLocations) != 0)
                 {
                     buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
                     buildResult.Exception.ShouldBeOfType<ProjectCacheException>();
@@ -854,7 +854,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 // BuildManager.EndBuild calls plugin.EndBuild, so if only plugin.EndBuild fails it means everything else passed,
                 // so the build submission should be successful.
-                if (exceptionLocations == ExceptionLocations.EndBuildAsync)
+                if (errorLocations == ErrorLocations.EndBuildAsync)
                 {
                     buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
                 }
@@ -862,15 +862,15 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             finally
             {
                 // These exceptions prevent the creation of a plugin so there's no plugin to shutdown.
-                var exceptionsThatPreventEndBuildFromThrowing = ExceptionLocations.Constructor |
-                                                                ExceptionLocations.BeginBuildAsync;
+                var exceptionsThatPreventEndBuildFromThrowing = ErrorLocations.Constructor |
+                                                                ErrorLocations.BeginBuildAsync;
 
-                if ((exceptionLocations & exceptionsThatPreventEndBuildFromThrowing) != 0 ||
-                    !exceptionLocations.HasFlag(ExceptionLocations.EndBuildAsync))
+                if ((errorLocations & exceptionsThatPreventEndBuildFromThrowing) != 0 ||
+                    !errorLocations.HasFlag(ErrorLocations.EndBuildAsync))
                 {
                     Should.NotThrow(() => buildSession!.Dispose());
                 }
-                else if (exceptionLocations.HasFlag(ExceptionLocations.EndBuildAsync))
+                else if (errorLocations.HasFlag(ErrorLocations.EndBuildAsync))
                 {
                     var e = Should.Throw<ProjectCacheException>(() => buildSession!.Dispose());
                     e.InnerException!.ShouldNotBeNull();
@@ -885,9 +885,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             logger.BuildFinishedEvents.First().Succeeded.ShouldBeFalse();
 
             // Plugin query must happen after plugin init. So if plugin init fails, then the plugin should not get queried.
-            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync;
+            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ErrorLocations.Constructor | ErrorLocations.BeginBuildAsync;
 
-            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & exceptionLocations) != 0)
+            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & errorLocations) != 0)
             {
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: GetCacheResultAsync for");
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: EndBuildAsync");
@@ -898,16 +898,16 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 StringShouldContainSubstring(logger.FullLog, $"{AssemblyMockCache}: EndBuildAsync", expectedOccurrences: 1);
             }
 
-            logger.FullLog.ShouldNotContain("Cache plugin exception");
+            logger.FullLog.ShouldNotContain("Cache plugin exception from");
         }
 
         [Theory]
         [MemberData(nameof(CacheExceptionLocationsTestData))]
-        public void EngineShouldHandleExceptionsFromCachePluginViaGraphBuild(ExceptionLocations exceptionLocations)
+        public void EngineShouldHandleExceptionsFromCachePluginViaGraphBuild(ErrorLocations errorLocations)
         {
             _env.DoNotLaunchDebugger();
 
-            SetEnvironmentForExceptionLocations(exceptionLocations);
+            SetEnvironmentForErrorLocations(errorLocations);
 
             var graph = Helpers.CreateProjectGraph(
                 _env,
@@ -961,9 +961,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             logger.BuildFinishedEvents.First().Succeeded.ShouldBeFalse();
 
-            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync;
+            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ErrorLocations.Constructor | ErrorLocations.BeginBuildAsync;
 
-            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & exceptionLocations) != 0)
+            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & errorLocations) != 0)
             {
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: GetCacheResultAsync for");
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: EndBuildAsync");
@@ -971,7 +971,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             else
             {
                 // There's two projects, so there should be two cache queries logged ... unless a cache queries throws an exception. That ends the build.
-                var expectedQueryOccurrences = exceptionLocations.HasFlag(ExceptionLocations.GetCacheResultAsync)
+                var expectedQueryOccurrences = errorLocations.HasFlag(ErrorLocations.GetCacheResultAsync)
                     ? 1
                     : 2;
 
@@ -998,7 +998,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         </Target>
                     </Project>".Cleanup());
 
-            SetEnvironmentForExceptionLocations(ExceptionLocations.EndBuildAsync);
+            SetEnvironmentForErrorLocations(ErrorLocations.EndBuildAsync);
 
             using var buildSession = new Helpers.BuildManagerSession(
                 _env,
@@ -1031,15 +1031,15 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             Regex.Matches(aString, substring).Count.ShouldBe(expectedOccurrences);
         }
 
-        private void SetEnvironmentForExceptionLocations(ExceptionLocations exceptionLocations)
+        private void SetEnvironmentForErrorLocations(ErrorLocations errorLocations)
         {
-            foreach (var enumValue in Enum.GetValues(typeof(ExceptionLocations)))
+            foreach (var enumValue in Enum.GetValues(typeof(ErrorLocations)))
             {
-                var typedValue = (ExceptionLocations) enumValue;
-                if (exceptionLocations.HasFlag(typedValue))
+                var typedValue = (ErrorLocations) enumValue;
+                if (errorLocations.HasFlag(typedValue))
                 {
                     var exceptionLocation = typedValue.ToString();
-                    _env.SetEnvironmentVariable(exceptionLocation, "1");
+                    _env.SetEnvironmentVariable(exceptionLocation, "exception");
                     _output.WriteLine($"Set exception location: {exceptionLocation}");
                 }
             }
