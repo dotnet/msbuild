@@ -213,17 +213,12 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("net6.0")]
         void It_can_publish_readytorun_using_crossgen2(string targetFramework)
         {
-            // Crossgen2 only supported for Linux/Windows x64 scenarios for now
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
+            // In .NET 5 Crossgen2 supported Linux/Windows x64 only
+            if (targetFramework == "net5.0" &&
+                (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64))
                 return;
 
-            // Incorrect version check in SDK .NET 6 Preview 2 causes lack of support
-            // for perfmap files when compiling with Crossgen2. The bug has already been
-            // fixed in the SDK repo, https://github.com/dotnet/sdk/pull/16029
-            // and will be available from Preview 3 onward.
-            bool emitNativeSymbols = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-
-            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: emitNativeSymbols, useCrossgen2: true, composite: false, identifier: targetFramework);
+            TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: true, useCrossgen2: true, composite: false, identifier: targetFramework);
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -231,18 +226,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("net6.0")]
         void It_can_publish_readytorun_using_crossgen2_composite_mode(string targetFramework)
         {
-            // Crossgen2 only supported for Linux/Windows x64 scenarios for now
-
-            // Incorrect version check in SDK .NET 6 Preview 2 causes lack of support
-            // for perfmap files when compiling with Crossgen2. The bug has already been
-            // fixed in the SDK repo, https://github.com/dotnet/sdk/pull/16029
-            // and will be available from Preview 3 onward.
-
-            // Another SDK bug, https://github.com/dotnet/sdk/issues/16083
-            // forces disabling this test on Linux completely as emitNativeSymbols is
-            // ignored in composite mode.
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || 
-                RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
+            // In .NET 5 Crossgen2 supported Linux/Windows x64 only
+            if (targetFramework == "net5.0" &&
+                (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64))
                 return;
 
             TestProjectPublishing_Internal("Crossgen2TestApp", targetFramework, isSelfContained: true, emitNativeSymbols: false, useCrossgen2: true, composite: true, identifier: targetFramework);
@@ -253,8 +239,9 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("net6.0")]
         public void It_supports_libraries_when_using_crossgen2(string targetFramework)
         {
-            // Crossgen2 only supported for Linux/Windows x64 scenarios for now
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64)
+            // In .NET 5 Crossgen2 supported Linux/Windows x64 only
+            if (targetFramework == "net5.0" &&
+                (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.OSArchitecture != Architecture.X64))
                 return;
 
             var projectName = "FrameworkDependentUsingCrossgen2";
