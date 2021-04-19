@@ -66,6 +66,7 @@ namespace Microsoft.DotNet.Tools.New
             if (!disableSdkTemplates)
             {
                 builtIns.Add(new KeyValuePair<Guid, Func<Type>>(BuiltInTemplatePackageProviderFactory.FactoryId, () => typeof(BuiltInTemplatePackageProviderFactory)));
+                builtIns.Add(new KeyValuePair<Guid, Func<Type>>(OptionalWorkloadProviderFactory.FactoryId, () => typeof(OptionalWorkloadProviderFactory)));
             }
 
             string preferredLangEnvVar = Environment.GetEnvironmentVariable("DOTNET_NEW_PREFERRED_LANG");
