@@ -13,7 +13,7 @@ trigger:
 variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  - $[ if and( startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'), eq(variables.OptProfDropName,'') ) ]:
+  - $[ and( startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'), eq(variables.OptProfDropName,'') ) ]:
     - name: SourceBranch
       value: main
   - name: _DotNetArtifactsCategory
