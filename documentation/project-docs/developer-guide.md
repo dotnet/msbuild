@@ -101,6 +101,10 @@ This should output `.../artifacts/bin/redist/Debug/dotnet/dotnet`.
 
 You can now run `dotnet` commands to test changes.
 
+### Debugging
+
+Run "dotnet --debug <command>" which will launch dotnet and pause waiting for user input. This will give you time to attach a debugger to the running dotnet process, set the breakpoints you want to stop at in your built copy of the sdk, and then you can hit enter for the dotnet command to continue.
+
 ## Run tests from the command line
 
 ```shell
