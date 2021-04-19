@@ -14,8 +14,13 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <DefaultCopyToPublishDirectoryMetadata Condition="'$(DefaultCopyToPublishDirectoryMetadata)' == ''">true</DefaultCopyToPublishDirectoryMetadata>
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
-
     <IsPublishable Condition="'$(IsPublishable)' == ''">true</IsPublishable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PublishReadyToRun)' == 'true' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+    <!-- For .NET 6 and higher, default to using Crossgen2 in non-composite mode -->
+    <PublishReadyToRunUseCrossgen2 Condition="'$(PublishReadyToRunUseCrossgen2)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">true</PublishReadyToRunUseCrossgen2>
+    <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == '' and '$(_TargetFrameworkVersionWithoutV)' >= '6.0'">false</PublishReadyToRunComposite>
     <PublishReadyToRunComposite Condition="'$(PublishReadyToRunComposite)' == ''">true</PublishReadyToRunComposite>
     <PublishReadyToRunComposite Condition="'$(PublishReadyToRunUseCrossgen2)' != 'true' or '$(SelfContained)' != 'true'">false</PublishReadyToRunComposite>
   </PropertyGroup>
