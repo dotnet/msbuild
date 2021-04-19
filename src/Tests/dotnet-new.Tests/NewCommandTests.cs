@@ -7,6 +7,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.NET.TestFramework.Assertions;
 
 namespace Microsoft.DotNet.New.Tests
 {
@@ -27,6 +28,14 @@ namespace Microsoft.DotNet.New.Tests
             {
                 cmd.StdErr.Should().StartWith("No templates found");
             }
+        }
+
+        [Fact]
+        public void ItCanCreateTemplate()
+        {
+            var tempDir = _testAssetsManager.CreateTestDirectory();
+            var cmd = new DotnetCommand(Log).Execute("new", "console", "-o", tempDir.Path);
+            cmd.Should().Pass();
         }
 
         [Fact(Skip = "https://github.com/dotnet/templating/issues/1971")]
