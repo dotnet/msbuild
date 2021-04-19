@@ -22,20 +22,20 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
             templateOneDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
             templateOneDispositions.Add(new ParameterMatchInfo("bar", "test2", MatchKind.InvalidName));
-            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateOneDispositions);
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
             templateTwoDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
-            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateTwoDispositions);
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
             // template three
             List<MatchInfo> templateThreeDispositions = new List<MatchInfo>();
             templateThreeDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
             templateThreeDispositions.Add(new ParameterMatchInfo("baz", "test3", MatchKind.InvalidName));
-            ITemplateMatchInfo templateThreeMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateThreeDispositions);
+            ITemplateMatchInfo templateThreeMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateThreeDispositions);
             matchInfo.Add(templateThreeMatchInfo);
 
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
@@ -57,12 +57,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
             templateOneDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
             templateOneDispositions.Add(new ParameterMatchInfo("bar", "test2", MatchKind.InvalidName));
-            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateOneDispositions);
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
-            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateTwoDispositions);
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
@@ -82,13 +82,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             // template one
             List<MatchInfo> templateOneDispositions = new List<MatchInfo>();
             templateOneDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
-            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateOneDispositions);
+            ITemplateMatchInfo templateOneMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateOneDispositions);
             matchInfo.Add(templateOneMatchInfo);
 
             // template two
             List<MatchInfo> templateTwoDispositions = new List<MatchInfo>();
             templateTwoDispositions.Add(new ParameterMatchInfo("foo", "test", MatchKind.InvalidName));
-            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo2(new MockTemplateInfo(), templateTwoDispositions);
+            ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
             HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);

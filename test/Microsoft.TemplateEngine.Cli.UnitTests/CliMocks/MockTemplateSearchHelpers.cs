@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public static Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<ITemplateMatchInfo>> DefaultMatchFilter => (nameMatches) =>
         {
-            return nameMatches.Select(match => new TemplateMatchInfo2(match.Template, DefaultMatchInfo)).ToList();
+            return nameMatches.Select(match => new TemplateMatchInfo(match.Template, DefaultMatchInfo)).ToList();
         };
     }
 }
