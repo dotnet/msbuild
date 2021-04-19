@@ -1085,6 +1085,7 @@ start notepad "%RootPath%$$ProjectName$$.deploy-readme.txt"
 )
 echo =========================================================
 goto :eof</value>
+    <comment>{Locked}</comment>
   </data>
   <data name="MsDeployReadMe" xml:space="preserve">
     <value>===========================
@@ -1148,6 +1149,7 @@ Environment-Specific Settings:
 		 "$$ProjectName$$.SetParameters.xml"
 ===========================
 For more information on this deploy script visit:	https://go.microsoft.com/fwlink/?LinkID=183544</value>
+    <comment>{Locked}</comment>
   </data>
   <data name="WebConfigTransform_HostingModel_Error" xml:space="preserve">
     <value>The acceptable value for AspNetCoreHostingModel property is either "InProcess" or "OutOfProcess".</value>
