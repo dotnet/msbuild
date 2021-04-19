@@ -32,6 +32,8 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly TaskCompletionSource _taskCompletionSource;
         private IHost _refreshServer;
 
+        private const int MESSAGE_TIMEOUT = 5000;
+
         public BrowserRefreshServer(IReporter reporter)
         {
             _reporter = reporter;
@@ -100,22 +102,25 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask SendMessage(ReadOnlyMemory<byte> messageBytes, CancellationToken cancellationToken = default)
         {
-            for (var i = 0; i < _clientSockets.Count; i++)
+            try
             {
-                var clientSocket = _clientSockets[i];
-                if (clientSocket.CloseStatus.HasValue)
+                for (var i = 0; i < _clientSockets.Count; i++)
                 {
-                    continue;
-                }
-
-                try
-                {
+                    var clientSocket = _clientSockets[i];
+                    if (clientSocket.State is not WebSocketState.Open)
+                    {
+                        continue;
+                    }
                     await clientSocket.SendAsync(messageBytes, WebSocketMessageType.Text, endOfMessage: true, cancellationToken);
                 }
-                catch (Exception ex)
-                {
-                    _reporter.Verbose($"Refresh server error: {ex}");
-                }
+            }
+            catch (TaskCanceledException)
+            {
+                _reporter.Verbose("WebSocket connection has been terminated.");
+            }
+            catch (Exception ex)
+            {
+                _reporter.Verbose($"Refresh server error: {ex}");
             }
         }
 
@@ -134,6 +139,33 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             _taskCompletionSource.TrySetResult();
+        }
+
+        public async ValueTask<ValueWebSocketReceiveResult?> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+        {
+            var linkedCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken,
+                new CancellationTokenSource(MESSAGE_TIMEOUT).Token);
+            for (int i = 0; i < _clientSockets.Count; i++)
+            {
+                var clientSocket = _clientSockets[i];
+
+                if (clientSocket.State is not WebSocketState.Open)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    return await clientSocket.ReceiveAsync(buffer, linkedCancellationToken.Token);
+                }
+                catch (Exception ex)
+                {
+                    _reporter.Verbose($"Refresh server error: {ex}");
+                }
+            }
+
+            return default;
         }
 
         public ValueTask ReloadAsync(CancellationToken cancellationToken) => SendMessage(ReloadMessage, cancellationToken);

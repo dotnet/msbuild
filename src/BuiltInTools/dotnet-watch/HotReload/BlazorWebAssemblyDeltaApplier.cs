@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
@@ -50,7 +51,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await context.BrowserRefreshServer.SendJsonSerlialized(payload, cancellationToken);
 
-            return true;
+            return await VerifyDeltaApplied(context, cancellationToken);
         }
 
         public async ValueTask ReportDiagnosticsAsync(DotNetWatchContext context, IEnumerable<string> diagnostics, CancellationToken cancellationToken)
@@ -63,6 +64,30 @@ namespace Microsoft.DotNet.Watcher.Tools
                 };
 
                 await context.BrowserRefreshServer.SendJsonSerlialized(message, cancellationToken);
+            }
+        }
+
+        private async ValueTask<bool> VerifyDeltaApplied(DotNetWatchContext context, CancellationToken cancellationToken)
+        {
+            var _receiveBuffer = new byte[1];
+            try 
+            {
+                var result = await context.BrowserRefreshServer.ReceiveAsync(_receiveBuffer, cancellationToken);
+                return IsDeltaApplied(result);
+            }
+            catch when (!cancellationToken.IsCancellationRequested)
+            {
+                _reporter.Verbose("Timed out while waiting to verify delta was applied.");
+                return false;
+            }
+            
+            bool IsDeltaApplied(ValueWebSocketReceiveResult? result)
+            {
+                return result.HasValue
+                    && result.Value.Count == 1 // Should have received 1 byte on the socket for the acknowledgement
+                    && result.Value.MessageType is WebSocketMessageType.Binary 
+                    && result.Value.EndOfMessage
+                    && _receiveBuffer[0] == 1;
             }
         }
 

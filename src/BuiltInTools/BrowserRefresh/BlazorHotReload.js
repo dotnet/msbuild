@@ -12,7 +12,12 @@ async function receiveHotReloadAsync() {
   if (response.status === 200) {
     const deltas = await response.json();
     if (deltas) {
-      deltas.forEach(d => window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta));
+      try {
+        deltas.forEach(d => window.Blazor._internal.applyHotReload(d.moduleId, d.metadataDelta, d.ilDelta));
+      } catch (error) {
+        console.warn(error);
+        return;
+      } 
     }
   }
 }
