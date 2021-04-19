@@ -292,7 +292,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
 
 
-            var embeddedResourceItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "EmbeddedResource", setup, projectChanges: projectChanges);
+            var embeddedResourceItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "EmbeddedResource", setup, projectChanges: projectChanges, identifier: "EmbeddedResource");
 
             var expectedEmbeddedResourceItems = new[]
             {
@@ -343,7 +343,7 @@ namespace Microsoft.NET.Build.Tests
             compileItems.Should().BeEquivalentTo(expectedItems);
 
 
-            var contentItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "Content", setup, projectChanges: projectChanges);
+            var contentItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "Content", setup, projectChanges: projectChanges, identifier: "Content");
 
             var expectedContentItems = new[]
             {
@@ -354,7 +354,7 @@ namespace Microsoft.NET.Build.Tests
 
             contentItems.Should().BeEquivalentTo(expectedContentItems);
 
-            var noneItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "None", setup, projectChanges: projectChanges);
+            var noneItems = GivenThatWeWantToBuildALibrary.GetValuesFromTestLibrary(Log, _testAssetsManager, "None", setup, projectChanges: projectChanges, identifier: expectedContentItems.GetHashCode().ToString());
 
             var expectedNoneItems = new[]
             {

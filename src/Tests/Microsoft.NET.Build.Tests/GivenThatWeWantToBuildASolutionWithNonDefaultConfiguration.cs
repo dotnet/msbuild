@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var targetFramework = "netcoreapp2.1";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", configuration)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
