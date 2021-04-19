@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         private IReadOnlyCollection<TemplateGroup> _partiallyMatchedTemplateGroups;
 
         /// <summary>
-        /// Returns list of exact or partially matched templates by name and exact match by language, filter, baseline (if specified in command paramaters).
+        /// Returns list of exact or partially matched templates by name and exact match by language, filter, baseline (if specified in command parameters).
         /// </summary>
         internal IReadOnlyCollection<ITemplateMatchInfo> ExactMatchedTemplates
         {
@@ -43,7 +43,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                     }
                     else
                     {
-                        _exactMatchedTemplates = _coreMatchedTemplates.Where(t => t.IsMatch).ToList();
+                        //TODO: now it ignores InvalidName and InvalidValue cases and handles it separately in HelpForTemplateResolution. Rework when complete refactoring.
+                        _exactMatchedTemplates = _coreMatchedTemplates.Where(t => t.MatchDisposition.Count > 0 && t.MatchDisposition.All(x => x.Kind != MatchKind.Mismatch)).ToList();
                     }
                 }
                 return _exactMatchedTemplates;

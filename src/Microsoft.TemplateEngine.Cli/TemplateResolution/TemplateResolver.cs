@@ -67,7 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning disable CS0618 // Type or member is obsolete
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
-                WellKnownSearchFilters.PartialCriteria,
+                WellKnownSearchFilters.MatchesAtLeastOneCriteria,
                 CliNameFilter(string.Empty)
             )
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -118,7 +118,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning disable CS0618 // Type or member is obsolete
             IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
-                WellKnownSearchFilters.PartialCriteria,
+                WellKnownSearchFilters.MatchesAtLeastOneCriteria,
                 listFilters.ToArray()
             )
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -136,7 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning disable CS0618 // Type or member is obsolete
             IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
-                WellKnownSearchFilters.PartialCriteria,
+                WellKnownSearchFilters.MatchesAtLeastOneCriteria,
                 CliNameFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.TypeFilter(commandInput.TypeFilter),
@@ -183,7 +183,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                                     .Select(filter => filter.TemplateMatchFilter(commandInput)));
             // once template resolution refactoring is complete we would no longer use this method, but use GetTemplatesAsync instead as overriding group names should not be needed
 #pragma warning disable CS0618 // Type or member is obsolete
-            IReadOnlyCollection<ITemplateMatchInfo> matchedTemplates = TemplateListFilter.GetTemplateMatchInfo(filterableTemplateInfo, WellKnownSearchFilters.ExactCriteria, searchFilters.ToArray());
+            IReadOnlyCollection<ITemplateMatchInfo> matchedTemplates = TemplateListFilter.GetTemplateMatchInfo(filterableTemplateInfo, WellKnownSearchFilters.MatchesAllCriteria, searchFilters.ToArray());
 #pragma warning restore CS0618 // Type or member is obsolete
 
             AddParameterMatchingToTemplates(matchedTemplates, hostDataLoader, commandInput);
@@ -208,7 +208,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning disable CS0618 // Type or member is obsolete
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
-                WellKnownSearchFilters.ExactCriteria,
+                WellKnownSearchFilters.MatchesAllCriteria,
                 CliNameFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.TypeFilter(commandInput.TypeFilter),

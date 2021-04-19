@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, defaultLanguage);
                 Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
                 Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Templates.Count);
-                Assert.True(matchResult.UnambiguousTemplateGroup.Templates.All(t => t.IsMatch));
+                Assert.True(matchResult.UnambiguousTemplateGroup.Templates.All(t => WellKnownSearchFilters.MatchesAllCriteria(t)));
 
                 foreach (ITemplateMatchInfo templateMatchInfo in matchResult.UnambiguousTemplateGroup.Templates)
                 {
