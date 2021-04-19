@@ -109,7 +109,7 @@ namespace Microsoft.Build.Utilities
         /// breaking change. Use 'Latest' if possible, but note the
         /// compatibility implications.
         /// </summary>
-        VersionLatest = Version48,
+        VersionLatest = Version462,
 
         /// <summary>
         /// Sentinel value for the latest version that this version of MSBuild is aware of. Similar
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// The latest version available at the time of release
         /// </summary>
-        VersionLatest = Version160
+        VersionLatest = Version150
     }
 
     /// <summary>
