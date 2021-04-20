@@ -21,9 +21,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
 {
     public class NupkgInstallTests
     {
-        private static readonly string HostIdentifier = "installTestHost";
-        private static readonly string HostVersion = "v1.0.0";
-        private static readonly string CommandName = "new3";
+        private const string HostIdentifier = "installTestHost";
+        private const string HostVersion = "v1.0.0";
+        private const string CommandName = "new3";
 
         [Fact(DisplayName = nameof(NupkgReinstallDoesntRemoveTemplates))]
         public async Task NupkgReinstallDoesntRemoveTemplates()

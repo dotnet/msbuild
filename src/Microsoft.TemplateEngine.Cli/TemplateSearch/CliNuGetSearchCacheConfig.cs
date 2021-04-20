@@ -10,7 +10,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliNuGetSearchCacheConfig : NuGetSearchCacheConfig
     {
-        internal static readonly string CliHostDataName = "cliHostData";
+        internal const string CliHostDataName = "cliHostData";
 
         internal CliNuGetSearchCacheConfig(string templateDiscoveryFileName)
             : base(templateDiscoveryFileName)

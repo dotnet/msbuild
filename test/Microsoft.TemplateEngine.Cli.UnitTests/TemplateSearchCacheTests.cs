@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class TemplateSearchCacheTests : TestBase
     {
-        private static readonly string DefaultLanguage = "C#";
+        private const string DefaultLanguage = "C#";
 
         [Fact(DisplayName = nameof(CacheSearchNameMatchTest))]
         public async Task CacheSearchNameMatchTest()
