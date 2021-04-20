@@ -67,7 +67,7 @@ namespace Microsoft.Build.Framework
             MessageImportance importance,
             DateTime eventTimestamp
         )
-            : base(commandLine, null, taskName, importance, eventTimestamp)
+            : base(commandLine, helpKeyword: null, taskName, importance, eventTimestamp)
         {
             // do nothing
         }

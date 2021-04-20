@@ -198,6 +198,43 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Baz"].ResultCode);
         }
 
+        [Fact]
+        public void TestLoggingForSkippedTargetInputsAndOutputs()
+        {
+            string projectContents = @"
+<Project>
+  <Target Name=""Build"" Inputs=""a.txt;b.txt"" Outputs=""c.txt"">
+    <Message Text=""test"" Importance=""High"" />
+  </Target>
+</Project>";
+
+            using (var env = TestEnvironment.Create())
+            {
+                var files = env.CreateTestProjectWithFiles(projectContents, new[] { "a.txt", "b.txt", "c.txt" });
+                var fileA = new FileInfo(files.CreatedFiles[0]);
+                var fileB = new FileInfo(files.CreatedFiles[1]);
+                var fileC = new FileInfo(files.CreatedFiles[2]);
+
+                var now = DateTime.UtcNow;
+                fileA.LastWriteTimeUtc = now - TimeSpan.FromSeconds(10);
+                fileB.LastWriteTimeUtc = now - TimeSpan.FromSeconds(10);
+                fileC.LastWriteTimeUtc = now;
+
+                var logger = files.BuildProjectExpectSuccess();
+                var logText = logger.FullLog.Replace("\r\n", "\n");
+
+                var expected = @"
+Skipping target ""Build"" because all output files are up-to-date with respect to the input files.
+Input files: 
+    a.txt
+    b.txt
+Output files: c.txt
+Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n");
+
+                logText.ShouldContainWithoutWhitespace(expected);
+            }
+        }
+
         /// <summary>
         /// Ensure that skipped targets only infer outputs once
         /// </summary>

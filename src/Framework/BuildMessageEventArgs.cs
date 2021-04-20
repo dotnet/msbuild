@@ -176,7 +176,7 @@ namespace Microsoft.Build.Framework
             MessageImportance importance,
             DateTime eventTimestamp
         )
-            : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, importance, eventTimestamp, null)
+            : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, importance, eventTimestamp, messageArgs: null)
         {
             // do nothing
         }

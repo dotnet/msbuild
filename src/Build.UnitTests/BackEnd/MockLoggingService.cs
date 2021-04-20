@@ -300,6 +300,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _writer(message);
         }
 
+        /// <inheritdoc />
+        public void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object[] messageArgs)
+        {
+            if (messageArgs?.Length > 0)
+            {
+                message = string.Format(message, messageArgs);
+            }
+
+            _writer(message);
+        }
+
         /// <summary>
         /// Logs a pre-formed build event
         /// </summary>

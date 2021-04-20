@@ -45,7 +45,10 @@ namespace Microsoft.Build.Logging
         //   - new record kind: TaskParameterEventArgs
         // version 12:
         //   - add GlobalProperties, Properties and Items on ProjectEvaluationFinished
-        internal const int FileFormatVersion = 12;
+        // version 13:
+        //   - don't log Message where it can be recovered
+        //   - log arguments for LazyFormattedBuildEventArgs
+        internal const int FileFormatVersion = 13;
 
         private Stream stream;
         private BinaryWriter binaryWriter;

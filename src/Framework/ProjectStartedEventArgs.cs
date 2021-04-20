@@ -482,5 +482,36 @@ namespace Microsoft.Build.Framework
             }
         }
         #endregion
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    lock (locker)
+                    {
+                        if (RawMessage == null)
+                        {
+                            string projectFilePath = Path.GetFileName(ProjectFile);
+
+                            // Check to see if the there are any specific target names to be built.
+                            // If targetNames is null or empty then we will be building with the 
+                            // default targets.
+                            if (!string.IsNullOrEmpty(TargetNames))
+                            {
+                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithTargetNames", projectFilePath, TargetNames);
+                            }
+                            else
+                            {
+                                RawMessage = FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", projectFilePath);
+                            }
+                        }
+                    }
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }

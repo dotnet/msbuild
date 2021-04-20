@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -257,9 +257,7 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadProjectImportedEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            // Read unused Importance, it defaults to Low
-            ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
 
             bool importIgnored = false;
 
@@ -275,7 +273,8 @@ namespace Microsoft.Build.Logging
             var e = new ProjectImportedEventArgs(
                 fields.LineNumber,
                 fields.ColumnNumber,
-                fields.Message);
+                fields.Message,
+                fields.Arguments);
 
             SetCommonFields(e, fields);
 
@@ -289,16 +288,27 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadTargetSkippedEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            // Read unused Importance, it defaults to Low
-            ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+
             var targetFile = ReadOptionalString();
             var targetName = ReadOptionalString();
             var parentTarget = ReadOptionalString();
+
+            string condition = null;
+            string evaluatedCondition = null;
+            bool originallySucceeded = false;
+            if (fileFormatVersion >= 13)
+            {
+                condition = ReadOptionalString();
+                evaluatedCondition = ReadOptionalString();
+                originallySucceeded = ReadBoolean();
+            }
+
             var buildReason = (TargetBuiltReason)ReadInt32();
 
             var e = new TargetSkippedEventArgs(
-                fields.Message);
+                fields.Message,
+                fields.Arguments);
 
             SetCommonFields(e, fields);
 
@@ -307,6 +317,9 @@ namespace Microsoft.Build.Logging
             e.TargetName = targetName;
             e.ParentTarget = parentTarget;
             e.BuildReason = buildReason;
+            e.Condition = condition;
+            e.EvaluatedCondition = evaluatedCondition;
+            e.OriginallySucceeded = originallySucceeded;
 
             return e;
         }
@@ -562,7 +575,8 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                fields.Timestamp);
+                fields.Timestamp,
+                fields.Arguments);
             e.BuildEventContext = fields.BuildEventContext;
             e.ProjectFile = fields.ProjectFile;
             return e;
@@ -584,7 +598,8 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                fields.Timestamp);
+                fields.Timestamp,
+                fields.Arguments);
             e.BuildEventContext = fields.BuildEventContext;
             e.ProjectFile = fields.ProjectFile;
             return e;
@@ -592,8 +607,7 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadBuildMessageEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            var importance = (MessageImportance)ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
 
             var e = new BuildMessageEventArgs(
                 fields.Subcategory,
@@ -606,8 +620,9 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                importance,
-                fields.Timestamp);
+                fields.Importance,
+                fields.Timestamp,
+                fields.Arguments);
             e.BuildEventContext = fields.BuildEventContext;
             e.ProjectFile = fields.ProjectFile;
             return e;
@@ -615,15 +630,14 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadTaskCommandLineEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            var importance = (MessageImportance)ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
             var commandLine = ReadOptionalString();
             var taskName = ReadOptionalString();
 
             var e = new TaskCommandLineEventArgs(
                 commandLine,
                 taskName,
-                importance,
+                fields.Importance,
                 fields.Timestamp);
             e.BuildEventContext = fields.BuildEventContext;
             e.ProjectFile = fields.ProjectFile;
@@ -632,9 +646,7 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadTaskParameterEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            // Read unused Importance, it defaults to Low
-            ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
 
             var kind = (TaskParameterMessageKind)ReadInt32();
             var itemType = ReadDeduplicatedString();
@@ -653,8 +665,7 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadCriticalBuildMessageEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            var importance = (MessageImportance)ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
 
             var e = new CriticalBuildMessageEventArgs(
                 fields.Subcategory,
@@ -667,7 +678,8 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                fields.Timestamp);
+                fields.Timestamp,
+                fields.Arguments);
             e.BuildEventContext = fields.BuildEventContext;
             e.ProjectFile = fields.ProjectFile;
             return e;
@@ -675,8 +687,7 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            var importance = (MessageImportance)ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
 
             var environmentVariableName = ReadDeduplicatedString();
 
@@ -685,7 +696,7 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                importance);
+                fields.Importance);
             SetCommonFields(e, fields);
 
             return e;
@@ -693,8 +704,8 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadPropertyReassignmentEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            var importance = (MessageImportance)ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+
             string propertyName = ReadDeduplicatedString();
             string previousValue = ReadDeduplicatedString();
             string newValue = ReadDeduplicatedString();
@@ -708,7 +719,7 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                importance);
+                fields.Importance);
             SetCommonFields(e, fields);
 
             return e;
@@ -716,8 +727,7 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadUninitializedPropertyReadEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            var importance = (MessageImportance)ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
             string propertyName = ReadDeduplicatedString();
 
             var e = new UninitializedPropertyReadEventArgs(
@@ -725,7 +735,7 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                importance);
+                fields.Importance);
             SetCommonFields(e, fields);
 
             return e;
@@ -733,8 +743,8 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadPropertyInitialValueSetEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
-            var importance = (MessageImportance)ReadInt32();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+
             string propertyName = ReadDeduplicatedString();
             string propertyValue = ReadDeduplicatedString();
             string propertySource = ReadDeduplicatedString();
@@ -746,7 +756,7 @@ namespace Microsoft.Build.Logging
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
-                importance);
+                fields.Importance);
             SetCommonFields(e, fields);
 
             return e;
@@ -770,7 +780,7 @@ namespace Microsoft.Build.Logging
             fields.EndColumnNumber = ReadInt32();
         }
 
-        private BuildEventArgsFields ReadBuildEventArgsFields()
+        private BuildEventArgsFields ReadBuildEventArgsFields(bool readImportance = false)
         {
             BuildEventArgsFieldFlags flags = (BuildEventArgsFieldFlags)ReadInt32();
             var result = new BuildEventArgsFields();
@@ -791,7 +801,7 @@ namespace Microsoft.Build.Logging
                 result.ThreadId = ReadInt32();
             }
 
-            if ((flags & BuildEventArgsFieldFlags.HelpHeyword) != 0)
+            if ((flags & BuildEventArgsFieldFlags.HelpKeyword) != 0)
             {
                 result.HelpKeyword = ReadDeduplicatedString();
             }
@@ -844,6 +854,23 @@ namespace Microsoft.Build.Logging
             if ((flags & BuildEventArgsFieldFlags.EndColumnNumber) != 0)
             {
                 result.EndColumnNumber = ReadInt32();
+            }
+
+            if ((flags & BuildEventArgsFieldFlags.Arguments) != 0)
+            {
+                int count = ReadInt32();
+                object[] arguments = new object[count];
+                for (int i = 0; i < count; i++)
+                {
+                    arguments[i] = ReadDeduplicatedString();
+                }
+
+                result.Arguments = arguments;
+            }
+
+            if ((fileFormatVersion < 13 && readImportance) || (fileFormatVersion >= 13 && (flags & BuildEventArgsFieldFlags.Importance) != 0))
+            {
+                result.Importance = (MessageImportance)ReadInt32();
             }
 
             return result;
@@ -1006,6 +1033,11 @@ namespace Microsoft.Build.Logging
                             list.Add(new DictionaryEntry(itemType, item));
                         }
                     }
+                }
+
+                if (list.Count == 0)
+                {
+                    list = null;
                 }
             }
             else

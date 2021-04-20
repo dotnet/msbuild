@@ -20,6 +20,15 @@ namespace Microsoft.Build.Framework
         private object[] arguments;
 
         /// <summary>
+        /// Exposes the underlying arguments field to serializers.
+        /// </summary>
+        internal object[] RawArguments
+        {
+            get => arguments;
+            set => arguments = value;
+        }
+
+        /// <summary>
         /// Stores the original culture for String.Format.
         /// </summary>
         private string originalCultureName;
@@ -34,7 +43,7 @@ namespace Microsoft.Build.Framework
         /// Lock object.
         /// </summary>
         [NonSerialized]
-        private Object locker;
+        protected Object locker;
 
         /// <summary>
         /// This constructor allows all event data to be initialized.
