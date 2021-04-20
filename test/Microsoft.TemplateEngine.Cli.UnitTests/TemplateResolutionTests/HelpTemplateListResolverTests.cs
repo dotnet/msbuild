@@ -326,7 +326,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
         }
 
-
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_OtherParameterMatch_Text))]
         public void TestGetTemplateResolutionResult_OtherParameterMatch_Text()
         {
@@ -458,7 +457,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     .WithTag("type", "project")
                     .WithClassifications("Common", "Test")
                     .WithBaselineInfo("app", "standard"));
-
 
             INewCommandInput userInputs = new MockNewCommandInput("Common").WithHelpOption();
 

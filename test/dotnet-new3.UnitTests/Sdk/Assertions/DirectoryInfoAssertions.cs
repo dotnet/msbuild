@@ -99,7 +99,6 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 
-
         public AndConstraint<DirectoryInfoAssertions> HaveDirectory(string expectedDir)
         {
             var dir = _dirInfo.EnumerateDirectories(expectedDir, SearchOption.TopDirectoryOnly).SingleOrDefault();
@@ -160,7 +159,6 @@ namespace Microsoft.NET.TestFramework.Assertions
 
             var subDirectories = _dirInfo.EnumerateDirectories();
 
-            
             if (!notExpectedSubdirectories.Any())
             {
                 //  If no subdirectories were passed in, it means there should be no subdirectories at all

@@ -277,7 +277,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             yield return new object[] { new MockNewCommandInput("foo", language: "Perl"), templates, "Perl", (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
             yield return new object[] { new MockNewCommandInput("foo", language: "Perl"), templates, "C#", (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
 
-
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("foo", identity: "foo.Perl", groupIdentity: "foo.group").WithTag("language", "Perl"),
@@ -506,7 +505,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             yield return new object[] { new MockNewCommandInput("foo", language: "Perl"), templates, null, (int)TemplateResolutionResult.Status.SingleMatch, "foo.Perl" };
             yield return new object[] { new MockNewCommandInput("foo"), templates, "C#", (int)TemplateResolutionResult.Status.SingleMatch, "foo.Perl" };
             yield return new object[] { new MockNewCommandInput("foo", language: "Perl"), templates, "C#", (int)TemplateResolutionResult.Status.SingleMatch, "foo.Perl" };
-
 
             templates = new MockTemplateInfo[]
             {

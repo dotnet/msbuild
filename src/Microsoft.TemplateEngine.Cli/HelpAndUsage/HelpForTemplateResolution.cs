@@ -132,7 +132,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
             }
         }
-       
 
         private static CreationResultStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
         {
@@ -193,7 +192,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.PartialTemplateMatchSwitchesNotValidForAllMatches);
             }
 
-
             if (templateResolutionResult.HasExactMatches)
             {
                 ShowTemplatesFoundMessage(commandInput);
@@ -222,8 +220,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 return CreationResultStatus.OperationNotSpecified;
             }
         }
-
-
 
         /// <summary>
         /// Displays the help in case <paramref name="commandInput"/> contains invalid parameters for resolved <paramref name="unambiguousTemplateGroup"/>.
@@ -329,7 +325,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Error.WriteLine(hintMessage.Bold().Red());
             return CreationResultStatus.NotFound;
         }
-
 
         // Displays the list of templates in a table, one row per template group.
         //

@@ -60,7 +60,6 @@ namespace Microsoft.TemplateEngine.Cli
             Writer.WriteLine();
         }
 
-
         internal void Write(string message)
         {
             var escapeScan = 0;

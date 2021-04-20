@@ -422,7 +422,6 @@ namespace dotnet_new3.IntegrationTests
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";
 
-
             new DotnetNewCommand(_log, "-i", pattern)
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())

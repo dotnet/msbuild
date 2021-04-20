@@ -226,7 +226,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 .WithTag("Framework", "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1")
                 .WithTag("language", "C#");
 
-
         private static readonly ITemplateInfo _barCSharpTemplate =
             new MockTemplateInfo("barC", name: "MockBarCsharpTemplate", identity: "Mock.Bar.1.Csharp", groupIdentity: "Mock.Bar")
                 .WithDescription("Mock Bar CSharp template")
