@@ -13,7 +13,7 @@ namespace dotnet_new3.IntegrationTests
 {
     public class DotnetNewCommand : TestCommand
     {
-        private bool _hiveSet = false;
+        private bool _hiveSet;
 
         public DotnetNewCommand(ITestOutputHelper log, params string[] args) : base(log)
         {
