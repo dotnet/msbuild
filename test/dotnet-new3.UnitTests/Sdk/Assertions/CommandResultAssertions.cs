@@ -87,7 +87,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
         public AndConstraint<CommandResultAssertions> HaveStdOutContainingIgnoreCase(string pattern)
         {
-            Execute.Assertion.ForCondition(_commandResult.StdOut.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) >= 0)
+            Execute.Assertion.ForCondition(_commandResult.StdOut.Contains(pattern, StringComparison.OrdinalIgnoreCase))
                 .FailWith(AppendDiagnosticsTo($"The command output did not contain expected result (ignoring case): {pattern}{Environment.NewLine}"));
             return new AndConstraint<CommandResultAssertions>(this);
         }
