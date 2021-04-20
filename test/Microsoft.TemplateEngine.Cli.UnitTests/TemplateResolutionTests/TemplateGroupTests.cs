@@ -205,7 +205,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group", precedence: 300),
                 },
                 null,
-                new string[] { "foo.1", "foo.2","foo.3" }
+                new string[] { "foo.1", "foo.2", "foo.3" }
             };
 
             yield return new object[]
