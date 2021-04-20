@@ -20,7 +20,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private ProjectCacheException(
             string message,
             Exception innerException,
-            bool hasBeenLogged,
+            bool hasBeenLoggedByProjectCache,
             string errorCode
         )
             : base(message, innerException)
@@ -28,7 +28,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
 
-            HasBeenLogged = hasBeenLogged;
+            HasBeenLoggedByProjectCache = hasBeenLoggedByProjectCache;
             ErrorCode = errorCode;
         }
 
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         /// The project cache has already logged this as an error.
         /// Should not get logged again.
         /// </summary>
-        public bool HasBeenLogged { get; }
+        public bool HasBeenLoggedByProjectCache { get; }
 
         /// <summary>
         /// Gets the error code associated with this exception's message (not the inner exception).
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
 
-            throw new ProjectCacheException(message, innerException, hasBeenLogged: false, errorCode);
+            throw new ProjectCacheException(message, innerException, hasBeenLoggedByProjectCache: false, errorCode);
         }
 
         internal static void ThrowForLoggedError
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
 
-            throw new ProjectCacheException(message: message, innerException: null, hasBeenLogged: true, errorCode: errorCode);
+            throw new ProjectCacheException(message: message, innerException: null, hasBeenLoggedByProjectCache: true, errorCode: errorCode);
         }
     }
 }
