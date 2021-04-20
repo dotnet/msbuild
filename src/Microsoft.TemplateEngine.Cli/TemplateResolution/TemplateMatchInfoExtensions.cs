@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning restore CS0618 // Type or member is obsolete
         }
 
-        internal static bool HasInvalidParameterName (this ITemplateMatchInfo templateMatchInfo)
+        internal static bool HasInvalidParameterName(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.OfType<ParameterMatchInfo>().Any(x => x.Kind == MatchKind.InvalidName);
         }

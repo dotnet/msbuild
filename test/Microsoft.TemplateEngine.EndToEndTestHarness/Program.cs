@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             string[] passthroughArgs = new string[args.Length - 2 - batteryCount];
             string outputPath = args[batteryCount + 1];
 
-            for(int i = 0; i < passthroughArgs.Length; ++i)
+            for (int i = 0; i < passthroughArgs.Length; ++i)
             {
                 passthroughArgs[i] = args[i + 2 + batteryCount];
             }
@@ -132,7 +132,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
         private static bool CheckFileExists(IPhysicalFileSystem fs, JObject config, string outputPath)
         {
             string path = Path.Combine(outputPath, config["path"].ToString());
-            if(fs.FileExists(path))
+            if (fs.FileExists(path))
             {
                 return true;
             }
@@ -180,7 +180,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
         private static bool RunVerifications(JArray verifications, IPhysicalFileSystem fs, string outputPath)
         {
             bool success = true;
-            foreach(JObject verification in verifications)
+            foreach (JObject verification in verifications)
             {
                 string kind = verification["kind"].ToString();
                 if (!VerificationLookup.TryGetValue(kind, out Func<IPhysicalFileSystem, JObject, string, bool> func))

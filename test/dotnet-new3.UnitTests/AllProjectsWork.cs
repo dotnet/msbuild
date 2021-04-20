@@ -22,14 +22,14 @@ namespace dotnet_new3.IntegrationTests
         }
 
         [Theory]
-        [InlineData("emptyweb_cs-50",  "web")]
-        [InlineData("mvc_cs-50",  "mvc")]
-        [InlineData("mvc_fs-50",  "mvc", "-lang", "F#")]
-        [InlineData("api_cs-50",  "api")]
-        [InlineData("emptyweb_cs-31",  "web", "-f", "netcoreapp3.1")]
-        [InlineData("mvc_cs-31",  "mvc", "-f", "netcoreapp3.1")]
-        [InlineData("mvc_fs-31",  "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
-        [InlineData("api_cs-31",  "api", "-f", "netcoreapp3.1")]
+        [InlineData("emptyweb_cs-50", "web")]
+        [InlineData("mvc_cs-50", "mvc")]
+        [InlineData("mvc_fs-50", "mvc", "-lang", "F#")]
+        [InlineData("api_cs-50", "api")]
+        [InlineData("emptyweb_cs-31", "web", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_cs-31", "mvc", "-f", "netcoreapp3.1")]
+        [InlineData("mvc_fs-31", "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
+        [InlineData("api_cs-31", "api", "-f", "netcoreapp3.1")]
         [InlineData("console_cs-31", "console", "-f", "netcoreapp3.1")]
         [InlineData("library_cs-50", "classlib", "-f", "net5.0")]
         public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)

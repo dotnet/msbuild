@@ -37,7 +37,7 @@ namespace Microsoft.NET.TestFramework.Assertions
                     },
                     _cancellationTokenSource.Token));
 
-                    taskCompletionSource.Task.Wait();
+                taskCompletionSource.Task.Wait();
             }
 
             public void Dispose()

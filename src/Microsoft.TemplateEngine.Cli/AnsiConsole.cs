@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli
         internal void Write(string message)
         {
             var escapeScan = 0;
-            for (;;)
+            for (; ; )
             {
                 var escapeIndex = message.IndexOf("\x1b[", escapeScan, StringComparison.Ordinal);
                 if (escapeIndex == -1)

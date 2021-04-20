@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             Func<INewCommandInput, string> filterValue,
             Func<INewCommandInput, bool> isFilterSet,
             Func<INewCommandInput, Func<ITemplateInfo, MatchInfo?>> matchFilter,
-            Func<TemplateListResolutionResult, bool> mismatchCriteria) : base (name, filterValue, isFilterSet)
+            Func<TemplateListResolutionResult, bool> mismatchCriteria) : base(name, filterValue, isFilterSet)
         {
             TemplateMatchFilter = matchFilter ?? throw new ArgumentNullException(nameof(matchFilter));
             MismatchCriteria = mismatchCriteria ?? throw new ArgumentNullException(nameof(mismatchCriteria));

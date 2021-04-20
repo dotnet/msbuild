@@ -474,7 +474,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         private class TemplateInfoWithGroupShortNames : ITemplateInfo
         {
             private ITemplateInfo _parent;
-            internal TemplateInfoWithGroupShortNames (ITemplateInfo source, IEnumerable<string> groupShortNameList)
+            internal TemplateInfoWithGroupShortNames(ITemplateInfo source, IEnumerable<string> groupShortNameList)
             {
                 _parent = source;
                 GroupShortNameList = groupShortNameList.ToList();

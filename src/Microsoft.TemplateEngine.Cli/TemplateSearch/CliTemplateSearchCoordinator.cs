@@ -148,7 +148,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         /// </summary>
         private class SearchResultTableRow
         {
-            internal SearchResultTableRow (TemplateGroupTableRow templateGroupTableRow, string packageName, long downloads = 0)
+            internal SearchResultTableRow(TemplateGroupTableRow templateGroupTableRow, string packageName, long downloads = 0)
             {
                 TemplateGroupInfo = templateGroupTableRow;
                 PackageName = packageName;

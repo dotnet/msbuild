@@ -9,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
     internal class ParameterMatchInfo : MatchInfo
     {
-        internal ParameterMatchInfo(string name, string? value, MatchKind kind, string? inputFormat = null) : base (name, value, kind)
+        internal ParameterMatchInfo(string name, string? value, MatchKind kind, string? inputFormat = null) : base(name, value, kind)
         {
             InputFormat = inputFormat;
         }

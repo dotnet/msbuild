@@ -41,9 +41,9 @@ namespace Microsoft.TemplateEngine.Cli
             _commandInput = commandInput;
         }
 
-        internal HelpFormatter<T> DefineColumn(Func<T, string> binder,  string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
+        internal HelpFormatter<T> DefineColumn(Func<T, string> binder, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)
         {
-            return DefineColumn(binder, out object c,  header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
+            return DefineColumn(binder, out object c, header, columnName, shrinkIfNeeded, minWidth, showAlways, defaultColumn, rightAlign);
         }
 
         internal HelpFormatter<T> DefineColumn(Func<T, string> binder, out object column, string header = null, string columnName = null, bool shrinkIfNeeded = false, int minWidth = 2, bool showAlways = false, bool defaultColumn = true, bool rightAlign = false)

@@ -162,7 +162,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private bool ProcessAction(IPostAction action, IPostActionProcessor actionProcessor)
         {
-            if(actionProcessor is PostActionProcessor2Base actionProcessor2Base)
+            if (actionProcessor is PostActionProcessor2Base actionProcessor2Base)
             {
                 actionProcessor2Base.Callbacks = _callbacks;
             }

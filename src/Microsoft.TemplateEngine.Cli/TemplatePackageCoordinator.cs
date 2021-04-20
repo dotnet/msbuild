@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// </summary>
         /// <param name="commandInput">the command input with instructions to process.</param>
         /// <returns></returns>
-        internal Task<CreationResultStatus> ProcessAsync (INewCommandInput commandInput, CancellationToken cancellationToken = default)
+        internal Task<CreationResultStatus> ProcessAsync(INewCommandInput commandInput, CancellationToken cancellationToken = default)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
@@ -408,7 +408,7 @@ namespace Microsoft.TemplateEngine.Cli
             return (result, packagesToUninstall);
         }
 
-        private async Task<IEnumerable<ITemplatePackage>> GetTemplatePackagesByShortNameAsync (string sourceIdentifier, CancellationToken cancellationToken)
+        private async Task<IEnumerable<ITemplatePackage>> GetTemplatePackagesByShortNameAsync(string sourceIdentifier, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(sourceIdentifier))
             {

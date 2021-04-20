@@ -210,7 +210,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
             Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
             Assert.False(matchResult.HasLanguageMismatch);
-            Assert.True (matchResult.HasTypeMismatch);
+            Assert.True(matchResult.HasTypeMismatch);
             Assert.False(matchResult.HasBaselineMismatch);
             Assert.False(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);

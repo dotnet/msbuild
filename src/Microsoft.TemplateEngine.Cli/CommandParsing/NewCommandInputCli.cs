@@ -439,7 +439,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             {
                 if (string.Equals(token, "-x", StringComparison.Ordinal) || string.Equals(token, "--extra-args", StringComparison.Ordinal))
                 {
-                   inExtraArgsContext = true;
+                    inExtraArgsContext = true;
                 }
                 else if (inExtraArgsContext && ExtraArgsFileNames.Contains(token, StringComparer.Ordinal))
                 {
