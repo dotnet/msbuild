@@ -148,7 +148,8 @@ namespace Microsoft.TemplateEngine.Cli
                             workingPath = null;
                         }
                     }
-                } while (!found && (workingPath != null));
+                }
+                while (!found && (workingPath != null));
 
                 return found;
             }

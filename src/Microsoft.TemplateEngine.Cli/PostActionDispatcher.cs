@@ -154,7 +154,8 @@ namespace Microsoft.TemplateEngine.Cli
                 }
 
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInvalidInputRePrompt, input, YesAnswer, NoAnswer));
-            } while (true);
+            }
+            while (true);
         }
 
         private bool ProcessAction(IPostAction action, IPostActionProcessor actionProcessor)
