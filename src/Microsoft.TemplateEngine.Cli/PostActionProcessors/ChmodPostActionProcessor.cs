@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 }
                 catch
                 {
-                    values = new[] {entry.Value };
+                    values = new[] { entry.Value };
                 }
 
                 foreach (string file in values)
