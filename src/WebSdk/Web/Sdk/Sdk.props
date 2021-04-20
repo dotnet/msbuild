@@ -21,7 +21,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Default properties that shouldn't be replaced by the microsoft.net.sdk.props -->
   <PropertyGroup>
     <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
-    <SuppressTrimAnalysisWarnings Condition="'$(SuppressTrimAnalysisWarnings)' == ''">true</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
