@@ -791,12 +791,15 @@ namespace Microsoft.Build.CommandLine
                     exitType = ExitType.InitializationError;
                 }
             }
-            catch (ProjectCacheException e) when (!e.HasBeenLogged)
+            catch (ProjectCacheException e)
             {
                 Console.WriteLine($"MSBUILD : error {e.ErrorCode}: {e.Message}");
 
 #if DEBUG
-                Console.WriteLine("This is an unhandled exception from a project cache -- PLEASE OPEN A BUG AGAINST THE PROJECT CACHE OWNER.");
+                if (!e.HasBeenLoggedByProjectCache)
+                {
+                    Console.WriteLine("This is an unhandled exception from a project cache -- PLEASE OPEN A BUG AGAINST THE PROJECT CACHE OWNER.");
+                }
 #endif
 
                 if (e.InnerException is not null)
