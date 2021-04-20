@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli
         No,
         Yes,
         Prompt
-    };
+    }
 
     internal class PostActionDispatcher
     {
