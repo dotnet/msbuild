@@ -6,6 +6,7 @@ using Microsoft.TemplateEngine.TestHelper;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -354,12 +355,12 @@ namespace dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void InstallingSamePackageFromRemoteUpdatesLocal()
+        public async Task InstallingSamePackageFromRemoteUpdatesLocal()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             using var packageManager = new PackageManager();
-            string packageLocation = packageManager.GetNuGetPackage("Microsoft.DotNet.Common.ProjectTemplates.5.0");
+            string packageLocation = await packageManager.GetNuGetPackage("Microsoft.DotNet.Common.ProjectTemplates.5.0", _log).ConfigureAwait(false);
 
             new DotnetNewCommand(_log, "-i", packageLocation)
                 .WithCustomHive(home)

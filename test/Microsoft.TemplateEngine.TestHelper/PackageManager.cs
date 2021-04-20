@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,11 +17,13 @@ using NuGet.Configuration;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Xunit.Abstractions;
 
 namespace Microsoft.TemplateEngine.TestHelper
 {
     public class PackageManager : IDisposable
     {
+        private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         private string _packageLocation = TestUtils.CreateTemporaryFolder("packages");
         private readonly ILogger _nugetLogger = NullLogger.Instance;
         private readonly SourceCacheContext _cacheSettings = new SourceCacheContext()
@@ -36,20 +40,37 @@ namespace Microsoft.TemplateEngine.TestHelper
             return PackNuGetPackage(projectToPack);
         }
 
-        public string GetNuGetPackage(string templatePackName)
+        public async Task<string> GetNuGetPackage(string templatePackName, ITestOutputHelper? log = null)
         {
-            lock (string.Intern(templatePackName.ToLowerInvariant()))
+
+            try
             {
+                await semaphore.WaitAsync().ConfigureAwait(false);
                 if (_installedPackages.TryGetValue(templatePackName, out string packagePath))
                 {
                     return packagePath;
                 }
 
-                Task<string> downloadTask = DownloadPackageAsync(templatePackName);
-                downloadTask.Wait();
-                string downloadedPackage = downloadTask.Result;
-                _installedPackages[templatePackName] = downloadedPackage;
-                return downloadedPackage;
+                for (int retry = 0; retry < 5; retry++)
+                {
+                    try
+                    {
+                        string downloadedPackage = await DownloadPackageAsync(templatePackName, log: log).ConfigureAwait(false);
+                        _installedPackages[templatePackName] = downloadedPackage;
+                        return downloadedPackage;
+                    }
+                    catch (Exception ex)
+                    {
+                        log?.WriteLine($"[NuGet Package Manager] Download failed: package {templatePackName}, details: {ex}");
+                        //retry failed download
+                    }
+                    await Task.Delay(1000).ConfigureAwait(false);
+                }
+                throw new Exception($"Failed to download {templatePackName} after 5 retries");
+            }
+            finally
+            {
+                semaphore.Release();
             }
         }
 
@@ -94,7 +115,12 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public void Dispose() => Directory.Delete(_packageLocation, true);
 
-        private async Task<string> DownloadPackageAsync(string identifier, string version = null, IEnumerable<string> additionalSources = null, CancellationToken cancellationToken = default)
+        private async Task<string> DownloadPackageAsync(
+            string identifier,
+            string? version = null,
+            IEnumerable<string>? additionalSources = null,
+            ITestOutputHelper? log = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(identifier))
             {
@@ -109,12 +135,12 @@ namespace Microsoft.TemplateEngine.TestHelper
 
             if (string.IsNullOrWhiteSpace(version))
             {
-                (source, packageMetadata) = await GetLatestVersionInternalAsync(identifier, packagesSources, cancellationToken).ConfigureAwait(false);
+                (source, packageMetadata) = await GetLatestVersionInternalAsync(identifier, packagesSources, log, cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 packageVersion = new NuGetVersion(version);
-                (source, packageMetadata) = await GetPackageMetadataAsync(identifier, packageVersion, packagesSources, cancellationToken).ConfigureAwait(false);
+                (source, packageMetadata) = await GetPackageMetadataAsync(identifier, packageVersion, packagesSources, log, cancellationToken).ConfigureAwait(false);
             }
 
             FindPackageByIdResource resource;
@@ -157,7 +183,11 @@ namespace Microsoft.TemplateEngine.TestHelper
             }
         }
 
-        private async Task<(PackageSource, IPackageSearchMetadata)> GetLatestVersionInternalAsync(string packageIdentifier, IEnumerable<PackageSource> packageSources, CancellationToken cancellationToken)
+        private async Task<(PackageSource, IPackageSearchMetadata)> GetLatestVersionInternalAsync(
+            string packageIdentifier,
+            IEnumerable<PackageSource> packageSources,
+            ITestOutputHelper? log = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(packageIdentifier))
             {
@@ -165,12 +195,12 @@ namespace Microsoft.TemplateEngine.TestHelper
             }
             _ = packageSources ?? throw new ArgumentNullException(nameof(packageSources));
 
-            (PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)[] foundPackagesBySource =
+            (PackageSource source, IEnumerable<IPackageSearchMetadata>? foundPackages)[] foundPackagesBySource =
                 await Task.WhenAll(
-                    packageSources.Select(source => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, cancellationToken)))
+                    packageSources.Select(source => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, log, cancellationToken)))
                           .ConfigureAwait(false);
 
-            if (!foundPackagesBySource.Any())
+            if (!foundPackagesBySource.Where(result => result.foundPackages != null).Any())
             {
                 throw new Exception($"Failed to load NuGet sources {string.Join(";", packageSources.Select(source => source.Source))}");
             }
@@ -192,7 +222,12 @@ namespace Microsoft.TemplateEngine.TestHelper
             return latestVersion;
         }
 
-        private async Task<(PackageSource, IPackageSearchMetadata)> GetPackageMetadataAsync(string packageIdentifier, NuGetVersion packageVersion, IEnumerable<PackageSource> sources, CancellationToken cancellationToken)
+        private async Task<(PackageSource, IPackageSearchMetadata)> GetPackageMetadataAsync(
+            string packageIdentifier,
+            NuGetVersion packageVersion,
+            IEnumerable<PackageSource> sources,
+            ITestOutputHelper? log = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(packageIdentifier))
             {
@@ -204,7 +239,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             bool atLeastOneSourceValid = false;
             using CancellationTokenSource linkedCts =
                       CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var tasks = sources.Select(source => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, linkedCts.Token)).ToList();
+            var tasks = sources.Select(source => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, log, linkedCts.Token)).ToList();
             while (tasks.Any())
             {
                 var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
@@ -229,7 +264,12 @@ namespace Microsoft.TemplateEngine.TestHelper
             throw new Exception($"{packageIdentifier}, version: {packageVersion} is not found in {string.Join(";", sources.Select(source => source.Source))}");
         }
 
-        private async Task<(PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)> GetPackageMetadataAsync(PackageSource source, string packageIdentifier, bool includePrerelease = false, CancellationToken cancellationToken = default)
+        private async Task<(PackageSource source, IEnumerable<IPackageSearchMetadata>? foundPackages)> GetPackageMetadataAsync(
+            PackageSource source,
+            string packageIdentifier,
+            bool includePrerelease = false,
+            ITestOutputHelper? log = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(packageIdentifier))
             {
@@ -237,16 +277,25 @@ namespace Microsoft.TemplateEngine.TestHelper
             }
             _ = source ?? throw new ArgumentNullException(nameof(source));
 
-            SourceRepository repository = Repository.Factory.GetCoreV3(source);
-            PackageMetadataResource resource = await repository.GetResourceAsync<PackageMetadataResource>(cancellationToken).ConfigureAwait(false);
-            IEnumerable<IPackageSearchMetadata> foundPackages = await resource.GetMetadataAsync(
-                packageIdentifier,
-                includePrerelease: includePrerelease,
-                includeUnlisted: false,
-                _cacheSettings,
-                _nugetLogger,
-                cancellationToken).ConfigureAwait(false);
-            return (source, foundPackages);
+            try
+            {
+                SourceRepository repository = Repository.Factory.GetCoreV3(source);
+                PackageMetadataResource resource = await repository.GetResourceAsync<PackageMetadataResource>(cancellationToken).ConfigureAwait(false);
+                IEnumerable<IPackageSearchMetadata> foundPackages = await resource.GetMetadataAsync(
+                    packageIdentifier,
+                    includePrerelease: includePrerelease,
+                    includeUnlisted: false,
+                    _cacheSettings,
+                    _nugetLogger,
+                    cancellationToken).ConfigureAwait(false);
+                return (source, foundPackages);
+            }
+            catch (Exception ex)
+            {
+                //ignore errors
+                log?.WriteLine($"Retrieving info from {source.Source} failed, details: {ex}");
+                return (source, null);
+            }
         }
 
         private IEnumerable<PackageSource> LoadNuGetSources(params string[] additionalSources)
@@ -265,7 +314,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                 throw new Exception($"Failed to load NuGet sources configured for the folder {currentDirectory}", ex);
             }
 
-            if (!additionalSources?.Any() ?? true)
+            if (!additionalSources.Any())
             {
                 if (!defaultSources.Any())
                 {
