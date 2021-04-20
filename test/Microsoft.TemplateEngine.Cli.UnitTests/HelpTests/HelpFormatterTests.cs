@@ -17,15 +17,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
         [Fact(DisplayName = nameof(CanShrinkOneColumn))]
         public void CanShrinkOneColumn()
         {
-            ITemplateEngineHost host = new TestHost
-            {
-                HostIdentifier = "TestRunner",
-                Version = "1.0.0.0",
-            };
-
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
             {
-                Host = host,
                 Environment = new MockEnvironment()
                 {
                     ConsoleBufferWidth = 6 + 2 + 12 + 1
@@ -61,15 +54,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
         [Fact(DisplayName = nameof(CanShrinkMultipleColumnsAndBalanceShrinking))]
         public void CanShrinkMultipleColumnsAndBalanceShrinking()
         {
-            ITemplateEngineHost host = new TestHost
-            {
-                HostIdentifier = "TestRunner",
-                Version = "1.0.0.0",
-            };
-
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
             {
-                Host = host,
                 Environment = new MockEnvironment()
                 {
                     ConsoleBufferWidth = 6 + 2 + 6 + 1,
@@ -105,15 +91,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
         [Fact(DisplayName = nameof(CannotShrinkOverMinimumWidth))]
         public void CannotShrinkOverMinimumWidth()
         {
-            ITemplateEngineHost host = new TestHost
-            {
-                HostIdentifier = "TestRunner",
-                Version = "1.0.0.0",
-            };
-
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
             {
-                Host = host,
                 Environment = new MockEnvironment()
                 {
                     ConsoleBufferWidth = 10, //less than need for data below
@@ -149,15 +128,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
         [Fact(DisplayName = nameof(CanShowDefaultColumns))]
         public void CanShowDefaultColumns()
         {
-            ITemplateEngineHost host = new TestHost
-            {
-                HostIdentifier = "TestRunner",
-                Version = "1.0.0.0",
-            };
-
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
             {
-                Host = host,
                 Environment = new MockEnvironment()
                 {
                     ConsoleBufferWidth = 100
@@ -194,15 +166,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
         [Fact(DisplayName = nameof(CanShowUserSelectedColumns))]
         public void CanShowUserSelectedColumns()
         {
-            ITemplateEngineHost host = new TestHost
-            {
-                HostIdentifier = "TestRunner",
-                Version = "1.0.0.0",
-            };
-
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
             {
-                Host = host,
                 Environment = new MockEnvironment()
                 {
                     ConsoleBufferWidth = 100
@@ -239,15 +204,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
         [Fact(DisplayName = nameof(CanShowAllColumns))]
         public void CanShowAllColumns()
         {
-            ITemplateEngineHost host = new TestHost
-            {
-                HostIdentifier = "TestRunner",
-                Version = "1.0.0.0",
-            };
-
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
             {
-                Host = host,
                 Environment = new MockEnvironment()
                 {
                     ConsoleBufferWidth = 100
@@ -284,15 +242,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
         [Fact(DisplayName = nameof(CanRightAlign))]
         public void CanRightAlign()
         {
-            ITemplateEngineHost host = new TestHost
-            {
-                HostIdentifier = "TestRunner",
-                Version = "1.0.0.0",
-            };
-
             IEngineEnvironmentSettings environmentSettings = new MockEngineEnvironmentSettings()
             {
-                Host = host,
                 Environment = new MockEnvironment()
                 {
                     ConsoleBufferWidth = 10, //less than need for data below

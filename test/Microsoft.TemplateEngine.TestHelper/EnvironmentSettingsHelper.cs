@@ -59,8 +59,6 @@ namespace Microsoft.TemplateEngine.TestHelper
             return engineEnvironmentSettings;
         }
 
-
-
         public string CreateTemporaryFolder(string name = "")
         {
             string folder = TestUtils.CreateTemporaryFolder(name);

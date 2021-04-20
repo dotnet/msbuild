@@ -15,8 +15,14 @@ using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
-    public class TemplateSearcherTests : TestBase
+    public class TemplateSearcherTests : IClassFixture<EnvironmentSettingsHelper>
     {
+        private IEngineEnvironmentSettings _engineEnvironmentSettings;
+        public TemplateSearcherTests(EnvironmentSettingsHelper environmentSettingsHelper)
+        {
+            _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: this.GetType().Name, virtualize: true);
+        }
+
         private static readonly PackInfo _fooPackInfo = new PackInfo("fooPack", "1.0.0");
 
         private static readonly PackInfo _barPackInfo = new PackInfo("barPack", "2.0.0");
@@ -30,10 +36,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(TwoSourcesAreBothSearched))]
         public void TwoSourcesAreBothSearched()
         {
-            EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockTemplateSearchSource));
-            EngineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockTemplateSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockTemplateSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockTemplateSearchSource));
 
-            IList<ITemplateSearchSource> searchSources = EngineEnvironmentSettings.SettingsLoader.Components.OfType<ITemplateSearchSource>().ToList();
+            IList<ITemplateSearchSource> searchSources = _engineEnvironmentSettings.SettingsLoader.Components.OfType<ITemplateSearchSource>().ToList();
 
             Assert.Equal(2, searchSources.Count);
         }
@@ -42,11 +48,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         public void SourcesCorrectlySearchOnName()
         {
             MockTemplateSearchSource.ClearResultsForAllSources();
-            IReadOnlyDictionary<string, Guid> sourceNameToIdMap = MockTemplateSearchSource.SetupMultipleSources(EngineEnvironmentSettings, GetMockNameSearchResults());
+            IReadOnlyDictionary<string, Guid> sourceNameToIdMap = MockTemplateSearchSource.SetupMultipleSources(_engineEnvironmentSettings, GetMockNameSearchResults());
 
             const string templateName = "foo";
 
-            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
+            TemplateSearcher searcher = new TemplateSearcher(_engineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
             List<IManagedTemplatePackage> existingInstalls = new List<IManagedTemplatePackage>();
             SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, templateName).Result;
             Assert.True(searchResults.AnySources);
@@ -64,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             const string templateName = "foo";
 
-            TemplateSearcher searcher = new TemplateSearcher(EngineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
+            TemplateSearcher searcher = new TemplateSearcher(_engineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
 
             IReadOnlyList<IManagedTemplatePackage> packsToIgnore = new List<IManagedTemplatePackage>()
             {
