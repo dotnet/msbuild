@@ -10,7 +10,7 @@ namespace dotnet_new3.IntegrationTests
     /// This is so we can pass ITestOutputHelper to TestCommand constructor
     /// when calling from SharedHomeDirectory.
     /// </summary>
-    class SharedTestOutputHelper : ITestOutputHelper
+    internal class SharedTestOutputHelper : ITestOutputHelper
     {
         private readonly IMessageSink sink;
 

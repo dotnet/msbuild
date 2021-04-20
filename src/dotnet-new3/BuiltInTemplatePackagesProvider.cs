@@ -18,7 +18,7 @@ namespace dotnet_new3
     /// <summary>
     /// Factory responsible for adding "console", "library" and other templates contained in "template_feed" to "dotnet new3".
     /// </summary>
-    class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
+    internal class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
         public static readonly Guid FactoryId = new Guid("{3227D09D-C1EA-48F1-A33B-1F132BFD9F06}");
 
@@ -31,7 +31,7 @@ namespace dotnet_new3
             return new BuiltInTemplatePackagesProvider(this, settings);
         }
 
-        class BuiltInTemplatePackagesProvider : ITemplatePackageProvider
+        private class BuiltInTemplatePackagesProvider : ITemplatePackageProvider
         {
             private readonly IEngineEnvironmentSettings _settings;
 

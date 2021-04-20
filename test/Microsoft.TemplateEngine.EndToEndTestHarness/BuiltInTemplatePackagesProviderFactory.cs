@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.TemplateEngine.EndToEndTestHarness
 {
-    class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
+    internal class BuiltInTemplatePackagesProviderFactory : ITemplatePackageProviderFactory
     {
         public string DisplayName => "E2E Harness BuiltIn";
 

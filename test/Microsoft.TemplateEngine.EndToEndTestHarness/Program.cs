@@ -20,14 +20,14 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.EndToEndTestHarness
 {
-    class Program
+    internal class Program
     {
         private const string HostIdentifier = "endtoendtestharness";
         private const string HostVersion = "v1.0.0";
         private const string CommandName = "test-test";
         private static readonly Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>> VerificationLookup = new Dictionary<string, Func<IPhysicalFileSystem, JObject, string, bool>>(StringComparer.OrdinalIgnoreCase);
 
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
             VerificationLookup["dir_exists"] = CheckDirectoryExists;
             VerificationLookup["file_exists"] = CheckFileExists;
