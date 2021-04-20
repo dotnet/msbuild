@@ -320,7 +320,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                      headerSeparator: '-',
                      blankLineBetweenRows: false)
                  .DefineColumn(t => t.Item1, "Column 1" )
-                 .DefineColumn(t => t.Item2, "Column 2", rightAlign:true);
+                 .DefineColumn(t => t.Item2, "Column 2", rightAlign: true);
 
             string result = formatter.Layout();
             Assert.Equal(expectedOutput, result);

@@ -250,8 +250,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity:"Group", precedence:100),
-                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity:"Group", precedence:200)
+                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity: "Group", precedence: 100),
+                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity: "Group", precedence: 200)
             };
             yield return new object[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
             yield return new object[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
@@ -259,8 +259,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity:"Group"),
-                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity:"Group")
+                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity: "Group"),
+                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity: "Group")
             };
             yield return new object[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
             yield return new object[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
@@ -479,8 +479,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity:"Group", precedence:100),
-                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity:"Group", precedence:200)
+                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity: "Group", precedence: 100),
+                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity: "Group", precedence: 200)
             };
             yield return new object[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.Status.SingleMatch, "Template2" };
             yield return new object[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.Status.SingleMatch, "Template2" };
@@ -488,8 +488,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity:"Group"),
-                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity:"Group")
+                    new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity: "Group"),
+                    new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity: "Group")
             };
             yield return new object[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousTemplateChoice, null };
             yield return new object[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousTemplateChoice, null };

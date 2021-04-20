@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
     internal class MockCliNuGetMetadataSearchSource : CliNuGetMetadataSearchSource
     {
         public MockCliNuGetMetadataSearchSource()
-            :base()
+            : base()
         {
         }
 
