@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// so that the next process will receive the same string[] args
         /// 
         /// See here for more info:
-        /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
+        /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx.
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
@@ -28,7 +28,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// so that the next process will receive the same string[] args
         /// 
         /// See here for more info:
-        /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
+        /// http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx.
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>

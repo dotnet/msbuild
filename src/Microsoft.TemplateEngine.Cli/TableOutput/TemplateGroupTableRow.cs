@@ -4,7 +4,7 @@
 namespace Microsoft.TemplateEngine.Cli.TableOutput
 {
     /// <summary>
-    /// Represents a table row for template group display
+    /// Represents a table row for template group display.
     /// </summary>
     internal struct TemplateGroupTableRow
     {

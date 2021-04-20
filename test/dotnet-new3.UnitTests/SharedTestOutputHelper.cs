@@ -8,7 +8,7 @@ namespace dotnet_new3.IntegrationTests
 {
     /// <summary>
     /// This is so we can pass ITestOutputHelper to TestCommand constructor
-    /// when calling from SharedHomeDirectory
+    /// when calling from SharedHomeDirectory.
     /// </summary>
     class SharedTestOutputHelper : ITestOutputHelper
     {

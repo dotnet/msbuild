@@ -66,10 +66,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <summary>
         /// Displays the help in case it is not possible to resolve template to use based on user input on template instantiation.
         /// </summary>
-        /// <param name="resolutionResult">template resolution result</param>
+        /// <param name="resolutionResult">template resolution result.</param>
         /// <param name="environmentSettings"></param>
-        /// <param name="commandInput">command input used in CLI</param>
-        /// <param name="defaultLanguage">default language for the host</param>
+        /// <param name="commandInput">command input used in CLI.</param>
+        /// <param name="defaultLanguage">default language for the host.</param>
         /// <returns></returns>
         internal static Task<CreationResultStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
             TemplateResolutionResult resolutionResult,
@@ -226,13 +226,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
 
         /// <summary>
-        /// Displays the help in case <paramref name="commandInput"/> contains invalid parameters for resolved <paramref name="unambiguousTemplateGroup"/>
+        /// Displays the help in case <paramref name="commandInput"/> contains invalid parameters for resolved <paramref name="unambiguousTemplateGroup"/>.
         /// </summary>
-        /// <param name="unambiguousTemplateGroup">the unambigious template group to use based on the command input</param>
-        /// <param name="commandInput">the command input</param>
-        /// <returns><see cref="CreationResultStatus.InvalidParamValues"/></returns>
-        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/></exception>
-        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/></exception>
+        /// <param name="unambiguousTemplateGroup">the unambigious template group to use based on the command input.</param>
+        /// <param name="commandInput">the command input.</param>
+        /// <returns><see cref="CreationResultStatus.InvalidParamValues"/>.</returns>
+        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/>.</exception>
         private static CreationResultStatus DisplayInvalidParameterError(TemplateGroup unambiguousTemplateGroup, INewCommandInput commandInput)
         {
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
@@ -268,12 +268,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <summary>
         /// Displays the help when <paramref name="unambiguousTemplateGroup"/> contains the invokable templates with ambiguous precedence.
         /// </summary>
-        /// <param name="unambiguousTemplateGroup">resolved unambiguous template group to use based on the command input</param>
+        /// <param name="unambiguousTemplateGroup">resolved unambiguous template group to use based on the command input.</param>
         /// <param name="environmentSettings"></param>
-        /// <param name="commandInput">the command input</param>
+        /// <param name="commandInput">the command input.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/></exception>
-        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/></exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/>.</exception>
         private static async Task<CreationResultStatus> DisplayAmbiguousPrecedenceErrorAsync(
             TemplateGroup unambiguousTemplateGroup,
             IEngineEnvironmentSettings environmentSettings,

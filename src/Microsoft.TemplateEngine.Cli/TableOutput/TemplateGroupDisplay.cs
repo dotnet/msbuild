@@ -20,11 +20,11 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
         /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
         /// - Tags
         /// - Author
-        /// - Type
+        /// - Type.
         /// </summary>
-        /// <param name="templateList">list of templates to be displayed</param>
-        /// <param name="language">language from the command input</param>
-        /// <param name="defaultLanguage">default language</param>
+        /// <param name="templateList">list of templates to be displayed.</param>
+        /// <param name="language">language from the command input.</param>
+        /// <param name="defaultLanguage">default language.</param>
         /// <returns></returns>
         internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(IEnumerable<ITemplateInfo> templateList, string language, string defaultLanguage)
         {
@@ -46,11 +46,11 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
         /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
         /// - Tags
         /// - Author
-        /// - Type
+        /// - Type.
         /// </summary>
-        /// <param name="templateList">list of template groups to be displayed</param>
-        /// <param name="language">language from the command input</param>
-        /// <param name="defaultLanguage">default language</param>
+        /// <param name="templateList">list of template groups to be displayed.</param>
+        /// <param name="language">language from the command input.</param>
+        /// <param name="defaultLanguage">default language.</param>
         /// <returns></returns>
         internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(IReadOnlyCollection<TemplateGroup> templateGroupList, string language, string defaultLanguage)
         {

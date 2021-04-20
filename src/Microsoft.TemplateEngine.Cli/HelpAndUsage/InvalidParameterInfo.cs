@@ -11,12 +11,12 @@ using System.Text;
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     /// <summary>
-    /// The class represents the information about the invalid template parameter used when executing the command
+    /// The class represents the information about the invalid template parameter used when executing the command.
     /// </summary>
     internal class InvalidParameterInfo : IEquatable<InvalidParameterInfo>
     {
         /// <summary>
-        /// Defines the possible reason for the parameter to be invalid
+        /// Defines the possible reason for the parameter to be invalid.
         /// </summary>
         internal enum Kind
         {
@@ -47,28 +47,28 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         /// <summary>
-        /// the option used in CLI for parameter
+        /// the option used in CLI for parameter.
         /// </summary>
         internal string InputFormat { get; }
         /// <summary>
-        /// The value specified for the parameter in CLI
+        /// The value specified for the parameter in CLI.
         /// </summary>
         internal string SpecifiedValue { get; }
         /// <summary>
-        /// The canonical name for the parameter
+        /// The canonical name for the parameter.
         /// </summary>
         internal string Canonical { get; }
         /// <summary>
-        /// The reason why the parameter is invalid
+        /// The reason why the parameter is invalid.
         /// </summary>
         internal Kind ErrorKind { get; }
 
         /// <summary>
-        /// Provides the error string to use for the invalid parameters collection
+        /// Provides the error string to use for the invalid parameters collection.
         /// </summary>
-        /// <param name="invalidParameterList">the invalid parameters collection to prepare output for</param>
+        /// <param name="invalidParameterList">the invalid parameters collection to prepare output for.</param>
         /// <param name="templateGroup">the template group to use to get more information about parameters. Optional - if not provided the possible value for the parameters won't be included to the output.</param>
-        /// <returns>the error string for the output</returns>
+        /// <returns>the error string for the output.</returns>
         internal static string InvalidParameterListToString(IEnumerable<InvalidParameterInfo> invalidParameterList, TemplateGroup templateGroup = null)
         {
             if (!invalidParameterList.Any())

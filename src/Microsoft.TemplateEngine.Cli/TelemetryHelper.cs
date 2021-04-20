@@ -47,7 +47,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         /// <summary>
-        /// // The hashed mac address needs to be the same hashed value as produced by the other distinct sources given the same input. (e.g. VsCode)
+        /// // The hashed mac address needs to be the same hashed value as produced by the other distinct sources given the same input. (e.g. VsCode).
         /// </summary>
         internal static string Hash(string text)
         {
