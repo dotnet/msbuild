@@ -84,7 +84,8 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             if (actionConfig.Args.TryGetValue("projectFileExtensions", out string projectFileExtensions))
             {
                 if (projectFileExtensions.Contains("/") || projectFileExtensions.Contains("\\") || projectFileExtensions.Contains("*"))
-                {   // these must be literals
+                {
+                    // these must be literals
                     environment.Host.LogMessage(LocalizableStrings.AddRefPostActionMisconfigured);
                     return false;
                 }

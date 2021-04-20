@@ -89,12 +89,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         }
 
         [Theory(DisplayName = nameof(ChoiceValueDisambiguatesMatchesWithMultipleShortNames))]
-        [InlineData("aaa", "W", "MultiName.Test.High.CSharp")]  // uses a short name from the expected invokable template
-        [InlineData("fff", "W", "MultiName.Test.High.CSharp")]  // uses a short name from a different template in the group
-        [InlineData("ccc", "X", "MultiName.Test.Low.CSharp")]   // uses a short name from the expected invokable template
-        [InlineData("fff", "X", "MultiName.Test.Low.CSharp")]   // uses a short name from a different template in the group
-        [InlineData("fff", "Y", "Multiname.Test.Only.FSharp")]  // uses a short name from the expected invokable template
-        [InlineData("eee", "Y", "Multiname.Test.Only.FSharp")]  // uses a short name from a different template in the group
+        [InlineData("aaa", "W", "MultiName.Test.High.CSharp")] // uses a short name from the expected invokable template
+        [InlineData("fff", "W", "MultiName.Test.High.CSharp")] // uses a short name from a different template in the group
+        [InlineData("ccc", "X", "MultiName.Test.Low.CSharp")] // uses a short name from the expected invokable template
+        [InlineData("fff", "X", "MultiName.Test.Low.CSharp")] // uses a short name from a different template in the group
+        [InlineData("fff", "Y", "Multiname.Test.Only.FSharp")] // uses a short name from the expected invokable template
+        [InlineData("eee", "Y", "Multiname.Test.Only.FSharp")] // uses a short name from a different template in the group
         public void ChoiceValueDisambiguatesMatchesWithMultipleShortNames(string name, string fooChoice, string expectedIdentity)
         {
             INewCommandInput commandInput = new MockNewCommandInput(name).WithTemplateOption("foo", fooChoice);
@@ -107,8 +107,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         [Theory(DisplayName = nameof(ParameterExistenceDisambiguatesMatchesWithMultipleShortNames))]
         [InlineData("aaa", "HighC", "someValue", "MultiName.Test.High.CSharp")] // uses a short name from the expected invokable template
         [InlineData("fff", "HighC", "someValue", "MultiName.Test.High.CSharp")] // uses a short name from a different template in the group
-        [InlineData("ccc", "LowC", "someValue", "MultiName.Test.Low.CSharp")]   // uses a short name from the expected invokable template
-        [InlineData("fff", "LowC", "someValue", "MultiName.Test.Low.CSharp")]   // uses a short name from a different template in the group
+        [InlineData("ccc", "LowC", "someValue", "MultiName.Test.Low.CSharp")] // uses a short name from the expected invokable template
+        [InlineData("fff", "LowC", "someValue", "MultiName.Test.Low.CSharp")] // uses a short name from a different template in the group
         [InlineData("fff", "OnlyF", "someValue", "Multiname.Test.Only.FSharp")] // uses a short name from the expected invokable template
         [InlineData("eee", "OnlyF", "someValue", "Multiname.Test.Only.FSharp")] // uses a short name from a different template in the group
         public void ParameterExistenceDisambiguatesMatchesWithMultipleShortNames(string name, string paramName, string paramValue, string expectedIdentity)

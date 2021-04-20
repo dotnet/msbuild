@@ -14,7 +14,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             HashSet<string> invalidParams = new HashSet<string>();
 
             if (parameterName.IndexOf(':') >= 0)
-            {   // Colon is reserved, template param names cannot have any.
+            {
+                // Colon is reserved, template param names cannot have any.
                 invalidParams.Add(parameterName);
                 assignedAliases = aliasAssignments;
                 return false;
@@ -41,13 +42,15 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
 
             if (shortNameOverride == string.Empty)
-            {   // it was explicitly empty string in the host file. If it wasn't specified, it'll be null
+            {
+                // it was explicitly empty string in the host file. If it wasn't specified, it'll be null
                 shortNameFound = true;
             }
             else if (shortNameOverride != null)
             {
                 if (!string.IsNullOrEmpty(shortNameOverride))
-                {   // short name starting point was explicitly specified
+                {
+                    // short name starting point was explicitly specified
                     string fullShortNameOverride = "-" + shortNameOverride;
 
                     if (!isAliasTaken(shortNameOverride))
@@ -65,7 +68,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 }
             }
             else
-            {   // no explicit short name specification, try generating one
+            {
+                // no explicit short name specification, try generating one
                 // always unless taken
                 string shortName = GetFreeShortName(isAliasTaken, flagFullText);
                 if (!isAliasTaken(shortName))

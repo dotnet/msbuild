@@ -24,7 +24,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             IDictionary<string, string> longNameOverrides = new Dictionary<string, string>()
             {
-                { "bar", "foo" }    // bar explicitly wants foo for its long form
+                { "bar", "foo" } // bar explicitly wants foo for its long form
             };
             IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>();
 
@@ -51,7 +51,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IDictionary<string, string> longNameOverrides = new Dictionary<string, string>();
             IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>()
             {
-                { "bar", "f" }  // bar explicitly wants f for its short form
+                { "bar", "f" } // bar explicitly wants f for its short form
             };
 
             AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);
@@ -76,7 +76,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             IDictionary<string, string> longNameOverrides = new Dictionary<string, string>();
             IDictionary<string, string> shortNameOverrides = new Dictionary<string, string>()
             {
-                { "bar", "" }  // bar explicitly wants f for its short form
+                { "bar", "" } // bar explicitly wants f for its short form
             };
 
             AliasAssignmentCoordinator assignmentCoordinator = new AliasAssignmentCoordinator(parameters, longNameOverrides, shortNameOverrides, InitiallyTakenAliases);

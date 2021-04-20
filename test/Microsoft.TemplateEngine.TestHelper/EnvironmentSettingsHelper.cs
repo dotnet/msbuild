@@ -33,7 +33,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                 BuiltInComponents = new AssemblyComponentCatalog(new List<Assembly>()
                 {
                     typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).Assembly,   //RunnableProject
-                    typeof(SettingsLoader).Assembly   //Edge
+                    typeof(SettingsLoader).Assembly //Edge
                 }),
                 FileSystem = new MonitoredFileSystem(new PhysicalFileSystem()),
                 FallbackHostTemplateConfigNames = new[] { "dotnetcli" }

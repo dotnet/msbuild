@@ -44,7 +44,8 @@ namespace Microsoft.TemplateEngine.Cli
             inputTokens.RemoveAt(0);    // remove the command name
 
             if (aliasRegistry.TryExpandCommandAliases(inputTokens, out IReadOnlyList<string> expandedTokens))
-            {   // TryExpandCommandAliases() return value indicates error (cycle) or not error. It doesn't indicate whether or not expansions actually occurred.
+            {
+                // TryExpandCommandAliases() return value indicates error (cycle) or not error. It doesn't indicate whether or not expansions actually occurred.
                 if (!expandedTokens.SequenceEqual(inputTokens))
                 {
                     commandInput.ResetArgs(expandedTokens.ToArray());

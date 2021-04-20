@@ -115,7 +115,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 string shortOverride = canonicalAndShort.Value;
 
                 if (shortOverride == string.Empty)
-                {   // it was explicitly empty string in the host file. If it wasn't specified, it'll be null
+                {
+                    // it was explicitly empty string in the host file. If it wasn't specified, it'll be null
                     // this means there should be no short version
                     continue;
                 }
@@ -141,7 +142,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             foreach (ITemplateParameter parameterInfo in paramNamesNeedingAssignment.Values)
             {
                 if (_longAssignments.ContainsKey(parameterInfo.Name) && _shortAssignments.ContainsKey(parameterInfo.Name))
-                {   // already fully assigned
+                {
+                    // already fully assigned
                     continue;
                 }
 
@@ -151,10 +153,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 if (CommandAliasAssigner.TryAssignAliasesForParameter((x) => _takenAliases.Contains(x), parameterInfo.Name, longOverride, shortOverride, out IReadOnlyList<string> assignedAliases))
                 {
                     if (shortOverride != string.Empty)
-                    {   // explicit empty string in the host file means there should be no short name.
+                    {
+                        // explicit empty string in the host file means there should be no short name.
                         // but thats not the case here.
                         if (!_shortAssignments.ContainsKey(parameterInfo.Name))
-                        {   // still needs a short version
+                        {
+                            // still needs a short version
                             string shortParam = assignedAliases.FirstOrDefault(x => x.StartsWith("-") && !x.StartsWith("--"));
                             if (!string.IsNullOrEmpty(shortParam))
                             {
@@ -165,7 +169,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     }
 
                     if (!_longAssignments.ContainsKey(parameterInfo.Name))
-                    {   // still needs a long version
+                    {
+                        // still needs a long version
                         string longParam = assignedAliases.FirstOrDefault(x => x.StartsWith("--"));
                         if (!string.IsNullOrEmpty(longParam))
                         {

@@ -54,7 +54,8 @@ namespace Microsoft.TemplateEngine.Cli
                 bool result = false;
 
                 if (actionProcessor == null)
-                {   // The host doesn't know how to handle this action, just display instructions.
+                {
+                    // The host doesn't know how to handle this action, just display instructions.
                     result = DisplayInstructionsForAction(action);
                 }
                 else if (actionProcessor is ProcessStartPostActionProcessor)
@@ -114,7 +115,8 @@ namespace Microsoft.TemplateEngine.Cli
         private bool HandlePromptRequired(IPostAction action, IPostActionProcessor actionProcessor, Func<string> inputGetter)
         {
             if (actionProcessor is InstructionDisplayPostActionProcessor)
-            {   // it's just instructions, no need to prompt
+            {
+                // it's just instructions, no need to prompt
                 bool result = ProcessAction(action, actionProcessor);
                 return result;
             }

@@ -185,7 +185,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                      headerSeparator: '-',
                      blankLineBetweenRows: false)
                  .DefineColumn(t => t.Item1, "Column 1", showAlways: true)
-                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2")  //defaultColumn: true by default
+                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2") //defaultColumn: true by default
                  .DefineColumn(t => t.Item3, "Column 3", columnName: "column3", defaultColumn: false);
 
             string result = formatter.Layout();
@@ -230,7 +230,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                      headerSeparator: '-',
                      blankLineBetweenRows: false)
                  .DefineColumn(t => t.Item1, "Column 1", showAlways: true)
-                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2")  //defaultColumn: true by default
+                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2") //defaultColumn: true by default
                  .DefineColumn(t => t.Item3, "Column 3", columnName: "column3", defaultColumn: false);
 
             string result = formatter.Layout();
@@ -275,7 +275,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
                      headerSeparator: '-',
                      blankLineBetweenRows: false)
                  .DefineColumn(t => t.Item1, "Column 1", showAlways: true)
-                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2")  //defaultColumn: true by default
+                 .DefineColumn(t => t.Item2, "Column 2", columnName: "column2") //defaultColumn: true by default
                  .DefineColumn(t => t.Item3, "Column 3", columnName: "column3", defaultColumn: false);
 
             string result = formatter.Layout();
