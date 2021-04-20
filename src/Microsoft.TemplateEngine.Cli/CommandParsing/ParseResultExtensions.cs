@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return true;
         }
 
-        // If the argument path exists, return true. 
+        // If the argument path exists, return true.
         // If the argument has a value, set it to the out param.
         // This allows checking for args existence whose type is not known, which makes it safe to check for bool flags without values
         // in addition to checking for string value args.
@@ -85,7 +85,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             if (optionPath.Length == 0)
             {
                 option = null;
-                return false; 
+                return false;
             }
 
             if (!parseResult.HasOption(optionPath[0]))

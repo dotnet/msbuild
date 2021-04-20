@@ -39,10 +39,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             //in case only --help option is specified we don't need to show templates list
             if (commandInput.IsHelpFlagSpecified && string.IsNullOrEmpty(commandInput.TemplateName))
             {
-                return CreationResultStatus.Success; 
+                return CreationResultStatus.Success;
             }
 
-            // in case list is specified we always need to list templates 
+            // in case list is specified we always need to list templates
             if (commandInput.IsListFlagSpecified)
             {
                 return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);

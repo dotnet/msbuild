@@ -34,7 +34,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     Reporter.Error.WriteLine();
                     return;
                 }
-                // get the input params valid for any param in the group              
+                // get the input params valid for any param in the group
                 IReadOnlyDictionary<string, string> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
                 ShowTemplateDetailHeaders(templateInfoList);
                 ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings, commandInput);

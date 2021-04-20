@@ -24,7 +24,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         /// <param name="defaultLanguage">default language for the host.</param>
         /// <returns><c>CreationResultStatus.Success</c> when the templates were found and displayed;
         /// <c>CreationResultStatus.Cancelled</c> when the command validation fails;
-        /// <c>CreationResultStatus.NotFound</c> when no templates found based on the filter criteria. 
+        /// <c>CreationResultStatus.NotFound</c> when no templates found based on the filter criteria.
         /// </returns>
         internal static async Task<CreationResultStatus> SearchForTemplateMatchesAsync(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage)
         {
@@ -144,7 +144,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         }
 
         /// <summary>
-        /// Represents a table row for the template with the package information. 
+        /// Represents a table row for the template with the package information.
         /// </summary>
         private class SearchResultTableRow
         {

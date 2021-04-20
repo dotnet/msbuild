@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             EngineEnvironmentSettings = new EngineEnvironmentSettings(host, x => new MockSettingsLoader(x));
             host.VirtualizeDirectory(GetTemplateEngineDirectory());
         }
-        
+
         private static string GetTemplateEngineDirectory()
         {
             return Path.Combine(Directory.GetCurrentDirectory(), ".templateengine");

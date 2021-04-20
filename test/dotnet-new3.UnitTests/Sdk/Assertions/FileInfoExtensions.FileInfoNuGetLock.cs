@@ -33,7 +33,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
                         Task.Delay(60000, cancellationToken).Wait();
 
-                        return Task.FromResult(0);   
+                        return Task.FromResult(0);
                     },
                     _cancellationTokenSource.Token));
 

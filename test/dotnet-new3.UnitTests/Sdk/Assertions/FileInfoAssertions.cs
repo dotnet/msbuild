@@ -27,7 +27,7 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             Execute.Assertion
                 .ForCondition(_fileInfo.Exists)
-                .BecauseOf(because, reasonArgs) 
+                .BecauseOf(because, reasonArgs)
                 .FailWith($"Expected File {_fileInfo.FullName} to exist, but it does not.");
             return new AndConstraint<FileInfoAssertions>(this);
         }
@@ -36,7 +36,7 @@ namespace Microsoft.NET.TestFramework.Assertions
         {
             Execute.Assertion
                 .ForCondition(!_fileInfo.Exists)
-                .BecauseOf(because, reasonArgs) 
+                .BecauseOf(because, reasonArgs)
                 .FailWith($"Expected File {_fileInfo.FullName} to not exist, but it does.");
             return new AndConstraint<FileInfoAssertions>(this);
         }

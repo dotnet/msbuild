@@ -87,7 +87,7 @@ namespace Microsoft.NET.TestFramework.Commands
         }
 
         public virtual CommandResult Execute(IEnumerable<string> args)
-        { 
+        {
             var command = CreateCommandSpec(args)
                 .ToCommand()
                 .CaptureStdOut()

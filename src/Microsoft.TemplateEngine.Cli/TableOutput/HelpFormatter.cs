@@ -270,11 +270,11 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     columnToShrink.CalculatedWidth--;
                     amountForShrinkableColumnToGiveUp--;
-                }    
+                }
             }
 
         }
-    
+
         private class ColumnDefinition
         {
             private readonly Func<T, string> _binder;

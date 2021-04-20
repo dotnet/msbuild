@@ -105,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli
                 string changeKind = GetChangeString(change.ChangeKind);
                 Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
             }
-            
+
             Reporter.Error.WriteLine();
             Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
             return false;

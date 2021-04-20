@@ -295,7 +295,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             }
 
             TemplateDiscoveryMetadata discoveryMetadta = new TemplateDiscoveryMetadata(version, templateCache, packToTemplateMap, additionalData);
-        
+
             return discoveryMetadta;
         }
     }

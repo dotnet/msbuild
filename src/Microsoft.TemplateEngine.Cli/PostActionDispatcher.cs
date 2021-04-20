@@ -108,9 +108,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // If the action is just instructions, display them and be done with the action.
-        // Otherwise ask the user if they want to run the action. 
+        // Otherwise ask the user if they want to run the action.
         // If they do, run it, and return the result.
-        // Otherwise return false, indicating the action was not run. 
+        // Otherwise return false, indicating the action was not run.
         private bool HandlePromptRequired(IPostAction action, IPostActionProcessor actionProcessor, Func<string> inputGetter)
         {
             if (actionProcessor is InstructionDisplayPostActionProcessor)
