@@ -9,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliNuGetMetadataTemplateSearchCache : FileMetadataTemplateSearchCache
     {
-        protected IReadOnlyDictionary<string, HostSpecificTemplateData> _cliHostSpecificData;
+        protected IReadOnlyDictionary<string, HostSpecificTemplateData> _cliHostSpecificData { get; set; }
 
         internal CliNuGetMetadataTemplateSearchCache(IEngineEnvironmentSettings environmentSettings, string pathToMetadata)
             : base(environmentSettings, pathToMetadata)
