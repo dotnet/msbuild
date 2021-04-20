@@ -27,12 +27,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The list of resx files.
         /// </summary>
-        internal Dependencies resXFiles = new Dependencies();
+        internal IDictionary<string, ResXFile> resXFiles = new Dictionary<string, ResXFile>();
 
         /// <summary>
         /// A list of portable libraries and the ResW files they can produce.
         /// </summary>
-        internal Dependencies portableLibraries = new Dependencies();
+        internal IDictionary<string, PortableLibraryFile> portableLibraries = new Dictionary<string, PortableLibraryFile>();
 
         /// <summary>
         /// A newly-created ResGenDependencies is not dirty.
@@ -98,8 +98,22 @@ namespace Microsoft.Build.Tasks
 
         public override void Translate(ITranslator translator)
         {
-            resXFiles.Translate(translator, typeof(ResXFile));
-            portableLibraries.Translate(translator, typeof(PortableLibraryFile));
+            translator.TranslateDictionary(ref resXFiles,
+                (ITranslator translator, ref string s) => translator.Translate(ref s),
+                (ITranslator translator, ref ResXFile resx) => {
+                    ResXFile temp = resx ?? new();
+                    temp.Translate(translator);
+                    resx = temp;
+                },
+                count => new Dictionary<string, ResXFile>(count));
+            translator.TranslateDictionary(ref portableLibraries,
+                (ITranslator translator, ref string s) => translator.Translate(ref s),
+                (ITranslator translator, ref PortableLibraryFile portableLibrary) => {
+                    PortableLibraryFile temp = portableLibrary ?? new();
+                    temp.Translate(translator);
+                    portableLibrary = temp;
+                },
+                count => new Dictionary<string, PortableLibraryFile>(count));
             translator.Translate(ref baseLinkedFileDirectory);
             translator.Translate(ref _serializedVersion);
         }
@@ -107,7 +121,7 @@ namespace Microsoft.Build.Tasks
         internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)
         {
             // First, try to retrieve the resx information from our hashtable.
-            if ((resXFiles.GetDependencyFile(resxFile) as ResXFile retVal) is null)
+            if (!resXFiles.TryGetValue(resxFile, out ResXFile retVal))
             {
                 // Ok, the file wasn't there.  Add it to our cache and return it to the caller.  
                 retVal = AddResxFile(resxFile, useMSBuildResXReader);
@@ -118,7 +132,7 @@ namespace Microsoft.Build.Tasks
                 // by removing it from the hashtable and readding it.
                 if (retVal.HasFileChanged())
                 {
-                    resXFiles.RemoveDependencyFile(resxFile);
+                    resXFiles.Remove(resxFile);
                     _isDirty = true;
                     retVal = AddResxFile(resxFile, useMSBuildResXReader);
                 }
@@ -133,7 +147,7 @@ namespace Microsoft.Build.Tasks
             // to be cracked for contained files.
 
             var resxFile = new ResXFile(file, BaseLinkedFileDirectory, useMSBuildResXReader);
-            resXFiles.AddDependencyFile(file, resxFile);
+            resXFiles.Add(file, resxFile);
             _isDirty = true;
             return resxFile;
         }
@@ -141,13 +155,13 @@ namespace Microsoft.Build.Tasks
         internal PortableLibraryFile TryGetPortableLibraryInfo(string libraryPath)
         {
             // First, try to retrieve the portable library information from our hashtable.  
-            var retVal = (PortableLibraryFile)portableLibraries.GetDependencyFile(libraryPath);
+            portableLibraries.TryGetValue(libraryPath, out PortableLibraryFile retVal);
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
             // this entry from the cache and rebuild all the state at a later point.
             if (retVal?.HasFileChanged() == true)
             {
-                portableLibraries.RemoveDependencyFile(libraryPath);
+                portableLibraries.Remove(libraryPath);
                 _isDirty = true;
                 retVal = null;
             }
@@ -157,11 +171,10 @@ namespace Microsoft.Build.Tasks
 
         internal void UpdatePortableLibrary(PortableLibraryFile library)
         {
-            var cached = (PortableLibraryFile)portableLibraries.GetDependencyFile(library.FileName);
-            if (cached == null || !library.Equals(cached))
+            if (!portableLibraries.TryGetValue(library.FileName, out PortableLibraryFile cached) || !library.Equals(cached))
             {
                 // Add a new entry or replace the existing one.
-                portableLibraries.AddDependencyFile(library.FileName, library);
+                portableLibraries.Add(library.FileName, library);
                 _isDirty = true;
             }
         }
@@ -228,6 +241,9 @@ namespace Microsoft.Build.Tasks
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref linkedFiles);
+                translator.Translate(ref filename);
+                translator.Translate(ref lastModified);
+                translator.Translate(ref exists);
             }
 
             /// <summary>
@@ -317,6 +333,9 @@ namespace Microsoft.Build.Tasks
                 translator.Translate(ref assemblySimpleName);
                 translator.Translate(ref outputFiles);
                 translator.Translate(ref neutralResourceLanguage);
+                translator.Translate(ref filename);
+                translator.Translate(ref lastModified);
+                translator.Translate(ref exists);
             }
 
             internal PortableLibraryFile(string filename)

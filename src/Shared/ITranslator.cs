@@ -301,7 +301,7 @@ namespace Microsoft.Build.BackEnd
 
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
 
-        public void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer);
+        void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer);
 
         void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
 

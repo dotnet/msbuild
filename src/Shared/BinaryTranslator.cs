@@ -660,12 +660,27 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            /// <summary>
-            /// Reads in the boolean which says if this object is null or not.
-            /// </summary>
-            /// <typeparam name="T">The type of object to test.</typeparam>
-            /// <returns>True if the object should be read, false otherwise.</returns>
-            public bool TranslateNullable<T>(T value)
+            public void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer)
+            {
+                int count = 0;
+                dictionary = new(comparer);
+                Translate(ref count);
+                string key = string.Empty;
+                DateTime val = DateTime.MinValue;
+                for (int i = 0; i < count; i++)
+                {
+                    Translate(ref key);
+                    Translate(ref val);
+                    dictionary.Add(key, val);
+                }
+            }
+
+        /// <summary>
+        /// Reads in the boolean which says if this object is null or not.
+        /// </summary>
+        /// <typeparam name="T">The type of object to test.</typeparam>
+        /// <returns>True if the object should be read, false otherwise.</returns>
+        public bool TranslateNullable<T>(T value)
             {
                 bool haveRef = _reader.ReadBoolean();
                 return haveRef;
@@ -1261,31 +1276,14 @@ namespace Microsoft.Build.BackEnd
             /// <param name="comparer">Key comparer</param>
             public void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer)
             {
-                int count = 0;
-                if (Mode == TranslationDirection.ReadFromStream)
+                int count = dictionary.Count;
+                Translate(ref count);
+                foreach (KeyValuePair<string, DateTime> kvp in dictionary)
                 {
-                    dictionary = new(comparer);
-                    Translate(ref count);
-                    string key = string.Empty;
-                    DateTime val = DateTime.MinValue;
-                    for (int i = 0; i < count; i++)
-                    {
-                        Translate(ref key);
-                        Translate(ref val);
-                        dictionary.Add(key, val);
-                    }
-                }
-                else
-                {
-                    count = dictionary.Count;
-                    Translate(ref count);
-                    foreach (KeyValuePair<string, DateTime> kvp in dictionary)
-                    {
-                        string key = kvp.Key;
-                        DateTime val = kvp.Value;
-                        Translate(ref key);
-                        Translate(ref val);
-                    }
+                    string key = kvp.Key;
+                    DateTime val = kvp.Value;
+                    Translate(ref key);
+                    Translate(ref val);
                 }
             }
 

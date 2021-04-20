@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
                 libFile.outputFiles = new string[] { "first", "second" };
                 libFile.assemblySimpleName = "simpleName";
                 libFile.lastModified = DateTime.Now.Subtract(TimeSpan.FromSeconds(10));
-                cache.portableLibraries.AddDependencyFile("fileName", libFile);
+                cache.portableLibraries.Add("fileName", libFile);
 
                 // Writing the file to disk should make the cache clean.
                 cache.SerializeCache(stateFile, /* Log */ null);
@@ -42,8 +42,8 @@ namespace Microsoft.Build.UnitTests
                 cache.IsDirty.ShouldBeTrue();
 
                 // Add linkedFiles to further test serialization and deserialization.
-                cache.resXFiles.dependencies.TryGetValue(resx, out DependencyFile file).ShouldBeTrue();
-                (file as ResGenDependencies.ResXFile).linkedFiles = new string[] { "third", "fourth" };
+                cache.resXFiles.TryGetValue(resx, out ResGenDependencies.ResXFile file).ShouldBeTrue();
+                file.linkedFiles = new string[] { "third", "fourth" };
 
                 // Writing the file to disk should make the cache clean again.
                 cache.SerializeCache(stateFile, /* Log */ null);
@@ -54,16 +54,16 @@ namespace Microsoft.Build.UnitTests
                 cache2.IsDirty.ShouldBeFalse();
 
                 // Validate that serialization worked
-                ResGenDependencies.PortableLibraryFile portableLibrary = cache.portableLibraries.GetDependencyFile("fileName") as ResGenDependencies.PortableLibraryFile;
-                ResGenDependencies.PortableLibraryFile portableLibrary2 = cache2.portableLibraries.GetDependencyFile("fileName") as ResGenDependencies.PortableLibraryFile;
+                cache.portableLibraries.TryGetValue("fileName", out ResGenDependencies.PortableLibraryFile portableLibrary);
+                cache2.portableLibraries.TryGetValue("fileName", out ResGenDependencies.PortableLibraryFile portableLibrary2);
                 portableLibrary2.filename.ShouldBe(portableLibrary.filename);
                 portableLibrary2.exists.ShouldBe(portableLibrary.exists);
                 portableLibrary2.assemblySimpleName.ShouldBe(portableLibrary.assemblySimpleName);
                 portableLibrary2.lastModified.ShouldBe(portableLibrary.lastModified);
                 portableLibrary2.outputFiles.Length.ShouldBe(portableLibrary.outputFiles.Length);
                 portableLibrary2.outputFiles[1].ShouldBe(portableLibrary.outputFiles[1]);
-                ResGenDependencies.ResXFile resX = cache.resXFiles.GetDependencyFile(resx) as ResGenDependencies.ResXFile;
-                ResGenDependencies.ResXFile resX2 = cache2.resXFiles.GetDependencyFile(resx) as ResGenDependencies.ResXFile;
+                cache.resXFiles.TryGetValue(resx, out ResGenDependencies.ResXFile resX);
+                cache2.resXFiles.TryGetValue(resx, out ResGenDependencies.ResXFile resX2);
                 resX2.filename.ShouldBe(resX.filename);
                 resX2.lastModified.ShouldBe(resX.lastModified);
                 resX2.linkedFiles.Length.ShouldBe(resX.linkedFiles.Length);
