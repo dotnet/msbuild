@@ -24,14 +24,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             /// The parameter name is invalid
             /// </summary>
             InvalidParameterName,
+
             /// <summary>
             /// The value is invalid
             /// </summary>
             InvalidParameterValue,
+
             /// <summary>
             /// The default name is invalid
             /// </summary>
             InvalidDefaultValue,
+
             /// <summary>
             /// The value provided leads to ambiguous choice (for choice parameters only)
             /// </summary>
@@ -50,14 +53,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// the option used in CLI for parameter.
         /// </summary>
         internal string InputFormat { get; }
+
         /// <summary>
         /// The value specified for the parameter in CLI.
         /// </summary>
         internal string SpecifiedValue { get; }
+
         /// <summary>
         /// The canonical name for the parameter.
         /// </summary>
         internal string Canonical { get; }
+
         /// <summary>
         /// The reason why the parameter is invalid.
         /// </summary>
