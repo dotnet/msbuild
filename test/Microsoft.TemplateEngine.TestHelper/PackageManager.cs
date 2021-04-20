@@ -215,7 +215,11 @@ namespace Microsoft.TemplateEngine.TestHelper
             (PackageSource, IPackageSearchMetadata) latestVersion = accumulativeSearchResults.Aggregate(
                 (max, current) =>
                 {
-                    if (max == default) return current;
+                    if (max == default)
+                    {
+                        return current;
+                    }
+
                     return current.package.Identity.Version > max.package.Identity.Version ? current : max;
                 });
             return latestVersion;
