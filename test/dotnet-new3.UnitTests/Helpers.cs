@@ -7,7 +7,7 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
-namespace dotnet_new3.IntegrationTests
+namespace Dotnet_new3.IntegrationTests
 {
     internal static class Helpers
     {

@@ -13,7 +13,7 @@ using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
 
-namespace dotnet_new3
+namespace Dotnet_new3
 {
     /// <summary>
     /// Factory responsible for adding "console", "library" and other templates contained in "template_feed" to "dotnet new3".

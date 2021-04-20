@@ -16,7 +16,7 @@ using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Utils;
 
-namespace dotnet_new3
+namespace Dotnet_new3
 {
     public class Program
     {

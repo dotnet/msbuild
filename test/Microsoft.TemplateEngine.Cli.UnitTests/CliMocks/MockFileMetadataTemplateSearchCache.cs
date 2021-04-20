@@ -16,22 +16,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public void SetupMockData(TemplateDiscoveryMetadata templateDiscoveryMetadata)
         {
-            _templateDiscoveryMetadata = templateDiscoveryMetadata;
+            TemplateDiscoveryMetadata = templateDiscoveryMetadata;
         }
 
         // Does nothing. Prevents the base versions from being called.
         protected override void EnsureInitialized()
         {
-            if (_isInitialized)
+            if (IsInitialized)
             {
                 return;
             }
 
-            _templateToPackMap = TemplateToPackMap.FromPackToTemplateDictionary(_templateDiscoveryMetadata.PackToTemplateMap);
+            TemplateToPackMap = TemplateToPackMap.FromPackToTemplateDictionary(TemplateDiscoveryMetadata.PackToTemplateMap);
 
             SetupCliHostSpecificData();
 
-            _isInitialized = true;
+            IsInitialized = true;
         }
     }
 }

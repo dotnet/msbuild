@@ -12,7 +12,7 @@ using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace dotnet_new3.IntegrationTests
+namespace Dotnet_new3.IntegrationTests
 {
     public class DotnetNewLocaleTests
     {

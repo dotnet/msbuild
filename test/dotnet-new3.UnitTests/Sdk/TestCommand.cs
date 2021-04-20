@@ -12,7 +12,7 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public abstract class TestCommand
     {
-        protected Dictionary<string, string> _environment { get; set; } = new Dictionary<string, string>();
+        protected Dictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
 
         public ITestOutputHelper Log { get; }
 
@@ -35,7 +35,7 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public TestCommand WithEnvironmentVariable(string name, string value)
         {
-            _environment[name] = value;
+            Environment[name] = value;
             return this;
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.NET.TestFramework.Commands
         private SdkCommandSpec CreateCommandSpec(IEnumerable<string> args)
         {
             var commandSpec = CreateCommand(args);
-            foreach (var kvp in _environment)
+            foreach (var kvp in Environment)
             {
                 commandSpec.Environment[kvp.Key] = kvp.Value;
             }

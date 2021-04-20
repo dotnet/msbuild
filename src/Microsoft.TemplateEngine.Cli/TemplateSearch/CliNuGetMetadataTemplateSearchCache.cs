@@ -9,7 +9,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliNuGetMetadataTemplateSearchCache : FileMetadataTemplateSearchCache
     {
-        protected IReadOnlyDictionary<string, HostSpecificTemplateData> _cliHostSpecificData { get; set; }
+        protected IReadOnlyDictionary<string, HostSpecificTemplateData> CliHostSpecificData { get; set; }
 
         internal CliNuGetMetadataTemplateSearchCache(IEngineEnvironmentSettings environmentSettings, string pathToMetadata)
             : base(environmentSettings, pathToMetadata)
@@ -18,12 +18,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         protected override NuGetSearchCacheConfig SetupSearchCacheConfig()
         {
-            return new CliNuGetSearchCacheConfig(_pathToMetadta);
+            return new CliNuGetSearchCacheConfig(PathToMetadta);
         }
 
         protected override void EnsureInitialized()
         {
-            if (_isInitialized)
+            if (IsInitialized)
             {
                 return;
             }
@@ -37,9 +37,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         {
             try
             {
-                if (_templateDiscoveryMetadata.AdditionalData.TryGetValue(CliNuGetSearchCacheConfig.CliHostDataName, out object cliHostDataObject))
+                if (TemplateDiscoveryMetadata.AdditionalData.TryGetValue(CliNuGetSearchCacheConfig.CliHostDataName, out object cliHostDataObject))
                 {
-                    _cliHostSpecificData = (Dictionary<string, HostSpecificTemplateData>)cliHostDataObject;
+                    CliHostSpecificData = (Dictionary<string, HostSpecificTemplateData>)cliHostDataObject;
                     return;
                 }
             }
@@ -49,7 +49,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
 
             // set a default for when there isn't any in the discovery metadata, or when there's an exception.
-            _cliHostSpecificData = new Dictionary<string, HostSpecificTemplateData>();
+            CliHostSpecificData = new Dictionary<string, HostSpecificTemplateData>();
         }
 
         internal IReadOnlyDictionary<string, HostSpecificTemplateData> GetHostDataForTemplateIdentities(IReadOnlyList<string> identities)
@@ -60,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
             foreach (string templateIdentity in identities)
             {
-                if (_cliHostSpecificData.TryGetValue(templateIdentity, out HostSpecificTemplateData hostData))
+                if (CliHostSpecificData.TryGetValue(templateIdentity, out HostSpecificTemplateData hostData))
                 {
                     map[templateIdentity] = hostData;
                 }
@@ -73,7 +73,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         {
             EnsureInitialized();
 
-            return _cliHostSpecificData.TryGetValue(identity, out hostData);
+            return CliHostSpecificData.TryGetValue(identity, out hostData);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         protected override TemplateNameSearchResult CreateNameSearchResult(ITemplateInfo candidateTemplateInfo, PackInfo candidatePackInfo)
         {
-            if (_searchCache is CliNuGetMetadataTemplateSearchCache cliSearchCache
+            if (SearchCache is CliNuGetMetadataTemplateSearchCache cliSearchCache
                 && cliSearchCache.TryGetHostDataForTemplateIdentity(candidateTemplateInfo.Identity, out HostSpecificTemplateData hostData))
             {
                 return new CliTemplateNameSearchResult(candidateTemplateInfo, candidatePackInfo, hostData);

@@ -4,7 +4,7 @@
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace dotnet_new3.IntegrationTests
+namespace Dotnet_new3.IntegrationTests
 {
     /// <summary>
     /// This is so we can pass ITestOutputHelper to TestCommand constructor

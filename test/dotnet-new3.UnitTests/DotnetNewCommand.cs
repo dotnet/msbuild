@@ -9,7 +9,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit.Abstractions;
 
-namespace dotnet_new3.IntegrationTests
+namespace Dotnet_new3.IntegrationTests
 {
     public class DotnetNewCommand : TestCommand
     {

@@ -15,7 +15,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         internal CliNuGetSearchCacheConfig(string templateDiscoveryFileName)
             : base(templateDiscoveryFileName)
         {
-            _additionalDataReaders[CliHostDataName] = CliHostDataReader;
+            AdditionalDataReaders[CliHostDataName] = CliHostDataReader;
         }
 
         private static readonly Func<JObject, object> CliHostDataReader = (cacheObject) =>
