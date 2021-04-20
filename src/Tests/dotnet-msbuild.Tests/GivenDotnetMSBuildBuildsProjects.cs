@@ -40,14 +40,14 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             var testProjectDirectory = testInstance.Path;
 
             new MSBuildCommand(Log, "SayHello", testProjectDirectory)
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Pass()
                 .And
                 .HaveStdOutContaining("Hello, from MSBuild!");
 
             new MSBuildCommand(Log, "SayGoodbye", testProjectDirectory)
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Pass()
                 .And
