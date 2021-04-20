@@ -31,7 +31,7 @@ namespace Microsoft.NET.TestFramework.Assertions
                     {
                         taskCompletionSource.SetResult("Lock is taken so test can continue");
 
-                        Task.Delay(60000, cancellationToken).Wait();
+                        Task.Delay(60000, cancellationToken).Wait(cancellationToken);
 
                         return Task.FromResult(0);
                     },
