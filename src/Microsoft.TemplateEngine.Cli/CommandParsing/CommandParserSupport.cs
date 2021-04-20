@@ -68,7 +68,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         private static HashSet<string> _argsForBuiltInCommands = null;
 
         // Creates a command setup with the args for "new", plus args for the input template parameters.
-        internal static Command CreateNewCommandWithArgsForTemplate(string commandName,
+        internal static Command CreateNewCommandWithArgsForTemplate(
+            string commandName,
             string templateName,
             IReadOnlyList<ITemplateParameter> parameterDefinitions,
             IDictionary<string, string> longNameOverrides,

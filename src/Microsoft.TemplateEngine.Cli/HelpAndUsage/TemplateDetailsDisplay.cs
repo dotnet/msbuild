@@ -119,138 +119,139 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     LocalizableStrings.Options
                 );
 
-                formatter.DefineColumn(delegate (ITemplateParameter param)
-                {
-                    StringBuilder displayValue = new StringBuilder(255);
-                    displayValue.AppendLine(param.Documentation);
-
-                    if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase))
+                formatter.DefineColumn(
+                    delegate (ITemplateParameter param)
                     {
-                        int longestChoiceLength = param.Choices.Keys.Max(x => x.Length);
+                        StringBuilder displayValue = new StringBuilder(255);
+                        displayValue.AppendLine(param.Documentation);
 
-                        foreach (KeyValuePair<string, ParameterChoice> choiceInfo in param.Choices)
+                        if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase))
                         {
-                            displayValue.Append("    " + choiceInfo.Key.PadRight(longestChoiceLength + 4));
+                            int longestChoiceLength = param.Choices.Keys.Max(x => x.Length);
 
-                            if (!string.IsNullOrWhiteSpace(choiceInfo.Value.Description))
+                            foreach (KeyValuePair<string, ParameterChoice> choiceInfo in param.Choices)
                             {
-                                displayValue.Append("- " + choiceInfo.Value.Description);
-                            }
+                                displayValue.Append("    " + choiceInfo.Key.PadRight(longestChoiceLength + 4));
 
-                            displayValue.AppendLine();
-                        }
-                    }
-                    else
-                    {
-                        displayValue.Append(param.DataType ?? "string");
-                        displayValue.AppendLine(" - " + param.Priority.ToString());
-                    }
-
-                    // determine the configured value
-                    string configuredValue = null;
-                    if (parameterDetails.AllParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
-                    {
-                        // Set the configured value as long as it's non-empty and not the default value.
-                        // If it's the default, we're not sure if it was explicitly entered or not.
-                        // Below, there's a check if the user entered a value. If so, set it.
-                        string resolvedValue = resolvedValueObject?.ToString() ?? string.Empty;
-
-                        if (!string.IsNullOrEmpty(resolvedValue))
-                        {
-                            // bools get ToString() values of "True" & "False", but most templates use "true" & "false"
-                            // So do a case-insensitive comparison on bools, case-sensitive on other values.
-                            StringComparison comparisonType = string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                                ? StringComparison.OrdinalIgnoreCase
-                                : StringComparison.Ordinal;
-
-                            if (!string.Equals(param.DefaultValue, resolvedValue, comparisonType))
-                            {
-                                configuredValue = resolvedValue;
-                            }
-                        }
-                    }
-
-                    // If the resolved value is null/empty, or the default, only display the configured value if
-                    // the user explicitly specified it or if it can be resolved from the DefaultIfOptionWithoutValue (or bool='true' for backwards compat).
-                    if (string.IsNullOrEmpty(configuredValue))
-                    {
-                        bool handled = false;
-
-                        if (parameterDetails.GroupUserParamsWithDefaultValues.Contains(param.Name))
-                        {
-                            if (param is IAllowDefaultIfOptionWithoutValue parameterWithNoValueDefault)
-                            {
-                                if (!string.IsNullOrEmpty(parameterWithNoValueDefault.DefaultIfOptionWithoutValue))
+                                if (!string.IsNullOrWhiteSpace(choiceInfo.Value.Description))
                                 {
-                                    configuredValue = parameterWithNoValueDefault.DefaultIfOptionWithoutValue;
-                                    handled = true;
+                                    displayValue.Append("- " + choiceInfo.Value.Description);
                                 }
-                            }
-                            else if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Before the introduction of DefaultIfOptionWithoutValue, bool params were handled like this.
-                                // Other param types didn't have any analogous handling.
-                                configuredValue = "true";
-                                handled = true;
-                            }
-                        }
 
-                        if (!handled)
-                        {
-                            // If the user explicitly specified the switch, the value is in the inputParams, so try to retrieve it here.
-                            inputParams.TryGetValue(param.Name, out configuredValue);
-                        }
-                    }
-
-                    // display the configured value if there is one
-                    if (!string.IsNullOrEmpty(configuredValue))
-                    {
-                        string realValue = configuredValue;
-
-                        if (parameterDetails.InvalidParams.Contains(param.Name) ||
-                            (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase)
-                                && !param.Choices.ContainsKey(configuredValue)))
-                        {
-                            realValue = realValue.Bold().Red();
-                        }
-                        else if (parameterDetails.AllParams.TryGetRuntimeValue(environmentSettings, param.Name, out object runtimeVal) && runtimeVal != null)
-                        {
-                            realValue = runtimeVal.ToString();
-                        }
-
-                        displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, realValue));
-                    }
-
-                    // display the default value if there is one
-                    if (!string.IsNullOrWhiteSpace(param.DefaultValue))
-                    {
-                        displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
-                    }
-
-                    if (param is IAllowDefaultIfOptionWithoutValue paramWithNoValueDefault
-                        && !string.IsNullOrWhiteSpace(paramWithNoValueDefault.DefaultIfOptionWithoutValue))
-                    {
-                        // default if option is provided without a value should not be displayed if:
-                        // - it is bool parameter with "DefaultIfOptionWithoutValue": "true"
-                        // - it is not bool parameter (int, string, etc) and default value coincides with "DefaultIfOptionWithoutValue"
-                        if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, "true", StringComparison.OrdinalIgnoreCase))
-                            {
-                                displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                                displayValue.AppendLine();
                             }
                         }
                         else
                         {
-                            if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, param.DefaultValue, StringComparison.Ordinal))
+                            displayValue.Append(param.DataType ?? "string");
+                            displayValue.AppendLine(" - " + param.Priority.ToString());
+                        }
+
+                        // determine the configured value
+                        string configuredValue = null;
+                        if (parameterDetails.AllParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
+                        {
+                            // Set the configured value as long as it's non-empty and not the default value.
+                            // If it's the default, we're not sure if it was explicitly entered or not.
+                            // Below, there's a check if the user entered a value. If so, set it.
+                            string resolvedValue = resolvedValueObject?.ToString() ?? string.Empty;
+
+                            if (!string.IsNullOrEmpty(resolvedValue))
                             {
-                                displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                                // bools get ToString() values of "True" & "False", but most templates use "true" & "false"
+                                // So do a case-insensitive comparison on bools, case-sensitive on other values.
+                                StringComparison comparisonType = string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                                    ? StringComparison.OrdinalIgnoreCase
+                                    : StringComparison.Ordinal;
+
+                                if (!string.Equals(param.DefaultValue, resolvedValue, comparisonType))
+                                {
+                                    configuredValue = resolvedValue;
+                                }
                             }
                         }
-                    }
 
-                    return displayValue.ToString();
-                }, string.Empty);
+                        // If the resolved value is null/empty, or the default, only display the configured value if
+                        // the user explicitly specified it or if it can be resolved from the DefaultIfOptionWithoutValue (or bool='true' for backwards compat).
+                        if (string.IsNullOrEmpty(configuredValue))
+                        {
+                            bool handled = false;
+
+                            if (parameterDetails.GroupUserParamsWithDefaultValues.Contains(param.Name))
+                            {
+                                if (param is IAllowDefaultIfOptionWithoutValue parameterWithNoValueDefault)
+                                {
+                                    if (!string.IsNullOrEmpty(parameterWithNoValueDefault.DefaultIfOptionWithoutValue))
+                                    {
+                                        configuredValue = parameterWithNoValueDefault.DefaultIfOptionWithoutValue;
+                                        handled = true;
+                                    }
+                                }
+                                else if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    // Before the introduction of DefaultIfOptionWithoutValue, bool params were handled like this.
+                                    // Other param types didn't have any analogous handling.
+                                    configuredValue = "true";
+                                    handled = true;
+                                }
+                            }
+
+                            if (!handled)
+                            {
+                                // If the user explicitly specified the switch, the value is in the inputParams, so try to retrieve it here.
+                                inputParams.TryGetValue(param.Name, out configuredValue);
+                            }
+                        }
+
+                        // display the configured value if there is one
+                        if (!string.IsNullOrEmpty(configuredValue))
+                        {
+                            string realValue = configuredValue;
+
+                            if (parameterDetails.InvalidParams.Contains(param.Name) ||
+                                (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase)
+                                    && !param.Choices.ContainsKey(configuredValue)))
+                            {
+                                realValue = realValue.Bold().Red();
+                            }
+                            else if (parameterDetails.AllParams.TryGetRuntimeValue(environmentSettings, param.Name, out object runtimeVal) && runtimeVal != null)
+                            {
+                                realValue = runtimeVal.ToString();
+                            }
+
+                            displayValue.AppendLine(string.Format(LocalizableStrings.ConfiguredValue, realValue));
+                        }
+
+                        // display the default value if there is one
+                        if (!string.IsNullOrWhiteSpace(param.DefaultValue))
+                        {
+                            displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
+                        }
+
+                        if (param is IAllowDefaultIfOptionWithoutValue paramWithNoValueDefault
+                            && !string.IsNullOrWhiteSpace(paramWithNoValueDefault.DefaultIfOptionWithoutValue))
+                        {
+                            // default if option is provided without a value should not be displayed if:
+                            // - it is bool parameter with "DefaultIfOptionWithoutValue": "true"
+                            // - it is not bool parameter (int, string, etc) and default value coincides with "DefaultIfOptionWithoutValue"
+                            if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, "true", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                                }
+                            }
+                            else
+                            {
+                                if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, param.DefaultValue, StringComparison.Ordinal))
+                                {
+                                    displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                                }
+                            }
+                        }
+
+                        return displayValue.ToString();
+                    }, string.Empty);
 
                 Reporter.Output.WriteLine(formatter.Layout());
             }
