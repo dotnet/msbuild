@@ -562,7 +562,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private static string GetPartialMatchReason(TemplateListResolutionResult templateResolutionResult, INewCommandInput commandInput)
         {
             string separator = ", ";
-            return string.Join(separator,
+            return string.Join(
+                separator,
                 SupportedFilterOptions.SupportedListFilters
                 .OfType<TemplateFilterOption>()
                 .Where(filter => filter.IsFilterSet(commandInput) && filter.MismatchCriteria(templateResolutionResult))

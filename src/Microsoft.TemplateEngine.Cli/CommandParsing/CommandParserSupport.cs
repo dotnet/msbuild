@@ -18,10 +18,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         {
             Option[] combinedArgs = ArrayExtensions.CombineArrays(args);
 
-            return Create.Command(commandName,
-                           LocalizableStrings.CommandDescription,
-                           Accept.ZeroOrMoreArguments(),    // this can't be ZeroOrOneArguments() because template args would cause errors
-                           combinedArgs);
+            return Create.Command(
+                commandName,
+                LocalizableStrings.CommandDescription,
+                Accept.ZeroOrMoreArguments(),    // this can't be ZeroOrOneArguments() because template args would cause errors
+                combinedArgs);
         }
 
         // Final parser for when there is no template name provided.
@@ -30,21 +31,23 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         {
             Option[] combinedArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
 
-            return Create.Command(commandName,
-                           LocalizableStrings.CommandDescription,
-                           Accept.NoArguments(),
-                           true,
-                           combinedArgs);
+            return Create.Command(
+                commandName,
+                LocalizableStrings.CommandDescription,
+                Accept.NoArguments(),
+                true,
+                combinedArgs);
         }
 
         private static Command GetNewCommandForTemplate(string commandName, string templateName, params Option[][] args)
         {
             Option[] combinedArgs = ArrayExtensions.CombineArrays(args);
 
-            return Create.Command(commandName,
-                           LocalizableStrings.CommandDescription,
-                           Accept.ExactlyOneArgument().WithSuggestionsFrom(templateName),
-                           combinedArgs);
+            return Create.Command(
+                commandName,
+                LocalizableStrings.CommandDescription,
+                Accept.ExactlyOneArgument().WithSuggestionsFrom(templateName),
+                combinedArgs);
         }
 
         internal static HashSet<string> ArgsForBuiltInCommands
@@ -137,10 +140,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
                     Create.Option("--dry-run", LocalizableStrings.DryRunDescription, Accept.NoArguments()),
                     Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
-                    Create.Option("-lang|--language",
-                                    LocalizableStrings.LanguageParameter,
-                                    // don't give this a default, otherwise 'new -lang' is valid and assigns the default. User should have to explicitly give the value.
-                                    Accept.ExactlyOneArgument().WithSuggestionsFrom("C#", "F#")),
+                    Create.Option(
+                        "-lang|--language",
+                        LocalizableStrings.LanguageParameter,
+                        // don't give this a default, otherwise 'new -lang' is valid and assigns the default. User should have to explicitly give the value.
+                        Accept.ExactlyOneArgument().WithSuggestionsFrom("C#", "F#")),
                     Create.Option("--update-check", LocalizableStrings.UpdateCheckCommandHelp, Accept.NoArguments()),
                     Create.Option("--update-apply", LocalizableStrings.UpdateApplyCommandHelp, Accept.NoArguments()),
                     Create.Option("--search", LocalizableStrings.OptionDescriptionSearch, Accept.NoArguments()),

@@ -11,10 +11,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
     {
         internal static TemplateSearchCoordinator CreateCliTemplateSearchCoordinator(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage)
         {
-            return new TemplateSearchCoordinator(environmentSettings,
-                                            commandInput.TemplateName,
-                                            defaultLanguage,
-                                            new CliHostSpecificDataMatchFilterFactory(commandInput).MatchFilter);
+            return new TemplateSearchCoordinator(
+                environmentSettings,
+                commandInput.TemplateName,
+                defaultLanguage,
+                new CliHostSpecificDataMatchFilterFactory(commandInput).MatchFilter);
         }
     }
 }
