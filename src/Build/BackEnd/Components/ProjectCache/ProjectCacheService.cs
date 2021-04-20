@@ -20,7 +20,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     internal class ProjectCacheService
     {
         private readonly BuildManager _buildManager;
-        private readonly PluginLoggerBase _logger;
+        private readonly Func<PluginLoggerBase> _loggerFactory;
         private readonly ProjectCacheDescriptor _projectCacheDescriptor;
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
@@ -28,13 +28,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
             BuildManager buildManager,
-            PluginLoggerBase logger,
+            Func<PluginLoggerBase> loggerFactory,
             ProjectCacheDescriptor projectCacheDescriptor,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             _projectCachePlugin = projectCachePlugin;
             _buildManager = buildManager;
-            _logger = logger;
+            _loggerFactory = loggerFactory;
             _projectCacheDescriptor = projectCacheDescriptor;
             _cancellationToken = cancellationToken;
         }
@@ -49,7 +50,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 .ConfigureAwait(false);
 
             // TODO: Detect and use the highest verbosity from all the user defined loggers. That's tricky because right now we can't discern between user set loggers and msbuild's internally added loggers.
-            var logger = new LoggingServiceToPluginLoggerAdapter(LoggerVerbosity.Normal, loggingService);
+            var loggerFactory = new Func<PluginLoggerBase>(() => new LoggingServiceToPluginLoggerAdapter(LoggerVerbosity.Normal, loggingService));
+
+            var logger = loggerFactory();
 
             try
             {
@@ -73,7 +76,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 ProjectCacheException.ThrowForLoggedError("ProjectCacheInitializationFailed");
             }
 
-            return new ProjectCacheService(plugin, buildManager, logger, pluginDescriptor, cancellationToken);
+            return new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
         }
 
         private static ProjectCachePluginBase GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
@@ -152,21 +155,23 @@ namespace Microsoft.Build.Experimental.ProjectCache
                                    $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
                                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
 
-            _logger.LogMessage(
+            var logger = _loggerFactory();
+
+            logger.LogMessage(
                 "\n====== Querying project cache for project " + queryDescription,
                 MessageImportance.High);
 
             CacheResult cacheResult = null!;
             try
             {
-                cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, _logger, _cancellationToken);
+                cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, logger, _cancellationToken);
             }
             catch (Exception e)
             {
                 HandlePluginException(e, nameof(ProjectCachePluginBase.GetCacheResultAsync));
             }
 
-            if (_logger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
+            if (logger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
             {
                 ProjectCacheException.ThrowForLoggedError("ProjectCacheQueryFailed", queryDescription);
             }
@@ -188,7 +193,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     throw new ArgumentOutOfRangeException();
             }
 
-            _logger.LogMessage(
+            logger.LogMessage(
                 message,
                 MessageImportance.High);
 
@@ -197,16 +202,18 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public async Task ShutDown()
         {
+            var logger = _loggerFactory();
+
             try
             {
-                await _projectCachePlugin.EndBuildAsync(_logger, _cancellationToken);
+                await _projectCachePlugin.EndBuildAsync(logger, _cancellationToken);
             }
             catch (Exception e)
             {
                 HandlePluginException(e, nameof(ProjectCachePluginBase.EndBuildAsync));
             }
 
-            if (_logger.HasLoggedErrors)
+            if (logger.HasLoggedErrors)
             {
                 ProjectCacheException.ThrowForLoggedError("ProjectCacheShutdownFailed");
             }
