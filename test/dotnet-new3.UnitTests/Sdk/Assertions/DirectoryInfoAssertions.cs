@@ -75,7 +75,8 @@ namespace Microsoft.NET.TestFramework.Assertions
                 .ForCondition(matchingFileExists == true)
                 .BecauseOf(because, reasonArgs)
                 .FailWith("Expected directory {0} to contain files matching {1}, but no matching file exists.",
-                    _dirInfo.FullName, expectedFilesSearchPattern);
+                          _dirInfo.FullName,
+                          expectedFilesSearchPattern);
 
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
@@ -95,7 +96,9 @@ namespace Microsoft.NET.TestFramework.Assertions
             var matchingFileCount = _dirInfo.EnumerateFiles(expectedFilesSearchPattern, searchOption).Count();
             Execute.Assertion.ForCondition(matchingFileCount == 0)
                 .FailWith("Found {0} files that should not exist in directory {1}. No file matching {2} should exist.",
-                    matchingFileCount, _dirInfo.FullName, expectedFilesSearchPattern);
+                    matchingFileCount,
+                    _dirInfo.FullName,
+                    expectedFilesSearchPattern);
             return new AndConstraint<DirectoryInfoAssertions>(this);
         }
 

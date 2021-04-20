@@ -88,8 +88,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         private static void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, bool showImplicitlyHiddenParams, TemplateGroupParameterDetails parameterDetails, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput)
         {
-            IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(parameterDetails.AllParams.ParameterDefinitions, parameterDetails.ExplicitlyHiddenParams,
-                                                                                    showImplicitlyHiddenParams, parameterDetails.HasPostActionScriptRunner, parameterDetails.ParametersToAlwaysShow);
+            IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(parameterDetails.AllParams.ParameterDefinitions,
+                                                                                                           parameterDetails.ExplicitlyHiddenParams,
+                                                                                                           showImplicitlyHiddenParams,
+                                                                                                           parameterDetails.HasPostActionScriptRunner,
+                                                                                                           parameterDetails.ParametersToAlwaysShow);
 
             if (filteredParams.Any())
             {

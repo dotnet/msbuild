@@ -129,7 +129,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             {
                 Reporter.Error.WriteLine(string.Format(
                                             LocalizableStrings.SearchOnlineErrorNoTemplateNameOrFilter,
-                                            string.Join(", ", SupportedFilterOptions.SupportedSearchFilters.Select(f => $"'{f.Name}'")), commandInput.CommandName).Bold().Red());
+                                            string.Join(", ", SupportedFilterOptions.SupportedSearchFilters.Select(f => $"'{f.Name}'")),
+                                            commandInput.CommandName).Bold().Red());
                 return false;
             }
 

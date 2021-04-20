@@ -65,11 +65,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         private static HashSet<string> _argsForBuiltInCommands = null;
 
         // Creates a command setup with the args for "new", plus args for the input template parameters.
-        internal static Command CreateNewCommandWithArgsForTemplate(string commandName, string templateName,
-                    IReadOnlyList<ITemplateParameter> parameterDefinitions,
-                    IDictionary<string, string> longNameOverrides,
-                    IDictionary<string, string> shortNameOverrides,
-                    out IReadOnlyDictionary<string, IReadOnlyList<string>> templateParamMap)
+        internal static Command CreateNewCommandWithArgsForTemplate(string commandName,
+            string templateName,
+            IReadOnlyList<ITemplateParameter> parameterDefinitions,
+            IDictionary<string, string> longNameOverrides,
+            IDictionary<string, string> shortNameOverrides,
+            out IReadOnlyDictionary<string, IReadOnlyList<string>> templateParamMap)
         {
             IList<Option> paramOptionList = new List<Option>();
             HashSet<string> initiallyTakenAliases = ArgsForBuiltInCommands;
@@ -103,14 +104,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 {
                     // This switch can be provided with or without a value.
                     // If the user doesn't specify a value, it gets the value of DefaultIfOptionWithoutValue
-                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation,
-                                            Accept.ZeroOrOneArgument());
+                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation, Accept.ZeroOrOneArgument());
                 }
                 else
                 {
                     // User must provide a value if this switch is specified.
-                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation,
-                                        Accept.ExactlyOneArgument());
+                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation, Accept.ExactlyOneArgument());
                 }
 
                 paramOptionList.Add(option);    // add the option
@@ -138,10 +137,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
                     Create.Option("--dry-run", LocalizableStrings.DryRunDescription, Accept.NoArguments()),
                     Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
-                    Create.Option("-lang|--language", LocalizableStrings.LanguageParameter,
-                                    Accept.ExactlyOneArgument()
-                                        .WithSuggestionsFrom("C#", "F#")),
-                                        // don't give this a default, otherwise 'new -lang' is valid and assigns the default. User should have to explicitly give the value.
+                    Create.Option("-lang|--language",
+                                    LocalizableStrings.LanguageParameter,
+                                    // don't give this a default, otherwise 'new -lang' is valid and assigns the default. User should have to explicitly give the value.
+                                    Accept.ExactlyOneArgument().WithSuggestionsFrom("C#", "F#")),
                     Create.Option("--update-check", LocalizableStrings.UpdateCheckCommandHelp, Accept.NoArguments()),
                     Create.Option("--update-apply", LocalizableStrings.UpdateApplyCommandHelp, Accept.NoArguments()),
                     Create.Option("--search", LocalizableStrings.OptionDescriptionSearch, Accept.NoArguments()),
