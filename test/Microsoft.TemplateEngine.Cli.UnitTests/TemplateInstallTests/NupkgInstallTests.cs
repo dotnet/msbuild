@@ -62,7 +62,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             IHostSpecificDataLoader hostDataLoader = new MockHostSpecificDataLoader();
 
             // check that the template was installed from the first install.
-            IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default), hostDataLoader);
+            IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), hostDataLoader);
             Assert.Contains(checkTemplateName, allTemplates.SelectMany(t => t.Info.ShortNameList));
 
             // install the same test pack again
@@ -70,7 +70,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateInstallTests
             Assert.NotEqual(0, secondInstallResult);
 
             // check that the template is still installed after the second install.
-            IReadOnlyCollection<ITemplateMatchInfo> allTemplatesAfterSecondInstall = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default), hostDataLoader);
+            IReadOnlyCollection<ITemplateMatchInfo> allTemplatesAfterSecondInstall = TemplateResolver.PerformAllTemplatesQuery(await settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), hostDataLoader);
             Assert.Contains(checkTemplateName, allTemplatesAfterSecondInstall.SelectMany(t => t.Info.ShortNameList));
         }
 

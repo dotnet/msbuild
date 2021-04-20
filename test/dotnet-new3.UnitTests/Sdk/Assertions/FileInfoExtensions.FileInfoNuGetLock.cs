@@ -25,7 +25,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
                 _cancellationTokenSource = new CancellationTokenSource();
 
-                _task = Task.Run(async () => await ConcurrencyUtilities.ExecuteWithFileLockedAsync<int>(
+                _task = Task.Run(async () => await ConcurrencyUtilities.ExecuteWithFileLockedAsync(
                     fileInfo.FullName,
                     cancellationToken =>
                     {
@@ -35,7 +35,7 @@ namespace Microsoft.NET.TestFramework.Assertions
 
                         return Task.FromResult(0);
                     },
-                    _cancellationTokenSource.Token));
+                    _cancellationTokenSource.Token).ConfigureAwait(false));
 
                 taskCompletionSource.Task.Wait();
             }
