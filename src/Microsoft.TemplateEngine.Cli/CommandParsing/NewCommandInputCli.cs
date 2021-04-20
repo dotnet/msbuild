@@ -307,11 +307,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                                                                                     && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
                                                                                     && !string.Equals(x.Name, "name", StringComparison.OrdinalIgnoreCase))
                                                                                     .ToList();
-            Command _templateSpecificCommand;
+            Command templateSpecificCommand;
 
             try
             {
-                _templateSpecificCommand = CommandParserSupport.CreateNewCommandWithArgsForTemplate(
+                templateSpecificCommand = CommandParserSupport.CreateNewCommandWithArgsForTemplate(
                             _commandName,
                             _templateNameArg,
                             filteredParams,
@@ -319,7 +319,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                             hostSpecificTemplateData.ShortNameOverrides,
                             out IReadOnlyDictionary<string, IReadOnlyList<string>> templateParamMap);
 
-                _currentCommand = _templateSpecificCommand;
+                _currentCommand = templateSpecificCommand;
                 ParseArgs();
 
                 // this must happen after ParseArgs(), which resets _templateParamCanonicalToVariantMap
