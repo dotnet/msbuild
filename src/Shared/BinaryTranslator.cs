@@ -1255,6 +1255,41 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
+            /// </summary>
+            /// <param name="dictionary">The dictionary to be translated.</param>
+            /// <param name="comparer">Key comparer</param>
+            public void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer)
+            {
+                int count = 0;
+                if (Mode == TranslationDirection.ReadFromStream)
+                {
+                    dictionary = new(comparer);
+                    Translate(ref count);
+                    string key = string.Empty;
+                    DateTime val = DateTime.MinValue;
+                    for (int i = 0; i < count; i++)
+                    {
+                        Translate(ref key);
+                        Translate(ref val);
+                        dictionary.Add(key, val);
+                    }
+                }
+                else
+                {
+                    count = dictionary.Count;
+                    Translate(ref count);
+                    foreach (KeyValuePair<string, DateTime> kvp in dictionary)
+                    {
+                        string key = kvp.Key;
+                        DateTime val = kvp.Value;
+                        Translate(ref key);
+                        Translate(ref val);
+                    }
+                }
+            }
+
+            /// <summary>
             /// Writes out the boolean which says if this object is null or not.
             /// </summary>
             /// <param name="value">The object to test.</param>

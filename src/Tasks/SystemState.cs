@@ -246,6 +246,9 @@ namespace Microsoft.Build.Tasks
                 ref instanceLocalFileStateCache,
                 StringComparer.OrdinalIgnoreCase,
                 (ITranslator t) => new FileState(t));
+
+            // IsDirty should be false for either direction. Either this cache was brought
+            // up-to-date with the on-disk cache or vice versa. Either way, they agree.
             IsDirty = false;
         }
 

@@ -107,7 +107,7 @@ namespace Microsoft.Build.Tasks
         internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)
         {
             // First, try to retrieve the resx information from our hashtable.
-            if (resXFiles.GetDependencyFile(resxFile) is not ResXFile retVal || retVal == null)
+            if ((resXFiles.GetDependencyFile(resxFile) as ResXFile retVal) is null)
             {
                 // Ok, the file wasn't there.  Add it to our cache and return it to the caller.  
                 retVal = AddResxFile(resxFile, useMSBuildResXReader);
