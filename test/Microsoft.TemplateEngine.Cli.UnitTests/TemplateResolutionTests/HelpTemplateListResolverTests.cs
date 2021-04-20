@@ -3,16 +3,16 @@
 
 using System;
 using System.Collections.Generic;
-using Xunit;
-using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using System.Linq;
-using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
+using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
+using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {

@@ -3,12 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using Xunit;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
+using Microsoft.TemplateEngine.Mocks;
+using Microsoft.TemplateEngine.TestHelper;
+using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 {

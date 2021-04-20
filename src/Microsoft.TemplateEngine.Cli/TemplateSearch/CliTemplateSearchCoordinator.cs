@@ -7,9 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.TableOutput;
 using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateSearch.Common;
-using Microsoft.TemplateEngine.Cli.TableOutput;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
