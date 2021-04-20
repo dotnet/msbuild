@@ -36,7 +36,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "Template2" }
+                new string[] { "Template2" }
             };
 
             //TestPerformCoreTemplateQuery_InputLanguageIsPreferredOverDefault
@@ -52,7 +52,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 "Perl",
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test.Lisp" }
+                new string[] { "foo.test.Lisp" }
             };
 
             //TestPerformCoreTemplateQuery_GroupIsFound
@@ -67,7 +67,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test.old", "foo.test.new" }
+                new string[] { "foo.test.old", "foo.test.new" }
             };
 
             //TestPerformCoreTemplateQuery_ParameterNameDisambiguates
@@ -81,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test.new", "foo.test.old" }
+                new string[] { "foo.test.new", "foo.test.old" }
             };
 
             //TestPerformCoreTemplateQuery_ParameterValueDisambiguates
@@ -95,7 +95,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test.old", "foo.test.new" }
+                new string[] { "foo.test.old", "foo.test.new" }
             };
 
             //TestPerformCoreTemplateQuery_UnknownParameterNameInvalidatesMatch
@@ -108,7 +108,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test" }
+                new string[] { "foo.test" }
             };
 
             //TestPerformCoreTemplateQuery_InvalidChoiceValueInvalidatesMatch
@@ -122,7 +122,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test.1x", "foo.test.2x" }
+                new string[] { "foo.test.1x", "foo.test.2x" }
             };
 
             //SingularInvokableMatchTests
@@ -139,7 +139,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test_1", "foo.test_2" }
+                new string[] { "foo.test_1", "foo.test_2" }
             };
 
             //MultipleTemplatesInGroupParamPartiaMatch_TheOneHavingSingleStartsWithIsTheSingularInvokableMatch
@@ -155,7 +155,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test_1", "foo.test_2" }
+                new string[] { "foo.test_1", "foo.test_2" }
             };
 
             //MultipleTemplatesInGroupHavingAmbiguousParamMatchOnSameParamIsAmbiguous
@@ -171,7 +171,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test_1", "foo.test_2" }
+                new string[] { "foo.test_1", "foo.test_2" }
             };
 
             //MultipleTemplatesInGroupHavingSingularStartMatchesOnDifferentParams_HighPrecedenceIsChosen
@@ -189,7 +189,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test_1", "foo.test_2" }
+                new string[] { "foo.test_1", "foo.test_2" }
             };
 
             //GivenOneInvokableTemplateWithNonDefaultLanguage_ItIsChosen
@@ -203,7 +203,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test_1" }
+                new string[] { "foo.test_1" }
             };
 
             //GivenTwoInvokableTemplatesNonDefaultLanguage_HighPrecedenceIsChosen
@@ -219,7 +219,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test_1.FSharp", "foo.test_1.VB" }
+                new string[] { "foo.test_1.FSharp", "foo.test_1.VB" }
             };
 
             //GivenMultipleHighestPrecedenceTemplates_ResultIsAmbiguous
@@ -235,7 +235,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string [] { "foo.test_1.FSharp", "foo.test_1.VB" }
+                new string[] { "foo.test_1.FSharp", "foo.test_1.VB" }
             };
 
             //new tests

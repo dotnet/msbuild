@@ -192,7 +192,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group", precedence: 300),
                 },
                 null,
-                new string [] { "foo.3" }
+                new string[] { "foo.3" }
             };
 
             yield return new object[]
@@ -205,7 +205,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group", precedence: 300),
                 },
                 null,
-                new string [] { "foo.1", "foo.2","foo.3" }
+                new string[] { "foo.1", "foo.2","foo.3" }
             };
 
             yield return new object[]
@@ -218,7 +218,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group", precedence: 300).WithTag("language", "Lisp"),
                 },
                 "Lisp",
-                new string [] { "foo.1" }
+                new string[] { "foo.1" }
             };
 
             yield return new object[]
@@ -231,7 +231,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group", precedence: 300).WithTag("language", "Lisp"),
                 },
                 "Lisp",
-                new string [] { "foo.3" }
+                new string[] { "foo.3" }
             };
 
             yield return new object[]
@@ -244,7 +244,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group", precedence: 300).WithTag("language", "Lisp"),
                 },
                 null,
-                new string [] { "foo.1", "foo.2", "foo.3" }
+                new string[] { "foo.1", "foo.2", "foo.3" }
             };
 
             yield return new object[]
@@ -257,7 +257,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group", precedence: 300).WithTag("language", "Lisp"),
                 },
                 null,
-                new string [] { "foo.3" }
+                new string[] { "foo.3" }
             };
         }
 
