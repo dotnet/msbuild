@@ -38,8 +38,9 @@ namespace Microsoft.TemplateEngine.Utils
             var optionalWorkloadLocator = new TemplateLocator();
             var sdkDirectory = Path.GetDirectoryName(typeof(DotnetFiles).Assembly.Location);
             var sdkVersion = Path.GetFileName(sdkDirectory);
+            var dotnetRootPath = Path.GetDirectoryName(Path.GetDirectoryName(sdkDirectory));
 
-            var packages = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, sdkDirectory);
+            var packages = optionalWorkloadLocator.GetDotnetSdkTemplatePackages(sdkVersion, dotnetRootPath);
             var fileSystem = _environmentSettings.Host.FileSystem as IFileLastWriteTimeSource;
             foreach (IOptionalSdkTemplatePackageInfo packageInfo in packages)
             {
