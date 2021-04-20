@@ -87,11 +87,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return false;
                 }
 
-                Reporter.Output.WriteLine($"    dotnet {commandName} {templateInfo.ShortNameList.First()} {hostTemplateData.UsageExamples[0]}");
+                Reporter.Output.WriteLine($"    dotnet {commandName} {templateInfo.ShortNameList[0]} {hostTemplateData.UsageExamples[0]}");
                 return true;
             }
 
-            Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortNameList.First()}");
+            Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortNameList[0]}");
             IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames, parametersToAlwaysShow: hostTemplateData.ParametersToAlwaysShow);
 

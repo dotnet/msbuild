@@ -61,7 +61,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.SearchResultInstallHeader, commandInput.CommandName));
                 if (string.IsNullOrWhiteSpace(packageIdToShow))
                 {
-                    packageIdToShow = searchResults.MatchesBySource.First().PacksWithMatches.First().Key.Name;
+                    packageIdToShow = searchResults.MatchesBySource[0].PacksWithMatches.First().Key.Name;
                 }
                 Reporter.Output.WriteLine("Example:");
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.SearchResultInstallCommand, commandInput.CommandName, packageIdToShow));
