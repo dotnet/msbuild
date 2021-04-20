@@ -132,9 +132,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
                 },
-                new MockInvalidParameterInfo[]
-                {
-                }
+                System.Array.Empty<MockInvalidParameterInfo>()
             };
 
             yield return new object[]
@@ -145,9 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
                 },
-                new MockInvalidParameterInfo[]
-                {
-                }
+                System.Array.Empty<MockInvalidParameterInfo>()
             };
 
             yield return new object[]

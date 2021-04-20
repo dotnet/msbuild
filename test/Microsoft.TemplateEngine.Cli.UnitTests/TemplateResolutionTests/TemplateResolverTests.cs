@@ -245,8 +245,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("Template2", identity: "Template2")
             };
             yield return new object[] { new MockNewCommandInput("Template2"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template2" } };
-            yield return new object[] { new MockNewCommandInput("Template3"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, new string[] { } };
-            yield return new object[] { new MockNewCommandInput("Template"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.Ambiguous, new string[] { } };
+            yield return new object[] { new MockNewCommandInput("Template3"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, Array.Empty<string>() };
+            yield return new object[] { new MockNewCommandInput("Template"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.Ambiguous, Array.Empty<string>() };
 
             templates = new MockTemplateInfo[]
             {
