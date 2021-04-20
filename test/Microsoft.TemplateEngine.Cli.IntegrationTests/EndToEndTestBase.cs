@@ -31,7 +31,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             int scriptCount = scripts.Length;
             StringBuilder builder = new StringBuilder();
             builder.Append(scriptCount);
-            builder.Append(" ");
+            builder.Append(' ');
 
             foreach (string script in scripts)
             {

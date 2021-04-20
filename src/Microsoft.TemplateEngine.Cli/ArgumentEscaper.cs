@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (needsQuotes)
             {
-                sb.Append("\"");
+                sb.Append('"');
             }
 
             for (int i = 0; i < arg.Length; ++i)
@@ -100,7 +100,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (needsQuotes)
             {
-                sb.Append("\"");
+                sb.Append('"');
             }
 
             return sb.ToString();
