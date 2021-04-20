@@ -1,17 +1,19 @@
-# MSBuild 16.10.0
+# MSBuild Changelog
+
+## MSBuild 16.10.0 (in development)
 
 This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .NET SDK 5.0.300.
 
-## What's new
+### What's new
 
 * MSBuild now targets .NET 5.0 and .NET Framework 4.7.2.
 * MSBuild is faster and uses less memory.
 * Binary logs are smaller and have less performance overhead.
 * Tasks can now opt into resource management to improve parallelism in large builds.
 
-## Detailed release notes
+### Detailed release notes
 
-### Added
+#### Added
 
 * Projects can now specify `AdditionalTargetFrameworkInfoProperty` items to indicate that referencing projects should get those properties exposed as `AdditionalPropertiesFromProject` metadata on resolved reference items. (#5994).
 * The `Unzip` task now accepts `Include` and `Exclude` arguments to filter what is extracted from the zip file (#6018). Thanks, @IvanLieckens!
@@ -27,7 +29,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * `WriteCodeFragment` can now write assembly attributes of specified types, and infers some common types (#6285). Thanks, @reduckted!
 * The `-detailedSummary` option now accepts a boolean argument, preventing dumping details to the console logger when building with `-bl -ds:false` (#6338). Thanks, @KirillOsenkov!
 
-### Changed
+#### Changed
 
 * String deduplication is now much more sophisticated, reducing memory usage (#5663).
 * Improved memory usage and JIT time on MSBuild on .NET 5.0 and higher (#6126, #6189).
@@ -43,9 +45,9 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * `TargetPath` metadata is now respected on items that copy to output directories, and takes precedence over `Link` (#6237).
 * The `Restore` operation now fails when SDKs are unresolvable or no `Restore` target exists (#6312).
 
-### Fixed
+#### Fixed
 
-* Inconsistencies between `XamlPreCompile` and the `CoreCompile` C# compiler invocation (#6093). Thanks, @huoyaoyuan!
+* Inconsistencies between `XamlPreCompile` and the `CoreCompile` C## compiler invocation (#6093). Thanks, @huoyaoyuan!
 * Wait for child nodes to exit before exiting the entry-point node in VSTest scenarios (#6053). Thanks, @tmds!
 * Fix bad plugin EndBuild exception handling during graph builds (#6110).
 * Allow specifying `UseUtf8Encoding` in `ToolTask`s (#6188).
@@ -55,7 +57,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * Escape special characters in `Exec`’s generated batch files, allowing builds as users with some special characters in their Windows username (#6233).
 * Permit comments and trailing commas in solution filter files (#6346).
 
-### Infrastructure
+#### Infrastructure
 
 * Update to Arcade 5.0 and .NET 5.0 (#5836).
 * The primary development branch is now named `main`.
@@ -64,10 +66,99 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * Correctly mark .NET Framework 3.5 reference assembly package dependency as private (#6214).
 * Our own builds opt into text-based performance logging (#6274).
 
-### Documentation
+#### Documentation
 
 * Updates to static graph documentation (#6043).
 * Short doc on the threading model (#6042).
 * Update help text to indicate that `--` is a valid argument prefix (#6205). Thanks, @BartoszKlonowski!
 * API documentation improvements (#6246, #6284).
 * Details about interactions with the Global Assembly Cache (#6173).
+
+## MSBuild 16.9.0.2116703
+
+⚠ This release should have been versioned `16.9.1` but was erroneously released as 16.9.0.
+
+This version of MSBuild shipped with Visual Studio 2019 version 16.9.3.
+
+#### Fixed
+
+* Restore support for building solutions with web site projects (#6238).
+
+## MSBuild 16.9.0
+
+This version of MSBuild shipped with Visual Studio 2019 version 16.9.0 and .NET SDK 5.0.200.
+
+### What's new
+
+* `MSB3277` warnings now include information about the assembly identities involved, instead of saying to rerun under higher verbosity.
+* It's now possible to opt out of culture-name detection of `EmbeddedResource`s, for instance to have a resource named `a.cs.template`.
+* Common targets now support `$(BaseOutputPath)`, with the default value `bin`.
+* Item `Update`s are no longer case-sensitive, fixing a regression in MSBuild 16.6 (#5888).
+* `ParentBuildEventContext` now includes a parent `MSBuild` task if relevant, enabling proper nesting in GUI viewers.
+* Builds that fail because a warning was elevated to an error now report overall failure in the `MSBuild.exe` exit code.
+
+### Detailed release notes
+
+#### Added
+
+* The `MSB4006` error has been enhanced to describe the cycle when possible (#5711). Thanks, @haiyuzhu!.
+* More information is logged under `MSBUILDDEBUGCOMM` (#5759).
+* The command line parser now accepts arguments with double hyphens (`--argument`) as well as single hyphens (`-argument`) and forward slashes (`/argument`) (#5786). Thanks, @BartoszKlonowski!
+* MSBuild now participates in the .NET CLI text performance log system on an opt-in basis (#5861).
+* Common targets now support `$(BaseOutputPath)`, with the default value `bin` (#5238). Thanks, @Nirmal4G!
+* `Microsoft.Build.Exceptions.CircularDependencyException` is now public (#5988). Thanks, @tflynt91!
+* `EvaluationId` is now preserved in the `ProjectStarted` event, allowing disambiguating related project start events (#5997). Thanks, @KirillOsenkov!
+* The `ResolveAssemblyReference` task can now optionally emit items describing unresolved assembly conflicts (#5990).
+* Experimental `ProjectCache` API to enable higher-order build systems (#5936).
+
+#### Changed
+
+* Warnings suppressed via `$(NoWarn)` (which formerly applied only to targets that opted in like the C## compiler) are now treated as `$(MSBuildWarningsAsMessages)` (#5671).
+* Warnings elevated via `$(WarningsAsErrors )` (which formerly applied only to targets that opted in like the C## compiler) are now treated as `$(MSBuildWarningsAsErrors)` (#5774).
+* Improved error message when using an old .NET (Core) SDK and targeting .NET 5.0 (#5826).
+* Trailing spaces in property expressions inside conditionals now emit an error instead of silently expanding to the empty string (#5672, #5868). Thanks, @mfkl!
+* `MSB3277` warnings now include information about the assembly identities involved, instead of saying to rerun under higher verbosity (#5798).
+* `MSB5009` errors now indicate the project in the solution that is causing the nesting error (#5835). Thanks, @BartoszKlonowski!
+* Avoid spawning a process to determine processor architecture (#5897). Thanks, @tmds!
+* It's now possible to opt out of culture-name detection of `EmbeddedResource`s, for instance to have a resource named `a.cs.template` (#5824).
+* `ProjectInSolution.AbsolutePath` returns a normalized full path when possible (#5949).
+* Evaluation pass-stop events now include information about the "size" (number of properties/items/imports) of the project (#5978). Thanks, @arkalyanms!
+
+#### Fixed
+
+* `AllowFailureWithoutError` now does what it said it would do (#5743).
+* The solution parser now no longer skips projects that are missing an EndProject line (#5808). Thanks, @BartoszKlonowski!
+* `ProjectReference`s to `.vcxproj` projects from multi-targeted .NET projects no longer overbuild (#5838).
+* Removed unused `InternalsVisibleTo` to obsolete test assemblies (#5914). Thanks, @SingleAccretion!
+* Respect conditions when removing all items from an existing list at evaluation time (#5927).
+* Common targets should no longer break if the environment variable `OS` is set (#5916).
+* Some internal errors will now be reported as errors instead of hanging the build (#5917).
+* Item `Update`s are no longer case-sensitive, fixing a regression in MSBuild 16.6 (#5888).
+* Use lazy string formatting in more places (#5924).
+* Redundant references to MSBuild assemblies no longer fail in 64 MSBuild inline tasks (#5975).
+* The `Exec` task will now no longer emit the expanded `Command` to the log on failure (#5962). Thanks, @tmds!
+* Tasks generated with `RoslynCodeTaskFactory` now no longer rebuild for every use, even with identical inputs (#5988). Thanks, @KirillOsenkov!
+* `ParentBuildEventContext` now includes a parent `MSBuild` task if relevant (#5966). Thanks, @KirillOsenkov!
+* Builds that fail because a warning was elevated to an error now report overall failure in the `MSBuild.exe` exit code (#6006).
+* Performance of projects with large numbers of consecutive item updates without wildcards improved (#5853).
+* Performance improvements in `ResolveAssemblyReferences` (#5973).
+* PackageReferences that are marked as development dependencies are removed from the ClickOnce manifest (#6037).
+* Stop overfiltering .NET Core assemblies from the ClickOnce manifest (#6080).
+
+#### Infrastructure
+
+* The MSBuild codebase now warns for unused `using` statements (#5761).
+* The MSBuild codebase is now indexed for [Rich Code Navigation](https://visualstudio.microsoft.com/services/rich-code-navigation/) on CI build (#5790). Thanks, @jepetty!
+* The 64-bit bootstrap directory is more usable (#5825).
+* Test robustness improvements (#5827, #5944, #5995).
+* Make non-shipping NuGet packages compliant (#5823).
+* Use [Darc](https://github.com/dotnet/arcade/blob/main/Documentation/Darc.md) to keep bootstrap dependencies up to date (#5909).
+* Replace MSBuild.Dev.sln and MSBuild.SourceBuild.sln with solution filters (#6010).
+* Minimize and update NuGet feeds (#6019, #6136).
+
+#### Documentation
+
+* Improvements to MSBuild-internal Change Wave docs (#5770, #5851).
+* High-level documentation for static graph functionality added (#5741).
+* Instructions on testing private bits (#5818, #5831).
+* XML doc comments updated to match public-ready API docs pages (#6028). Thanks, @ghogen!
