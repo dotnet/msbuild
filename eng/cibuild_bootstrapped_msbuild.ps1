@@ -53,6 +53,7 @@ $RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd($([System.IO.Path]:
 $ArtifactsDir = Join-Path $RepoRoot "artifacts"
 $Stage1Dir = Join-Path $RepoRoot "stage1"
 $Stage1BinDir = Join-Path $Stage1Dir "bin"
+$PerfLogDir = Join-Path $ArtifactsDir "log\$Configuration\PerformanceLogs"
 
 if ($msbuildEngine -eq '')
 {
@@ -95,7 +96,7 @@ try {
   else
   {
     $buildToolPath = $dotnetExePath
-    $buildToolCommand = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\MSBuild.dll"
+    $buildToolCommand = Join-Path $bootstrapRoot "net5.0\MSBuild\MSBuild.dll"
     $buildToolFramework = "netcoreapp2.1"
   }
 
@@ -122,6 +123,9 @@ try {
 
   # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
   $env:MSBUILDDONOTLAUNCHDEBUGGER="true"
+
+  # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
+  $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)

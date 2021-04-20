@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
-#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -563,7 +561,7 @@ namespace Microsoft.Build.CommandLine
                 bool enableProfiler = false;
                 bool interactive = false;
                 bool isolateProjects = false;
-                bool graphBuild = false;
+                GraphBuildOptions graphBuildOptions = null;
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
@@ -597,7 +595,7 @@ namespace Microsoft.Build.CommandLine
                         ref enableProfiler,
                         ref restoreProperties,
                         ref isolateProjects,
-                        ref graphBuild,
+                        ref graphBuildOptions,
                         ref inputResultsCaches,
                         ref outputResultsCache,
                         ref lowPriority,
@@ -675,7 +673,7 @@ namespace Microsoft.Build.CommandLine
                                     enableProfiler,
                                     interactive,
                                     isolateProjects,
-                                    graphBuild,
+                                    graphBuildOptions,
                                     lowPriority,
                                     inputResultsCaches,
                                     outputResultsCache))
@@ -984,7 +982,7 @@ namespace Microsoft.Build.CommandLine
             bool enableProfiler,
             bool interactive,
             bool isolateProjects,
-            bool graphBuild,
+            GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             string[] inputResultsCaches,
             string outputResultsCache
@@ -1211,9 +1209,9 @@ namespace Microsoft.Build.CommandLine
                             BuildRequestData buildRequest = null;
                             if (!restoreOnly)
                             {
-                                if (graphBuild)
+                                if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new ProjectGraphEntryPoint(projectFile, globalProperties), targets, null);
+                                    graphBuildRequest = new GraphBuildRequestData(new[]{ new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, BuildRequestDataFlags.None, graphBuildOptions);
                                 }
                                 else
                                 {
@@ -1233,7 +1231,7 @@ namespace Microsoft.Build.CommandLine
 
                             if (!restoreOnly)
                             {
-                                if (graphBuild)
+                                if (graphBuildOptions != null)
                                 {
                                     (result, exception) = ExecuteGraphBuild(buildManager, graphBuildRequest);
                                 }
@@ -1424,16 +1422,19 @@ namespace Microsoft.Build.CommandLine
 
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
-            //  - BuildRequestDataFlags.SkipNonexistentTargets to ignore missing targets since Restore does not require that all targets exist
+            //  - BuildRequestDataFlags.SkipNonexistentNonEntryTargets to ignore missing non-entry targets since Restore does not require that all targets
+            //      exist, only top-level ones like Restore itself
             //  - BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports to ignore imports that don't exist, are empty, or are invalid because restore might
             //     make available an import that doesn't exist yet and the <Import /> might be missing a condition.
+            //  - BuildRequestDataFlags.FailOnUnresolvedSdk to still fail in the case when an MSBuild project SDK can't be resolved since this is fatal and should
+            //     fail the build.
             BuildRequestData restoreRequest = new BuildRequestData(
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports);
+                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentNonEntryTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }
@@ -2094,7 +2095,7 @@ namespace Microsoft.Build.CommandLine
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
             ref bool isolateProjects,
-            ref bool graphBuild,
+            ref GraphBuildOptions graphBuild,
             ref string[] inputResultsCaches,
             ref string outputResultsCache,
             ref bool lowPriority,
@@ -2253,8 +2254,6 @@ namespace Microsoft.Build.CommandLine
                         targetsWriter = ProcessTargetsSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Targets]);
                     }
 
-                    detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
-
                     warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
 
                     warningsAsMessages = ProcessWarnAsMessageSwitch(commandLineSwitches);
@@ -2276,7 +2275,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
                     {
-                        graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
+                        graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
                     }
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.LowPriority))
@@ -2304,13 +2303,21 @@ namespace Microsoft.Build.CommandLine
                         groupedFileLoggerParameters,
                         out distributedLoggerRecords,
                         out verbosity,
-                        ref detailedSummary,
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler
                         );
 
-                    // If we picked up switches from the autoreponse file, let the user know. This could be a useful
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.DetailedSummary))
+                    {
+                        detailedSummary = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DetailedSummary], defaultValue: true, resourceName: "InvalidDetailedSummaryValue");
+                    }
+                    else if (verbosity == LoggerVerbosity.Diagnostic)
+                    {
+                        detailedSummary = true;
+                    }
+
+                    // If we picked up switches from the autoresponse file, let the user know. This could be a useful
                     // hint to a user that does not know that we are picking up the file automatically.
                     // Since this is going to happen often in normal use, only log it in high verbosity mode.
                     // Also, only log it to the console; logging to loggers would involve increasing the public API of
@@ -2338,6 +2345,37 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
+        }
+
+        internal static GraphBuildOptions ProcessGraphBuildSwitch(string[] parameters)
+        {
+            var options = new GraphBuildOptions();
+
+            // Before /graph had parameters, it was treated as a boolean switch.
+            // Preserve that in case anyone is using /graph:{false|true}
+            if (parameters.Length == 1 && bool.TryParse(parameters[0], out var boolValue))
+            {
+                return boolValue ? options : null;
+            }
+
+            foreach (var parameter in parameters)
+            {
+                if (string.IsNullOrWhiteSpace(parameter))
+                {
+                    continue;
+                }
+
+                if (parameter.Trim().Equals("NoBuild", StringComparison.OrdinalIgnoreCase))
+                {
+                    options = options with {Build = false};
+                }
+                else
+                {
+                    CommandLineSwitchException.Throw("InvalidGraphBuildValue", parameter);
+                }
+            }
+
+            return options;
         }
 
         private static string ProcessOutputResultsCache(CommandLineSwitches commandLineSwitches)
@@ -2988,7 +3026,6 @@ namespace Microsoft.Build.CommandLine
             string[][] groupedFileLoggerParameters,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
-            ref bool detailedSummary,
             int cpuCount,
             out ProfilerLogger profilerLogger,
             out bool enableProfiler
@@ -3017,11 +3054,6 @@ namespace Microsoft.Build.CommandLine
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
-
-            if (verbosity == LoggerVerbosity.Diagnostic)
-            {
-                detailedSummary = true;
-            }
 
             return loggers.ToArray();
         }

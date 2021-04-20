@@ -46,7 +46,6 @@ namespace Microsoft.Build.CommandLine
             OldOM,
 #endif
             DistributedFileLogger,
-            DetailedSummary,
 #if DEBUG
             WaitForDebugger,
 #endif
@@ -104,6 +103,7 @@ namespace Microsoft.Build.CommandLine
             InputResultsCaches,
             OutputResultsCache,
             LowPriority,
+            DetailedSummary,
             NumberOfParameterizedSwitches,
         }
 
@@ -221,7 +221,6 @@ namespace Microsoft.Build.CommandLine
             new ParameterlessSwitchInfo(  new string[] { "oldom" },                         ParameterlessSwitch.OldOM,                 null),
 #endif
             new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },  ParameterlessSwitch.DistributedFileLogger, null),
-            new ParameterlessSwitchInfo(  new string[] { "detailedsummary", "ds" },         ParameterlessSwitch.DetailedSummary,       null),
 #if DEBUG
             new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },        ParameterlessSwitch.WaitForDebugger,       null),
 #endif
@@ -269,10 +268,11 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingRestorePropertyError",         true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "interactive" },                       ParameterizedSwitch.Interactive,                null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "isolateprojects", "isolate" },        ParameterizedSwitch.IsolateProjects,            null,                           false,          null,                                  true,   false  ),
-            new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           true,           null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true   ),
             new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>

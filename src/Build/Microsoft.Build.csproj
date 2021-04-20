@@ -1,13 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
-    <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
-         in .NETStandard. -->
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
@@ -17,7 +15,7 @@
 
     <EnableDefaultItems>false</EnableDefaultItems>
 
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <CreateTlb>true</CreateTlb>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</PackageDescription>
@@ -30,10 +28,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
-    <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Text.Json" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
@@ -41,8 +40,8 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.IO.Compression" />
+    <PackageReference Include="System.Memory" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -128,6 +127,7 @@
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
+    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
@@ -333,6 +333,8 @@
     <Compile Include="BackEnd\Shared\BuildRequestBlocker.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestConfiguration.cs" />
     <Compile Include="BackEnd\Shared\BuildResult.cs" />
+    <Compile Include="BackEnd\Shared\ResourceRequest.cs" />
+    <Compile Include="BackEnd\Shared\ResourceResponse.cs" />
     <Compile Include="BackEnd\Shared\CircularDependencyException.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestUnblocker.cs" />
     <Compile Include="BackEnd\Shared\IBuildResults.cs" />
@@ -357,10 +359,6 @@
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
-    <Compile Include="..\Shared\IInternable.cs" />
-    <Compile Include="..\Shared\WeakStringCache.cs" />
-    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
-    <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>Collections\CopyOnWriteDictionary.cs</Link>
     </Compile>
@@ -379,6 +377,7 @@
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
     <!-- ######################## -->
     <Compile Include="Collections\WeakValueDictionary.cs" />
+    <Compile Include="Collections\ArrayDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />
     <Compile Include="Construction\ProjectElementContainer.cs" />
@@ -423,8 +422,8 @@
     <Compile Include="Definition\ResolvedImport.cs" />
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
-    <Compile Include="Definition\ToolsetConfigurationReader.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <Compile Include="..\Shared\ToolsetElement.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Compile Include="Definition\ToolsetConfigurationReader.cs" />
+    <Compile Include="..\Shared\ToolsetElement.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />

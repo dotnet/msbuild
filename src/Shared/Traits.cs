@@ -44,16 +44,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool CacheFileExistence = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileExistence"));
 
-        /// <summary>
-        /// Use the legacy string interning implementation based on MRU lists.
-        /// </summary>
-        public readonly bool UseLegacyStringInterner = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildUseLegacyStringInterner"));
-
-        /// <summary>
-        /// Eliminate locking in OpportunisticIntern at the expense of memory (in effect only if UseLegacyStringInterner is set).
-        /// </summary>
-        public readonly bool UseSimpleInternConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildUseSimpleInternConcurrency"));
-
         public readonly bool UseSimpleProjectRootElementCacheConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency"));
 
         /// <summary>
@@ -182,6 +172,32 @@ namespace Microsoft.Build.Utilities
             set
             {
                 _logTaskInputs = value;
+            }
+        }
+
+        private bool? _logPropertiesAndItemsAfterEvaluation;
+        private bool _logPropertiesAndItemsAfterEvaluationInitialized = false;
+        public bool? LogPropertiesAndItemsAfterEvaluation
+        {
+            get
+            {
+                if (!_logPropertiesAndItemsAfterEvaluationInitialized)
+                {
+                    _logPropertiesAndItemsAfterEvaluationInitialized = true;
+                    var variable = Environment.GetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION");
+                    if (!string.IsNullOrEmpty(variable))
+                    {
+                        _logPropertiesAndItemsAfterEvaluation = variable == "1" || string.Equals(variable, "true", StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+
+                return _logPropertiesAndItemsAfterEvaluation;
+            }
+
+            set
+            {
+                _logPropertiesAndItemsAfterEvaluationInitialized = true;
+                _logPropertiesAndItemsAfterEvaluation = value;
             }
         }
 

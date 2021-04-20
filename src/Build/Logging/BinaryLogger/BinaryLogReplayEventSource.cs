@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -14,6 +15,14 @@ namespace Microsoft.Build.Logging
     /// <remarks>The class is public so that we can call it from MSBuild.exe when replaying a log file.</remarks>
     public sealed class BinaryLogReplayEventSource : EventArgsDispatcher
     {
+        /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
+        /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
+        /// and <see cref="TaskParameterEventArgs.DictionaryFactory"/>
+        static BinaryLogReplayEventSource()
+        {
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+        }
+
         /// <summary>
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
@@ -33,7 +42,12 @@ namespace Microsoft.Build.Logging
             using (var stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var gzipStream = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
-                var binaryReader = new BinaryReader(gzipStream);
+
+                // wrapping the GZipStream in a buffered stream significantly improves performance
+                // and the max throughput is reached with a 32K buffer. See details here:
+                // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
+                var bufferedStream = new BufferedStream(gzipStream, 32768);
+                var binaryReader = new BinaryReader(bufferedStream);
 
                 int fileFormatVersion = binaryReader.ReadInt32();
 
@@ -45,7 +59,7 @@ namespace Microsoft.Build.Logging
                     throw new NotSupportedException(text);
                 }
 
-                var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
+                using var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
                 while (true)
                 {
                     if (cancellationToken.IsCancellationRequested)

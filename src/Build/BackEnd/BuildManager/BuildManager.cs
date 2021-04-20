@@ -34,6 +34,8 @@ using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
+using Microsoft.NET.StringTools;
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -415,7 +417,7 @@ namespace Microsoft.Build.Execution
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
-                    OpportunisticIntern.Instance.EnableStatisticsGathering();
+                    Strings.EnableDiagnostics();
                 }
 
                 _overallBuildSuccess = true;
@@ -460,6 +462,7 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.BuildResult, BuildResult.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
+                _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
                 if (_threadException != null)
                 {
@@ -627,7 +630,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    ShutdownConnectedNodesAsync(true /* abort */);
+                    ShutdownConnectedNodes(true /* abort */);
                     CheckForActiveNodesAndCleanUpSubmissions();
                 }
             }
@@ -772,7 +775,7 @@ namespace Microsoft.Build.Execution
             try
             {
                 _noActiveSubmissionsEvent.WaitOne();
-                ShutdownConnectedNodesAsync(false /* normal termination */);
+                ShutdownConnectedNodes(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
 
                 // Wait for all of the actions in the work queue to drain.  Wait() could throw here if there was an unhandled exception
@@ -860,7 +863,7 @@ namespace Microsoft.Build.Execution
 
                     if (BuildParameters.DumpOpportunisticInternStats)
                     {
-                        OpportunisticIntern.Instance.ReportStatistics();
+                        Console.WriteLine(Strings.CreateDiagnosticReport());
                     }
                 }
             }
@@ -1535,6 +1538,11 @@ namespace Microsoft.Build.Execution
                         HandleResult(node, result);
                         break;
 
+                    case NodePacketType.ResourceRequest:
+                        ResourceRequest request = ExpectPacketType<ResourceRequest>(packet, NodePacketType.ResourceRequest);
+                        HandleResourceRequest(node, request);
+                        break;
+
                     case NodePacketType.NodeShutdown:
                         // Remove the node from the list of active nodes.  When they are all done, we have shut down fully
                         NodeShutdown shutdownPacket = ExpectPacketType<NodeShutdown>(packet, NodePacketType.NodeShutdown);
@@ -1694,6 +1702,11 @@ namespace Microsoft.Build.Execution
                                 projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
                             }
 
+                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                            {
+                                projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                            }
+
                             return new ProjectInstance(
                                 path,
                                 properties,
@@ -1721,76 +1734,23 @@ namespace Microsoft.Build.Execution
                         projectGraph.ConstructionMetrics.NodeCount,
                         projectGraph.ConstructionMetrics.EdgeCount));
 
-                var targetListTask = Task.Run(() => projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames));
-                var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
+                Dictionary<ProjectGraphNode, BuildResult> resultsPerNode = null;
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = targetListTask.Result;
-                using var cacheService = cacheServiceTask.Result;
-
-                var waitHandle = new AutoResetEvent(true);
-                var graphBuildStateLock = new object();
-
-                var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
-                var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
-                var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
-                var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
-
-                while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
+                if (submission.BuildRequestData.GraphBuildOptions.Build)
                 {
-                    waitHandle.WaitOne();
+                    var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
+                    var targetListTask = Task.Run(() => projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames));
 
-                    lock (graphBuildStateLock)
-                    {
-                        var unblockedNodes = blockedNodes
-                            .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
-                            .ToList();
-                        foreach (var node in unblockedNodes)
-                        {
-                            var targetList = targetLists[node];
-                            if (targetList.Count == 0)
-                            {
-                                // An empty target list here means "no targets" instead of "default targets", so don't even build it.
-                                finishedNodes.Add(node);
-                                blockedNodes.Remove(node);
+                    using var cacheService = cacheServiceTask.Result;
 
-                                waitHandle.Set();
-
-                                continue;
-                            }
-
-                            var request = new BuildRequestData(
-                                node.ProjectInstance,
-                                targetList.ToArray(),
-                                submission.BuildRequestData.HostServices,
-                                submission.BuildRequestData.Flags);
-
-                            // TODO Tack onto the existing submission instead of pending a whole new submission for every node
-                            // Among other things, this makes BuildParameters.DetailedSummary produce a summary for each node, which is not desirable.
-                            // We basically want to submit all requests to the scheduler all at once and describe dependencies by requests being blocked by other requests.
-                            // However today the scheduler only keeps track of MSBuild nodes being blocked by other MSBuild nodes, and MSBuild nodes haven't been assigned to the graph nodes yet.
-                            var innerBuildSubmission = PendBuildRequest(request);
-                            buildingNodes.Add(innerBuildSubmission, node);
-                            blockedNodes.Remove(node);
-                            innerBuildSubmission.ExecuteAsync(finishedBuildSubmission =>
-                            {
-                                lock (graphBuildStateLock)
-                                {
-                                    ProjectGraphNode finishedNode = buildingNodes[finishedBuildSubmission];
-
-                                    finishedNodes.Add(finishedNode);
-                                    buildingNodes.Remove(finishedBuildSubmission);
-
-                                    resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult);
-                                }
-
-                                waitHandle.Set();
-                            }, null);
-                        }
-                    }
+                    resultsPerNode = BuildGraph(projectGraph, targetListTask.Result, submission.BuildRequestData);
                 }
 
                 // The overall submission is complete, so report it as complete
-                ReportResultsToSubmission(new GraphBuildResult(submission.SubmissionId, new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode)));
+                ReportResultsToSubmission(
+                    new GraphBuildResult(
+                        submission.SubmissionId,
+                        new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
@@ -1837,8 +1797,79 @@ namespace Microsoft.Build.Execution
                 }
 
                 ReportResultsToSubmission(result);
+
                 _overallBuildSuccess = false;
             }
+        }
+
+        private Dictionary<ProjectGraphNode, BuildResult> BuildGraph(
+            ProjectGraph projectGraph,
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
+            GraphBuildRequestData graphBuildRequestData)
+        {
+            var waitHandle = new AutoResetEvent(true);
+            var graphBuildStateLock = new object();
+
+            var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
+            var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
+            var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
+            var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
+
+            while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
+            {
+                waitHandle.WaitOne();
+
+                lock (graphBuildStateLock)
+                {
+                    var unblockedNodes = blockedNodes
+                        .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
+                        .ToList();
+                    foreach (var node in unblockedNodes)
+                    {
+                        var targetList = targetsPerNode[node];
+                        if (targetList.Count == 0)
+                        {
+                            // An empty target list here means "no targets" instead of "default targets", so don't even build it.
+                            finishedNodes.Add(node);
+                            blockedNodes.Remove(node);
+
+                            waitHandle.Set();
+
+                            continue;
+                        }
+
+                        var request = new BuildRequestData(
+                            node.ProjectInstance,
+                            targetList.ToArray(),
+                            graphBuildRequestData.HostServices,
+                            graphBuildRequestData.Flags);
+
+                        // TODO Tack onto the existing submission instead of pending a whole new submission for every node
+                        // Among other things, this makes BuildParameters.DetailedSummary produce a summary for each node, which is not desirable.
+                        // We basically want to submit all requests to the scheduler all at once and describe dependencies by requests being blocked by other requests.
+                        // However today the scheduler only keeps track of MSBuild nodes being blocked by other MSBuild nodes, and MSBuild nodes haven't been assigned to the graph nodes yet.
+                        var innerBuildSubmission = PendBuildRequest(request);
+                        buildingNodes.Add(innerBuildSubmission, node);
+                        blockedNodes.Remove(node);
+                        innerBuildSubmission.ExecuteAsync(finishedBuildSubmission =>
+                        {
+                            lock (graphBuildStateLock)
+                            {
+                                ProjectGraphNode finishedNode = buildingNodes[finishedBuildSubmission];
+
+                                finishedNodes.Add(finishedNode);
+                                buildingNodes.Remove(finishedBuildSubmission);
+
+                                resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult);
+                            }
+
+                            waitHandle.Set();
+                        }, null);
+                    }
+                }
+            }
+
+            return resultsPerNode;
         }
 
         private DisposePluginService SearchAndInitializeProjectCachePluginFromGraph(ProjectGraph projectGraph)
@@ -1925,8 +1956,14 @@ namespace Microsoft.Build.Execution
 
                 lock (_buildManager._syncLock)
                 {
-                    _buildManager._projectCacheService?.Result.ShutDown().GetAwaiter().GetResult();
-                    _buildManager._projectCacheService = null;
+                    try
+                    {
+                        _buildManager._projectCacheService?.Result.ShutDown().GetAwaiter().GetResult();
+                    }
+                    finally
+                    {
+                        _buildManager._projectCacheService = null;
+                    }
                 }
             }
         }
@@ -1935,7 +1972,7 @@ namespace Microsoft.Build.Execution
         /// Asks the nodeManager to tell the currently connected nodes to shut down and sets a flag preventing all non-shutdown-related packets from
         /// being processed.
         /// </summary>
-        private void ShutdownConnectedNodesAsync(bool abort)
+        private void ShutdownConnectedNodes(bool abort)
         {
             _shuttingDown = true;
 
@@ -2146,6 +2183,30 @@ namespace Microsoft.Build.Execution
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportRequestBlocked(node, blocker);
             PerformSchedulingActions(response);
+        }
+
+        /// <summary>
+        /// Handles a resource request coming from a node.
+        /// </summary>
+        private void HandleResourceRequest(int node, ResourceRequest request)
+        {
+            if (request.IsResourceAcquire)
+            {
+                // Resource request requires a response and may be blocking. Our continuation is effectively a callback
+                // to be called once at least one core becomes available.
+                _scheduler.RequestCores(request.GlobalRequestId, request.NumCores, request.IsBlocking).ContinueWith((Task<int> task) =>
+                {
+                    var response = new ResourceResponse(request.GlobalRequestId, task.Result);
+                    _nodeManager.SendData(node, response);
+                }, TaskContinuationOptions.ExecuteSynchronously);
+            }
+            else
+            {
+                // Resource release is a one-way call, no response is expected. We release the cores as instructed
+                // and kick the scheduler because there may be work waiting for cores to become available.
+                IEnumerable<ScheduleResponse> response = _scheduler.ReleaseCores(request.GlobalRequestId, request.NumCores);
+                PerformSchedulingActions(response);
+            }
         }
 
         /// <summary>
@@ -2397,10 +2458,8 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 // The build submission has not already been completed.
-                if (_buildSubmissions.ContainsKey(result.SubmissionId))
+                if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmission submission))
                 {
-                    BuildSubmission submission = _buildSubmissions[result.SubmissionId];
-
                     /* If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
                      * this submission, therefore set the logging as complete. InternalLoggerExceptions are unhandled exceptions from the logger. If the logger author does
                      * not handle an exception the eventsource wraps all exceptions (except a logging exception) into an internal logging exception.
@@ -2433,9 +2492,8 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 // The build submission has not already been completed.
-                if (_graphBuildSubmissions.ContainsKey(result.SubmissionId))
+                if (_graphBuildSubmissions.TryGetValue(result.SubmissionId, out GraphBuildSubmission submission))
                 {
-                    GraphBuildSubmission submission = _graphBuildSubmissions[result.SubmissionId];
                     submission.CompleteResults(result);
 
                     _overallBuildSuccess &= submission.BuildResult.OverallResult == BuildResultCode.Success;
@@ -2525,7 +2583,11 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                 , AppDomain.CurrentDomain.SetupInformation
 #endif
-                , new LoggingNodeConfiguration(loggingService.IncludeEvaluationMetaprojects, loggingService.IncludeEvaluationProfile, loggingService.IncludeTaskInputs)
+                , new LoggingNodeConfiguration(
+                    loggingService.IncludeEvaluationMetaprojects,
+                    loggingService.IncludeEvaluationProfile,
+                    loggingService.IncludeEvaluationPropertiesAndItems,
+                    loggingService.IncludeTaskInputs)
                 );
             }
 

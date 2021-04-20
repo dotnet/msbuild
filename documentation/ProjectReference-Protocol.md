@@ -5,8 +5,8 @@ The MSBuild engine doesn't have a notion of a “project reference”—it only 
 That's a powerful tool, but no one would want to have to specify how to build every single reference in every single project. The common targets introduce an item, `ProjectReference`, and a default process for building references declared via that item.
 
 Default protocol implementation:
-- https://github.com/Microsoft/msbuild/blob/master/src/Tasks/Microsoft.Common.CurrentVersion.targets
-- https://github.com/Microsoft/msbuild/blob/master/src/Tasks/Microsoft.Common.CrossTargeting.targets
+- https://github.com/dotnet/msbuild/blob/main/src/Tasks/Microsoft.Common.CurrentVersion.targets
+- https://github.com/dotnet/msbuild/blob/main/src/Tasks/Microsoft.Common.CrossTargeting.targets
 
 ## Projects that have references
 
@@ -61,6 +61,7 @@ If implementing a project with an “outer” (determine what properties to pass
   * The `GetReferenceNearestTargetFrameworkTask` (provided by NuGet) is responsible for selecting the best matching `TargetFramework` of the referenced project
   * This target is _optional_. If not present, the reference will be built with no additional properties.
   * **New** in MSBuild 15.5.  (`TargetFrameworkMonikers` and `TargetPlatformMonikers` metadata is new in MSBuild 16.8)
+  * It is possible to gather additional information from referenced projects.  See the below section on "Getting additional properties from referenced projects" for more information
 * `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target for a given `ReferringTargetFramework`.
   * **Deprecated** in MSBuild 15.5.
   * New for MSBuild 15/Visual Studio 2017. Supports the cross-targeting feature allowing a project to have multiple `TargetFrameworks`.
@@ -72,7 +73,7 @@ If implementing a project with an “outer” (determine what properties to pass
 * `GetTargetPath` should return the path of the project's output, but _not_ build that output.
   * **Conditions**: this is used for builds inside Visual Studio, but not on the command line.
   * It's also used when the property `BuildProjectReferences` is `false`, manually indicating that all `ProjectReferences` are up to date and shouldn't be (re)built.
-  * This should return a single item that is the primary output of the project, with metadata describing that output. See [`TargetPathWithTargetPlatformMoniker`](https://github.com/Microsoft/msbuild/blob/080ef976a428f6ff7bf53ca5dd4ee637b3fe949c/src/Tasks/Microsoft.Common.CurrentVersion.targets#L1834-L1842) for the default metadata.
+  * This should return a single item that is the primary output of the project, with metadata describing that output. See [`TargetPathWithTargetPlatformMoniker`](https://github.com/dotnet/msbuild/blob/080ef976a428f6ff7bf53ca5dd4ee637b3fe949c/src/Tasks/Microsoft.Common.CurrentVersion.targets#L1834-L1842) for the default metadata.
 * **Default** targets should do the full build and return an assembly to be referenced.
   * **Conditions**: this is _not_ called when building inside Visual Studio. Instead, Visual Studio builds each project in isolation but in order, so the path returned from `GetTargetPath` can be assumed to exist at consumption time.
   * If the `ProjectReference` defines the `Targets` metadata, it is used. If not, no target is passed, and the default target of the reference (usually `Build`) is built.
@@ -91,3 +92,31 @@ As with all MSBuild logic, targets can be added to do other work with `ProjectRe
 In particular, NuGet depends on being able to identify referenced projects' package dependencies, and calls some targets that are imported through `Microsoft.Common.targets` to do so. At the time of writing this this is in [`NuGet.targets`](https://github.com/NuGet/NuGet.Client/blob/79264a74262354c1a8f899c2c9ddcaff58afaf62/src/NuGet.Core/NuGet.Build.Tasks/NuGet.targets).
 
 `Microsoft.AppxPackage.targets` adds a dependency on the target `GetPackagingOutputs`.
+
+## Getting additional properties from referenced projects
+
+As of MSBuild 16.10, it is possible to gather additional properties from referenced projects.  To do this, the referenced project should declare an `AdditionalTargetFrameworkInfoProperty` item for each property that should be gathered for referencing projects.  For example:
+
+```xml
+  <ItemGroup>
+    <AdditionalTargetFrameworkInfoProperty Include="SelfContained"/>
+    <AdditionalTargetFrameworkInfoProperty Include="_IsExecutable"/>
+  </ItemGroup>
+```
+
+These properties will then be gathered via the `GetTargetFrameworks` call.  They will be available to the referencing project via the `AdditionalPropertiesFromProject` metadata on the `_MSBuildProjectReferenceExistent` item.  The `AdditionalPropertiesFromProject` value will be an XML string which contains the values of the properties for each `TargetFramework` in the referenced project.  For example:
+
+```xml
+<AdditionalProjectProperties>
+  <net5.0>
+    <SelfContained>true</SelfContained>
+    <_IsExecutable>true</_IsExecutable>
+  </net5.0>
+  <net5.0-windows>
+    <SelfContained>false</SelfContained>
+    <_IsExecutable>true</_IsExecutable>
+  </net5.0-windows>
+</AdditionalProjectProperties>
+```
+
+The `NearestTargetFramework` metadata will be the target framework which was selected as the best one to use for the reference (via `GetReferenceNearestTargetFrameworkTask`).  This can be used to select which set of properties were used in the target framework that was active for the reference.

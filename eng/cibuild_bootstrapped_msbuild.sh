@@ -39,6 +39,7 @@ done
 RepoRoot="$ScriptRoot/.."
 ArtifactsDir="$RepoRoot/artifacts"
 Stage1Dir="$RepoRoot/stage1"
+PerfLogDir="$ArtifactsDir/log/$configuration/PerformanceLogs"
 
 . "$ScriptRoot/common/tools.sh"
 InitializeDotNetCli true
@@ -62,7 +63,7 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 if [ $host_type = "core" ]
 then
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
-  _InitializeBuildToolCommand="$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll"
+  _InitializeBuildToolCommand="$bootstrapRoot/net5.0/MSBuild/MSBuild.dll"
   _InitializeBuildToolFramework="netcoreapp2.1"
 elif [ $host_type = "mono" ]
 then
@@ -85,6 +86,9 @@ mv $ArtifactsDir $Stage1Dir
 
 # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
 export MSBUILDDONOTLAUNCHDEBUGGER=true
+
+# Opt into performance logging.
+export DOTNET_PERFLOG_DIR=$PerfLogDir
 
 # Prior to 3.0, the Csc task uses this environment variable to decide whether to run
 # a CLI host or directly execute the compiler.

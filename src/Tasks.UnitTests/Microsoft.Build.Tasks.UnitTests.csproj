@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
-    
+
     <IsPackable>false</IsPackable>
 
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
@@ -12,8 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Security.Principal.Windows" />
-    <PackageReference Include="System.Xml.XPath" />
     <PackageReference Include="Shouldly" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
@@ -32,10 +35,9 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
-    <Reference Include="PresentationFramework" Condition="'$(OsEnvironment)' == 'windows'" />
+    <Reference Include="PresentationFramework" Condition="$([MSBuild]::IsOSPlatform('windows'))" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-
 
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
@@ -61,7 +63,8 @@
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
     <EmbeddedResource Include="SampleResx" />
-    
+    <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
+
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

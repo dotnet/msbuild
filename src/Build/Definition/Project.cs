@@ -260,11 +260,11 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
             ProjectCollection = projectCollection;
-            var defailtImplementation = new ProjectImpl(this, xml, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
-            implementationInternal = (IProjectLinkInternal)defailtImplementation;
-            implementation = defailtImplementation;
+            var defaultImplementation = new ProjectImpl(this, xml, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defaultImplementation;
+            implementation = defaultImplementation;
 
-            defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
         /// <summary>
@@ -2564,10 +2564,10 @@ namespace Microsoft.Build.Evaluation
                 IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
                 IMSBuildGlob removeGlob = null;
 
-                if (removeElementCache.ContainsKey(itemElement.ItemType))
+                if (removeElementCache.TryGetValue(itemElement.ItemType, out CumulativeRemoveElementData removeItemElement))
                 {
-                    removeFragmentStrings = removeElementCache[itemElement.ItemType].FragmentStrings;
-                    removeGlob = new CompositeGlob(removeElementCache[itemElement.ItemType].Globs);
+                    removeFragmentStrings = removeItemElement.FragmentStrings;
+                    removeGlob = new CompositeGlob(removeItemElement.Globs);
                 }
 
                 var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
@@ -2577,27 +2577,17 @@ namespace Microsoft.Build.Evaluation
 
             private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
             {
-                if (excludeGlob != null && removeGlob != null)
+                if (excludeGlob == null)
                 {
-                    return new MSBuildGlobWithGaps(
-                        includeGlob,
-                        new CompositeGlob(
-                            excludeGlob,
-                            removeGlob
-                        ));
+                    return removeGlob == null ? includeGlob :
+                        new MSBuildGlobWithGaps(includeGlob, removeGlob);
                 }
-
-                if (excludeGlob != null || removeGlob != null)
+                else
                 {
-                    var gapGlob = excludeGlob ?? removeGlob;
-
-                    return new MSBuildGlobWithGaps(
-                        includeGlob,
-                        gapGlob
-                    );
+                    return new MSBuildGlobWithGaps(includeGlob,
+                        removeGlob == null ? excludeGlob :
+                        new CompositeGlob(excludeGlob, removeGlob));
                 }
-
-                return includeGlob;
             }
 
             private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)

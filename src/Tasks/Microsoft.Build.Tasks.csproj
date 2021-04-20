@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -7,7 +7,7 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
@@ -27,6 +27,14 @@
       <LogicalName>System.Design.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <!-- Binary serialization by ITranslatable -->
+    <Compile Include="..\Shared\ITranslatable.cs" />
+    <Compile Include="..\Shared\ITranslator.cs" />
+    <Compile Include="..\Shared\BinaryTranslator.cs" />
+    <Compile Include="..\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\Shared\TranslatorHelpers.cs" />    
+  </ItemGroup> 
   <ItemGroup>
     <!-- Source Files -->
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
@@ -61,6 +69,8 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
+    <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
+    <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -82,18 +92,6 @@
       <Link>NGen.cs</Link>
     </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs"/>
-    <Compile Include="..\Shared\IInternable.cs">
-      <Link>IInternable.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\WeakStringCache.cs">
-      <Link>WeakStringCache.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs">
-      <Link>WeakStringCache.Concurrent.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\OpportunisticIntern.cs">
-      <Link>OpportunisticIntern.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
@@ -527,6 +525,7 @@
     <Compile Include="TaskExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="TaskTranslatorHelpers.cs" />
     <Compile Include="Telemetry.cs" />
     <Compile Include="ToolTaskExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
@@ -983,6 +982,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
@@ -1005,8 +1005,6 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Reflection.Metadata" />
-    <PackageReference Include="System.Reflection.TypeExtensions" />
-    <PackageReference Include="System.Runtime.InteropServices" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="System.Security.Permissions" />
@@ -1015,7 +1013,7 @@
     <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
     <PackageReference Include="Microsoft.Win32.Registry" />
 
-    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\netcoreapp2.1\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
+    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\netcoreapp3.1\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">

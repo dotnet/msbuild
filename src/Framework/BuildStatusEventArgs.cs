@@ -61,7 +61,7 @@ namespace Microsoft.Build.Framework
             string senderName,
             DateTime eventTimestamp
         )
-            : this(message, helpKeyword, senderName, eventTimestamp, null)
+            : this(message, helpKeyword, senderName, eventTimestamp, messageArgs: null)
         {
             // do nothing
         }

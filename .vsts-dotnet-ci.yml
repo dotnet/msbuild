@@ -1,5 +1,5 @@
 trigger:
-- master
+- main
 - exp/*
 - vs*
 
@@ -209,6 +209,8 @@ jobs:
     condition: always()
 
 - job: MonoOnMac
+  # Mono CI disabled until it can parse C# 9 syntax: https://github.com/dotnet/msbuild/issues/6058
+  condition: eq(1,2)
   displayName: "macOS Mono"
   pool:
     vmImage: 'macOS-10.14'

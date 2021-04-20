@@ -213,12 +213,12 @@ namespace Microsoft.Build.BackEnd
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
-                var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
-                    ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix,
+                ItemGroupLoggingHelper.LogTaskParameter(
+                    LoggingContext,
+                    TaskParameterMessageKind.AddItem,
                     child.ItemType,
                     itemsToAdd,
                     logItemMetadata: true);
-                LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
             }
 
             // Now add the items we created to the lookup.
@@ -249,46 +249,23 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                itemsToRemove = FindItemsUsingMatchOnMetadata(group, child, bucket, matchOnMetadata, matchingOptions);
+                itemsToRemove = FindItemsMatchingMetadataSpecification(group, child, bucket.Expander, matchOnMetadata, matchingOptions);
             }
 
             if (itemsToRemove != null)
             {
                 if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToRemove.Count > 0)
                 {
-                    var itemGroupText = ItemGroupLoggingHelper.GetParameterText(
-                        ItemGroupLoggingHelper.ItemGroupRemoveLogMessage,
+                    ItemGroupLoggingHelper.LogTaskParameter(
+                        LoggingContext,
+                        TaskParameterMessageKind.RemoveItem,
                         child.ItemType,
                         itemsToRemove,
                         logItemMetadata: true);
-                    LoggingContext.LogCommentFromText(MessageImportance.Low, itemGroupText);
                 }
 
                 bucket.Lookup.RemoveItems(itemsToRemove);
             }
-        }
-
-        private List<ProjectItemInstance> FindItemsUsingMatchOnMetadata(
-            ICollection<ProjectItemInstance> items,
-            ProjectItemGroupTaskItemInstance child,
-            ItemBucket bucket,
-            HashSet<string> matchOnMetadata,
-            MatchOnMetadataOptions options)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(matchOnMetadata, nameof(matchOnMetadata));
-
-            var itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, bucket.Expander, child.RemoveLocation, Project.Directory, true);
-
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                itemSpec.Fragments.Count == 1
-                && itemSpec.Fragments.First() is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment
-                && matchOnMetadata.Count == 1,
-                new BuildEventFileInfo(string.Empty),
-                "OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem",
-                child.RemoveLocation,
-                child.Remove);
-
-            return items.Where(item => itemSpec.MatchesItemOnMetadata(item, matchOnMetadata, options)).ToList();
         }
 
         /// <summary>
@@ -595,6 +572,24 @@ namespace Microsoft.Build.BackEnd
             }
 
             return itemsRemoved;
+        }
+
+        private List<ProjectItemInstance> FindItemsMatchingMetadataSpecification(
+            ICollection<ProjectItemInstance> group,
+            ProjectItemGroupTaskItemInstance child,
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
+            HashSet<string> matchOnMetadata,
+            MatchOnMetadataOptions matchingOptions)
+        {
+            ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, expander, child.RemoveLocation, Project.Directory, true);
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                itemSpec.Fragments.All(f => f is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment),
+                new BuildEventFileInfo(string.Empty),
+                "OM_MatchOnMetadataIsRestrictedToReferencedItems",
+                child.RemoveLocation,
+                child.Remove);
+            MetadataTrie<ProjectPropertyInstance, ProjectItemInstance> metadataSet = new MetadataTrie<ProjectPropertyInstance, ProjectItemInstance>(matchingOptions, matchOnMetadata, itemSpec);
+            return group.Where(item => metadataSet.Contains(matchOnMetadata.Select(m => item.GetMetadataValue(m)))).ToList();
         }
 
         /// <summary>

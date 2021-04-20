@@ -1615,12 +1615,11 @@ namespace Microsoft.Build.Evaluation
         {
             Debug.Assert(_locker.IsWriteLockHeld);
 
-            if (!_toolsets.ContainsKey(toolsVersion))
+            if (!_toolsets.Remove(toolsVersion))
             {
                 return false;
             }
 
-            _toolsets.Remove(toolsVersion);
             _toolsetsVersion++;
             return true;
         }
@@ -1729,7 +1728,6 @@ namespace Microsoft.Build.Evaluation
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
         }
 
-#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Reset the toolsets using the provided toolset reader, used by unit tests
         /// </summary>
@@ -1737,7 +1735,6 @@ namespace Microsoft.Build.Evaluation
         {
             InitializeToolsetCollection(configReader:configurationReaderForTestsOnly);
         }
-#endif
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
@@ -1757,9 +1754,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
                 ToolsetRegistryReader registryReader = null,
 #endif
-#if FEATURE_SYSTEM_CONFIGURATION
                 ToolsetConfigurationReader configReader = null
-#endif
                 )
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -1769,9 +1764,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
                     registryReader,
 #endif
-#if FEATURE_SYSTEM_CONFIGURATION
                     configReader,
-#endif
                     EnvironmentProperties, _globalProperties, ToolsetLocations);
 
             _toolsetsVersion++;
@@ -1801,7 +1794,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource3
+        internal class ReusableLogger : INodeLogger, IEventSource4
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1898,6 +1891,8 @@ namespace Microsoft.Build.Evaluation
             private bool _includeEvaluationProfiles;
 
             private bool _includeTaskInputs;
+
+            private bool _includeEvaluationPropertiesAndItems;
 
             /// <summary>
             /// Constructor.
@@ -2038,6 +2033,22 @@ namespace Microsoft.Build.Evaluation
 
                 _includeTaskInputs = true;
             }
+
+            public void IncludeEvaluationPropertiesAndItems()
+            {
+                if (_buildTimeEventSource is IEventSource4 buildEventSource4)
+                {
+                    buildEventSource4.IncludeEvaluationPropertiesAndItems();
+                }
+
+                if (_designTimeEventSource is IEventSource4 designTimeEventSource4)
+                {
+                    designTimeEventSource4.IncludeEvaluationPropertiesAndItems();
+                }
+
+                _includeEvaluationPropertiesAndItems = true;
+            }
+
             #endregion
 
             #region ILogger Members
@@ -2170,6 +2181,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         eventSource3.IncludeEvaluationMetaprojects();
                     }
+
                     if (_includeEvaluationProfiles)
                     {
                         eventSource3.IncludeEvaluationProfiles();
@@ -2178,6 +2190,14 @@ namespace Microsoft.Build.Evaluation
                     if (_includeTaskInputs)
                     {
                         eventSource3.IncludeTaskInputs();
+                    }
+                }
+
+                if (eventSource is IEventSource4 eventSource4)
+                {
+                    if (_includeEvaluationPropertiesAndItems)
+                    {
+                        eventSource4.IncludeEvaluationPropertiesAndItems();
                     }
                 }
             }

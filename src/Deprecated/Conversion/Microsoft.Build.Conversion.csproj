@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</PackageDescription>
@@ -20,7 +20,7 @@
     <Compile Include="ProjectFileConverter.cs" />
 
     <!-- Resource Files -->
-    
+
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
@@ -31,12 +31,12 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    
+
     <!-- Assemblies Files we depend on -->
     <Reference Include="System.Configuration" />
     <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Engine\Microsoft.Build.Engine.csproj" />
   </ItemGroup>
 
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="! $([MSBuild]::IsOSPlatform('windows'))" />
 </Project>

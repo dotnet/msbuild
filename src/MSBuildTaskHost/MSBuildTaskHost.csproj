@@ -5,7 +5,7 @@
   <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MonoBuild)' == 'true'" />
 
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>    
+    <TargetFramework>net35</TargetFramework>
     <OutputType>Exe</OutputType>
     <PlatformTarget Condition="'$(Platform)' == 'x64'">x64</PlatformTarget>
     <PlatformTarget Condition="'$(Platform)' == 'AnyCPU'">x86</PlatformTarget>
@@ -14,12 +14,12 @@
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
          versions of this project -->
     <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
-    
+
     <EnableDefaultItems>false</EnableDefaultItems>
-    <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY</DefineConstants>
+    <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY;TASKHOST</DefineConstants>
     <!-- Need pointers for getting environment block -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- It is vital that msbuildtaskhost.exe is allowed to use the full 4GB on 64 bit machines in order to help avoid 
+    <!-- It is vital that msbuildtaskhost.exe is allowed to use the full 4GB on 64 bit machines in order to help avoid
          out of memory problems on large trees -->
     <LargeAddressAware>true</LargeAddressAware>
     <ApplicationIcon>..\MSBuild\MSBuild.ico</ApplicationIcon>
@@ -129,15 +129,6 @@
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IInternable.cs">
-      <Link>IInternable.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\WeakStringCache.cs">
-      <Link>WeakStringCache.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\OpportunisticIntern.cs">
-      <Link>OpportunisticIntern.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>ReadOnlyEmptyCollection.cs</Link>
     </Compile>
@@ -169,7 +160,6 @@
     <Compile Include="Immutable\ImmutableDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
-    <Compile Include="WeakStringCache.Locking.cs" />
     <Compile Include="..\MSBuild\LogMessagePacket.cs">
       <Link>LogMessagePacket.cs</Link>
     </Compile>
@@ -211,12 +201,15 @@
     <Content Include="..\MSBuild.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <!-- Disabled PdbGit because of warnings; it could/should be brought back.
     <PackageReference Include="PdbGit" /> -->
     <PackageReference Include="SourceLink.Create.CommandLine" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
-    <PackageReference Include="jnm2.ReferenceAssemblies.net35" />
+    <PackageReference Include="jnm2.ReferenceAssemblies.net35" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->

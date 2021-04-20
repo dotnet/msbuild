@@ -48,7 +48,7 @@ Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
-    $targetFramework = "netcoreapp2.1"
+    $targetFramework = "net5.0"
 }
 
 $bootstrapBinDirectory = "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework"
@@ -58,6 +58,7 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.Framework.dll"
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.Tasks.Core.dll"
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.Utilities.Core.dll"
+    FileToCopy "$bootstrapBinDirectory\Microsoft.NET.StringTools.dll"
 
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.resources.dll" "en"
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Tasks.Core.resources.dll" "en"
@@ -73,11 +74,11 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Managed.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.Managed.Before.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.Managed.After.targets"
-    FileToCopy "$bootstrapBinDirectory\Microsoft.Net.props"
-    FileToCopy "$bootstrapBinDirectory\Microsoft.NetFramework.CurrentVersion.props"
-    FileToCopy "$bootstrapBinDirectory\Microsoft.NetFramework.CurrentVersion.targets"
-    FileToCopy "$bootstrapBinDirectory\Microsoft.NetFramework.props"
-    FileToCopy "$bootstrapBinDirectory\Microsoft.NetFramework.targets"
+    FileToCopy "$bootstrapBinDirectory\Microsoft.NET.props"
+    FileToCopy "$bootstrapBinDirectory\Microsoft.NETFramework.CurrentVersion.props"
+    FileToCopy "$bootstrapBinDirectory\Microsoft.NETFramework.CurrentVersion.targets"
+    FileToCopy "$bootstrapBinDirectory\Microsoft.NETFramework.props"
+    FileToCopy "$bootstrapBinDirectory\Microsoft.NETFramework.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.CrossTargeting.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.CurrentVersion.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.targets"

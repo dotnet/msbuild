@@ -128,15 +128,20 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>"EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system."</source>
-        <target state="translated">"Los objetos EvaluationContext creados con SharingPolicy.Isolated no admiten que se les pase un sistema de archivos MSBuildFileSystemBase".</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="translated">Los objetos EvaluationContext creados con SharingPolicy.Isolated no admiten que se les pase un sistema de archivos MSBuildFileSystemBase.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="KillingProcessWithPid">
+        <source>Killing process with pid = {0}.</source>
+        <target state="translated">Terminando el proceso con el PID = {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
         <source>"Loading the following project cache plugin:
     {0}"</source>
-        <target state="new">"Loading the following project cache plugin:
-    {0}"</target>
+        <target state="translated">"Cargando el complemento de caché de proyectos siguiente:
+    {0} "</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -163,12 +168,12 @@
       </trans-unit>
       <trans-unit id="NoProjectCachePluginFoundInAssembly">
         <source>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</source>
-        <target state="new">MSB4270: No project cache plugins found in assembly "{0}". Expected one.</target>
+        <target state="translated">MSB4270: No se encontró ningún complemento de caché de proyectos en el ensamblado "{0}". Se esperaba uno.</target>
         <note />
       </trans-unit>
       <trans-unit id="NotAllNodesDefineACacheItem">
         <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="new">MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</target>
+        <target state="translated">MSB4269: Cuando un nodo de gráfico estático define una memoria caché de proyectos, todos los nodos deben definir la misma caché de proyectos. Los proyectos siguientes no contienen ninguna declaración de elemento "{0}": {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -184,9 +189,9 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
-      <trans-unit id="OM_MatchOnMetadataIsRestrictedToOnlyOneReferencedItem">
-        <source>Only one item type may be referenced when removing with MatchOnMetadata.</source>
-        <target state="translated">Solo se puede hacer referencia a un tipo de elemento al quitarlo con MatchOnMetadata.</target>
+      <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
+        <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
+        <target state="translated">Solo se puede hacer referencia a los objetos de tipo elemento al quitar con MatchOnMetadata</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataOnlyApplicableToRemoveItems">
@@ -211,22 +216,22 @@
       </trans-unit>
       <trans-unit id="OnlyOneCachePluginMustBeSpecified">
         <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="new">MSB4265: A single project cache plugin must be specified but multiple where found: {0}</target>
+        <target state="translated">MSB4265: Debe especificarse un solo complemento de caché de proyectos, pero se encontraron varios: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
-        <target state="new">MSB4266: Failed to initialize the project cache.</target>
+        <target state="translated">MSB4266: No se pudo inicializar la caché de proyectos.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
-        <target state="new">MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</target>
+        <target state="translated">MSB4267: Error de la memoria caché de proyectos al consultar el proyecto siguiente: {0}. La memoria caché se consulta en paralelo para varios proyectos, por lo que puede que este proyecto específico no sea la causa.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
-        <target state="new">MSB4268: The project cache failed to shut down properly.</target>
+        <target state="translated">MSB4268: La memoria caché de proyectos no se cerró correctamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
@@ -236,6 +241,11 @@
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
+      </trans-unit>
+      <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
+        <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
+        <target state="translated">"{1}" no importó el proyecto "{0}" en ({2},{3}) porque la expresión se evalúa en una cadena vacía.</target>
+        <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
@@ -251,7 +261,7 @@
       </trans-unit>
       <trans-unit id="SolutionPathPropertyMustBeSetOnVSSubmissions">
         <source>"MSB4264: Invalid $(SolutionPath) property: {0}"</source>
-        <target state="new">"MSB4264: Invalid $(SolutionPath) property: {0}"</target>
+        <target state="translated">"MSB4264: Propiedad $(SolutionPath) no válida: {0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphAcceptsSingleSolutionEntryPoint">
@@ -262,8 +272,8 @@
     </note>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionMetrics">
-        <source>"Static graph loaded in {0} seconds: {1} nodes, {2} edges"</source>
-        <target state="translated">"Grafo estático cargado en {0} segundos: {1} nodos, {2} bordes"</target>
+        <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
+        <target state="translated">Grafo estático cargado en {0} segundos: {1} nodos, {2} bordes</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -287,6 +297,21 @@
         <note>
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
+      </trans-unit>
+      <trans-unit id="TaskAcquiredCores">
+        <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCores">
+        <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
+        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskReleasedCoresWarning">
+        <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
+        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
@@ -1670,8 +1695,8 @@
         <note>{StrBegin="MSB4091: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskAttribute">
-        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task. Verify the parameter exists on the task, and it is a settable public instance property.</source>
-        <target state="translated">MSB4064: El parámetro "{0}" no es compatible con la tarea "{1}". Compruebe que el parámetro existe en la tarea y que es una propiedad de instancia Public que se puede establecer.</target>
+        <source>MSB4064: The "{0}" parameter is not supported by the "{1}" task loaded from assembly: {2} from the path: {3}. Verify that the parameter exists on the task, the &lt;UsingTask&gt; points to the correct assembly, and it is a settable public instance property.</source>
+        <target state="translated">MSB4064: El parámetro "{0}" no es compatible con la tarea "{1}" que se cargó desde el ensamblado {2} desde la ruta de acceso {3}. Compruebe que el parámetro existe en la tarea, que &lt;UsingTask&gt; apunta al ensamblado correcto y que es una propiedad de instancia pública que puede establecerse.</target>
         <note>{StrBegin="MSB4064: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedTaskOutputAttribute">

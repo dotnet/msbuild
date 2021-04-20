@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
+using Microsoft.NET.StringTools;
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -24,11 +26,25 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static Dictionary<string, string> s_unescapedToEscapedStrings = new Dictionary<string, string>(StringComparer.Ordinal);
 
-        private static bool IsHexDigit(char character)
+        private static bool TryDecodeHexDigit(char character, out int value)
         {
-            return ((character >= '0') && (character <= '9'))
-                || ((character >= 'A') && (character <= 'F'))
-                || ((character >= 'a') && (character <= 'f'));
+            if (character >= '0' && character <= '9')
+            {
+                value = character - '0';
+                return true;
+            }
+            if (character >= 'A' && character <= 'F')
+            {
+                value = character - 'A' + 10;
+                return true;
+            }
+            if (character >= 'a' && character <= 'f')
+            {
+                value = character - 'a' + 10;
+                return true;
+            }
+            value = default;
+            return false;
         }
 
         /// <summary>
@@ -83,8 +99,8 @@ namespace Microsoft.Build.Shared
                 // for us to even consider doing anything with this.
                 if (
                         (indexOfPercent <= (escapedStringLength - 3)) &&
-                        IsHexDigit(escapedString[indexOfPercent + 1]) &&
-                        IsHexDigit(escapedString[indexOfPercent + 2])
+                        TryDecodeHexDigit(escapedString[indexOfPercent + 1], out int digit1) &&
+                        TryDecodeHexDigit(escapedString[indexOfPercent + 2], out int digit2)
                     )
                 {
                     // First copy all the characters up to the current percent sign into
@@ -92,9 +108,7 @@ namespace Microsoft.Build.Shared
                     unescapedString.Append(escapedString, currentPosition, indexOfPercent - currentPosition);
 
                     // Convert the %XX to an actual real character.
-                    string hexString = escapedString.Substring(indexOfPercent + 1, 2);
-                    char unescapedCharacter = (char)int.Parse(hexString, System.Globalization.NumberStyles.HexNumber,
-                        CultureInfo.InvariantCulture);
+                    char unescapedCharacter = (char)((digit1 << 4) + digit2);
 
                     // if the unescaped character is not on the exception list, append it
                     unescapedString.Append(unescapedCharacter);
@@ -181,7 +195,7 @@ namespace Microsoft.Build.Shared
                 return StringBuilderCache.GetStringAndRelease(escapedStringBuilder);
             }
 
-            string escapedString = OpportunisticIntern.StringBuilderToString(escapedStringBuilder);
+            string escapedString = Strings.WeakIntern(escapedStringBuilder.ToString());
             StringBuilderCache.Release(escapedStringBuilder);
 
             lock (s_unescapedToEscapedStrings)
@@ -212,28 +226,30 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="escapedString"></param>
         /// <returns></returns>
-        internal static bool ContainsEscapedWildcards
-            (
-            string escapedString
-            )
+        internal static bool ContainsEscapedWildcards(string escapedString)
         {
-            if (-1 != escapedString.IndexOf('%'))
+            if (escapedString.Length < 3)
             {
-                // It has a '%' sign.  We have promise.
-                if (
-                        (-1 != escapedString.IndexOf("%2", StringComparison.Ordinal)) ||
-                        (-1 != escapedString.IndexOf("%3", StringComparison.Ordinal))
-                    )
+                return false;
+            }
+            // Look for the first %. We know that it has to be followed by at least two more characters so we subtract 2
+            // from the length to search.
+            int index = escapedString.IndexOf('%', 0, escapedString.Length - 2);
+            while (index != -1)
+            {
+                if (escapedString[index + 1] == '2' && (escapedString[index + 2] == 'a' || escapedString[index + 2] == 'A'))
                 {
-                    // It has either a '%2' or a '%3'.  This is looking very promising.
-                    return
-
-                            (-1 != escapedString.IndexOf("%2a", StringComparison.Ordinal)) ||
-                            (-1 != escapedString.IndexOf("%2A", StringComparison.Ordinal)) ||
-                            (-1 != escapedString.IndexOf("%3f", StringComparison.Ordinal)) ||
-                            (-1 != escapedString.IndexOf("%3F", StringComparison.Ordinal))
-                        ;
+                    // %2a or %2A
+                    return true;
                 }
+                if (escapedString[index + 1] == '3' && (escapedString[index + 2] == 'f' || escapedString[index + 2] == 'F'))
+                {
+                    // %3f or %3F
+                    return true;
+                }
+                // Continue searching for % starting at (index + 1). We know that it has to be followed by at least two
+                // more characters so we subtract 2 from the length of the substring to search.
+                index = escapedString.IndexOf('%', index + 1, escapedString.Length - (index + 1) - 2);
             }
             return false;
         }

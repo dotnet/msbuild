@@ -1945,6 +1945,16 @@ namespace Microsoft.Build.UnitTests
                 return buildResult;
             }
 
+            public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData)
+            {
+                return _buildManager.BuildRequest(requestData);
+            }
+
+            public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
+            {
+                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? new string[0]));
+            }
+
             public void Dispose()
             {
                 if (_disposed)
@@ -1956,11 +1966,6 @@ namespace Microsoft.Build.UnitTests
 
                 _buildManager.EndBuild();
                 _buildManager.Dispose();
-            }
-
-            public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
-            {
-                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? new string[0]));
             }
         }
 

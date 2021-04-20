@@ -168,11 +168,26 @@ namespace Microsoft.Build.Construction
             {
                 if (_absolutePath == null)
                 {
+                    _absolutePath = Path.Combine(ParentSolution.SolutionFileDirectory, _relativePath);
+
+                    // For web site projects, Visual Studio stores the URL of the site as the relative path so it cannot be normalized.
+                    // Legacy behavior dictates that we must just return the result of Path.Combine()
+                    if (!Uri.TryCreate(_relativePath, UriKind.Absolute, out Uri _))
+                    {
+                        try
+                        {
 #if NETFRAMEWORK && !MONO
-                    _absolutePath = Path.GetFullPath(Path.Combine(ParentSolution.SolutionFileDirectory, _relativePath));
+                            _absolutePath = Path.GetFullPath(_absolutePath);
 #else
-                    _absolutePath = FileUtilities.NormalizePath(Path.Combine(ParentSolution.SolutionFileDirectory, _relativePath));
+                            _absolutePath = FileUtilities.NormalizePath(_absolutePath);
 #endif
+                        }
+                        catch (Exception)
+                        {
+                            // The call to GetFullPath() can throw if the relative path is some unsupported value or the paths are too long for the current file system
+                            // This falls back to previous behavior of returning a path that may not be correct but at least returns some value
+                        }
+                    }
                 }
 
                 return _absolutePath;
@@ -229,9 +244,9 @@ namespace Microsoft.Build.Construction
 
         internal string TargetFrameworkMoniker { get; set; }
 
-#endregion
+        #endregion
 
-#region Methods
+        #region Methods
 
         private bool _checkedIfCanBeMSBuildProjectFile;
         private bool _canBeMSBuildProjectFile;
@@ -529,13 +544,13 @@ namespace Microsoft.Build.Construction
             return false;
         }
 
-#endregion
+        #endregion
 
-#region Constants
+        #region Constants
 
         internal const int DependencyLevelUnknown = -1;
         internal const int DependencyLevelBeingDetermined = -2;
 
-#endregion
+        #endregion
     }
 }

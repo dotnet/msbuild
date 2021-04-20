@@ -197,6 +197,12 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool? _includeEvaluationProfile;
 
         /// <summary>
+        /// Whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
+        /// instead of <see cref="ProjectStartedEventArgs"/>.
+        /// </summary>
+        private bool? _includeEvaluationPropertiesAndItems;
+
+        /// <summary>
         /// Whether to include task inputs in task events.
         /// </summary>
         private bool? _includeTaskInputs;
@@ -284,6 +290,10 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 CreateLoggingEventQueue();
             }
+
+            // Ensure the static constructor of ItemGroupLoggingHelper runs.
+            // It is important to ensure the Message delegate on TaskParameterEventArgs is set.
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
 
             _serviceState = LoggingServiceState.Instantiated;
         }
@@ -499,6 +509,16 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
+        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// </summary>
+        public bool IncludeEvaluationPropertiesAndItems
+        {
+            get => _includeEvaluationPropertiesAndItems ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+            set => _includeEvaluationPropertiesAndItems = value;
+        }
+
+        /// <summary>
         /// Determines if the specified submission has logged an errors.
         /// </summary>
         /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
@@ -513,6 +533,50 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
+        }
+
+        /// <summary>
+        /// Returns a hashset of warnings to be logged as errors for the specified build context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as errors.</param>
+        /// <returns>
+        /// </returns>
+        public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            int key = GetWarningsAsErrorOrMessageKey(context);
+
+            if (_warningsAsErrorsByProject != null && _warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrors))
+            {
+                if (WarningsAsErrors != null)
+                {
+                    warningsAsErrors.UnionWith(WarningsAsErrors);
+                }
+
+                return warningsAsErrors;
+            }
+            else
+            {
+                return WarningsAsErrors;
+            }
+        }
+
+        public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
+        {
+            int key = GetWarningsAsErrorOrMessageKey(context);
+
+            if (_warningsAsMessagesByProject != null && _warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
+            {
+                if (WarningsAsMessages != null)
+                {
+                    warningsAsMessages.UnionWith(WarningsAsMessages);
+                }
+
+                return warningsAsMessages;
+            }
+            else
+            {
+                return WarningsAsMessages;
+            }
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
@@ -1106,7 +1170,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
-                    s_projectStartedEventArgsGlobalProperties.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.GlobalProperties.ToDictionary(), null);
+
+                    // Always log GlobalProperties on ProjectStarted for compatibility.
+                    // There are loggers that depend on it being not-null and always set.
+                    // See https://github.com/dotnet/msbuild/issues/6341 for details.
+                    s_projectStartedEventArgsGlobalProperties.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.GlobalProperties.ToDictionary(), index: null);
+
                     s_projectStartedEventArgsToolsVersion.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.ToolsVersion, null);
                 }
             }

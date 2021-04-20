@@ -6,7 +6,7 @@
     <Copyright>$(CopyrightNetFoundation)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <Product>Microsoft® Build Tools®</Product>
     <Configurations>Debug;Release;Debug-MONO;Release-MONO;MachineIndependent</Configurations>
@@ -17,23 +17,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('windows'))">windows</OsEnvironment>
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('linux'))">linux</OsEnvironment>
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('osx'))">osx</OsEnvironment>
-    <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
-    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">bsd</OsEnvironment>
-
-    <OsUnixLike>false</OsUnixLike>
-    <OsUnixLike Condition="$([MSBuild]::IsOsUnixLike())">true</OsUnixLike>
-
-    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot).dotnet\</DOTNET_INSTALL_DIR>
 
     <!-- Repository and project URLs (used in nuget packages) -->
-    <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dotnet/msbuild</RepositoryUrl>
     <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
     <PackageIcon>MSBuild-NuGet-Icon.png</PackageIcon>
     <PackageTags>MSBuild</PackageTags>
@@ -49,9 +36,10 @@
         CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
         you don't get those defaults.
         NU5125: Arcade uses licenseUrl when doing pack, which now causes NU5125 warning. This disables that warning until arcade can switch over.
+        SYSLIB0011: Removing binary formatter will happen as part of a larger .NET-wide effort.
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702;SYSLIB0011</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">

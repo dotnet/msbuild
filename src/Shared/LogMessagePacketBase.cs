@@ -2,12 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Framework;
+
+#if !TASKHOST
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Execution;
+#endif
+
 #if FEATURE_APPDOMAIN
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
@@ -89,7 +98,37 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Event is a TaskCommandLineEventArgs
         /// </summary>
-        TaskCommandLineEvent = 12
+        TaskCommandLineEvent = 12,
+
+        /// <summary>
+        /// Event is a TaskParameterEventArgs
+        /// </summary>
+        TaskParameterEvent = 13,
+
+        /// <summary>
+        /// Event is a ProjectEvaluationStartedEventArgs
+        /// </summary>
+        ProjectEvaluationStartedEvent = 14,
+
+        /// <summary>
+        /// Event is a ProjectEvaluationFinishedEventArgs
+        /// </summary>
+        ProjectEvaluationFinishedEvent = 15,
+
+        /// <summary>
+        /// Event is a ProjectImportedEventArgs
+        /// </summary>
+        ProjectImportedEvent = 16,
+
+        /// <summary>
+        /// Event is a TargetSkippedEventArgs
+        /// </summary>
+        TargetSkipped = 17,
+
+        /// <summary>
+        /// Event is a TelemetryEventArgs
+        /// </summary>
+        Telemetry = 18,
     }
     #endregion
 
@@ -291,6 +330,17 @@ namespace Microsoft.Build.Shared
                 translator.Translate(ref packetVersion);
 
                 bool eventCanSerializeItself = methodInfo != null;
+
+#if !TASKHOST && !MSBUILDENTRYPOINTEXE
+                if (_buildEvent is ProjectEvaluationStartedEventArgs ||
+                    _buildEvent is ProjectEvaluationFinishedEventArgs)
+                {
+                    // switch to serialization methods that we provide in this file
+                    // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
+                    eventCanSerializeItself = false;
+                }
+#endif
+
                 translator.Translate(ref eventCanSerializeItself);
 
                 if (eventCanSerializeItself)
@@ -459,36 +509,30 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private BuildEventArgs GetBuildEventArgFromId()
         {
-            switch (_eventType)
+            return _eventType switch
             {
-                case LoggingEventType.BuildErrorEvent:
-                    return new BuildErrorEventArgs(null, null, null, -1, -1, -1, -1, null, null, null);
-                case LoggingEventType.BuildFinishedEvent:
-                    return new BuildFinishedEventArgs(null, null, false);
-                case LoggingEventType.BuildMessageEvent:
-                    return new BuildMessageEventArgs(null, null, null, MessageImportance.Normal);
-                case LoggingEventType.BuildStartedEvent:
-                    return new BuildStartedEventArgs(null, null);
-                case LoggingEventType.BuildWarningEvent:
-                    return new BuildWarningEventArgs(null, null, null, -1, -1, -1, -1, null, null, null);
-                case LoggingEventType.ProjectFinishedEvent:
-                    return new ProjectFinishedEventArgs(null, null, null, false);
-                case LoggingEventType.ProjectStartedEvent:
-                    return new ProjectStartedEventArgs(null, null, null, null, null, null);
-                case LoggingEventType.TargetStartedEvent:
-                    return new TargetStartedEventArgs(null, null, null, null, null);
-                case LoggingEventType.TargetFinishedEvent:
-                    return new TargetFinishedEventArgs(null, null, null, null, null, false);
-                case LoggingEventType.TaskStartedEvent:
-                    return new TaskStartedEventArgs(null, null, null, null, null);
-                case LoggingEventType.TaskFinishedEvent:
-                    return new TaskFinishedEventArgs(null, null, null, null, null, false);
-                case LoggingEventType.TaskCommandLineEvent:
-                    return new TaskCommandLineEventArgs(null, null, MessageImportance.Normal);
-                default:
-                    ErrorUtilities.VerifyThrow(false, "Should not get to the default of GetBuildEventArgFromId ID: " + _eventType);
-                    return null;
-            }
+                LoggingEventType.BuildErrorEvent => new BuildErrorEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
+                LoggingEventType.BuildFinishedEvent => new BuildFinishedEventArgs(null, null, false),
+                LoggingEventType.BuildMessageEvent => new BuildMessageEventArgs(null, null, null, MessageImportance.Normal),
+                LoggingEventType.BuildStartedEvent => new BuildStartedEventArgs(null, null),
+                LoggingEventType.BuildWarningEvent => new BuildWarningEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
+                LoggingEventType.ProjectFinishedEvent => new ProjectFinishedEventArgs(null, null, null, false),
+                LoggingEventType.ProjectStartedEvent => new ProjectStartedEventArgs(null, null, null, null, null, null),
+                LoggingEventType.TargetStartedEvent => new TargetStartedEventArgs(null, null, null, null, null),
+                LoggingEventType.TargetFinishedEvent => new TargetFinishedEventArgs(null, null, null, null, null, false),
+                LoggingEventType.TaskStartedEvent => new TaskStartedEventArgs(null, null, null, null, null),
+                LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
+                LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
+#if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
+                LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
+                LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
+                LoggingEventType.ProjectEvaluationFinishedEvent => new ProjectEvaluationFinishedEventArgs(),
+                LoggingEventType.ProjectImportedEvent => new ProjectImportedEventArgs(),
+                LoggingEventType.TargetSkipped => new TargetSkippedEventArgs(),
+                LoggingEventType.Telemetry => new TelemetryEventArgs(),
+#endif
+                _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
+            };
         }
 
         /// <summary>
@@ -509,6 +553,12 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.TaskCommandLineEvent;
             }
+#if !TASKHOST
+            else if (eventType == typeof(TaskParameterEventArgs))
+            {
+                return LoggingEventType.TaskParameterEvent;
+            }
+#endif
             else if (eventType == typeof(ProjectFinishedEventArgs))
             {
                 return LoggingEventType.ProjectFinishedEvent;
@@ -517,6 +567,28 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.ProjectStartedEvent;
             }
+#if !TASKHOST
+            else if (eventType == typeof(ProjectEvaluationFinishedEventArgs))
+            {
+                return LoggingEventType.ProjectEvaluationFinishedEvent;
+            }
+            else if (eventType == typeof(ProjectEvaluationStartedEventArgs))
+            {
+                return LoggingEventType.ProjectEvaluationStartedEvent;
+            }
+            else if (eventType == typeof(ProjectImportedEventArgs))
+            {
+                return LoggingEventType.ProjectImportedEvent;
+            }
+            else if (eventType == typeof(TargetSkippedEventArgs))
+            {
+                return LoggingEventType.TargetSkipped;
+            }
+            else if (eventType == typeof(TelemetryEventArgs))
+            {
+                return LoggingEventType.Telemetry;
+            }
+#endif
             else if (eventType == typeof(TargetStartedEventArgs))
             {
                 return LoggingEventType.TargetStartedEvent;
@@ -561,6 +633,19 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private void WriteEventToStream(BuildEventArgs buildEvent, LoggingEventType eventType, ITranslator translator)
         {
+#if !TASKHOST && !MSBUILDENTRYPOINTEXE
+            if (eventType == LoggingEventType.ProjectEvaluationStartedEvent)
+            {
+                WriteProjectEvaluationStartedEventToStream((ProjectEvaluationStartedEventArgs)buildEvent, translator);
+                return;
+            }
+            else if (eventType == LoggingEventType.ProjectEvaluationFinishedEvent)
+            {
+                WriteProjectEvaluationFinishedEventToStream((ProjectEvaluationFinishedEventArgs)buildEvent, translator);
+                return;
+            }
+#endif
+
             string message = buildEvent.Message;
             string helpKeyword = buildEvent.HelpKeyword;
             string senderName = buildEvent.SenderName;
@@ -700,6 +785,207 @@ namespace Microsoft.Build.Shared
             translator.TranslateEnum(ref importance, (int)importance);
         }
 
+#if !TASKHOST && !MSBUILDENTRYPOINTEXE
+        private void WriteProjectEvaluationStartedEventToStream(ProjectEvaluationStartedEventArgs args, ITranslator translator)
+        {
+            WriteEvaluationEvent(args, args.ProjectFile, args.RawTimestamp, translator);
+        }
+
+        private void WriteProjectEvaluationFinishedEventToStream(ProjectEvaluationFinishedEventArgs args, ITranslator translator)
+        {
+            WriteEvaluationEvent(args, args.ProjectFile, args.RawTimestamp, translator);
+
+            WriteProperties(args.GlobalProperties, translator);
+            WriteProperties(args.Properties, translator);
+            WriteItems(args.Items, translator);
+            WriteProfileResult(args.ProfilerResult, translator);
+        }
+
+        private static void WriteEvaluationEvent(BuildStatusEventArgs args, string projectFile, DateTime timestamp, ITranslator translator)
+        {
+            var buildEventContext = args.BuildEventContext;
+            translator.Translate(ref buildEventContext);
+            translator.Translate(ref timestamp);
+            translator.Translate(ref projectFile);
+        }
+
+        private void WriteProfileResult(ProfilerResult? result, ITranslator translator)
+        {
+            bool hasValue = result.HasValue;
+            translator.Translate(ref hasValue);
+            if (hasValue)
+            {
+                var value = result.Value;
+                var count = value.ProfiledLocations.Count;
+                translator.Translate(ref count);
+
+                foreach (var item in value.ProfiledLocations)
+                {
+                    WriteEvaluationLocation(translator, item.Key);
+                    WriteProfiledLocation(translator, item.Value);
+                }
+            }
+        }
+
+        private void WriteEvaluationLocation(ITranslator translator, EvaluationLocation evaluationLocation)
+        {
+            string elementName = evaluationLocation.ElementName;
+            string elementDescription = evaluationLocation.ElementDescription;
+            string evaluationPassDescription = evaluationLocation.EvaluationPassDescription;
+            string file = evaluationLocation.File;
+            int kind = (int)evaluationLocation.Kind;
+            int evaluationPass = (int)evaluationLocation.EvaluationPass;
+            bool lineHasValue = evaluationLocation.Line.HasValue;
+            int line = lineHasValue ? evaluationLocation.Line.Value : 0;
+            long id = evaluationLocation.Id;
+            bool parentIdHasValue = evaluationLocation.ParentId.HasValue;
+            long parentId = parentIdHasValue ? evaluationLocation.ParentId.Value : 0;
+
+            translator.Translate(ref elementName);
+            translator.Translate(ref elementDescription);
+            translator.Translate(ref evaluationPassDescription);
+            translator.Translate(ref file);
+
+            translator.Translate(ref kind);
+            translator.Translate(ref evaluationPass);
+
+            translator.Translate(ref lineHasValue);
+            if (lineHasValue)
+            {
+                translator.Translate(ref line);
+            }
+
+            translator.Translate(ref id);
+            translator.Translate(ref parentIdHasValue);
+            if (parentIdHasValue)
+            {
+                translator.Translate(ref parentId);
+            }
+        }
+
+        private void WriteProfiledLocation(ITranslator translator, ProfiledLocation profiledLocation)
+        {
+            int numberOfHits = profiledLocation.NumberOfHits;
+            TimeSpan exclusiveTime = profiledLocation.ExclusiveTime;
+            TimeSpan inclusiveTime = profiledLocation.InclusiveTime;
+            translator.Translate(ref numberOfHits);
+            translator.Translate(ref exclusiveTime);
+            translator.Translate(ref inclusiveTime);
+        }
+
+        [ThreadStatic]
+        private static List<KeyValuePair<string, string>> reusablePropertyList;
+
+        [ThreadStatic]
+        private static List<(string itemType, object item)> reusableItemList;
+
+        private void WriteProperties(IEnumerable properties, ITranslator translator)
+        {
+            var writer = translator.Writer;
+            if (properties == null)
+            {
+                writer.Write((byte)0);
+                return;
+            }
+
+            if (reusablePropertyList == null)
+            {
+                reusablePropertyList = new List<KeyValuePair<string, string>>();
+            }
+
+            // it is expensive to access a ThreadStatic field every time
+            var list = reusablePropertyList;
+
+            Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(kvp));
+
+            BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
+
+            foreach (var item in list)
+            {
+                writer.Write(item.Key);
+                writer.Write(item.Value);
+            }
+
+            list.Clear();
+        }
+
+        private void WriteItems(IEnumerable items, ITranslator translator)
+        {
+            var writer = translator.Writer;
+            if (items == null)
+            {
+                writer.Write((byte)0);
+                return;
+            }
+
+            if (reusableItemList == null)
+            {
+                reusableItemList = new List<(string itemType, object item)>();
+            }
+
+            var list = reusableItemList;
+
+            Internal.Utilities.EnumerateItems(items, dictionaryEntry =>
+            {
+                list.Add((dictionaryEntry.Key as string, dictionaryEntry.Value));
+            });
+
+            BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
+
+            foreach (var kvp in list)
+            {
+                writer.Write(kvp.itemType);
+                if (kvp.item is ITaskItem taskItem)
+                {
+                    writer.Write(taskItem.ItemSpec);
+                    WriteMetadata(taskItem, writer);
+                }
+                else
+                {
+                    writer.Write(kvp.item?.ToString() ?? "");
+                    writer.Write((byte)0);
+                }
+            }
+
+            list.Clear();
+        }
+
+        private void WriteMetadata(object metadataContainer, BinaryWriter writer)
+        {
+            if (metadataContainer is ITaskItem taskItem)
+            {
+                var metadata = taskItem.EnumerateMetadata();
+
+                if (reusablePropertyList == null)
+                {
+                    reusablePropertyList = new List<KeyValuePair<string, string>>();
+                }
+
+                // it is expensive to access a ThreadStatic field every time
+                var list = reusablePropertyList;
+
+                foreach (var item in metadata)
+                {
+                    list.Add(item);
+                }
+
+                BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
+                foreach (var kvp in list)
+                {
+                    writer.Write(kvp.Key ?? string.Empty);
+                    writer.Write(kvp.Value ?? string.Empty);
+                }
+
+                list.Clear();
+            }
+            else
+            {
+                writer.Write((byte)0);
+            }
+        }
+
+#endif
+
         #endregion
 
         #region Reads from Stream
@@ -710,6 +996,17 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private BuildEventArgs ReadEventFromStream(LoggingEventType eventType, ITranslator translator)
         {
+#if !TASKHOST && !MSBUILDENTRYPOINTEXE
+            if (eventType == LoggingEventType.ProjectEvaluationStartedEvent)
+            {
+                return ReadProjectEvaluationStartedEventFromStream(translator);
+            }
+            else if (eventType == LoggingEventType.ProjectEvaluationFinishedEvent)
+            {
+                return ReadProjectEvaluationFinishedEventFromStream(translator);
+            }
+#endif
+
             string message = null;
             string helpKeyword = null;
             string senderName = null;
@@ -905,6 +1202,213 @@ namespace Microsoft.Build.Shared
             BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(message, helpKeyword, senderName, importance);
             return buildEvent;
         }
+
+#if !TASKHOST && !MSBUILDENTRYPOINTEXE
+        private ProjectEvaluationStartedEventArgs ReadProjectEvaluationStartedEventFromStream(ITranslator translator)
+        {
+            var (buildEventContext, timestamp, projectFile) = ReadEvaluationEvent(translator);
+
+            var args = new ProjectEvaluationStartedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationStarted"), projectFile);
+
+            args.BuildEventContext = buildEventContext;
+            args.RawTimestamp = timestamp;
+            args.ProjectFile = projectFile;
+
+            return args;
+        }
+
+        private ProjectEvaluationFinishedEventArgs ReadProjectEvaluationFinishedEventFromStream(ITranslator translator)
+        {
+            var (buildEventContext, timestamp, projectFile) = ReadEvaluationEvent(translator);
+
+            var args = new ProjectEvaluationFinishedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile);
+
+            args.BuildEventContext = buildEventContext;
+            args.RawTimestamp = timestamp;
+            args.ProjectFile = projectFile;
+
+            args.GlobalProperties = ReadProperties(translator);
+            args.Properties = ReadProperties(translator);
+            args.Items = ReadItems(translator);
+            args.ProfilerResult = ReadProfileResult(translator);
+
+            return args;
+        }
+
+        private (BuildEventContext buildEventContext, DateTime timestamp, string projectFile)
+            ReadEvaluationEvent(ITranslator translator)
+        {
+            BuildEventContext buildEventContext = null;
+            translator.Translate(ref buildEventContext);
+
+            DateTime timestamp = default;
+            translator.Translate(ref timestamp);
+
+            string projectFile = null;
+            translator.Translate(ref projectFile);
+
+            return (buildEventContext, timestamp, projectFile);
+        }
+
+        private IEnumerable ReadProperties(ITranslator translator)
+        {
+            var reader = translator.Reader;
+            int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
+            if (count == 0)
+            {
+                return Array.Empty<DictionaryEntry>();
+            }
+
+            var list = new ArrayList(count);
+            for (int i = 0; i < count; i++)
+            {
+                string key = reader.ReadString();
+                string value = reader.ReadString();
+                var entry = new DictionaryEntry(key, value);
+                list.Add(entry);
+            }
+
+            return list;
+        }
+
+        private IEnumerable ReadItems(ITranslator translator)
+        {
+            var reader = translator.Reader;
+
+            int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
+            if (count == 0)
+            {
+                return Array.Empty<DictionaryEntry>();
+            }
+
+            var list = new ArrayList(count);
+            for (int i = 0; i < count; i++)
+            {
+                string itemType = reader.ReadString();
+                string evaluatedValue = reader.ReadString();
+                var metadata = ReadMetadata(reader);
+                var taskItemData = new TaskItemData(evaluatedValue, metadata);
+                var entry = new DictionaryEntry(itemType, taskItemData);
+                list.Add(entry);
+            }
+
+            return list;
+        }
+
+        private IDictionary<string, string> ReadMetadata(BinaryReader reader)
+        {
+            int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
+            if (count == 0)
+            {
+                return null;
+            }
+
+            var list = ArrayDictionary<string, string>.Create(count);
+            for (int i = 0; i < count; i++)
+            {
+                string key = reader.ReadString();
+                string value = reader.ReadString();
+                list.Add(key, value);
+            }
+
+            return list;
+        }
+
+        private ProfilerResult? ReadProfileResult(ITranslator translator)
+        {
+            bool hasValue = false;
+            translator.Translate(ref hasValue);
+            if (!hasValue)
+            {
+                return null;
+            }
+
+            int count = 0;
+            translator.Translate(ref count);
+
+            var dictionary = new ArrayDictionary<EvaluationLocation, ProfiledLocation>(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                var evaluationLocation = ReadEvaluationLocation(translator);
+                var profiledLocation = ReadProfiledLocation(translator);
+                dictionary.Add(evaluationLocation, profiledLocation);
+            }
+
+            var result = new ProfilerResult(dictionary);
+            return result;
+        }
+
+        private EvaluationLocation ReadEvaluationLocation(ITranslator translator)
+        {
+            string elementName = default;
+            string elementDescription = default;
+            string evaluationPassDescription = default;
+            string file = default;
+            int kind = default;
+            int evaluationPass = default;
+            bool lineHasValue = default;
+            int line = default;
+            long id = default;
+            bool parentIdHasValue = default;
+            long parentId = default;
+
+            translator.Translate(ref elementName);
+            translator.Translate(ref elementDescription);
+            translator.Translate(ref evaluationPassDescription);
+            translator.Translate(ref file);
+
+            translator.Translate(ref kind);
+            translator.Translate(ref evaluationPass);
+
+            translator.Translate(ref lineHasValue);
+            if (lineHasValue)
+            {
+                translator.Translate(ref line);
+            }
+
+            translator.Translate(ref id);
+            translator.Translate(ref parentIdHasValue);
+            if (parentIdHasValue)
+            {
+                translator.Translate(ref parentId);
+            }
+
+            var evaluationLocation = new EvaluationLocation(
+                id,
+                parentIdHasValue ? parentId : null,
+                (EvaluationPass)evaluationPass,
+                evaluationPassDescription,
+                file,
+                lineHasValue ? line : null,
+                elementName,
+                elementDescription,
+                (EvaluationLocationKind)kind);
+
+            return evaluationLocation;
+        }
+
+        private ProfiledLocation ReadProfiledLocation(ITranslator translator)
+        {
+            int numberOfHits = default;
+            TimeSpan exclusiveTime = default;
+            TimeSpan inclusiveTime = default;
+
+            translator.Translate(ref numberOfHits);
+            translator.Translate(ref exclusiveTime);
+            translator.Translate(ref inclusiveTime);
+
+            var profiledLocation = new ProfiledLocation(
+                inclusiveTime,
+                exclusiveTime,
+                numberOfHits);
+
+            return profiledLocation;
+        }
+
+#endif
 
         #endregion
 

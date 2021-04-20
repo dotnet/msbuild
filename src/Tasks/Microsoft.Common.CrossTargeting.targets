@@ -11,10 +11,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
 
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup>
     <BuildInParallel Condition="'$(BuildInParallel)' == ''">true</BuildInParallel>
     <ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>
+
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore\*.targets"
           Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore')"/>
 
@@ -26,20 +28,27 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Error Condition="'$(IsCrossTargetingBuild)' != 'true'"
            Text="Internal MSBuild error: CrossTargeting GetTargetFrameworks target should only be used in cross targeting (outer) build" />
-    
+
+    <CombineXmlElements
+      RootElementName="AdditionalProjectProperties"
+      XmlElements="@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)')">
+      <Output TaskParameter="Result"
+        PropertyName="_AdditionalPropertiesFromProject"/>
+    </CombineXmlElements>
+
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
         <TargetFrameworks>@(_TargetFrameworkInfo)</TargetFrameworks>
         <TargetFrameworkMonikers>@(_TargetFrameworkInfo->'%(TargetFrameworkMonikers)')</TargetFrameworkMonikers>
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
-
+        <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>false</HasSingleTargetFramework>
-
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
+
   </Target>
 
   <Target Name="_ComputeTargetFrameworkItems" Returns="@(InnerOutput)">
@@ -170,7 +179,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter\*.targets" 
+
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter\*.targets"
           Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter')"/>
 
   <!--
@@ -180,8 +190,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Each package management system should use a unique moniker to avoid collisions.  It is a wild-card iport so the package
     management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
 
-    This is the same import that would happen in an inner (non-cross targeting) build. Package management systems are responsible for generating 
-    appropriate conditions based on $(IsCrossTargetingBuild) to pull in only those package targets that are meant to participate in a cross-targeting 
+    This is the same import that would happen in an inner (non-cross targeting) build. Package management systems are responsible for generating
+    appropriate conditions based on $(IsCrossTargetingBuild) to pull in only those package targets that are meant to participate in a cross-targeting
     build.
   -->
   <PropertyGroup>
@@ -194,19 +204,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ImportDirectoryBuildTargets Condition="'$(ImportDirectoryBuildTargets)' == ''">true</ImportDirectoryBuildTargets>
   </PropertyGroup>
 
-  <!-- 
+  <!--
         Determine the path to the directory build targets file if the user did not disable $(ImportDirectoryBuildTargets) and
         they did not already specify an absolute path to use via $(DirectoryBuildTargetsPath)
     -->
   <PropertyGroup Condition="'$(ImportDirectoryBuildTargets)' == 'true' and '$(DirectoryBuildTargetsPath)' == ''">
     <_DirectoryBuildTargetsFile Condition="'$(_DirectoryBuildTargetsFile)' == ''">Directory.Build.targets</_DirectoryBuildTargetsFile>
     <_DirectoryBuildTargetsBasePath Condition="'$(_DirectoryBuildTargetsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectoryBuildTargetsFile)'))</_DirectoryBuildTargetsBasePath>
-    <DirectoryBuildTargetsPath Condition="'$(_DirectoryBuildTargetsBasePath)' != '' and '$(_DirectoryBuildTargetsFile)' != ''">$([MSBuild]::NormalizePath('$(_DirectoryBuildTargetsBasePath)', '$(_DirectoryBuildTargetsFile)'))</DirectoryBuildTargetsPath>
+    <DirectoryBuildTargetsPath Condition="'$(_DirectoryBuildTargetsBasePath)' != '' and '$(_DirectoryBuildTargetsFile)' != ''">$([System.IO.Path]::Combine('$(_DirectoryBuildTargetsBasePath)', '$(_DirectoryBuildTargetsFile)'))</DirectoryBuildTargetsPath>
   </PropertyGroup>
 
   <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
 
   <!-- TODO: https://github.com/Microsoft/msbuild/issues/1062: Remove this temporary hook when possible. -->
-  <Import Project="$(CoreCrossTargetingTargetsPath)" 
+  <Import Project="$(CoreCrossTargetingTargetsPath)"
           Condition="'$(CoreCrossTargetingTargetsPath)' != '' and Exists('$(CoreCrossTargetingTargetsPath)')" />
+
 </Project>

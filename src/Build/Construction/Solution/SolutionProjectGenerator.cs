@@ -28,6 +28,8 @@ using FrameworkName = System.Runtime.Versioning.FrameworkName;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Utilities;
 
+using Microsoft.NET.StringTools;
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -50,7 +52,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The set of properties all projects in the solution should be built with
         /// </summary>
-        private const string SolutionProperties = "BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)";
+        private const string SolutionProperties = "BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionFilterName=$(SolutionFilterName); SolutionPath=$(SolutionPath)";
 
         /// <summary>
         /// The set of properties which identify the configuration and platform to build a project with
@@ -92,6 +94,7 @@ namespace Microsoft.Build.Construction
             new Tuple<string, string>("SolutionExt", null),
             new Tuple<string, string>("SolutionFileName", null),
             new Tuple<string, string>("SolutionName", null),
+            new Tuple<string, string>("SolutionFilterName", null),
             new Tuple<string, string>(SolutionPathPropertyName, null)
         };
 
@@ -497,7 +500,7 @@ namespace Microsoft.Build.Construction
 
             string additionalProperties = string.Format(
                 CultureInfo.InvariantCulture,
-                "Configuration={0}; Platform={1}; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)",
+                "Configuration={0}; Platform={1}; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionFilterName=$(SolutionFilterName); SolutionPath=$(SolutionPath)",
                 EscapingUtilities.Escape(configurationName),
                 EscapingUtilities.Escape(platformName)
             );
@@ -780,7 +783,7 @@ namespace Microsoft.Build.Construction
                 AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, "Publish", null, canBuildDirectly);
 
                 // Add any other targets specified by the user that were not already added
-                foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
+                foreach (string targetName in _targetNames.Except(traversalInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
                 {
                     AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, targetName, null, canBuildDirectly);
                 }
@@ -794,7 +797,7 @@ namespace Microsoft.Build.Construction
             }
 
             // Add any other targets specified by the user that were not already added
-            foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
+            foreach (string targetName in _targetNames.Except(traversalInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
             {
                 AddTraversalReferencesTarget(traversalInstance, targetName, null);
             }
@@ -1097,7 +1100,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static string GetPropertiesAttributeForDirectMSBuildTask(ProjectConfigurationInSolution projectConfiguration)
         {
-            string directProjectProperties = OpportunisticIntern.InternStringIfPossible(String.Join(";", GetConfigurationAndPlatformPropertiesString(projectConfiguration), SolutionProperties));
+            string directProjectProperties = Strings.WeakIntern(String.Join(";", GetConfigurationAndPlatformPropertiesString(projectConfiguration), SolutionProperties));
             return directProjectProperties;
         }
 
@@ -1199,7 +1202,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Publish");
 
-                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
+                foreach (string targetName in _targetNames.Except(metaprojectInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
                 {
                     AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, targetName);
                 }
@@ -1219,7 +1222,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Rebuild", targetOutputItemName);
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Publish", null);
 
-                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
+                foreach (string targetName in _targetNames.Except(metaprojectInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
                 {
                     AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, targetName, null);
                 }
@@ -1231,7 +1234,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Rebuild", unknownProjectTypeErrorMessage);
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Publish", unknownProjectTypeErrorMessage);
 
-                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
+                foreach (string targetName in _targetNames.Except(metaprojectInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
                 {
                     AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, targetName, unknownProjectTypeErrorMessage);
                 }
@@ -1343,7 +1346,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectBuildTask(ProjectInSolution project, ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", OpportunisticIntern.InternStringIfPossible("'%(ProjectReference.Identity)' == '" + GetMetaprojectName(project) + "'"), String.Empty);
+            ProjectTaskInstance task = target.AddTask("MSBuild", Strings.WeakIntern("'%(ProjectReference.Identity)' == '" + GetMetaprojectName(project) + "'"), String.Empty);
             task.SetParameter("Projects", "@(ProjectReference)");
 
             if (targetToBuild != null)
@@ -2289,6 +2292,7 @@ namespace Microsoft.Build.Construction
             globalProperties.AddProperty("SolutionExt", EscapingUtilities.Escape(Path.GetExtension(_solutionFile.FullPath)));
             globalProperties.AddProperty("SolutionFileName", EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath)));
             globalProperties.AddProperty("SolutionName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.FullPath)));
+            globalProperties.AddProperty("SolutionFilterName", EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(_solutionFile.SolutionFilterFilePath ?? string.Empty)));
 
             globalProperties.AddProperty(SolutionPathPropertyName, EscapingUtilities.Escape(Path.Combine(_solutionFile.SolutionFileDirectory, Path.GetFileName(_solutionFile.FullPath))));
 

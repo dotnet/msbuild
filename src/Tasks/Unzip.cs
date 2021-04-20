@@ -1,14 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
+
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -26,6 +28,16 @@ namespace Microsoft.Build.Tasks
         /// Stores a <see cref="CancellationTokenSource"/> used for cancellation.
         /// </summary>
         private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+
+        /// <summary>
+        /// Stores the include patterns after parsing.
+        /// </summary>
+        private string[] _includePatterns;
+
+        /// <summary>
+        /// Stores the exclude patterns after parsing.
+        /// </summary>
+        private string[] _excludePatterns;
 
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> with a destination folder path to unzip the files to.
@@ -48,6 +60,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Required]
         public ITaskItem[] SourceFiles { get; set; }
+
+        /// <summary>
+        /// Gets or sets an MSBuild glob expression that will be used to determine which files to include being unzipped from the archive.
+        /// </summary>
+        public string Include { get; set; }
+
+        /// <summary>
+        /// Gets or sets an MSBuild glob expression that will be used to determine which files to exclude from being unzipped from the archive.
+        /// </summary>
+        public string Exclude { get; set; }
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -74,41 +96,46 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
-                {
-                    if (!FileSystems.Default.FileExists(sourceFile.ItemSpec))
-                    {
-                        Log.LogErrorWithCodeFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
-                        continue;
-                    }
+                ParseIncludeExclude();
 
-                    try
+                if (!Log.HasLoggedErrors)
+                {
+                    foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                     {
-                        using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
+                        if (!FileSystems.Default.FileExists(sourceFile.ItemSpec))
                         {
-                            using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
+                            Log.LogErrorWithCodeFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
+                            continue;
+                        }
+
+                        try
+                        {
+                            using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
-                                try
+                                using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
                                 {
-                                    Extract(zipArchive, destinationDirectory);
-                                }
-                                catch (Exception e)
-                                {
-                                    // Unhandled exception in Extract() is a bug!
-                                    Log.LogErrorFromException(e, showStackTrace: true);
-                                    return false;
+                                    try
+                                    {
+                                        Extract(zipArchive, destinationDirectory);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        // Unhandled exception in Extract() is a bug!
+                                        Log.LogErrorFromException(e, showStackTrace: true);
+                                        return false;
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        break;
-                    }
-                    catch (Exception e)
-                    {
-                        // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
-                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc)
+                            Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                        }
                     }
                 }
             }
@@ -129,6 +156,12 @@ namespace Microsoft.Build.Tasks
         {
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
+                if (ShouldSkipEntry(zipArchiveEntry))
+                {
+                    Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFilter", zipArchiveEntry.FullName);
+                    continue;
+                }
+
                 FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
 
                 // Zip archives can have directory entries listed explicitly.
@@ -200,6 +233,28 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Determines whether or not a file should be skipped when unzipping by filtering.
+        /// </summary>
+        /// <param name="zipArchiveEntry">The <see cref="ZipArchiveEntry"/> object containing information about the file in the zip archive.</param>
+        /// <returns><code>true</code> if the file should be skipped, otherwise <code>false</code>.</returns>
+        private bool ShouldSkipEntry(ZipArchiveEntry zipArchiveEntry)
+        {
+            bool result = false;
+
+            if (_includePatterns.Length > 0)
+            {
+                result = _includePatterns.All(pattern => !FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
+            }
+
+            if (_excludePatterns.Length > 0)
+            {
+                result |= _excludePatterns.Any(pattern => FileMatcher.IsMatch(FileMatcher.Normalize(zipArchiveEntry.FullName), pattern));
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Determines whether or not a file should be skipped when unzipping.
         /// </summary>
         /// <param name="zipArchiveEntry">The <see cref="ZipArchiveEntry"/> object containing information about the file in the zip archive.</param>
@@ -211,6 +266,35 @@ namespace Microsoft.Build.Tasks
                    && fileInfo.Exists
                    && zipArchiveEntry.LastWriteTime == fileInfo.LastWriteTimeUtc
                    && zipArchiveEntry.Length == fileInfo.Length;
+        }
+
+        private void ParseIncludeExclude()
+        {
+            ParsePattern(Include, out _includePatterns);
+            ParsePattern(Exclude, out _excludePatterns);
+        }
+
+        private void ParsePattern(string pattern, out string[] patterns)
+        {
+            patterns = Array.Empty<string>();
+            if (!string.IsNullOrWhiteSpace(pattern))
+            {
+                if (FileMatcher.HasPropertyOrItemReferences(pattern))
+                {
+                    // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
+                    Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
+                }
+                else if (pattern.IndexOfAny(FileUtilities.InvalidPathChars) != -1)
+                {
+                    Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
+                }
+                else
+                {
+                    patterns = pattern.Contains(';')
+                                   ? pattern.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
+                                   : new[] { pattern };
+                }
+            }
         }
     }
 }

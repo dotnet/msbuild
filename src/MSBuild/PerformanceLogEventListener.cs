@@ -7,6 +7,7 @@ using System.Diagnostics.Tracing;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -51,7 +52,8 @@ namespace Microsoft.Build.CommandLine
 
                 // Check to see if we should enable the event listener.
                 string logDirectory = Environment.GetEnvironmentVariable(PerfLogDirEnvVar);
-                if (Directory.Exists(logDirectory))
+
+                if (!string.IsNullOrEmpty(logDirectory) && Directory.CreateDirectory(logDirectory).Exists)
                 {
                     eventListener = new PerformanceLogEventListener();
                     eventListener.Initialize(logDirectory);

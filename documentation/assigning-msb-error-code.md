@@ -4,7 +4,7 @@ User-facing errors encountered in MSBuild should have an error code in the form 
 
 Errors that should not be user-facing (because they're a result of a problem internal to MSBuild like an `InternalErrorException`) do not need an error code.
 
-This code is defined in the `.resx` file that includes the string representation of the error. For example, [MSB3021 is defined as](https://github.com/Microsoft/msbuild/blob/ea30bf10ad0d7ab37ea54ab9d98fe39a5d97bfb0/src/Tasks/Resources/Strings.resx#L234-L237):
+This code is defined in the `.resx` file that includes the string representation of the error. For example, [MSB3021 is defined as](https://github.com/dotnet/msbuild/blob/ea30bf10ad0d7ab37ea54ab9d98fe39a5d97bfb0/src/Tasks/Resources/Strings.resx#L234-L237):
 
 ```xml
   <data name="Copy.Error">

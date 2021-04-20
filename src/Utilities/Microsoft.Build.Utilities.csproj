@@ -9,7 +9,7 @@
     <RootNamespace>Microsoft.Build.Utilities</RootNamespace>
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
     <EnableDocumentationFile>true</EnableDocumentationFile>
-    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <!-- <CreateTlb>true</CreateTlb> --><!-- This was created in VS but not published, so I don't think it's needed -->
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to implement custom MSBuild tasks.</PackageDescription>
@@ -19,14 +19,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+
     <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-
-    <Reference Include="System.Configuration" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
@@ -124,17 +124,8 @@
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IInternable.cs">
-      <Link>Shared\IInternable.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\WeakStringCache.cs">
-      <Link>Shared\WeakStringCache.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs">
-      <Link>Shared\WeakStringCache.Concurrent.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\OpportunisticIntern.cs">
-      <Link>Shared\OpportunisticIntern.cs</Link>
+    <Compile Include="..\Shared\ProcessExtensions.cs">
+      <Link>Shared\ProcessExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Shared\ReadOnlyEmptyCollection.cs</Link>

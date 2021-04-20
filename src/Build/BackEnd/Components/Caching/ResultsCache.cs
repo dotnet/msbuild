@@ -55,15 +55,15 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_resultsByConfiguration)
             {
-                if (_resultsByConfiguration.ContainsKey(result.ConfigurationId))
+                if (_resultsByConfiguration.TryGetValue(result.ConfigurationId, out BuildResult buildResult))
                 {
-                    if (Object.ReferenceEquals(_resultsByConfiguration[result.ConfigurationId], result))
+                    if (Object.ReferenceEquals(buildResult, result))
                     {
                         // Merging results would be meaningless as we would be merging the object with itself.
                         return;
                     }
 
-                    _resultsByConfiguration[result.ConfigurationId].MergeResults(result);
+                    buildResult.MergeResults(result);
                 }
                 else
                 {
@@ -105,9 +105,8 @@ namespace Microsoft.Build.BackEnd
 
             lock (_resultsByConfiguration)
             {
-                if (_resultsByConfiguration.ContainsKey(request.ConfigurationId))
+                if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult result))
                 {
-                    BuildResult result = _resultsByConfiguration[request.ConfigurationId];
                     foreach (string target in request.Targets)
                     {
                         ErrorUtilities.VerifyThrow(result.HasResultsForTarget(target), "No results in cache for target " + target);
@@ -159,10 +158,8 @@ namespace Microsoft.Build.BackEnd
 
             lock (_resultsByConfiguration)
             {
-                if (_resultsByConfiguration.ContainsKey(request.ConfigurationId))
+                if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    BuildResult allResults = _resultsByConfiguration[request.ConfigurationId];
-
                     // Check for targets explicitly specified.
                     bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, response.ExplicitTargetsToBuild, skippedResultsDoNotCauseCacheMiss);
 

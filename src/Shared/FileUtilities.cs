@@ -4,6 +4,8 @@
 using System;
 #if !CLR2COMPATIBILITY
 using System.Collections.Concurrent;
+#else
+using Microsoft.Build.Shared.Concurrent;
 #endif
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -107,11 +109,8 @@ namespace Microsoft.Build.Shared
 
         internal static readonly string DirectorySeparatorString = Path.DirectorySeparatorChar.ToString();
 
-#if !CLR2COMPATIBILITY
         private static readonly ConcurrentDictionary<string, bool> FileExistenceCache = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-#else
-        private static readonly Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool> FileExistenceCache = new Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-#endif
+
         private static readonly IFileSystem DefaultFileSystem = FileSystems.Default;
 
         /// <summary>
@@ -451,6 +450,7 @@ namespace Microsoft.Build.Shared
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');//.Replace("//", "/");
         }
 
+#if !CLR2COMPATIBILITY
         /// <summary>
         /// If on Unix, convert backslashes to slashes for strings that resemble paths.
         /// The heuristic is if something resembles paths (contains slashes) check if the
@@ -474,60 +474,45 @@ namespace Microsoft.Build.Shared
             }
 
             // For Unix-like systems, we may want to convert backslashes to slashes
-#if FEATURE_SPAN
             Span<char> newValue = ConvertToUnixSlashes(value.ToCharArray());
-#else
-            string newValue = ConvertToUnixSlashes(value);
-#endif
 
             // Find the part of the name we want to check, that is remove quotes, if present
             bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
             return shouldAdjust ? newValue.ToString() : value;
         }
 
-#if !FEATURE_SPAN
-        private static string ConvertToUnixSlashes(string path)
+        /// <summary>
+        /// If on Unix, convert backslashes to slashes for strings that resemble paths.
+        /// This overload takes and returns ReadOnlyMemory of characters.
+        /// </summary>
+        internal static ReadOnlyMemory<char> MaybeAdjustFilePath(ReadOnlyMemory<char> value, string baseDirectory = "")
         {
-            if (path.IndexOf('\\') == -1)
+            if (NativeMethodsShared.IsWindows || value.IsEmpty)
             {
-                return path;
+                return value;
             }
-            StringBuilder unixPath = StringBuilderCache.Acquire(path.Length);
-            CopyAndCollapseSlashes(path, unixPath);
-            return StringBuilderCache.GetStringAndRelease(unixPath);
-        }
 
-#if !CLR2COMPATIBILITY && !FEATURE_SPAN
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private static void CopyAndCollapseSlashes(string str, StringBuilder copy)
-        {
-            // Performs Regex.Replace(str, @"[\\/]+", "/")
-            for (int i = 0; i < str.Length; i++)
+            // Don't bother with arrays or properties or network paths.
+            if (value.Length >= 2)
             {
-                bool isCurSlash = IsAnySlash(str[i]);
-                bool isPrevSlash = i > 0 && IsAnySlash(str[i - 1]);
+                var span = value.Span;
 
-                if (!isCurSlash || !isPrevSlash)
+                // The condition is equivalent to span.StartsWith("$(") || span.StartsWith("@(") || span.StartsWith("\\\\")
+                if ((span[1] == '(' && (span[0] == '$' || span[0] == '@')) ||
+                    (span[1] == '\\' && span[0] == '\\'))
                 {
-                    copy.Append(str[i] == '\\' ? '/' : str[i]);
+                    return value;
                 }
             }
+
+            // For Unix-like systems, we may want to convert backslashes to slashes
+            Span<char> newValue = ConvertToUnixSlashes(value.ToArray());
+
+            // Find the part of the name we want to check, that is remove quotes, if present
+            bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
+            return shouldAdjust ? newValue.ToString().AsMemory() : value;
         }
 
-        private static string RemoveQuotes(string path)
-        {
-            int endId = path.Length - 1;
-            char singleQuote = '\'';
-            char doubleQuote = '\"';
-
-            bool hasQuotes = path.Length > 2
-                && ((path[0] == singleQuote && path[endId] == singleQuote)
-                || (path[0] == doubleQuote && path[endId] == doubleQuote));
-
-            return hasQuotes ? path.Substring(1, endId - 1) : path;
-        }
-#else
         private static Span<char> ConvertToUnixSlashes(Span<char> path)
         {
             return path.IndexOf('\\') == -1 ? path : CollapseSlashes(path);
@@ -573,6 +558,7 @@ namespace Microsoft.Build.Shared
 #endif
         internal static bool IsAnySlash(char c) => c == '/' || c == '\\';
 
+#if !CLR2COMPATIBILITY
         /// <summary>
         /// If on Unix, check if the string looks like a file path.
         /// The heuristic is if something resembles paths (contains slashes) check if the
@@ -582,24 +568,8 @@ namespace Microsoft.Build.Shared
         /// that
         /// </summary>
         internal static bool LooksLikeUnixFilePath(string value, string baseDirectory = "")
-        {
-            if (NativeMethodsShared.IsWindows)
-            {
-                return false;
-            }
+            => LooksLikeUnixFilePath(value.AsSpan(), baseDirectory);
 
-            // The first slash will either be at the beginning of the string or after the first directory name
-            int directoryLength = value.IndexOf('/', 1) + 1;
-            bool shouldCheckDirectory = directoryLength != 0;
-
-            // Check for actual files or directories under / that get missed by the above logic
-            bool shouldCheckFileOrDirectory = !shouldCheckDirectory && value.Length > 0 && value[0] == '/';
-
-            return (shouldCheckDirectory && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.Substring(0, directoryLength))))
-                || (shouldCheckFileOrDirectory && DefaultFileSystem.DirectoryEntryExists(value));
-        }
-
-#if FEATURE_SPAN
         internal static bool LooksLikeUnixFilePath(ReadOnlySpan<char> value, string baseDirectory = "")
         {
             if (NativeMethodsShared.IsWindows)
@@ -1061,27 +1031,55 @@ namespace Microsoft.Build.Shared
             ErrorUtilities.VerifyThrowArgumentNull(basePath, nameof(basePath));
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
-            if (basePath.Length == 0)
+            string fullBase = Path.GetFullPath(basePath);
+            string fullPath = Path.GetFullPath(path);
+
+            string[] splitBase = fullBase.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            string[] splitPath = fullPath.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+
+            ErrorUtilities.VerifyThrow(splitPath.Length > 0, "Cannot call MakeRelative on a path of only slashes.");
+
+            // On a mac, the path could start with any number of slashes and still be valid. We have to check them all.
+            int indexOfFirstNonSlashChar = 0;
+            while (path[indexOfFirstNonSlashChar] == Path.DirectorySeparatorChar)
             {
-                return path;
+                indexOfFirstNonSlashChar++;
+            }
+            if (path.IndexOf(splitPath[0]) != indexOfFirstNonSlashChar)
+            {
+                // path was already relative so just return it
+                return FixFilePath(path);
             }
 
-            Uri baseUri = new Uri(EnsureTrailingSlash(basePath), UriKind.Absolute); // May throw UriFormatException
-
-            Uri pathUri = CreateUriFromPath(path);
-
-            if (!pathUri.IsAbsoluteUri)
+            int index = 0;
+            while (index < splitBase.Length && index < splitPath.Length && splitBase[index].Equals(splitPath[index], PathComparison))
             {
-                // the path is already a relative url, we will just normalize it...
-                pathUri = new Uri(baseUri, pathUri);
+                index++;
             }
 
-            Uri relativeUri = baseUri.MakeRelativeUri(pathUri);
-            string relativePath = Uri.UnescapeDataString(relativeUri.IsAbsoluteUri ? relativeUri.LocalPath : relativeUri.ToString());
+            if (index == splitBase.Length && index == splitPath.Length)
+            {
+                return ".";
+            }
+            
+            // If the paths have no component in common, the only valid relative path is the full path.
+            if (index == 0)
+            {
+                return fullPath;
+            }
 
-            string result = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            StringBuilder sb = StringBuilderCache.Acquire();
 
-            return result;
+            for (int i = index; i < splitBase.Length; i++)
+            {
+                sb.Append("..").Append(Path.DirectorySeparatorChar);
+            }
+            for (int i = index; i < splitPath.Length; i++)
+            {
+                sb.Append(splitPath[i]).Append(Path.DirectorySeparatorChar);
+            }
+            sb.Length--;
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         /// <summary>

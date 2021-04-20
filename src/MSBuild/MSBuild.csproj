@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -7,6 +7,9 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    <!-- MSBuild.csproj no longer uses apphost. This fixes an issue where certain tests would find
+         MSBuild.exe AND MSBuild.dll when they should only find MSBuild.dll. -->
+    <UseAppHost>false</UseAppHost>
 
     <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
@@ -37,6 +40,7 @@
     <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
 
     <DebugType Condition="'$(Platform)' == 'x64'">full</DebugType><!-- Setting DebugType here goes hand in hand with eng\AfterSigning.targets. This is to prompt the x64 build to produce a 'full' .pdb that's `more compatible` then 'portable' and 'embedded' .pdbs. This doesn't get set on 32 bit architecture, which will default to 'embedded' and 'pdb2pdb' will convert those as needed. See https://github.com/microsoft/msbuild/pull/5070 for context. -->
+    <DefineConstants>$(DefineConstants);MSBUILDENTRYPOINTEXE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -130,10 +134,6 @@
     <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
-    <Compile Include="..\Shared\IInternable.cs" />
-    <Compile Include="..\Shared\WeakStringCache.cs" />
-    <Compile Include="..\Shared\WeakStringCache.Concurrent.cs" />
-    <Compile Include="..\Shared\OpportunisticIntern.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
@@ -198,7 +198,6 @@
     <Compile Include="XMake.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <None Include="project.json" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
@@ -223,12 +222,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- File for Assemblies we depend on -->
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Configuration" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">

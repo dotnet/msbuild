@@ -214,5 +214,212 @@ namespace Microsoft.Build.Tasks.UnitTests
                 _mockEngine.Log.ShouldContain("MSB3932", () => _mockEngine.Log);
             }
         }
+
+        [Fact]
+        public void CanUnzip_WithIncludeFilter()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                                  {
+                                      BuildEngine = _mockEngine,
+                                      DestinationFolder = new TaskItem(destination.Path),
+                                      OverwriteReadOnlyFiles = true,
+                                      SkipUnchangedFiles = false,
+                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                                      Include = "BE78A17D30144B549D21F71D5C633F7D.txt"
+                                  };
+
+                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void CanUnzip_WithExcludeFilter()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                                  {
+                                      BuildEngine = _mockEngine,
+                                      DestinationFolder = new TaskItem(destination.Path),
+                                      OverwriteReadOnlyFiles = true,
+                                      SkipUnchangedFiles = false,
+                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                                      Exclude = "BE78A17D30144B549D21F71D5C633F7D.txt"
+                                  };
+
+                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void CanUnzip_WithIncludeAndExcludeFilter()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                TransientTestFolder sub = source.CreateDirectory("sub");
+                testEnvironment.CreateFile(source, "file1.js", "file1");
+                testEnvironment.CreateFile(source, "file1.js.map", "file2");
+                testEnvironment.CreateFile(source, "file2.js", "file3");
+                testEnvironment.CreateFile(source, "readme.txt", "file4");
+                testEnvironment.CreateFile(sub, "subfile.js", "File5");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                                  {
+                                      BuildEngine = _mockEngine,
+                                      DestinationFolder = new TaskItem(destination.Path),
+                                      OverwriteReadOnlyFiles = true,
+                                      SkipUnchangedFiles = false,
+                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                                      Include = "*.js",
+                                      Exclude = "*.js.map;sub\\*.js"
+                                  };
+
+                unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file1.js"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "file1.js.map"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "file2.js"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "readme.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain(Path.Combine(destination.Path, "sub", "subfile.js"), () => _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorIfIncludeContainsInvalidPathCharacters()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                                  {
+                                      BuildEngine = _mockEngine,
+                                      DestinationFolder = new TaskItem(destination.Path),
+                                      OverwriteReadOnlyFiles = true,
+                                      SkipUnchangedFiles = false,
+                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                                      Include = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
+                                  };
+
+                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB3937", () => _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorIfIncludeContainsPropertyReferences()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                                  {
+                                      BuildEngine = _mockEngine,
+                                      DestinationFolder = new TaskItem(destination.Path),
+                                      OverwriteReadOnlyFiles = true,
+                                      SkipUnchangedFiles = false,
+                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                                      Include = "$(Include)"
+                                  };
+
+                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB3938", () => _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorIfExcludeContainsInvalidPathCharacters()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                                  {
+                                      BuildEngine = _mockEngine,
+                                      DestinationFolder = new TaskItem(destination.Path),
+                                      OverwriteReadOnlyFiles = true,
+                                      SkipUnchangedFiles = false,
+                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                                      Exclude = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
+                                  };
+
+                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB3937", () => _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorIfExcludeContainsPropertyReferences()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                                  {
+                                      BuildEngine = _mockEngine,
+                                      DestinationFolder = new TaskItem(destination.Path),
+                                      OverwriteReadOnlyFiles = true,
+                                      SkipUnchangedFiles = false,
+                                      SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                                      Exclude = "$(Include)"
+                                  };
+
+                unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB3938", () => _mockEngine.Log);
+            }
+        }
     }
 }

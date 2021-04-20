@@ -1,11 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
 using Shouldly;
 
 namespace Microsoft.Build.UnitTests
@@ -119,15 +126,15 @@ namespace Microsoft.Build.UnitTests
             CreatedFiles = Helpers.CreateFilesInDirectory(TestRoot, files);
         }
 
-        internal MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
+        internal MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null, bool validateLoggerRoundtrip = true)
         {
-            BuildProject(globalProperties, toolsVersion, out MockLogger logger).ShouldBeFalse();
+            BuildProject(globalProperties, toolsVersion, out MockLogger logger, validateLoggerRoundtrip).ShouldBeFalse();
             return logger;
         }
 
-        internal MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
+        internal MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null, bool validateLoggerRoundtrip = true)
         {
-            BuildProject(globalProperties, toolsVersion, out MockLogger logger).ShouldBeTrue();
+            BuildProject(globalProperties, toolsVersion, out MockLogger logger, validateLoggerRoundtrip).ShouldBeTrue();
             return logger;
         }
 
@@ -136,15 +143,120 @@ namespace Microsoft.Build.UnitTests
             _folder.Revert();
         }
 
-        private bool BuildProject(IDictionary<string, string> globalProperties, string toolsVersion, out MockLogger logger)
+        private IEnumerable<(ILogger logger, Func<string> textGetter)> GetLoggers()
         {
-            logger = new MockLogger();
+            var result = new List<(ILogger logger, Func<string> textGetter)>();
 
-            using (ProjectCollection projectCollection = new ProjectCollection())
+            result.Add(GetMockLogger());
+            result.Add(GetBinaryLogger());
+
+#if MICROSOFT_BUILD_ENGINE_UNITTESTS
+            result.Add(GetSerialLogger());
+            result.Add(GetParallelLogger());
+#endif
+
+            return result;
+        }
+
+        private (ILogger logger, Func<string> textGetter) GetMockLogger()
+        {
+            var logger = new MockLogger();
+            return (logger, () => logger.FullLog);
+        }
+
+#if MICROSOFT_BUILD_ENGINE_UNITTESTS
+
+        private (ILogger, Func<string>) GetSerialLogger()
+        {
+            var sb = new StringBuilder();
+            var serialFromBuild = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null);
+            serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
+            return (serialFromBuild, () => sb.ToString());
+        }
+
+        private (ILogger, Func<string>) GetParallelLogger()
+        {
+            var sb = new StringBuilder();
+            var parallelFromBuild = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null);
+            parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
+            return (parallelFromBuild, () => sb.ToString());
+        }
+
+#endif
+
+        private (ILogger, Func<string>) GetBinaryLogger()
+        {
+            var binaryLogger = new BinaryLogger();
+            string binaryLoggerFilePath = Path.GetFullPath(Path.Combine(TestRoot, Guid.NewGuid().ToString() + ".binlog"));
+            binaryLogger.CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.None;
+            binaryLogger.Parameters = binaryLoggerFilePath;
+            return (binaryLogger, null);
+        }
+
+        private bool BuildProject(
+            IDictionary<string, string> globalProperties,
+            string toolsVersion,
+            out MockLogger mockLogger,
+            bool validateLoggerRoundtrip = true)
+        {
+            var expectedLoggerPairs = validateLoggerRoundtrip ? GetLoggers() : new[] { GetMockLogger() };
+            var expectedLoggers = expectedLoggerPairs.Select(l => l.logger).ToArray();
+            mockLogger = expectedLoggers.OfType<MockLogger>().First();
+            var binaryLogger = expectedLoggers.OfType<BinaryLogger>().FirstOrDefault();
+
+            try
             {
-                Project project = new Project(ProjectFile, globalProperties, toolsVersion, projectCollection);
+                using (ProjectCollection projectCollection = new ProjectCollection())
+                {
+                    Project project = new Project(ProjectFile, globalProperties, toolsVersion, projectCollection);
+                    return project.Build(expectedLoggers);
+                }
+            }
+            finally
+            {
+                if (binaryLogger != null)
+                {
+                    string binaryLoggerFilePath = binaryLogger.Parameters;
 
-                return project.Build(logger);
+                    var actualLoggerPairs = GetLoggers().Where(l => l.logger is not BinaryLogger).ToArray();
+                    expectedLoggerPairs = expectedLoggerPairs.Where(l => l.logger is not BinaryLogger).ToArray();
+
+                    PlaybackBinlog(binaryLoggerFilePath, actualLoggerPairs.Select(k => k.logger).ToArray());
+                    FileUtilities.DeleteNoThrow(binaryLoggerFilePath);
+
+                    var pairs = expectedLoggerPairs.Zip(actualLoggerPairs, (expected, actual) => (expected, actual));
+
+                    foreach (var pair in pairs)
+                    {
+                        var expectedText = pair.expected.textGetter();
+                        var actualText = pair.actual.textGetter();
+                        actualText.ShouldContainWithoutWhitespace(expectedText);
+                    }
+                }
+            }
+        }
+
+        private static void PlaybackBinlog(string binlogFilePath, params ILogger[] loggers)
+        {
+            var replayEventSource = new BinaryLogReplayEventSource();
+
+            foreach (var logger in loggers)
+            {
+                if (logger is INodeLogger nodeLogger)
+                {
+                    nodeLogger.Initialize(replayEventSource, 1);
+                }
+                else
+                {
+                    logger.Initialize(replayEventSource);
+                }
+            }
+
+            replayEventSource.Replay(binlogFilePath);
+
+            foreach (var logger in loggers)
+            {
+                logger.Shutdown();
             }
         }
     }

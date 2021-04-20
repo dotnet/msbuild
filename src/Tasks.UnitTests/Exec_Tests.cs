@@ -48,6 +48,50 @@ namespace Microsoft.Build.UnitTests
             return exec;
         }
 
+        [Fact]
+        [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
+        public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile()
+        {
+            using (var testEnvironment = TestEnvironment.Create())
+            {
+                var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()w]o(rld)").TempPath;
+
+                string tempPath = Path.GetTempPath();
+                Assert.StartsWith(newTempPath, tempPath);
+
+                // Now run the Exec task on a simple command.
+                Exec exec = PrepareExec("echo Hello World!");
+                exec.Execute().ShouldBeTrue();
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
+        public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile_DisabledUnderChangeWave16_10()
+        {
+            using (var testEnvironment = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+                testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()w]o(rld)").TempPath;
+
+                string tempPath = Path.GetTempPath();
+                Assert.StartsWith(newTempPath, tempPath);
+
+                // Now run the Exec task on a simple command.
+                Exec exec = PrepareExec("echo Hello World!");
+                exec.Execute().ShouldBeFalse();
+
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         /// <summary>
         /// Ensures that calling the Exec task does not leave any extra TEMP files
         /// lying around.
@@ -103,8 +147,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Timeout()
         {
-            // On non-Windows the exit code of a killed process is SIGTERM (143)
-            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 143;
+            // On non-Windows the exit code of a killed process is SIGKILL (137)
+            int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 137;
 
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
@@ -122,7 +166,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TimeoutFailsEvenWhenExitCodeIsIgnored()
         {
-
             Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? ":foo \n goto foo" : "while true; do sleep 1; done");
             exec.Timeout = 5;
             exec.IgnoreExitCode = true;
@@ -138,16 +181,13 @@ namespace Microsoft.Build.UnitTests
 
             if (NativeMethodsShared.IsMono)
             {
-                // The standard check for SIGTERM fails intermittently on macOS Mono
-                // https://github.com/dotnet/msbuild/issues/5506
-                // To avoid test flakiness, allow 259 even though I can't justify it.
-                exec.ExitCode.ShouldBeOneOf(143, 259);
+                const int STILL_ACTIVE = 259; // When Process.WaitForExit times out.
+                exec.ExitCode.ShouldBeOneOf(137, STILL_ACTIVE);
             }
             else
             {
-                // On non-Windows the exit code of a killed process is generally 128 + SIGTERM = 143
-                // though this isn't 100% guaranteed, see https://unix.stackexchange.com/a/99134
-                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 143);
+                // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
+                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
             }
         }
 
@@ -920,6 +960,117 @@ echo line 3"" />
 
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
                 }
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
+        public void EndToEndMultilineExec_EscapeSpecialCharacters()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                var testProject = env.CreateTestProjectWithFiles(@"<Project>
+<Target Name=""ExecCommand"">
+  <Exec Command=""echo Hello, World!"" />
+   </Target>
+</Project>");
+
+                // Ensure path has subfolders
+                var newTempPath = env.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
+                string tempPath = Path.GetTempPath();
+                Assert.StartsWith(newTempPath, tempPath);
+
+                using (var buildManager = new BuildManager())
+                {
+                    MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
+
+                    var parameters = new BuildParameters()
+                    {
+                        Loggers = new[] { logger },
+                    };
+
+                    var collection = new ProjectCollection(
+                        new Dictionary<string, string>(),
+                        new[] { logger },
+                        remoteLoggers: null,
+                        ToolsetDefinitionLocations.Default,
+                        maxNodeCount: 1,
+                        onlyLogCriticalEvents: false,
+                        loadProjectsReadOnly: true);
+
+                    var project = collection.LoadProject(testProject.ProjectFile).CreateProjectInstance();
+
+                    var request = new BuildRequestData(
+                        project,
+                        targetsToBuild: new[] { "ExecCommand" },
+                        hostServices: null);
+
+                    var result = buildManager.Build(parameters, request);
+
+                    logger.AssertLogContains("Hello, World!");
+
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+            }
+        }
+
+        [Fact]
+        [Trait("Category", "mono-osx-failing")]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
+        public void EndToEndMultilineExec_EscapeSpecialCharacters_DisabledUnderChangeWave16_10()
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                var testProject = env.CreateTestProjectWithFiles(@"<Project>
+<Target Name=""ExecCommand"">
+  <Exec Command=""echo Hello, World!"" />
+   </Target>
+</Project>");
+
+                // Ensure path has subfolders
+                var newTempPath = env.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
+                string tempPath = Path.GetTempPath();
+                Assert.StartsWith(newTempPath, tempPath);
+
+                using (var buildManager = new BuildManager())
+                {
+                    MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
+
+                    var parameters = new BuildParameters()
+                    {
+                        Loggers = new[] { logger },
+                    };
+
+                    var collection = new ProjectCollection(
+                        new Dictionary<string, string>(),
+                        new[] { logger },
+                        remoteLoggers: null,
+                        ToolsetDefinitionLocations.Default,
+                        maxNodeCount: 1,
+                        onlyLogCriticalEvents: false,
+                        loadProjectsReadOnly: true);
+
+                    var project = collection.LoadProject(testProject.ProjectFile).CreateProjectInstance();
+
+                    var request = new BuildRequestData(
+                        project,
+                        targetsToBuild: new[] { "ExecCommand" },
+                        hostServices: null);
+
+                    var result = buildManager.Build(parameters, request);
+
+                    logger.AssertLogContains("Hello, World!");
+
+                    result.OverallResult.ShouldBe(BuildResultCode.Failure);
+                }
+                ChangeWaves.ResetStateForTests();
             }
         }
     }

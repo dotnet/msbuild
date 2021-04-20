@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -361,6 +361,25 @@ namespace Microsoft.Build.Tasks
                 using (var stream = File.OpenRead(_sourceFile))
                 using (var peFile = new PEReader(stream))
                 {
+                    bool hasMetadata = false;
+                    try
+                    {
+                        // This can throw if the stream is too small, which means
+                        // the assembly doesn't have metadata.
+                        hasMetadata = peFile.HasMetadata;
+                    }
+                    finally
+                    {
+                        // If the file does not contain PE metadata, throw BadImageFormatException to preserve
+                        // behavior from AssemblyName.GetAssemblyName(). RAR will deal with this correctly.
+                        if (!hasMetadata)
+                        {
+                            throw new BadImageFormatException(string.Format(CultureInfo.CurrentCulture,
+                                AssemblyResources.GetString("ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata"),
+                                _sourceFile));
+                        }
+                    }
+
                     var metadataReader = peFile.GetMetadataReader();
 
                     var assemblyReferences = metadataReader.AssemblyReferences;

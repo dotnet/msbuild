@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -204,6 +205,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Log properties and items on ProjectEvaluationFinishedEventArgs
+        /// instead of ProjectStartedEventArgs.
+        /// </summary>
+        public bool IncludeEvaluationPropertiesAndItems
+        {
+            get => false;
+            set { }
+        }
+
+        /// <summary>
         /// Should task events include task inputs?
         /// </summary>
         public bool IncludeTaskInputs
@@ -286,6 +297,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="message">The message</param>
         public void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message)
         {
+            _writer(message);
+        }
+
+        /// <inheritdoc />
+        public void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object[] messageArgs)
+        {
+            if (messageArgs?.Length > 0)
+            {
+                message = string.Format(message, messageArgs);
+            }
+
             _writer(message);
         }
 
@@ -459,7 +481,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Logs a project evaluation finished event
         /// </summary>
-        public void LogProjectEvaluationFinished(BuildEventContext projectEvaluationEventContext, string projectFile)
+        public void LogProjectEvaluationFinished(
+            BuildEventContext projectEvaluationEventContext,
+            string projectFile,
+            IEnumerable globalProperties,
+            IEnumerable properties,
+            IEnumerable items,
+            ProfilerResult? profilerResult)
         {
         }
 
@@ -555,6 +583,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public bool HasBuildSubmissionLoggedErrors(int submissionId)
         {
             return false;
+        }
+
+        public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

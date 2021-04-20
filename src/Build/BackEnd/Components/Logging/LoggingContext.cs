@@ -135,6 +135,18 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Helper method to create a message build event from a string
+        /// </summary>
+        /// <param name="importance">Importance level of the message</param>
+        /// <param name="message">Message to log</param>
+        /// <param name="messageArgs">Format string arguments</param>
+        internal void LogCommentFromText(MessageImportance importance, string message, params object[] messageArgs)
+        {
+            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            _loggingService.LogCommentFromText(_eventContext, importance, message, messageArgs);
+        }
+
+        /// <summary>
         /// Log an error
         /// </summary>
         /// <param name="file">The file in which the error occurred</param>

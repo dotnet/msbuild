@@ -27,8 +27,8 @@ First, verify the `global.json` file in your repository is using a preview versi
 ![](https://user-images.githubusercontent.com/3347530/59614580-a795c900-90e6-11e9-8981-0fdbd08d42bd.png)
 
 ## Tools
-Many debugging tools listed [here](https://github.com/Microsoft/msbuild/blob/master/documentation/wiki/MSBuild-Resources.md#tools).
+Many debugging tools listed [here](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/MSBuild-Resources.md#tools).
 
 [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) can be used to get a clearer idea of what's going on in your build. MSBuildStructuredLog is graphical interface over MSBuild binary logs that visualizes a structured representation of executed targets, tasks, properties, and item values. It can be easier to look though than the diagnostic log.
 
-![](https://raw.githubusercontent.com/KirillOsenkov/MSBuildStructuredLog/master/docs/Screenshot1.png)
+![](https://raw.githubusercontent.com/KirillOsenkov/MSBuildStructuredLog/main/docs/Screenshot1.png)

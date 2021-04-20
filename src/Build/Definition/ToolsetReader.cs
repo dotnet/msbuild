@@ -76,7 +76,6 @@ namespace Microsoft.Build.Evaluation
             get;
         }
 
-#if FEATURE_WIN32_REGISTRY || FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Gathers toolset data from the registry and configuration file, if any:
         /// allows you to specify which of the registry and configuration file to
@@ -88,12 +87,9 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
                 null,
 #endif
-#if FEATURE_SYSTEM_CONFIGURATION
                 null,
-#endif
                 environmentProperties, globalProperties, locations);
         }
-#endif
 
         /// <summary>
         /// Gathers toolset data from the registry and configuration file, if any.
@@ -105,9 +101,7 @@ namespace Microsoft.Build.Evaluation
 #if FEATURE_WIN32_REGISTRY
             ToolsetRegistryReader registryReader,
 #endif
-#if FEATURE_SYSTEM_CONFIGURATION
             ToolsetConfigurationReader configurationReader,
-#endif
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             ToolsetDefinitionLocations locations
@@ -124,7 +118,6 @@ namespace Microsoft.Build.Evaluation
             string overrideTasksPathFromConfiguration = null;
             string defaultOverrideToolsVersionFromConfiguration = null;
 
-#if FEATURE_SYSTEM_CONFIGURATION
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
                 if (configurationReader == null)
@@ -137,7 +130,6 @@ namespace Microsoft.Build.Evaluation
                     initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
                     out defaultOverrideToolsVersionFromConfiguration);
             }
-#endif
 
             string defaultToolsVersionFromRegistry = null;
             string overrideTasksPathFromRegistry = null;

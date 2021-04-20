@@ -1,18 +1,27 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     public class BuildEventArgsSerializationTests
     {
+        public BuildEventArgsSerializationTests()
+        {
+            // touch the type so that static constructor runs
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+        }
+
         [Fact]
         public void RoundtripBuildStartedEventArgs()
         {
@@ -33,7 +42,7 @@ namespace Microsoft.Build.UnitTests
                     { "SampleName", "SampleValue" }
                 });
             Roundtrip(args,
-                e => ToString(e.BuildEnvironment),
+                e => TranslationHelpers.ToString(e.BuildEnvironment),
                 e => e.HelpKeyword,
                 e => e.ThreadId.ToString(),
                 e => e.SenderName);
@@ -59,9 +68,9 @@ namespace Microsoft.Build.UnitTests
         {
             var args = new ProjectStartedEventArgs(
                 projectId: 42,
-                message: "Project started message",
+                message: "Project \"test.proj\" (Build target(s)):",
                 helpKeyword: "help",
-                projectFile: "C:\\test.proj",
+                projectFile: Path.Combine("a", "test.proj"),
                 targetNames: "Build",
                 properties: new List<DictionaryEntry>() { new DictionaryEntry("Key", "Value") },
                 items: new List<DictionaryEntry>() { new DictionaryEntry("Key", new MyTaskItem() { ItemSpec = "TestItemSpec" }) },
@@ -70,15 +79,15 @@ namespace Microsoft.Build.UnitTests
                 toolsVersion: "Current");
             args.BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6);
 
-            Roundtrip(args,
+            Roundtrip<ProjectStartedEventArgs>(args,
                 e => ToString(e.BuildEventContext),
-                e => ToString(e.GlobalProperties),
-                e => ToString(e.Items.OfType<DictionaryEntry>().ToDictionary(d => d.Key.ToString(), d => ((ITaskItem)d.Value).ItemSpec)),
+                e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
+                e => TranslationHelpers.GetMultiItemsString(e.Items),
                 e => e.Message,
                 e => ToString(e.ParentProjectBuildEventContext),
                 e => e.ProjectFile,
                 e => e.ProjectId.ToString(),
-                e => ToString(e.Properties.OfType<DictionaryEntry>().ToDictionary(d => d.Key.ToString(), d => d.Value.ToString())),
+                e => TranslationHelpers.GetPropertiesString(e.Properties),
                 e => e.TargetNames,
                 e => e.ThreadId.ToString(),
                 e => e.Timestamp.ToString(),
@@ -310,12 +319,32 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripTaskParameterEventArgs()
+        {
+            var items = new ITaskItem[]
+            {
+                new TaskItemData("ItemSpec1", null),
+                new TaskItemData("ItemSpec2", Enumerable.Range(1,3).ToDictionary(i => i.ToString(), i => i.ToString() + "value"))
+            };
+            var args = new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, "ItemName", items, true, DateTime.MinValue);
+
+            Roundtrip(args,
+                e => e.Kind.ToString(),
+                e => e.ItemType,
+                e => e.LogItemMetadata.ToString(),
+                e => TranslationHelpers.GetItemsString(e.Items));
+        }
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
-            var args = new ProjectEvaluationStartedEventArgs("Message")
+            var projectFile = @"C:\foo\bar.proj";
+            var args = new ProjectEvaluationStartedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationStarted"),
+                projectFile)
             {
                 BuildEventContext = BuildEventContext.Invalid,
-                ProjectFile = @"C:\foo\bar.proj",
+                ProjectFile = projectFile,
             };
 
             Roundtrip(args,
@@ -326,21 +355,33 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RoundtripProjectEvaluationFinishedEventArgs()
         {
-            var args = new ProjectEvaluationFinishedEventArgs("Message")
+            var projectFile = @"C:\foo\bar.proj";
+            var args = new ProjectEvaluationFinishedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationFinished"),
+                projectFile)
             {
                 BuildEventContext = BuildEventContext.Invalid,
                 ProjectFile = @"C:\foo\bar.proj",
+                GlobalProperties = new Dictionary<string, string>() { { "GlobalKey", "GlobalValue" } },
+                Properties = new List<DictionaryEntry>() { new DictionaryEntry("Key", "Value") },
+                Items = new List<DictionaryEntry>() { new DictionaryEntry("Key", new MyTaskItem() { ItemSpec = "TestItemSpec" }) }
             };
 
             Roundtrip(args,
                 e => e.Message,
-                e => e.ProjectFile);
+                e => e.ProjectFile,
+                e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
+                e => TranslationHelpers.GetPropertiesString(e.Properties),
+                e => TranslationHelpers.GetMultiItemsString(e.Items));
         }
 
         [Fact]
         public void RoundtripProjectEvaluationFinishedEventArgsWithProfileData()
         {
-            var args = new ProjectEvaluationFinishedEventArgs("Message")
+            var projectFile = @"C:\foo\bar.proj";
+            var args = new ProjectEvaluationFinishedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationFinished"),
+                projectFile)
             {
                 BuildEventContext = BuildEventContext.Invalid,
                 ProjectFile = @"C:\foo\bar.proj",
@@ -396,7 +437,7 @@ namespace Microsoft.Build.UnitTests
         public void RoundtripTargetSkippedEventArgs()
         {
             var args = new TargetSkippedEventArgs(
-                "Message")
+                "Target \"target\" skipped. Previously built unsuccessfully.")
             {
                 BuildEventContext = BuildEventContext.Invalid,
                 ProjectFile = "foo.csproj",
@@ -438,13 +479,13 @@ namespace Microsoft.Build.UnitTests
         public void RoundTripPropertyReassignmentEventArgs()
         {
             var args = new PropertyReassignmentEventArgs(
-                propertyName: Guid.NewGuid().ToString(),
-                previousValue: Guid.NewGuid().ToString(),
-                newValue: Guid.NewGuid().ToString(),
-                location: Guid.NewGuid().ToString(),
-                message: Guid.NewGuid().ToString(),
-                helpKeyword: Guid.NewGuid().ToString(),
-                senderName: Guid.NewGuid().ToString());
+                propertyName: "a",
+                previousValue: "b",
+                newValue: "c",
+                location: "d",
+                message: "Property reassignment: $(a)=\"c\" (previous value: \"b\") at d",
+                helpKeyword: "e",
+                senderName: "f");
 
             Roundtrip(args,
                 e => e.PropertyName,
@@ -513,7 +554,7 @@ namespace Microsoft.Build.UnitTests
                 memoryStream.Position = 0;
 
                 var binaryReader = new BinaryReader(memoryStream);
-                var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+                using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
 
                 Assert.Throws<EndOfStreamException>(() => buildEventArgsReader.Read());
             }
@@ -522,16 +563,6 @@ namespace Microsoft.Build.UnitTests
         private string ToString(BuildEventContext context)
         {
             return $"{context.BuildRequestId} {context.NodeId} {context.ProjectContextId} {context.ProjectInstanceId} {context.SubmissionId} {context.TargetId} {context.TaskId}";
-        }
-
-        private string ToString(IDictionary<string, string> dictionary)
-        {
-            if (dictionary == null)
-            {
-                return "null";
-            }
-
-            return string.Join(";", dictionary.Select(kvp => kvp.Key + "=" + kvp.Value));
         }
 
         private string ToString(IEnumerable<ITaskItem> items)
@@ -570,7 +601,7 @@ namespace Microsoft.Build.UnitTests
             memoryStream.Position = 0;
 
             var binaryReader = new BinaryReader(memoryStream);
-            var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
             var deserializedArgs = (T)buildEventArgsReader.Read();
 
             Assert.Equal(length, memoryStream.Position);

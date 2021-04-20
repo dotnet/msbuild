@@ -162,10 +162,8 @@ namespace Microsoft.Build.Evaluation
                     {
                         return getEscapedValueFunc(_operationItem, itemType, name);
                     }
-                    else if (_capturedItems.ContainsKey(itemType))
+                    else if (_capturedItems.TryGetValue(itemType, out var item))
                     {
-                        var item = _capturedItems[itemType];
-
                         return getEscapedValueFunc(item, itemType, name);
                     }
                     else

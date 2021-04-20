@@ -850,6 +850,20 @@ namespace Microsoft.Build.Shared
         }
 
         #endregion
+
+        #region VerifyThrowObjectDisposed
+
+        internal static void VerifyThrowObjectDisposed(bool condition, string objectName)
+        {
+            {
+                if (s_throwExceptions && !condition)
+                {
+                    throw new ObjectDisposedException(objectName);
+                }
+            }
+        }
+
+        #endregion
 #endif
     }
 }

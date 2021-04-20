@@ -242,11 +242,11 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
-        <source>Switches:            Note that you can specify switches using both
-                     "-switch" and "/switch".
+        <source>Switches:            Note that you can specify switches using
+                     "-switch", "/switch" and "--switch".
 </source>
         <target state="translated">Przełączniki:            Należy pamiętać, że przełączniki można określać
-                     zarówno za pomocą składni „-przełącznik”, jak i „/przełącznik”.
+                     za pomocą składni „-przełącznik”, „/przełącznik” i „--przełącznik”.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -944,19 +944,22 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_26_DetailedSummarySwitch">
-        <source>  -detailedSummary
+        <source>  -detailedSummary[:True|False]
                      Shows detailed information at the end of the build
                      about the configurations built and how they were
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="translated">  -detailedSummary
+        <target state="needs-review-translation">  -detailedSummary
                      Powoduje wyświetlenie na zakończenie kompilacji
                      szczegółowych informacji o utworzonych konfiguracjach
                      i ich planowanym wykorzystaniu węzłów.
                      (Krótka wersja: -ds)
     </target>
-        <note />
+        <note>
+      LOCALIZATION: "detailedSummary", "True" and "False" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
       </trans-unit>
       <trans-unit id="InvalidConfigurationFile">
         <source>MSBUILD : Configuration error MSB1043: The application could not start. {0}</source>
@@ -967,9 +970,19 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       LOCALIZATION: The prefix "MSBUILD : Configuration error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidDetailedSummaryValue">
+        <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1061: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -detailedSummary parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
-        <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1057: Wartość kompilacji grafu jest nieprawidłowa. {0}</target>
+        <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
+        <target state="translated">MSBUILD : error MSB1057: Wartość kompilacji grafu jest nieprawidłowa.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1547,7 +1560,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      Other loggers will receive the information contained
                      in the log file as if the original build was happening.
                      You can read more about the binary log and its usages at:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     https://aka.ms/msbuild/binlog
 
                      Examples:
                        -bl
@@ -1557,7 +1570,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje wszystkie zdarzenia kompilacji do skompresowanego pliku
                      binarnego. Domyślnie plik znajduje się w bieżącym katalogu i ma
                      nazwę „msbuild.binlog”. Dziennik binarny to szczegółowy opis procesu

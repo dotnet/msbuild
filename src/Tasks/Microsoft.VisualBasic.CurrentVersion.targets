@@ -8,7 +8,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 
 This file defines the steps in the standard build process specific for VB .NET projects.
 For example, it contains the step that actually calls the VB compiler.  The remainder
-of the build process is defined in Microsoft.Common.targets, which is imported by 
+of the build process is defined in Microsoft.Common.targets, which is imported by
 this file.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
@@ -21,7 +21,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
        <ImportByWildcardBeforeMicrosoftVisualBasicTargets Condition="'$(ImportByWildcardBeforeMicrosoftVisualBasicTargets)' == ''">true</ImportByWildcardBeforeMicrosoftVisualBasicTargets>
        <ImportByWildcardAfterMicrosoftVisualBasicTargets Condition="'$(ImportByWildcardAfterMicrosoftVisualBasicTargets)' == ''">true</ImportByWildcardAfterMicrosoftVisualBasicTargets>
        <ImportUserLocationsByWildcardBeforeMicrosoftVisualBasicTargets Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftVisualBasicTargets)' == ''">true</ImportUserLocationsByWildcardBeforeMicrosoftVisualBasicTargets>
-       <ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets>    
+       <ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets)' == ''">true</ImportUserLocationsByWildcardAfterMicrosoftVisualBasicTargets>
     </PropertyGroup>
 
     <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore\*" Condition="'$(ImportUserLocationsByWildcardBeforeMicrosoftVisualBasicTargets)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualBasic.targets\ImportBefore')"/>
@@ -65,14 +65,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!--
     The CreateManifestResourceNames target create the manifest resource names from the .RESX
-    files.      
-    
+    files.
+
         [IN]
         @(EmbeddedResource) - The list of EmbeddedResource items that have been pre-processed to add metadata about resource type
                               Expected Metadata "Type" can either be "Resx" or "Non-Resx"
 
         [OUT]
-        @(EmbeddedResource) - EmbeddedResource items with metadata    
+        @(EmbeddedResource) - EmbeddedResource items with metadata
 
     For VB applications the transformation is like:
 
@@ -83,30 +83,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     For other project systems, this transformation may be different.
     -->
+
     <PropertyGroup>
         <CreateManifestResourceNamesDependsOn></CreateManifestResourceNamesDependsOn>
     </PropertyGroup>
+
     <Target
         Name="CreateManifestResourceNames"
         Condition="'@(EmbeddedResource)' != ''"
         DependsOnTargets="$(CreateManifestResourceNamesDependsOn)"
         >
-        
         <ItemGroup>
             <_Temporary Remove="@(_Temporary)" />
         </ItemGroup>
-        
+
         <!-- Create manifest names for culture and non-culture Resx files, and for non-culture Non-Resx resources -->
         <CreateVisualBasicManifestResourceName
               ResourceFiles="@(EmbeddedResource)"
               RootNamespace="$(RootNamespace)"
               UseDependentUponConvention="$(EmbeddedResourceUseDependentUponConvention)"
               Condition="'%(EmbeddedResource.ManifestResourceName)' == '' and ('%(EmbeddedResource.WithCulture)' == 'false' or '%(EmbeddedResource.Type)' == 'Resx')">
-
             <Output TaskParameter="ResourceFilesWithManifestResourceNames" ItemName="_Temporary" />
-
         </CreateVisualBasicManifestResourceName>
-        
+
         <!-- Create manifest names for all culture non-resx resources -->
         <CreateVisualBasicManifestResourceName
               ResourceFiles="@(EmbeddedResource)"
@@ -114,9 +113,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               PrependCultureAsDirectory="false"
               UseDependentUponConvention="$(EmbeddedResourceUseDependentUponConvention)"
               Condition="'%(EmbeddedResource.ManifestResourceName)' == '' and '%(EmbeddedResource.WithCulture)' == 'true' and '%(EmbeddedResource.Type)' == 'Non-Resx'">
-
             <Output TaskParameter="ResourceFilesWithManifestResourceNames" ItemName="_Temporary" />
-
         </CreateVisualBasicManifestResourceName>
 
         <ItemGroup>
@@ -124,23 +121,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             <EmbeddedResource Include="@(_Temporary)" />
             <_Temporary Remove="@(_Temporary)" />
         </ItemGroup>
-      
     </Target>
 
     <Target
         Name="ResolveCodeAnalysisRuleSet"
         Condition="'$(CodeAnalysisRuleSet)' != ''"
         >
-
         <ResolveCodeAnalysisRuleSet
             CodeAnalysisRuleSet="$(CodeAnalysisRuleSet)"
             CodeAnalysisRuleSetDirectories="$(CodeAnalysisRuleSetDirectories)"
             MSBuildProjectDirectory="$(MSBuildProjectDirectory)">
-
             <Output TaskParameter="ResolvedCodeAnalysisRuleSet" PropertyName="ResolvedCodeAnalysisRuleSet" />
-
         </ResolveCodeAnalysisRuleSet>
-
     </Target>
 
     <PropertyGroup>
@@ -205,8 +197,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <PropertyGroup>
             <_NoWarnings Condition=" '$(WarningLevel)' == '0' ">true</_NoWarnings>
             <_NoWarnings Condition=" '$(WarningLevel)' == '1' ">false</_NoWarnings>
-        </PropertyGroup> 
-        
+        </PropertyGroup>
+
         <PropertyGroup>
           <!-- If we are targeting winmdobj we want to specifically set the pdbFile property so that it does not collide with the output of winmdexp which we will run subsequently -->
           <PdbFile Condition="'$(PdbFile)' == '' and '$(OutputType)' == 'winmdobj' and '$(DebugSymbols)' == 'true'">$(IntermediateOutputPath)$(TargetName).compile.pdb</PdbFile>
@@ -227,7 +219,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           <AdditionalFileItems Include="$(AdditionalFileItemNames)" />
           <AdditionalFiles Include="@(%(AdditionalFileItems.Identity))" />
         </ItemGroup>
-      
+
         <!-- Don't run analyzers for Vbc task on XamlPrecompile pass, we only want to run them on core compile. -->
         <!-- Analyzers="@(Analyzer)" -->
 
@@ -272,7 +264,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               OptionExplicit="$(OptionExplicit)"
               OptionInfer="$(OptionInfer)"
               OptionStrict="$(OptionStrict)"
-              OptionStrictType="$(OptionStrictType)" 
+              OptionStrictType="$(OptionStrictType)"
               OutputAssembly="@(XamlIntermediateAssembly)"
               Platform="$(PlatformTarget)"
               Prefer32Bit="$(Prefer32Bit)"
@@ -308,12 +300,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
  <!-- Only Applicable to the regular CoreCompile:
               <ItemGroup>
-                  <_CoreCompileResourceInputs Remove="@(_CoreCompileResourceInputs)" />                  
-              </ItemGroup>    
-              
-              <CallTarget Targets="$(TargetsTriggeredByCompilation)" Condition="'$(TargetsTriggeredByCompilation)' != ''"/>         
- -->         
-        <OnError Condition="'$(OnXamlPreCompileErrorTarget)' != ''" ExecuteTargets="$(OnXamlPreCompileErrorTarget)" />    
+                  <_CoreCompileResourceInputs Remove="@(_CoreCompileResourceInputs)" />
+              </ItemGroup>
+
+              <CallTarget Targets="$(TargetsTriggeredByCompilation)" Condition="'$(TargetsTriggeredByCompilation)' != ''"/>
+ -->
+        <OnError Condition="'$(OnXamlPreCompileErrorTarget)' != ''" ExecuteTargets="$(OnXamlPreCompileErrorTarget)" />
     </Target>
 
     <PropertyGroup>
@@ -328,9 +320,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
        <VisualBasicDesignTimeTargetsPath Condition="'$(VisualBasicDesignTimeTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed\Microsoft.VisualBasic.DesignTime.targets</VisualBasicDesignTimeTargetsPath>
     </PropertyGroup>
+
     <Import Project="$(VisualBasicDesignTimeTargetsPath)" Condition="'$(VisualBasicDesignTimeTargetsPath)' != '' and Exists('$(VisualBasicDesignTimeTargetsPath)')" />
 
     <Import Project="Microsoft.Common.targets" />
+
     <Import Project="$(MSBuildToolsPath)\Microsoft.ServiceModel.targets" Condition="('$(TargetFrameworkVersion)' != 'v2.0' and '$(TargetFrameworkVersion)' != 'v3.0' and '$(TargetFrameworkVersion)' != 'v3.5') and Exists('$(MSBuildToolsPath)\Microsoft.ServiceModel.targets')"/>
 
     <Target Name="_SetTargetFrameworkMonikerAttribute" BeforeTargets="GenerateTargetFrameworkMonikerAttribute">
@@ -350,7 +344,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
        <Utf8Output Condition="'$(Utf8Output)' == ''">true</Utf8Output>
-
       <!-- NoCompilerStandardLib maps to the compiler's /nostdlib option. By default we always
            want that switch to be passed to the compiler so that either we or the user
            provides the references
@@ -358,7 +351,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            so only if NoStdLib isn't set to true, will we provide the standard references
       -->
       <NoCompilerStandardLib Condition=" '$(NoCompilerStandardLib)' == '' ">true</NoCompilerStandardLib>
-
        <!-- When building inside VS, by default use the same language for compiler messages as VS itself does. -->
        <PreferredUILang Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(PreferredUILang)' == ''">$([System.Globalization.CultureInfo]::CurrentUICulture.Name)</PreferredUILang>
     </PropertyGroup>

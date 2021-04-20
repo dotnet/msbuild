@@ -11,6 +11,7 @@ using System.Resources;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -345,13 +346,22 @@ namespace Microsoft.Build.UnitTests
         [InlineData("detailedsummary")]
         [InlineData("DETAILEDSUMMARY")]
         [InlineData("DetailedSummary")]
-        public void DetailedSummarySwitchIndentificationTests(string detailedsummary)
+        public void DetailedSummarySwitchIdentificationTests(string detailedsummary)
         {
-            CommandLineSwitches.ParameterlessSwitch parameterlessSwitch;
-            string duplicateSwitchErrorMessage;
-            CommandLineSwitches.IsParameterlessSwitch(detailedsummary, out parameterlessSwitch, out duplicateSwitchErrorMessage).ShouldBeTrue();
-            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
+            CommandLineSwitches.IsParameterizedSwitch(
+                detailedsummary,
+                out var parameterizedSwitch,
+                out var duplicateSwitchErrorMessage,
+                out var multipleParametersAllowed,
+                out var missingParametersErrorMessage,
+                out var unquoteParameters,
+                out var emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.DetailedSummary);
             duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBe(false);
+            missingParametersErrorMessage.ShouldBeNull();
+            unquoteParameters.ShouldBe(true);
+            emptyParametersAllowed.ShouldBe(false);
         }
 
         [Theory]
@@ -503,7 +513,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches.IsParameterizedSwitch(graph, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
             parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.GraphBuild);
             duplicateSwitchErrorMessage.ShouldBeNull();
-            multipleParametersAllowed.ShouldBeFalse();
+            multipleParametersAllowed.ShouldBeTrue();
             missingParametersErrorMessage.ShouldBeNull();
             unquoteParameters.ShouldBeTrue();
             emptyParametersAllowed.ShouldBeFalse();
@@ -531,6 +541,29 @@ namespace Microsoft.Build.UnitTests
             emptyParametersAllowed.ShouldBeFalse();
         }
 
+        [Fact]
+        public void GraphBuildSwitchCanHaveParameters()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo"}, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] {"true", "  NoBuild  ", "  ", "foo"});
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
+
+        [Fact]
+        public void GraphBuildSwitchCanBeParameterless()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            MSBuildApp.GatherCommandLineSwitches(new List<string>{ "/graph" }, switches);
+
+            switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new string[0]);
+
+            switches.HaveErrors().ShouldBeFalse();
+        }
 
         [Fact]
         public void InputResultsCachesSupportsMultipleOccurrence()
@@ -967,7 +1000,7 @@ namespace Microsoft.Build.UnitTests
                                         enableProfiler: false,
                                         interactive: false,
                                         isolateProjects: false,
-                                        graphBuild: false,
+                                        graphBuildOptions: null,
                                         lowPriority: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null
@@ -1199,6 +1232,67 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessBooleanSwitch(new[] { "false" }, defaultValue: true, resourceName: null).ShouldBeFalse();
 
             Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidRestoreValue"));
+        }
+
+        public static IEnumerable<object[]> ProcessGraphBuildSwitchData()
+        {
+            var emptyOptions = new GraphBuildOptions();
+            var noBuildOptions = new GraphBuildOptions {Build = false};
+
+            yield return new object[] {new string[0], emptyOptions, null};
+
+            yield return new object[] {new[] {"true"}, emptyOptions, null};
+
+            yield return new object[] {new[] {"false"}, null, null};
+
+            yield return new object[] {new[] {"  ", "  "}, emptyOptions, null};
+
+            yield return new object[] {new[] {"NoBuild"}, noBuildOptions, null};
+
+            yield return new object[] {new[] {"noBUILD"}, noBuildOptions, null};
+
+            yield return new object[] {new[] {"noBUILD     "}, noBuildOptions, null};
+
+            yield return new object[] {new[] {"false", "true"}, null, new[] {"false"}};
+
+            yield return new object[] {new[] {"nobuild", "true"}, noBuildOptions, new[] {"true"}};
+
+            yield return new object[] {new[] { "false", "nobuild" }, null, new[] {"false"}};
+
+            yield return new object[] {new[] {"nobuild", "invalid"}, null, new[] {"invalid"}};
+        }
+
+        [Theory]
+        [MemberData(nameof(ProcessGraphBuildSwitchData))]
+        public void ProcessGraphBuildSwitch(string[] parameters, GraphBuildOptions expectedOptions, string[] expectedWordsInException)
+        {
+            CommandLineSwitchException exception = null;
+
+            try
+            {
+                var graphBuildOptions = MSBuildApp.ProcessGraphBuildSwitch(parameters);
+                graphBuildOptions.ShouldBe(expectedOptions);
+            }
+            catch (CommandLineSwitchException e)
+            {
+                exception = e;
+            }
+
+            if (expectedWordsInException != null)
+            {
+                exception.ShouldNotBeNull();
+
+                exception.Message.ShouldContain("Graph build value is not valid");
+
+                foreach (var expectedWord in expectedWordsInException)
+                {
+                    exception.Message.ShouldContain(expectedWord);
+                }
+            }
+            else
+            {
+                exception.ShouldBeNull();
+            }
         }
 
         /// <summary>

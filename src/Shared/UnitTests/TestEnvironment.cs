@@ -173,6 +173,15 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Creates a new temp path with a custom subfolder
+        /// </summary>
+        public TransientTempPath CreateNewTempPathWithSubfolder(string subfolder)
+        {
+            var folder = CreateFolder(null, true, subfolder);
+            return SetTempPath(folder.Path, true);
+        }
+
+        /// <summary>
         /// Creates a new temp path
         /// Sets all OS temp environment variables to the new path
         ///
@@ -266,9 +275,9 @@ namespace Microsoft.Build.UnitTests
         ///     Creates a test variant used to add a unique temporary folder during a test. Will be deleted when the test
         ///     completes.
         /// </summary>
-        public TransientTestFolder CreateFolder(string folderPath = null, bool createFolder = true)
+        public TransientTestFolder CreateFolder(string folderPath = null, bool createFolder = true, string subfolder = null)
         {
-            var folder = WithTransientTestState(new TransientTestFolder(folderPath, createFolder));
+            var folder = WithTransientTestState(new TransientTestFolder(folderPath, createFolder, subfolder));
 
             Assert.True(!(createFolder ^ FileSystems.Default.DirectoryExists(folder.Path)));
 
@@ -605,9 +614,9 @@ namespace Microsoft.Build.UnitTests
 
     public class TransientTestFolder : TransientTestState
     {
-        public TransientTestFolder(string folderPath = null, bool createFolder = true)
+        public TransientTestFolder(string folderPath = null, bool createFolder = true, string subfolder = null)
         {
-            Path = folderPath ?? FileUtilities.GetTemporaryDirectory(createFolder);
+            Path = folderPath ?? FileUtilities.GetTemporaryDirectory(createFolder, subfolder);
 
             if (createFolder)
             {

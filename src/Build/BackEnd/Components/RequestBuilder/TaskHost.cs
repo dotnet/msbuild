@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine7
+        IBuildEngine9
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -361,6 +361,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Reacquire()
         {
+            // Release all cores on reacquire. The assumption here is that the task is done with CPU intensive work at this point and forgetting
+            // to release explicitly granted cores when reacquiring the node may lead to deadlocks.
+            ReleaseAllCores();
+
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
@@ -670,10 +674,198 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region IBuildEngine7 Members
+
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
         public bool AllowFailureWithoutError { get; set; } = false;
+
+        #endregion
+
+        #region IBuildEngine8 Members
+
+        private ICollection<string> _warningsAsErrors;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsAsErrors
+        {
+            get
+            {
+                // Test compatibility
+                if(_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsAsErrors ??= _taskLoggingContext.GetWarningsAsErrors();
+            }
+        }
+
+        private ICollection<string> _warningsAsMessages;
+
+        /// <summary>
+        /// Contains all warnings that should be logged as errors.
+        /// Non-null empty set when all warnings should be treated as errors.
+        /// </summary>
+        private ICollection<string> WarningsAsMessages
+        {
+            get
+            {
+                // Test compatibility
+                if (_taskLoggingContext == null)
+                {
+                    return null;
+                }
+
+                return _warningsAsMessages ??= _taskLoggingContext.GetWarningsAsMessages();
+            }
+        }
+
+        /// <summary>
+        /// Determines if the given warning should be treated as an error.
+        /// </summary>
+        /// <param name="warningCode"></param>
+        /// <returns>True if the warning should not be treated as a message and WarningsAsErrors is an empty set or contains the given warning code.</returns>
+        public bool ShouldTreatWarningAsError(string warningCode)
+        {
+            // Warnings as messages overrides warnings as errors.
+            if (WarningsAsErrors == null || WarningsAsMessages?.Contains(warningCode) == true)
+            {
+                return false;
+            }
+
+            // An empty set means all warnings are errors.
+            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+        }
+
+        #endregion
+
+        #region IBuildEngine9 Members
+
+        /// <summary>
+        /// Additional cores granted to the task by the scheduler. Does not include the one implicit core automatically granted to all tasks.
+        /// </summary>
+        private int _additionalAcquiredCores = 0;
+
+        /// <summary>
+        /// True if the one implicit core has been allocated by <see cref="RequestCores"/>, false otherwise.
+        /// </summary>
+        private bool _isImplicitCoreUsed = false;
+
+        /// <summary>
+        /// Total number of cores granted to the task, including the one implicit core.
+        /// </summary>
+        private int TotalAcquiredCores => _additionalAcquiredCores + (_isImplicitCoreUsed ? 1 : 0);
+
+        /// <summary>
+        /// Allocates shared CPU resources. Called by a task when it's about to do potentially multi-threaded/multi-process work.
+        /// </summary>
+        /// <param name="requestedCores">The number of cores the task wants to use.</param>
+        /// <returns>The number of cores the task is allowed to use given the current state of the build. This number is always between
+        /// 1 and <paramref name="requestedCores"/>. If the task has allocated its one implicit core, this call may block, waiting for
+        /// at least one core to become available.</returns>
+        public int RequestCores(int requestedCores)
+        {
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+
+            lock (_callbackMonitor)
+            {
+                IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
+
+                int coresAcquired = 0;
+                bool allocatingImplicitCore = false;
+                if (_isImplicitCoreUsed)
+                {
+                    coresAcquired = builderCallback.RequestCores(_callbackMonitor, requestedCores, waitForCores: true);
+                }
+                else
+                {
+                    _isImplicitCoreUsed = true;
+                    allocatingImplicitCore = true;
+                    if (requestedCores > 1)
+                    {
+                        coresAcquired = builderCallback.RequestCores(_callbackMonitor, requestedCores - 1, waitForCores: false);
+                    }
+                }
+                _additionalAcquiredCores += coresAcquired;
+
+                if (allocatingImplicitCore)
+                {
+                    // Pad the result with the one implicit core if it was still available.
+                    // This ensures that first call never blocks and always returns >= 1.
+                    coresAcquired++;
+                }
+
+                Debug.Assert(coresAcquired >= 1);
+                if (LoggingContext.IsValid)
+                {
+                    LoggingContext.LogComment(MessageImportance.Low, "TaskAcquiredCores", _taskLoggingContext.TaskName,
+                        requestedCores, coresAcquired, TotalAcquiredCores);
+                }
+                return coresAcquired;
+            }
+        }
+
+        /// <summary>
+        /// Frees shared CPU resources. Called by a task when it's finished doing multi-threaded/multi-process work.
+        /// </summary>
+        /// <param name="coresToRelease">The number of cores the task wants to return. This number must be between 0 and the number of cores
+        /// granted and not yet released.</param>
+        public void ReleaseCores(int coresToRelease)
+        {
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+
+            lock (_callbackMonitor)
+            {
+                int coresBeingReleased = coresToRelease;
+                int previousTotalAcquiredCores = TotalAcquiredCores;
+
+                if (_isImplicitCoreUsed && coresBeingReleased > _additionalAcquiredCores)
+                {
+                    // Release the implicit core last, i.e. only if we're asked to release everything.
+                    coresBeingReleased -= 1;
+                    _isImplicitCoreUsed = false;
+                }
+
+                coresBeingReleased = Math.Min(coresBeingReleased, _additionalAcquiredCores);
+                if (coresBeingReleased >= 1)
+                {
+                    IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
+                    builderCallback.ReleaseCores(coresBeingReleased);
+                    _additionalAcquiredCores -= coresBeingReleased;
+                }
+
+                if (LoggingContext.IsValid)
+                {
+                    if (TotalAcquiredCores == previousTotalAcquiredCores - coresToRelease)
+                    {
+                        LoggingContext.LogComment(MessageImportance.Low, "TaskReleasedCores", _taskLoggingContext.TaskName,
+                            coresToRelease, TotalAcquiredCores);
+                    }
+                    else
+                    {
+                        LoggingContext.LogComment(MessageImportance.Low, "TaskReleasedCoresWarning", _taskLoggingContext.TaskName,
+                            coresToRelease, previousTotalAcquiredCores, TotalAcquiredCores);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Frees all CPU resources granted so far.
+        /// </summary>
+        internal void ReleaseAllCores()
+        {
+            int coresToRelease = TotalAcquiredCores;
+            if (coresToRelease > 0)
+            {
+                ReleaseCores(coresToRelease);
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -783,6 +975,7 @@ namespace Microsoft.Build.BackEnd
                 return lease;
             }
         }
+#endif
 
         /// <summary>
         /// Indicates to the TaskHost that it is no longer needed.
@@ -795,6 +988,8 @@ namespace Microsoft.Build.BackEnd
                 VerifyActiveProxy();
                 _activeProxy = false;
 
+                ReleaseAllCores();
+
                 // Since the task has a pointer to this class it may store it in a static field. Null out
                 // internal data so the leak of this object doesn't lead to a major memory leak.            
                 _host = null;
@@ -804,6 +999,7 @@ namespace Microsoft.Build.BackEnd
                 _taskLoggingContext = null;
                 _targetBuilderCallback = null;
 
+#if FEATURE_APPDOMAIN
                 // Clear out the sponsor (who is responsible for keeping the EngineProxy remoting lease alive until the task is done)
                 // this will be null if the engine proxy was never sent across an AppDomain boundary.
                 if (_sponsor != null)
@@ -815,9 +1011,9 @@ namespace Microsoft.Build.BackEnd
                     _sponsor.Close();
                     _sponsor = null;
                 }
+#endif
             }
         }
-#endif
 
         /// <summary>
         /// Determine if the event is serializable. If we are running with multiple nodes we need to make sure the logging events are serializable. If not

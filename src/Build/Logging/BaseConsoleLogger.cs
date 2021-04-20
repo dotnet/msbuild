@@ -527,10 +527,9 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Gather a sorted list of all the properties.
             var list = new List<DictionaryEntry>(properties.FastCountOrZero());
-            foreach (DictionaryEntry prop in properties)
-            {
-                list.Add(prop);
-            }
+
+            Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
+
             list.Sort(new DictionaryEntryKeyComparer());
             return list;
         }
@@ -620,18 +619,19 @@ namespace Microsoft.Build.BackEnd.Logging
             // Use a SortedList instead of an ArrayList (because we need to lookup fast)
             // and instead of a Hashtable (because we need to sort it)
             SortedList itemTypes = new SortedList(CaseInsensitiveComparer.Default);
-            foreach (DictionaryEntry item in items)
+
+            Internal.Utilities.EnumerateItems(items, item =>
             {
-                // Create a new list for this itemtype, if we haven't already
-                if (itemTypes[(string)item.Key] == null)
+                string key = (string)item.Key;
+                var bucket = itemTypes[key] as ArrayList;
+                if (bucket == null)
                 {
-                    itemTypes[(string)item.Key] = new ArrayList();
+                    bucket = new ArrayList();
+                    itemTypes[key] = bucket;
                 }
 
-                // Add the item to the list for its itemtype
-                ArrayList itemsOfAType = (ArrayList)itemTypes[(string)item.Key];
-                itemsOfAType.Add(item.Value);
-            }
+                bucket.Add(item.Value);
+            });
 
             return itemTypes;
         }
@@ -908,13 +908,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="eventSource">Available events.</param>
         public virtual void Initialize(IEventSource eventSource)
         {
-            ParseParameters();
-
             // Always show perf summary for diagnostic verbosity.
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
                 this.showPerfSummary = true;
             }
+
+            ParseParameters();
 
             showTargetOutputs = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING"));
 
@@ -974,6 +974,9 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 case "PERFORMANCESUMMARY":
                     showPerfSummary = true;
+                    return true;
+                case "NOPERFORMANCESUMMARY":
+                    showPerfSummary = false;
                     return true;
                 case "NOSUMMARY":
                     ShowSummary = false;

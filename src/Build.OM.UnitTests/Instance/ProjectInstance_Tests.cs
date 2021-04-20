@@ -450,6 +450,48 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// Constructs a new ProjectInstances from Project.
+        /// </summary>
+        [Fact]
+        public void CreateProjectInstanceFromProject()
+        {
+            const string CapturedMetadataName = "DefiningProjectFullPath";
+            var pc = new ProjectCollection();
+            var projA = ProjectRootElement.Create(pc);
+            var projB = ProjectRootElement.Create(pc);
+            projA.FullPath = Path.Combine(Path.GetTempPath(), "a.proj");
+            projB.FullPath = Path.Combine(Path.GetTempPath(), "b.proj");
+            projB.AddImport("a.proj");
+            projA.AddItem("Compile", "aItem.cs");
+            projB.AddItem("Compile", "bItem.cs");
+
+            var loadSettings = ProjectLoadSettings.RecordDuplicateButNotCircularImports
+                | ProjectLoadSettings.RejectCircularImports
+                | ProjectLoadSettings.IgnoreEmptyImports
+                | ProjectLoadSettings.IgnoreMissingImports
+                | ProjectLoadSettings.IgnoreInvalidImports;
+
+            var projBEval = new Project(projB, null, null, pc, loadSettings);
+            var projBInstance = new ProjectInstance(projBEval, ProjectInstanceSettings.ImmutableWithFastItemLookup);
+            var projBInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "bItem.cs").Single();
+            var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
+            Assert.Equal(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.Equal(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
+
+            // Although GetMetadataValue returns non-null, GetMetadata returns null...
+            Assert.Null(projAInstanceItem.GetMetadata(CapturedMetadataName));
+
+            // .. Just like built-in metadata does: (this segment just demonstrates similar functionality -- it's not meant to test built-in metadata)
+            Assert.NotNull(projAInstanceItem.GetMetadataValue("Identity"));
+            Assert.Null(projAInstanceItem.GetMetadata("Identity"));
+
+            Assert.True(projAInstanceItem.HasMetadata(CapturedMetadataName));
+            Assert.False(projAInstanceItem.Metadata.Any());
+            Assert.Contains(CapturedMetadataName, projAInstanceItem.MetadataNames);
+            Assert.Equal(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
+        }
+
+        /// <summary>
         /// Verifies that the built-in metadata for specialized ProjectInstances is present when items are based on wildcards in the construction model.
         /// </summary>
         [Fact]

@@ -7,7 +7,8 @@
       "src\\MSBuild\\MSBuild.csproj",
       "src\\Package\\Localization\\Localization.csproj",
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",
-      "src\\Utilities\\Microsoft.Build.Utilities.csproj"
+      "src\\Utilities\\Microsoft.Build.Utilities.csproj",
+      "src\\StringTools\\StringTools.csproj"
     ]
   }
 }

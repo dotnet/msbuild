@@ -25,13 +25,14 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * Introduce cross-process resource management for tasks (#5859).
 * `ProjectEvaluationFinished` now has fields for properties and items (#6287). Thanks, @KirillOsenkov!
 * `WriteCodeFragment` can now write assembly attributes of specified types, and infers some common types (#6285). Thanks, @reduckted!
+* The `-detailedSummary` option now accepts a boolean argument, preventing dumping details to the console logger when building with `-bl -ds:false` (#6338). Thanks, @KirillOsenkov!
 
 ### Changed
 
 * String deduplication is now much more sophisticated, reducing memory usage (#5663).
 * Improved memory usage and JIT time on MSBuild on .NET 5.0 and higher (#6126, #6189).
 * Refactoring and performance improvements in `ResolveAssemblyReferences` (#5929, #6094).
-* Binary logs now store strings only once, dramatically reducing log size (#6017). Thanks, @KirillOsenkov!
+* Binary logs now store strings only once, dramatically reducing log size (#6017, #6326). Thanks, @KirillOsenkov!
 * Refactoring and code cleanup (#6120, #6159, #6158, #6282). Thanks, @Nirmal4G!
 * `Span<T>`-based methods are used on .NET Framework MSBuild as well as .NET 5.0 (#6130).
 * Improved `MSB4064` error to include information about the loaded task that didn't have the argument (#5945). Thanks, @BartoszKlonowski!
@@ -57,6 +58,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 ### Infrastructure
 
 * Update to Arcade 5.0 and .NET 5.0 (#5836).
+* The primary development branch is now named `main`.
 * Test robustness improvements (#6055). Thanks, @tmds!
 * Remove unnecessary NuGet package references (#6036). Thanks, @teo-tsirpanis!
 * Correctly mark .NET Framework 3.5 reference assembly package dependency as private (#6214).

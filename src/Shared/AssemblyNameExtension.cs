@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Runtime.Serialization;
 using System.IO;
+using Microsoft.Build.BackEnd;
 #if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
@@ -54,7 +55,7 @@ namespace Microsoft.Build.Shared
     /// between the two is done lazily on demand.
     /// </summary>
     [Serializable]
-    internal sealed class AssemblyNameExtension : ISerializable, IEquatable<AssemblyNameExtension>
+    internal sealed class AssemblyNameExtension : ISerializable, IEquatable<AssemblyNameExtension>, ITranslatable
     {
         private AssemblyName asAssemblyName = null;
         private string asString = null;
@@ -174,6 +175,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Ctor for deserializing from state file (custom binary serialization) using translator.
+        /// </summary>
+        internal AssemblyNameExtension(ITranslator translator) : this()
+        {
+            Translate(translator);
+        }
+
+        /// <summary>
         /// To be used as a delegate. Gets the AssemblyName of the given file.
         /// </summary>
         /// <param name="path"></param>
@@ -251,8 +260,16 @@ namespace Microsoft.Build.Shared
         {
             if (remappedFrom == null)
             {
-                remappedFrom = new HashSet<AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
+                remappedFrom = CreateRemappedFrom();
             }
+        }
+
+        /// <summary>
+        /// Create remappedFrom HashSet. Used by deserialization as well.
+        /// </summary>
+        private static HashSet<AssemblyNameExtension> CreateRemappedFrom()
+        {
+            return new HashSet<AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
         }
 
         /// <summary>
@@ -992,6 +1009,24 @@ namespace Microsoft.Build.Shared
             info.AddValue("hasCpuArch", hasProcessorArchitectureInFusionName);
             info.AddValue("immutable", immutable);
             info.AddValue("remapped", remappedFrom);
+        }
+
+        /// <summary>
+        /// Reads/writes this class
+        /// </summary>
+        /// <param name="translator"></param>
+        public void Translate(ITranslator translator)
+        {
+            translator.Translate(ref asAssemblyName);
+            translator.Translate(ref asString);
+            translator.Translate(ref isSimpleName);
+            translator.Translate(ref hasProcessorArchitectureInFusionName);
+            translator.Translate(ref immutable);
+            
+            // TODO: consider some kind of protection against infinite loop during serialization, hint: pre serialize check for cycle in graph
+            translator.TranslateHashSet(ref remappedFrom,
+                (ITranslator t) => new AssemblyNameExtension(t),
+                (int capacity) => CreateRemappedFrom());
         }
     }
 }

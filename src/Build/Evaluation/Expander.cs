@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -23,6 +23,8 @@ using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
+
+using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -121,6 +123,136 @@ namespace Microsoft.Build.Evaluation
         where P : class, IProperty
         where I : class, IItem
     {
+        /// <summary>
+        /// A helper struct wrapping a <see cref="SpanBasedStringBuilder"/> and providing file path conversion
+        /// as used in e.g. property expansion.
+        /// </summary>
+        /// <remarks>
+        /// If exactly one value is added and no concatenation takes places, this value is returned without
+        /// conversion. In other cases values are stringified and attempted to be interpreted as file paths
+        /// before concatenation.
+        /// </remarks>
+        private struct SpanBasedConcatenator : IDisposable
+        {
+            /// <summary>
+            /// The backing <see cref="SpanBasedStringBuilder"/>, null until the second value is added.
+            /// </summary>
+            private SpanBasedStringBuilder _builder;
+
+            /// <summary>
+            /// The first value added to the concatenator. Tracked in its own field so it can be returned
+            /// without conversion if no concatenation takes place.
+            /// </summary>
+            private object _firstObject;
+
+            /// <summary>
+            /// The first value added to the concatenator if it is a span. Tracked in its own field so the
+            /// <see cref="SpanBasedStringBuilder"/> functionality doesn't have to be invoked if no concatenation
+            /// takes place.
+            /// </summary>
+            private ReadOnlyMemory<char> _firstSpan;
+
+            /// <summary>
+            /// True if this instance is already disposed.
+            /// </summary>
+            private bool _disposed;
+
+            /// <summary>
+            /// Adds an object to be concatenated.
+            /// </summary>
+            public void Add(object obj)
+            {
+                CheckDisposed();
+                FlushFirstValueIfNeeded();
+                if (_builder != null)
+                {
+                    _builder.Append(FileUtilities.MaybeAdjustFilePath(obj.ToString()));
+                }
+                else
+                {
+                    _firstObject = obj;
+                }
+            }
+
+            /// <summary>
+            /// Adds a span to be concatenated.
+            /// </summary>
+            public void Add(ReadOnlyMemory<char> span)
+            {
+                CheckDisposed();
+                FlushFirstValueIfNeeded();
+                if (_builder != null)
+                {
+                    _builder.Append(FileUtilities.MaybeAdjustFilePath(span));
+                }
+                else
+                {
+                    _firstSpan = span;
+                }
+            }
+
+            /// <summary>
+            /// Returns the result of the concatenation.
+            /// </summary>
+            /// <returns>
+            /// If only one value has been added and it is not a string, it is returned unchanged.
+            /// In all other cases (no value, one string value, multiple values) the result is a
+            /// concatenation of the string representation of the values, each additionally subjected
+            /// to file path adjustment.
+            /// </returns>
+            public object GetResult()
+            {
+                CheckDisposed();
+                if (_firstObject != null)
+                {
+                    return (_firstObject is string stringValue) ? FileUtilities.MaybeAdjustFilePath(stringValue) : _firstObject;
+                }
+                return _firstSpan.IsEmpty
+                    ? _builder?.ToString() ?? string.Empty
+                    : FileUtilities.MaybeAdjustFilePath(_firstSpan).ToString();
+            }
+
+            /// <summary>
+            /// Disposes of the struct by delegating the call to the underlying <see cref="SpanBasedStringBuilder"/>.
+            /// </summary>
+            public void Dispose()
+            {
+                CheckDisposed();
+                _builder?.Dispose();
+                _disposed = true;
+            }
+
+            /// <summary>
+            /// Throws <see cref="ObjectDisposedException"/> if this concatenator is already disposed.
+            /// </summary>
+            private void CheckDisposed() =>
+                ErrorUtilities.VerifyThrowObjectDisposed(!_disposed, nameof(SpanBasedConcatenator));
+
+            /// <summary>
+            /// Lazily initializes <see cref="_builder"/> and populates it with the first value
+            /// when the second value is being added.
+            /// </summary>
+            private void FlushFirstValueIfNeeded()
+            {
+                if (_firstObject != null)
+                {
+                    _builder = Strings.GetSpanBasedStringBuilder();
+                    _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstObject.ToString()));
+                    _firstObject = null;
+                }
+                else if (!_firstSpan.IsEmpty)
+                {
+                    _builder = Strings.GetSpanBasedStringBuilder();
+#if FEATURE_SPAN
+                    _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan));
+#else
+                    _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan.ToString()));
+#endif
+                    _firstSpan = new ReadOnlyMemory<char>();
+                }
+            }
+        }
+
         /// <summary>
         /// A limit for truncating string expansions within an evaluated Condition. Properties, item metadata, or item groups will be truncated to N characters such as 'N...'.
         /// Enabled by ExpanderOptions.Truncate.
@@ -486,19 +618,6 @@ namespace Microsoft.Build.Evaluation
         /// essentially, pushes and pops on a stack of parentheses to do this.
         /// Takes the expression and the index to start at.
         /// Returns the index of the matching parenthesis, or -1 if it was not found.
-        /// </summary>
-        private static int ScanForClosingParenthesis(string expression, int index)
-        {
-            bool potentialPropertyFunction;
-            bool potentialRegistryFunction;
-            return ScanForClosingParenthesis(expression, index, out potentialPropertyFunction, out potentialRegistryFunction);
-        }
-
-        /// <summary>
-        /// Scan for the closing bracket that matches the one we've already skipped;
-        /// essentially, pushes and pops on a stack of parentheses to do this.
-        /// Takes the expression and the index to start at.
-        /// Returns the index of the matching parenthesis, or -1 if it was not found.
         /// Also returns flags to indicate if a propertyfunction or registry property is likely
         /// to be found in the expression.
         /// </summary>
@@ -510,16 +629,15 @@ namespace Microsoft.Build.Evaluation
             potentialPropertyFunction = false;
             potentialRegistryFunction = false;
 
-            unsafe
+            // Scan for our closing ')'
+            while (index < length && nestLevel > 0)
             {
-                fixed (char* pchar = expression)
+                char character = expression[index];
+                switch (character)
                 {
-                    // Scan for our closing ')'
-                    while (index < length && nestLevel > 0)
-                    {
-                        char character = pchar[index];
-
-                        if (character == '\'' || character == '`' || character == '"')
+                    case '\'':
+                    case '`':
+                    case '"':
                         {
                             index++;
                             index = ScanForClosingQuote(character, expression, index);
@@ -528,27 +646,33 @@ namespace Microsoft.Build.Evaluation
                             {
                                 return -1;
                             }
+                            break;
                         }
-                        else if (character == '(')
+                    case '(':
                         {
                             nestLevel++;
+                            break;
                         }
-                        else if (character == ')')
+                    case ')':
                         {
                             nestLevel--;
+                            break;
                         }
-                        else if (character == '.' || character == '[' || character == '$')
+                    case '.':
+                    case '[':
+                    case '$':
                         {
                             potentialPropertyFunction = true;
+                            break;
                         }
-                        else if (character == ':')
+                    case ':':
                         {
                             potentialRegistryFunction = true;
+                            break;
                         }
-
-                        index++;
-                    }
                 }
+
+                index++;
             }
 
             // We will have parsed past the ')', so step back one character
@@ -562,40 +686,20 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static int ScanForClosingQuote(char quoteChar, string expression, int index)
         {
-            unsafe
-            {
-                fixed (char* pchar = expression)
-                {
-                    // Scan for our closing quoteChar
-                    while (index < expression.Length)
-                    {
-                        if (pchar[index] == quoteChar)
-                        {
-                            return index;
-                        }
-
-                        index++;
-                    }
-                }
-            }
-
-            return -1;
+            // Scan for our closing quoteChar
+            return expression.IndexOf(quoteChar, index);
         }
 
         /// <summary>
         /// Add the argument in the StringBuilder to the arguments list, handling nulls
         /// appropriately.
         /// </summary>
-        private static void AddArgument(List<string> arguments, ReuseableStringBuilder argumentBuilder)
+        private static void AddArgument(List<string> arguments, SpanBasedStringBuilder argumentBuilder)
         {
-            // If we don't have something that can be treated as an argument
-            // then we should treat it as a null so that passing nulls
-            // becomes possible through an empty argument between commas.
-            ErrorUtilities.VerifyThrowArgumentNull(argumentBuilder, nameof(argumentBuilder));
-
             // we reached the end of an argument, add the builder's final result
-            // to our arguments. 
-            string argValue = OpportunisticIntern.InternableToString(argumentBuilder).Trim();
+            // to our arguments.
+            argumentBuilder.Trim();
+            string argValue = argumentBuilder.ToString();
 
             // We support passing of null through the argument constant value null
             if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
@@ -642,68 +746,80 @@ namespace Microsoft.Build.Evaluation
 
             List<string> arguments = new List<string>();
 
-            // With the reuseable string builder, there's no particular need to initialize the length as it will already have grown.
-            using (var argumentBuilder = new ReuseableStringBuilder())
+            using SpanBasedStringBuilder argumentBuilder = Strings.GetSpanBasedStringBuilder();
+            int? argumentStartIndex = null;
+
+            // We iterate over the string in the for loop below. When we find an argument, instead of adding it to the argument
+            // builder one-character-at-a-time, we remember the start index and then call this function when we find the end of
+            // the argument. This appends the entire {start, end} span to the builder in one call.
+            void FlushCurrentArgumentToArgumentBuilder(int argumentEndIndex)
             {
-                unsafe
+                if (argumentStartIndex.HasValue)
                 {
-                    fixed (char* argumentsContent = argumentsString)
-                    {
-                        // Iterate over the contents of the arguments extracting the
-                        // the individual arguments as we go
-                        for (int n = 0; n < argumentsContentLength; n++)
-                        {
-                            // We found a property expression.. skip over all of it.
-                            if ((n < argumentsContentLength - 1) && (argumentsContent[n] == '$' && argumentsContent[n + 1] == '('))
-                            {
-                                int nestedPropertyStart = n;
-                                n += 2; // skip over the opening '$('
-
-                                // Scan for the matching closing bracket, skipping any nested ones
-                                n = ScanForClosingParenthesis(argumentsString, n);
-
-                                if (n == -1)
-                                {
-                                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedParenthesis"));
-                                }
-
-                                argumentBuilder.Append(argumentsString, nestedPropertyStart, (n - nestedPropertyStart) + 1);
-                            }
-                            else if (argumentsContent[n] == '`' || argumentsContent[n] == '"' || argumentsContent[n] == '\'')
-                            {
-                                int quoteStart = n;
-                                n++; // skip over the opening quote
-
-                                n = ScanForClosingQuote(argumentsString[quoteStart], argumentsString, n);
-
-                                if (n == -1)
-                                {
-                                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedQuote"));
-                                }
-
-                                argumentBuilder.Append(argumentsString, quoteStart, (n - quoteStart) + 1);
-                            }
-                            else if (argumentsContent[n] == ',')
-                            {
-                                // We have reached the end of the current argument, go ahead and add it
-                                // to our list
-                                AddArgument(arguments, argumentBuilder);
-
-                                // Clear out the argument builder ready for the next argument
-                                argumentBuilder.Remove(0, argumentBuilder.Length);
-                            }
-                            else
-                            {
-                                argumentBuilder.Append(argumentsContent[n]);
-                            }
-                        }
-                    }
+                    argumentBuilder.Append(argumentsString, argumentStartIndex.Value, argumentEndIndex - argumentStartIndex.Value);
+                    argumentStartIndex = null;
                 }
-
-                // This will either be the one and only argument, or the last one
-                // so add it to our list
-                AddArgument(arguments, argumentBuilder);
             }
+
+            // Iterate over the contents of the arguments extracting the
+            // the individual arguments as we go
+            for (int n = 0; n < argumentsContentLength; n++)
+            {
+                // We found a property expression.. skip over all of it.
+                if ((n < argumentsContentLength - 1) && (argumentsString[n] == '$' && argumentsString[n + 1] == '('))
+                {
+                    int nestedPropertyStart = n;
+                    n += 2; // skip over the opening '$('
+
+                    // Scan for the matching closing bracket, skipping any nested ones
+                    n = ScanForClosingParenthesis(argumentsString, n, out _, out _);
+
+                    if (n == -1)
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedParenthesis"));
+                    }
+
+                    FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: nestedPropertyStart);
+                    argumentBuilder.Append(argumentsString, nestedPropertyStart, (n - nestedPropertyStart) + 1);
+                }
+                else if (argumentsString[n] == '`' || argumentsString[n] == '"' || argumentsString[n] == '\'')
+                {
+                    int quoteStart = n;
+                    n++; // skip over the opening quote
+
+                    n = ScanForClosingQuote(argumentsString[quoteStart], argumentsString, n);
+
+                    if (n == -1)
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedQuote"));
+                    }
+
+                    FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: quoteStart);
+                    argumentBuilder.Append(argumentsString, quoteStart, (n - quoteStart) + 1);
+                }
+                else if (argumentsString[n] == ',')
+                {
+                    FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: n);
+
+                    // We have reached the end of the current argument, go ahead and add it
+                    // to our list
+                    AddArgument(arguments, argumentBuilder);
+
+                    // Clear out the argument builder ready for the next argument
+                    argumentBuilder.Clear();
+                }
+                else
+                {
+                    argumentStartIndex ??= n;
+                }
+            }
+
+            // We reached the end of the string but we may have seen the start but not the end of the last (or only) argument so flush it now.
+            FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: argumentsContentLength);
+
+            // This will either be the one and only argument, or the last one
+            // so add it to our list
+            AddArgument(arguments, argumentBuilder);
 
             return arguments.ToArray();
         }
@@ -766,55 +882,53 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // otherwise, run the more complex Regex to find item metadata references not contained in transforms
-                        // With the reuseable string builder, there's no particular need to initialize the length as it will already have grown.
-                        using (var finalResultBuilder = new ReuseableStringBuilder())
+                        using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
+
+                        int start = 0;
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+
+                        if (itemVectorExpressions != null)
                         {
-                            int start = 0;
-                            MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
-
-                            if (itemVectorExpressions != null)
+                            // Move over the expression, skipping those that have been recognized as an item vector expression
+                            // Anything other than an item vector expression we want to expand bare metadata in.
+                            for (int n = 0; n < itemVectorExpressions.Count; n++)
                             {
-                                // Move over the expression, skipping those that have been recognized as an item vector expression
-                                // Anything other than an item vector expression we want to expand bare metadata in.
-                                for (int n = 0; n < itemVectorExpressions.Count; n++)
-                                {
-                                    string vectorExpression = itemVectorExpressions[n].Value;
+                                string vectorExpression = itemVectorExpressions[n].Value;
 
-                                    // Extract the part of the expression that appears before the item vector expression
-                                    // e.g. the ABC in ABC@(foo->'%(FullPath)')
-                                    string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                    string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
-
-                                    // Append the metadata replacement
-                                    finalResultBuilder.Append(replacementResult);
-
-                                    // Expand any metadata that appears in the item vector expression's separator
-                                    if (itemVectorExpressions[n].Separator != null)
-                                    {
-                                        vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
-                                    }
-
-                                    // Append the item vector expression as is
-                                    // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
-                                    finalResultBuilder.Append(vectorExpression);
-
-                                    // Move onto the next part of the expression that isn't an item vector expression
-                                    start = (itemVectorExpressions[n].Index + itemVectorExpressions[n].Length);
-                                }
-                            }
-
-                            // If there's anything left after the last item vector expression
-                            // then we need to metadata replace and then append that
-                            if (start < expression.Length)
-                            {
-                                string subExpressionToReplaceIn = expression.Substring(start);
+                                // Extract the part of the expression that appears before the item vector expression
+                                // e.g. the ABC in ABC@(foo->'%(FullPath)')
+                                string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
                                 string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
+                                // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
-                            }
 
-                            result = OpportunisticIntern.InternableToString(finalResultBuilder);
+                                // Expand any metadata that appears in the item vector expression's separator
+                                if (itemVectorExpressions[n].Separator != null)
+                                {
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
+                                }
+
+                                // Append the item vector expression as is
+                                // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
+                                finalResultBuilder.Append(vectorExpression);
+
+                                // Move onto the next part of the expression that isn't an item vector expression
+                                start = (itemVectorExpressions[n].Index + itemVectorExpressions[n].Length);
+                            }
                         }
+
+                        // If there's anything left after the last item vector expression
+                        // then we need to metadata replace and then append that
+                        if (start < expression.Length)
+                        {
+                            string subExpressionToReplaceIn = expression.Substring(start);
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+
+                            finalResultBuilder.Append(replacementResult);
+                        }
+
+                        result = finalResultBuilder.ToString();
                     }
 
                     // Don't create more strings
@@ -992,8 +1106,7 @@ namespace Microsoft.Build.Evaluation
                 // so that we can either maintain the object's type in the event
                 // that we have a single component, or convert to a string
                 // if concatenation is required.
-                List<object> results = null;
-                object lastResult = null;
+                using Expander<P, I>.SpanBasedConcatenator results = new Expander<P, I>.SpanBasedConcatenator();
 
                 // The sourceIndex is the zero-based index into the expression,
                 // where we've essentially read up to and copied into the target string.
@@ -1003,36 +1116,18 @@ namespace Microsoft.Build.Evaluation
                 // any more.
                 while (propertyStartIndex != -1)
                 {
-                    if (lastResult != null)
-                    {
-                        if (results == null)
-                        {
-                            results = new List<object>(4);
-                        }
-
-                        results.Add(lastResult);
-                    }
-
-
                     // Append the result with the portion of the expression up to
                     // (but not including) the "$(", and advance the sourceIndex pointer.
                     if (propertyStartIndex - sourceIndex > 0)
                     {
-                        if (results == null)
-                        {
-                            results = new List<object>(4);
-                        }
-
-                        results.Add(expression.Substring(sourceIndex, propertyStartIndex - sourceIndex));
+                        results.Add(expression.AsMemory(sourceIndex, propertyStartIndex - sourceIndex));
                     }
 
-                    bool tryExtractPropertyFunction;
-                    bool tryExtractRegistryFunction;
                     // Following the "$(" we need to locate the matching ')'
                     // Scan for the matching closing bracket, skipping any nested ones
                     // This is a very complete, fast validation of parenthesis matching including for nested
                     // function calls.
-                    propertyEndIndex = ScanForClosingParenthesis(expression, propertyStartIndex + 2, out tryExtractPropertyFunction, out tryExtractRegistryFunction);
+                    propertyEndIndex = ScanForClosingParenthesis(expression, propertyStartIndex + 2, out bool tryExtractPropertyFunction, out bool tryExtractRegistryFunction);
 
                     if (propertyEndIndex == -1)
                     {
@@ -1040,7 +1135,7 @@ namespace Microsoft.Build.Evaluation
                         // isn't really a well-formed property tag.  Just literally
                         // copy the remainder of the expression (starting with the "$("
                         // that we found) into the result, and quit.
-                        lastResult = expression.Substring(propertyStartIndex, expression.Length - propertyStartIndex);
+                        results.Add(expression.AsMemory(propertyStartIndex, expression.Length - propertyStartIndex));
                         sourceIndex = expression.Length;
                     }
                     else
@@ -1117,62 +1212,20 @@ namespace Microsoft.Build.Evaluation
                         // Record our result, and advance
                         // our sourceIndex pointer to the character just after the closing
                         // parenthesis.
-                        lastResult = propertyValue;
+                        results.Add(propertyValue);
                         sourceIndex = propertyEndIndex + 1;
                     }
 
                     propertyStartIndex = s_invariantCompareInfo.IndexOf(expression, "$(", sourceIndex, CompareOptions.Ordinal);
                 }
 
-                // If we have only a single result, then just return it
-                if (results == null && expression.Length == sourceIndex)
+                // If we couldn't find any more property tags in the expression just copy the remainder into the result.
+                if (expression.Length - sourceIndex > 0)
                 {
-                    var resultString = lastResult as string;
-                    return resultString != null ? FileUtilities.MaybeAdjustFilePath(resultString) : lastResult;
+                    results.Add(expression.AsMemory(sourceIndex, expression.Length - sourceIndex));
                 }
-                else
-                {
-                    // The expression is constant, return it as is
-                    if (sourceIndex == 0)
-                    {
-                        return expression;
-                    }
 
-                    // We have more than one result collected, therefore we need to concatenate
-                    // into the final result string. This does mean that we will lose type information.
-                    // However since the user wanted contatenation, then they clearly wanted that to happen.
-
-                    // Initialize our output string to empty string.
-                    // This method is called very often - of the order of 3,000 times per project.
-                    // With the reuseable string builder, there's no particular need to initialize the length as it will already have grown.
-                    using (var result = new ReuseableStringBuilder())
-                    {
-                        // Append our collected results
-                        if (results != null)
-                        {
-                            // Create a combined result string from the result components that we've gathered
-                            foreach (object component in results)
-                            {
-                                result.Append(FileUtilities.MaybeAdjustFilePath(component.ToString()));
-                            }
-                        }
-
-                        // Append the last result we collected (it wasn't added to the list)
-                        if (lastResult != null)
-                        {
-                            result.Append(FileUtilities.MaybeAdjustFilePath(lastResult.ToString()));
-                        }
-
-                        // And if we couldn't find anymore property tags in the expression,
-                        // so just literally copy the remainder into the result.
-                        if (expression.Length - sourceIndex > 0)
-                        {
-                            result.Append(expression, sourceIndex, expression.Length - sourceIndex);
-                        }
-
-                        return OpportunisticIntern.InternableToString(result);
-                    }
-                }
+                return results.GetResult();
             }
 
             /// <summary>
@@ -1300,74 +1353,72 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal static string ConvertToString(object valueToConvert)
             {
-                if (valueToConvert != null)
-                {
-                    Type valueType = valueToConvert.GetType();
-                    string convertedString;
-
-                    // If the type is a string, then there is nothing to do
-                    if (valueType == typeof(string))
-                    {
-                        convertedString = (string)valueToConvert;
-                    }
-                    else if (valueToConvert is IDictionary)
-                    {
-                        // If the return type is an IDictionary, then we convert this to
-                        // a semi-colon delimited set of A=B pairs.
-                        // Key and Value are converted to string and escaped
-                        IDictionary dictionary = valueToConvert as IDictionary;
-                        using (var builder = new ReuseableStringBuilder())
-                        {
-                            foreach (DictionaryEntry entry in dictionary)
-                            {
-                                if (builder.Length > 0)
-                                {
-                                    builder.Append(';');
-                                }
-
-                                // convert and escape each key and value in the dictionary entry
-                                builder.Append(EscapingUtilities.Escape(ConvertToString(entry.Key)));
-                                builder.Append('=');
-                                builder.Append(EscapingUtilities.Escape(ConvertToString(entry.Value)));
-                            }
-
-                            convertedString = OpportunisticIntern.InternableToString(builder);
-                        }
-                    }
-                    else if (valueToConvert is IEnumerable)
-                    {
-                        // If the return is enumerable, then we'll convert to semi-colon delimited elements
-                        // each of which must be converted, so we'll recurse for each element
-                        using (var builder = new ReuseableStringBuilder())
-                        {
-                            IEnumerable enumerable = (IEnumerable)valueToConvert;
-
-                            foreach (object element in enumerable)
-                            {
-                                if (builder.Length > 0)
-                                {
-                                    builder.Append(';');
-                                }
-
-                                // we need to convert and escape each element of the array
-                                builder.Append(EscapingUtilities.Escape(ConvertToString(element)));
-                            }
-
-                            convertedString = OpportunisticIntern.InternableToString(builder);
-                        }
-                    }
-                    else
-                    {
-                        // The fall back is always to just convert to a string directly.
-                        convertedString = valueToConvert.ToString();
-                    }
-
-                    return convertedString;
-                }
-                else
+                if (valueToConvert == null)
                 {
                     return String.Empty;
                 }
+                // If the value is a string, then there is nothing to do
+                if (valueToConvert is string stringValue)
+                {
+                    return stringValue;
+                }
+
+                string convertedString;
+                if (valueToConvert is IDictionary dictionary)
+                {
+                    // If the return type is an IDictionary, then we convert this to
+                    // a semi-colon delimited set of A=B pairs.
+                    // Key and Value are converted to string and escaped
+                    if (dictionary.Count > 0)
+                    {
+                        using SpanBasedStringBuilder builder = Strings.GetSpanBasedStringBuilder();
+
+                        foreach (DictionaryEntry entry in dictionary)
+                        {
+                            if (builder.Length > 0)
+                            {
+                                builder.Append(";");
+                            }
+
+                            // convert and escape each key and value in the dictionary entry
+                            builder.Append(EscapingUtilities.Escape(ConvertToString(entry.Key)));
+                            builder.Append("=");
+                            builder.Append(EscapingUtilities.Escape(ConvertToString(entry.Value)));
+                        }
+
+                        convertedString = builder.ToString();
+                    }
+                    else
+                    {
+                        convertedString = string.Empty;
+                    }
+                }
+                else if (valueToConvert is IEnumerable enumerable)
+                {
+                    // If the return is enumerable, then we'll convert to semi-colon delimited elements
+                    // each of which must be converted, so we'll recurse for each element
+                    using SpanBasedStringBuilder builder = Strings.GetSpanBasedStringBuilder();
+
+                    foreach (object element in enumerable)
+                    {
+                        if (builder.Length > 0)
+                        {
+                            builder.Append(";");
+                        }
+
+                        // we need to convert and escape each element of the array
+                        builder.Append(EscapingUtilities.Escape(ConvertToString(element)));
+                    }
+
+                    convertedString = builder.ToString();
+                }
+                else
+                {
+                    // The fall back is always to just convert to a string directly.
+                    convertedString = valueToConvert.ToString();
+                }
+
+                return convertedString;
             }
 
             /// <summary>
@@ -1759,17 +1810,15 @@ namespace Microsoft.Build.Evaluation
                     // a scalar and then create a single item. Basically we need this
                     // to be able to convert item lists with user specified separators into properties.
                     string expandedItemVector;
-                    using (var builder = new ReuseableStringBuilder())
+                    using SpanBasedStringBuilder builder = Strings.GetSpanBasedStringBuilder();
+                    brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, expressionCapture, items, elementLocation, builder, options);
+
+                    if (brokeEarlyNonEmpty)
                     {
-                        brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, expressionCapture, items, elementLocation, builder, options);
-
-                        if (brokeEarlyNonEmpty)
-                        {
-                            return null;
-                        }
-
-                        expandedItemVector = OpportunisticIntern.InternableToString(builder);
+                        return null;
                     }
+
+                    expandedItemVector = builder.ToString();
 
                     result = new List<T>(1);
 
@@ -1941,38 +1990,36 @@ namespace Microsoft.Build.Evaluation
                     return expression;
                 }
 
-                using (var builder = new ReuseableStringBuilder())
+                using SpanBasedStringBuilder builder = Strings.GetSpanBasedStringBuilder();
+                // As we walk through the matches, we need to copy out the original parts of the string which
+                // are not covered by the match.  This preserves original behavior which did not trim whitespace
+                // from between separators.
+                int lastStringIndex = 0;
+                for (int i = 0; i < matches.Count; i++)
                 {
-                    // As we walk through the matches, we need to copy out the original parts of the string which
-                    // are not covered by the match.  This preserves original behavior which did not trim whitespace
-                    // from between separators.
-                    int lastStringIndex = 0;
-                    for (int i = 0; i < matches.Count; i++)
+                    if (matches[i].Index > lastStringIndex)
                     {
-                        if (matches[i].Index > lastStringIndex)
-                        {
-                            if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
-                            {
-                                return null;
-                            }
-
-                            builder.Append(expression, lastStringIndex, matches[i].Index - lastStringIndex);
-                        }
-
-                        bool brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, matches[i], items, elementLocation, builder, options);
-
-                        if (brokeEarlyNonEmpty)
+                        if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
                             return null;
                         }
 
-                        lastStringIndex = matches[i].Index + matches[i].Length;
+                        builder.Append(expression, lastStringIndex, matches[i].Index - lastStringIndex);
                     }
 
-                    builder.Append(expression, lastStringIndex, expression.Length - lastStringIndex);
+                    bool brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, matches[i], items, elementLocation, builder, options);
 
-                    return OpportunisticIntern.InternableToString(builder);
+                    if (brokeEarlyNonEmpty)
+                    {
+                        return null;
+                    }
+
+                    lastStringIndex = matches[i].Index + matches[i].Length;
                 }
+
+                builder.Append(expression, lastStringIndex, expression.Length - lastStringIndex);
+
+                return builder.ToString();
             }
 
             /// <summary>
@@ -2019,7 +2066,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Expand the match provided into a string, and append that to the provided string builder.
+            /// Expand the match provided into a string, and append that to the provided InternableString.
             /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
             /// </summary>
             /// <typeparam name="S">Type of source items.</typeparam>
@@ -2028,7 +2075,7 @@ namespace Microsoft.Build.Evaluation
                 ExpressionShredder.ItemExpressionCapture capture,
                 IItemProvider<S> evaluatedItems,
                 IElementLocation elementLocation,
-                ReuseableStringBuilder builder,
+                SpanBasedStringBuilder builder,
                 ExpanderOptions options
                 )
                 where S : class, IItem
@@ -2069,12 +2116,11 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                     builder.Append(item.Key);
-                    builder.Append(';');
+                    if (i < itemsFromCapture.Count - 1)
+                    {
+                        builder.Append(";");
+                    }
                 }
-
-                // Remove trailing separator if we added one
-                if (itemsFromCapture.Count > 0)
-                    builder.Length--;
                 
                 return false;
             }
@@ -4733,7 +4779,7 @@ namespace Microsoft.Build.Evaluation
                     argumentStartIndex++;
 
                     // Scan for the matching closing bracket, skipping any nested ones
-                    int argumentsEndIndex = ScanForClosingParenthesis(expressionFunction, argumentStartIndex);
+                    int argumentsEndIndex = ScanForClosingParenthesis(expressionFunction, argumentStartIndex, out _, out _);
 
                     if (argumentsEndIndex == -1)
                     {
@@ -4935,7 +4981,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    string propertyValue = "\"" + objectInstance as string + "\"";
+                    string propertyValue = $"\"{objectInstance as string}\"";
 
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                     {

@@ -2397,7 +2397,9 @@ namespace Microsoft.Build.UnitTests
 
             if (NativeMethodsShared.IsWindows)
             {
+#pragma warning disable CA1416 // Suppress Warning saying that WindowsPrincipal might not be compatible on Windows (Which shouldn't be an issue...)
                 if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null)))
+#pragma warning restore CA1416 // Suppress Warning saying that WindowsPrincipal might not be compatible on Windows (Which shouldn't be an issue...)
                 {
                     isPrivileged = false;
                     Assert.True(true, "It seems that you don't have the permission to create symbolic links. Try to run this test again with higher privileges");

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -31,6 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
            );
         }
+
         /// <summary>
         /// Verify when creating a LogMessagePacket
         /// that the correct Event Type is set.
@@ -44,6 +47,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskStartedEventArgs taskStarted = new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName");
             TaskFinishedEventArgs taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
             TaskCommandLineEventArgs commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
+            TaskParameterEventArgs taskParameter = CreateTaskParameter();
             BuildWarningEventArgs warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             BuildErrorEventArgs error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             TargetStartedEventArgs targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
@@ -51,6 +55,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectStartedEventArgs projectStarted = new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null);
             ProjectFinishedEventArgs projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
             ExternalProjectStartedEventArgs externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
+            ProjectEvaluationStartedEventArgs evaluationStarted = new ProjectEvaluationStartedEventArgs();
+            ProjectEvaluationFinishedEventArgs evaluationFinished = new ProjectEvaluationFinishedEventArgs();
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -58,13 +64,114 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(taskStarted, LoggingEventType.TaskStartedEvent);
             VerifyLoggingPacket(taskFinished, LoggingEventType.TaskFinishedEvent);
             VerifyLoggingPacket(commandLine, LoggingEventType.TaskCommandLineEvent);
+            VerifyLoggingPacket(taskParameter, LoggingEventType.TaskParameterEvent);
             VerifyLoggingPacket(warning, LoggingEventType.BuildWarningEvent);
             VerifyLoggingPacket(error, LoggingEventType.BuildErrorEvent);
             VerifyLoggingPacket(targetStarted, LoggingEventType.TargetStartedEvent);
             VerifyLoggingPacket(targetFinished, LoggingEventType.TargetFinishedEvent);
             VerifyLoggingPacket(projectStarted, LoggingEventType.ProjectStartedEvent);
             VerifyLoggingPacket(projectFinished, LoggingEventType.ProjectFinishedEvent);
+            VerifyLoggingPacket(evaluationStarted, LoggingEventType.ProjectEvaluationStartedEvent);
+            VerifyLoggingPacket(evaluationFinished, LoggingEventType.ProjectEvaluationFinishedEvent);
             VerifyLoggingPacket(externalStartedEvent, LoggingEventType.CustomEvent);
+        }
+
+        private static BuildEventContext CreateBuildEventContext()
+        {
+            return new BuildEventContext(1, 2, 3, 4, 5, 6, 7);
+        }
+
+        private static ProjectEvaluationStartedEventArgs CreateProjectEvaluationStarted()
+        {
+            string projectFile = "test.csproj";
+            var result = new ProjectEvaluationStartedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationStarted"),
+                projectFile)
+            {
+                ProjectFile = projectFile
+            };
+            result.BuildEventContext = CreateBuildEventContext();
+
+            return result;
+        }
+
+        private static ProjectEvaluationFinishedEventArgs CreateProjectEvaluationFinished()
+        {
+            string projectFile = "test.csproj";
+            var result = new ProjectEvaluationFinishedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationFinished"),
+                projectFile)
+            {
+                ProjectFile = projectFile,
+                GlobalProperties = CreateProperties(),
+                Properties = CreateProperties(),
+                Items = new ArrayList
+                {
+                    new DictionaryEntry("Compile", new TaskItemData("a", null)),
+                    new DictionaryEntry("Compile", new TaskItemData("b", CreateStringDictionary())),
+                    new DictionaryEntry("Reference", new TaskItemData("c", CreateStringDictionary())),
+                }
+            };
+            result.BuildEventContext = CreateBuildEventContext();
+
+            return result;
+        }
+
+        private static IEnumerable CreateProperties()
+        {
+            return new ArrayList
+            {
+                new DictionaryEntry("a", "b"),
+                new DictionaryEntry("c", "d")
+            };
+        }
+
+        private static Dictionary<string, string> CreateStringDictionary()
+        {
+            return new Dictionary<string, string>
+            {
+                { "a", "b" },
+                { "c", "d" }
+            };
+        }
+
+        private static TaskItemData[] CreateTaskItems()
+        {
+            var items = new TaskItemData[]
+            {
+                new TaskItemData("ItemSpec1", null),
+                new TaskItemData("ItemSpec1", CreateStringDictionary()),
+                new TaskItemData("ItemSpec2", Enumerable.Range(1, 3).ToDictionary(i => i.ToString(), i => i.ToString() + "value"))
+            };
+            return items;
+        }
+
+        private static TaskParameterEventArgs CreateTaskParameter()
+        {
+            // touch ItemGroupLoggingHelper to ensure static constructor runs
+            _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
+
+            var items = CreateTaskItems();
+            var result = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "ItemName",
+                items,
+                logItemMetadata: true,
+                DateTime.MinValue);
+
+            // normalize line endings as we can't rely on the line endings of NodePackets_Tests.cs
+            Assert.Equal(@"Task Parameter:
+    ItemName=
+        ItemSpec1
+        ItemSpec1
+                a=b
+                c=d
+        ItemSpec2
+                1=1value
+                2=2value
+                3=3value".Replace("\r\n", "\n"), result.Message);
+
+            return result;
         }
 
         /// <summary>
@@ -73,6 +180,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestTranslation()
         {
+            // need to touch the type so that the static constructor runs
+            _ = ItemGroupLoggingHelper.OutputItemParameterMessagePrefix;
+
             TaskItem item = new TaskItem("Hello", "my.proj");
             List<TaskItem> targetOutputs = new List<TaskItem>();
             targetOutputs.Add(item);
@@ -88,13 +198,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName"),
                     new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true),
                     new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low),
+                    CreateTaskParameter(),
                     new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
                     new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender"),
                     new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile"),
                     new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true, targetOutputs),
                     new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null),
                     new ProjectFinishedEventArgs("message", "help", "ProjectFile", true),
-                    new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames")
+                    new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames"),
+                    CreateProjectEvaluationStarted(),
+                    CreateProjectEvaluationFinished()
                 };
 
                 foreach (BuildEventArgs arg in testArgs)
@@ -250,6 +363,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     // Assert.AreEqual(leftProjectStarted.Properties, rightProjectStarted.Properties);
                     break;
 
+                case LoggingEventType.ProjectEvaluationStartedEvent:
+                    ProjectEvaluationStartedEventArgs leftEvaluationStarted = left.NodeBuildEvent.Value.Value as ProjectEvaluationStartedEventArgs;
+                    ProjectEvaluationStartedEventArgs rightEvaluationStarted = right.NodeBuildEvent.Value.Value as ProjectEvaluationStartedEventArgs;
+                    Assert.NotNull(leftEvaluationStarted);
+                    Assert.NotNull(rightEvaluationStarted);
+                    Assert.Equal(leftEvaluationStarted.ProjectFile, rightEvaluationStarted.ProjectFile);
+                    break;
+
+                case LoggingEventType.ProjectEvaluationFinishedEvent:
+                    ProjectEvaluationFinishedEventArgs leftEvaluationFinished = left.NodeBuildEvent.Value.Value as ProjectEvaluationFinishedEventArgs;
+                    ProjectEvaluationFinishedEventArgs rightEvaluationFinished = right.NodeBuildEvent.Value.Value as ProjectEvaluationFinishedEventArgs;
+                    Assert.NotNull(leftEvaluationFinished);
+                    Assert.NotNull(rightEvaluationFinished);
+                    Assert.Equal(leftEvaluationFinished.ProjectFile, rightEvaluationFinished.ProjectFile);
+                    Assert.Equal(leftEvaluationFinished.ProfilerResult, rightEvaluationFinished.ProfilerResult);
+                    Assert.Equal(
+                        TranslationHelpers.GetPropertiesString(leftEvaluationFinished.GlobalProperties),
+                        TranslationHelpers.GetPropertiesString(rightEvaluationFinished.GlobalProperties));
+                    Assert.Equal(
+                        TranslationHelpers.GetPropertiesString(leftEvaluationFinished.Properties),
+                        TranslationHelpers.GetPropertiesString(rightEvaluationFinished.Properties));
+                    Assert.Equal(
+                        TranslationHelpers.GetMultiItemsString(leftEvaluationFinished.Items),
+                        TranslationHelpers.GetMultiItemsString(rightEvaluationFinished.Items));
+                    break;
+
                 case LoggingEventType.TargetFinishedEvent:
                     TargetFinishedEventArgs leftTargetFinished = left.NodeBuildEvent.Value.Value as TargetFinishedEventArgs;
                     TargetFinishedEventArgs rightTargetFinished = right.NodeBuildEvent.Value.Value as TargetFinishedEventArgs;
@@ -259,6 +398,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTargetFinished.Succeeded, rightTargetFinished.Succeeded);
                     Assert.Equal(leftTargetFinished.TargetFile, rightTargetFinished.TargetFile);
                     Assert.Equal(leftTargetFinished.TargetName, rightTargetFinished.TargetName);
+                    //TODO: target output translation is a special case and is done in TranslateTargetFinishedEvent
+                    //Assert.Equal(leftTargetFinished.TargetOutputs, rightTargetFinished.TargetOutputs);
                     break;
 
                 case LoggingEventType.TargetStartedEvent:
@@ -279,6 +420,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftCommand.CommandLine, rightCommand.CommandLine);
                     Assert.Equal(leftCommand.Importance, rightCommand.Importance);
                     Assert.Equal(leftCommand.TaskName, rightCommand.TaskName);
+                    break;
+
+                case LoggingEventType.TaskParameterEvent:
+                    var leftTaskParameter = left.NodeBuildEvent.Value.Value as TaskParameterEventArgs;
+                    var rightTaskParameter = right.NodeBuildEvent.Value.Value as TaskParameterEventArgs;
+                    Assert.NotNull(leftTaskParameter);
+                    Assert.NotNull(rightTaskParameter);
+                    Assert.Equal(leftTaskParameter.Kind, rightTaskParameter.Kind);
+                    Assert.Equal(leftTaskParameter.ItemType, rightTaskParameter.ItemType);
+                    Assert.Equal(leftTaskParameter.Items.Count, rightTaskParameter.Items.Count);
+                    Assert.Equal(leftTaskParameter.Message, rightTaskParameter.Message);
+                    Assert.Equal(leftTaskParameter.BuildEventContext, rightTaskParameter.BuildEventContext);
+                    Assert.Equal(leftTaskParameter.Timestamp, rightTaskParameter.Timestamp);
                     break;
 
                 case LoggingEventType.TaskFinishedEvent:

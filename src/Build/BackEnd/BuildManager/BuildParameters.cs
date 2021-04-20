@@ -70,7 +70,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Indicates if we should dump string interning stats.
         /// </summary>
-        private static bool? s_dumpOpportunisticInternStats;
+        private static bool? s_dumpStringInterningStats;
 
         /// <summary>
         /// Indicates if we should debug the expander.
@@ -647,7 +647,7 @@ namespace Microsoft.Build.Execution
         /// Indicates whether we should dump string interning stats
         /// </summary>
         internal static bool DumpOpportunisticInternStats => GetStaticBoolVariableOrDefault(
-            "MSBUILDDUMPOPPORTUNISTICINTERNSTATS", ref s_dumpOpportunisticInternStats, false);
+            "MSBUILDDUMPOPPORTUNISTICINTERNSTATS", ref s_dumpStringInterningStats, false);
 
         /// <summary>
         /// Indicates whether we should dump debugging information about the expander

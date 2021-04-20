@@ -282,12 +282,12 @@ namespace Microsoft.Build.Utilities
 
             BuildMessageEventArgs e = new BuildMessageEventArgs
                 (
-                    message,                             // message
-                    null,                                // help keyword
-                    TaskName,                            // sender 
-                    importance,                          // importance
-                    DateTime.UtcNow,                     // timestamp
-                    messageArgs                          // message arguments
+                    message,
+                    helpKeyword: null,
+                    senderName: TaskName,
+                    importance,
+                    DateTime.UtcNow,
+                    messageArgs
                 );
 
             // If BuildEngine is null, task attempted to log before it was set on it,
@@ -1015,6 +1015,28 @@ namespace Microsoft.Build.Utilities
             // If the task has missed out all location information, add the location of the task invocation;
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
+
+            // This warning will be converted to an error if:
+            // 1. Its code exists within WarningsAsErrors
+            // 2. If WarningsAsErrors is a non-null empty set (treat all warnings as errors)
+            if (BuildEngine is IBuildEngine8 be8 && be8.ShouldTreatWarningAsError(warningCode))
+            {
+                LogError
+                (
+                    subcategory: subcategory,
+                    errorCode: warningCode,
+                    helpKeyword: helpKeyword,
+                    helpLink: helpLink,
+                    file: fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    lineNumber: fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    columnNumber: fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber: endLineNumber,
+                    endColumnNumber: endColumnNumber,
+                    message: message,
+                    messageArgs: messageArgs
+                );
+                return;
+            }
 
             var e = new BuildWarningEventArgs
                 (

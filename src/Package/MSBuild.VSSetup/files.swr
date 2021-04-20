@@ -8,7 +8,6 @@ package name=Microsoft.Build
 vs.dependencies
   vs.dependency id=Microsoft.Build.UnGAC
   vs.dependency id=Microsoft.VisualStudio.PackageGroup.NuGet
-                version=[15.0,17.0)
 
 vs.relatedProcessFiles
   vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\Microsoft.Build.dll"
@@ -48,6 +47,8 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all vs.file.ngenPriority=1
+  file source=$(X86BinPath)Microsoft.NET.StringTools.dll vs.file.ngenArchitecture=all
+  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
@@ -198,6 +199,8 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.NET.StringTools.dll vs.file.ngenArchitecture=all
+  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
@@ -321,6 +324,7 @@ folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)Build\Microsoft.Build.pkgdef
   file source=$(SourceDir)Build\System.Text.Encodings.Web.pkgdef
   file source=$(SourceDir)Build\System.Text.Json.pkgdef
+  file source=$(SourceDir)StringTools\StringTools.pkgdef
   file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
   file source=$(SourceDir)Tasks\System.Resources.Extensions.pkgdef
   file source=$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef

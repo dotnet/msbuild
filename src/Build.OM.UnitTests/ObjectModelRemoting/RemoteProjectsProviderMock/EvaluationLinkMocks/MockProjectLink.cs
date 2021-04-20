@@ -187,7 +187,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public override string ExpandString(string unexpandedValue) => this.Proxy.ExpandString(unexpandedValue);
 
-// TODO: Glob is not needed for the CSproj, but we might want to test it at least 
         public override List<GlobResult> GetAllGlobs(EvaluationContext evaluationContext)
         {
             throw new NotImplementedException();

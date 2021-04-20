@@ -3,7 +3,7 @@
   <PropertyGroup>
     <DisableProject Condition="'$(MonoBuild)' == 'true'">true</DisableProject>
     <DisableProject Condition="'$(MSBuildRuntimeType)' == 'Core'">true</DisableProject>
-    <DisableProject Condition="'$(OsEnvironment)'!='windows'">true</DisableProject>
+    <DisableProject Condition="! $([MSBuild]::IsOSPlatform('windows'))">true</DisableProject>
   </PropertyGroup>
   <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(DisableProject)' == 'true'" />
 
