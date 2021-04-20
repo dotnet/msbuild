@@ -99,7 +99,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
             IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetInvalidParameterList();
 
-            Assert.Equal(expectedInvalidParams.Count(), invalidParameters.Count());
+            Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
             foreach (MockInvalidParameterInfo exp in expectedInvalidParams)
             {
                 Assert.Single(invalidParameters.Where(param => param.ErrorKind == exp.Kind && param.InputFormat == exp.InputFormat && param.SpecifiedValue == exp.SpecifiedValue));
@@ -115,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
             IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetAmbiguousSingleStartsWithParameters();
 
-            Assert.Equal(expectedInvalidParams.Count(), invalidParameters.Count());
+            Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
             foreach (MockInvalidParameterInfo exp in expectedInvalidParams)
             {
                 Assert.Single(invalidParameters.Where(param => param.ErrorKind == exp.Kind && param.InputFormat == exp.InputFormat && param.SpecifiedValue == exp.SpecifiedValue));
@@ -273,7 +273,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             var identitiesToCheck = selectedTemplates.Select(t => t.Info.Identity);
 
-            Assert.Equal(expectedTemplates.Count(), selectedTemplates.Count());
+            Assert.Equal(expectedTemplates.Length, selectedTemplates.Count());
             foreach (string exp in expectedTemplates)
             {
                 Assert.Single(selectedTemplates.Where(t => t.Info.Identity == exp));
