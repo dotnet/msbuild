@@ -8,10 +8,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
     internal class MockInvalidParameterInfo : IXunitSerializable
     {
-
         public MockInvalidParameterInfo()
         {
-
         }
 
         public MockInvalidParameterInfo(InvalidParameterInfo.Kind kind, string inputFormat, string specifiedValue)

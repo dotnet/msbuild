@@ -12,7 +12,6 @@ using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
-
     public class TemplateGroupTests
     {
         public static IEnumerable<object[]> GetInvalidParametersTestData()

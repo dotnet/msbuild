@@ -42,7 +42,6 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public async Task<string> GetNuGetPackage(string templatePackName, ITestOutputHelper? log = null)
         {
-
             try
             {
                 await semaphore.WaitAsync().ConfigureAwait(false);
