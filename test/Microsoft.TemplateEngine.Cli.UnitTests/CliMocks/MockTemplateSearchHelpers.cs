@@ -12,14 +12,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
     internal static class MockTemplateSearchHelpers
     {
-        private static IReadOnlyList<MatchInfo> DefaultMatchInfo = new List<MatchInfo>()
+        private static IReadOnlyList<MatchInfo> defaultMatchInfo = new List<MatchInfo>()
         {
             new MatchInfo(MatchInfo.BuiltIn.Name, "test-name", MatchKind.Exact)
         };
 
         public static Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<ITemplateMatchInfo>> DefaultMatchFilter => (nameMatches) =>
         {
-            return nameMatches.Select(match => new TemplateMatchInfo(match.Template, DefaultMatchInfo)).ToList();
+            return nameMatches.Select(match => new TemplateMatchInfo(match.Template, defaultMatchInfo)).ToList();
         };
     }
 }
