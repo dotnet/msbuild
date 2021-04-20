@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd
         void Reset();
 
         /// <summary>
-        /// Writes a detailed summary of the build state which includes informaiton about the scheduling plan.
+        /// Writes a detailed summary of the build state which includes information about the scheduling plan.
         /// </summary>
         void WriteDetailedSummary(int submissionId);
 
