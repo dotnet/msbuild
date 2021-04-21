@@ -250,7 +250,6 @@ namespace Dotnet_new3.IntegrationTests
                 .Should().Fail()
                 .And.HaveStdErrContaining("The template package 'Microsoft.DotNet.Common.ProjectTemplates.5.0' is not found")
                 .And.HaveStdErrContaining("To list installed template packages, use dotnet new3 -u");
-
         }
 
         [Fact]
@@ -309,7 +308,6 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("The template 'console' is included to the packages:")
                 .And.HaveStdErrContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 (contains 6 templates)")
                 .And.HaveStdErrContaining("Microsoft.DotNet.Common.ProjectTemplates.3.1::5.0.0 (contains 6 templates)");
-
         }
     }
 }

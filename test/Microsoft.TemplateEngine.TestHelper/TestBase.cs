@@ -14,8 +14,6 @@ namespace Microsoft.TemplateEngine.TestHelper
 {
     public abstract class TestBase
     {
-        protected IEngineEnvironmentSettings EngineEnvironmentSettings { get; }
-
         protected TestBase()
         {
             ITemplateEngineHost host = new TestHost
@@ -28,10 +26,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             host.VirtualizeDirectory(GetTemplateEngineDirectory());
         }
 
-        private static string GetTemplateEngineDirectory()
-        {
-            return Path.Combine(Directory.GetCurrentDirectory(), ".templateengine");
-        }
+        protected IEngineEnvironmentSettings EngineEnvironmentSettings { get; }
 
         protected static void RunAndVerify(string originalValue, string expectedValue, IProcessor processor, int bufferSize, bool? changeOverride = null)
         {
@@ -56,6 +51,11 @@ namespace Microsoft.TemplateEngine.TestHelper
             {
                 Assert.False(true, $"Expected value to {modifier} be changed");
             }
+        }
+
+        private static string GetTemplateEngineDirectory()
+        {
+            return Path.Combine(Directory.GetCurrentDirectory(), ".templateengine");
         }
     }
 }

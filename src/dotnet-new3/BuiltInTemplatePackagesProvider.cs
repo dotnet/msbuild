@@ -41,11 +41,13 @@ namespace Dotnet_new3
                 Factory = factory;
             }
 
-            public ITemplatePackageProviderFactory Factory { get; }
-
 #pragma warning disable CS0067
+
             public event Action TemplatePackagesChanged;
+
 #pragma warning restore CS0067
+
+            public ITemplatePackageProviderFactory Factory { get; }
 
             public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
             {

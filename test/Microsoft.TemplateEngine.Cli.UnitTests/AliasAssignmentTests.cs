@@ -11,6 +11,36 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class AliasAssignmentTests
     {
+        private static HashSet<string> InitiallyTakenAliases
+        {
+            get
+            {
+                HashSet<string> initiallyTakenAliases = new HashSet<string>()
+                {
+                    "-h", "--help",
+                    "-l", "--list",
+                    "-n", "--name",
+                    "-o", "--output",
+                    "-i", "--install",
+                    "-u", "--uninstall",
+                    "--type",
+                    "--force",
+                    "-lang", "--language",
+                    "-a", "--alias",
+                    "--show-alias",
+                    "-x", "--extra-args",
+                    "--quiet",
+                    "-all", "--show-all",
+                    "--allow-scripts",
+                    "--baseline",
+                    "-up", "--update",
+                    "--skip-update-check"
+                };
+
+                return initiallyTakenAliases;
+            }
+        }
+
         // also asserts that "--param:<name>" is used if <name> is taken
         [Fact(DisplayName = nameof(LongNameOverrideTakesPrecendence))]
         public void LongNameOverrideTakesPrecendence()
@@ -35,7 +65,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal("--foo", assignmentCoordinator.LongNameAssignments["bar"]);
             Assert.Equal("-fo", assignmentCoordinator.ShortNameAssignments["bar"]); // the short name is based on the long name override if it exists
             Assert.Empty(assignmentCoordinator.InvalidParams);
-
         }
 
         [Fact(DisplayName = nameof(ShortNameOverrideTakesPrecedence))]
@@ -261,36 +290,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             }
 
             return parameterList;
-        }
-
-        private static HashSet<string> InitiallyTakenAliases
-        {
-            get
-            {
-                HashSet<string> initiallyTakenAliases = new HashSet<string>()
-                {
-                    "-h", "--help",
-                    "-l", "--list",
-                    "-n", "--name",
-                    "-o", "--output",
-                    "-i", "--install",
-                    "-u", "--uninstall",
-                    "--type",
-                    "--force",
-                    "-lang", "--language",
-                    "-a", "--alias",
-                    "--show-alias",
-                    "-x", "--extra-args",
-                    "--quiet",
-                    "-all", "--show-all",
-                    "--allow-scripts",
-                    "--baseline",
-                    "-up", "--update",
-                    "--skip-update-check"
-                };
-
-                return initiallyTakenAliases;
-            }
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Microsoft.TemplateEngine.Cli
 
     internal class HelpFormatter<T>
     {
+        private const string ShrinkReplacement = "...";
         private readonly bool _blankLineBetweenRows;
         private readonly int _columnPadding;
         private readonly List<ColumnDefinition> _columns = new List<ColumnDefinition>();
@@ -28,7 +29,6 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IEnumerable<T> _rowDataItems;
         private readonly List<Tuple<int, bool, IComparer<string>>> _ordering = new List<Tuple<int, bool, IComparer<string>>>();
         private readonly IEngineEnvironmentSettings _environmentSettings;
-        private const string ShrinkReplacement = "...";
         private readonly INewCommandInput _commandInput;
 
         internal HelpFormatter(IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IEnumerable<T> rows, int columnPadding, char? headerSeparator, bool blankLineBetweenRows)
@@ -56,17 +56,6 @@ namespace Microsoft.TemplateEngine.Cli
                 column = c;
             }
             return this;
-        }
-
-        private static string ShrinkTextToLength(string text, int maxLength)
-        {
-            if (text.Length <= maxLength)
-            {
-                // The text is short enough, so return it
-                return text;
-            }
-            // If the text is too long, shorten it enough to allow room for the ellipsis, then add the ellipsis
-            return text.Substring(0, Math.Max(0, maxLength - ShrinkReplacement.Length)) + ShrinkReplacement;
         }
 
         internal string Layout()
@@ -196,6 +185,45 @@ namespace Microsoft.TemplateEngine.Cli
             return b.ToString();
         }
 
+        internal HelpFormatter<T> OrderBy(object columnToken, IComparer<string> comparer = null)
+        {
+            comparer = comparer ?? StringComparer.Ordinal;
+            int index = _columns.IndexOf(columnToken as ColumnDefinition);
+
+            if (index < 0)
+            {
+                return this;
+            }
+
+            _ordering.Add(Tuple.Create(index, false, comparer));
+            return this;
+        }
+
+        internal HelpFormatter<T> OrderByDescending(object columnToken, IComparer<string> comparer = null)
+        {
+            comparer = comparer ?? StringComparer.Ordinal;
+            int index = _columns.IndexOf(columnToken as ColumnDefinition);
+
+            if (index < 0)
+            {
+                return this;
+            }
+
+            _ordering.Add(Tuple.Create(index, true, comparer));
+            return this;
+        }
+
+        private static string ShrinkTextToLength(string text, int maxLength)
+        {
+            if (text.Length <= maxLength)
+            {
+                // The text is short enough, so return it
+                return text;
+            }
+            // If the text is too long, shorten it enough to allow room for the ellipsis, then add the ellipsis
+            return text.Substring(0, Math.Max(0, maxLength - ShrinkReplacement.Length)) + ShrinkReplacement;
+        }
+
         private void CalculateColumnWidth(IReadOnlyDictionary<int, int> columnWidthLookup)
         {
             int maxAllowedGridWidth = _environmentSettings.Environment.ConsoleBufferWidth;
@@ -272,7 +300,6 @@ namespace Microsoft.TemplateEngine.Cli
                     amountForShrinkableColumnToGiveUp--;
                 }
             }
-
         }
 
         private class ColumnDefinition
@@ -355,6 +382,8 @@ namespace Microsoft.TemplateEngine.Cli
 
             internal int MaxWidth { get; }
 
+            internal string RawText { get; }
+
             internal string GetTextWithPadding(int line, int maxColumnWidth, bool rightAlign = false)
             {
                 var text = _lines.Count > line ? _lines[line] : string.Empty;
@@ -398,36 +427,6 @@ namespace Microsoft.TemplateEngine.Cli
                     position += properMax;
                 }
             }
-
-            internal string RawText { get; }
-        }
-
-        internal HelpFormatter<T> OrderBy(object columnToken, IComparer<string> comparer = null)
-        {
-            comparer = comparer ?? StringComparer.Ordinal;
-            int index = _columns.IndexOf(columnToken as ColumnDefinition);
-
-            if (index < 0)
-            {
-                return this;
-            }
-
-            _ordering.Add(Tuple.Create(index, false, comparer));
-            return this;
-        }
-
-        internal HelpFormatter<T> OrderByDescending(object columnToken, IComparer<string> comparer = null)
-        {
-            comparer = comparer ?? StringComparer.Ordinal;
-            int index = _columns.IndexOf(columnToken as ColumnDefinition);
-
-            if (index < 0)
-            {
-                return this;
-            }
-
-            _ordering.Add(Tuple.Create(index, true, comparer));
-            return this;
         }
     }
 }

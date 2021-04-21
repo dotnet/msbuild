@@ -8,6 +8,8 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal class AnsiConsole
     {
+        private int _boldRecursion;
+
         private AnsiConsole(TextWriter writer)
         {
             Writer = writer;
@@ -15,7 +17,9 @@ namespace Microsoft.TemplateEngine.Cli
             OriginalForegroundColor = Console.ForegroundColor;
         }
 
-        private int _boldRecursion;
+        internal TextWriter Writer { get; }
+
+        internal ConsoleColor OriginalForegroundColor { get; }
 
         internal static AnsiConsole GetOutput()
         {
@@ -25,33 +29,6 @@ namespace Microsoft.TemplateEngine.Cli
         internal static AnsiConsole GetError()
         {
             return new AnsiConsole(Console.Error);
-        }
-
-        internal TextWriter Writer { get; }
-
-        internal ConsoleColor OriginalForegroundColor { get; }
-
-        private void SetColor(ConsoleColor color)
-        {
-            const int Light = 0x08;
-            int c = (int)color;
-
-            Console.ForegroundColor =
-                c < 0 ? color : // unknown, just use it
-                _boldRecursion > 0 ? (ConsoleColor)(c | Light) : // ensure color is light
-                (ConsoleColor)(c & ~Light); // ensure color is dark
-        }
-
-        private void SetBold(bool bold)
-        {
-            _boldRecursion += bold ? 1 : -1;
-            if (_boldRecursion > 1 || (_boldRecursion == 1 && !bold))
-            {
-                return;
-            }
-
-            // switches on _boldRecursion to handle boldness
-            SetColor(Console.ForegroundColor);
         }
 
         internal void WriteLine(string message)
@@ -139,6 +116,29 @@ namespace Microsoft.TemplateEngine.Cli
                     escapeScan = endIndex + 1;
                 }
             }
+        }
+
+        private void SetColor(ConsoleColor color)
+        {
+            const int Light = 0x08;
+            int c = (int)color;
+
+            Console.ForegroundColor =
+                c < 0 ? color : // unknown, just use it
+                _boldRecursion > 0 ? (ConsoleColor)(c | Light) : // ensure color is light
+                (ConsoleColor)(c & ~Light); // ensure color is dark
+        }
+
+        private void SetBold(bool bold)
+        {
+            _boldRecursion += bold ? 1 : -1;
+            if (_boldRecursion > 1 || (_boldRecursion == 1 && !bold))
+            {
+                return;
+            }
+
+            // switches on _boldRecursion to handle boldness
+            SetColor(Console.ForegroundColor);
         }
     }
 }

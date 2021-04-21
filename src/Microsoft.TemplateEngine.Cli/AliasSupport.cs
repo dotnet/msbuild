@@ -15,6 +15,14 @@ namespace Microsoft.TemplateEngine.Cli
 {
     internal static class AliasSupport
     {
+        // Matches on any non-word character (letter, number, or underscore)
+        // Almost the same as \W, except \W has some quirks with unicode characters, and we allow '.'
+        private static readonly Regex InvalidAliasRegex = new Regex("[^a-z0-9_.]", RegexOptions.IgnoreCase);
+
+        // The first token must be a valid template short name. This naively tests for it by checking the first character.
+        // TODO: make this test more robust.
+        private static readonly Regex ValidFirstTokenRegex = new Regex("^[a-z0-9]", RegexOptions.IgnoreCase);
+
         internal static CreationResultStatus CoordinateAliasExpansion(INewCommandInput commandInput, AliasRegistry aliasRegistry, ITelemetryLogger telemetryLogger)
         {
             AliasExpansionStatus aliasExpansionStatus = AliasSupport.TryExpandAliases(commandInput, aliasRegistry);
@@ -58,13 +66,6 @@ namespace Microsoft.TemplateEngine.Cli
             return AliasExpansionStatus.ExpansionError;
         }
 
-        // Matches on any non-word character (letter, number, or underscore)
-        // Almost the same as \W, except \W has some quirks with unicode characters, and we allow '.'
-        private static readonly Regex InvalidAliasRegex = new Regex("[^a-z0-9_.]", RegexOptions.IgnoreCase);
-        // The first token must be a valid template short name. This naively tests for it by checking the first character.
-        // TODO: make this test more robust.
-        private static readonly Regex ValidFirstTokenRegex = new Regex("^[a-z0-9]", RegexOptions.IgnoreCase);
-
         internal static CreationResultStatus ManipulateAliasIfValid(AliasRegistry aliasRegistry, string aliasName, List<string> inputTokens, HashSet<string> reservedAliasNames)
         {
             if (reservedAliasNames.Contains(aliasName))
@@ -90,6 +91,46 @@ namespace Microsoft.TemplateEngine.Cli
 
             // create, update, or delete an alias.
             return ManipulateAliasValue(aliasName, aliasTokens, aliasRegistry);
+        }
+
+        internal static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
+        {
+            IReadOnlyDictionary<string, IReadOnlyList<string>> aliasesToShow;
+
+            if (!string.IsNullOrEmpty(commandInput.ShowAliasesAliasName))
+            {
+                if (aliasRegistry.AllAliases.TryGetValue(commandInput.ShowAliasesAliasName, out IReadOnlyList<string> aliasValue))
+                {
+                    aliasesToShow = new Dictionary<string, IReadOnlyList<string>>()
+                    {
+                        { commandInput.ShowAliasesAliasName, aliasValue }
+                    };
+                }
+                else
+                {
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasShowErrorUnknownAlias, commandInput.ShowAliasesAliasName, commandName));
+                    return CreationResultStatus.InvalidParamValues;
+                }
+            }
+            else
+            {
+                aliasesToShow = aliasRegistry.AllAliases;
+                Reporter.Output.WriteLine(LocalizableStrings.AliasShowAllAliasesHeader);
+            }
+
+            HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>> formatter =
+                new HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>>(
+                    environment,
+                    commandInput,
+                    aliasesToShow,
+                    columnPadding: 2,
+                    headerSeparator: '-',
+                    blankLineBetweenRows: false)
+                .DefineColumn(t => t.Key, LocalizableStrings.AliasName, showAlways: true)
+                .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue, showAlways: true);
+
+            Reporter.Output.WriteLine(formatter.Layout());
+            return CreationResultStatus.Success;
         }
 
         private static CreationResultStatus ManipulateAliasValue(string aliasName, IReadOnlyList<string> aliasTokens, AliasRegistry aliasRegistry)
@@ -159,46 +200,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return aliasTokens;
-        }
-
-        internal static CreationResultStatus DisplayAliasValues(IEngineEnvironmentSettings environment, INewCommandInput commandInput, AliasRegistry aliasRegistry, string commandName)
-        {
-            IReadOnlyDictionary<string, IReadOnlyList<string>> aliasesToShow;
-
-            if (!string.IsNullOrEmpty(commandInput.ShowAliasesAliasName))
-            {
-                if (aliasRegistry.AllAliases.TryGetValue(commandInput.ShowAliasesAliasName, out IReadOnlyList<string> aliasValue))
-                {
-                    aliasesToShow = new Dictionary<string, IReadOnlyList<string>>()
-                    {
-                        { commandInput.ShowAliasesAliasName, aliasValue }
-                    };
-                }
-                else
-                {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasShowErrorUnknownAlias, commandInput.ShowAliasesAliasName, commandName));
-                    return CreationResultStatus.InvalidParamValues;
-                }
-            }
-            else
-            {
-                aliasesToShow = aliasRegistry.AllAliases;
-                Reporter.Output.WriteLine(LocalizableStrings.AliasShowAllAliasesHeader);
-            }
-
-            HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>> formatter =
-                new HelpFormatter<KeyValuePair<string, IReadOnlyList<string>>>(
-                    environment,
-                    commandInput,
-                    aliasesToShow,
-                    columnPadding: 2,
-                    headerSeparator: '-',
-                    blankLineBetweenRows: false)
-                .DefineColumn(t => t.Key, LocalizableStrings.AliasName, showAlways: true)
-                .DefineColumn(t => string.Join(" ", t.Value), LocalizableStrings.AliasValue, showAlways: true);
-
-            Reporter.Output.WriteLine(formatter.Layout());
-            return CreationResultStatus.Success;
         }
     }
 }

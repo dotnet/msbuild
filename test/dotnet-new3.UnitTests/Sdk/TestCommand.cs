@@ -12,26 +12,21 @@ namespace Microsoft.NET.TestFramework.Commands
 {
     public abstract class TestCommand
     {
-        protected Dictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
-
-        public ITestOutputHelper Log { get; }
-
-        public string WorkingDirectory { get; set; }
-
-        public List<string> Arguments { get; set; } = new List<string>();
-
-        public List<string> EnvironmentToRemove { get; } = new List<string>();
-
-        //  These only work via Execute(), not when using GetProcessStartInfo()
-        public Action<string> CommandOutputHandler { get; set; }
-        public Action<Process> ProcessStartedHandler { get; set; }
-
         protected TestCommand(ITestOutputHelper log)
         {
             Log = log;
         }
 
-        protected abstract SdkCommandSpec CreateCommand(IEnumerable<string> args);
+        public ITestOutputHelper Log { get; }
+        public string WorkingDirectory { get; set; }
+        public List<string> Arguments { get; set; } = new List<string>();
+        public List<string> EnvironmentToRemove { get; } = new List<string>();
+
+        //  These only work via Execute(), not when using GetProcessStartInfo()
+        public Action<string> CommandOutputHandler { get; set; }
+
+        public Action<Process> ProcessStartedHandler { get; set; }
+        protected Dictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
 
         public TestCommand WithEnvironmentVariable(string name, string value)
         {
@@ -43,32 +38,6 @@ namespace Microsoft.NET.TestFramework.Commands
         {
             WorkingDirectory = workingDirectory;
             return this;
-        }
-
-        private SdkCommandSpec CreateCommandSpec(IEnumerable<string> args)
-        {
-            var commandSpec = CreateCommand(args);
-            foreach (var kvp in Environment)
-            {
-                commandSpec.Environment[kvp.Key] = kvp.Value;
-            }
-
-            foreach (var envToRemove in EnvironmentToRemove)
-            {
-                commandSpec.EnvironmentToRemove.Add(envToRemove);
-            }
-
-            if (WorkingDirectory != null)
-            {
-                commandSpec.WorkingDirectory = WorkingDirectory;
-            }
-
-            if (Arguments.Any())
-            {
-                commandSpec.Arguments = Arguments.Concat(commandSpec.Arguments).ToList();
-            }
-
-            return commandSpec;
         }
 
         public ProcessStartInfo GetProcessStartInfo(params string[] args)
@@ -116,6 +85,34 @@ namespace Microsoft.NET.TestFramework.Commands
             }
 
             return result;
+        }
+
+        protected abstract SdkCommandSpec CreateCommand(IEnumerable<string> args);
+
+        private SdkCommandSpec CreateCommandSpec(IEnumerable<string> args)
+        {
+            var commandSpec = CreateCommand(args);
+            foreach (var kvp in Environment)
+            {
+                commandSpec.Environment[kvp.Key] = kvp.Value;
+            }
+
+            foreach (var envToRemove in EnvironmentToRemove)
+            {
+                commandSpec.EnvironmentToRemove.Add(envToRemove);
+            }
+
+            if (WorkingDirectory != null)
+            {
+                commandSpec.WorkingDirectory = WorkingDirectory;
+            }
+
+            if (Arguments.Any())
+            {
+                commandSpec.Arguments = Arguments.Concat(commandSpec.Arguments).ToList();
+            }
+
+            return commandSpec;
         }
     }
 }

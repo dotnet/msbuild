@@ -322,29 +322,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_1"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
         }
 
-        [Theory(DisplayName = nameof(TemplateResolution_UnambiguousGroup_Test))]
-        [MemberData(nameof(Get_TemplateResolution_UnambiguousGroup_TestData))]
-        internal void TemplateResolution_UnambiguousGroup_Test(MockNewCommandInput command, MockTemplateInfo[] templateSet, string defaultLanguage, int expectedStatus, string[] expectedIdentities)
-        {
-            var matchResult = TemplateResolver.GetTemplateResolutionResult(templateSet, new MockHostSpecificDataLoader(), command, defaultLanguage);
-
-            Assert.Equal(expectedStatus, (int)matchResult.GroupResolutionStatus);
-
-            if (expectedStatus == (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch)
-            {
-                var identities = matchResult.UnambiguousTemplateGroup.Templates.Select(t => t.Info.Identity);
-                Assert.Equal(expectedIdentities.Length, identities.Count());
-                foreach (string identity in expectedIdentities)
-                {
-                    Assert.Single(identities.Where(i => i == identity));
-                }
-            }
-            else
-            {
-                Assert.Null(matchResult.UnambiguousTemplateGroup);
-            }
-        }
-
         public static IEnumerable<object[]> Get_TemplateResolution_TemplateToInvoke_TestData()
         {
             //SingularInvokableMatchTests
@@ -630,6 +607,29 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                         .WithTag("language", "F#")
             };
             yield return new object[] { new MockNewCommandInput("foo"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousTemplateChoice, null };
+        }
+
+        [Theory(DisplayName = nameof(TemplateResolution_UnambiguousGroup_Test))]
+        [MemberData(nameof(Get_TemplateResolution_UnambiguousGroup_TestData))]
+        internal void TemplateResolution_UnambiguousGroup_Test(MockNewCommandInput command, MockTemplateInfo[] templateSet, string defaultLanguage, int expectedStatus, string[] expectedIdentities)
+        {
+            var matchResult = TemplateResolver.GetTemplateResolutionResult(templateSet, new MockHostSpecificDataLoader(), command, defaultLanguage);
+
+            Assert.Equal(expectedStatus, (int)matchResult.GroupResolutionStatus);
+
+            if (expectedStatus == (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch)
+            {
+                var identities = matchResult.UnambiguousTemplateGroup.Templates.Select(t => t.Info.Identity);
+                Assert.Equal(expectedIdentities.Length, identities.Count());
+                foreach (string identity in expectedIdentities)
+                {
+                    Assert.Single(identities.Where(i => i == identity));
+                }
+            }
+            else
+            {
+                Assert.Null(matchResult.UnambiguousTemplateGroup);
+            }
         }
 
         [Theory(DisplayName = nameof(TemplateResolution_TemplateToInvoke_Test))]

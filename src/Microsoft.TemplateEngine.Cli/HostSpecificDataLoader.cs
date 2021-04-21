@@ -14,6 +14,7 @@ namespace Microsoft.TemplateEngine.Cli
     public class HostSpecificDataLoader : IHostSpecificDataLoader
     {
         private readonly ISettingsLoader _settingsLoader;
+
         public HostSpecificDataLoader(ISettingsLoader settingsLoader)
         {
             _settingsLoader = settingsLoader;

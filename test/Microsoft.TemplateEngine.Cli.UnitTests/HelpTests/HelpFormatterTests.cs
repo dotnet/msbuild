@@ -100,7 +100,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 
             string result = formatter.Layout();
             Assert.Equal(expectedOutput, result);
-
         }
 
         [Fact(DisplayName = nameof(CannotShrinkOverMinimumWidth))]
@@ -326,6 +325,5 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             Assert.Equal(expectedOutput, result);
         }
     }
-
 }
 

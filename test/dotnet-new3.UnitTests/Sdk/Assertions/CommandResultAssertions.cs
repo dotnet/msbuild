@@ -148,16 +148,6 @@ namespace Microsoft.NET.TestFramework.Assertions
             return new AndConstraint<CommandResultAssertions>(this);
         }
 
-        private string AppendDiagnosticsTo(string s)
-        {
-            return s + $"{Environment.NewLine}" +
-                       $"File Name: {_commandResult.StartInfo.FileName}{Environment.NewLine}" +
-                       $"Arguments: {_commandResult.StartInfo.Arguments}{Environment.NewLine}" +
-                       $"Exit Code: {_commandResult.ExitCode}{Environment.NewLine}" +
-                       $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
-                       $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}";
-        }
-
         public AndConstraint<CommandResultAssertions> HaveSkippedProjectCompilation(string skippedProject, string frameworkFullName)
         {
             _commandResult.StdOut.Should().Contain($"Project {skippedProject} ({frameworkFullName}) was previously compiled. Skipping compilation.");
@@ -170,6 +160,16 @@ namespace Microsoft.NET.TestFramework.Assertions
             _commandResult.StdOut.Should().Contain($"Project {compiledProject} ({frameworkFullName}) will be compiled");
 
             return new AndConstraint<CommandResultAssertions>(this);
+        }
+
+        private string AppendDiagnosticsTo(string s)
+        {
+            return s + $"{Environment.NewLine}" +
+                       $"File Name: {_commandResult.StartInfo.FileName}{Environment.NewLine}" +
+                       $"Arguments: {_commandResult.StartInfo.Arguments}{Environment.NewLine}" +
+                       $"Exit Code: {_commandResult.ExitCode}{Environment.NewLine}" +
+                       $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
+                       $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}";
         }
     }
 }

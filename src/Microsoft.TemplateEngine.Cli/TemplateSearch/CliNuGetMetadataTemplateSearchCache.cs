@@ -9,11 +9,35 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliNuGetMetadataTemplateSearchCache : FileMetadataTemplateSearchCache
     {
-        protected IReadOnlyDictionary<string, HostSpecificTemplateData> CliHostSpecificData { get; set; }
-
         internal CliNuGetMetadataTemplateSearchCache(IEngineEnvironmentSettings environmentSettings, string pathToMetadata)
             : base(environmentSettings, pathToMetadata)
         {
+        }
+
+        protected IReadOnlyDictionary<string, HostSpecificTemplateData> CliHostSpecificData { get; set; }
+
+        internal IReadOnlyDictionary<string, HostSpecificTemplateData> GetHostDataForTemplateIdentities(IReadOnlyList<string> identities)
+        {
+            EnsureInitialized();
+
+            Dictionary<string, HostSpecificTemplateData> map = new Dictionary<string, HostSpecificTemplateData>();
+
+            foreach (string templateIdentity in identities)
+            {
+                if (CliHostSpecificData.TryGetValue(templateIdentity, out HostSpecificTemplateData hostData))
+                {
+                    map[templateIdentity] = hostData;
+                }
+            }
+
+            return map;
+        }
+
+        internal bool TryGetHostDataForTemplateIdentity(string identity, out HostSpecificTemplateData hostData)
+        {
+            EnsureInitialized();
+
+            return CliHostSpecificData.TryGetValue(identity, out hostData);
         }
 
         protected override NuGetSearchCacheConfig SetupSearchCacheConfig()
@@ -50,30 +74,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
             // set a default for when there isn't any in the discovery metadata, or when there's an exception.
             CliHostSpecificData = new Dictionary<string, HostSpecificTemplateData>();
-        }
-
-        internal IReadOnlyDictionary<string, HostSpecificTemplateData> GetHostDataForTemplateIdentities(IReadOnlyList<string> identities)
-        {
-            EnsureInitialized();
-
-            Dictionary<string, HostSpecificTemplateData> map = new Dictionary<string, HostSpecificTemplateData>();
-
-            foreach (string templateIdentity in identities)
-            {
-                if (CliHostSpecificData.TryGetValue(templateIdentity, out HostSpecificTemplateData hostData))
-                {
-                    map[templateIdentity] = hostData;
-                }
-            }
-
-            return map;
-        }
-
-        internal bool TryGetHostDataForTemplateIdentity(string identity, out HostSpecificTemplateData hostData)
-        {
-            EnsureInitialized();
-
-            return CliHostSpecificData.TryGetValue(identity, out hostData);
         }
     }
 }

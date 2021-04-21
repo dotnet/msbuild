@@ -24,13 +24,15 @@ namespace Microsoft.TemplateEngine.TestHelper
     public class PackageManager : IDisposable
     {
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
-        private string _packageLocation = TestUtils.CreateTemporaryFolder("packages");
         private readonly ILogger _nugetLogger = NullLogger.Instance;
+
         private readonly SourceCacheContext _cacheSettings = new SourceCacheContext()
         {
             NoCache = true,
             DirectDownload = true
         };
+
+        private string _packageLocation = TestUtils.CreateTemporaryFolder("packages");
         private ConcurrentDictionary<string, string> _installedPackages = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public string PackTestTemplatesNuGetPackage()

@@ -17,6 +17,46 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
     public class MultiShortNameResolutionTests
     {
+        private static IReadOnlyList<ITemplateInfo> _multiShortNameGroupTemplateInfo;
+
+        private static IReadOnlyList<ITemplateInfo> MultiShortNameGroupTemplateInfo
+        {
+            get
+            {
+                if (_multiShortNameGroupTemplateInfo == null)
+                {
+                    List<ITemplateInfo> templateList = new List<ITemplateInfo>();
+
+                    templateList.Add(
+                        new MockTemplateInfo(new string[] { "aaa", "bbb" }, name: "High precedence C# in group", precedence: 2000, identity: "MultiName.Test.High.CSharp", groupIdentity: "MultiName.Test")
+                            .WithTag("language", "C#")
+                            .WithTag("foo", "A", "W")
+                            .WithParameters("HighC"));
+
+                    templateList.Add(
+                        new MockTemplateInfo(new string[] { "ccc", "ddd", "eee" }, name: "Low precedence C# in group", precedence: 100, identity: "MultiName.Test.Low.CSharp", groupIdentity: "MultiName.Test")
+                            .WithTag("language", "C#")
+                            .WithTag("foo", "A", "X")
+                            .WithParameters("LowC"));
+
+                    templateList.Add(
+                       new MockTemplateInfo(new string[] { "fff" }, name: "Only F# in group", precedence: 100, identity: "Multiname.Test.Only.FSharp", groupIdentity: "MultiName.Test")
+                           .WithTag("language", "F#")
+                           .WithTag("foo", "A", "Y")
+                           .WithParameters("OnlyF"));
+
+                    templateList.Add(
+                        new MockTemplateInfo(new string[] { "other" }, name: "Unrelated template", precedence: 9999, identity: "Unrelated.Template.CSharp", groupIdentity: "Unrelated.Template")
+                            .WithTag("language", "C#")
+                            .WithTag("foo", "A", "Z"));
+
+                    _multiShortNameGroupTemplateInfo = templateList;
+                }
+
+                return _multiShortNameGroupTemplateInfo;
+            }
+        }
+
         [Fact(DisplayName = nameof(AllTemplatesInGroupUseAllShortNamesForResolution))]
         public void AllTemplatesInGroupUseAllShortNamesForResolution()
         {
@@ -119,44 +159,5 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
             Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke.Info.Identity);
         }
-
-        private static IReadOnlyList<ITemplateInfo> MultiShortNameGroupTemplateInfo
-        {
-            get
-            {
-                if (_multiShortNameGroupTemplateInfo == null)
-                {
-                    List<ITemplateInfo> templateList = new List<ITemplateInfo>();
-
-                    templateList.Add(
-                        new MockTemplateInfo(new string[] { "aaa", "bbb" }, name: "High precedence C# in group", precedence: 2000, identity: "MultiName.Test.High.CSharp", groupIdentity: "MultiName.Test")
-                            .WithTag("language", "C#")
-                            .WithTag("foo", "A", "W")
-                            .WithParameters("HighC"));
-
-                    templateList.Add(
-                        new MockTemplateInfo(new string[] { "ccc", "ddd", "eee" }, name: "Low precedence C# in group", precedence: 100, identity: "MultiName.Test.Low.CSharp", groupIdentity: "MultiName.Test")
-                            .WithTag("language", "C#")
-                            .WithTag("foo", "A", "X")
-                            .WithParameters("LowC"));
-
-                    templateList.Add(
-                       new MockTemplateInfo(new string[] { "fff" }, name: "Only F# in group", precedence: 100, identity: "Multiname.Test.Only.FSharp", groupIdentity: "MultiName.Test")
-                           .WithTag("language", "F#")
-                           .WithTag("foo", "A", "Y")
-                           .WithParameters("OnlyF"));
-
-                    templateList.Add(
-                        new MockTemplateInfo(new string[] { "other" }, name: "Unrelated template", precedence: 9999, identity: "Unrelated.Template.CSharp", groupIdentity: "Unrelated.Template")
-                            .WithTag("language", "C#")
-                            .WithTag("foo", "A", "Z"));
-
-                    _multiShortNameGroupTemplateInfo = templateList;
-                }
-
-                return _multiShortNameGroupTemplateInfo;
-            }
-        }
-        private static IReadOnlyList<ITemplateInfo> _multiShortNameGroupTemplateInfo;
     }
 }

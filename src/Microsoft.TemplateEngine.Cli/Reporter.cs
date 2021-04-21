@@ -26,6 +26,16 @@ namespace Microsoft.TemplateEngine.Cli
         internal static Reporter Error { get; private set; }
         internal static Reporter Verbose { get; private set; }
 
+        private static bool IsVerbose
+        {
+            get { return bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE") ?? "false", out bool value) && value; }
+        }
+
+        private bool ShouldPassAnsiCodesThrough
+        {
+            get { return bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_ANSI_PASS_THRU") ?? "false", out bool value) && value; }
+        }
+
         /// <summary>
         /// Resets the Reporters to write to the current Console Out/Error.
         /// </summary>
@@ -77,16 +87,6 @@ namespace Microsoft.TemplateEngine.Cli
                     _console?.Write(message);
                 }
             }
-        }
-
-        private static bool IsVerbose
-        {
-            get { return bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE") ?? "false", out bool value) && value; }
-        }
-
-        private bool ShouldPassAnsiCodesThrough
-        {
-            get { return bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_ANSI_PASS_THRU") ?? "false", out bool value) && value; }
         }
     }
 }

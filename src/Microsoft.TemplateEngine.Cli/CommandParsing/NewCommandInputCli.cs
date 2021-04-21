@@ -26,7 +26,9 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             LanguageColumnFilter,
             TagsColumnFilter
         };
+
         private readonly string _commandName;
+
         // used for parsing args outside the context of a specific template.
         private readonly Command _noTemplateCommand;
 
@@ -68,6 +70,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         public string BaselineName => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "baseline" });
 
         public bool CheckForUpdates => _parseResult.HasAppliedOption(new[] { _commandName, "update-check" });
+
         public IReadOnlyCollection<string> Columns
         {
             get
@@ -251,7 +254,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
                 return _templateParamVariantToCanonicalMap;
             }
-
         }
 
         public int Execute(params string[] args)
@@ -355,6 +357,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             ExpandedExtraArgsFiles = false;
             ParseArgs();
         }
+
         // TODO: probably deprecate one of RemainingArguments | RemainingParameters
         public bool TemplateParamHasValue(string paramName)
         {

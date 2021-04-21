@@ -17,6 +17,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class TemplateSearcherTests : TestBase
     {
+        private static readonly PackInfo _fooPackInfo = new PackInfo("fooPack", "1.0.0");
+
+        private static readonly PackInfo _barPackInfo = new PackInfo("barPack", "2.0.0");
+
+        private static readonly PackInfo _redPackInfo = new PackInfo("redPack", "1.1");
+
+        private static readonly PackInfo _bluePackInfo = new PackInfo("bluePack", "2.1");
+
+        private static readonly PackInfo _greenPackInfo = new PackInfo("greenPack", "3.0.0");
+
         [Fact(DisplayName = nameof(TwoSourcesAreBothSearched))]
         public void TwoSourcesAreBothSearched()
         {
@@ -64,12 +74,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             SearchResults searchResults = searcher.SearchForTemplatesAsync(packsToIgnore, templateName).Result;
             Assert.Equal(0, searchResults.MatchesBySource.Count);
         }
-
-        private static readonly PackInfo _fooPackInfo = new PackInfo("fooPack", "1.0.0");
-        private static readonly PackInfo _barPackInfo = new PackInfo("barPack", "2.0.0");
-        private static readonly PackInfo _redPackInfo = new PackInfo("redPack", "1.1");
-        private static readonly PackInfo _bluePackInfo = new PackInfo("bluePack", "2.1");
-        private static readonly PackInfo _greenPackInfo = new PackInfo("greenPack", "3.0.0");
 
         private static IReadOnlyDictionary<string, IReadOnlyList<ITemplateNameSearchResult>> GetMockNameSearchResults()
         {

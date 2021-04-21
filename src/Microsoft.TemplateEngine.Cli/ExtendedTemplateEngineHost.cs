@@ -31,6 +31,35 @@ namespace Microsoft.TemplateEngine.Cli
 
         public virtual IReadOnlyList<KeyValuePair<Guid, Func<Type>>> BuiltInComponents => _baseHost.BuiltInComponents;
 
+        private bool GlobalJsonFileExistsInPath
+        {
+            get
+            {
+                const string fileName = "global.json";
+
+                string workingPath = Path.Combine(FileSystem.GetCurrentDirectory(), _new3Command.OutputPath);
+                bool found = false;
+
+                do
+                {
+                    string checkPath = Path.Combine(workingPath, fileName);
+                    found = FileSystem.FileExists(checkPath);
+                    if (!found)
+                    {
+                        workingPath = Path.GetDirectoryName(workingPath.TrimEnd('/', '\\'));
+
+                        if (!FileSystem.DirectoryExists(workingPath))
+                        {
+                            workingPath = null;
+                        }
+                    }
+                }
+                while (!found && (workingPath != null));
+
+                return found;
+            }
+        }
+
         public virtual void LogMessage(string message)
         {
             Reporter.Output.WriteLine(message);
@@ -71,29 +100,6 @@ namespace Microsoft.TemplateEngine.Cli
             _baseHost.VirtualizeDirectory(path);
         }
 
-        private static string GetChangeString(ChangeKind kind)
-        {
-            string changeType;
-
-            switch (kind)
-            {
-                case ChangeKind.Change:
-                    changeType = LocalizableStrings.Change;
-                    break;
-                case ChangeKind.Delete:
-                    changeType = LocalizableStrings.Delete;
-                    break;
-                case ChangeKind.Overwrite:
-                    changeType = LocalizableStrings.Overwrite;
-                    break;
-                default:
-                    changeType = LocalizableStrings.UnknownChangeKind;
-                    break;
-            }
-
-            return changeType;
-        }
-
         public bool OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
         {
             Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
@@ -126,33 +132,27 @@ namespace Microsoft.TemplateEngine.Cli
             _baseHost.LogTiming(label, duration, depth);
         }
 
-        private bool GlobalJsonFileExistsInPath
+        private static string GetChangeString(ChangeKind kind)
         {
-            get
+            string changeType;
+
+            switch (kind)
             {
-                const string fileName = "global.json";
-
-                string workingPath = Path.Combine(FileSystem.GetCurrentDirectory(), _new3Command.OutputPath);
-                bool found = false;
-
-                do
-                {
-                    string checkPath = Path.Combine(workingPath, fileName);
-                    found = FileSystem.FileExists(checkPath);
-                    if (!found)
-                    {
-                        workingPath = Path.GetDirectoryName(workingPath.TrimEnd('/', '\\'));
-
-                        if (!FileSystem.DirectoryExists(workingPath))
-                        {
-                            workingPath = null;
-                        }
-                    }
-                }
-                while (!found && (workingPath != null));
-
-                return found;
+                case ChangeKind.Change:
+                    changeType = LocalizableStrings.Change;
+                    break;
+                case ChangeKind.Delete:
+                    changeType = LocalizableStrings.Delete;
+                    break;
+                case ChangeKind.Overwrite:
+                    changeType = LocalizableStrings.Overwrite;
+                    break;
+                default:
+                    changeType = LocalizableStrings.UnknownChangeKind;
+                    break;
             }
+
+            return changeType;
         }
     }
 }

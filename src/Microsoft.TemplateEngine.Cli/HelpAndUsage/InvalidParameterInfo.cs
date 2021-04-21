@@ -15,6 +15,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
     /// </summary>
     internal class InvalidParameterInfo : IEquatable<InvalidParameterInfo>
     {
+        internal InvalidParameterInfo(Kind kind, string inputFormat, string specifiedValue, string canonical)
+        {
+            ErrorKind = kind;
+            InputFormat = inputFormat;
+            SpecifiedValue = specifiedValue;
+            Canonical = canonical;
+        }
+
         /// <summary>
         /// Defines the possible reason for the parameter to be invalid.
         /// </summary>
@@ -41,14 +49,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             AmbiguousParameterValue
         }
 
-        internal InvalidParameterInfo(Kind kind, string inputFormat, string specifiedValue, string canonical)
-        {
-            ErrorKind = kind;
-            InputFormat = inputFormat;
-            SpecifiedValue = specifiedValue;
-            Canonical = canonical;
-        }
-
         /// <summary>
         /// the option used in CLI for parameter.
         /// </summary>
@@ -68,6 +68,26 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// The reason why the parameter is invalid.
         /// </summary>
         internal Kind ErrorKind { get; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is InvalidParameterInfo info)
+            {
+                //checking canonical name and kind is enough for invalid parameters to be the same
+                return Canonical.Equals(info.Canonical, StringComparison.OrdinalIgnoreCase) && ErrorKind == info.ErrorKind;
+            }
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return new { a = Canonical?.ToLowerInvariant(), ErrorKind }.GetHashCode();
+        }
+
+        public bool Equals(InvalidParameterInfo other)
+        {
+            return Canonical.Equals(other.Canonical, StringComparison.OrdinalIgnoreCase) && ErrorKind == other.ErrorKind;
+        }
 
         /// <summary>
         /// Provides the error string to use for the invalid parameters collection.
@@ -127,6 +147,21 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return invalidParamsErrorText.ToString();
         }
 
+        internal static IDictionary<string, InvalidParameterInfo> IntersectWithExisting(IDictionary<string, InvalidParameterInfo> existing, IReadOnlyList<InvalidParameterInfo> newInfo)
+        {
+            Dictionary<string, InvalidParameterInfo> intersection = new Dictionary<string, InvalidParameterInfo>();
+
+            foreach (InvalidParameterInfo info in newInfo)
+            {
+                if (existing.ContainsKey(info.Canonical))
+                {
+                    intersection.Add(info.Canonical, info);
+                }
+            }
+
+            return intersection;
+        }
+
         private static void DisplayValidValues(StringBuilder text, string header, IDictionary<string, ParameterChoice> possibleValues, int padWidth)
         {
             text.Append(' ', padWidth).Append(header);
@@ -149,41 +184,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
                 text.AppendLine();
             }
-        }
-
-        internal static IDictionary<string, InvalidParameterInfo> IntersectWithExisting(IDictionary<string, InvalidParameterInfo> existing, IReadOnlyList<InvalidParameterInfo> newInfo)
-        {
-            Dictionary<string, InvalidParameterInfo> intersection = new Dictionary<string, InvalidParameterInfo>();
-
-            foreach (InvalidParameterInfo info in newInfo)
-            {
-                if (existing.ContainsKey(info.Canonical))
-                {
-                    intersection.Add(info.Canonical, info);
-                }
-            }
-
-            return intersection;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is InvalidParameterInfo info)
-            {
-                //checking canonical name and kind is enough for invalid parameters to be the same
-                return Canonical.Equals(info.Canonical, StringComparison.OrdinalIgnoreCase) && ErrorKind == info.ErrorKind;
-            }
-            return base.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return new { a = Canonical?.ToLowerInvariant(), ErrorKind }.GetHashCode();
-        }
-
-        public bool Equals(InvalidParameterInfo other)
-        {
-            return Canonical.Equals(other.Canonical, StringComparison.OrdinalIgnoreCase) && ErrorKind == other.ErrorKind;
         }
     }
 }

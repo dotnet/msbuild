@@ -13,6 +13,27 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
     public class MockTemplateSearchSource : ITemplateSearchSource
     {
+        private static IDictionary<Guid, IReadOnlyList<ITemplateNameSearchResult>> _resultsById;
+
+        private readonly Guid _id;
+
+        private ISearchPackFilter _packFilter;
+
+        static MockTemplateSearchSource()
+        {
+            ClearResultsForAllSources();
+        }
+
+        public MockTemplateSearchSource()
+        {
+            _id = Guid.NewGuid();
+            DisplayName = string.Format("Mock Search Source {0}", _id);
+        }
+
+        public string DisplayName { get; set; }
+
+        public Guid Id => _id;
+
         public static IReadOnlyDictionary<string, Guid> SetupMultipleSources(IEngineEnvironmentSettings environmentSettings, IReadOnlyDictionary<string, IReadOnlyList<ITemplateNameSearchResult>> dataForSources)
         {
             // create the sources initially
@@ -40,13 +61,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             return sourceNameToIdMap;
         }
 
-        private static IDictionary<Guid, IReadOnlyList<ITemplateNameSearchResult>> _resultsById;
-
-        static MockTemplateSearchSource()
-        {
-            ClearResultsForAllSources();
-        }
-
         public static void SetPossibleResultsForId(Guid id, IReadOnlyList<ITemplateNameSearchResult> possibleResults)
         {
             _resultsById[id] = possibleResults;
@@ -62,35 +76,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             _resultsById = new Dictionary<Guid, IReadOnlyList<ITemplateNameSearchResult>>();
         }
 
-        private static IReadOnlyList<ITemplateNameSearchResult> GetPossibleResultsOrDefaultForId(Guid id)
-        {
-            if (_resultsById.TryGetValue(id, out IReadOnlyList<ITemplateNameSearchResult> possibleResults))
-            {
-                return possibleResults;
-            }
-
-            return new List<ITemplateNameSearchResult>();
-        }
-
-        public MockTemplateSearchSource()
-        {
-            _id = Guid.NewGuid();
-            DisplayName = string.Format("Mock Search Source {0}", _id);
-        }
-
         public Task<bool> TryConfigure(IEngineEnvironmentSettings environment, IReadOnlyList<IManagedTemplatePackage> existingTemplatePackage)
         {
             _packFilter = new NupkgHigherVersionInstalledPackFilter(existingTemplatePackage);
 
             return Task.FromResult(true);
         }
-
-        private ISearchPackFilter _packFilter;
-
-        public string DisplayName { get; set; }
-
-        private readonly Guid _id;
-        public Guid Id => _id;
 
         public Task<IReadOnlyList<ITemplateNameSearchResult>> CheckForTemplateNameMatchesAsync(string templateName)
         {
@@ -116,6 +107,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public Task<IReadOnlyDictionary<string, PackToTemplateEntry>> CheckForTemplatePackMatchesAsync(IReadOnlyList<string> packNameList)
         {
             throw new NotImplementedException();
+        }
+
+        private static IReadOnlyList<ITemplateNameSearchResult> GetPossibleResultsOrDefaultForId(Guid id)
+        {
+            if (_resultsById.TryGetValue(id, out IReadOnlyList<ITemplateNameSearchResult> possibleResults))
+            {
+                return possibleResults;
+            }
+
+            return new List<ITemplateNameSearchResult>();
         }
     }
 }

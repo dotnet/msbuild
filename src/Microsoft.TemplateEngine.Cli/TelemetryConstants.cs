@@ -7,6 +7,7 @@ namespace Microsoft.TemplateEngine.Cli
     {
         // event name suffixes
         internal const string InstallEventSuffix = "-install";
+
         internal const string HelpEventSuffix = "-help";
         internal const string CreateEventSuffix = "-create-template";
         internal const string CalledWithNoArgsEventSuffix = "-called-with-no-args";
@@ -16,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         // create event args
         internal const string Language = "language";
+
         internal const string ArgError = "argument-error";
         internal const string Framework = "framework";
         internal const string TemplateName = "template-name";

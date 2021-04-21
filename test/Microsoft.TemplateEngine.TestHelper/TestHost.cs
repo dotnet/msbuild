@@ -18,15 +18,15 @@ namespace Microsoft.TemplateEngine.TestHelper
             FileSystem = new PhysicalFileSystem();
         }
 
-        public event Action<string, TimeSpan> TimingCompleted;
-
-        public event Action<string, object> SymbolUsed;
-
         public delegate bool ParameterErrorHandler(ITemplateParameter parameter, string receivedValue, string message, out string newValue);
 
         public delegate bool NonCriticalErrorHandler(string code, string message, string currentFile, long currentPosition);
 
         public delegate void CriticalErrorHandler(string code, string message, string currentFile, long currentPosition);
+
+        public event Action<string, TimeSpan> TimingCompleted;
+
+        public event Action<string, object> SymbolUsed;
 
         public event ParameterErrorHandler ParameterError;
 

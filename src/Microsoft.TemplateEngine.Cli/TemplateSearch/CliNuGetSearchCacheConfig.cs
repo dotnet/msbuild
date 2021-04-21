@@ -12,12 +12,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
     {
         internal const string CliHostDataName = "cliHostData";
 
-        internal CliNuGetSearchCacheConfig(string templateDiscoveryFileName)
-            : base(templateDiscoveryFileName)
-        {
-            AdditionalDataReaders[CliHostDataName] = CliHostDataReader;
-        }
-
         private static readonly Func<JObject, object> CliHostDataReader = (cacheObject) =>
         {
             try
@@ -29,5 +23,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 throw new Exception("Error deserializing the cli host specific template data.", ex);
             }
         };
+
+        internal CliNuGetSearchCacheConfig(string templateDiscoveryFileName)
+                    : base(templateDiscoveryFileName)
+        {
+            AdditionalDataReaders[CliHostDataName] = CliHostDataReader;
+        }
     }
 }

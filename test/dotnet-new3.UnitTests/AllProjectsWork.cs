@@ -87,5 +87,4 @@ namespace Dotnet_new3.IntegrationTests
 
         internal string BaseWorkingDirectory { get; private set; }
     }
-
 }

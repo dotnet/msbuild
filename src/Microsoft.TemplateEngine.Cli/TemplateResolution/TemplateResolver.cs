@@ -17,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     internal static class TemplateResolver
     {
         internal const string DefaultLanguageMatchParameterName = "DefaultLanguage";
+
         internal static void ParseTemplateArgs(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {
             HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
@@ -31,12 +32,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             }
 
             return templateList.AllAreTheSame((x) => x.Info.GroupIdentity, StringComparer.OrdinalIgnoreCase);
-        }
-
-        private static bool IsTemplateHiddenByHostFile(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader)
-        {
-            HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
-            return hostData.IsHidden;
         }
 
         // This version relies on the commandInput being in the context desired - so the most recent parse would have to have been
@@ -467,6 +462,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             };
         }
 
+        private static bool IsTemplateHiddenByHostFile(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader)
+        {
+            HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
+            return hostData.IsHidden;
+        }
+
         /// <summary>
         /// In addition to <see cref="ITemplateInfo"/> the class contains <see cref="TemplateInfoWithGroupShortNames.GroupShortNameList"/> property which contains the short names of other templates in the template group.
         /// The class is used for template filtering using specific <see cref="CliNameFilter(string)"/> filter which takes into account the short names of template group when matching names.
@@ -474,6 +475,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         private class TemplateInfoWithGroupShortNames : ITemplateInfo
         {
             private ITemplateInfo _parent;
+
             internal TemplateInfoWithGroupShortNames(ITemplateInfo source, IEnumerable<string> groupShortNameList)
             {
                 _parent = source;
@@ -533,7 +535,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 {
                     _parent.HasScriptRunningPostActions = value;
                 }
-
             }
         }
     }

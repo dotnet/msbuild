@@ -39,6 +39,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// But there is never a guarantee which template the parse is in the context of.
         /// </summary>
         private readonly INewCommandInput _commandInput;
+
         private readonly IHostSpecificDataLoader _hostDataLoader;
         private readonly string? _defaultLanguage;
         private readonly New3Callbacks _callbacks;
@@ -73,12 +74,9 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        internal string CommandName { get; }
-
         internal string TemplateName => _commandInput.TemplateName;
-
         internal string OutputPath => _commandInput.OutputPath;
-
+        internal string CommandName { get; }
         internal EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
         /// <summary>

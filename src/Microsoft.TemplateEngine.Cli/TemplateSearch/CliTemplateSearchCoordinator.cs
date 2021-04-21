@@ -154,7 +154,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 PackageName = packageName;
                 TotalDownloads = downloads;
             }
+
             internal string PackageName { get; private set; }
+
             internal string PrintableTotalDownloads
             {
                 get

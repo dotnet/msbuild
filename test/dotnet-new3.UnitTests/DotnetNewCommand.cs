@@ -23,6 +23,21 @@ namespace Dotnet_new3.IntegrationTests
             Arguments.AddRange(args);
         }
 
+        public DotnetNewCommand WithCustomHive(string path = null)
+        {
+            path ??= TestUtils.CreateTemporaryFolder();
+            Arguments.Add("--debug:custom-hive");
+            Arguments.Add(path);
+            _hiveSet = true;
+            return this;
+        }
+
+        public DotnetNewCommand WithoutCustomHive()
+        {
+            _hiveSet = true;
+            return this;
+        }
+
         protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
         {
             var sdkCommandSpec = new SdkCommandSpec()
@@ -38,21 +53,6 @@ namespace Dotnet_new3.IntegrationTests
             }
 
             return sdkCommandSpec;
-        }
-
-        public DotnetNewCommand WithCustomHive(string path = null)
-        {
-            path ??= TestUtils.CreateTemporaryFolder();
-            Arguments.Add("--debug:custom-hive");
-            Arguments.Add(path);
-            _hiveSet = true;
-            return this;
-        }
-
-        public DotnetNewCommand WithoutCustomHive()
-        {
-            _hiveSet = true;
-            return this;
         }
     }
 }

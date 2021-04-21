@@ -15,16 +15,48 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// </summary>
     internal sealed class TemplateListResolutionResult
     {
+        private readonly IReadOnlyCollection<ITemplateMatchInfo> _coreMatchedTemplates;
+
+        private IReadOnlyCollection<ITemplateMatchInfo> _exactMatchedTemplates;
+
+        private IReadOnlyCollection<ITemplateMatchInfo> _partiallyMatchedTemplates;
+
+        private IReadOnlyCollection<TemplateGroup> _exactMatchedTemplateGroups;
+
+        private IReadOnlyCollection<TemplateGroup> _partiallyMatchedTemplateGroups;
+
         internal TemplateListResolutionResult(IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates)
         {
             _coreMatchedTemplates = coreMatchedTemplates;
         }
 
-        private readonly IReadOnlyCollection<ITemplateMatchInfo> _coreMatchedTemplates;
-        private IReadOnlyCollection<ITemplateMatchInfo> _exactMatchedTemplates;
-        private IReadOnlyCollection<ITemplateMatchInfo> _partiallyMatchedTemplates;
-        private IReadOnlyCollection<TemplateGroup> _exactMatchedTemplateGroups;
-        private IReadOnlyCollection<TemplateGroup> _partiallyMatchedTemplateGroups;
+        /// <summary>
+        /// Returns true when at least one template has mismatch in language.
+        /// </summary>
+        // as we need to count errors per template group: for language we need to check template groups as templates in single group may have different language
+        // and if one of them can match the filter, then the whole group matches the filter
+        // if all templates in the group has language mismatch, then group has language mismatch
+        internal bool HasLanguageMismatch => PartiallyMatchedTemplateGroups.Any(g => g.Templates.All(t => t.HasLanguageMismatch()));
+
+        /// <summary>
+        /// Returns true when at least one template has mismatch in context (type).
+        /// </summary>
+        internal bool HasTypeMismatch => PartiallyMatchedTemplates.Any(t => t.HasTypeMismatch());
+
+        /// <summary>
+        /// Returns true when at least one template has mismatch in baseline.
+        /// </summary>
+        internal bool HasBaselineMismatch => PartiallyMatchedTemplates.Any(t => t.HasBaselineMismatch());
+
+        /// <summary>
+        /// Returns true when at least one template has mismatch in author.
+        /// </summary>
+        internal bool HasAuthorMismatch => PartiallyMatchedTemplates.Any(t => t.HasAuthorMismatch());
+
+        /// <summary>
+        /// Returns true when at least one template has mismatch in tags.
+        /// </summary>
+        internal bool HasClassificationMismatch => PartiallyMatchedTemplates.Any(t => t.HasClassificationMismatch());
 
         /// <summary>
         /// Returns list of exact or partially matched templates by name and exact match by language, filter, baseline (if specified in command parameters).
@@ -122,34 +154,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// Returns true when at least one template exactly or partially matched templates by name but has mismatch in any of the following: language, filter, baseline (if specified in command paramaters).
         /// </summary>
         internal bool HasPartialMatches => PartiallyMatchedTemplates.Any();
-
-        /// <summary>
-        /// Returns true when at least one template has mismatch in language.
-        /// </summary>
-        // as we need to count errors per template group: for language we need to check template groups as templates in single group may have different language
-        // and if one of them can match the filter, then the whole group matches the filter
-        // if all templates in the group has language mismatch, then group has language mismatch
-        internal bool HasLanguageMismatch => PartiallyMatchedTemplateGroups.Any(g => g.Templates.All(t => t.HasLanguageMismatch()));
-
-        /// <summary>
-        /// Returns true when at least one template has mismatch in context (type).
-        /// </summary>
-        internal bool HasTypeMismatch => PartiallyMatchedTemplates.Any(t => t.HasTypeMismatch());
-
-        /// <summary>
-        /// Returns true when at least one template has mismatch in baseline.
-        /// </summary>
-        internal bool HasBaselineMismatch => PartiallyMatchedTemplates.Any(t => t.HasBaselineMismatch());
-
-        /// <summary>
-        /// Returns true when at least one template has mismatch in author.
-        /// </summary>
-        internal bool HasAuthorMismatch => PartiallyMatchedTemplates.Any(t => t.HasAuthorMismatch());
-
-        /// <summary>
-        /// Returns true when at least one template has mismatch in tags.
-        /// </summary>
-        internal bool HasClassificationMismatch => PartiallyMatchedTemplates.Any(t => t.HasClassificationMismatch());
 
         /// <summary>
         /// Returns true when one and only one template has exact match.

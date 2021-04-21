@@ -13,12 +13,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal class CliHostSpecificDataMatchFilterFactory
     {
+        private readonly INewCommandInput _commandInput;
+
         internal CliHostSpecificDataMatchFilterFactory(INewCommandInput commandInput)
         {
             _commandInput = commandInput;
         }
-
-        private readonly INewCommandInput _commandInput;
 
         internal Func<IReadOnlyList<ITemplateNameSearchResult>, IReadOnlyList<ITemplateMatchInfo>> MatchFilter => (foundPackages) =>
         {

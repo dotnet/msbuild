@@ -11,24 +11,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 {
     public class CacheUpgradeTests
     {
-        [Fact(DisplayName = nameof(CanReadUnversionedCache))]
-        public void CanReadUnversionedCache()
-        {
-            IEngineEnvironmentSettings mockEnvironmentSettings = new MockEngineEnvironmentSettings();
-            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataOriginalStyle);
-
-            Assert.Equal(3, cache.TemplateInfo.Count);
-        }
-
-        [Fact(DisplayName = nameof(CanReadVersion1000Cache))]
-        public void CanReadVersion1000Cache()
-        {
-            IEngineEnvironmentSettings mockEnvironmentSettings = new MockEngineEnvironmentSettings();
-            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataVersion1000);
-
-            Assert.Equal(3, cache.TemplateInfo.Count);
-        }
-
         private static JObject CacheDataVersion1000
         {
             get
@@ -238,6 +220,24 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 }";
                 return JObject.Parse(configString);
             }
+        }
+
+        [Fact(DisplayName = nameof(CanReadUnversionedCache))]
+        public void CanReadUnversionedCache()
+        {
+            IEngineEnvironmentSettings mockEnvironmentSettings = new MockEngineEnvironmentSettings();
+            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataOriginalStyle);
+
+            Assert.Equal(3, cache.TemplateInfo.Count);
+        }
+
+        [Fact(DisplayName = nameof(CanReadVersion1000Cache))]
+        public void CanReadVersion1000Cache()
+        {
+            IEngineEnvironmentSettings mockEnvironmentSettings = new MockEngineEnvironmentSettings();
+            TemplateCache cache = new TemplateCache(mockEnvironmentSettings, CacheDataVersion1000);
+
+            Assert.Equal(3, cache.TemplateInfo.Count);
         }
     }
 }

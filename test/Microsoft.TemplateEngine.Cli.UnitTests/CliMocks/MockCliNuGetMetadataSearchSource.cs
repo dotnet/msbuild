@@ -13,12 +13,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
     internal class MockCliNuGetMetadataSearchSource : CliNuGetMetadataSearchSource
     {
+        private static TemplateDiscoveryMetadata _templateDiscoveryMetadata;
+
         public MockCliNuGetMetadataSearchSource()
-            : base()
+                    : base()
         {
         }
-
-        private static TemplateDiscoveryMetadata _templateDiscoveryMetadata;
 
         // Only exists on the mock, to give specific search data
         public static void SetupMockData(TemplateDiscoveryMetadata templateDiscoveryMetadata)

@@ -18,13 +18,6 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string WorkingDirectory { get; set; }
 
-        private string EscapeArgs()
-        {
-            //  Note: this doesn't handle invoking .cmd files via "cmd /c" on Windows, which probably won't be necessary here
-            //  If it is, refer to the code in WindowsExePreferredCommandSpecFactory in Microsoft.DotNet.Cli.Utils
-            return ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(Arguments);
-        }
-
         public Command ToCommand()
         {
             var process = new Process()
@@ -56,6 +49,13 @@ namespace Microsoft.NET.TestFramework.Commands
             }
 
             return ret;
+        }
+
+        private string EscapeArgs()
+        {
+            //  Note: this doesn't handle invoking .cmd files via "cmd /c" on Windows, which probably won't be necessary here
+            //  If it is, refer to the code in WindowsExePreferredCommandSpecFactory in Microsoft.DotNet.Cli.Utils
+            return ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(Arguments);
         }
     }
 }

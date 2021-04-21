@@ -17,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
     {
         // a list of all the parameters defined by the template
         private IReadOnlyList<string> _allParametersForTemplate;
+
         private Dictionary<string, string> _templateOptions;
         private Dictionary<string, string> _commandOptions;
 
@@ -41,29 +42,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             _allParametersForTemplate = new List<string>();
             _commandOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             _templateOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        }
-
-        public MockNewCommandInput WithTemplateOption(string optionName, string optionValue = null)
-        {
-            _templateOptions[optionName] = optionValue;
-            return this;
-        }
-
-        public MockNewCommandInput WithHelpOption()
-        {
-            _commandOptions["--help"] = null;
-            return this;
-        }
-        public MockNewCommandInput WithListOption()
-        {
-            _commandOptions["--list"] = null;
-            return this;
-        }
-
-        public MockNewCommandInput WithCommandOption(string optionName, string optionValue = null)
-        {
-            _commandOptions[optionName] = optionValue;
-            return this;
         }
 
         public string Alias { get; }
@@ -159,7 +137,32 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public IReadOnlyList<string> Tokens { get; }
 
         public IList<string> ToUninstallList { get; }
+
         public string TypeFilter => _commandOptions.ContainsKey("--type") ? _commandOptions["--type"] : string.Empty;
+
+        public MockNewCommandInput WithTemplateOption(string optionName, string optionValue = null)
+        {
+            _templateOptions[optionName] = optionValue;
+            return this;
+        }
+
+        public MockNewCommandInput WithHelpOption()
+        {
+            _commandOptions["--help"] = null;
+            return this;
+        }
+
+        public MockNewCommandInput WithListOption()
+        {
+            _commandOptions["--list"] = null;
+            return this;
+        }
+
+        public MockNewCommandInput WithCommandOption(string optionName, string optionValue = null)
+        {
+            _commandOptions[optionName] = optionValue;
+            return this;
+        }
 
         public int Execute(params string[] args)
         {
@@ -258,6 +261,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         }
 
         #region IXunitSerializable implementation
+
         public void Deserialize(IXunitSerializationInfo info)
         {
             TemplateName = info.GetValue<string>("command_templateName");
@@ -279,6 +283,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             result += " " + string.Join(" ", _templateOptions.Select(kvp => kvp.Key + (string.IsNullOrWhiteSpace(kvp.Value) ? string.Empty : " " + kvp.Value)));
             return result;
         }
-        #endregion
+
+        #endregion IXunitSerializable implementation
     }
 }

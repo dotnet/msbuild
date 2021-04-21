@@ -45,6 +45,24 @@ namespace Microsoft.TemplateEngine.Cli
             _hostDataLoader = new HostSpecificDataLoader(_environment.SettingsLoader);
         }
 
+        internal static bool CheckForArgsError(ITemplateMatchInfo template)
+        {
+            bool argsError;
+            IEnumerable<string> invalidParams = template.GetInvalidParameterNames();
+
+            if (invalidParams.Any())
+            {
+                HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
+                argsError = true;
+            }
+            else
+            {
+                argsError = false;
+            }
+
+            return argsError;
+        }
+
         internal async Task<CreationResultStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke)
         {
             templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag language);
@@ -118,24 +136,6 @@ namespace Microsoft.TemplateEngine.Cli
 
                 return CreationResultStatus.CreateFailed;
             }
-        }
-
-        internal static bool CheckForArgsError(ITemplateMatchInfo template)
-        {
-            bool argsError;
-            IEnumerable<string> invalidParams = template.GetInvalidParameterNames();
-
-            if (invalidParams.Any())
-            {
-                HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
-                argsError = true;
-            }
-            else
-            {
-                argsError = false;
-            }
-
-            return argsError;
         }
 
         // Attempts to invoke the template.

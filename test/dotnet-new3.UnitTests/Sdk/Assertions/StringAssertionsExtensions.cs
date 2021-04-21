@@ -11,11 +11,6 @@ namespace Microsoft.NET.TestFramework.Assertions
 {
     public static class StringAssertionsExtensions
     {
-        private static string NormalizeLineEndings(string s)
-        {
-            return s.Replace("\r\n", "\n");
-        }
-
         public static AndConstraint<StringAssertions> BeVisuallyEquivalentTo(this StringAssertions assertions, string expected, string because = "", params object[] becauseArgs)
         {
             Execute.Assertion
@@ -34,6 +29,11 @@ namespace Microsoft.NET.TestFramework.Assertions
                 .FailWith($"String \"{assertions.Subject}\" does not contain visually same fragment string \"{expected}\".");
 
             return new AndConstraint<StringAssertions>(assertions);
+        }
+
+        private static string NormalizeLineEndings(string s)
+        {
+            return s.Replace("\r\n", "\n");
         }
     }
 }

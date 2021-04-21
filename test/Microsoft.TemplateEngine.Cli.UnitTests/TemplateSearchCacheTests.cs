@@ -22,6 +22,35 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     {
         private const string DefaultLanguage = "C#";
 
+        private static readonly PackInfo _packOneInfo = new PackInfo("PackOne", "1.0.0");
+
+        private static readonly PackInfo _packTwoInfo = new PackInfo("PackTwo", "1.6.0");
+
+        private static readonly PackInfo _packThreeInfo = new PackInfo("PackThree", "2.1");
+
+        private static readonly ITemplateInfo _fooOneTemplate =
+            new MockTemplateInfo("foo1", name: "MockFooTemplateOne", identity: "Mock.Foo.1", groupIdentity: "Mock.Foo", author: "TestAuthor")
+                .WithDescription("Mock Foo template one")
+                .WithTag("Framework", "netcoreapp3.0", "netcoreapp3.1")
+                .WithTag("language", "C#")
+                .WithTag("type", "project");
+
+        private static readonly ITemplateInfo _fooTwoTemplate =
+            new MockTemplateInfo("foo2", name: "MockFooTemplateTwo", identity: "Mock.Foo.2", groupIdentity: "Mock.Foo")
+                .WithDescription("Mock Foo template two")
+                .WithTag("Framework", "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1")
+                .WithTag("language", "C#");
+
+        private static readonly ITemplateInfo _barCSharpTemplate =
+            new MockTemplateInfo("barC", name: "MockBarCsharpTemplate", identity: "Mock.Bar.1.Csharp", groupIdentity: "Mock.Bar")
+                .WithDescription("Mock Bar CSharp template")
+                .WithTag("language", "C#");
+
+        private static readonly ITemplateInfo _barFSharpTemplate =
+            new MockTemplateInfo("barF", name: "MockBarFSharpTemplate", identity: "Mock.Bar.1.FSharp", groupIdentity: "Mock.Bar")
+                .WithDescription("Mock Bar FSharp template")
+                .WithTag("language", "F#");
+
         [Fact(DisplayName = nameof(CacheSearchNameMatchTest))]
         public async Task CacheSearchNameMatchTest()
         {
@@ -208,33 +237,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.True(searchResults.AnySources);
             Assert.Equal(0, searchResults.MatchesBySource.Count);
         }
-
-        private static readonly PackInfo _packOneInfo = new PackInfo("PackOne", "1.0.0");
-        private static readonly PackInfo _packTwoInfo = new PackInfo("PackTwo", "1.6.0");
-        private static readonly PackInfo _packThreeInfo = new PackInfo("PackThree", "2.1");
-
-        private static readonly ITemplateInfo _fooOneTemplate =
-            new MockTemplateInfo("foo1", name: "MockFooTemplateOne", identity: "Mock.Foo.1", groupIdentity: "Mock.Foo", author: "TestAuthor")
-                .WithDescription("Mock Foo template one")
-                .WithTag("Framework", "netcoreapp3.0", "netcoreapp3.1")
-                .WithTag("language", "C#")
-                .WithTag("type", "project");
-
-        private static readonly ITemplateInfo _fooTwoTemplate =
-            new MockTemplateInfo("foo2", name: "MockFooTemplateTwo", identity: "Mock.Foo.2", groupIdentity: "Mock.Foo")
-                .WithDescription("Mock Foo template two")
-                .WithTag("Framework", "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1")
-                .WithTag("language", "C#");
-
-        private static readonly ITemplateInfo _barCSharpTemplate =
-            new MockTemplateInfo("barC", name: "MockBarCsharpTemplate", identity: "Mock.Bar.1.Csharp", groupIdentity: "Mock.Bar")
-                .WithDescription("Mock Bar CSharp template")
-                .WithTag("language", "C#");
-
-        private static readonly ITemplateInfo _barFSharpTemplate =
-            new MockTemplateInfo("barF", name: "MockBarFSharpTemplate", identity: "Mock.Bar.1.FSharp", groupIdentity: "Mock.Bar")
-                .WithDescription("Mock Bar FSharp template")
-                .WithTag("language", "F#");
 
         private static TemplateDiscoveryMetadata SetupDiscoveryMetadata(bool includehostData = false)
         {

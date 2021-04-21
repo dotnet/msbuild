@@ -47,6 +47,30 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         /// <summary>
+        /// Checks if <paramref name="commandInput"/> has instructions for template packages.
+        /// </summary>
+        /// <param name="commandInput">the command input to check.</param>
+        /// <returns></returns>
+        internal static bool IsTemplatePackageManipulationFlow(INewCommandInput commandInput)
+        {
+            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+
+            if (commandInput.CheckForUpdates || commandInput.ApplyUpdates)
+            {
+                return true;
+            }
+            if (commandInput.ToUninstallList != null)
+            {
+                return true;
+            }
+            if (commandInput.ToInstallList != null && commandInput.ToInstallList.Count > 0 && commandInput.ToInstallList[0] != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Processes template packages according to <paramref name="commandInput"/>.
         /// </summary>
         /// <param name="commandInput">the command input with instructions to process.</param>
@@ -72,30 +96,6 @@ namespace Microsoft.TemplateEngine.Cli
                 return EnterInstallFlowAsync(commandInput, cancellationToken);
             }
             throw new NotSupportedException($"The operation is not supported, command: {commandInput}.");
-        }
-
-        /// <summary>
-        /// Checks if <paramref name="commandInput"/> has instructions for template packages.
-        /// </summary>
-        /// <param name="commandInput">the command input to check.</param>
-        /// <returns></returns>
-        internal static bool IsTemplatePackageManipulationFlow(INewCommandInput commandInput)
-        {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
-
-            if (commandInput.CheckForUpdates || commandInput.ApplyUpdates)
-            {
-                return true;
-            }
-            if (commandInput.ToUninstallList != null)
-            {
-                return true;
-            }
-            if (commandInput.ToInstallList != null && commandInput.ToInstallList.Count > 0 && commandInput.ToInstallList[0] != null)
-            {
-                return true;
-            }
-            return false;
         }
 
         /// <summary>
@@ -132,6 +132,23 @@ namespace Microsoft.TemplateEngine.Cli
             InitializeNuGetCredentialService(commandInput);
             IReadOnlyList<CheckUpdateResult> versionChecks = await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false);
             DisplayUpdateCheckResults(versionChecks, commandInput, showUpdates: true);
+        }
+
+        private static void InitializeNuGetCredentialService(INewCommandInput commandInput)
+        {
+            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+
+            try
+            {
+                DefaultCredentialServiceUtility.SetupDefaultCredentialService(new CliNuGetLogger(), !commandInput.IsInteractiveFlagSpecified);
+            }
+            catch (Exception ex)
+            {
+                Reporter.Verbose.WriteLine(
+                    string.Format(
+                        LocalizableStrings.TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError,
+                        ex.ToString()));
+            }
         }
 
         /// <summary>
@@ -631,23 +648,6 @@ namespace Microsoft.TemplateEngine.Cli
                                 packageToInstall).Bold().Red());
                         break;
                 }
-            }
-        }
-
-        private static void InitializeNuGetCredentialService(INewCommandInput commandInput)
-        {
-            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
-
-            try
-            {
-                DefaultCredentialServiceUtility.SetupDefaultCredentialService(new CliNuGetLogger(), !commandInput.IsInteractiveFlagSpecified);
-            }
-            catch (Exception ex)
-            {
-                Reporter.Verbose.WriteLine(
-                    string.Format(
-                        LocalizableStrings.TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError,
-                        ex.ToString()));
             }
         }
     }

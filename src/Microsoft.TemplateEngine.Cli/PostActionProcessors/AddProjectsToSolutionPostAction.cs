@@ -60,53 +60,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
         }
 
-        internal static IReadOnlyList<string> FindSolutionFilesAtOrAbovePath(IPhysicalFileSystem fileSystem, string outputBasePath)
-        {
-            return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, outputBasePath, "*.sln");
-        }
-
-        // The project files to add are a subset of the primary outputs, specifically the primary outputs indicated by the primaryOutputIndexes post action arg (semicolon separated)
-        // If any indexes are out of range or non-numeric, thsi method returns false and projectFiles is set to null.
-        internal static bool TryGetProjectFilesToAdd(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, out IReadOnlyList<string> projectFiles)
-        {
-            List<string> filesToAdd = new List<string>();
-
-            if ((actionConfig.Args != null) && actionConfig.Args.TryGetValue("primaryOutputIndexes", out string projectIndexes))
-            {
-                foreach (string indexString in projectIndexes.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    if (int.TryParse(indexString.Trim(), out int index))
-                    {
-                        if (templateCreationResult.PrimaryOutputs.Count <= index || index < 0)
-                        {
-                            projectFiles = null;
-                            return false;
-                        }
-
-                        filesToAdd.Add(Path.Combine(outputBasePath, templateCreationResult.PrimaryOutputs[index].Path));
-                    }
-                    else
-                    {
-                        projectFiles = null;
-                        return false;
-                    }
-                }
-
-                projectFiles = filesToAdd;
-                return true;
-            }
-            else
-            {
-                foreach (string pathString in templateCreationResult.PrimaryOutputs.Select(x => x.Path))
-                {
-                    filesToAdd.Add(!string.IsNullOrEmpty(outputBasePath) ? Path.Combine(outputBasePath, pathString) : pathString);
-                }
-
-                projectFiles = filesToAdd;
-                return true;
-            }
-        }
-
         public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
             if (string.IsNullOrEmpty(outputBasePath))
@@ -191,7 +144,53 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
                 return true;
             }
+        }
 
+        internal static IReadOnlyList<string> FindSolutionFilesAtOrAbovePath(IPhysicalFileSystem fileSystem, string outputBasePath)
+        {
+            return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, outputBasePath, "*.sln");
+        }
+
+        // The project files to add are a subset of the primary outputs, specifically the primary outputs indicated by the primaryOutputIndexes post action arg (semicolon separated)
+        // If any indexes are out of range or non-numeric, thsi method returns false and projectFiles is set to null.
+        internal static bool TryGetProjectFilesToAdd(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath, out IReadOnlyList<string> projectFiles)
+        {
+            List<string> filesToAdd = new List<string>();
+
+            if ((actionConfig.Args != null) && actionConfig.Args.TryGetValue("primaryOutputIndexes", out string projectIndexes))
+            {
+                foreach (string indexString in projectIndexes.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (int.TryParse(indexString.Trim(), out int index))
+                    {
+                        if (templateCreationResult.PrimaryOutputs.Count <= index || index < 0)
+                        {
+                            projectFiles = null;
+                            return false;
+                        }
+
+                        filesToAdd.Add(Path.Combine(outputBasePath, templateCreationResult.PrimaryOutputs[index].Path));
+                    }
+                    else
+                    {
+                        projectFiles = null;
+                        return false;
+                    }
+                }
+
+                projectFiles = filesToAdd;
+                return true;
+            }
+            else
+            {
+                foreach (string pathString in templateCreationResult.PrimaryOutputs.Select(x => x.Path))
+                {
+                    filesToAdd.Add(!string.IsNullOrEmpty(outputBasePath) ? Path.Combine(outputBasePath, pathString) : pathString);
+                }
+
+                projectFiles = filesToAdd;
+                return true;
+            }
         }
 
         private string GetSolutionFolder(IPostAction actionConfig)

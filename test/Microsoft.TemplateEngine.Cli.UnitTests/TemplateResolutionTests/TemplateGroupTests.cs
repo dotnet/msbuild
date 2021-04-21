@@ -90,38 +90,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             };
         }
 
-        [Theory(DisplayName = nameof(GetInvalidParametersTest))]
-        [MemberData(nameof(GetInvalidParametersTestData))]
-        internal void GetInvalidParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
-        {
-            TemplateResolutionResult matchedTemplates = TemplateResolver.GetTemplateResolutionResult(templates, new MockHostSpecificDataLoader(), command, null);
-
-            TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
-            IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetInvalidParameterList();
-
-            Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
-            foreach (MockInvalidParameterInfo exp in expectedInvalidParams)
-            {
-                Assert.Single(invalidParameters.Where(param => param.ErrorKind == exp.Kind && param.InputFormat == exp.InputFormat && param.SpecifiedValue == exp.SpecifiedValue));
-            }
-        }
-
-        [Theory(DisplayName = nameof(GetAmbiguousSingleStartsWithParametersTest))]
-        [MemberData(nameof(GetAmbiguousSingleStartsWithParametersTestData))]
-        internal void GetAmbiguousSingleStartsWithParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
-        {
-            TemplateResolutionResult matchedTemplates = TemplateResolver.GetTemplateResolutionResult(templates, new MockHostSpecificDataLoader(), command, null);
-
-            TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
-            IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetAmbiguousSingleStartsWithParameters();
-
-            Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
-            foreach (MockInvalidParameterInfo exp in expectedInvalidParams)
-            {
-                Assert.Single(invalidParameters.Where(param => param.ErrorKind == exp.Kind && param.InputFormat == exp.InputFormat && param.SpecifiedValue == exp.SpecifiedValue));
-            }
-        }
-
         public static IEnumerable<object[]> GetAmbiguousSingleStartsWithParametersTestData()
         {
             yield return new object[]
@@ -257,6 +225,38 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             };
         }
 
+        [Theory(DisplayName = nameof(GetInvalidParametersTest))]
+        [MemberData(nameof(GetInvalidParametersTestData))]
+        internal void GetInvalidParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
+        {
+            TemplateResolutionResult matchedTemplates = TemplateResolver.GetTemplateResolutionResult(templates, new MockHostSpecificDataLoader(), command, null);
+
+            TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
+            IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetInvalidParameterList();
+
+            Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
+            foreach (MockInvalidParameterInfo exp in expectedInvalidParams)
+            {
+                Assert.Single(invalidParameters.Where(param => param.ErrorKind == exp.Kind && param.InputFormat == exp.InputFormat && param.SpecifiedValue == exp.SpecifiedValue));
+            }
+        }
+
+        [Theory(DisplayName = nameof(GetAmbiguousSingleStartsWithParametersTest))]
+        [MemberData(nameof(GetAmbiguousSingleStartsWithParametersTestData))]
+        internal void GetAmbiguousSingleStartsWithParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
+        {
+            TemplateResolutionResult matchedTemplates = TemplateResolver.GetTemplateResolutionResult(templates, new MockHostSpecificDataLoader(), command, null);
+
+            TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
+            IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetAmbiguousSingleStartsWithParameters();
+
+            Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
+            foreach (MockInvalidParameterInfo exp in expectedInvalidParams)
+            {
+                Assert.Single(invalidParameters.Where(param => param.ErrorKind == exp.Kind && param.InputFormat == exp.InputFormat && param.SpecifiedValue == exp.SpecifiedValue));
+            }
+        }
+
         [Theory(DisplayName = nameof(GetHighestPrecedenceInvokableTemplatesTest))]
         [MemberData(nameof(GetHighestPrecedenceInvokableTemplatesTestData))]
         internal void GetHighestPrecedenceInvokableTemplatesTest(MockNewCommandInput command, MockTemplateInfo[] templates, string defaultLanguage, string[] expectedTemplates)
@@ -287,8 +287,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 Assert.Null(selectedTemplate);
                 Assert.False(success);
             }
-
         }
-
     }
 }

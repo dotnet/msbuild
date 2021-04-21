@@ -97,6 +97,18 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             return AddReference(environment, actionConfig, nearestProjectFilesFound);
         }
 
+        internal IReadOnlyList<string> FindProjFileAtOrAbovePath(IPhysicalFileSystem fileSystem, string startPath, HashSet<string> extensionLimiters)
+        {
+            if (extensionLimiters.Count == 0)
+            {
+                return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, startPath, "*.*proj");
+            }
+            else
+            {
+                return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, startPath, "*.*proj", (filename) => extensionLimiters.Contains(Path.GetExtension(filename)));
+            }
+        }
+
         private bool AddReference(IEngineEnvironmentSettings environment, IPostAction actionConfig, IReadOnlyList<string> nearestProjectFilesFound)
         {
             if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string referenceToAdd))
@@ -183,18 +195,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 }
 
                 return false;
-            }
-        }
-
-        internal IReadOnlyList<string> FindProjFileAtOrAbovePath(IPhysicalFileSystem fileSystem, string startPath, HashSet<string> extensionLimiters)
-        {
-            if (extensionLimiters.Count == 0)
-            {
-                return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, startPath, "*.*proj");
-            }
-            else
-            {
-                return FileFindHelpers.FindFilesAtOrAbovePath(fileSystem, startPath, "*.*proj", (filename) => extensionLimiters.Contains(Path.GetExtension(filename)));
             }
         }
     }

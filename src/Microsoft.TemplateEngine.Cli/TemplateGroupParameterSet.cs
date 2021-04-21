@@ -13,12 +13,14 @@ namespace Microsoft.TemplateEngine.Cli
     {
         private readonly IReadOnlyList<IParameterSet> _parameterSetList;
 
+        private IEnumerable<ITemplateParameter> _parameterDefinitions;
+
+        private IDictionary<ITemplateParameter, object> _resolvedValues;
+
         internal TemplateGroupParameterSet(IReadOnlyList<IParameterSet> parameterSetList)
         {
             _parameterSetList = parameterSetList;
         }
-
-        private IEnumerable<ITemplateParameter> _parameterDefinitions;
 
         public IEnumerable<ITemplateParameter> ParameterDefinitions
         {
@@ -110,8 +112,6 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         public IEnumerable<string> RequiredBrokerCapabilities => Enumerable.Empty<string>();
-
-        private IDictionary<ITemplateParameter, object> _resolvedValues;
 
         public IDictionary<ITemplateParameter, object> ResolvedValues
         {

@@ -76,55 +76,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static bool GenerateUsageForTemplate(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, string commandName)
-        {
-            HostSpecificTemplateData hostTemplateData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
-
-            if (hostTemplateData.UsageExamples != null)
-            {
-                if (hostTemplateData.UsageExamples.Count == 0)
-                {
-                    return false;
-                }
-
-                Reporter.Output.WriteLine($"    dotnet {commandName} {templateInfo.ShortNameList[0]} {hostTemplateData.UsageExamples[0]}");
-                return true;
-            }
-
-            Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortNameList[0]}");
-            IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
-            IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames, parametersToAlwaysShow: hostTemplateData.ParametersToAlwaysShow);
-
-            foreach (ITemplateParameter parameter in filteredParams)
-            {
-                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                else if (string.Equals(parameter.DataType, "string", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                else if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase) && parameter.Choices.Count == 1)
-                {
-                    continue;
-                }
-
-                string displayParameter = hostTemplateData.DisplayNameForParameter(parameter.Name);
-
-                Reporter.Output.Write($" --{displayParameter}");
-
-                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                {
-                    Reporter.Output.Write($" {parameter.DefaultValue}");
-                }
-            }
-
-            Reporter.Output.WriteLine();
-            return true;
-        }
-
         // TODO: rework this method... it's a bit of a god-method, for very specific purposes.
         // Number of times I've deferred on reworking this method: 4
         internal static TemplateUsageInformation? GetTemplateUsageInformation(ITemplateInfo templateInfo, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
@@ -207,6 +158,55 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 VariantsForCanonicals = variantsForCanonicals,
                 HasPostActionScriptRunner = hasPostActionScriptRunner
             };
+        }
+
+        private static bool GenerateUsageForTemplate(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, string commandName)
+        {
+            HostSpecificTemplateData hostTemplateData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
+
+            if (hostTemplateData.UsageExamples != null)
+            {
+                if (hostTemplateData.UsageExamples.Count == 0)
+                {
+                    return false;
+                }
+
+                Reporter.Output.WriteLine($"    dotnet {commandName} {templateInfo.ShortNameList[0]} {hostTemplateData.UsageExamples[0]}");
+                return true;
+            }
+
+            Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortNameList[0]}");
+            IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
+            IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames, parametersToAlwaysShow: hostTemplateData.ParametersToAlwaysShow);
+
+            foreach (ITemplateParameter parameter in filteredParams)
+            {
+                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                else if (string.Equals(parameter.DataType, "string", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                else if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase) && parameter.Choices.Count == 1)
+                {
+                    continue;
+                }
+
+                string displayParameter = hostTemplateData.DisplayNameForParameter(parameter.Name);
+
+                Reporter.Output.Write($" --{displayParameter}");
+
+                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
+                {
+                    Reporter.Output.Write($" {parameter.DefaultValue}");
+                }
+            }
+
+            Reporter.Output.WriteLine();
+            return true;
         }
 
         private static bool CheckIfTemplateHasScriptRunningPostActions(ITemplate template, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, TemplateCreator templateCreator)

@@ -19,6 +19,7 @@ namespace Microsoft.TemplateEngine.Cli
         private bool _anyNonEmptyStderrWritten;
 
         internal string Command => string.Concat(_info.FileName, " ", _info.Arguments);
+
         internal static Dotnet Restore(params string[] args)
         {
             return new Dotnet
@@ -101,6 +102,20 @@ namespace Microsoft.TemplateEngine.Cli
             };
         }
 
+        internal static Dotnet Version()
+        {
+            return new Dotnet
+            {
+                _info = new ProcessStartInfo("dotnet", "--version")
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                    RedirectStandardOutput = true
+                }
+            };
+        }
+
         internal Dotnet ForwardStdErr()
         {
             _errorDataReceived = ForwardStreamStdErr;
@@ -111,6 +126,32 @@ namespace Microsoft.TemplateEngine.Cli
         {
             _outputDataReceived = ForwardStreamStdOut;
             return this;
+        }
+
+        internal Dotnet CaptureStdOut()
+        {
+            _stdout = new StringBuilder();
+            _outputDataReceived += CaptureStreamStdOut;
+            return this;
+        }
+
+        internal Dotnet CaptureStdErr()
+        {
+            _stderr = new StringBuilder();
+            _errorDataReceived += CaptureStreamStdErr;
+            return this;
+        }
+
+        internal Result Execute()
+        {
+            Process p = Process.Start(_info);
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+            p.ErrorDataReceived += OnErrorDataReceived;
+            p.OutputDataReceived += OnOutputDataReceived;
+            p.WaitForExit();
+
+            return new Result(_stdout?.ToString(), _stderr?.ToString(), p.ExitCode);
         }
 
         private void ForwardStreamStdOut(object sender, DataReceivedEventArgs e)
@@ -133,40 +174,14 @@ namespace Microsoft.TemplateEngine.Cli
             Console.Error.WriteLine(e.Data);
         }
 
-        internal Dotnet CaptureStdOut()
-        {
-            _stdout = new StringBuilder();
-            _outputDataReceived += CaptureStreamStdOut;
-            return this;
-        }
-
         private void CaptureStreamStdOut(object sender, DataReceivedEventArgs e)
         {
             _stdout.AppendLine(e.Data);
         }
 
-        internal Dotnet CaptureStdErr()
-        {
-            _stderr = new StringBuilder();
-            _errorDataReceived += CaptureStreamStdErr;
-            return this;
-        }
-
         private void CaptureStreamStdErr(object sender, DataReceivedEventArgs e)
         {
             _stderr.AppendLine(e.Data);
-        }
-
-        internal Result Execute()
-        {
-            Process p = Process.Start(_info);
-            p.BeginOutputReadLine();
-            p.BeginErrorReadLine();
-            p.ErrorDataReceived += OnErrorDataReceived;
-            p.OutputDataReceived += OnOutputDataReceived;
-            p.WaitForExit();
-
-            return new Result(_stdout?.ToString(), _stderr?.ToString(), p.ExitCode);
         }
 
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
@@ -193,20 +208,6 @@ namespace Microsoft.TemplateEngine.Cli
             internal string StdOut { get; }
 
             internal int ExitCode { get; }
-        }
-
-        internal static Dotnet Version()
-        {
-            return new Dotnet
-            {
-                _info = new ProcessStartInfo("dotnet", "--version")
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true
-                }
-            };
         }
     }
 }

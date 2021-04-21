@@ -59,7 +59,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
                 }
-
             }
         }
 
@@ -105,6 +104,120 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
             }
             return Task.FromResult(CreationResultStatus.CreateFailed);
+        }
+
+        // Displays the list of templates in a table, one row per template group.
+        //
+        // The columns displayed are as follows:
+        // Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
+        // (There is no check that the info doesn't vary.)
+        // - Template Name
+        // - Short Name: displays the first short name from the highest precedence template in the group.
+        // - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
+        // - Tags
+        internal static void DisplayTemplateList(IReadOnlyCollection<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage, bool useErrorOutput = false)
+        {
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templateGroups, commandInput.Language, defaultLanguage);
+            DisplayTemplateList(groupsForDisplay, environmentSettings, commandInput, useErrorOutput);
+        }
+
+        internal static void DisplayTemplateList(IEnumerable<ITemplateInfo> templates, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage, bool useErrorOutput = false)
+        {
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templates, commandInput.Language, defaultLanguage);
+            DisplayTemplateList(groupsForDisplay, environmentSettings, commandInput, useErrorOutput);
+        }
+
+        internal static void DisplayInvalidParameters(IEnumerable<string> invalidParams)
+        {
+            _ = invalidParams ?? throw new ArgumentNullException(nameof(invalidParams));
+
+            if (invalidParams.Any())
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
+                foreach (string flag in invalidParams)
+                {
+                    Reporter.Error.WriteLine($"  {flag}".Bold().Red());
+                }
+            }
+        }
+
+        // Returns a list of the parameter names that are invalid for every template in the input group.
+        internal static void GetParametersInvalidForTemplatesInList(IReadOnlyCollection<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
+        {
+            IDictionary<string, int> invalidCounts = new Dictionary<string, int>();
+
+            foreach (ITemplateMatchInfo template in templateList)
+            {
+                foreach (string paramName in template.GetInvalidParameterNames())
+                {
+                    if (!invalidCounts.ContainsKey(paramName))
+                    {
+                        invalidCounts[paramName] = 1;
+                    }
+                    else
+                    {
+                        invalidCounts[paramName]++;
+                    }
+                }
+            }
+
+            IEnumerable<IGrouping<string, string>> countGroups = invalidCounts.GroupBy(x => x.Value == templateList.Count ? "all" : "some", x => x.Key);
+            invalidForAllTemplates =
+                countGroups.FirstOrDefault(x => string.Equals(x.Key, "all", StringComparison.Ordinal))?.ToList()
+                ?? new List<string>();
+
+            invalidForSomeTemplates =
+                countGroups.FirstOrDefault(x => string.Equals(x.Key, "some", StringComparison.Ordinal))?.ToList()
+                ?? new List<string>();
+        }
+
+        internal static void ShowUsageHelp(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
+        {
+            if (commandInput.IsHelpFlagSpecified)
+            {
+                telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
+            }
+
+            Reporter.Output.WriteLine(commandInput.HelpText);
+            Reporter.Output.WriteLine();
+        }
+
+        internal static CreationResultStatus HandleParseError(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
+        {
+            TemplateResolver.ValidateRemainingParameters(commandInput, out IReadOnlyList<string> invalidParams);
+            DisplayInvalidParameters(invalidParams);
+
+            // TODO: get a meaningful error message from the parser
+            if (commandInput.IsHelpFlagSpecified)
+            {
+                // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
+                ShowUsageHelp(commandInput, telemetryLogger);
+            }
+            else if (invalidParams.Count > 0)
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, commandInput.CommandName).Bold().Red());
+            }
+            if (commandInput.HasColumnsParseError)
+            {
+                Reporter.Error.WriteLine(commandInput.ColumnsParseError.Bold().Red());
+            }
+
+            return CreationResultStatus.InvalidParamValues;
+        }
+
+        /// <summary>
+        /// Returns the help command for given template; or null in case template does not have short name defined.
+        /// </summary>
+        /// <param name="commandName"></param>
+        /// <param name="template"></param>
+        /// <returns>the help command or null in case template does not have short name defined.</returns>
+        internal static string? GetTemplateHelpCommand(string commandName, ITemplateInfo template)
+        {
+            if (template.ShortNameList.Any())
+            {
+                return GetTemplateHelpCommand(commandName, template.ShortNameList[0]);
+            }
+            return null;
         }
 
         private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string? defaultLanguage)
@@ -250,17 +363,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return CreationResultStatus.InvalidParamValues;
         }
 
-        private struct AmbiguousTemplateDetails
-        {
-            internal string TemplateIdentity;
-            internal string TemplateName;
-            internal IReadOnlyList<string> TemplateShortNames;
-            internal string TemplateLanguage;
-            internal int TemplatePrecedence;
-            internal string TemplateAuthor;
-            internal IManagedTemplatePackage? TemplatePackage;
-        }
-
         /// <summary>
         /// Displays the help when <paramref name="unambiguousTemplateGroup"/> contains the invokable templates with ambiguous precedence.
         /// </summary>
@@ -326,27 +428,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return CreationResultStatus.NotFound;
         }
 
-        // Displays the list of templates in a table, one row per template group.
-        //
-        // The columns displayed are as follows:
-        // Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
-        // (There is no check that the info doesn't vary.)
-        // - Template Name
-        // - Short Name: displays the first short name from the highest precedence template in the group.
-        // - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
-        // - Tags
-        internal static void DisplayTemplateList(IReadOnlyCollection<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage, bool useErrorOutput = false)
-        {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templateGroups, commandInput.Language, defaultLanguage);
-            DisplayTemplateList(groupsForDisplay, environmentSettings, commandInput, useErrorOutput);
-        }
-
-        internal static void DisplayTemplateList(IEnumerable<ITemplateInfo> templates, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage, bool useErrorOutput = false)
-        {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templates, commandInput.Language, defaultLanguage);
-            DisplayTemplateList(groupsForDisplay, environmentSettings, commandInput, useErrorOutput);
-        }
-
         private static void DisplayTemplateList(
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay,
             IEngineEnvironmentSettings environmentSettings,
@@ -374,20 +455,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
             reporter.WriteLine(formatter.Layout());
-        }
-
-        internal static void DisplayInvalidParameters(IEnumerable<string> invalidParams)
-        {
-            _ = invalidParams ?? throw new ArgumentNullException(nameof(invalidParams));
-
-            if (invalidParams.Any())
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
-                foreach (string flag in invalidParams)
-                {
-                    Reporter.Error.WriteLine($"  {flag}".Bold().Red());
-                }
-            }
         }
 
         private static void DisplayParametersInvalidForSomeTemplates(IReadOnlyList<string> invalidParams, string messageHeader)
@@ -436,85 +503,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             // To search for the templates on NuGet.org, run 'dotnet {0} <template name> --search'.
             Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.CommandName, commandInput.TemplateName).Bold().Red());
             Reporter.Error.WriteLine();
-        }
-
-        // Returns a list of the parameter names that are invalid for every template in the input group.
-        internal static void GetParametersInvalidForTemplatesInList(IReadOnlyCollection<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
-        {
-            IDictionary<string, int> invalidCounts = new Dictionary<string, int>();
-
-            foreach (ITemplateMatchInfo template in templateList)
-            {
-                foreach (string paramName in template.GetInvalidParameterNames())
-                {
-                    if (!invalidCounts.ContainsKey(paramName))
-                    {
-                        invalidCounts[paramName] = 1;
-                    }
-                    else
-                    {
-                        invalidCounts[paramName]++;
-                    }
-                }
-            }
-
-            IEnumerable<IGrouping<string, string>> countGroups = invalidCounts.GroupBy(x => x.Value == templateList.Count ? "all" : "some", x => x.Key);
-            invalidForAllTemplates =
-                countGroups.FirstOrDefault(x => string.Equals(x.Key, "all", StringComparison.Ordinal))?.ToList()
-                ?? new List<string>();
-
-            invalidForSomeTemplates =
-                countGroups.FirstOrDefault(x => string.Equals(x.Key, "some", StringComparison.Ordinal))?.ToList()
-                ?? new List<string>();
-        }
-
-        internal static void ShowUsageHelp(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
-        {
-            if (commandInput.IsHelpFlagSpecified)
-            {
-                telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
-            }
-
-            Reporter.Output.WriteLine(commandInput.HelpText);
-            Reporter.Output.WriteLine();
-        }
-
-        internal static CreationResultStatus HandleParseError(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
-        {
-            TemplateResolver.ValidateRemainingParameters(commandInput, out IReadOnlyList<string> invalidParams);
-            DisplayInvalidParameters(invalidParams);
-
-            // TODO: get a meaningful error message from the parser
-            if (commandInput.IsHelpFlagSpecified)
-            {
-                // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
-                ShowUsageHelp(commandInput, telemetryLogger);
-            }
-            else if (invalidParams.Count > 0)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, commandInput.CommandName).Bold().Red());
-            }
-            if (commandInput.HasColumnsParseError)
-            {
-                Reporter.Error.WriteLine(commandInput.ColumnsParseError.Bold().Red());
-            }
-
-            return CreationResultStatus.InvalidParamValues;
-        }
-
-        /// <summary>
-        /// Returns the help command for given template; or null in case template does not have short name defined.
-        /// </summary>
-        /// <param name="commandName"></param>
-        /// <param name="template"></param>
-        /// <returns>the help command or null in case template does not have short name defined.</returns>
-        internal static string? GetTemplateHelpCommand(string commandName, ITemplateInfo template)
-        {
-            if (template.ShortNameList.Any())
-            {
-                return GetTemplateHelpCommand(commandName, template.ShortNameList[0]);
-            }
-            return null;
         }
 
         /// <summary>
@@ -568,6 +556,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 .OfType<TemplateFilterOption>()
                 .Where(filter => filter.IsFilterSet(commandInput) && filter.MismatchCriteria(templateResolutionResult))
                 .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
+        }
+
+        private struct AmbiguousTemplateDetails
+        {
+            internal string TemplateIdentity;
+            internal string TemplateName;
+            internal IReadOnlyList<string> TemplateShortNames;
+            internal string TemplateLanguage;
+            internal int TemplatePrecedence;
+            internal string TemplateAuthor;
+            internal IManagedTemplatePackage? TemplatePackage;
         }
     }
 }
