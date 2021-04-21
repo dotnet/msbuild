@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 
 namespace Microsoft.TemplateEngine.TestHelper

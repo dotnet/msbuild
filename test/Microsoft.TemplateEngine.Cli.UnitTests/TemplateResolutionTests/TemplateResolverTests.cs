@@ -4,14 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests

@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
@@ -9,9 +8,7 @@ using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Mocks;
-using Microsoft.TemplateEngine.Orchestrator.RunnableProjects;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests

@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
-using Microsoft.TemplateEngine.Edge.Installers.NuGet;
 using Microsoft.TemplateEngine.Mocks;
 using Microsoft.TemplateEngine.TestHelper;
 using Microsoft.TemplateSearch.Common;
