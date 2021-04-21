@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli
         internal TemplatePackageCoordinator(
             ITelemetryLogger telemetryLogger,
             IEngineEnvironmentSettings environmentSettings,
-            string defaultLanguage = null)
+            string? defaultLanguage = null)
         {
             _ = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _ = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
@@ -42,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             _telemetryLogger = telemetryLogger;
             _engineEnvironmentSettings = environmentSettings;
-            _defaultLanguage = defaultLanguage;
+            _defaultLanguage = defaultLanguage!;
         }
 
         /// <summary>
@@ -98,13 +100,13 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         /// <summary>
-        /// Checks if there is an update for the package contiaing the <paramref name="template"/>.
+        /// Checks if there is an update for the package containing the <paramref name="template"/>.
         /// </summary>
         /// <param name="template">template to check the update for.</param>
         /// <param name="commandInput"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        internal async Task CheckUpdateForTemplate(ITemplateInfo template, INewCommandInput commandInput, CancellationToken cancellationToken = default)
+        internal async Task<IReadOnlyList<CheckUpdateResult>> CheckUpdateForTemplate(ITemplateInfo template, INewCommandInput commandInput, CancellationToken cancellationToken = default)
         {
             _ = template ?? throw new ArgumentNullException(nameof(template));
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
@@ -118,19 +120,17 @@ namespace Microsoft.TemplateEngine.Cli
             catch (Exception)
             {
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Error_PackageForTemplateNotFound, template.Identity));
-                return;
+                return Array.Empty<CheckUpdateResult>();
             }
 
-            IManagedTemplatePackage managedTemplatePackage = templatePackage as IManagedTemplatePackage;
-            if (managedTemplatePackage is null)
+            if (!(templatePackage is IManagedTemplatePackage managedTemplatePackage))
             {
                 //update is not supported - built-in or optional workload source
-                return;
+                return Array.Empty<CheckUpdateResult>();
             }
 
             InitializeNuGetCredentialService(commandInput);
-            IReadOnlyList<CheckUpdateResult> versionChecks = await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false);
-            DisplayUpdateCheckResults(versionChecks, commandInput, showUpdates: true);
+            return await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false);
         }
 
         private static void InitializeNuGetCredentialService(INewCommandInput commandInput)
@@ -179,7 +179,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 string[] splitByColons = installArg.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
                 string identifier = splitByColons[0];
-                string version = null;
+                string? version = null;
                 //'*' is placeholder for the latest version
                 if (splitByColons.Length > 1 && splitByColons[1] != "*")
                 {
@@ -285,7 +285,7 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             success = CreationResultStatus.CreateFailed;
                         }
-                        await DisplayInstallResultAsync(commandInput, updateResult.UpdateRequest.TemplatePackage?.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
+                        await DisplayInstallResultAsync(commandInput, updateResult.UpdateRequest.TemplatePackage.DisplayName, updateResult, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -461,7 +461,11 @@ namespace Microsoft.TemplateEngine.Cli
             });
         }
 
-        private void DisplayUpdateCheckResults(IEnumerable<CheckUpdateResult> versionCheckResults, INewCommandInput commandInput, bool showUpdates = true)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "StyleCop.CSharp.OrderingRules",
+            "SA1202:Elements should be ordered by access",
+            Justification = "To make reviewing PR easier, will undo before merging.")]
+        internal void DisplayUpdateCheckResults(IEnumerable<CheckUpdateResult> versionCheckResults, INewCommandInput commandInput, bool showUpdates = true)
         {
             _ = versionCheckResults ?? throw new ArgumentNullException(nameof(versionCheckResults));
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
