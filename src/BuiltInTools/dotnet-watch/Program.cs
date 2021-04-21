@@ -261,7 +261,7 @@ Examples:
             {
                 _reporter.Verbose($"Found HotReloadProfile={defaultProfile.HotReloadProfile}. Watching with hot-reload");
 
-                // We'll sue hot-reload based watching if
+                // Use hot-reload based watching if
                 // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
                 // b) The launch profile supports hot-reload based watching.
                 // The watcher will complain if users configure this for runtimes that would not support it.
