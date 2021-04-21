@@ -99,7 +99,6 @@
     <Compile Remove="CSharpTokenizer_Tests.cs" />
     <Compile Remove="DependentAssembly_Tests.cs" />
     <Compile Remove="ErrorWarningMessage_Tests.cs" />
-    <Compile Remove="FindInvalidProjectReferences_Tests.cs" />
     <Compile Remove="ResourceHandling\GenerateResourceOutOfProc_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGen_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGenDependencies_Tests.cs" />

@@ -290,6 +290,18 @@ namespace Microsoft.Build.Tasks
         public bool MatchFileNameOnly { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class FindInvalidProjectReferences : Microsoft.Build.Tasks.TaskExtension
+    {
+        public FindInvalidProjectReferences() { }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] InvalidReferences { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskItem[] ProjectReferences { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string TargetPlatformIdentifier { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string TargetPlatformVersion { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public partial class FindUnderPath : Microsoft.Build.Tasks.TaskExtension
     {
         public FindUnderPath() { }

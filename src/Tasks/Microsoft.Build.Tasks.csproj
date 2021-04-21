@@ -387,6 +387,7 @@
     <Compile Include="FindAppConfigFile.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="FindInvalidProjectReferences.cs" />
     <Compile Include="GetFrameworkPath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -604,7 +605,6 @@
     <Compile Include="ComReferenceWrapperInfo.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="FindInvalidProjectReferences.cs" />
     <Compile Include="GenerateBootstrapper.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
