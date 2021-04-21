@@ -519,7 +519,7 @@ namespace Microsoft.Build.BuildEngine
 
             string additionalProperties = string.Format(
                 CultureInfo.InvariantCulture,
-                "Configuration={0}; Platform={1}; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionFilterName=$(SolutionFilterName); SolutionPath=$(SolutionPath)",
+                "Configuration={0}; Platform={1}; BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)",
                 EscapingUtilities.Escape(configurationName),
                 EscapingUtilities.Escape(platformName)
             );
