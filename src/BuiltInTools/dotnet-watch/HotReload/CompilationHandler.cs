@@ -115,10 +115,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 var diagnostics = GetDiagnostics(updatedSolution, cancellationToken);
                 if (diagnostics.IsDefaultOrEmpty)
                 {
+                    _reporter.Verbose("No deltas modified. Applying changes to clear diagnostics.");
                     await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
                 }
                 else
                 {
+                    _reporter.Verbose("Found compilation errors during hot reload. Reporting it in application UI.");
                     await _deltaApplier.ReportDiagnosticsAsync(context, diagnostics, cancellationToken);
                 }
 
@@ -143,6 +145,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             _currentSolution = updatedSolution;
 
             var applyState = await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+            _reporter.Verbose($"Received {(applyState ? "successful" : "failed")} apply from delta applier.");
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
             return applyState;
         }
