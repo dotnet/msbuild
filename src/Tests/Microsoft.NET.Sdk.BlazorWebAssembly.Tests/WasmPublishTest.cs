@@ -34,7 +34,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, testInstance.TestRoot);
-            publishCommand.Execute().Should().Pass();
+            publishCommand.Execute().Should().Pass()
+                .And.NotHaveStdOutContaining("warning IL");
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
