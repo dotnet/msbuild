@@ -107,7 +107,7 @@
     </Dependency>
     <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210420-01">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>7045302354975ea1b7d1e05e1bfb81d74a1f4d60</Sha> 
+      <Sha>7045302354975ea1b7d1e05e1bfb81d74a1f4d60</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-rtm.21213.1">
       <Uri>https://github.com/mono/linker</Uri>
