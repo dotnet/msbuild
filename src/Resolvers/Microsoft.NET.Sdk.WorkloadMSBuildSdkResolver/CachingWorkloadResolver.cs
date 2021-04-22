@@ -39,7 +39,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
     //  from the previous call, the cached state will be thrown out and recreated.
     class CachingWorkloadResolver
     {
-        private record CachedState
+        private sealed record CachedState
         {            
             public string DotnetRootPath { get; init; }
             public string SdkVersion { get; init; }
@@ -55,7 +55,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 
         public object _lockObject { get; } = new object();
         private CachedState _cachedState;
-        private bool _enabled;
+        private readonly bool _enabled;
 
 
         public CachingWorkloadResolver()
@@ -71,7 +71,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 }
             }
 
-            if (!_enabled)
+            if (_enabled)
             {
                 string sentinelPath = Path.Combine(Path.GetDirectoryName(typeof(CachingWorkloadResolver).Assembly.Location), "DisableWorkloadResolver.sentinel");
                 if (File.Exists(sentinelPath))
@@ -101,20 +101,20 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             }
         }
 
-        public record SinglePathResolutionResult(
+        public sealed record SinglePathResolutionResult(
             string Path
         ) : ResolutionResult;
 
-        public record MultiplePathResolutionResult(
+        public sealed record MultiplePathResolutionResult(
             IEnumerable<string> Paths
         ) : ResolutionResult;
 
-        public record EmptyResolutionResult(
+        public sealed record EmptyResolutionResult(
             IDictionary<string, string> propertiesToAdd,
             IDictionary<string, SdkResultItem> itemsToAdd
         ) : ResolutionResult;
 
-        public record NullResolutionResult() : ResolutionResult;
+        public sealed record NullResolutionResult() : ResolutionResult;
 
         private static ResolutionResult Resolve(string sdkReferenceName, IWorkloadManifestProvider manifestProvider, IWorkloadResolver workloadResolver)
         {
