@@ -14,11 +14,33 @@
         <NoDefaultExcludes>true</NoDefaultExcludes>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Remove="**\*"  />
+        <Compile Remove="**\*" />
         <Content Include="test_templates\**\*" Exclude="test_templates\**\bin\**;test_templates\**\obj\**" />
         <None Include="test_templates\**\*" CopyToOutputDirectory="Always" />
 
         <Content Include="nupkg_templates\**" />
         <None Include="nupkg_templates\**" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsFiles\.template.config\template.json" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsFiles\Custom\MyTestProject.Tests\MyTestProject.Tests.csproj" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsFiles\Custom\MyTestProject.Tests\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsFiles\Custom\MyTestProject\MyTestProject.csproj" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsFiles\Custom\MyTestProject\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsPrimaryOutputs\.template.config\template.json" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsPrimaryOutputs\Custom\MyTestProject.Tests\MyTestProject.Tests.csproj" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsPrimaryOutputs\Custom\MyTestProject\MyTestProject.csproj" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsPrimaryOutputs\Custom\MyTestProject\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsPrimaryOutputs\Custom\MyTestProject.Tests\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames2\.template.config\template.json" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames2\TemplateProject1\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames2\TemplateProject1\TemplateProject1.csproj" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames2\TemplateProject2\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames2\TemplateProject2\TemplateProject2.csproj" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames\.template.config\template.json" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames\TemplateProject2\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames\TemplateProject1\Program.cs" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames\TemplateProject1\TemplateProject1.csproj" />
+      <None Remove="test_templates\PostActions\RestoreNuGet\TwoProjectsWithSourceRenames\TemplateProject2\TemplateProject2.csproj" />
     </ItemGroup>
 </Project>

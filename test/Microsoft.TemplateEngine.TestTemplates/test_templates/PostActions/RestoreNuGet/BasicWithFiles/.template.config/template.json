@@ -7,7 +7,7 @@
     "precedence": "100",
     "identity": "TestAssets.PostActions.RestoreNuGet.BasicWithFiles",
     "shortName": "TestAssets.PostActions.RestoreNuGet.BasicWithFiles",
-    "sourceName": "basic",
+    "sourceName": "Basic",
     "postActions": [
         {
             "description": "Restore NuGet packages required by this project.",

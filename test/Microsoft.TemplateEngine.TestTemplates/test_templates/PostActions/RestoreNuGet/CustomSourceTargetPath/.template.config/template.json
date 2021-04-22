@@ -1,16 +1,22 @@
 {
     "author": "Test Asset",
     "classifications": [ "Test Asset" ],
-    "name": "TestAssets.PostActions.RestoreNuGet.Basic",
+    "name": "TestAssets.PostActions.RestoreNuGet.CustomSourceTargetPath",
     "generatorVersions": "[1.0.0.0-*)",
-    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.Basic",
+    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.CustomSourceTargetPath",
     "precedence": "100",
-    "identity": "TestAssets.PostActions.RestoreNuGet.Basic",
-    "shortName": "TestAssets.PostActions.RestoreNuGet.Basic",
+    "identity": "TestAssets.PostActions.RestoreNuGet.CustomSourceTargetPath",
+    "shortName": "TestAssets.PostActions.RestoreNuGet.CustomSourceTargetPath",
     "sourceName": "Basic",
+    "sources": [
+        {
+            "source": "./Src/Custom/Path/",
+            "target": "./Target/Output/"
+        }
+    ],
     "primaryOutputs": [
         {
-            "path": "Basic.csproj"
+            "path": "Target/Output/Basic.csproj"
         }
     ],
     "postActions": [
@@ -23,6 +29,6 @@
             ],
             "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
             "continueOnError": true
-        }
+            }
     ]
 }

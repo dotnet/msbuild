@@ -1,16 +1,21 @@
 {
     "author": "Test Asset",
     "classifications": [ "Test Asset" ],
-    "name": "TestAssets.PostActions.RestoreNuGet.Basic",
+    "name": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
     "generatorVersions": "[1.0.0.0-*)",
-    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.Basic",
+    "groupIdentity": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
     "precedence": "100",
-    "identity": "TestAssets.PostActions.RestoreNuGet.Basic",
-    "shortName": "TestAssets.PostActions.RestoreNuGet.Basic",
+    "identity": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
+    "shortName": "TestAssets.PostActions.RestoreNuGet.CustomTargetPath",
     "sourceName": "Basic",
+    "sources": [
+        {
+            "target": "./Custom/Path/"
+        }
+    ],
     "primaryOutputs": [
         {
-            "path": "Basic.csproj"
+            "path": "./Custom/Path/Basic.csproj"
         }
     ],
     "postActions": [
