@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -171,6 +172,8 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine("--debug:custom-hive requires 1 arg indicating the absolute or relative path to the custom hive".Bold().Red());
                     return 1;
                 }
+
+                hivePath = Path.GetFullPath(hivePath);
             }
 
             if (args.Length == 0)
