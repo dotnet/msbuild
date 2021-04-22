@@ -518,6 +518,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current.
+        /// </summary>
+        internal static string ColumnNameCurrentVersion {
+            get {
+                return ResourceManager.GetString("ColumnNameCurrentVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Identity.
         /// </summary>
         internal static string ColumnNameIdentity {
@@ -532,6 +541,15 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string ColumnNameLanguage {
             get {
                 return ResourceManager.GetString("ColumnNameLanguage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Latest.
+        /// </summary>
+        internal static string ColumnNameLatestVersion {
+            get {
+                return ResourceManager.GetString("ColumnNameLatestVersion", resourceCulture);
             }
         }
         
@@ -1382,6 +1400,312 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Error_PackageForTemplateNotFound {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Error_PackageForTemplateNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} (contains {1} templates).
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Error_PackageNameContainsTemplates {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Error_PackageNameContainsTemplates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The template package &apos;{0}&apos; is not found..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Error_PackageNotFound {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Error_PackageNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The template &apos;{0}&apos; is included to the packages:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Error_TemplateIncludedToPackages {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Error_TemplateIncludedToPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Found no template packages to install..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The command is attempting to install the template package &apos;{0}&apos; twice, check the arguments and retry..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Install_Error_SameInstallRequests {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Install_Error_SameInstallRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The following template packages will be installed:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is already installed..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} could not be installed, download failed..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_DownloadFailed {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_DownloadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} could not be installed..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_GenericError {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_GenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} could not be installed, no NuGet feeds are configured or they are invalid..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to install {0}, failed to uninstall previous version of the template package..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_InvalidPackage {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_InvalidPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} could not be installed, the package does not exist..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_PackageNotFound {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_PackageNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to install {0}, the template package is invalid..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_UninstallFailed {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_UninstallFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is not supported..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success: {0} installed the following templates:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Info_Success {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Info_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to uninstall {0}, reason: {1}..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Uninstall_Error_GenericError {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Uninstall_Error_GenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To list installed template packages use:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To uninstall the template package use:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Details:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Uninstall_Info_DetailsHeader {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Uninstall_Info_DetailsHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currently installed items:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Uninstall_Info_InstalledItems {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Uninstall_Info_InstalledItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Success: {0} was uninstalled..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Uninstall_Info_Success {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Uninstall_Info_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstall Command:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to check update for {0}: {1}..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_GenericError {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_GenericError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to check update for {0}: no NuGet feeds are configured or they are invalid..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to check update for {0}: the package is not available in configured NuGet feeds..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_PackageNotFound {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_PackageNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to check update for {0}: the package is not supported..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Error_PackageNotSupported {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Error_PackageNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All template packages are up-to-date..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The following template packages will be updated:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To update all the packages use:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An update for template package &apos;{0}&apos; is available..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Info_UpdateAvailable {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Info_UpdateAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An update for template packages is available:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To update the package use:.
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to initialize NuGet credential service, details: {0}..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [Warning]: Failed to parse input for template {0}, it will be skipped from further processing..
         /// </summary>
         internal static string TemplateResolver_Warning_FailedToReparseTemplate {
@@ -1414,313 +1738,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string TemplatesNotValidGivenTheSpecifiedFilter {
             get {
                 return ResourceManager.GetString("TemplatesNotValidGivenTheSpecifiedFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Error_PackageForTemplateNotFound {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Error_PackageForTemplateNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to   {0} (contains {1} templates).
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Error_PackageNameContainsTemplates {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Error_PackageNameContainsTemplates", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The template package &apos;{0}&apos; is not found.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Error_PackageNotFound {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Error_PackageNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The template &apos;{0}&apos; is included to the packages:.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Error_TemplateIncludedToPackages {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Error_TemplateIncludedToPackages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to   {0}.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Info_PackageName {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Info_PackageName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to   {0}, version: {1}.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Info_PackageNameVersion {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Info_PackageNameVersion", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Found no template packages to install.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The command is attempting to install the template package &apos;{0}&apos; twice, check the arguments and retry..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Install_Error_SameInstallRequests {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Install_Error_SameInstallRequests", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The following template packages will be installed:.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} is already installed.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} could not be installed, download failed.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_DownloadFailed {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_DownloadFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} could not be installed.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_GenericError {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_GenericError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} could not be installed, no NuGet feeds are configured or they are invalid.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to install {0}, failed to uninstall previous version of the template package.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_InvalidPackage {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_InvalidPackage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} could not be installed, the package does not exist.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_PackageNotFound {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_PackageNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to install {0}, the template package is invalid.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_UninstallFailed {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_UninstallFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} is not supported.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Success: {0} installed the following templates:.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_lnstall_Info_Success {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_lnstall_Info_Success", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to uninstall {0}, reason: {1}..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Uninstall_Error_GenericError {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Error_GenericError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to To list installed template packages, use dotnet {0} -u.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to To uninstall the template package, use dotnet {0} -u {1}.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Details:.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Currently installed items:.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Uninstall_Info_InstalledItems {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_InstalledItems", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Success: {0} was uninstalled..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Uninstall_Info_Success {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_Success", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Uninstall Command:.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to check update for {0}: {1}..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Error_GenericError {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_GenericError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to check update for {0}: no NuGet feeds are configured or they are invalid..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to check update for {0}: the package is not available in configured NuGet feeds..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Error_PackageNotFound {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_PackageNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to check update for {0}: the package is not supported..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Error_PackageNotSupported {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Error_PackageNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to All template packages are up-to-date..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to To update the package use: 
-        ///    dotnet {0} -i {1}.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Info_InstallCommand {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_InstallCommand", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The following template packages will be updated:.
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to An update for template package &apos;{0}&apos; is available..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Update_Info_UpdateAvailable {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Update_Info_UpdateAvailable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to initialize NuGet credential service, details: {0}..
-        /// </summary>
-        internal static string TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError {
-            get {
-                return ResourceManager.GetString("TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError", resourceCulture);
             }
         }
         

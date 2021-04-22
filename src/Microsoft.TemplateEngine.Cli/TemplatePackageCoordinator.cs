@@ -119,7 +119,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             catch (Exception)
             {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Error_PackageForTemplateNotFound, template.Identity));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Error_PackageForTemplateNotFound, template.Identity));
                 return null;
             }
 
@@ -143,9 +143,12 @@ namespace Microsoft.TemplateEngine.Cli
                 if (!versionCheckResult.IsLatestVersion)
                 {
                     string displayString = $"{versionCheckResult.TemplatePackage.Identifier}::{versionCheckResult.TemplatePackage.Version}";         // the package::version currently installed
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_UpdateAvailable, displayString));
-                    string installString = $"{versionCheckResult.TemplatePackage.Identifier}::{versionCheckResult.LatestVersion}"; // the package::version that will be installed
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_InstallCommand, commandInput.CommandName, installString));
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailable, displayString));
+
+                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
+                    Reporter.Output.WriteCommand(commandInput.InstallCommandExample(
+                        packageID: versionCheckResult.TemplatePackage.Identifier,
+                        version: versionCheckResult.LatestVersion));
                 }
             }
             else
@@ -166,7 +169,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter.Verbose.WriteLine(
                     string.Format(
-                        LocalizableStrings.TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError,
+                        LocalizableStrings.TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError,
                         ex.ToString()));
             }
         }
@@ -214,7 +217,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!installRequests.Any())
             {
-                Reporter.Error.WriteLine(LocalizableStrings.TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall);
+                Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall);
                 return CreationResultStatus.NotFound;
             }
 
@@ -226,21 +229,14 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     continue;
                 }
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Install_Error_SameInstallRequests, installRequest.PackageIdentifier));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Install_Error_SameInstallRequests, installRequest.PackageIdentifier));
                 return CreationResultStatus.Cancelled;
             }
 
-            Reporter.Output.WriteLine(LocalizableStrings.TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled);
+            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled);
             foreach (InstallRequest installRequest in installRequests)
             {
-                if (string.IsNullOrWhiteSpace(installRequest.Version))
-                {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Info_PackageName, installRequest.PackageIdentifier));
-                }
-                else
-                {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Info_PackageNameVersion, installRequest.PackageIdentifier, installRequest.Version));
-                }
+                Reporter.Output.WriteLine(installRequest.DisplayName.Indent());
             }
             Reporter.Output.WriteLine();
 
@@ -288,14 +284,10 @@ namespace Microsoft.TemplateEngine.Cli
                         continue;
                     }
 
-                    Reporter.Output.WriteLine(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated);
+                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated);
                     foreach (CheckUpdateResult update in updatesToApply)
                     {
-                        Reporter.Output.WriteLine(
-                            string.Format(
-                                LocalizableStrings.TemplatesPackageCoordinator_Info_PackageNameVersion,
-                                update.TemplatePackage.Identifier,
-                                update.LatestVersion));
+                        Reporter.Output.WriteLine($"{update.TemplatePackage.Identifier}::{update.LatestVersion}".Indent());
                     }
                     Reporter.Output.WriteLine();
 
@@ -313,7 +305,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (allTemplatesUpToDate)
             {
-                Reporter.Output.WriteLine(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate);
+                Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate);
             }
 
             return success;
@@ -347,12 +339,12 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         Reporter.Output.WriteLine(
                             string.Format(
-                                LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Info_Success,
+                                LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_Success,
                                 uninstallResult.TemplatePackage.DisplayName));
                     }
                     else
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_GenericError, uninstallResult.TemplatePackage.DisplayName, uninstallResult.ErrorMessage));
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_GenericError, uninstallResult.TemplatePackage.DisplayName, uninstallResult.ErrorMessage));
                         result = CreationResultStatus.CreateFailed;
                     }
                 }
@@ -397,7 +389,7 @@ namespace Microsoft.TemplateEngine.Cli
                 result = CreationResultStatus.NotFound;
                 Reporter.Error.WriteLine(
                     string.Format(
-                        LocalizableStrings.TemplatesPackageCoordinator_Error_PackageNotFound,
+                        LocalizableStrings.TemplatePackageCoordinator_Error_PackageNotFound,
                         templatePackageIdentifier).Bold().Red());
                 if (await IsTemplateShortNameAsync(templatePackageIdentifier, cancellationToken).ConfigureAwait(false))
                 {
@@ -407,40 +399,35 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         Reporter.Error.WriteLine(
                               string.Format(
-                                  LocalizableStrings.TemplatesPackageCoordinator_Error_TemplateIncludedToPackages,
-                                  templatePackageIdentifier).Bold().Red());
+                                  LocalizableStrings.TemplatePackageCoordinator_Error_TemplateIncludedToPackages,
+                                  templatePackageIdentifier));
                         foreach (IManagedTemplatePackage managedPackage in managedPackages)
                         {
                             IEnumerable<ITemplateInfo> templates = await managedPackage.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
+                            var templateGroupsCount = templates.GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase).Count();
                             Reporter.Error.WriteLine(
                                   string.Format(
-                                      LocalizableStrings.TemplatesPackageCoordinator_Error_PackageNameContainsTemplates,
+                                      LocalizableStrings.TemplatePackageCoordinator_Error_PackageNameContainsTemplates,
                                       managedPackage.DisplayName,
-                                      templates.Count()).Bold().Red());
+                                      templateGroupsCount).Indent());
                         }
-                        Reporter.Error.WriteLine(
-                              string.Format(
-                                  LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint,
-                                  commandInput.CommandName,
-                                  managedPackages?.First().Identifier).Bold().Red());
+                        Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader);
+                        Reporter.Error.WriteCommand(commandInput.UninstallCommandExample(managedPackages?.First().Identifier ?? ""));
                         //TODO:
                         //Reporter.Error.WriteLine($"To list the templates installed in a package, use dotnet new3 <new option> <package name>.");
                     }
                     else
                     {
-                        Reporter.Error.WriteLine(
-                              string.Format(
-                                  LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint,
-                                  commandInput.CommandName).Bold().Red());
+                        Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader);
+                        Reporter.Error.WriteCommand(commandInput.UninstallCommandExample(noArgs: true));
                     }
                 }
                 else
                 {
-                    Reporter.Error.WriteLine(
-                          string.Format(
-                              LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint,
-                              commandInput.CommandName));
+                    Reporter.Error.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader);
+                    Reporter.Error.WriteCommand(commandInput.UninstallCommandExample(noArgs: true));
                 }
+                Reporter.Error.WriteLine();
             }
             return (result, packagesToUninstall);
         }
@@ -487,22 +474,49 @@ namespace Microsoft.TemplateEngine.Cli
             _ = versionCheckResults ?? throw new ArgumentNullException(nameof(versionCheckResults));
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
 
-            foreach (CheckUpdateResult result in versionCheckResults)
+            //handle success
+            if (versionCheckResults.Any(result => result.Success && !result.IsLatestVersion) && showUpdates)
             {
-                if (result.Success)
-                {
-                    if (!result.IsLatestVersion && showUpdates)
-                    {
-                        string displayString = $"{result.TemplatePackage.Identifier}::{result.TemplatePackage.Version}";         // the package::version currently installed
-                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_UpdateAvailable, displayString));
-                        string installString = $"{result.TemplatePackage.Identifier}::{result.LatestVersion}"; // the package::version that will be installed
-                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_InstallCommand, commandInput.CommandName, installString));
-                    }
-                }
-                else
+                Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages);
+                IEnumerable<(string Identifier, string CurrentVersion, string LatestVersion)> displayableResults = versionCheckResults
+                    .Where(result => result.Success && !result.IsLatestVersion)
+                    .Select(result => (result.TemplatePackage.Identifier, result.TemplatePackage.Version, result.LatestVersion));
+                var formatter =
+                   HelpFormatter
+                       .For(
+                           _engineEnvironmentSettings,
+                           commandInput,
+                           displayableResults,
+                           columnPadding: 2,
+                           headerSeparator: '-',
+                           blankLineBetweenRows: false)
+                       .DefineColumn(r => r.Identifier, out object packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
+                       .DefineColumn(r => r.CurrentVersion, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
+                       .DefineColumn(r => r.LatestVersion, LocalizableStrings.ColumnNameLatestVersion, showAlways: true)
+                       .OrderBy(packageColumn);
+                Reporter.Output.WriteLine(formatter.Layout());
+                Reporter.Output.WriteLine();
+
+                Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader);
+                Reporter.Output.WriteCommand(commandInput.InstallCommandExample(withVersion: true));
+                Reporter.Output.WriteCommand(
+                    commandInput.InstallCommandExample(
+                        packageID: displayableResults.First().Identifier,
+                        version: displayableResults.First().LatestVersion));
+                Reporter.Output.WriteLine();
+                Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader);
+                Reporter.Output.WriteCommand(commandInput.UpdateApplyCommandExample());
+                Reporter.Output.WriteLine();
+            }
+
+            //handle errors
+            if (versionCheckResults.Any(result => !result.Success))
+            {
+                foreach (CheckUpdateResult result in versionCheckResults.Where(result => !result.Success))
                 {
                     HandleUpdateCheckErrors(result);
                 }
+                Reporter.Error.WriteLine();
             }
         }
 
@@ -513,7 +527,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
 
-            Reporter.Output.WriteLine(LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Info_InstalledItems);
+            Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_InstalledItems);
 
             if (!managedTemplatePackages.Any())
             {
@@ -523,44 +537,44 @@ namespace Microsoft.TemplateEngine.Cli
 
             foreach (IManagedTemplatePackage managedSource in managedTemplatePackages)
             {
-                Reporter.Output.WriteLine($"  {managedSource.Identifier}");
+                Reporter.Output.WriteLine($"{managedSource.Identifier}".Indent());
                 if (!string.IsNullOrWhiteSpace(managedSource.Version))
                 {
-                    Reporter.Output.WriteLine($"    {LocalizableStrings.Version} {managedSource.Version}");
+                    Reporter.Output.WriteLine($"{LocalizableStrings.Version} {managedSource.Version}".Indent(level: 2));
                 }
 
                 IReadOnlyDictionary<string, string> displayDetails = managedSource.GetDetails();
                 if (displayDetails?.Any() ?? false)
                 {
-                    Reporter.Output.WriteLine($"    {LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader}");
+                    Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_DetailsHeader.Indent(level: 2));
                     foreach (KeyValuePair<string, string> detail in displayDetails)
                     {
-                        Reporter.Output.WriteLine($"      {detail.Key}: {detail.Value}");
+                        Reporter.Output.WriteLine($"{detail.Key}: {detail.Value}".Indent(level: 3));
                     }
                 }
 
                 IEnumerable<ITemplateInfo> templates = await managedSource.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
                 if (templates.Any())
                 {
-                    Reporter.Output.WriteLine($"    {LocalizableStrings.Templates}:");
+                    Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
                     foreach (TemplateInfo info in templates)
                     {
                         string templateLanguage = info.GetLanguage();
                         string shortNames = string.Join(",", info.ShortNameList);
                         if (!string.IsNullOrWhiteSpace(templateLanguage))
                         {
-                            Reporter.Output.WriteLine($"      {info.Name} ({shortNames}) {templateLanguage}");
+                            Reporter.Output.WriteLine($"{info.Name} ({shortNames}) {templateLanguage}".Indent(level: 3));
                         }
                         else
                         {
-                            Reporter.Output.WriteLine($"      {info.Name} ({shortNames})");
+                            Reporter.Output.WriteLine($"{info.Name} ({shortNames})".Indent(level: 3));
                         }
                     }
                 }
 
                 // uninstall command:
-                Reporter.Output.WriteLine($"    {LocalizableStrings.TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint}");
-                Reporter.Output.WriteLine(string.Format("      dotnet {0} -u {1}", commandInput.CommandName, managedSource.Identifier));
+                Reporter.Output.WriteLine($"{LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint}".Indent(level: 2));
+                Reporter.Output.WriteCommand(commandInput.UninstallCommandExample(managedSource.Identifier));
 
                 Reporter.Output.WriteLine();
             }
@@ -580,7 +594,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter.Output.WriteLine(
                     string.Format(
-                        LocalizableStrings.TemplatesPackageCoordinator_lnstall_Info_Success,
+                        LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                         result.TemplatePackage.DisplayName));
                 IEnumerable<ITemplateInfo> templates = await result.TemplatePackage.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
                 HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
@@ -592,51 +606,51 @@ namespace Microsoft.TemplateEngine.Cli
                     case InstallerErrorCode.InvalidSource:
                         Reporter.Error.WriteLine(
                             string.Format(
-                                LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds,
+                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds,
                                 packageToInstall,
                                 result.ErrorMessage).Bold().Red());
                         break;
                     case InstallerErrorCode.PackageNotFound:
                         Reporter.Error.WriteLine(
                             string.Format(
-                                LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_PackageNotFound,
+                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_PackageNotFound,
                                 packageToInstall).Bold().Red());
                         break;
                     case InstallerErrorCode.DownloadFailed:
                         Reporter.Error.WriteLine(
                             string.Format(
-                                LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_DownloadFailed,
+                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_DownloadFailed,
                                 packageToInstall).Bold().Red());
                         break;
                     case InstallerErrorCode.UnsupportedRequest:
                         Reporter.Error.WriteLine(
                             string.Format(
-                                LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest,
+                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest,
                                 packageToInstall).Bold().Red());
                         break;
                     case InstallerErrorCode.AlreadyInstalled:
                         Reporter.Error.WriteLine(
                               string.Format(
-                                  LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled,
+                                  LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled,
                                   packageToInstall).Bold().Red());
                         break;
                     case InstallerErrorCode.UpdateUninstallFailed:
                         Reporter.Error.WriteLine(
                               string.Format(
-                                  LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_UninstallFailed,
+                                  LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_UninstallFailed,
                                   packageToInstall).Bold().Red());
                         break;
                     case InstallerErrorCode.InvalidPackage:
                         Reporter.Error.WriteLine(
                               string.Format(
-                                  LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_InvalidPackage,
+                                  LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_InvalidPackage,
                                   packageToInstall).Bold().Red());
                         break;
                     case InstallerErrorCode.GenericError:
                     default:
                         Reporter.Error.WriteLine(
                             string.Format(
-                                LocalizableStrings.TemplatesPackageCoordinator_lnstall_Error_GenericError,
+                                LocalizableStrings.TemplatePackageCoordinator_lnstall_Error_GenericError,
                                 packageToInstall).Bold().Red());
                         break;
                 }
@@ -650,26 +664,26 @@ namespace Microsoft.TemplateEngine.Cli
                 case InstallerErrorCode.InvalidSource:
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds,
+                            LocalizableStrings.TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds,
                             result.TemplatePackage.DisplayName).Bold().Red());
                     break;
                 case InstallerErrorCode.PackageNotFound:
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotFound,
+                            LocalizableStrings.TemplatePackageCoordinator_Update_Error_PackageNotFound,
                             result.TemplatePackage.DisplayName).Bold().Red());
                     break;
                 case InstallerErrorCode.UnsupportedRequest:
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotSupported,
+                            LocalizableStrings.TemplatePackageCoordinator_Update_Error_PackageNotSupported,
                             result.TemplatePackage.DisplayName).Bold().Red());
                     break;
                 case InstallerErrorCode.GenericError:
                 default:
                     Reporter.Error.WriteLine(
                         string.Format(
-                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_GenericError,
+                            LocalizableStrings.TemplatePackageCoordinator_Update_Error_GenericError,
                             result.TemplatePackage.DisplayName,
                             result.ErrorMessage).Bold().Red());
                     break;

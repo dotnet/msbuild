@@ -1,7 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
+#nullable enable
+
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -87,7 +88,7 @@ namespace Dotnet_new3.IntegrationTests
                 .NotHaveStdErr()
                 .And.NotHaveStdOutContaining("Determining projects to restore...")
                 .And.HaveStdOutContaining("The following template packages will be installed:")
-                .And.HaveStdOutContaining("Microsoft.DotNet.Web.ProjectTemplates.5.0, version: 5.0.0")
+                .And.HaveStdOutContaining("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .And.HaveStdOutContaining($"Success: Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0 installed the following templates:")
                 .And.HaveStdOutContaining("web")
                 .And.HaveStdOutContaining("blazorwasm");
@@ -333,7 +334,7 @@ namespace Dotnet_new3.IntegrationTests
                  .Should().ExitWith(0)
                  .And.NotHaveStdErr()
                  .And.HaveStdOutContaining("The following template packages will be installed:")
-                 .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0, version: 5.0.1")
+                 .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.1")
                  .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0 is already installed, version: 5.0.0, it will be replaced with version 5.0.1")
                  .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 was successfully uninstalled")
                  .And.HaveStdOutContaining($"Success: Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.1 installed the following templates:")
@@ -390,7 +391,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should().ExitWith(0)
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("The following template packages will be installed:")
-                .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0, version: 5.0.0")
+                .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .And.HaveStdOutMatching("Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0 is already installed, version: ([\\d\\.a-z-])+, it will be replaced with version 5\\.0\\.0")
                 .And.HaveStdOutMatching("Microsoft\\.DotNet\\.Common\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ was successfully uninstalled")
                 .And.HaveStdOutContaining($"Success: Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0 installed the following templates:")
@@ -412,12 +413,8 @@ namespace Dotnet_new3.IntegrationTests
         public void CanExpandWhenInstall()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            var outputFolder = TestUtils.CreateTemporaryFolder();
-
             string codebase = typeof(Program).GetTypeInfo().Assembly.Location;
-            Uri cb = new Uri(codebase);
-            string asmPath = cb.LocalPath;
-            string dir = Path.GetDirectoryName(asmPath);
+            string dir = Path.GetDirectoryName(codebase) ?? throw new System.Exception("Invalid assembly location");
             string testTemplateLocation = Path.Combine(dir, "..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";

@@ -256,7 +256,7 @@
   <data name="UnknownChangeKind" xml:space="preserve">
     <value>Unknown Change</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Update_Info_UpdateAvailable" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateAvailable" xml:space="preserve">
     <value>An update for template package '{0}' is available.</value>
   </data>
   <data name="NoPrimaryOutputsToRestore" xml:space="preserve">
@@ -323,7 +323,7 @@
   <data name="UninstallHelp" xml:space="preserve">
     <value>Uninstalls a source or a template package.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Uninstall_Error_GenericError" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Uninstall_Error_GenericError" xml:space="preserve">
     <value>Failed to uninstall {0}, reason: {1}.</value>
   </data>
   <data name="InvalidParameterDefault" xml:space="preserve">
@@ -445,7 +445,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="Version" xml:space="preserve">
     <value>Version:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Uninstall_Info_InstalledItems" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Uninstall_Info_InstalledItems" xml:space="preserve">
     <value>Currently installed items:</value>
   </data>
   <data name="SettingsReadError" xml:space="preserve">
@@ -484,18 +484,14 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="CouldntDetermineFilesToRestore" xml:space="preserve">
     <value>Couldn't determine files to restore.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Uninstall_Info_DetailsHeader" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Uninstall_Info_DetailsHeader" xml:space="preserve">
     <value>Details:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Uninstall_Info_UninstallCommandHint" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint" xml:space="preserve">
     <value>Uninstall Command:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Error_PackageForTemplateNotFound" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Error_PackageForTemplateNotFound" xml:space="preserve">
     <value>Could not find the template package containing template '{0}'</value>
-  </data>
-  <data name="TemplatesPackageCoordinator_Update_Info_InstallCommand" xml:space="preserve">
-    <value>To update the package use: 
-    dotnet {0} -i {1}</value>
   </data>
   <data name="SearchOnlineNotification" xml:space="preserve">
     <value>Searching for the templates...</value>
@@ -614,20 +610,20 @@ Examples:
   <data name="AmbiguousLanguageHint" xml:space="preserve">
     <value>Re-run the command specifying the language to use with --language option.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_DownloadFailed" xml:space="preserve">
-    <value>{0} could not be installed, download failed</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_DownloadFailed" xml:space="preserve">
+    <value>{0} could not be installed, download failed.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_GenericError" xml:space="preserve">
-    <value>{0} could not be installed</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_GenericError" xml:space="preserve">
+    <value>{0} could not be installed.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_InvalidNuGetFeeds" xml:space="preserve">
-    <value>{0} could not be installed, no NuGet feeds are configured or they are invalid</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds" xml:space="preserve">
+    <value>{0} could not be installed, no NuGet feeds are configured or they are invalid.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_PackageNotFound" xml:space="preserve">
-    <value>{0} could not be installed, the package does not exist</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_PackageNotFound" xml:space="preserve">
+    <value>{0} could not be installed, the package does not exist.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_UnsupportedRequest" xml:space="preserve">
-    <value>{0} is not supported</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest" xml:space="preserve">
+    <value>{0} is not supported.</value>
   </data>
   <data name="GenericError" xml:space="preserve">
     <value>Error: {0}</value>
@@ -638,70 +634,64 @@ Examples:
   <data name="OptionDescriptionTagFilter" xml:space="preserve">
     <value>Filters the templates based on the tag. Applies to --search and --list.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Error_PackageNameContainsTemplates" xml:space="preserve">
-    <value>  {0} (contains {1} templates)</value>
+  <data name="TemplatePackageCoordinator_Error_PackageNameContainsTemplates" xml:space="preserve">
+    <value>{0} (contains {1} templates)</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Error_PackageNotFound" xml:space="preserve">
-    <value>The template package '{0}' is not found</value>
+  <data name="TemplatePackageCoordinator_Error_PackageNotFound" xml:space="preserve">
+    <value>The template package '{0}' is not found.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Error_TemplateIncludedToPackages" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Error_TemplateIncludedToPackages" xml:space="preserve">
     <value>The template '{0}' is included to the packages:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Info_PackageName" xml:space="preserve">
-    <value>  {0}</value>
+  <data name="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall" xml:space="preserve">
+    <value>Found no template packages to install.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Info_PackageNameVersion" xml:space="preserve">
-    <value>  {0}, version: {1}</value>
-  </data>
-  <data name="TemplatesPackageCoordinator_Install_Error_FoundNoPackagesToInstall" xml:space="preserve">
-    <value>Found no template packages to install</value>
-  </data>
-  <data name="TemplatesPackageCoordinator_Install_Info_PackagesToBeInstalled" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled" xml:space="preserve">
     <value>The following template packages will be installed:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_AlreadyInstalled" xml:space="preserve">
-    <value>{0} is already installed</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled" xml:space="preserve">
+    <value>{0} is already installed.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_InvalidPackage" xml:space="preserve">
-    <value>Failed to install {0}, failed to uninstall previous version of the template package</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_InvalidPackage" xml:space="preserve">
+    <value>Failed to install {0}, failed to uninstall previous version of the template package.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Error_UninstallFailed" xml:space="preserve">
-    <value>Failed to install {0}, the template package is invalid</value>
+  <data name="TemplatePackageCoordinator_lnstall_Error_UninstallFailed" xml:space="preserve">
+    <value>Failed to install {0}, the template package is invalid.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_lnstall_Info_Success" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_lnstall_Info_Success" xml:space="preserve">
     <value>Success: {0} installed the following templates:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Uninstall_Error_ListPackagesHint" xml:space="preserve">
-    <value>To list installed template packages, use dotnet {0} -u</value>
+  <data name="TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader" xml:space="preserve">
+    <value>To list installed template packages use:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Uninstall_Error_UninstallCommandHint" xml:space="preserve">
-    <value>To uninstall the template package, use dotnet {0} -u {1}</value>
+  <data name="TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader" xml:space="preserve">
+    <value>To uninstall the template package use:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Uninstall_Info_Success" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Uninstall_Info_Success" xml:space="preserve">
     <value>Success: {0} was uninstalled.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Update_Error_GenericError" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Update_Error_GenericError" xml:space="preserve">
     <value>Failed to check update for {0}: {1}.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds" xml:space="preserve">
     <value>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Update_Error_PackageNotFound" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Update_Error_PackageNotFound" xml:space="preserve">
     <value>Failed to check update for {0}: the package is not available in configured NuGet feeds.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Update_Error_PackageNotSupported" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Update_Error_PackageNotSupported" xml:space="preserve">
     <value>Failed to check update for {0}: the package is not supported.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Update_Info_AllPackagesAreUpToDate" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate" xml:space="preserve">
     <value>All template packages are up-to-date.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated" xml:space="preserve">
     <value>The following template packages will be updated:</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Verbose_NuGetCredentialServiceError" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError" xml:space="preserve">
     <value>Failed to initialize NuGet credential service, details: {0}.</value>
   </data>
-  <data name="TemplatesPackageCoordinator_Install_Error_SameInstallRequests" xml:space="preserve">
+  <data name="TemplatePackageCoordinator_Install_Error_SameInstallRequests" xml:space="preserve">
     <value>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</value>
   </data>
   <data name="Generic_Details" xml:space="preserve">
@@ -709,5 +699,20 @@ Examples:
   </data>
   <data name="TemplateResolver_Warning_FailedToReparseTemplate" xml:space="preserve">
     <value>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</value>
+  </data>
+  <data name="ColumnNameCurrentVersion" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="ColumnNameLatestVersion" xml:space="preserve">
+    <value>Latest</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader" xml:space="preserve">
+    <value>To update all the packages use:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages" xml:space="preserve">
+    <value>An update for template packages is available:</value>
+  </data>
+  <data name="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader" xml:space="preserve">
+    <value>To update the package use:</value>
   </data>
 </root>
