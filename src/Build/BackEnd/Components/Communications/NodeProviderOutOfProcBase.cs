@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -944,7 +944,7 @@ namespace Microsoft.Build.BackEnd
                     _process.Id);
                 CommunicationsUtilities.Trace("Killing node with pid = {0}", _process.Id);
 
-                _process.KillTree(timeout: 5000);
+                _process.KillTree(timeoutMilliseconds: 5000);
             }
 
 #if FEATURE_APM
