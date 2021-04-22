@@ -6,13 +6,12 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
-using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
     internal class ProcessStartPostActionProcessor : IPostActionProcessor
     {
-        internal static readonly Guid ActionProcessorId = PostActionInfo.ProcessStartPostActionProcessorId;
+        internal static readonly Guid ActionProcessorId = new Guid("3A7C4B45-1F5D-4A30-959A-51B88E82B5D2");
 
         public Guid Id => ActionProcessorId;
 

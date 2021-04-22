@@ -525,17 +525,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             public IReadOnlyDictionary<string, IBaselineInfo> BaselineInfo => _parent.BaselineInfo;
 
-            public bool HasScriptRunningPostActions
-            {
-                get
-                {
-                    return _parent.HasScriptRunningPostActions;
-                }
-                set
-                {
-                    _parent.HasScriptRunningPostActions = value;
-                }
-            }
+            bool ITemplateInfo.HasScriptRunningPostActions { get; set; }
         }
     }
 }
