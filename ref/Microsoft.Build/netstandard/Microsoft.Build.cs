@@ -1473,7 +1473,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     {
         internal ProjectCacheException() { }
         public string ErrorCode { get { throw null; } }
-        public bool HasBeenLogged { get { throw null; } }
+        public bool HasBeenLoggedByProjectCache { get { throw null; } }
     }
     public abstract partial class ProjectCachePluginBase
     {
