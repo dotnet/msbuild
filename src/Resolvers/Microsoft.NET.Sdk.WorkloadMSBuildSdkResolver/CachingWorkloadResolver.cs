@@ -250,6 +250,8 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
     }
 }
 
+
+//  Add attribute to support init-only properties on .NET Framework
 #if !NET
 namespace System.Runtime.CompilerServices
 {

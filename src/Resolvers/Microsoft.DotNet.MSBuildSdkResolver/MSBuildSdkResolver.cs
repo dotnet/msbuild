@@ -136,12 +136,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
                 workloadResolver = _staticWorkloadResolver;
             }
 
-            if (msbuildSdksDir == null)
-            {
-                
-                dotnetRoot = _netCoreSdkResolver.GetDotnetExeDirectory();
-            }
-
             if (workloadResolver == null)
             {
                 workloadResolver = new CachingWorkloadResolver();
