@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
+<<<<<<< HEAD
     <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.300-preview.21214.2">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>091651d2bfe4b739c6c4f46f86608533a2087c35</Sha>
@@ -28,6 +29,35 @@
     <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.300-preview.21214.2">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>091651d2bfe4b739c6c4f46f86608533a2087c35</Sha>
+=======
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.203-servicing.21214.4">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>50e1aa014b0b35cb9aa2c5157d054ee654949dff</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="5.0.203">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>50e1aa014b0b35cb9aa2c5157d054ee654949dff</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.TemplateEngine.Cli.Localization" Version="5.0.203-servicing.21214.4">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>50e1aa014b0b35cb9aa2c5157d054ee654949dff</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.203">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>50e1aa014b0b35cb9aa2c5157d054ee654949dff</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="5.0.203">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>50e1aa014b0b35cb9aa2c5157d054ee654949dff</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="5.0.203">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>50e1aa014b0b35cb9aa2c5157d054ee654949dff</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.203">
+      <Uri>https://github.com/dotnet/templating</Uri>
+      <Sha>50e1aa014b0b35cb9aa2c5157d054ee654949dff</Sha>
+>>>>>>> upstream/release/5.0.2xx
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -69,21 +99,29 @@
       <Uri>https://github.com/dotnet/CliCommandLineParser</Uri>
       <Sha>0e89c2116ad28e404ba56c14d1c3f938caa25a01</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build" Version="16.10.0-preview-21215-05">
+    <Dependency Name="Microsoft.Build" Version="16.10.0-preview-21205-05">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>369631b4b21ef485f4d6f35e16b0c839a971b0e9</Sha>
+<<<<<<< HEAD
+      <Sha>7804350cd4fe271bee48b3dc99e9f4681ee686c5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Build.Localization" Version="16.10.0-preview-21215-05">
+    <Dependency Name="Microsoft.Build.Localization" Version="16.10.0-preview-21205-05">
       <Uri>https://github.com/dotnet/msbuild</Uri>
-      <Sha>369631b4b21ef485f4d6f35e16b0c839a971b0e9</Sha>
+      <Sha>7804350cd4fe271bee48b3dc99e9f4681ee686c5</Sha>
+=======
+      <Sha>5e4b48a27efce55a613664b58d353ab4c8d1f6c1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="11.4.2-beta.21221.4">
+    <Dependency Name="Microsoft.Build.Localization" Version="16.9.0-preview-21167-03">
+      <Uri>https://github.com/dotnet/msbuild</Uri>
+      <Sha>5e4b48a27efce55a613664b58d353ab4c8d1f6c1</Sha>
+>>>>>>> upstream/release/5.0.2xx
+    </Dependency>
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="11.4.2-beta.21214.1">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>01a833e650c36066087506cda6a8d608a9d8e4f5</Sha>
+      <Sha>8b1d616a7464314af09b30ad413a3d41a060eb16</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.10.0-3.21216.10">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.9.0-6.21160.10">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>9bfe989ad46e3f457d33ed800c3be012cec5afc6</Sha>
+      <Sha>59eedc33d35754759994155ea2f4e1012a9951e3</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.5-servicing.21167.8">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
@@ -101,17 +139,23 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
       <Sha>b7a2ec8c7ed6b48857af0a69688a73e8c14fe6cb</Sha>
     </Dependency>
+<<<<<<< HEAD
     <Dependency Name="NuGet.Build.Tasks" Version="5.10.0-preview.2.7203">
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>936eff1f2cccbb25ba537e47a2eaaa4984a160f4</Sha>
+=======
+    <Dependency Name="NuGet.Build.Tasks" Version="5.9.1-rc.8">
+      <Uri>https://github.com/nuget/nuget.client</Uri>
+      <Sha>d525b0e670f3b6cbd5c73a35f04730a9f658c852</Sha>
+>>>>>>> upstream/release/5.0.2xx
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210420-01">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.9.4">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>7045302354975ea1b7d1e05e1bfb81d74a1f4d60</Sha>
+      <Sha>99b911a57a02fc5d2eeef23e9ab8cbea4505678b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-rtm.21221.2">
+    <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="5.0.0-rtm.21213.1">
       <Uri>https://github.com/mono/linker</Uri>
-      <Sha>6a15056a9d71169bf04d007301edfd558afcfa6a</Sha>
+      <Sha>311102e38b4f925856f73af7a83da1ee4ded7af9</Sha>
     </Dependency>
     <Dependency Name="System.CodeDom" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -207,7 +251,7 @@
     </Dependency>
     <Dependency Name="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.2">
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-      <Sha>3c1d0c486c3044f97a48cfd6e18ce843870e24cb</Sha>
+      <Sha>755ceda71eaa7f2356fa0f310fea13bb529266f5</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
