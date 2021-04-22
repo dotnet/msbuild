@@ -73,5 +73,65 @@ namespace Dotnet_new3.IntegrationTests
                 .NotHaveStdErr()
                 .And.HaveStdOut("All template packages are up-to-date.");
         }
+
+        [Fact]
+        public void PrintInfoOnUpdateOnCreation()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
+                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.HaveStdOutContaining("Success:")
+                .And.HaveStdOutContaining("console")
+                .And.HaveStdOutContaining("classlib");
+
+            new DotnetNewCommand(_log, "console")
+                  .WithCustomHive(home).WithoutBuiltInTemplates()
+                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                  .Execute()
+                  .Should()
+                  .ExitWith(0)
+                  .And
+                  .NotHaveStdErr()
+                  .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.")
+                  .And.HaveStdOutContaining("An update for template package 'Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0' is available")
+                  .And.HaveStdOutContaining("To update the package use:")
+                  .And.HaveStdOutMatching("    dotnet new3 -i Microsoft.DotNet.Common.ProjectTemplates.5.0::([\\d\\.a-z-])+");
+        }
+
+        [Fact]
+        public void DoesNotPrintUpdateInfoOnCreation_WhenLatestVersionIsInstalled()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.HaveStdOutContaining("Success:")
+                .And.HaveStdOutContaining("console")
+                .And.HaveStdOutContaining("classlib");
+
+            new DotnetNewCommand(_log, "console")
+                  .WithCustomHive(home).WithoutBuiltInTemplates()
+                  .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                  .Execute()
+                  .Should()
+                  .ExitWith(0)
+                  .And
+                  .NotHaveStdErr()
+                  .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.")
+                  .And.NotHaveStdOutContaining("An update for template package 'Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0' is available")
+                  .And.NotHaveStdOutContaining("To update the package use:")
+                  .And.NotHaveStdOutMatching("    dotnet new3 -i Microsoft.DotNet.Common.ProjectTemplates.5.0::([\\d\\.a-z-])+");
+        }
     }
 }

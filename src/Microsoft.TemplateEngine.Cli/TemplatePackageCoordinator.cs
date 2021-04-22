@@ -105,8 +105,8 @@ namespace Microsoft.TemplateEngine.Cli
         /// <param name="template">template to check the update for.</param>
         /// <param name="commandInput"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        internal async Task<IReadOnlyList<CheckUpdateResult>> CheckUpdateForTemplate(ITemplateInfo template, INewCommandInput commandInput, CancellationToken cancellationToken = default)
+        /// <returns>Task for checking the update or null when check for update is not possible.</returns>
+        internal async Task<CheckUpdateResult?> CheckUpdateForTemplate(ITemplateInfo template, INewCommandInput commandInput, CancellationToken cancellationToken = default)
         {
             _ = template ?? throw new ArgumentNullException(nameof(template));
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
@@ -120,17 +120,38 @@ namespace Microsoft.TemplateEngine.Cli
             catch (Exception)
             {
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Error_PackageForTemplateNotFound, template.Identity));
-                return Array.Empty<CheckUpdateResult>();
+                return null;
             }
 
             if (!(templatePackage is IManagedTemplatePackage managedTemplatePackage))
             {
                 //update is not supported - built-in or optional workload source
-                return Array.Empty<CheckUpdateResult>();
+                return null;
             }
 
             InitializeNuGetCredentialService(commandInput);
-            return await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false);
+            return (await managedTemplatePackage.ManagedProvider.GetLatestVersionsAsync(new[] { managedTemplatePackage }, cancellationToken).ConfigureAwait(false)).Single();
+        }
+
+        internal void DisplayUpdateCheckResult(CheckUpdateResult versionCheckResult, INewCommandInput commandInput)
+        {
+            _ = versionCheckResult ?? throw new ArgumentNullException(nameof(versionCheckResult));
+            _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+
+            if (versionCheckResult.Success)
+            {
+                if (!versionCheckResult.IsLatestVersion)
+                {
+                    string displayString = $"{versionCheckResult.TemplatePackage.Identifier}::{versionCheckResult.TemplatePackage.Version}";         // the package::version currently installed
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_UpdateAvailable, displayString));
+                    string installString = $"{versionCheckResult.TemplatePackage.Identifier}::{versionCheckResult.LatestVersion}"; // the package::version that will be installed
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesPackageCoordinator_Update_Info_InstallCommand, commandInput.CommandName, installString));
+                }
+            }
+            else
+            {
+                HandleUpdateCheckErrors(versionCheckResult);
+            }
         }
 
         private static void InitializeNuGetCredentialService(INewCommandInput commandInput)
@@ -461,11 +482,7 @@ namespace Microsoft.TemplateEngine.Cli
             });
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "StyleCop.CSharp.OrderingRules",
-            "SA1202:Elements should be ordered by access",
-            Justification = "To make reviewing PR easier, will undo before merging.")]
-        internal void DisplayUpdateCheckResults(IEnumerable<CheckUpdateResult> versionCheckResults, INewCommandInput commandInput, bool showUpdates = true)
+        private void DisplayUpdateCheckResults(IEnumerable<CheckUpdateResult> versionCheckResults, INewCommandInput commandInput, bool showUpdates = true)
         {
             _ = versionCheckResults ?? throw new ArgumentNullException(nameof(versionCheckResults));
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
@@ -484,35 +501,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else
                 {
-                    switch (result.Error)
-                    {
-                        case InstallerErrorCode.InvalidSource:
-                            Reporter.Error.WriteLine(
-                                string.Format(
-                                    LocalizableStrings.TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds,
-                                    result.TemplatePackage.DisplayName).Bold().Red());
-                            break;
-                        case InstallerErrorCode.PackageNotFound:
-                            Reporter.Error.WriteLine(
-                                string.Format(
-                                    LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotFound,
-                                    result.TemplatePackage.DisplayName).Bold().Red());
-                            break;
-                        case InstallerErrorCode.UnsupportedRequest:
-                            Reporter.Error.WriteLine(
-                                string.Format(
-                                    LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotSupported,
-                                    result.TemplatePackage.DisplayName).Bold().Red());
-                            break;
-                        case InstallerErrorCode.GenericError:
-                        default:
-                            Reporter.Error.WriteLine(
-                                string.Format(
-                                    LocalizableStrings.TemplatesPackageCoordinator_Update_Error_GenericError,
-                                    result.TemplatePackage.DisplayName,
-                                    result.ErrorMessage).Bold().Red());
-                            break;
-                    }
+                    HandleUpdateCheckErrors(result);
                 }
             }
         }
@@ -651,6 +640,39 @@ namespace Microsoft.TemplateEngine.Cli
                                 packageToInstall).Bold().Red());
                         break;
                 }
+            }
+        }
+
+        private void HandleUpdateCheckErrors(InstallerOperationResult result)
+        {
+            switch (result.Error)
+            {
+                case InstallerErrorCode.InvalidSource:
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_InvalidNuGetFeeds,
+                            result.TemplatePackage.DisplayName).Bold().Red());
+                    break;
+                case InstallerErrorCode.PackageNotFound:
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotFound,
+                            result.TemplatePackage.DisplayName).Bold().Red());
+                    break;
+                case InstallerErrorCode.UnsupportedRequest:
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_PackageNotSupported,
+                            result.TemplatePackage.DisplayName).Bold().Red());
+                    break;
+                case InstallerErrorCode.GenericError:
+                default:
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.TemplatesPackageCoordinator_Update_Error_GenericError,
+                            result.TemplatePackage.DisplayName,
+                            result.ErrorMessage).Bold().Red());
+                    break;
             }
         }
     }

@@ -1688,7 +1688,8 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to     install command: dotnet {0} -i {1}.
+        ///   Looks up a localized string similar to To update the package use: 
+        ///    dotnet {0} -i {1}.
         /// </summary>
         internal static string TemplatesPackageCoordinator_Update_Info_InstallCommand {
             get {

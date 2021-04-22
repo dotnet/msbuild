@@ -47,8 +47,11 @@ namespace Microsoft.TemplateEngine.Cli
             // await for both tasks to finish
             await Task.WhenAll(checkForUpdateTask, templateCreationTask).ConfigureAwait(false);
 
-            // print if there is update for this template
-            packageCoordinator.DisplayUpdateCheckResults(checkForUpdateTask.Result, _commandInput, showUpdates: true);
+            if (checkForUpdateTask.Result != null)
+            {
+                // print if there is update for this template
+                packageCoordinator.DisplayUpdateCheckResult(checkForUpdateTask.Result, _commandInput);
+            }
 
             // return creation result
             return templateCreationTask.Result;

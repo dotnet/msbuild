@@ -38,6 +38,18 @@ namespace Dotnet_new3.IntegrationTests
             return this;
         }
 
+        public DotnetNewCommand WithoutBuiltInTemplates()
+        {
+            Arguments.Add("--debug:disable-sdk-templates");
+            return this;
+        }
+
+        public DotnetNewCommand Quietly()
+        {
+            Arguments.Add("--quiet");
+            return this;
+        }
+
         protected override SdkCommandSpec CreateCommand(IEnumerable<string> args)
         {
             var sdkCommandSpec = new SdkCommandSpec()

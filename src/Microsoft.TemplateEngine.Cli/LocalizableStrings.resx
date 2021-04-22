@@ -494,7 +494,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Could not find the template package containing template '{0}'</value>
   </data>
   <data name="TemplatesPackageCoordinator_Update_Info_InstallCommand" xml:space="preserve">
-    <value>    install command: dotnet {0} -i {1}</value>
+    <value>To update the package use: 
+    dotnet {0} -i {1}</value>
   </data>
   <data name="SearchOnlineNotification" xml:space="preserve">
     <value>Searching for the templates...</value>

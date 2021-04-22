@@ -885,8 +885,10 @@ Examples:
         <note />
       </trans-unit>
       <trans-unit id="TemplatesPackageCoordinator_Update_Info_InstallCommand">
-        <source>    install command: dotnet {0} -i {1}</source>
-        <target state="new">    install command: dotnet {0} -i {1}</target>
+        <source>To update the package use: 
+    dotnet {0} -i {1}</source>
+        <target state="new">To update the package use: 
+    dotnet {0} -i {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesPackageCoordinator_Update_Info_PackagesToBeUpdated">
