@@ -17,10 +17,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.DotNetSdkResolver;
 #endif
 
-#if USE_SERILOG
-using Serilog;
-#endif
-
 #nullable disable
 
 namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
@@ -34,32 +30,6 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 
         public override int Priority => 4000;
 
-        public WorkloadSdkResolver()
-        {
-#if USE_SERILOG
-            _instanceId = System.Threading.Interlocked.Increment(ref _lastInstanceId);
-#endif
-        }
-
-#if USE_SERILOG
-        static Serilog.Core.Logger Logger;
-
-        static int _lastInstanceId = 1;
-        int _instanceId;
-
-        static WorkloadSdkResolver()
-        {
-            Logger = new LoggerConfiguration()
-                .WriteTo.Seq("http://localhost:5341")
-                .CreateLogger();
-
-            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
-            {
-                Logger.Dispose();
-            };
-        }
-#endif
-
         private class CachedState
         {
             public string DotnetRootPath { get; init; }
@@ -70,10 +40,6 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
         {
-#if USE_SERILOG
-            List<Action<Serilog.ILogger>> logActions = new List<Action<Serilog.ILogger>>();
-#endif
-
             CachedState cachedState = null;
 
             if (resolverContext.State is CachedState resolverContextState)
@@ -84,9 +50,6 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             
             if (cachedState == null)
             {
-#if USE_SERILOG
-                logActions.Add(log => log.Information("Initializing resolver state"));
-#endif
                 var dotnetRootPath = GetDotNetRoot(resolverContext);
 
                 var sdkDirectory = GetSdkDirectory(resolverContext);
@@ -102,38 +65,11 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 
                 resolverContext.State = cachedState;
             }
-            else
-            {
-#if USE_SERILOG
-                logActions.Add(log => log.Information("Using cached resolver state"));
-#endif
-            }
 
-            var result = cachedState.WorkloadResolver.Resolve(sdkReference.Name, cachedState.DotnetRootPath, cachedState.SdkVersion
-#if USE_SERILOG
-                , logActions
-#endif
-                );
+            var result = cachedState.WorkloadResolver.Resolve(sdkReference.Name, cachedState.DotnetRootPath, cachedState.SdkVersion);
 
-
-#if USE_SERILOG
-            var msbuildSubmissionId = (int?)System.Threading.Thread.GetData(System.Threading.Thread.GetNamedDataSlot("MSBuildSubmissionId"));
-            var log = Logger
-                .ForContext("Resolver", "Sdk")
-                .ForContext("Process", System.Diagnostics.Process.GetCurrentProcess().Id)
-                .ForContext("Thread", System.Threading.Thread.CurrentThread.ManagedThreadId)
-                .ForContext("ResolverInstance", _instanceId)
-                .ForContext("RunningInVS", resolverContext.IsRunningInVisualStudio)
-                .ForContext("MSBuildSubmissionId", msbuildSubmissionId);
-
-            foreach (var logAction in logActions)
-            {
-                logAction(log);
-            }
-#endif
 
             return result.ToSdkResult(sdkReference, factory);
-
         }
 
         private string GetSdkDirectory(SdkResolverContext context)

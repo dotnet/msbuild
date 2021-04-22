@@ -11,10 +11,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver;
 
-#if USE_SERILOG
-using Serilog;
-#endif
-
 #nullable disable
 
 namespace Microsoft.DotNet.MSBuildSdkResolver
@@ -48,30 +44,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         {
             _getEnvironmentVariable = getEnvironmentVariable;
             _netCoreSdkResolver = new NETCoreSdkResolver(getEnvironmentVariable, vsSettings);
-
-#if USE_SERILOG
-            _instanceId = System.Threading.Interlocked.Increment(ref _lastInstanceId);
-#endif
         }
-
-#if USE_SERILOG
-        static Serilog.Core.Logger Logger;
-
-        static int _lastInstanceId = 1;
-        int _instanceId;
-        
-        static DotNetMSBuildSdkResolver()
-        {
-            Logger = new LoggerConfiguration()
-                .WriteTo.Seq("http://localhost:5341")
-                .CreateLogger();
-
-            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
-            {
-                Logger.Dispose();
-            };
-        }
-#endif
 
         private sealed class CachedState
         {
@@ -84,36 +57,6 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
         {
-#if USE_SERILOG
-            List<Action<Serilog.ILogger>> logActions = new List<Action<Serilog.ILogger>>();
-
-            var result = Resolve(sdkReference, context, factory, logActions);
-
-            var msbuildSubmissionId = (int?)System.Threading.Thread.GetData(System.Threading.Thread.GetNamedDataSlot("MSBuildSubmissionId"));
-            var log = Logger
-                .ForContext("Resolver", "Sdk")
-                .ForContext("Process", System.Diagnostics.Process.GetCurrentProcess().Id)
-                .ForContext("Thread", System.Threading.Thread.CurrentThread.ManagedThreadId)
-                .ForContext("ResolverInstance", _instanceId)
-                .ForContext("RunningInVS", context.IsRunningInVisualStudio)
-                .ForContext("MSBuildSubmissionId", msbuildSubmissionId)
-                .ForContext("HasCache", context.State != null)
-                .ForContext("SdkName", sdkReference.Name);
-
-            foreach (var logAction in logActions)
-            {
-                logAction(log);
-            }
-
-            return result;
-        }
-
-        private SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory, List<Action<Serilog.ILogger>> logActions)
-        {
-
-            logActions.Add(log => log.Information("Resolving SDK {sdkName}", sdkReference.Name));
-#endif
-
             string dotnetRoot = null;
             string msbuildSdksDir = null;
             string netcoreSdkVersion = null;
@@ -227,11 +170,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             };
 
             //  First check if requested SDK resolves to a workload SDK pack
-            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion
-#if USE_SERILOG
-                , logActions: logActions
-#endif
-                );
+            var workloadResult = workloadResolver.Resolve(sdkReference.Name, dotnetRoot, netcoreSdkVersion);
 
             if (workloadResult is not CachingWorkloadResolver.NullResolutionResult)
             {

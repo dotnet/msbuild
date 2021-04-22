@@ -16,10 +16,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.DotNetSdkResolver;
 #endif
 
-#if USE_SERILOG
-using Serilog;
-#endif
-
 #nullable disable
 
 namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
@@ -177,11 +173,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             return new NullResolutionResult();
         }
 
-        public ResolutionResult Resolve(string sdkReferenceName, string dotnetRootPath, string sdkVersion
-#if USE_SERILOG
-            , List<Action<Serilog.ILogger>> logActions
-#endif
-            )
+        public ResolutionResult Resolve(string sdkReferenceName, string dotnetRootPath, string sdkVersion)
         {
             if (!_enabled)
             {
@@ -196,17 +188,6 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                     _cachedState.DotnetRootPath != dotnetRootPath ||
                     _cachedState.SdkVersion != sdkVersion)
                 {
-#if USE_SERILOG
-                    if (_cachedState == null)
-                    {
-                        logActions.Add(log => log.Information($"Creating initial {nameof(CachingWorkloadResolver)} state"));
-                    }
-                    else
-                    {
-                        logActions.Add(log => log.Information($"Recreating {nameof(CachingWorkloadResolver)} state (resolved SDK changed)"));
-                    }
-#endif
-
                     var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRootPath, sdkVersion);
                     var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetRootPath, sdkVersion);
 
@@ -218,18 +199,9 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                         WorkloadResolver = workloadResolver
                     };
                 }
-                else
-                {
-#if USE_SERILOG
-                    logActions.Add(log => log.Information($"Using cached {nameof(CachingWorkloadResolver)} state"));
-#endif
-                }
 
                 if (!_cachedState.CachedResults.TryGetValue(sdkReferenceName, out resolutionResult))
                 {
-#if USE_SERILOG
-                    logActions.Add(log => log.Information($"Resolving workload in {nameof(CachingWorkloadResolver)}"));
-#endif
                     resolutionResult = Resolve(sdkReferenceName, _cachedState.ManifestProvider, _cachedState.WorkloadResolver);
 
                     _cachedState = _cachedState with
@@ -237,12 +209,6 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                         CachedResults = _cachedState.CachedResults.Add(sdkReferenceName, resolutionResult)
                     };
                 }
-#if USE_SERILOG
-                else
-                {
-                    logActions.Add(log => log.Information($"Using cached workload resolution result in {nameof(CachingWorkloadResolver)}"));
-                }
-#endif
             }
 
             return resolutionResult;

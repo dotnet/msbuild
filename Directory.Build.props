@@ -19,10 +19,6 @@
     <!-- <ArtifactsShippingSymbolsDir>$(ArtifactsDir)symbols\$(Configuration)\Shipping</ArtifactsShippingSymbolsDir> -->
 
     <DefineConstants Condition="'$(ContinuousIntegrationBuild)' == 'true'">$(DefineConstants);CI_BUILD</DefineConstants>
-    
-    <!-- Flag to enable using Serilog for debug logging for how SDK resolvers are called -->
-    <EnableSerilogLogging>false</EnableSerilogLogging>
-    <DefineConstants Condition="'$(EnableSerilogLogging)' == 'true'">$(DefineConstants);USE_SERILOG</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
