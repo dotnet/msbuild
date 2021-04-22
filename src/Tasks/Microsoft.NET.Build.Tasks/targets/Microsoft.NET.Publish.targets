@@ -1048,8 +1048,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <IncludeSymbolsInSingleFile Condition="'$(IncludeSymbolsInSingleFile)' == ''">false</IncludeSymbolsInSingleFile>
       <IncludeAllContentForSelfExtract Condition="'$(IncludeAllContentForSelfExtract)' == ''">false</IncludeAllContentForSelfExtract>
       <IncludeNativeLibrariesForSelfExtract Condition="'$(IncludeNativeLibrariesForSelfExtract)' == ''">$(IncludeAllContentForSelfExtract)</IncludeNativeLibrariesForSelfExtract>
-      <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == '' And
-                                   '$(_TargetFrameworkVersionWithoutV)' >= '6.0' And '$(SelfContained)' == 'true' ">true</EnableCompressionInSingleFile>
       <EnableCompressionInSingleFile Condition="'$(EnableCompressionInSingleFile)' == ''">false</EnableCompressionInSingleFile>
     </PropertyGroup>
 
