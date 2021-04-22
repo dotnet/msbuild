@@ -282,12 +282,12 @@ namespace Microsoft.Build.Utilities
 
             BuildMessageEventArgs e = new BuildMessageEventArgs
                 (
-                    message,                             // message
-                    null,                                // help keyword
-                    TaskName,                            // sender 
-                    importance,                          // importance
-                    DateTime.UtcNow,                     // timestamp
-                    messageArgs                          // message arguments
+                    message,
+                    helpKeyword: null,
+                    senderName: TaskName,
+                    importance,
+                    DateTime.UtcNow,
+                    messageArgs
                 );
 
             // If BuildEngine is null, task attempted to log before it was set on it,

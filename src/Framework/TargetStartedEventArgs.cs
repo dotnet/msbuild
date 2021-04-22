@@ -175,5 +175,45 @@ namespace Microsoft.Build.Framework
         /// Why this target was built by its parent.
         /// </summary>
         public TargetBuiltReason BuildReason => buildReason;
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    lock (locker)
+                    {
+                        if (RawMessage == null)
+                        {
+                            if (string.Equals(projectFile, targetFile, StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (!string.IsNullOrEmpty(parentTarget))
+                                {
+                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectDepends", targetName, projectFile, parentTarget);
+                                }
+                                else
+                                {
+                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectEntry", targetName, projectFile);
+                                }
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(parentTarget))
+                                {
+                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectDepends", targetName, targetFile, projectFile, parentTarget);
+                                }
+                                else
+                                {
+                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectEntry", targetName, targetFile, projectFile);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }

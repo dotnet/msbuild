@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Globalization;
 using System.Runtime.Serialization;
 using System.IO;
+using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
@@ -128,12 +130,22 @@ namespace Microsoft.Build.Framework
         public int ThreadId => threadId;
 
         /// <summary>
-        /// Text of event. 
+        /// Text of event.
         /// </summary>
         public virtual string Message
         {
             get => message;
             protected set => message = value;
+        }
+
+        /// <summary>
+        /// Exposes the underlying message field without side-effects.
+        /// Used for serialization.
+        /// </summary>
+        protected internal string RawMessage
+        {
+            get => message;
+            set => message = value;
         }
 
         /// <summary>
@@ -246,7 +258,48 @@ namespace Microsoft.Build.Framework
                 buildEventContext = BuildEventContext.Invalid;
             }
         }
-#endregion
+        #endregion
 
+        /// <summary>
+        /// This is the default stub implementation, only here as a safeguard.
+        /// Actual logic is injected from Microsoft.Build.dll to replace this.
+        /// This is used by the Message property overrides to reconstruct the
+        /// message lazily on demand.
+        /// </summary>
+        internal static Func<string, string[], string> ResourceStringFormatter = (string resourceName, string[] arguments) =>
+        {
+            var sb = new StringBuilder();
+            sb.Append(resourceName);
+            sb.Append("(");
+
+            bool notFirst = false;
+            foreach (var argument in arguments)
+            {
+                if (notFirst)
+                {
+                    sb.Append(",");
+                }
+                else
+                {
+                    notFirst = true;
+                }
+
+                sb.Append(argument);
+            }
+
+            sb.Append(")");
+            return sb.ToString();
+        };
+
+        /// <summary>
+        /// Shortcut method to mimic the original logic of creating the formatted strings.
+        /// </summary>
+        /// <param name="resourceName">Name of the resource string.</param>
+        /// <param name="arguments">Optional list of arguments to pass to the formatted string.</param>
+        /// <returns>The concatenated formatted string.</returns>
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params string[] arguments)
+        {
+            return ResourceStringFormatter(resourceName, arguments);
+        }
     }
 }

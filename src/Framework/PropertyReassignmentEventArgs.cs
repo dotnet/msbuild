@@ -64,5 +64,24 @@ namespace Microsoft.Build.Framework
         /// The location of the reassignment.
         /// </summary>
         public string Location { get; set; }
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    lock (locker)
+                    {
+                        if (RawMessage == null)
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, Location);
+                        }
+                    }
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }

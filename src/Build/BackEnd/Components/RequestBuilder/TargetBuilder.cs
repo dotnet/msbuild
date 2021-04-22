@@ -564,17 +564,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
-                    var skippedTargetEventArgs = new TargetSkippedEventArgs(
-                        ResourceUtilities.GetResourceString(targetResult.ResultCode == TargetResultCode.Success
-                            ? "TargetAlreadyCompleteSuccess"
-                            : "TargetAlreadyCompleteFailure"),
-                        currentTargetEntry.Name)
+                    var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
                         BuildEventContext = _projectLoggingContext.BuildEventContext,
                         TargetName = currentTargetEntry.Name,
                         TargetFile = currentTargetEntry.Target.Location.File,
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
-                        BuildReason = currentTargetEntry.BuildReason
+                        BuildReason = currentTargetEntry.BuildReason,
+                        OriginallySucceeded = targetResult.ResultCode == TargetResultCode.Success
                     };
 
                     _projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);

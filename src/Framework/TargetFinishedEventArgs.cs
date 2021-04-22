@@ -159,7 +159,7 @@ namespace Microsoft.Build.Framework
         public bool Succeeded => succeeded;
 
         /// <summary>
-        /// Project file associated with event.   
+        /// Project file associated with event.
         /// </summary>
         public string ProjectFile => projectFile;
 
@@ -175,6 +175,25 @@ namespace Microsoft.Build.Framework
         {
             get => targetOutputs;
             set => targetOutputs = value;
+        }
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    lock (locker)
+                    {
+                        if (RawMessage == null)
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "TargetFinishedSuccess" : "TargetFinishedFailure", targetName, Path.GetFileName(projectFile));
+                        }
+                    }
+                }
+
+                return RawMessage;
+            }
         }
     }
 }

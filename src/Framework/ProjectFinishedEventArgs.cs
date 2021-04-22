@@ -109,5 +109,24 @@ namespace Microsoft.Build.Framework
         /// True if project built successfully, false otherwise
         /// </summary>
         public bool Succeeded => succeeded;
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    lock (locker)
+                    {
+                        if (RawMessage == null)
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "ProjectFinishedSuccess" : "ProjectFinishedFailure", Path.GetFileName(ProjectFile));
+                        }
+                    }
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }

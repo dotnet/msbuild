@@ -368,17 +368,15 @@ namespace Microsoft.Build.BackEnd
                     // target.  In the Task builder (and original Task Engine), a Task Skipped message would be logged in
                     // the context of the target, not the task.  This should be the same, especially given that we
                     // wish to allow batching on the condition of a target.
-                    var skippedTargetEventArgs = new TargetSkippedEventArgs(
-                        ResourceUtilities.GetResourceString("TargetSkippedFalseCondition"),
-                        _target.Name,
-                        _target.Condition,
-                        expanded)
+                    var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
                         BuildEventContext = projectLoggingContext.BuildEventContext,
                         TargetName = _target.Name,
                         TargetFile = _target.Location.File,
                         ParentTarget = ParentEntry?.Target?.Name,
-                        BuildReason = BuildReason
+                        BuildReason = BuildReason,
+                        Condition = _target.Condition,
+                        EvaluatedCondition = expanded
                     };
 
                     projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);

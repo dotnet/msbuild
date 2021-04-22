@@ -2254,8 +2254,6 @@ namespace Microsoft.Build.CommandLine
                         targetsWriter = ProcessTargetsSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Targets]);
                     }
 
-                    detailedSummary = commandLineSwitches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.DetailedSummary);
-
                     warningsAsErrors = ProcessWarnAsErrorSwitch(commandLineSwitches);
 
                     warningsAsMessages = ProcessWarnAsMessageSwitch(commandLineSwitches);
@@ -2305,13 +2303,21 @@ namespace Microsoft.Build.CommandLine
                         groupedFileLoggerParameters,
                         out distributedLoggerRecords,
                         out verbosity,
-                        ref detailedSummary,
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler
                         );
 
-                    // If we picked up switches from the autoreponse file, let the user know. This could be a useful
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.DetailedSummary))
+                    {
+                        detailedSummary = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DetailedSummary], defaultValue: true, resourceName: "InvalidDetailedSummaryValue");
+                    }
+                    else if (verbosity == LoggerVerbosity.Diagnostic)
+                    {
+                        detailedSummary = true;
+                    }
+
+                    // If we picked up switches from the autoresponse file, let the user know. This could be a useful
                     // hint to a user that does not know that we are picking up the file automatically.
                     // Since this is going to happen often in normal use, only log it in high verbosity mode.
                     // Also, only log it to the console; logging to loggers would involve increasing the public API of
@@ -3020,7 +3026,6 @@ namespace Microsoft.Build.CommandLine
             string[][] groupedFileLoggerParameters,
             out List<DistributedLoggerRecord> distributedLoggerRecords,
             out LoggerVerbosity verbosity,
-            ref bool detailedSummary,
             int cpuCount,
             out ProfilerLogger profilerLogger,
             out bool enableProfiler
@@ -3049,11 +3054,6 @@ namespace Microsoft.Build.CommandLine
             ProcessBinaryLogger(binaryLoggerParameters, loggers, ref verbosity);
 
             profilerLogger = ProcessProfileEvaluationSwitch(profileEvaluationParameters, loggers, out enableProfiler);
-
-            if (verbosity == LoggerVerbosity.Diagnostic)
-            {
-                detailedSummary = true;
-            }
 
             return loggers.ToArray();
         }

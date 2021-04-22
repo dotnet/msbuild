@@ -3015,7 +3015,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             GenerateResource t = CreateTask(output);
             t.ExecuteAsTool = true;
-            t.SdkToolsPath = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.VersionLatest);
+            t.SdkToolsPath = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version48);
 
             return t;
         }

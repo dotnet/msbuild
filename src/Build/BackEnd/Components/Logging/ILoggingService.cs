@@ -297,6 +297,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="importance">Importance level of the message</param>
         /// <param name="message">message to log</param>
         void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message);
+
+        /// <summary>
+        /// Log a comment from a format string and arguments
+        /// </summary>
+        /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
+        /// <param name="importance">How important is the message, this will determine which verbosities the message will show up on.
+        /// The higher the importance the lower the verbosity needs to be for the message to be seen</param>
+        /// <param name="message">Message to log</param>
+        /// <param name="messageArgs">Message formatting arguments</param>
+        /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
+        /// <exception cref="InternalErrorException">Message is null</exception>
+        void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object[] messageArgs);
         #endregion
 
         #region Log events
