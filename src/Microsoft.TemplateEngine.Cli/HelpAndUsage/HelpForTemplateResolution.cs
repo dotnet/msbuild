@@ -28,17 +28,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             IHostSpecificDataLoader hostDataLoader,
             ITelemetryLogger telemetryLogger,
             TemplateCreator templateCreator,
-            string? defaultLanguage,
-            bool showUsageHelp = true)
+            string? defaultLanguage)
         {
-            if (showUsageHelp)
-            {
-                ShowUsageHelp(commandInput, telemetryLogger);
-            }
-
             //in case only --help option is specified we don't need to show templates list
             if (commandInput.IsHelpFlagSpecified && string.IsNullOrEmpty(commandInput.TemplateName))
             {
+                ShowUsageHelp(commandInput, telemetryLogger);
                 return CreationResultStatus.Success;
             }
 

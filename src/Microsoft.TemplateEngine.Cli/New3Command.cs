@@ -273,8 +273,19 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             // No other cases specified, we've fallen through to "Optional usage help + List"
-            TemplateListResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
-            HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(templateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
+            TemplateListResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(
+                await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false),
+                _hostDataLoader,
+                _commandInput,
+                _defaultLanguage);
+            HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(
+                templateResolutionResult,
+                EnvironmentSettings,
+                _commandInput,
+                _hostDataLoader,
+                _telemetryLogger,
+                _templateCreator,
+                _defaultLanguage);
 
             return CreationResultStatus.Success;
         }
@@ -283,8 +294,19 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
             {
-                TemplateListResolutionResult listingTemplateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
-                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(listingTemplateResolutionResult, EnvironmentSettings, _commandInput, _hostDataLoader, _telemetryLogger, _templateCreator, _defaultLanguage, showUsageHelp: _commandInput.IsHelpFlagSpecified);
+                TemplateListResolutionResult listingTemplateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(
+                    await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false),
+                    _hostDataLoader,
+                    _commandInput,
+                    _defaultLanguage);
+                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(
+                    listingTemplateResolutionResult,
+                    EnvironmentSettings,
+                    _commandInput,
+                    _hostDataLoader,
+                    _telemetryLogger,
+                    _templateCreator,
+                    _defaultLanguage);
             }
 
             TemplateResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(await _settingsLoader.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
