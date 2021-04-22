@@ -1608,7 +1608,7 @@ namespace Microsoft.Build.BuildEngine
                 BuildTask msbuildTask = newTarget.AddNewTask("MSBuild");
                 msbuildTask.Condition = buildItemReference + " != ''";
                 msbuildTask.SetParameterValue("Projects", buildItemReference);
-                msbuildTask.SetParameterValue("Properties", "Configuration=%(Configuration); Platform=%(Platform); BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionFilterName=$(SolutionFilterName); SolutionPath=$(SolutionPath)");
+                msbuildTask.SetParameterValue("Properties", "Configuration=%(Configuration); Platform=%(Platform); BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)");
 
                 if (!string.IsNullOrEmpty(subTargetName))
                 {
