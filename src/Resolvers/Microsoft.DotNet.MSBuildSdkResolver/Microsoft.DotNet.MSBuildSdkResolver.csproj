@@ -61,7 +61,7 @@
   <!-- To reduce dll load (cause RPS perf regression). Directly compile files from Microsoft.DotNet.SdkResolver, and the workload resolver -->
   <ItemGroup>
     <Compile Include="..\Microsoft.DotNet.SdkResolver\**\*.cs" LinkBase="Microsoft.DotNet.SdkResolver" />
-    <Compile Include="..\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\WorkloadPartialResolver.cs" LinkBase="Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver" />
+    <Compile Include="..\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\CachingWorkloadResolver.cs" LinkBase="Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver" />
     <Compile Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\**\*.cs" LinkBase="Microsoft.NET.Sdk.WorkloadManifestReader" />
   </ItemGroup>
 

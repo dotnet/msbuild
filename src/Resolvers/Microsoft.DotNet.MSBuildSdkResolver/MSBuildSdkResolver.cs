@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
         private readonly Func<string, string> _getEnvironmentVariable;
         private readonly NETCoreSdkResolver _netCoreSdkResolver;
 
-        private static WorkloadPartialResolver _staticWorkloadResolver = new WorkloadPartialResolver();
+        private static CachingWorkloadResolver _staticWorkloadResolver = new CachingWorkloadResolver();
 
         public DotNetMSBuildSdkResolver() 
             : this(Environment.GetEnvironmentVariable, VSSettings.Ambient)
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             public string MSBuildSdksDir;
             public string NETCoreSdkVersion;
             public IDictionary<string, string> PropertiesToAdd;
-            public WorkloadPartialResolver WorkloadResolver;
+            public CachingWorkloadResolver WorkloadResolver;
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext context, SdkResultFactory factory)
@@ -120,7 +120,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             IDictionary<string, string> propertiesToAdd = null;
             IDictionary<string, SdkResultItem> itemsToAdd = null;
             List<string> warnings = null;
-            WorkloadPartialResolver workloadResolver = null;
+            CachingWorkloadResolver workloadResolver = null;
 
             if (context.State is CachedState priorResult)
             {
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             if (workloadResolver == null)
             {
-                workloadResolver = new WorkloadPartialResolver();
+                workloadResolver = new CachingWorkloadResolver();
             }
 
             if (msbuildSdksDir == null)
@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 #endif
                 );
 
-            if (workloadResult is not WorkloadPartialResolver.NullResolutionResult)
+            if (workloadResult is not CachingWorkloadResolver.NullResolutionResult)
             {
                 return workloadResult.ToSdkResult(sdkReference, factory);
             }

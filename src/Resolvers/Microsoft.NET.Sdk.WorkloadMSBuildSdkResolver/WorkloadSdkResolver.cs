@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 {
 
     //  This SdkResolver is used by the .NET SDK version of MSBuild.  Workload resolution logic which
-    //  is shared with Full Framework / Visual Studio MSBuild is in WorkloadPartialResolver.
+    //  is shared with Full Framework / Visual Studio MSBuild is in CachingWorkloadResolver.
     public class WorkloadSdkResolver : SdkResolver
     {
         public override string Name => "Microsoft.DotNet.MSBuildWorkloadSdkResolver";
@@ -65,7 +65,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
             public string DotnetRootPath { get; init; }
             public string SdkVersion { get; init; }
 
-            public WorkloadPartialResolver WorkloadResolver { get; init; }
+            public CachingWorkloadResolver WorkloadResolver { get; init; }
         }
 
         public override SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
@@ -97,7 +97,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 {
                     DotnetRootPath = dotnetRootPath,
                     SdkVersion = sdkVersion,
-                    WorkloadResolver = new WorkloadPartialResolver()
+                    WorkloadResolver = new CachingWorkloadResolver()
                 };
 
                 resolverContext.State = cachedState;

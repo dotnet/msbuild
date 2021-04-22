@@ -31,9 +31,9 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
     //  so the state caching support provided by MSBuild for SDK Resolvers doesn't really help.  Additionally, multiple instances of the SDK resolver
     //  may be created, and the same instance may be called on multiple threads.  So state needs to be cached staticly and be thread-safe.
     //
-    //  To keep the state static, the MSBuildSdkResolver keeps a static reference to the WorkloadPartialResolver that is used if the build is inside
+    //  To keep the state static, the MSBuildSdkResolver keeps a static reference to the CachingWorkloadResolver that is used if the build is inside
     //  Visual Studio.  To keep it thread-safe, the body of the Resolve method is all protected by a lock statement.  This avoids having to make
-    //  the classes consumed by the WorkloadPartialResolver (the manifest provider and workload resolver) thread-safe.
+    //  the classes consumed by the CachingWorkloadResolver (the manifest provider and workload resolver) thread-safe.
     //
     //  A resolver should not over-cache and return out-of-date results.  For workloads, the resolution could change due to:
     //  - Installation, update, or uninstallation of a workload
@@ -41,7 +41,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
     //  For SDK or workload installation actions, we expect to be running under a new process since Visual Studio will have been restarted.
     //  For global.json changes, the Resolve method takes parameters for the dotnet root and the SDK version.  If those values have changed
     //  from the previous call, the cached state will be thrown out and recreated.
-    class WorkloadPartialResolver
+    class CachingWorkloadResolver
     {
         private record CachedState
         {            
@@ -62,7 +62,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
         private bool _enabled;
 
 
-        public WorkloadPartialResolver()
+        public CachingWorkloadResolver()
         {
             // Support opt-out for workload resolution
             _enabled = true;
@@ -77,7 +77,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 
             if (!_enabled)
             {
-                string sentinelPath = Path.Combine(Path.GetDirectoryName(typeof(WorkloadPartialResolver).Assembly.Location), "DisableWorkloadResolver.sentinel");
+                string sentinelPath = Path.Combine(Path.GetDirectoryName(typeof(CachingWorkloadResolver).Assembly.Location), "DisableWorkloadResolver.sentinel");
                 if (File.Exists(sentinelPath))
                 {
                     _enabled = false;
@@ -199,11 +199,11 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 #if USE_SERILOG
                     if (_cachedState == null)
                     {
-                        logActions.Add(log => log.Information($"Creating initial {nameof(WorkloadPartialResolver)} state"));
+                        logActions.Add(log => log.Information($"Creating initial {nameof(CachingWorkloadResolver)} state"));
                     }
                     else
                     {
-                        logActions.Add(log => log.Information($"Recreating {nameof(WorkloadPartialResolver)} state (resolved SDK changed)"));
+                        logActions.Add(log => log.Information($"Recreating {nameof(CachingWorkloadResolver)} state (resolved SDK changed)"));
                     }
 #endif
 
@@ -221,14 +221,14 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
                 else
                 {
 #if USE_SERILOG
-                    logActions.Add(log => log.Information($"Using cached {nameof(WorkloadPartialResolver)} state"));
+                    logActions.Add(log => log.Information($"Using cached {nameof(CachingWorkloadResolver)} state"));
 #endif
                 }
 
                 if (!_cachedState.CachedResults.TryGetValue(sdkReferenceName, out resolutionResult))
                 {
 #if USE_SERILOG
-                    logActions.Add(log => log.Information($"Resolving workload in {nameof(WorkloadPartialResolver)}"));
+                    logActions.Add(log => log.Information($"Resolving workload in {nameof(CachingWorkloadResolver)}"));
 #endif
                     resolutionResult = Resolve(sdkReferenceName, _cachedState.ManifestProvider, _cachedState.WorkloadResolver);
 
@@ -240,7 +240,7 @@ namespace Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver
 #if USE_SERILOG
                 else
                 {
-                    logActions.Add(log => log.Information($"Using cached workload resolution result in {nameof(WorkloadPartialResolver)}"));
+                    logActions.Add(log => log.Information($"Using cached workload resolution result in {nameof(CachingWorkloadResolver)}"));
                 }
 #endif
             }
