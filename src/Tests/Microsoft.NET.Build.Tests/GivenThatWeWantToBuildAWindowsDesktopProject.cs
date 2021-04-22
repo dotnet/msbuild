@@ -352,7 +352,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 TargetFrameworks = targetFramework
             };
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var getValueCommand = new GetValuesCommand(testAsset, "SdkSupportedTargetPlatformIdentifier", GetValuesCommand.ValueType.Item);
             getValueCommand.Execute()
