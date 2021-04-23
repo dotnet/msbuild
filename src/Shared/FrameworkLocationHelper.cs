@@ -307,6 +307,25 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
             }),
+
+            // VS17
+            new VisualStudioSpec(visualStudioVersion170, "NETFXSDK\\{0}", "v10.0", "InstallationFolder", new []
+            {
+                dotNetFrameworkVersion11,
+                dotNetFrameworkVersion20,
+                dotNetFrameworkVersion35,
+                dotNetFrameworkVersion40,
+                dotNetFrameworkVersion45,
+                dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452,
+                dotNetFrameworkVersion46,
+                dotNetFrameworkVersion461,
+                dotNetFrameworkVersion462,
+                dotNetFrameworkVersion47,
+                dotNetFrameworkVersion471,
+                dotNetFrameworkVersion472,
+                dotNetFrameworkVersion48,
+            }),
         };
 
 #if FEATURE_WIN32_REGISTRY
