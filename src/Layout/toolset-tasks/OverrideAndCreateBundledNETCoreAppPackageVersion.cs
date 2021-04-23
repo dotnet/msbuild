@@ -115,22 +115,6 @@ namespace Microsoft.DotNet.Build.Tasks
                 crossgen2Rids.Value += ";osx-x64";
             }
 
-            // TODO: remove this once we're using an SDK that contains https://github.com/dotnet/installer/pull/10206
-            if (itemGroup.Elements(ns + "KnownRuntimePack").FirstOrDefault() == null)
-            {
-                itemGroup.Add(new XElement
-                (
-                    "KnownRuntimePack",
-                    new XAttribute("Include", "Microsoft.NETCore.App"),
-                    new XAttribute("TargetFramework", "net6.0"),
-                    new XAttribute("RuntimeFrameworkName", "Microsoft.NETCore.App"),
-                    new XAttribute("LatestRuntimeFrameworkVersion", originalBundledNETCoreAppPackageVersion),
-                    new XAttribute("RuntimePackNamePatterns", "Microsoft.NETCore.App.Runtime.Mono.**RID**"),
-                    new XAttribute("RuntimePackRuntimeIdentifiers", "browser-wasm"),
-                    new XAttribute("RuntimePackLabels", "Mono"),
-                    new XAttribute("IsTrimmable", "true")
-                ));
-            }
             CheckAndReplaceAttribute(itemGroup
                 .Elements(ns + "KnownRuntimePack").First().Attribute("LatestRuntimeFrameworkVersion"));
 
