@@ -28,6 +28,9 @@ namespace Microsoft.Build.Internal
         private readonly Stream _stream;
         private readonly StreamReader _streamReader;
 
+        private static volatile PropertyInfo _normalizationPropertyInfo;
+        private static bool _disableReadOnlyLoad;
+
         private XmlReaderExtension(string file, bool loadAsReadOnly)
         {
             try
@@ -73,21 +76,19 @@ namespace Microsoft.Build.Internal
             _stream?.Dispose();
         }
 
-        private static volatile PropertyInfo _normalizationPropertyInfo;
-
+        /// <summary>
+        /// Returns <see cref="PropertyInfo"/> of the "Normalization" internal property on the given <see cref="XmlReader"/>-derived type.
+        /// </summary>
         private static PropertyInfo GetNormalizationPropertyInfo(Type xmlReaderType)
         {
-            BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance;
-            if (_normalizationPropertyInfo == null)
+            PropertyInfo propertyInfo = _normalizationPropertyInfo;
+            if (propertyInfo == null)
             {
-                _normalizationPropertyInfo = xmlReaderType.GetProperty("Normalization", bindingFlags);
+                BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance;
+                propertyInfo = xmlReaderType.GetProperty("Normalization", bindingFlags);
+                _normalizationPropertyInfo = propertyInfo;
             }
-            else if (xmlReaderType != _normalizationPropertyInfo.ReflectedType)
-            {
-                Debug.Fail("GetNormalizationPropertyInfo can only take one type");
-                return xmlReaderType.GetProperty("Normalization", bindingFlags);
-            }
-            return _normalizationPropertyInfo;
+            return propertyInfo;
         }
 
         private static XmlReader GetXmlReader(string file, StreamReader input, bool loadAsReadOnly, out Encoding encoding)
@@ -95,8 +96,10 @@ namespace Microsoft.Build.Internal
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
 
             XmlReader reader;
-            if (loadAsReadOnly)
+            if (loadAsReadOnly && !_disableReadOnlyLoad)
             {
+                // Create an XML reader with IgnoreComments and IgnoreWhitespace set if we know that we won't be asked
+                // to write the DOM back to a file. This is a performance optimization.
                 XmlReaderSettings xrs = new XmlReaderSettings
                 {
                     DtdProcessing = DtdProcessing.Ignore,
@@ -104,8 +107,23 @@ namespace Microsoft.Build.Internal
                     IgnoreWhitespace = true,
                 };
                 reader = XmlReader.Create(input, xrs, uri);
-                // HACK: Set Normalization to false to behave the same as XmlTextReader.
-                GetNormalizationPropertyInfo(reader.GetType()).SetValue(reader, false);
+
+                // Try to set Normalization to false. We do this to remain compatible with earlier versions of MSBuild
+                // where we constructed the reader with 'new XmlTextReader()' which has normalization enabled by default.
+                PropertyInfo normalizationPropertyInfo = GetNormalizationPropertyInfo(reader.GetType());
+                if (normalizationPropertyInfo != null)
+                {
+                    normalizationPropertyInfo.SetValue(reader, false);
+                }
+                else
+                {
+                    // Fall back to using XmlTextReader if the prop could not be bound.
+                    Debug.Fail("Could not set Normalization to false on the result of XmlReader.Create");
+                    _disableReadOnlyLoad = true;
+
+                    reader.Dispose();
+                    reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
+                }
             }
             else
             {
