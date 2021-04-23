@@ -26,7 +26,7 @@
     <NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</NETStandardLibraryNETFrameworkVersion>
     <NewtonsoftJsonPackageVersion>12.0.3</NewtonsoftJsonPackageVersion>
     <NewtonsoftJsonVersion>$(NewtonsoftJsonPackageVersion)</NewtonsoftJsonVersion>
-    <SystemCommandLineVersion>2.0.0-beta1.21118.1</SystemCommandLineVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.21223.1</SystemCommandLineVersion>
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>5.0.0</SystemReflectionMetadataVersion>
     <MicrosoftDotNetSignToolVersion>6.0.0-beta.21221.1</MicrosoftDotNetSignToolVersion>
