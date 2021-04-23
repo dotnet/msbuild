@@ -21,6 +21,7 @@ using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -60,11 +61,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _sdkVersion = new ReleaseVersion(version ?? Product.Version);
 
             var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver);
-            userHome = userHome ?? EnvironmentProvider.GetUserHomeDirectory();
+            userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(userHome, ".dotnet", "sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, new NullLogger());
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, userHome);
@@ -161,10 +162,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             if (!skipManifestUpdate)
             {
                 // Update currently installed workloads
-                var installedWorkloads = _workloadInstaller.GetInstalledWorkloads(featureBand);
-                workloadIds = workloadIds.Concat(installedWorkloads);
+                var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
+                workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
 
-                _workloadManifestUpdater.UpdateAdvertisingManifests(featureBand);
+                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(featureBand).Wait();
                 manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates(featureBand);
             }
 

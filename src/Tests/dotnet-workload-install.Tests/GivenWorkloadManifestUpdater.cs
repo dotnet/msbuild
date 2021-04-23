@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
@@ -14,6 +13,7 @@ using Microsoft.NET.TestFramework.Utilities;
 using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             foreach (var manifest in installedManifests)
             {
                 Directory.CreateDirectory(Path.Combine(installedManifestDir, manifest.ToString()));
-                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion(1)));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("1")));
             }
 
             var manifestDirs = installedManifests
@@ -53,8 +53,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir);
 
-            manifestUpdater.UpdateAdvertisingManifests(new SdkFeatureBand(featureBand));
-            var expectedDownloadedPackages = installedManifests.Select(id => ((PackageId, NuGetVersion))(new PackageId(id.ToString()), null));
+            manifestUpdater.UpdateAdvertisingManifestsAsync(new SdkFeatureBand(featureBand)).Wait();
+            var expectedDownloadedPackages = installedManifests.Select(id => ((PackageId, NuGetVersion))(new PackageId($"{id}.manifest-{featureBand}"), null));
             nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
         }
 
@@ -65,8 +65,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var featureBand = "6.0.100";
             var dotnetRoot = Path.Combine(testDir, "dotnet");
             var expectedManifestUpdates = new (ManifestId, ManifestVersion, ManifestVersion)[] {
-                (new ManifestId("test-manifest-1"), new ManifestVersion(5), new ManifestVersion(7)),
-                (new ManifestId("test-manifest-2"), new ManifestVersion(3), new ManifestVersion(4)) };
+                (new ManifestId("test-manifest-1"), new ManifestVersion("5.0.0"), new ManifestVersion("7.0.0")),
+                (new ManifestId("test-manifest-2"), new ManifestVersion("3.0.0"), new ManifestVersion("4.0.0")) };
             var expectedManifestNotUpdated = new ManifestId[] { new ManifestId("test-manifest-3"), new ManifestId("test-manifest-4") };
 
             // Write mock manifests
@@ -84,9 +84,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             foreach (var manifest in expectedManifestNotUpdated)
             {
                 Directory.CreateDirectory(Path.Combine(installedManifestDir, manifest.ToString()));
-                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion(5)));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5")));
                 Directory.CreateDirectory(Path.Combine(adManifestDir, manifest.ToString()));
-                File.WriteAllText(Path.Combine(adManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion(5)));
+                File.WriteAllText(Path.Combine(adManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5")));
             }
 
             var manifestDirs = expectedManifestUpdates.Select(manifest => manifest.Item1)
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         internal static string GetManifestContent(ManifestVersion version)
         {
             return $@"{{
-  ""version"": {version},
+  ""version"": {version.ToString().Substring(0, 1)},
   ""workloads"": {{
     }}
   }},

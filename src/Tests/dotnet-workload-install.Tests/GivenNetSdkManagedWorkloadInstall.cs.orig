@@ -58,7 +58,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 }
             }
 
+<<<<<<< HEAD
             var featureBands = installer.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords();
+=======
+            var featureBands = installer.GetFeatureBandsWithInstallationRecords();
+>>>>>>> 0412aaacc... PR feedback
             if (writeRecords)
             {
                 featureBands.ShouldBeEquivalentTo(versions);
@@ -152,7 +156,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
+<<<<<<< HEAD
+            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(0);
+=======
+            _reporter.Lines.Should().Contain(string.Format(Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings.WorkloadPackAlreadyInstalledMessage, packInfo.Id, packInfo.Version));
             (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams.Count.Should().Be(0);
+>>>>>>> 0412aaacc... PR feedback
         }
 
         [Fact]

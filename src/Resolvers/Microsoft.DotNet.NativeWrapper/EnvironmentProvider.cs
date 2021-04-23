@@ -89,26 +89,5 @@ namespace Microsoft.DotNet.NativeWrapper
             var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
             return environmentProvider.GetDotnetExeDirectory();
         }
-
-        public string GetUserHomeDirectory()
-        {
-            var home = _getEnvironmentVariable("DOTNET_CLI_HOME");
-            if (string.IsNullOrEmpty(home))
-            {
-                home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            }
-
-            return home;
-        }
-
-        public static string GetUserHomeDirectory(Func<string, string> getEnvironmentVariable = null)
-        {
-            if (getEnvironmentVariable == null)
-            {
-                getEnvironmentVariable = Environment.GetEnvironmentVariable;
-            }
-            var environmentProvider = new EnvironmentProvider(getEnvironmentVariable);
-            return environmentProvider.GetUserHomeDirectory();
-        }
     }
 }

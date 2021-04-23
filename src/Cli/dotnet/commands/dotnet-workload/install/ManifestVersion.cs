@@ -7,26 +7,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class ManifestVersion : IEquatable<ManifestVersion>, IComparable<ManifestVersion>
     {
-        private long _version;
+        private string _version;
 
         public ManifestVersion(string version)
         {
-            _version = long.Parse(version);
-        }
-
-        public ManifestVersion(long version)
-        {
-            _version = version;
+            _version = version?.ToLowerInvariant() ?? throw new ArgumentNullException(nameof(version));
         }
 
         public bool Equals(ManifestVersion other)
         {
-            return _version == other._version;
+            return ToString() == other.ToString();
         }
 
         public int CompareTo(ManifestVersion other)
         {
-            return _version.CompareTo(other._version);
+            return string.Compare(ToString(), other.ToString(), StringComparison.Ordinal);
         }
 
         public override bool Equals(object obj)
@@ -41,7 +36,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override string ToString()
         {
-            return _version.ToString();
+            return _version;
         }
     }
 }

@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -17,9 +19,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             _manifestUpdates = manifestUpdates ?? new List<(ManifestId, ManifestVersion, ManifestVersion)>();
         }
 
-        public void UpdateAdvertisingManifests(SdkFeatureBand featureBand)
+        public Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand)
         {
             UpdateAdvertisingManifestsCallParams.Add(featureBand);
+            return Task.CompletedTask;
         }
 
         public IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> CalculateManifestUpdates(SdkFeatureBand featureBand)

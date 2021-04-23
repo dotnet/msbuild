@@ -9,6 +9,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
+using System.Threading.Tasks;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -31,12 +33,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _nugetPackageDownloader = nugetPackageDownloader;
         }
 
-        public void UpdateAdvertisingManifests(SdkFeatureBand featureBand)
+        public async Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand)
         {
             var manifests = GetInstalledManifestIds();
             foreach (var manifest in manifests)
             {
-                UpdateAdvertisingManifest(manifest, featureBand);
+                await UpdateAdvertisingManifestAsync(manifest, featureBand);
             }
         }
 
@@ -74,14 +76,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return manifests;
         }
 
-        private void UpdateAdvertisingManifest(ManifestId manifestId, SdkFeatureBand featureBand)
+        private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, SdkFeatureBand featureBand)
         {
             string packagePath = null;
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(featureBand, manifestId);
-                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(manifestId.ToString())).Result;
-                var resultingFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, adManifestPath).Result;
+                packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(featureBand, manifestId));
+                var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, adManifestPath);
                 _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
             }
             catch (Exception e)
@@ -118,7 +120,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
-                var manifest = WorkloadManifestReader.ReadWorkloadManifest(fsSource);
+                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource);
                 return new ManifestVersion(manifest.Version);
             }
         }
@@ -140,12 +142,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
-                var manifest = WorkloadManifestReader.ReadWorkloadManifest(fsSource);
+                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource);
                 return new ManifestVersion(manifest.Version);
             }
         }
 
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userHome, ".dotnet", "sdk-advertising", featureBand.ToString(), manifestId.ToString());
+
+        internal static PackageId GetManifestPackageId(SdkFeatureBand featureBand, ManifestId manifestId) =>
+            new PackageId($"{manifestId}.Manifest-{featureBand}");
     }
 }
