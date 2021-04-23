@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Sln.Add.Tests
   Add one or more projects to a solution file.
 
 Usage:
-  dotnet sln <SLN_FILE> add [options] <PROJECT_PATH>...
+  dotnet [options] sln <SLN_FILE> add <PROJECT_PATH>...
 
 Arguments:
   <SLN_FILE>        The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -38,7 +38,7 @@ Options:
   .NET modify solution file command
 
 Usage:
-  dotnet sln [options] <SLN_FILE> [command]
+  dotnet [options] sln <SLN_FILE> [command]
 
 Arguments:
   <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]

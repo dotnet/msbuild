@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Add.ProjectToProjectReference
 
             var frameworkString = _parseResult.ValueForOption<string>(AddProjectToProjectReferenceParser.FrameworkOption);
 
-            var arguments = _parseResult.ValueForArgument<IReadOnlyCollection<string>>(AddProjectToProjectReferenceParser.ProjectPathArgument);
+            var arguments = _parseResult.ValueForArgument<IEnumerable<string>>(AddProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
             PathUtility.EnsureAllPathsExist(arguments,
                 CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
             List<MsbuildProject> refs =

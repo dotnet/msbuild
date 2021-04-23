@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Workloads.Workload.Install.LocalizableStrings;
 
@@ -9,7 +10,7 @@ namespace Microsoft.DotNet.Cli
     internal static class WorkloadInstallCommandParser
     {
         public static readonly Argument WorkloadIdArgument =
-            new Argument<string>(LocalizableStrings.WorkloadIdArgumentName)
+            new Argument<IEnumerable<string>>(LocalizableStrings.WorkloadIdArgumentName)
             {
                 Arity = ArgumentArity.OneOrMore, Description = LocalizableStrings.WorkloadIdArgumentDescription
             };

@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining(@"dotnet build [options] [<PROJECT | SOLUTION>...]");
+                .HaveStdOutContaining(@"dotnet [options] build [<PROJECT | SOLUTION>...]");
         }
     }
 }

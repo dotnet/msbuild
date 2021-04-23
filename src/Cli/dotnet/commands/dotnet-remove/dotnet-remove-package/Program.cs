@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Remove.PackageReference
             ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = parseResult.ValueForArgument<string>(RemoveCommandParser.ProjectArgument);
-            _arguments = parseResult.ValueForArgument<IReadOnlyCollection<string>>(RemovePackageParser.CmdPackageArgument);
+            _arguments = parseResult.ValueForArgument<IEnumerable<string>>(RemovePackageParser.CmdPackageArgument).ToList().AsReadOnly();
             if (_fileOrDirectory == null)
             {
                 throw new ArgumentNullException(nameof(_fileOrDirectory));
