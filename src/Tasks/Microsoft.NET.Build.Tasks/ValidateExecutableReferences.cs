@@ -32,6 +32,13 @@ namespace Microsoft.NET.Build.Tasks
             {
                 string nearestTargetFramework = project.GetMetadata("NearestTargetFramework");
 
+                if (string.IsNullOrEmpty(nearestTargetFramework) || !project.HasMetadataValue("AdditionalPropertiesFromProject"))
+                {
+                    //  Referenced project doesn't have the right metadata.  This may be because it's a different project type (C++, for example)
+                    //  In this case just skip the checks
+                    continue;
+                }
+
                 var additionalPropertiesXml = XElement.Parse(project.GetMetadata("AdditionalPropertiesFromProject"));
                 var targetFrameworkElement = additionalPropertiesXml.Element(nearestTargetFramework);
                 Dictionary<string, string> projectAdditionalProperties = new(StringComparer.OrdinalIgnoreCase);

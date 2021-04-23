@@ -976,13 +976,19 @@ Copyright (c) .NET Foundation. All rights reserved.
   into the runtime as assemblies
   ============================================================
   -->
+
+  <UsingTask TaskName="CheckForUnsupportedWinMDReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />  
+
   <Target Name="_BlockWinMDsOnUnsupportedTFMs"
           AfterTargets="PreBuildEvent"
           DependsOnTargets="ResolveReferences"
           Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '5.0'))">
-    <NETSdkError Condition="'%(ReferencePath.Extension)' == '.winmd'"
-      ResourceName="WinMDReferenceNotSupportedOnTargetFramework"
-      FormatArguments="$(TargetFrameworkMoniker)" />
+
+    <CheckForUnsupportedWinMDReferences
+      TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
+      ReferencePaths="@(ReferencePath)"
+      />
+    
     <NETSdkError Condition="'$(OutputType)' == 'winmdobj'"
       ResourceName="WinMDObjNotSupportedOnTargetFramework"
       FormatArguments="$(TargetFrameworkMoniker)" />
