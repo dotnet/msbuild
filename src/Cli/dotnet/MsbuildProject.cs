@@ -219,7 +219,7 @@ namespace Microsoft.DotNet.Tools
                     project = _projects.LoadProject(
                         ProjectRootElement.FullPath,
                         new Dictionary<string, string>
-                            {[Constants.MsBuildInteractivePropertyName] = "true"},
+                            {["NuGetInteractive"] = "true"},
                         null);
                 }
                 else

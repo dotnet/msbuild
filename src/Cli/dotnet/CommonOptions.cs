@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<bool>(
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription)
-            .ForwardAs(Utils.Constants.MsBuildInteractiveOption);
+            .ForwardAs("-property:NuGetInteractive=true");
 
         public static Option InteractiveOption() =>
             new Option<bool>(
