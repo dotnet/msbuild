@@ -160,7 +160,7 @@ namespace Microsoft.Build.Utilities
         Version160,
 
         /// <summary>
-        /// Visual Studio (Dev17)
+        /// Visual Studio 2022 (Dev17)
         /// </summary>
         Version170,
 
