@@ -796,7 +796,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine($"MSBUILD : error {e.ErrorCode}: {e.Message}");
 
 #if DEBUG
-                if (!e.HasBeenLoggedByProjectCache)
+                if (!e.HasBeenLoggedByProjectCache && e.InnerException != null)
                 {
                     Console.WriteLine("This is an unhandled exception from a project cache -- PLEASE OPEN A BUG AGAINST THE PROJECT CACHE OWNER.");
                 }

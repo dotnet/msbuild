@@ -58,7 +58,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             throw new ProjectCacheException(message, innerException, hasBeenLoggedByProjectCache: false, errorCode);
         }
 
-        internal static void ThrowForLoggedError
+        internal static void ThrowForErrorLoggedInsideTheProjectCache
         (
             string messageResourceName,
             params string[] messageArgs
@@ -69,6 +69,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
 
             throw new ProjectCacheException(message: message, innerException: null, hasBeenLoggedByProjectCache: true, errorCode: errorCode);
+        }
+
+        internal static void ThrowForMSBuildIssueWithTheProjectCache
+        (
+            string messageResourceName,
+            params string[] messageArgs
+        )
+        {
+            ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
+
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
+
+            throw new ProjectCacheException(message: message, innerException: null, hasBeenLoggedByProjectCache: false, errorCode: errorCode);
         }
     }
 }
