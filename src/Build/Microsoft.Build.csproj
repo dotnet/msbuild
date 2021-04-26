@@ -800,11 +800,4 @@
   <ItemGroup>
     <Compile Remove="Collections\RetrievableEntryHashSet\Originals\*" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="BackEnd\Components\ProjectCache\ProjectCacheException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-  </ItemGroup>
-
 </Project>
