@@ -10,7 +10,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
@@ -47,11 +46,7 @@ namespace Dotnet_new3
                 AddInstallLogger(host);
             }
 
-            var callbacks = new New3Callbacks
-            {
-                OnFirstRun = FirstRun
-            };
-
+            var callbacks = new New3Callbacks();
             return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), callbacks, args);
         }
 
@@ -116,13 +111,6 @@ namespace Dotnet_new3
                 Console.WriteLine(string.Format("Install: {0}", message));
             };
             host.RegisterDiagnosticLogger("Install", installLogger);
-        }
-
-        private static void FirstRun(IEngineEnvironmentSettings environmentSettings)
-        {
-            Paths paths = new Paths(environmentSettings);
-
-            environmentSettings.Host.FileSystem.CreateDirectory(paths.User.BaseDir);
         }
 
         private static void ConfigureLocale()
