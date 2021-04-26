@@ -52,7 +52,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 "store",
                 "test",
                 "tool",
-                "vstest"
+                "vstest",
+                "workload"
             };
 
             var reporter = new BufferedReporter();
