@@ -77,10 +77,7 @@ namespace Microsoft.DotNet.Cli
             }
 
             // Workload command is behind a feature flag during development
-            if (includeWorkloadCommands || Env.GetEnvironmentVariableAsBool("DEVENABLEWORKLOADCOMMAND", defaultValue: false))
-            {
-                rootCommand.AddCommand(WorkloadCommandParser.GetCommand());
-            }
+            rootCommand.AddCommand(WorkloadCommandParser.GetCommand(includeWorkloadCommands || Env.GetEnvironmentVariableAsBool("DEVENABLEWORKLOADCOMMAND", defaultValue: false)));
 
             //Add internal commands
            rootCommand.AddCommand(InstallSuccessCommand);
