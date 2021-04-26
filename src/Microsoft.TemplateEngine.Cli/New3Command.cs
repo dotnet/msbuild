@@ -33,7 +33,6 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly TemplateCreator _templateCreator;
         private readonly ISettingsLoader _settingsLoader;
         private readonly AliasRegistry _aliasRegistry;
-        private readonly Paths _paths;
 
         /// <summary>
         /// It's safe to access template agnostic information anytime after the first parse.
@@ -51,16 +50,15 @@ namespace Microsoft.TemplateEngine.Cli
         {
         }
 
-        internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string? hivePath)
+        internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string? hivePath, bool virtualize = false)
         {
             _telemetryLogger = telemetryLogger;
             host = new ExtendedTemplateEngineHost(host, this);
-            EnvironmentSettings = new EngineEnvironmentSettings(host, x => new SettingsLoader(x), hivePath);
+            EnvironmentSettings = new EngineEnvironmentSettings(host, settingsLocation: hivePath, onFirstRun: FirstRun, virtualizeSettings: virtualize);
             _settingsLoader = EnvironmentSettings.SettingsLoader;
             _templateCreator = new TemplateCreator(EnvironmentSettings);
             _aliasRegistry = new AliasRegistry(EnvironmentSettings);
             CommandName = commandName;
-            _paths = new Paths(EnvironmentSettings);
             _hostDataLoader = new HostSpecificDataLoader(EnvironmentSettings.SettingsLoader);
             _commandInput = commandInput;
             _callbacks = callbacks;
@@ -176,13 +174,15 @@ namespace Microsoft.TemplateEngine.Cli
                 hivePath = Path.GetFullPath(hivePath);
             }
 
+            bool ephemeralHiveFlag = args.Any(x => string.Equals(x, "--debug:ephemeral-hive", StringComparison.Ordinal));
+
             if (args.Length == 0)
             {
                 telemetryLogger.TrackEvent(commandName + TelemetryConstants.CalledWithNoArgsEventSuffix);
             }
 
             INewCommandInput commandInput = new NewCommandInputCli(commandName);
-            New3Command instance = new New3Command(commandName, host, telemetryLogger, callbacks, commandInput, hivePath);
+            New3Command instance = new New3Command(commandName, host, telemetryLogger, callbacks, commandInput, hivePath, virtualize: ephemeralHiveFlag);
 
             commandInput.OnExecute(instance.ExecuteAsync);
 
@@ -238,19 +238,6 @@ namespace Microsoft.TemplateEngine.Cli
             int targetLength = Math.Max(LocalizableStrings.Version.Length, LocalizableStrings.CommitHash.Length);
             Reporter.Output.WriteLine($" {LocalizableStrings.Version.PadRight(targetLength)} {GitInfo.PackageVersion}");
             Reporter.Output.WriteLine($" {LocalizableStrings.CommitHash.PadRight(targetLength)} {GitInfo.CommitHash}");
-        }
-
-        private void ConfigureEnvironment()
-        {
-            // delete everything from previous attempts for this install when doing first run setup.
-            // don't want to leave partial setup if it's in a bad state.
-            if (_paths.Exists(_paths.User.BaseDir))
-            {
-                _paths.DeleteDirectory(_paths.User.BaseDir);
-            }
-
-            _callbacks.OnFirstRun?.Invoke(EnvironmentSettings);
-            EnvironmentSettings.SettingsLoader.Components.RegisterMany(typeof(New3Command).GetTypeInfo().Assembly.GetTypes());
         }
 
         // TODO: make sure help / usage works right in these cases.
@@ -412,28 +399,10 @@ namespace Microsoft.TemplateEngine.Cli
 
         private bool Initialize()
         {
-            bool ephemeralHiveFlag = _commandInput.HasDebuggingFlag("--debug:ephemeral-hive");
-
-            if (ephemeralHiveFlag)
-            {
-                EnvironmentSettings.Host.VirtualizeDirectory(EnvironmentSettings.Paths.TemplateEngineRootDir);
-            }
-
             bool reinitFlag = _commandInput.HasDebuggingFlag("--debug:reinit");
             if (reinitFlag)
             {
-                _paths.Delete(_paths.User.BaseDir);
-            }
-
-            if (!_paths.Exists(_paths.User.BaseDir) || !_paths.Exists(_paths.User.FirstRunCookie))
-            {
-                if (!_commandInput.IsQuietFlagSpecified)
-                {
-                    Reporter.Output.WriteLine(LocalizableStrings.GettingReady);
-                }
-
-                ConfigureEnvironment();
-                _paths.WriteAllText(_paths.User.FirstRunCookie, "");
+                EnvironmentSettings.SettingsLoader.ResetSettings();
             }
 
             if (_commandInput.HasDebuggingFlag("--debug:showconfig"))
@@ -443,6 +412,15 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return true;
+        }
+        private void FirstRun(IEngineEnvironmentSettings environmentSettings)
+        {
+            if (!_commandInput.IsQuietFlagSpecified)
+            {
+                Reporter.Output.WriteLine(LocalizableStrings.GettingReady);
+            }
+            _callbacks.OnFirstRun?.Invoke(environmentSettings);
+            environmentSettings.SettingsLoader.Components.RegisterMany(typeof(New3Command).GetTypeInfo().Assembly.GetTypes());
         }
 
         private async Task<HashSet<string>> GetAllTemplateShortNamesAsync()

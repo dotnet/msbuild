@@ -85,7 +85,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             HashSet<string> userParamsWithDefaultValues;
             bool hasPostActionScriptRunner;
 
-            ITemplate template = environmentSettings.SettingsLoader.LoadTemplate(templateInfo, commandInput.BaselineName);
+            ITemplate? template = environmentSettings.SettingsLoader.LoadTemplate(templateInfo, commandInput.BaselineName);
 
             if (template == null)
             {
