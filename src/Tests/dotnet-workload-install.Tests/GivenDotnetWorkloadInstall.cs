@@ -13,6 +13,9 @@ using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.Assertions;
+
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -25,6 +28,20 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             _reporter = new BufferedReporter();
             _manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
+        }
+
+        [Fact]
+        public void GivenWorkloadInstallItErrorsOnFakeWorkloadName()
+        {
+            var command = new DotnetCommand(Log);
+            command
+                .WithEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", string.Empty)
+                .WithEnvironmentVariable("PATH", "fake")
+                .Execute("workload", "install", "fake", "--skip-manifest-update")
+                .Should()
+                .Fail()
+                .And
+                .NotHaveStdOutContaining("Workload not found");
         }
 
         [Fact]
