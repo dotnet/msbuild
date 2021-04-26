@@ -213,7 +213,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             var builtIns = new AssemblyComponentCatalog(new[]
             {
                 typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
-                typeof(Microsoft.TemplateEngine.Edge.Paths).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
+                typeof(Microsoft.TemplateEngine.Edge.AssemblyComponentCatalog).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
                 typeof(New3Command).GetTypeInfo().Assembly,    // for assembly: Microsoft.TemplateEngine.Cli
                 typeof(Microsoft.TemplateSearch.Common.NuGetSearchCacheConfig).GetTypeInfo().Assembly, // for assembly: Microsoft.TemplateSearch.Common
                 typeof(Program).GetTypeInfo().Assembly

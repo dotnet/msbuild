@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.TestHelper
@@ -47,13 +46,12 @@ namespace Microsoft.TemplateEngine.TestHelper
             EngineEnvironmentSettings engineEnvironmentSettings;
             if (virtualize)
             {
-                engineEnvironmentSettings = new EngineEnvironmentSettings(host, (x) => new SettingsLoader(x));
-                host.VirtualizeDirectory(engineEnvironmentSettings.Paths.TemplateEngineRootDir);
+                engineEnvironmentSettings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
             }
             else
             {
                 var tempateEngineRoot = Path.Combine(CreateTemporaryFolder(), ".templateengine");
-                engineEnvironmentSettings = new EngineEnvironmentSettings(host, (x) => new SettingsLoader(x), tempateEngineRoot);
+                engineEnvironmentSettings = new EngineEnvironmentSettings(host, settingsLocation: tempateEngineRoot);
             }
             _engineEnvironmentToDispose.Add(engineEnvironmentSettings);
             return engineEnvironmentSettings;
