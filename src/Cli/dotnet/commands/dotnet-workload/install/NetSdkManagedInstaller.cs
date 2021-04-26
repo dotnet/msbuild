@@ -183,13 +183,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempBackupDir, manifestPath));
                         }
                     });
-            }
-            catch (Exception e)
-            {
-                throw new Exception(string.Format(LocalizableStrings.FailedToInstallWorkloadManifest, manifestId, manifestVersion, e.Message));
-            }
-            finally
-            {
+
                 // Delete leftover dirs and files
                 if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
                 {
@@ -216,6 +210,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     Directory.Delete(tempBackupDir, true);
                 }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(string.Format(LocalizableStrings.FailedToInstallWorkloadManifest, manifestId, manifestVersion, e.Message));
             }
         }
 

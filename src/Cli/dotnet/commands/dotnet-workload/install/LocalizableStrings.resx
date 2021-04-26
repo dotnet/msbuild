@@ -216,4 +216,7 @@
   <data name="InstallingWorkloadManifest" xml:space="preserve">
     <value>Installing workload manifest {0} version {1}.</value>
   </data>
+  <data name="IncludePreviewOptionDescription" xml:space="preserve">
+    <value>Allow prerelease workload manifests.</value>
+  </data>
 </root>

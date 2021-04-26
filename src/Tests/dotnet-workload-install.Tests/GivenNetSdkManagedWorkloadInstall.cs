@@ -39,34 +39,39 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.GetInstallationUnit().Should().Be(InstallationUnit.Packs);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenManagedInstallItCanGetFeatureBands(bool writeRecords)
+        [Fact]
+        public void GivenManagedInstallItCanGetFeatureBandsWhenFilesArePresent()
         {
             var versions = new string[] { "6.0.100", "6.0.300", "7.0.100" };
-            var (dotnetRoot, installer, _) = GetTestInstaller(identifier: writeRecords.ToString());
+            var (dotnetRoot, installer, _) = GetTestInstaller();
 
             // Write fake workloads
             foreach (var version in versions)
             {
                 var path = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads");
                 Directory.CreateDirectory(path);
-                if (writeRecords)
-                {
-                    File.Create(Path.Combine(path, "6.0.100"));
-                }
+                File.Create(Path.Combine(path, "6.0.100"));
             }
 
             var featureBands = installer.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords();
-            if (writeRecords)
+            featureBands.ShouldBeEquivalentTo(versions);
+        }
+
+        [Fact]
+        public void GivenManagedInstallItCanNotGetFeatureBandsWhenFilesAreNotPresent()
+        {
+            var versions = new string[] { "6.0.100", "6.0.300", "7.0.100" };
+            var (dotnetRoot, installer, _) = GetTestInstaller();
+
+            // Write fake workloads
+            foreach (var version in versions)
             {
-                featureBands.ShouldBeEquivalentTo(versions);
+                var path = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads");
+                Directory.CreateDirectory(path);
             }
-            else
-            {
-                featureBands.Should().BeEmpty();
-            }
+
+            var featureBands = installer.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords();
+            featureBands.Should().BeEmpty();
         }
 
         [Fact]
@@ -276,7 +281,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var (_, installer, nugetDownloader) = GetTestInstaller();
             var featureBand = new SdkFeatureBand("6.0.100");
             var manifestId = new ManifestId("test-manifest-1");
-            var manifestVersion = new ManifestVersion("5");
+            var manifestVersion = new ManifestVersion("5.0.0");
 
             installer.InstallWorkloadManifest(manifestId, manifestVersion, featureBand);
 

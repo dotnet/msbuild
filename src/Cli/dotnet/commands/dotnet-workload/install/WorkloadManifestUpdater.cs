@@ -33,12 +33,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _nugetPackageDownloader = nugetPackageDownloader;
         }
 
-        public async Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand)
+        public async Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand, bool includePreviews)
         {
             var manifests = GetInstalledManifestIds();
             foreach (var manifest in manifests)
             {
-                await UpdateAdvertisingManifestAsync(manifest, featureBand);
+                await UpdateAdvertisingManifestAsync(manifest, featureBand, includePreviews);
             }
         }
 
@@ -76,13 +76,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return manifests;
         }
 
-        private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, SdkFeatureBand featureBand)
+        private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, SdkFeatureBand featureBand, bool includePreviews)
         {
             string packagePath = null;
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(featureBand, manifestId);
-                packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(featureBand, manifestId));
+                packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(featureBand, manifestId), includePreview: includePreviews);
                 var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, adManifestPath);
                 _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
             }

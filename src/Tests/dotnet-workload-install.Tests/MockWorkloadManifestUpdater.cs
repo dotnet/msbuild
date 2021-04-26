@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             _manifestUpdates = manifestUpdates ?? new List<(ManifestId, ManifestVersion, ManifestVersion)>();
         }
 
-        public Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand)
+        public Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand, bool includePreview)
         {
             UpdateAdvertisingManifestsCallParams.Add(featureBand);
             return Task.CompletedTask;

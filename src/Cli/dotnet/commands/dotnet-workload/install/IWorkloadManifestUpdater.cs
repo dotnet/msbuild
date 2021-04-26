@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal interface IWorkloadManifestUpdater
     {
-        Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand);
+        Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand, bool includePreviews);
 
         IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestUpdates(SdkFeatureBand featureBand);
     }

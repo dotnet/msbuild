@@ -31,6 +31,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly bool _skipManifestUpdate;
         private readonly string _fromCacheOption;
         private readonly bool _printDownloadLinkOnly;
+        private readonly bool _includePreviews;
         private readonly IReadOnlyCollection<string> _workloadIds; 
         private readonly IInstaller _workloadInstaller;
         private readonly IWorkloadResolver _workloadResolver;
@@ -55,6 +56,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _reporter = reporter ?? Reporter.Output;
             _skipManifestUpdate = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.SkipManifestUpdateOption);
+            _includePreviews = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.IncludePreviewOption);
             _printDownloadLinkOnly = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
             _workloadIds = parseResult.ValueForArgument<IReadOnlyCollection<string>>(WorkloadInstallCommandParser.WorkloadIdArgument);
@@ -132,7 +134,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate);
+                InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews);
             }
 
             return 0;
@@ -153,7 +155,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             "." +
             version.ToNormalizedString() + ".nupkg";
 
-        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false)
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false, bool includePreviews = false)
         {
             _reporter.WriteLine();
             var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
@@ -165,7 +167,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
                 workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
 
-                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(featureBand).Wait();
+                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(featureBand, includePreviews).Wait();
                 manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates(featureBand);
             }
 

@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             foreach (var manifest in installedManifests)
             {
                 Directory.CreateDirectory(Path.Combine(installedManifestDir, manifest.ToString()));
-                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("1")));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
             }
 
             var manifestDirs = installedManifests
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir);
 
-            manifestUpdater.UpdateAdvertisingManifestsAsync(new SdkFeatureBand(featureBand)).Wait();
+            manifestUpdater.UpdateAdvertisingManifestsAsync(new SdkFeatureBand(featureBand), true).Wait();
             var expectedDownloadedPackages = installedManifests.Select(id => ((PackageId, NuGetVersion))(new PackageId($"{id}.manifest-{featureBand}"), null));
             nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
         }
@@ -84,9 +84,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             foreach (var manifest in expectedManifestNotUpdated)
             {
                 Directory.CreateDirectory(Path.Combine(installedManifestDir, manifest.ToString()));
-                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5")));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5.0.0")));
                 Directory.CreateDirectory(Path.Combine(adManifestDir, manifest.ToString()));
-                File.WriteAllText(Path.Combine(adManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5")));
+                File.WriteAllText(Path.Combine(adManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("5.0.0")));
             }
 
             var manifestDirs = expectedManifestUpdates.Select(manifest => manifest.Item1)
