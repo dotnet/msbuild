@@ -220,8 +220,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
-        <source>MSB4271: The project cache threw an unhandled exception from the {0} method.</source>
-        <target state="new">MSB4271: The project cache threw an unhandled exception from the {0} method.</target>
+        <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
+        <target state="new">MSB4273: The project cache threw an unhandled exception from the {0} method.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
