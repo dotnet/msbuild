@@ -448,5 +448,35 @@ namespace Dotnet_new3.IntegrationTests
                 .Should().Fail()
                 .And.HaveStdErrContaining($"{codebase} is not supported");
         }
+
+        [Fact]
+        public void ReinstallDoesntRemoveTemplates()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            using var packageManager = new PackageManager();
+            string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
+
+            new DotnetNewCommand(_log, "-i", packageLocation)
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The following template packages will be installed:")
+                .And.HaveStdOutMatching($"Success: Microsoft\\.TemplateEngine\\.TestTemplates::([\\d\\.a-z-])+ installed the following templates:")
+                .And.HaveStdOutContaining("TestAssets.TemplateWithTags")
+                .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
+
+            new DotnetNewCommand(_log, "-i", packageLocation)
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The following template packages will be installed:")
+                .And.HaveStdOutMatching($"Success: Microsoft\\.TemplateEngine\\.TestTemplates::([\\d\\.a-z-])+ installed the following templates:")
+                .And.HaveStdOutContaining("TestAssets.TemplateWithTags")
+                .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
+        }
     }
 }
