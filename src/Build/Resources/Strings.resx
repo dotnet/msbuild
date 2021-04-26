@@ -1889,7 +1889,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4270: No project cache plugins found in assembly "{0}". Expected one.</value>
   </data>
   <data name="ProjectCacheException" xml:space="preserve">
-    <value>MSB4271: The project cache threw an unhandled exception from the {0} method.</value>
+    <value>MSB4273: The project cache threw an unhandled exception from the {0} method.</value>
   </data>
   <data name="KillingProcessWithPid" xml:space="preserve">
     <value>Killing process with pid = {0}.</value>
