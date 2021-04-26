@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tools.Test
 
             msbuildArgs.AddRange(result.OptionValuesToBeForwarded(TestCommandParser.GetCommand()));
 
-            msbuildArgs.AddRange(result.ValueForArgument<IReadOnlyCollection<string>>(TestCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+            msbuildArgs.AddRange(result.ValueForArgument<IEnumerable<string>>(TestCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             if (settings.Any())
             {

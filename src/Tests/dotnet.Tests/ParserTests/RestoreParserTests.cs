@@ -47,9 +47,9 @@ namespace Microsoft.DotNet.Tests.CommandLineParserTests
                       .Parse(
                           @"dotnet restore --no-cache --packages ""D:\OSS\corefx\packages"" --source https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json --source https://dotnet.myget.org/F/dotnet-core/api/v3/index.json --source https://api.nuget.org/v3/index.json D:\OSS\corefx\external\runtime\runtime.depproj");
 
-            restore.ValueForArgument<string[]>(RestoreCommandParser.SlnOrProjectArgument);
+            restore.ValueForArgument<IEnumerable<string>>(RestoreCommandParser.SlnOrProjectArgument);
 
-            restore.ValueForOption<string[]>("--source")
+            restore.ValueForOption<IEnumerable<string>>("--source")
                 .Should()
                 .BeEquivalentTo(
                     "https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json",

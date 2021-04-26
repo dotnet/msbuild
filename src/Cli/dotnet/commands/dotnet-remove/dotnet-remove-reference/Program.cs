@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
             ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = parseResult.ValueForArgument<string>(RemoveCommandParser.ProjectArgument);
-            _arguments = parseResult.ValueForArgument<IReadOnlyCollection<string>>(RemoveProjectToProjectReferenceParser.ProjectPathArgument);
+            _arguments = parseResult.ValueForArgument<IEnumerable<string>>(RemoveProjectToProjectReferenceParser.ProjectPathArgument).ToList().AsReadOnly();
 
             if (_arguments.Count == 0)
             {

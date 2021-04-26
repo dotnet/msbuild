@@ -24,30 +24,13 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
   List all projects in a solution file.
 
 Usage:
-  dotnet sln <SLN_FILE> list [options]
+  dotnet [options] sln <SLN_FILE> list
 
 Arguments:
   <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
   -?, -h, --help    Show help and usage information";
-
-        private Func<string, string> SlnCommandHelpText = (defaultVal) => $@"sln:
-  .NET modify solution file command
-
-Usage:
-  dotnet sln [options] <SLN_FILE> [command]
-
-Arguments:
-  <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
-
-Options:
-  -?, -h, --help    Show help and usage information
-
-Commands:
-  add <PROJECT_PATH>       Add one or more projects to a solution file.
-  list                     List all projects in a solution file.
-  remove <PROJECT_PATH>    Remove one or more projects from a solution file.";
 
         public GivenDotnetSlnList(ITestOutputHelper log) : base(log)
         {
