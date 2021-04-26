@@ -28,7 +28,14 @@ namespace Microsoft.Build.Internal
         private readonly Stream _stream;
         private readonly StreamReader _streamReader;
 
+        /// <summary>
+        /// Caches a <see cref="PropertyInfo"/> representing the "Normalization" internal property on the <see cref="XmlReader"/>-derived
+        /// type returned from <see cref="XmlReader.Create(TextReader, XmlReaderSettings, string)"/>. The cache is process/AppDomain-wide
+        /// and lock-free, so we use volatile access for thread safety, i.e. to ensure that when the field is updated the PropertyInfo
+        /// it's pointing to is seen as fully initialized by all CPUs.
+        /// </summary>
         private static volatile PropertyInfo _normalizationPropertyInfo;
+
         private static bool _disableReadOnlyLoad;
 
         private XmlReaderExtension(string file, bool loadAsReadOnly)
@@ -88,6 +95,7 @@ namespace Microsoft.Build.Internal
                 propertyInfo = xmlReaderType.GetProperty("Normalization", bindingFlags);
                 _normalizationPropertyInfo = propertyInfo;
             }
+
             return propertyInfo;
         }
 
@@ -95,18 +103,18 @@ namespace Microsoft.Build.Internal
         {
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
 
-            XmlReader reader;
+            XmlReader reader = null;
             if (loadAsReadOnly && !_disableReadOnlyLoad)
             {
                 // Create an XML reader with IgnoreComments and IgnoreWhitespace set if we know that we won't be asked
                 // to write the DOM back to a file. This is a performance optimization.
-                XmlReaderSettings xrs = new XmlReaderSettings
+                XmlReaderSettings settings = new XmlReaderSettings
                 {
                     DtdProcessing = DtdProcessing.Ignore,
                     IgnoreComments = true,
                     IgnoreWhitespace = true,
                 };
-                reader = XmlReader.Create(input, xrs, uri);
+                reader = XmlReader.Create(input, settings, uri);
 
                 // Try to set Normalization to false. We do this to remain compatible with earlier versions of MSBuild
                 // where we constructed the reader with 'new XmlTextReader()' which has normalization enabled by default.
@@ -122,10 +130,11 @@ namespace Microsoft.Build.Internal
                     _disableReadOnlyLoad = true;
 
                     reader.Dispose();
-                    reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
+                    reader = null;
                 }
             }
-            else
+
+            if (reader == null)
             {
                 reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
             }
