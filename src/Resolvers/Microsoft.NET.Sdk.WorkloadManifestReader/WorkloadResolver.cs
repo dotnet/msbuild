@@ -141,7 +141,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 pack.Id.ToString(),
                 pack.Version,
                 pack.Kind,
-                aliasedPath
+                aliasedPath,
+                pack.IsAlias ? pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers)?.ToString() : pack.Id.ToString()
             );
 
         private bool PackExists (string packPath, WorkloadPackKind packKind)
@@ -352,12 +353,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public class PackInfo
         {
-            public PackInfo(string id, string version, WorkloadPackKind kind, string path)
+            public PackInfo(string id, string version, WorkloadPackKind kind, string path, string? aliasedPackageId)
             {
                 Id = id;
                 Version = version;
                 Kind = kind;
                 Path = path;
+                AliasedPackageId = aliasedPackageId;
             }
 
             public string Id { get; }
@@ -365,6 +367,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             public string Version { get; }
 
             public WorkloadPackKind Kind { get; }
+
+            public string? AliasedPackageId { get; }
 
             /// <summary>
             /// Path to the pack. If it's a template or library pack, <see cref="IsStillPacked"/> will be <code>true</code> and this will be a path to the <code>nupkg</code>,
