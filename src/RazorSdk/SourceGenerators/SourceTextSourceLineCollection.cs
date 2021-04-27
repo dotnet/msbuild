@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         internal override SourceLocation GetLocation(int position)
         {
             var line = _textLines.GetLineFromPosition(position);
-            return new SourceLocation(_filePath, position, line.LineNumber, position);
+            return new SourceLocation(_filePath, position, line.LineNumber, position - line.Start);
         }
     }
 }
