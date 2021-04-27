@@ -3106,10 +3106,10 @@ namespace Microsoft.Build.Tasks
             _appConfigFile = _concurrencyExecutionContext.GetFullPath(_appConfigFile);
             _stateFile = _concurrencyExecutionContext.GetFullPath(_stateFile);
 
+            // Note: it is said that _installedAssemblyTables, _installedAssemblySubsetTables, _fullFrameworkAssemblyTables is a list of XML files. _installedAssemblyTables[i].ItemSpec is passed to XmlReader.
+            // Code itself does not prohibit _installedAssemblyTables[i].ItemSpec to be an URL, however, it does not seem as we need to support the file on web.
             for (int i = 0; i < _installedAssemblyTables.Length; i++)
             {
-                // Note: it is said that _installedAssemblyTables is a list of XML files. _installedAssemblyTables[i].ItemSpec is passed to XmlReader.
-                // Code itself does not prohibit _installedAssemblyTables[i].ItemSpec to be an URL, however, it does not seem as we need to support the file on web.
                 _installedAssemblyTables[i].ItemSpec = _concurrencyExecutionContext.GetFullPath(_installedAssemblyTables[i].ItemSpec);
             }
 
