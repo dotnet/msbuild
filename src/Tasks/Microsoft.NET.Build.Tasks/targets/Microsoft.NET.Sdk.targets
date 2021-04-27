@@ -1044,6 +1044,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <AdditionalTargetFrameworkInfoProperty Include="SelfContained"/>
     <AdditionalTargetFrameworkInfoProperty Include="_IsExecutable"/>
+    <AdditionalTargetFrameworkInfoProperty Include="ShouldBeValidatedAsExecutableReference"/>
   </ItemGroup>
 
   <UsingTask TaskName="ValidateExecutableReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

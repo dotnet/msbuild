@@ -47,10 +47,11 @@ namespace Microsoft.NET.Build.Tasks
                     projectAdditionalProperties[propertyElement.Name.LocalName] = propertyElement.Value;
                 }
 
+                var shouldBeValidatedAsExecutableReference = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["ShouldBeValidatedAsExecutableReference"], true);
                 var referencedProjectIsExecutable = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_IsExecutable"]);
                 var referencedProjectIsSelfContained = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["SelfContained"]);
 
-                if (referencedProjectIsExecutable)
+                if (referencedProjectIsExecutable && shouldBeValidatedAsExecutableReference)
                 {
                     if (SelfContained && !referencedProjectIsSelfContained)
                     {
