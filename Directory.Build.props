@@ -37,9 +37,10 @@
         you don't get those defaults.
         NU5125: Arcade uses licenseUrl when doing pack, which now causes NU5125 warning. This disables that warning until arcade can switch over.
         SYSLIB0011: Removing binary formatter will happen as part of a larger .NET-wide effort.
+        CA1416: False positives due to changes in OS-detection patterns https://github.com/dotnet/msbuild/issues/6376
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702;SYSLIB0011</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702;SYSLIB0011;CA1416</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
