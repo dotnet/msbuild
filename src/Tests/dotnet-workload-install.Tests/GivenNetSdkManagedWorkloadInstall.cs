@@ -18,6 +18,7 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -106,7 +107,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void GivenManagedInstallItCanInstallDirectoryPacks()
         {
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
-            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk");
             var version = "6.0.100";
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
@@ -126,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void GivenManagedInstallItCanInstallSingleFilePacks()
         {
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
-            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Template, Path.Combine(dotnetRoot, "template-packs", "Xamarin.Android.Sdk.8.4.7.nupkg"));
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Template, Path.Combine(dotnetRoot, "template-packs", "Xamarin.Android.Sdk.8.4.7.nupkg"), "Xamarin.Android.Sdk");
             var version = "6.0.100";
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
@@ -141,10 +142,34 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         [Fact]
+        public void GivenManagedInstallItCanInstallPacksWithAliases()
+        {
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
+            var alias = "Xamarin.Android.BuildTools.Alias";
+            var packInfo = new PackInfo("Xamarin.Android.BuildTools", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.BuildTools", "8.4.7"), alias);
+            var version = "6.0.100";
+            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
+
+            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(1);
+            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(alias), new NuGetVersion(packInfo.Version)));
+        }
+
+        [Fact]
+        public void GivenManagedInstallItIgnoresAliasedPacksWithNoAliasForThisOs()
+        {
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
+            var packInfo = new PackInfo("Xamarin.Android.BuildTools", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.BuildTools", "8.4.7"), null);
+            var version = "6.0.100";
+            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
+
+            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(0);
+        }
+
+        [Fact]
         public void GivenManagedInstallItDetectsInstalledPacks()
         {
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
-            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk");
             var version = "6.0.100";
 
             // Mock installing the pack
@@ -160,7 +185,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var version = "6.0.100";
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller(failingInstaller: true);
-            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"));
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk");
             
             var exceptionThrown = Assert.Throws<Exception>(() => installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version)));
             exceptionThrown.Message.Should().Be("Test Failure");
@@ -177,8 +202,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var (dotnetRoot, installer, _) = GetTestInstaller();
             var packs = new PackInfo[]
             {
-                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7")),
-                new PackInfo("Xamarin.Android.Framework", "8.4", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.4"))
+                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk"),
+                new PackInfo("Xamarin.Android.Framework", "8.4", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.4"), "Xamarin.Android.Framework")
             };
             var sdkVersions = new string[] { "6.0.100", "6.0.300" };
 
@@ -218,13 +243,13 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var (dotnetRoot, installer, _) = GetTestInstaller();
             var packs = new PackInfo[]
             {
-                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7")),
-                new PackInfo("Xamarin.Android.Framework", "8.4", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.4"))
+                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Library, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk"),
+                new PackInfo("Xamarin.Android.Framework", "8.4", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.4"), "Xamarin.Android.Framework")
             };
             var packsToBeGarbageCollected = new PackInfo[]
             {
-                new PackInfo("Test.Pack.A", "1.0", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Test.Pack.A", "1.0")),
-                new PackInfo("Test.Pack.B", "2.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Test.Pack.B", "2.0")),
+                new PackInfo("Test.Pack.A", "1.0", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Test.Pack.A", "1.0"), "Test.Pack.A"),
+                new PackInfo("Test.Pack.B", "2.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Test.Pack.B", "2.0"), "Test.Pack.B"),
             };
             var sdkVersions = new string[] { "6.0.100", "6.0.300" };
 

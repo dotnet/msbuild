@@ -85,9 +85,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 TransactionalAction.Run(
                     action: () =>
                     {
-                        if (!PackIsInstalled(packInfo))
+                        if (!PackIsInstalled(packInfo) && packInfo.AliasedPackageId != null)
                         {
-                            var packagePath = _nugetPackageInstaller.DownloadPackageAsync(new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)).Result;
+                            var packagePath = _nugetPackageInstaller.DownloadPackageAsync(new PackageId(packInfo.AliasedPackageId), new NuGetVersion(packInfo.Version)).Result;
                             tempFilesToDelete.Add(packagePath);
 
                             if (!Directory.Exists(Path.GetDirectoryName(packInfo.Path)))
