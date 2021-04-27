@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Internal
 {
@@ -104,7 +105,7 @@ namespace Microsoft.Build.Internal
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
 
             XmlReader reader = null;
-            if (loadAsReadOnly && !_disableReadOnlyLoad)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0) && loadAsReadOnly && !_disableReadOnlyLoad)
             {
                 // Create an XML reader with IgnoreComments and IgnoreWhitespace set if we know that we won't be asked
                 // to write the DOM back to a file. This is a performance optimization.
