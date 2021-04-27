@@ -621,7 +621,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1129: "}</comment>
   </data>
   <data name="WinMDReferenceNotSupportedOnTargetFramework" xml:space="preserve">
-    <value>NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</value>
+     <value>NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</value>
     <comment>{StrBegin="NETSDK1130: "}</comment>
   </data>
   <data name="WinMDObjNotSupportedOnTargetFramework" xml:space="preserve">
@@ -775,15 +775,15 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1167: "}</comment>
   </data>
   <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
-    <value>NETSDK1168: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
-    <comment>{StrBegin="NETSDK1168: "}</comment>
+    <value>NETSDK1167: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
+    <comment>{StrBegin="NETSDK1167: "}</comment>
   </data>
   <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
-    <value>NETSDK1169: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
-    <comment>{StrBegin="NETSDK1169: "}</comment>
+    <value>NETSDK1167: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
+    <comment>{StrBegin="NETSDK1167: "}</comment>
   </data>
   <data name="TrimmingWpfIsNotSupported" xml:space="preserve">
-    <value>NETSDK1170: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
-    <comment>{StrBegin="NETSDK1170: "}</comment>
+    <value>NETSDK1168: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
+    <comment>{StrBegin="NETSDK1168: "}</comment>
   </data>
 </root>

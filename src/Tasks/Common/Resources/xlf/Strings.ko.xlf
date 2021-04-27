@@ -218,9 +218,9 @@
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
-        <source>NETSDK1168: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="new">NETSDK1168: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
-        <note>{StrBegin="NETSDK1168: "}</note>
+        <source>NETSDK1167: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="new">NETSDK1167: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
+        <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
@@ -731,14 +731,14 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
-        <source>NETSDK1169: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
-        <target state="new">NETSDK1169: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</target>
-        <note>{StrBegin="NETSDK1169: "}</note>
+        <source>NETSDK1167: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
+        <target state="new">NETSDK1167: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</target>
+        <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWpfIsNotSupported">
-        <source>NETSDK1170: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
-        <target state="new">NETSDK1170: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
-        <note>{StrBegin="NETSDK1170: "}</note>
+        <source>NETSDK1168: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
+        <target state="new">NETSDK1168: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
+        <note>{StrBegin="NETSDK1168: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
@@ -816,8 +816,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1131: "}</note>
       </trans-unit>
       <trans-unit id="WinMDReferenceNotSupportedOnTargetFramework">
-        <source>NETSDK1130: Referencing a Windows Metadata component directly when targeting {0} is not supported. Use the C#/WinRT projection tool (https://aka.ms/cswinrt) or a provided projection for this target.</source>
-        <target state="translated">NETSDK1130: {0}을(를) 대상으로 지정하는 경우 Windows 메타데이터 구성 요소를 직접 참조하는 것은 지원되지 않습니다. C#/WinRT 프로젝션 도구(https://aka.ms/cswinrt) 또는 이 대상에 대해 제공된 프로젝션을 사용하세요.</target>
+        <source>NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</source>
+        <target state="new">NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</target>
         <note>{StrBegin="NETSDK1130: "}</note>
       </trans-unit>
       <trans-unit id="WinMDTransitiveReferenceNotSupported">
