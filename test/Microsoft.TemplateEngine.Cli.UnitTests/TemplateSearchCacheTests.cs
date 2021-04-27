@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,6 +35,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
         private static readonly ITemplateInfo _fooOneTemplate =
             new MockTemplateInfo("foo1", name: "MockFooTemplateOne", identity: "Mock.Foo.1", groupIdentity: "Mock.Foo", author: "TestAuthor")
+                .WithClassifications("CSharp", "Library")
                 .WithDescription("Mock Foo template one")
                 .WithTag("Framework", "netcoreapp3.0", "netcoreapp3.1")
                 .WithTag("language", "C#")
@@ -40,17 +43,20 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
         private static readonly ITemplateInfo _fooTwoTemplate =
             new MockTemplateInfo("foo2", name: "MockFooTemplateTwo", identity: "Mock.Foo.2", groupIdentity: "Mock.Foo")
+                .WithClassifications("CSharp", "Console")
                 .WithDescription("Mock Foo template two")
                 .WithTag("Framework", "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1")
                 .WithTag("language", "C#");
 
         private static readonly ITemplateInfo _barCSharpTemplate =
             new MockTemplateInfo("barC", name: "MockBarCsharpTemplate", identity: "Mock.Bar.1.Csharp", groupIdentity: "Mock.Bar")
+                .WithClassifications("CSharp")
                 .WithDescription("Mock Bar CSharp template")
                 .WithTag("language", "C#");
 
         private static readonly ITemplateInfo _barFSharpTemplate =
             new MockTemplateInfo("barF", name: "MockBarFSharpTemplate", identity: "Mock.Bar.1.FSharp", groupIdentity: "Mock.Bar")
+                .WithClassifications("FSharp")
                 .WithDescription("Mock Bar FSharp template")
                 .WithTag("language", "F#");
 
@@ -222,6 +228,36 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Assert.Equal(1, searchResults.MatchesBySource.Count);
                 Assert.Equal(packMatchCount, searchResults.MatchesBySource[0].PacksWithMatches.Count);
                 Assert.Equal(templateMatchCount, searchResults.MatchesBySource[0].PacksWithMatches[_packThreeInfo].TemplateMatches.Count);
+            }
+        }
+
+        [Theory(DisplayName = nameof(CacheSearchTagFilterTest))]
+        [InlineData("", "CSharp", 3, 3)]
+        [InlineData("bar", "FSharp", 1, 1)]
+        [InlineData("foo", "Library", 1, 1)]
+        [InlineData("", "Wrong", 0, 0)]
+        [InlineData("", "Lib", 0, 0)]
+        public async Task CacheSearchTagFilterTest(string commandTemplate, string commandTag, int packMatchCount, int templateMatchCount)
+        {
+            TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
+            MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
+            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+
+            MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--tag", commandTag);
+
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+
+            Assert.True(searchResults.AnySources);
+            if (packMatchCount == 0)
+            {
+                Assert.Equal(0, searchResults.MatchesBySource.Count);
+            }
+            else
+            {
+                Assert.Equal(1, searchResults.MatchesBySource.Count);
+                Assert.Equal(packMatchCount, searchResults.MatchesBySource[0].PacksWithMatches.Count);
+                Assert.Equal(templateMatchCount, searchResults.MatchesBySource[0].PacksWithMatches.Sum(pack => pack.Value.TemplateMatches.Count));
             }
         }
 
