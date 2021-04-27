@@ -92,6 +92,14 @@ namespace Microsoft.DotNet.Cli
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
         public static Option DebugOption() => new Option<bool>("--debug");
+
+        public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
+        {
+            return verbosity.Equals(VerbosityOptions.diag) ||
+                verbosity.Equals(VerbosityOptions.diagnostic) ||
+                verbosity.Equals(VerbosityOptions.d) ||
+                verbosity.Equals(VerbosityOptions.detailed);
+        }
     }
 
     public enum VerbosityOptions

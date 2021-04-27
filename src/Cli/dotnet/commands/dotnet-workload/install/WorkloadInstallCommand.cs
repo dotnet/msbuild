@@ -27,6 +27,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly bool _skipManifestUpdate;
         private readonly string _fromCacheOption;
         private readonly bool _printDownloadLinkOnly;
+        private readonly VerbosityOptions _verbosity;
         private readonly IReadOnlyCollection<string> _workloadIds; 
         private readonly IInstaller _workloadInstaller;
         private readonly IWorkloadResolver _workloadResolver;
@@ -48,13 +49,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _printDownloadLinkOnly = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
             _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
+            _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
             _sdkVersion = new ReleaseVersion(version ?? Product.Version);
 
             var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver);
+            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity);
         }
 
         public override int Execute()
@@ -118,7 +120,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             else
             {
-                InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate);
+                try
+                {
+                    InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate);
+                }
+                catch(Exception e)
+                {
+                    // Don't show entire stack trace
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
+                }
             }
 
             return 0;
@@ -187,16 +197,26 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     },
                     rollback: () => {
-                        foreach (var packId in workloadPackToInstall)
+                        try
                         {
-                            installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
+                            _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+                            foreach (var packId in workloadPackToInstall)
+                            {
+                                installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
+                            }
+
+                            foreach (var workloadId in workloadIds)
+                            {
+                                _workloadInstaller.GetWorkloadInstallationRecordRepository()
+                                    .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            // Don't hide the original error if roll back fails
+                            _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
                         }
 
-                        foreach (var workloadId in workloadIds)
-                        {
-                            _workloadInstaller.GetWorkloadInstallationRecordRepository()
-                                .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
-                        }
                     });
             }
             else

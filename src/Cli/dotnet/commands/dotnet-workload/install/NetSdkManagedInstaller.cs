@@ -15,6 +15,7 @@ using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using NuGet.Common;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -35,11 +36,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader = null,
-            string dotnetDir =  null)
+            string dotnetDir =  null,
+            VerbosityOptions verbosity = VerbosityOptions.normal)
         {
             _dotnetDir = dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory();
             _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
-            _nugetPackageInstaller = nugetPackageDownloader ?? new NuGetPackageDownloader(_tempPackagesDir);
+            _nugetPackageInstaller = nugetPackageDownloader ?? 
+                new NuGetPackageDownloader(_tempPackagesDir, verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger());
             _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;
@@ -114,7 +117,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         WritePackInstallationRecord(packInfo, sdkFeatureBand);
                     },
                     rollback: () => {
-                        RollBackWorkloadPackInstall(packInfo, sdkFeatureBand);
+                        try
+                        {
+                            _reporter.WriteLine(string.Format(LocalizableStrings.RollingBackPackInstall, packInfo.Id));
+                            RollBackWorkloadPackInstall(packInfo, sdkFeatureBand);
+                        }
+                        catch (Exception e)
+                        {
+                            // Don't hide the original error if roll back fails
+                            _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
+                        }
                     });
             }
             finally
@@ -230,6 +242,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             if (PackIsInstalled(packInfo))
             {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
                 if (IsSingleFilePack(packInfo))
                 {
                     File.Delete(packInfo.Path);
@@ -260,11 +274,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             File.Create(path);
         }
 
-        private void DeletePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand) 
+        private void DeletePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand)
         {
             var packInstallRecord = GetPackInstallRecordPath(packInfo, featureBand);
             if (File.Exists(packInstallRecord))
             {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
                 File.Delete(packInstallRecord);
 
                 var packRecordVersionDir = Path.GetDirectoryName(packInstallRecord);
