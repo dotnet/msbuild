@@ -192,12 +192,18 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
 
         [Flags]
-        public enum ExceptionLocations
+        public enum ErrorLocations
         {
             Constructor = 1 << 0,
             BeginBuildAsync = 1 << 1,
             GetCacheResultAsync = 1 << 2,
             EndBuildAsync = 1 << 3
+        }
+
+        public enum ErrorKind
+        {
+            Exception,
+            LoggedError
         }
 
         public class InstanceMockCache : ProjectCachePluginBase
@@ -791,27 +797,31 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             get
             {
-                yield return new object[]{ExceptionLocations.Constructor};
+                // Plugin constructors cannot log errors, they can only throw exceptions.
+                yield return new object[] { ErrorLocations.Constructor, ErrorKind.Exception };
 
-                yield return new object[]{ExceptionLocations.BeginBuildAsync};
-                yield return new object[]{ExceptionLocations.BeginBuildAsync | ExceptionLocations.GetCacheResultAsync};
-                yield return new object[]{ExceptionLocations.BeginBuildAsync | ExceptionLocations.GetCacheResultAsync | ExceptionLocations.EndBuildAsync};
-                yield return new object[]{ExceptionLocations.BeginBuildAsync | ExceptionLocations.EndBuildAsync};
+                foreach (var errorKind in new[]{ErrorKind.Exception, ErrorKind.LoggedError})
+                {
+                    yield return new object[] { ErrorLocations.BeginBuildAsync, errorKind };
+                    yield return new object[] { ErrorLocations.BeginBuildAsync | ErrorLocations.GetCacheResultAsync, errorKind };
+                    yield return new object[] { ErrorLocations.BeginBuildAsync | ErrorLocations.GetCacheResultAsync | ErrorLocations.EndBuildAsync, errorKind };
+                    yield return new object[] { ErrorLocations.BeginBuildAsync | ErrorLocations.EndBuildAsync, errorKind };
 
-                yield return new object[]{ExceptionLocations.GetCacheResultAsync};
-                yield return new object[]{ExceptionLocations.GetCacheResultAsync | ExceptionLocations.EndBuildAsync};
+                    yield return new object[] { ErrorLocations.GetCacheResultAsync, errorKind };
+                    yield return new object[] { ErrorLocations.GetCacheResultAsync | ErrorLocations.EndBuildAsync, errorKind };
 
-                yield return new object[]{ExceptionLocations.EndBuildAsync};
+                    yield return new object[] { ErrorLocations.EndBuildAsync, errorKind };
+                }
             }
         }
 
         [Theory]
         [MemberData(nameof(CacheExceptionLocationsTestData))]
-        public void EngineShouldHandleExceptionsFromCachePluginViaBuildParameters(ExceptionLocations exceptionLocations)
+        public void EngineShouldHandleExceptionsFromCachePluginViaBuildParameters(ErrorLocations errorLocations, ErrorKind errorKind)
         {
             _env.DoNotLaunchDebugger();
 
-            SetEnvironmentForExceptionLocations(exceptionLocations);
+            SetEnvironmentForErrorLocations(errorLocations, errorKind.ToString());
 
             var project = _env.CreateFile("1.proj", @$"
                     <Project>
@@ -842,36 +852,59 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // Plugin construction, initialization, and query all end up throwing in BuildManager.ExecuteSubmission and thus
                 // mark the submission as failed with exception.
                 var exceptionsThatEndUpInBuildResult =
-                    ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync | ExceptionLocations.GetCacheResultAsync;
+                    ErrorLocations.Constructor | ErrorLocations.BeginBuildAsync | ErrorLocations.GetCacheResultAsync;
 
-                if ((exceptionsThatEndUpInBuildResult & exceptionLocations) != 0)
+                if ((exceptionsThatEndUpInBuildResult & errorLocations) != 0)
                 {
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-                    buildResult.Exception.Message.ShouldContain("Cache plugin exception from");
+                    buildResult.Exception.ShouldNotBeNull();
+                    buildResult.Exception.ShouldBeOfType<ProjectCacheException>();
+
+                    if (errorKind == ErrorKind.Exception)
+                    {
+                        buildResult.Exception.InnerException!.ShouldNotBeNull();
+                        buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from");
+                    }
+                    else
+                    {
+                        buildResult.Exception.InnerException.ShouldBeNull();
+                    }
                 }
 
                 // BuildManager.EndBuild calls plugin.EndBuild, so if only plugin.EndBuild fails it means everything else passed,
                 // so the build submission should be successful.
-                if (exceptionLocations == ExceptionLocations.EndBuildAsync)
+                if (errorLocations == ErrorLocations.EndBuildAsync)
                 {
                     buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+                else
+                {
+                    buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
                 }
             }
             finally
             {
                 // These exceptions prevent the creation of a plugin so there's no plugin to shutdown.
-                var exceptionsThatPreventEndBuildFromThrowing = ExceptionLocations.Constructor |
-                                                                ExceptionLocations.BeginBuildAsync;
+                var exceptionsThatPreventEndBuildFromThrowing = ErrorLocations.Constructor |
+                                                                ErrorLocations.BeginBuildAsync;
 
-                if ((exceptionLocations & exceptionsThatPreventEndBuildFromThrowing) != 0 ||
-                    !exceptionLocations.HasFlag(ExceptionLocations.EndBuildAsync))
+                if ((errorLocations & exceptionsThatPreventEndBuildFromThrowing) != 0 ||
+                    !errorLocations.HasFlag(ErrorLocations.EndBuildAsync))
                 {
                     Should.NotThrow(() => buildSession!.Dispose());
                 }
-                else if (exceptionLocations.HasFlag(ExceptionLocations.EndBuildAsync))
+                else if (errorLocations.HasFlag(ErrorLocations.EndBuildAsync))
                 {
-                    var e = Should.Throw<Exception>(() => buildSession!.Dispose());
-                    e.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
+                    var e = Should.Throw<ProjectCacheException>(() => buildSession!.Dispose());
+
+                    if (errorKind == ErrorKind.Exception)
+                    {
+                        e.InnerException!.ShouldNotBeNull();
+                        e.InnerException!.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
+                    }
+                    else
+                    {
+                        e.InnerException.ShouldBeNull();
+                    }
                 }
                 else
                 {
@@ -882,9 +915,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             logger.BuildFinishedEvents.First().Succeeded.ShouldBeFalse();
 
             // Plugin query must happen after plugin init. So if plugin init fails, then the plugin should not get queried.
-            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync;
+            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ErrorLocations.Constructor | ErrorLocations.BeginBuildAsync;
 
-            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & exceptionLocations) != 0)
+            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & errorLocations) != 0)
             {
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: GetCacheResultAsync for");
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: EndBuildAsync");
@@ -895,17 +928,21 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 StringShouldContainSubstring(logger.FullLog, $"{AssemblyMockCache}: EndBuildAsync", expectedOccurrences: 1);
             }
 
-            // TODO: this ain't right now is it?
-            logger.FullLog.ShouldNotContain("Cache plugin exception");
+            logger.FullLog.ShouldNotContain("Cache plugin exception from");
+
+            if (errorKind == ErrorKind.LoggedError)
+            {
+                logger.FullLog.ShouldContain("Cache plugin logged error from");
+            }
         }
 
         [Theory]
         [MemberData(nameof(CacheExceptionLocationsTestData))]
-        public void EngineShouldHandleExceptionsFromCachePluginViaGraphBuild(ExceptionLocations exceptionLocations)
+        public void EngineShouldHandleExceptionsFromCachePluginViaGraphBuild(ErrorLocations errorLocations, ErrorKind errorKind)
         {
             _env.DoNotLaunchDebugger();
 
-            SetEnvironmentForExceptionLocations(exceptionLocations);
+            SetEnvironmentForErrorLocations(errorLocations, errorKind.ToString());
 
             var graph = Helpers.CreateProjectGraph(
                 _env,
@@ -945,10 +982,21 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 // Static graph build initializes and tears down the cache plugin so all cache plugin exceptions should end up in the GraphBuildResult
                 buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-                buildResult.Exception.Message.ShouldContain("Cache plugin exception from");
 
-                // TODO: this ain't right now is it?
-                logger.FullLog.ShouldNotContain("Cache plugin exception");
+                buildResult.Exception.ShouldBeOfType<ProjectCacheException>();
+
+                if (errorKind == ErrorKind.Exception)
+                {
+                    buildResult.Exception.InnerException!.ShouldNotBeNull();
+                    buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from");
+                }
+
+                logger.FullLog.ShouldNotContain("Cache plugin exception from");
+
+                if (errorKind == ErrorKind.LoggedError)
+                {
+                    logger.FullLog.ShouldContain("Cache plugin logged error from");
+                }
             }
             finally
             {
@@ -958,9 +1006,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             logger.BuildFinishedEvents.First().Succeeded.ShouldBeFalse();
 
-            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ExceptionLocations.Constructor | ExceptionLocations.BeginBuildAsync;
+            var exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ErrorLocations.Constructor | ErrorLocations.BeginBuildAsync;
 
-            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & exceptionLocations) != 0)
+            if ((exceptionsThatShouldPreventCacheQueryAndEndBuildAsync & errorLocations) != 0)
             {
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: GetCacheResultAsync for");
                 logger.FullLog.ShouldNotContain($"{AssemblyMockCache}: EndBuildAsync");
@@ -968,7 +1016,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             else
             {
                 // There's two projects, so there should be two cache queries logged ... unless a cache queries throws an exception. That ends the build.
-                var expectedQueryOccurrences = exceptionLocations.HasFlag(ExceptionLocations.GetCacheResultAsync)
+                var expectedQueryOccurrences = errorLocations.HasFlag(ErrorLocations.GetCacheResultAsync)
                     ? 1
                     : 2;
 
@@ -995,7 +1043,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         </Target>
                     </Project>".Cleanup());
 
-            SetEnvironmentForExceptionLocations(ExceptionLocations.EndBuildAsync);
+            SetEnvironmentForErrorLocations(ErrorLocations.EndBuildAsync, ErrorKind.Exception.ToString());
 
             using var buildSession = new Helpers.BuildManagerSession(
                 _env,
@@ -1014,7 +1062,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 });
 
             buildResult!.OverallResult.ShouldBe(BuildResultCode.Failure);
-            buildResult.Exception.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
+            buildResult.Exception.InnerException!.ShouldNotBeNull();
+            buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
 
             buildSession.Dispose();
 
@@ -1027,15 +1076,15 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             Regex.Matches(aString, substring).Count.ShouldBe(expectedOccurrences);
         }
 
-        private void SetEnvironmentForExceptionLocations(ExceptionLocations exceptionLocations)
+        private void SetEnvironmentForErrorLocations(ErrorLocations errorLocations, string errorKind)
         {
-            foreach (var enumValue in Enum.GetValues(typeof(ExceptionLocations)))
+            foreach (var enumValue in Enum.GetValues(typeof(ErrorLocations)))
             {
-                var typedValue = (ExceptionLocations) enumValue;
-                if (exceptionLocations.HasFlag(typedValue))
+                var typedValue = (ErrorLocations) enumValue;
+                if (errorLocations.HasFlag(typedValue))
                 {
                     var exceptionLocation = typedValue.ToString();
-                    _env.SetEnvironmentVariable(exceptionLocation, "1");
+                    _env.SetEnvironmentVariable(exceptionLocation, errorKind);
                     _output.WriteLine($"Set exception location: {exceptionLocation}");
                 }
             }
