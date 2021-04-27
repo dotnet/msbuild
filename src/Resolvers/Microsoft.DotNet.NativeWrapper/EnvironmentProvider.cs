@@ -41,7 +41,8 @@ namespace Microsoft.DotNet.NativeWrapper
                     searchPaths.AddRange(
                         _getEnvironmentVariable("PATH")
                         .Split(Path.PathSeparator)
-                        .Select(p => p.Trim('"')));
+                        .Select(p => p.Trim('"'))
+                        .Where(p => !string.IsNullOrWhiteSpace(p)));
 
                     _searchPaths = searchPaths;
                 }
@@ -78,7 +79,7 @@ namespace Microsoft.DotNet.NativeWrapper
                 dotnetExe = Interop.Unix.realpath(dotnetExe) ?? dotnetExe;
             }
 
-            if (dotnetExe == null)
+            if (string.IsNullOrWhiteSpace(dotnetExe))
             {
                 dotnetExe = Process.GetCurrentProcess().MainModule.FileName;
             }
