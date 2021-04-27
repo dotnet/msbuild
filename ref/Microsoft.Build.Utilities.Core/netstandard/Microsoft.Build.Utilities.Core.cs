@@ -434,5 +434,7 @@ namespace Microsoft.Build.Utilities
         Version140 = 3,
         Version150 = 4,
         VersionLatest = 4,
+        Version160 = 5,
+        Version170 = 6,
     }
 }

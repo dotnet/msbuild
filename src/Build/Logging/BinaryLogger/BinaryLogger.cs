@@ -164,11 +164,24 @@ namespace Microsoft.Build.Logging
             binaryWriter = new BinaryWriter(stream);
             eventArgsWriter = new BuildEventArgsWriter(binaryWriter);
 
+            if (projectImportsCollector != null)
+            {
+                eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
+            }
+
             binaryWriter.Write(FileFormatVersion);
 
             LogInitialInfo();
 
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+        }
+
+        private void EventArgsWriter_EmbedFile(string filePath)
+        {
+            if (projectImportsCollector != null)
+            {
+                projectImportsCollector.AddFile(filePath);
+            }
         }
 
         private void LogInitialInfo()

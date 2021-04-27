@@ -14,14 +14,14 @@ namespace MockCacheFromAssembly
     {
         public AssemblyMockCache()
         {
-            ThrowFrom("Constructor");
+            ErrorFrom("Constructor", pluginLoggerBase: null);
         }
 
         public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
         {
             logger.LogMessage($"{nameof(AssemblyMockCache)}: BeginBuildAsync", MessageImportance.High);
 
-            ThrowFrom(nameof(BeginBuildAsync));
+            ErrorFrom(nameof(BeginBuildAsync), logger);
 
             return Task.CompletedTask;
         }
@@ -33,7 +33,7 @@ namespace MockCacheFromAssembly
         {
             logger.LogMessage($"{nameof(AssemblyMockCache)}: GetCacheResultAsync for {buildRequest.ProjectFullPath}", MessageImportance.High);
 
-            ThrowFrom(nameof(GetCacheResultAsync));
+            ErrorFrom(nameof(GetCacheResultAsync), logger);
 
             return Task.FromResult(CacheResult.IndicateNonCacheHit(CacheResultType.CacheNotApplicable));
         }
@@ -42,16 +42,22 @@ namespace MockCacheFromAssembly
         {
             logger.LogMessage($"{nameof(AssemblyMockCache)}: EndBuildAsync", MessageImportance.High);
 
-            ThrowFrom(nameof(EndBuildAsync));
+            ErrorFrom(nameof(EndBuildAsync), logger);
 
             return Task.CompletedTask;
         }
 
-        private static void ThrowFrom(string throwFrom)
+        private static void ErrorFrom(string errorLocation, PluginLoggerBase pluginLoggerBase)
         {
-            if (Environment.GetEnvironmentVariable(throwFrom) != null)
+            var errorKind = Environment.GetEnvironmentVariable(errorLocation);
+
+            switch (errorKind)
             {
-                throw new Exception($"Cache plugin exception from {throwFrom}");
+                case "Exception":
+                    throw new Exception($"Cache plugin exception from {errorLocation}");
+                case "LoggedError":
+                    pluginLoggerBase?.LogError($"Cache plugin logged error from {errorLocation}");
+                    break;
             }
         }
     }

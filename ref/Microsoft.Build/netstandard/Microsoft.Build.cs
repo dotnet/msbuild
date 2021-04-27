@@ -1469,6 +1469,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
         public static Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor FromInstance(Microsoft.Build.Experimental.ProjectCache.ProjectCachePluginBase pluginInstance, System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphEntryPoint> entryPoints, Microsoft.Build.Graph.ProjectGraph projectGraph, System.Collections.Generic.IReadOnlyDictionary<string, string> pluginSettings = null) { throw null; }
         public string GetDetailedDescription() { throw null; }
     }
+    public sealed partial class ProjectCacheException : System.Exception
+    {
+        internal ProjectCacheException() { }
+        public string ErrorCode { get { throw null; } }
+        public bool HasBeenLoggedByProjectCache { get { throw null; } }
+    }
     public abstract partial class ProjectCachePluginBase
     {
         protected ProjectCachePluginBase() { }

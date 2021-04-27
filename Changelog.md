@@ -10,6 +10,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * MSBuild is faster and uses less memory.
 * Binary logs are smaller and have less performance overhead.
 * Tasks can now opt into resource management to improve parallelism in large builds.
+* It's now possible to optionally embed arbitrary files in a binary log.
 
 ### Detailed release notes
 
@@ -18,7 +19,6 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * Projects can now specify `AdditionalTargetFrameworkInfoProperty` items to indicate that referencing projects should get those properties exposed as `AdditionalPropertiesFromProject` metadata on resolved reference items. (#5994).
 * The `Unzip` task now accepts `Include` and `Exclude` arguments to filter what is extracted from the zip file (#6018). Thanks, @IvanLieckens!
 * The `-graph:noBuild` command line argument can be used to validate that a graph is buildable without actually building it (#6016).
-* When building a solution filter, `$(SolutionFilterName)` is now defined (#6171).
 * `TaskParameterEventArgs` allow logging task parameters and values in a compact, structured way (#6155). Thanks, @KirillOsenkov!
 * ClickOnce publish now supports Ready To Run (#6244).
 * .NET 5.0 applications may now specify a toolset configuration file (#6220).
@@ -28,6 +28,8 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * `ProjectEvaluationFinished` now has fields for properties and items (#6287). Thanks, @KirillOsenkov!
 * `WriteCodeFragment` can now write assembly attributes of specified types, and infers some common types (#6285). Thanks, @reduckted!
 * The `-detailedSummary` option now accepts a boolean argument, preventing dumping details to the console logger when building with `-bl -ds:false` (#6338). Thanks, @KirillOsenkov!
+* Binary logs now include files listed in the item `EmbedInBinlog` as well as MSBuild projects (#6339). Thanks, @KirillOsenkov!
+* The `FindInvalidProjectReferences` task is now available in .NET Core/5.0+ scenarios (#6365).
 
 #### Changed
 
@@ -44,6 +46,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * `Log.HasLoggedError` now respects `MSBuildWarningsAsErrors` (#6174).
 * `TargetPath` metadata is now respected on items that copy to output directories, and takes precedence over `Link` (#6237).
 * The `Restore` operation now fails when SDKs are unresolvable or no `Restore` target exists (#6312).
+* `MSBuild.exe.config` now has explicit binding redirects for all assemblies in the MSBuild VSIX (#6334).
 
 #### Fixed
 
@@ -56,15 +59,17 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * Improved error messages when encountering a `BadImageReferenceException` in `ResolveAssemblyReferences` (#6240, #6270). Thanks, @FiniteReality!
 * Escape special characters in `Exec`’s generated batch files, allowing builds as users with some special characters in their Windows username (#6233).
 * Permit comments and trailing commas in solution filter files (#6346).
+* Exceptions thrown from experimental cache plugins are now handled and logged better (#6345, #6368).
 
 #### Infrastructure
 
 * Update to Arcade 5.0 and .NET 5.0 (#5836).
 * The primary development branch is now named `main`.
-* Test robustness improvements (#6055). Thanks, @tmds!
+* Test robustness improvements (#6055, #6336, #6337, #6332). Thanks, @tmds and @KirillOsenkov!
 * Remove unnecessary NuGet package references (#6036). Thanks, @teo-tsirpanis!
 * Correctly mark .NET Framework 3.5 reference assembly package dependency as private (#6214).
 * Our own builds opt into text-based performance logging (#6274).
+* Update to Arcade publishing v3 (#6349).
 
 #### Documentation
 

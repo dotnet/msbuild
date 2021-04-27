@@ -130,29 +130,39 @@ namespace Microsoft.Build.Utilities
     public enum VisualStudioVersion
     {
         /// <summary>
-        /// Visual Studio 2010 and SP1
+        /// Visual Studio 2010 (Dev10) and SP1
         /// </summary>
         Version100,
 
         /// <summary>
-        /// Visual Studio Dev11
+        /// Visual Studio 2012 (Dev11)
         /// </summary>
         Version110,
 
         /// <summary>
-        /// Visual Studio Dev12
+        /// Visual Studio 2013 (Dev12)
         /// </summary>
         Version120,
 
         /// <summary>
-        /// Visual Studio Dev14
+        /// Visual Studio 2015 (Dev14)
         /// </summary>
         Version140,
 
         /// <summary>
-        /// Visual Studio Dev15
+        /// Visual Studio 2017 (Dev15)
         /// </summary>
         Version150,
+
+        /// <summary>
+        /// Visual Studio 2019 (Dev16)
+        /// </summary>
+        Version160,
+
+        /// <summary>
+        /// Visual Studio "Dev17"
+        /// </summary>
+        Version170,
 
         // keep this up-to-date; always point to the last entry.
         /// <summary>
@@ -2052,26 +2062,22 @@ namespace Microsoft.Build.Utilities
 
         private static Version VisualStudioVersionToSystemVersion(VisualStudioVersion version)
         {
-            switch (version)
+            return version switch
             {
-                case VisualStudioVersion.Version100:
-                    return FrameworkLocationHelper.visualStudioVersion100;
+                VisualStudioVersion.Version100 => FrameworkLocationHelper.visualStudioVersion100,
+                VisualStudioVersion.Version110 => FrameworkLocationHelper.visualStudioVersion110,
+                VisualStudioVersion.Version120 => FrameworkLocationHelper.visualStudioVersion120,
+                VisualStudioVersion.Version140 => FrameworkLocationHelper.visualStudioVersion140,
+                VisualStudioVersion.Version150 => FrameworkLocationHelper.visualStudioVersion150,
+                VisualStudioVersion.Version160 => FrameworkLocationHelper.visualStudioVersion160,
+                VisualStudioVersion.Version170 => FrameworkLocationHelper.visualStudioVersion170,
+                _ => Unsupported()
+            };
 
-                case VisualStudioVersion.Version110:
-                    return FrameworkLocationHelper.visualStudioVersion110;
-
-                case VisualStudioVersion.Version120:
-                    return FrameworkLocationHelper.visualStudioVersion120;
-
-                case VisualStudioVersion.Version140:
-                    return FrameworkLocationHelper.visualStudioVersion140;
-
-                case VisualStudioVersion.Version150:
-                    return FrameworkLocationHelper.visualStudioVersion150;
-
-                default:
-                    ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedVisualStudioVersion", version);
-                    return null;
+            Version Unsupported()
+            {
+                ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedVisualStudioVersion", version);
+                return null;
             }
         }
 
@@ -3250,7 +3256,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
         /// <returns>Path string.</returns>
-        public static string GetPathToDotNetFrameworkSdkFile(string fileName) => GetPathToDotNetFrameworkSdkFile(fileName, TargetDotNetFrameworkVersion.Latest);
+        public static string GetPathToDotNetFrameworkSdkFile(string fileName)
+            => GetPathToDotNetFrameworkSdkFile(fileName, TargetDotNetFrameworkVersion.Latest);
 
         /// <summary>
         /// Get a fully qualified path to a file in the .NET Framework SDK. Error if the .NET Framework SDK can't be found.
@@ -3261,7 +3268,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="fileName">File name to locate in the .NET Framework SDK directory</param>
         /// <param name="version">Version of the targeted .NET Framework</param>
         /// <returns>Path string.</returns>
-        public static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version) => GetPathToDotNetFrameworkSdkFile(fileName, version, VisualStudioVersion.VersionLatest);
+        public static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version)
+            => GetPathToDotNetFrameworkSdkFile(fileName, version, VisualStudioVersion.VersionLatest);
 
         /// <summary>
         /// Get a fully qualified path to a file in the .NET Framework SDK. Error if the .NET Framework SDK can't be found.
@@ -3276,7 +3284,7 @@ namespace Microsoft.Build.Utilities
                 version,
                 visualStudioVersion,
                 UtilitiesDotNetFrameworkArchitecture.Current,
-                true /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
+                canFallBackIfNecessary: true /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
             );
 
         /// <summary>
