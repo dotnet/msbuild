@@ -138,9 +138,9 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>"Loading the following project cache plugin:
-    {0}"</source>
-        <target state="translated">"다음 프로젝트 캐시 플러그 인을 로드하는 중:
+        <source>Loading the following project cache plugin:
+    {0}</source>
+        <target state="needs-review-translation">"다음 프로젝트 캐시 플러그 인을 로드하는 중:
     {0}"</target>
         <note />
       </trans-unit>
@@ -217,6 +217,11 @@
       <trans-unit id="OnlyOneCachePluginMustBeSpecified">
         <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
         <target state="translated">MSB4265: 단일 프로젝트 캐시 플러그 인이 지정되어야 하지만, {0}에서 여러 개를 찾았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheException">
+        <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
+        <target state="new">MSB4273: The project cache threw an unhandled exception from the {0} method.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">

@@ -20,7 +20,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     internal class ProjectCacheService
     {
         private readonly BuildManager _buildManager;
-        private readonly PluginLoggerBase _logger;
+        private readonly Func<PluginLoggerBase> _loggerFactory;
         private readonly ProjectCacheDescriptor _projectCacheDescriptor;
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
@@ -28,13 +28,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
             BuildManager buildManager,
-            PluginLoggerBase logger,
+            Func<PluginLoggerBase> loggerFactory,
             ProjectCacheDescriptor projectCacheDescriptor,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             _projectCachePlugin = projectCachePlugin;
             _buildManager = buildManager;
-            _logger = logger;
+            _loggerFactory = loggerFactory;
             _projectCacheDescriptor = projectCacheDescriptor;
             _cancellationToken = cancellationToken;
         }
@@ -49,25 +50,33 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 .ConfigureAwait(false);
 
             // TODO: Detect and use the highest verbosity from all the user defined loggers. That's tricky because right now we can't discern between user set loggers and msbuild's internally added loggers.
-            var logger = new LoggingServiceToPluginLoggerAdapter(LoggerVerbosity.Normal, loggingService);
+            var loggerFactory = new Func<PluginLoggerBase>(() => new LoggingServiceToPluginLoggerAdapter(LoggerVerbosity.Normal, loggingService));
 
-            await plugin.BeginBuildAsync(
-                new CacheContext(
-                    pluginDescriptor.PluginSettings,
-                    new IFileSystemAdapter(FileSystems.Default),
-                    pluginDescriptor.ProjectGraph,
-                    pluginDescriptor.EntryPoints),
-                // TODO: Detect verbosity from logging service.
-                logger,
-                cancellationToken);
+            var logger = loggerFactory();
+
+            try
+            {
+                await plugin.BeginBuildAsync(
+                    new CacheContext(
+                        pluginDescriptor.PluginSettings,
+                        new IFileSystemAdapter(FileSystems.Default),
+                        pluginDescriptor.ProjectGraph,
+                        pluginDescriptor.EntryPoints),
+                    // TODO: Detect verbosity from logging service.
+                    logger,
+                    cancellationToken);
+            }
+            catch (Exception e)
+            {
+                HandlePluginException(e, nameof(ProjectCachePluginBase.BeginBuildAsync));
+            }
 
             if (logger.HasLoggedErrors)
             {
-                throw new Exception(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectCacheInitializationFailed"));
+                ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheInitializationFailed");
             }
 
-            return new ProjectCacheService(plugin, buildManager, logger, pluginDescriptor, cancellationToken);
+            return new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
         }
 
         private static ProjectCachePluginBase GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
@@ -83,9 +92,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             ErrorUtilities.ThrowInternalErrorUnreachable();
 
-#pragma warning disable CS8603 // Possible null reference return.
-            return null;
-#pragma warning restore CS8603 // Possible null reference return.
+            return null!;
         }
 
         private static ProjectCachePluginBase GetPluginInstanceFromType(Type pluginType)
@@ -96,8 +103,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
-                throw e.InnerException;
+                HandlePluginException(e.InnerException, "Constructor");
             }
+
+            return null!;
         }
 
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
@@ -106,7 +115,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             var type = GetTypes<ProjectCachePluginBase>(assembly).FirstOrDefault();
 
-            ErrorUtilities.VerifyThrow(type != null, "NoProjectCachePluginFoundInAssembly", pluginAssemblyPath);
+            if (type == null)
+            {
+                ProjectCacheException.ThrowForMSBuildIssueWithTheProjectCache("NoProjectCachePluginFoundInAssembly", pluginAssemblyPath);
+            }
 
             return type!;
 
@@ -143,16 +155,25 @@ namespace Microsoft.Build.Experimental.ProjectCache
                                    $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
                                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
 
-            _logger.LogMessage(
+            var logger = _loggerFactory();
+
+            logger.LogMessage(
                 "\n====== Querying project cache for project " + queryDescription,
                 MessageImportance.High);
 
-            var cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, _logger, _cancellationToken);
-
-            if (_logger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
+            CacheResult cacheResult = null!;
+            try
             {
-                throw new Exception(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectCacheQueryFailed", queryDescription));
+                cacheResult = await _projectCachePlugin.GetCacheResultAsync(buildRequest, logger, _cancellationToken);
+            }
+            catch (Exception e)
+            {
+                HandlePluginException(e, nameof(ProjectCachePluginBase.GetCacheResultAsync));
+            }
+
+            if (logger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
+            {
+                ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheQueryFailed", queryDescription);
             }
 
             var message = $"Plugin result: {cacheResult.ResultType}.";
@@ -172,7 +193,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     throw new ArgumentOutOfRangeException();
             }
 
-            _logger.LogMessage(
+            logger.LogMessage(
                 message,
                 MessageImportance.High);
 
@@ -181,13 +202,34 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public async Task ShutDown()
         {
-            await _projectCachePlugin.EndBuildAsync(_logger, _cancellationToken);
+            var logger = _loggerFactory();
 
-            if (_logger.HasLoggedErrors)
+            try
             {
-                throw new Exception(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectCacheShutdownFailed"));
+                await _projectCachePlugin.EndBuildAsync(logger, _cancellationToken);
             }
+            catch (Exception e)
+            {
+                HandlePluginException(e, nameof(ProjectCachePluginBase.EndBuildAsync));
+            }
+
+            if (logger.HasLoggedErrors)
+            {
+                ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheShutdownFailed");
+            }
+        }
+
+        private static void HandlePluginException(Exception e, string apiExceptionWasThrownFrom)
+        {
+            if (ExceptionHandling.IsCriticalException(e))
+            {
+                throw e;
+            }
+
+            ProjectCacheException.ThrowAsUnhandledException(
+                e,
+                "ProjectCacheException",
+                apiExceptionWasThrownFrom);
         }
 
         private class LoggingServiceToPluginLoggerAdapter : PluginLoggerBase
