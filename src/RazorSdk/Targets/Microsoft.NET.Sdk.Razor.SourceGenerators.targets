@@ -31,9 +31,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- Configure analyzers -->
     <ItemGroup>
-      <_RazorAnalyzer Include="$(_RazorSdkToolsDirectoryRoot)Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkToolsDirectoryRoot)Microsoft.AspNetCore.Razor.Language.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkToolsDirectoryRoot)Microsoft.CodeAnalysis.Razor.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.AspNetCore.Razor.Language.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.CodeAnalysis.Razor.dll" />
       <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
 
       <Analyzer Include="@(_RazorAnalyzer)" />
