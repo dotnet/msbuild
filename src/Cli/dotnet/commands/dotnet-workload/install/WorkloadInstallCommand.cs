@@ -144,11 +144,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter.WriteLine();
             var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
-            if (!skipManifestUpdate)
-            {
-                throw new NotImplementedException();
-            }
-
             InstallWorkloadsWithInstallRecord(workloadIds, featureBand);
 
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
