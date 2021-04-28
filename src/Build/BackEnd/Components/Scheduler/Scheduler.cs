@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -791,6 +792,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We want to find more work first, and we assign traversals to the in-proc node first, if possible.
                     AssignUnscheduledRequestsByTraversalsFirst(responses, idleNodes);
+
+                    AssignUnscheduledProxyBuildRequestsToInProcNode(responses, idleNodes);
+
                     if (idleNodes.Count == 0)
                     {
                         return;
@@ -973,11 +977,40 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Proxy build requests <see cref="ProxyTargets"/> should be really cheap (only return properties and items) and it's not worth
+        /// paying the IPC cost and re-evaluating them on out of proc nodes (they are guaranteed to be evaluated in the Scheduler process).
+        /// </summary>
+        private void AssignUnscheduledProxyBuildRequestsToInProcNode(List<ScheduleResponse> responses, HashSet<int> idleNodes)
+        {
+            if (idleNodes.Contains(InProcNodeId))
+            {
+                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
+                foreach (SchedulableRequest request in unscheduledRequests)
+                {
+                    if (CanScheduleRequestToNode(request, InProcNodeId))
+                    {
+                        if (IsProxyBuildRequest(request.BuildRequest))
+                        {
+                            AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
+                            idleNodes.Remove(InProcNodeId);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns true if the request is for a traversal project.  Traversals are used to find more work.
         /// </summary>
         private bool IsTraversalRequest(BuildRequest request)
         {
             return _configCache[request.ConfigurationId].IsTraversal;
+        }
+
+        private bool IsProxyBuildRequest(BuildRequest request)
+        {
+            return request.ProxyTargets != null;
         }
 
         /// <summary>
@@ -2053,6 +2086,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             if (IsTraversalRequest(request))
+            {
+                return NodeAffinity.InProc;
+            }
+
+            if (IsProxyBuildRequest(request))
             {
                 return NodeAffinity.InProc;
             }
