@@ -42,6 +42,21 @@
         <target state="needs-review-translation">Целевая платформа для установки инструмента.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RollBackFailedMessage">
+        <source>Installation roll back failed: {0}</source>
+        <target state="new">Installation roll back failed: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackInstall">
+        <source>Workload installation failed, rolling back installed packs...</source>
+        <target state="new">Workload installation failed, rolling back installed packs...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollingBackPackInstall">
+        <source>Rolling back pack {0} installation...</source>
+        <target state="new">Rolling back pack {0} installation...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkipManifestUpdateOptionDescription">
         <source>Skip updating the workload manifests.</source>
         <target state="new">Skip updating the workload manifests.</target>
@@ -113,8 +128,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallationFailed">
-        <source>Workload '{0}' failed to install.</source>
-        <target state="new">Workload '{0}' failed to install.</target>
+        <source>Workload installation failed: {0}</source>
+        <target state="new">Workload installation failed: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadPackAlreadyInstalledMessage">

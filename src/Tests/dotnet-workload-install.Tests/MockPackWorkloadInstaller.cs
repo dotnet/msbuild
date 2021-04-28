@@ -15,10 +15,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
         public bool GarbageCollectionCalled = false;
         public MockInstallationRecordRepository InstallationRecordRepository;
+        public bool FailingRollback;
 
-        public MockPackWorkloadInstaller(string failingWorkload = null)
+        public MockPackWorkloadInstaller(string failingWorkload = null, bool failingRollback = false)
         {
             InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload);
+            FailingRollback = failingRollback;
         }
 
         public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
@@ -28,6 +30,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
         {
+            if (FailingRollback)
+            {
+                throw new Exception("Rollback failure");
+            }
             RolledBackPacks.Add(packInfo);
         }
 
