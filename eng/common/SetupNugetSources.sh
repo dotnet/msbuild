@@ -129,20 +129,6 @@ if [ "$?" == "0" ]; then
     PackageSources+=('dotnet5-internal-transport')
 fi
 
-# Ensure dotnet-tools-internal is in the packageSources if the public dotnet-tools feed is present
-grep -i "<add key=\"dotnet-tools\"" $ConfigFile
-if [ "$?" == "0" ]; then
-    grep -i "<add key=\"dotnet-tools-internal\"" $ConfigFile
-    if [ "$?" != "0" ]; then
-        echo "Adding dotnet-tools-internal to the packageSources."
-        PackageSourcesNodeFooter="</packageSources>"
-        PackageSourceTemplate="${TB}<add key=\"dotnet-tools-internal\" value=\"https://pkgs.dev.azure.com/dnceng/internal/_packaging/dotnet-tools-internal/nuget/v2\" />"
-
-        sed -i.bak "s|$PackageSourcesNodeFooter|$PackageSourceTemplate${NL}$PackageSourcesNodeFooter|" $ConfigFile
-    fi
-    PackageSources+=('dotnet-tools-internal')
-fi
-
 # I want things split line by line
 PrevIFS=$IFS
 IFS=$'\n'
