@@ -65,6 +65,8 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public string ReadAllText(string path) => _baseFileSystem.ReadAllText(path);
 
+        public byte[] ReadAllBytes(string path) => _baseFileSystem.ReadAllBytes(path);
+
         public void SetFileAttributes(string file, FileAttributes attributes) => _baseFileSystem.SetFileAttributes(file, attributes);
 
         public void WriteAllText(string path, string value) => _baseFileSystem.WriteAllText(path, value);
