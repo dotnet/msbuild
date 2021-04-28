@@ -382,7 +382,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             foreach (ITemplateInfo template in templateList)
             {
                 string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
-                    ? template.GroupIdentity
+                    ? template.GroupIdentity!
                     : template.Identity;
 
                 if (!shortNamesByGroup.TryGetValue(effectiveGroupIdentity, out HashSet<string> shortNames))
@@ -399,7 +399,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             foreach (ITemplateInfo template in templateList)
             {
                 string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
-                    ? template.GroupIdentity
+                    ? template.GroupIdentity!
                     : template.Identity;
 
                 templateListWithGroupNames.Add(new TemplateInfoWithGroupShortNames(template, shortNamesByGroup[effectiveGroupIdentity]));
@@ -482,19 +482,19 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 GroupShortNameList = groupShortNameList.ToList();
             }
 
-            public string Author => _parent.Author;
+            public string? Author => _parent.Author;
 
-            public string Description => _parent.Description;
+            public string? Description => _parent.Description;
 
             public IReadOnlyList<string> Classifications => _parent.Classifications;
 
-            public string DefaultName => _parent.DefaultName;
+            public string? DefaultName => _parent.DefaultName;
 
             public string Identity => _parent.Identity;
 
             public Guid GeneratorId => _parent.GeneratorId;
 
-            public string GroupIdentity => _parent.GroupIdentity;
+            public string? GroupIdentity => _parent.GroupIdentity;
 
             public int Precedence => _parent.Precedence;
 
@@ -517,11 +517,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             public string ConfigPlace => _parent.ConfigPlace;
 
-            public string LocaleConfigPlace => _parent.LocaleConfigPlace;
+            public string? LocaleConfigPlace => _parent.LocaleConfigPlace;
 
-            public string HostConfigPlace => _parent.HostConfigPlace;
+            public string? HostConfigPlace => _parent.HostConfigPlace;
 
-            public string ThirdPartyNotices => _parent.ThirdPartyNotices;
+            public string? ThirdPartyNotices => _parent.ThirdPartyNotices;
 
             public IReadOnlyDictionary<string, IBaselineInfo> BaselineInfo => _parent.BaselineInfo;
 

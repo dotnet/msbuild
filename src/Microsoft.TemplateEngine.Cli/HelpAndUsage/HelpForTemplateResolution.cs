@@ -386,7 +386,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     TemplateShortNames = template.Info.ShortNameList,
                     TemplateLanguage = template.Info.GetLanguage(),
                     TemplatePrecedence = template.Info.Precedence,
-                    TemplateAuthor = template.Info.Author,
+                    TemplateAuthor = template.Info.Author ?? string.Empty,
                     TemplatePackage = await template.Info.GetTemplatePackageAsync(environmentSettings).ConfigureAwait(false) as IManagedTemplatePackage
                 });
             }

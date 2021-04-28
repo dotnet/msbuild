@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
                 if (template != null)
                 {
-                    string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
+                    string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity!;
                     if (usedGroupIds.Add(identity))
                     {
                         GenerateUsageForTemplate(template, hostDataLoader, commandName);
@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 int index = rnd.Next(0, templateList.Count - 1);
                 ITemplateInfo template = templateList[index];
-                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
+                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity!;
                 if (usedGroupIds.Add(identity) && !GenerateUsageForTemplate(template, hostDataLoader, commandName))
                 {
                     --i;
