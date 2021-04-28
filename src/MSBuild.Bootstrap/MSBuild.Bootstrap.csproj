@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
-    
+
     <!-- Direct project references needed here to avoid NuGet version conflict errors -->
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
@@ -25,6 +25,9 @@
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
+    <PackageReference Include="Microsoft.DotNet.MSBuildSdkResolver" GeneratePathProperty="true" IncludeAssets="none" />
+    <PackageReference Include="runtime.win-x64.Microsoft.NETCore.DotNetHostResolver" GeneratePathProperty="true" IncludeAssets="none" />
+    <PackageReference Include="runtime.win-x86.Microsoft.NETCore.DotNetHostResolver" GeneratePathProperty="true" IncludeAssets="none" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
