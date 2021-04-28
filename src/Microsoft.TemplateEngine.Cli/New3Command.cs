@@ -402,7 +402,7 @@ namespace Microsoft.TemplateEngine.Cli
             bool reinitFlag = _commandInput.HasDebuggingFlag("--debug:reinit");
             if (reinitFlag)
             {
-                EnvironmentSettings.SettingsLoader.ResetSettings();
+                EnvironmentSettings.SettingsLoader.ResetHostSettings();
             }
 
             if (_commandInput.HasDebuggingFlag("--debug:showconfig"))
