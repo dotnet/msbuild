@@ -15,10 +15,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     public class AddProjectsToSolutionPostActionTests : IClassFixture<EnvironmentSettingsHelper>
     {
         private IEngineEnvironmentSettings _engineEnvironmentSettings;
+
         public AddProjectsToSolutionPostActionTests(EnvironmentSettingsHelper environmentSettingsHelper)
         {
             _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: this.GetType().Name, virtualize: true);
         }
+
         [Fact(DisplayName = nameof(AddProjectToSolutionPostActionFindSolutionFileAtOutputPath))]
         public void AddProjectToSolutionPostActionFindSolutionFileAtOutputPath()
         {

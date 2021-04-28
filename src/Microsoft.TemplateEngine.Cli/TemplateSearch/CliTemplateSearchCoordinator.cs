@@ -176,6 +176,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
 
             internal TemplateGroupTableRow TemplateGroupInfo { get; private set; }
+
             internal long TotalDownloads { get; private set; }
         }
     }

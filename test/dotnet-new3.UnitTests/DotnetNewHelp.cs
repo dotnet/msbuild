@@ -39,6 +39,7 @@ Options:
                                  The supported columns are: language, tags, author, type.
   --columns-all                  Display all columns in --list and --search output.
   --tag <TAG>                    Filters the templates based on the tag. Applies to --search and --list.";
+
         private const string ConsoleHelp =
 @"Console Application (C#)
 Author: Microsoft
@@ -95,6 +96,7 @@ Options:
   --no-restore    If specified, skips the automatic restore of the project on create.
                   bool - Optional                                                    
                   Default: false                                                     ";
+
         #endregion
         private readonly ITestOutputHelper _log;
 

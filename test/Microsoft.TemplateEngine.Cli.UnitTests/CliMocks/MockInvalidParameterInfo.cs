@@ -20,7 +20,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         }
 
         public string InputFormat { get; private set; }
+
         public string SpecifiedValue { get; private set; }
+
         public InvalidParameterInfo.Kind Kind { get; private set; }
 
         public void Deserialize(IXunitSerializationInfo info)

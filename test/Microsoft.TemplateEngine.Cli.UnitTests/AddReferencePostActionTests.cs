@@ -13,6 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     public class AddReferencePostActionTests : IClassFixture<EnvironmentSettingsHelper>
     {
         private IEngineEnvironmentSettings _engineEnvironmentSettings;
+
         public AddReferencePostActionTests(EnvironmentSettingsHelper environmentSettingsHelper)
         {
             _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: this.GetType().Name, virtualize: true);

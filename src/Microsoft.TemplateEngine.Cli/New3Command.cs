@@ -74,8 +74,11 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         internal string TemplateName => _commandInput.TemplateName;
+
         internal string OutputPath => _commandInput.OutputPath;
+
         internal string CommandName { get; }
+
         internal EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
         /// <summary>
@@ -413,6 +416,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             return true;
         }
+
         private void FirstRun(IEngineEnvironmentSettings environmentSettings)
         {
             if (!_commandInput.IsQuietFlagSpecified)

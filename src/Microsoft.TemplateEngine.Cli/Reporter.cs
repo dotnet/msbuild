@@ -23,7 +23,9 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         internal static Reporter Output { get; private set; }
+
         internal static Reporter Error { get; private set; }
+
         internal static Reporter Verbose { get; private set; }
 
         private static bool IsVerbose

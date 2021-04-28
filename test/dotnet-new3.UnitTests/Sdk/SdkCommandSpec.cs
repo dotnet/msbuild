@@ -10,6 +10,7 @@ namespace Microsoft.NET.TestFramework.Commands
     public class SdkCommandSpec
     {
         public string FileName { get; set; }
+
         public List<string> Arguments { get; set; } = new List<string>();
 
         public Dictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();

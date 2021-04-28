@@ -18,14 +18,18 @@ namespace Microsoft.NET.TestFramework.Commands
         }
 
         public ITestOutputHelper Log { get; }
+
         public string WorkingDirectory { get; set; }
+
         public List<string> Arguments { get; set; } = new List<string>();
+
         public List<string> EnvironmentToRemove { get; } = new List<string>();
 
         //  These only work via Execute(), not when using GetProcessStartInfo()
         public Action<string> CommandOutputHandler { get; set; }
 
         public Action<Process> ProcessStartedHandler { get; set; }
+
         protected Dictionary<string, string> Environment { get; set; } = new Dictionary<string, string>();
 
         public TestCommand WithEnvironmentVariable(string name, string value)

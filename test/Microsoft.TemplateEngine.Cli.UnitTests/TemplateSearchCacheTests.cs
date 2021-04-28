@@ -20,6 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
     public class TemplateSearchCacheTests : IClassFixture<EnvironmentSettingsHelper>
     {
         private IEngineEnvironmentSettings _engineEnvironmentSettings;
+
         public TemplateSearchCacheTests(EnvironmentSettingsHelper environmentSettingsHelper)
         {
             _engineEnvironmentSettings = environmentSettingsHelper.CreateEnvironment(hostIdentifier: this.GetType().Name, virtualize: true);

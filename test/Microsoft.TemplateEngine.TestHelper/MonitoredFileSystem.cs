@@ -88,7 +88,9 @@ namespace Microsoft.TemplateEngine.TestHelper
         public class DirectoryScanParameters
         {
             public string DirectoryName { get; set; }
+
             public string Pattern { get; set; }
+
             public SearchOption SearchOption { get; set; }
         }
     }
