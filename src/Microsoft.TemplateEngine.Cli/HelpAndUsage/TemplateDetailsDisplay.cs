@@ -251,7 +251,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         }
 
                         return displayValue.ToString();
-                    }, string.Empty);
+                    },
+                    string.Empty);
 
                 Reporter.Output.WriteLine(formatter.Layout());
             }

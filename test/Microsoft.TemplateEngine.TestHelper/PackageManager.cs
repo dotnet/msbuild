@@ -196,18 +196,18 @@ namespace Microsoft.TemplateEngine.TestHelper
             }
             _ = packageSources ?? throw new ArgumentNullException(nameof(packageSources));
 
-            (PackageSource source, IEnumerable<IPackageSearchMetadata>? foundPackages)[] foundPackagesBySource =
+            (PackageSource Source, IEnumerable<IPackageSearchMetadata>? FoundPackages)[] foundPackagesBySource =
                 await Task.WhenAll(
                     packageSources.Select(source => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, log, cancellationToken)))
                           .ConfigureAwait(false);
 
-            if (!foundPackagesBySource.Where(result => result.foundPackages != null).Any())
+            if (!foundPackagesBySource.Where(result => result.FoundPackages != null).Any())
             {
                 throw new Exception($"Failed to load NuGet sources {string.Join(";", packageSources.Select(source => source.Source))}");
             }
 
             var accumulativeSearchResults = foundPackagesBySource
-                .SelectMany(result => result.foundPackages.Select(package => (result.source, package)));
+                .SelectMany(result => result.FoundPackages.Select(package => (result.Source, package)));
 
             if (!accumulativeSearchResults.Any())
             {
@@ -249,17 +249,17 @@ namespace Microsoft.TemplateEngine.TestHelper
             {
                 var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
                 tasks.Remove(finishedTask);
-                (PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages) result = await finishedTask.ConfigureAwait(false);
-                if (result.foundPackages == null)
+                (PackageSource Source, IEnumerable<IPackageSearchMetadata> FoundPackages) result = await finishedTask.ConfigureAwait(false);
+                if (result.FoundPackages == null)
                 {
                     continue;
                 }
                 atLeastOneSourceValid = true;
-                IPackageSearchMetadata matchedVersion = result.foundPackages.FirstOrDefault(package => package.Identity.Version == packageVersion);
+                IPackageSearchMetadata matchedVersion = result.FoundPackages.FirstOrDefault(package => package.Identity.Version == packageVersion);
                 if (matchedVersion != null)
                 {
                     linkedCts.Cancel();
-                    return (result.source, matchedVersion);
+                    return (result.Source, matchedVersion);
                 }
             }
             if (!atLeastOneSourceValid)
@@ -269,7 +269,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             throw new Exception($"{packageIdentifier}, version: {packageVersion} is not found in {string.Join(";", sources.Select(source => source.Source))}");
         }
 
-        private async Task<(PackageSource source, IEnumerable<IPackageSearchMetadata>? foundPackages)> GetPackageMetadataAsync(
+        private async Task<(PackageSource Source, IEnumerable<IPackageSearchMetadata>? FoundPackages)> GetPackageMetadataAsync(
             PackageSource source,
             string packageIdentifier,
             bool includePrerelease = false,
