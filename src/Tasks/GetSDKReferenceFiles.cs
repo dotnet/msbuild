@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.Tasks
 
                 PopulateRedistDictionaryFromPaths(directoryToFileList, redistDirectories);
 
-                var cacheInfo = new SDKInfo(references.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase), directoryToFileList.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase), FileUtilities.GetPathsHash(directoriesToHash));
+                var cacheInfo = new SDKInfo(references, directoryToFileList, FileUtilities.GetPathsHash(directoriesToHash));
                 return cacheInfo;
             }
 
@@ -1217,18 +1217,17 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Structure that contains the on disk representation of the SDK in memory.
         /// </summary>
-        /// <remarks>This is a serialization format. Do not change member naming.</remarks>
         internal class SDKInfo : ITranslatable
         {
-            private Dictionary<string, SdkReferenceInfo> pathToReferenceMetadata;
-            private Dictionary<string, List<string>> directoryToFileList;
-            private int hash;
+            private IDictionary<string, SdkReferenceInfo> _pathToReferenceMetadata;
+            private IDictionary<string, List<string>> _directoryToFileList;
+            private int _hash;
 
             internal SDKInfo()
             {
-                pathToReferenceMetadata = new(StringComparer.OrdinalIgnoreCase);
-                directoryToFileList = new(StringComparer.OrdinalIgnoreCase);
-                hash = 0;
+                _pathToReferenceMetadata = new Dictionary<string, SdkReferenceInfo>(StringComparer.OrdinalIgnoreCase);
+                _directoryToFileList = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                _hash = 0;
             }
 
             public SDKInfo(ITranslator translator) : this()
@@ -1236,28 +1235,28 @@ namespace Microsoft.Build.Tasks
                 Translate(translator);
             }
 
-            public SDKInfo(Dictionary<string, SdkReferenceInfo> pathToReferenceMetadata, Dictionary<string, List<string>> directoryToFileList, int cacheHash)
+            public SDKInfo(IDictionary<string, SdkReferenceInfo> pathToReferenceMetadata, IDictionary<string, List<string>> directoryToFileList, int cacheHash)
             {
-                this.pathToReferenceMetadata = pathToReferenceMetadata;
-                this.directoryToFileList = directoryToFileList;
-                this.hash = cacheHash;
+                this._pathToReferenceMetadata = pathToReferenceMetadata;
+                this._directoryToFileList = directoryToFileList;
+                this._hash = cacheHash;
             }
 
             /// <summary>
             /// A dictionary which maps a file path to a structure that contain some metadata information about that file.
             /// </summary>
-            public Dictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return pathToReferenceMetadata; } }
+            public IDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get { return _pathToReferenceMetadata; } }
 
-            public Dictionary<string, List<string>> DirectoryToFileList { get { return directoryToFileList; } }
+            public IDictionary<string, List<string>> DirectoryToFileList { get { return _directoryToFileList; } }
 
             /// <summary>
             /// Hashset
             /// </summary>
-            public int Hash { get { return hash; } }
+            public int Hash { get { return _hash; } }
 
             public void Translate(ITranslator translator)
             {
-                translator.TranslateDictionary(ref pathToReferenceMetadata, StringComparer.OrdinalIgnoreCase, (ITranslator t, ref SdkReferenceInfo info) =>
+                translator.TranslateDictionary(ref _pathToReferenceMetadata, (ITranslator t, ref string s) => t.Translate(ref s), (ITranslator t, ref SdkReferenceInfo info) =>
                 {
                     info ??= new SdkReferenceInfo(null, null, false, false);
                     string fusionName = info.FusionName;
@@ -1272,18 +1271,18 @@ namespace Microsoft.Build.Tasks
                     info.ImageRuntime = imageRuntime;
                     info.IsManagedWinmd = isManagedWinmd;
                     info.IsWinMD = isWinmd;
-                });
+                }, count => new Dictionary<string, SdkReferenceInfo>(count));
 
-                translator.TranslateDictionary(ref directoryToFileList, StringComparer.OrdinalIgnoreCase, (ITranslator t, ref List<string> fileList) =>
+                translator.TranslateDictionary(ref _directoryToFileList, (ITranslator t, ref string s) => t.Translate(ref s), (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
-                });
-                translator.TranslateDictionary(ref directoryToFileList, StringComparer.OrdinalIgnoreCase, (ITranslator t, ref List<string> fileList) =>
+                }, count => new Dictionary<string, List<string>>(count));
+                translator.TranslateDictionary(ref _directoryToFileList, (ITranslator t, ref string s) => t.Translate(ref s), (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
-                });
+                }, count => new Dictionary<string, List<string>>(count));
 
-                translator.Translate(ref hash);
+                translator.Translate(ref _hash);
             }
         }
 
