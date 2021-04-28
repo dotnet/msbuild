@@ -26,6 +26,12 @@ stages:
   displayName: Build
 
   jobs:
+  - template: /eng/common/templates/job/onelocbuild.yml
+    parameters:
+      CreatePr: false
+      LclSource: lclFilesfromPackage
+      LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+
   - job: Windows_NT
     pool:
       name: VSEng-MicroBuildVS2019
