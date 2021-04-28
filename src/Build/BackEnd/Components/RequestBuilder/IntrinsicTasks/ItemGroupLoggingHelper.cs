@@ -271,6 +271,11 @@ namespace Microsoft.Build.BackEnd
             bool logItemMetadata,
             DateTime timestamp)
         {
+            // Only run this method if we use AppDomains and not in the default AppDomain
+#if FEATURE_APPDOMAIN
+            CreateItemsSnapshot(ref items);
+#endif
+
             var args = new TaskParameterEventArgs(
                 messageKind,
                 itemType,
@@ -279,6 +284,32 @@ namespace Microsoft.Build.BackEnd
                 timestamp);
             args.BuildEventContext = buildEventContext;
             return args;
+        }
+
+        private static void CreateItemsSnapshot(ref IList items)
+        {
+            if (items == null || AppDomain.CurrentDomain.IsDefaultAppDomain())
+            {
+                return;
+            }
+
+            int count = items.Count;
+            var cloned = new object[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                var item = items[i];
+                if (item is ITaskItem taskItem)
+                {
+                    cloned[i] = new TaskItemData(taskItem);
+                }
+                else
+                {
+                    cloned[i] = item;
+                }
+            }
+
+            items = cloned;
         }
 
         internal static string GetTaskParameterText(TaskParameterEventArgs args)
