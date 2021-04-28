@@ -40,9 +40,8 @@ namespace Microsoft.DotNet.NativeWrapper
 
                     searchPaths.AddRange(
                         _getEnvironmentVariable("PATH")
-                        .Split(Path.PathSeparator)
-                        .Select(p => p.Trim('"'))
-                        .Where(p => !string.IsNullOrWhiteSpace(p)));
+                        .Split(new char[] { Path.PathSeparator }, options: StringSplitOptions.RemoveEmptyEntries)
+                        .Select(p => p.Trim('"')));
 
                     _searchPaths = searchPaths;
                 }
