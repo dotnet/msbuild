@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .Should()
                 .Fail()
                 .And
-                .NotHaveStdOutContaining("Workload not found");
+                .HaveStdOutContaining("Workload not found");
         }
 
         [Fact]
