@@ -18,7 +18,6 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -146,23 +145,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
             var alias = "Xamarin.Android.BuildTools.Alias";
-            var packInfo = new PackInfo("Xamarin.Android.BuildTools", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.BuildTools", "8.4.7"), alias);
+            var packInfo = new PackInfo("Xamarin.Android.BuildTools", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", alias, "8.4.7"), alias);
             var version = "6.0.100";
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
             (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(1);
             (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(alias), new NuGetVersion(packInfo.Version)));
-        }
-
-        [Fact]
-        public void GivenManagedInstallItIgnoresAliasedPacksWithNoAliasForThisOs()
-        {
-            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
-            var packInfo = new PackInfo("Xamarin.Android.BuildTools", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.BuildTools", "8.4.7"), null);
-            var version = "6.0.100";
-            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
-
-            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(0);
         }
 
         [Fact]
