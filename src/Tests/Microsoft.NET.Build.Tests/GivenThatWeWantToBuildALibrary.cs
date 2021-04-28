@@ -332,7 +332,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework, identifier: expectedDefines.GetHashCode().ToString())
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", identifier: expectedDefines.GetHashCode().ToString())
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -393,7 +393,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework, identifier: expectedDefines.GetHashCode().ToString())
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", identifier: expectedDefines.GetHashCode().ToString())
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
