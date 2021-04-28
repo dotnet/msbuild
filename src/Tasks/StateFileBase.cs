@@ -21,10 +21,10 @@ namespace Microsoft.Build.Tasks
         // Version 4/5 - VS2017.7:
         //   Unify .NET Core + Full Framework. Custom serialization on some types that are no
         //   longer [Serializable].
-        private const byte CurrentSerializationVersion = 6;
+        internal const byte CurrentSerializationVersion = 6;
 
         // Version this instance is serialized with.
-        protected byte _serializedVersion = CurrentSerializationVersion;
+        private byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
         /// Writes the contents of this object out to the specified file.
@@ -43,6 +43,7 @@ namespace Microsoft.Build.Tasks
                     using (var s = new FileStream(stateFile, FileMode.CreateNew))
                     {
                         var translator = BinaryTranslator.GetWriteTranslator(s);
+                        translator.Translate(ref _serializedVersion);
                         Translate(translator);
                     }
                 }
@@ -74,6 +75,8 @@ namespace Microsoft.Build.Tasks
                     using (FileStream s = new FileStream(stateFile, FileMode.Open))
                     {
                         var translator = BinaryTranslator.GetReadTranslator(s, buffer: null);
+                        byte version = 0;
+                        translator.Translate(ref version);
                         var constructors = requiredReturnType.GetConstructors();
                         foreach (var constructor in constructors)
                         {
@@ -86,7 +89,7 @@ namespace Microsoft.Build.Tasks
 
                         // If retVal is still null or the version is wrong, log a message not a warning. This could be a valid cache with the wrong version preventing correct deserialization.
                         // For the latter case, internals may be unexpectedly null.
-                        if (retVal == null || retVal._serializedVersion != CurrentSerializationVersion)
+                        if (retVal == null || version != CurrentSerializationVersion)
                         {
                             // When upgrading to Visual Studio 2008 and running the build for the first time the resource cache files are replaced which causes a cast error due
                             // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase".

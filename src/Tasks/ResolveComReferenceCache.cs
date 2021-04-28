@@ -99,7 +99,6 @@ namespace Microsoft.Build.Tasks
             translator.Translate(ref axImpLocation);
             translator.Translate(ref tlbImpLocation);
             translator.TranslateDictionary(ref componentTimestamps, StringComparer.Ordinal);
-            translator.Translate(ref _serializedVersion);
         }
     }
 }

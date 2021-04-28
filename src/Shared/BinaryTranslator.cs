@@ -662,9 +662,13 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer)
             {
-                int count = 0;
-                dictionary = new(comparer);
-                Translate(ref count);
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                dictionary = new(count, comparer);
                 string key = string.Empty;
                 DateTime val = DateTime.MinValue;
                 for (int i = 0; i < count; i++)
@@ -1270,14 +1274,19 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
+            /// Translates a dictionary of { string, DateTime }.
             /// </summary>
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="comparer">Key comparer</param>
             public void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer)
             {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
                 int count = dictionary.Count;
-                Translate(ref count);
+                _writer.Write(count);
                 foreach (KeyValuePair<string, DateTime> kvp in dictionary)
                 {
                     string key = kvp.Key;

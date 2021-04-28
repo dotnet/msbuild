@@ -15,10 +15,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class ResolveAssemblyReferenceCacheSerialization : IDisposable
     {
-        // Maintain this two in sync with the constant in SystemState
-        private static readonly byte[] TranslateContractSignature = { (byte)'M', (byte)'B', (byte)'R', (byte)'S', (byte)'C' }; // Microsoft Build RAR State Cache
-        private static readonly byte TranslateContractVersion = 0x01;
-
         private readonly string _rarCacheFile;
         private readonly TaskLoggingHelper _taskLoggingHelper;
 
@@ -60,14 +56,32 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             systemState.SerializeCache(_rarCacheFile, _taskLoggingHelper);
             using (var cacheStream = new FileStream(_rarCacheFile, FileMode.Open, FileAccess.ReadWrite))
             {
-                cacheStream.Seek(TranslateContractSignature.Length, SeekOrigin.Begin);
-                cacheStream.WriteByte(TranslateContractVersion);
+                cacheStream.Seek(0, SeekOrigin.Begin);
+                cacheStream.WriteByte(StateFileBase.CurrentSerializationVersion);
                 cacheStream.Close();
             }
 
             var deserialized = SystemState.DeserializeCache(_rarCacheFile, _taskLoggingHelper, typeof(SystemState));
 
             deserialized.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void WrongFileVersion()
+        {
+            SystemState systemState = new();
+
+            systemState.SerializeCache(_rarCacheFile, _taskLoggingHelper);
+            using (var cacheStream = new FileStream(_rarCacheFile, FileMode.Open, FileAccess.ReadWrite))
+            {
+                cacheStream.Seek(0, SeekOrigin.Begin);
+                cacheStream.WriteByte(StateFileBase.CurrentSerializationVersion - 1);
+                cacheStream.Close();
+            }
+
+            var deserialized = SystemState.DeserializeCache(_rarCacheFile, _taskLoggingHelper, typeof(SystemState));
+
+            deserialized.ShouldBeNull();
         }
 
         [Fact]

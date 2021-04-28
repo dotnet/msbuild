@@ -115,7 +115,6 @@ namespace Microsoft.Build.Tasks
                 },
                 count => new Dictionary<string, PortableLibraryFile>(count));
             translator.Translate(ref baseLinkedFileDirectory);
-            translator.Translate(ref _serializedVersion);
         }
 
         internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)

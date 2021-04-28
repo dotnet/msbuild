@@ -65,7 +65,6 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrowArgumentNull(translator, nameof(translator));
             translator.Translate(ref _assemblies);
             translator.Translate(ref _typeLibraries);
-            translator.Translate(ref _serializedVersion);
         }
     }
 }
