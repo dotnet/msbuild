@@ -20,6 +20,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
@@ -81,7 +82,11 @@ namespace Microsoft.Build.CommandLine
             /// The build stopped unexpectedly, for example,
             /// because a child died or hung.
             /// </summary>
-            Unexpected
+            Unexpected,
+            /// <summary>
+            /// A project cache failed unexpectedly.
+            /// </summary>
+            ProjectCacheFailure
         }
 
         /// <summary>
@@ -786,6 +791,24 @@ namespace Microsoft.Build.CommandLine
                     exitType = ExitType.InitializationError;
                 }
             }
+            catch (ProjectCacheException e)
+            {
+                Console.WriteLine($"MSBUILD : error {e.ErrorCode}: {e.Message}");
+
+#if DEBUG
+                if (!e.HasBeenLoggedByProjectCache && e.InnerException != null)
+                {
+                    Console.WriteLine("This is an unhandled exception from a project cache -- PLEASE OPEN A BUG AGAINST THE PROJECT CACHE OWNER.");
+                }
+#endif
+
+                if (e.InnerException is not null)
+                {
+                    Console.WriteLine(e.InnerException.ToString());
+                }
+
+                exitType = ExitType.ProjectCacheFailure;
+            }
             catch (BuildAbortedException e)
             {
                 Console.WriteLine(
@@ -1262,21 +1285,17 @@ namespace Microsoft.Build.CommandLine
                         success = false;
 
                         // InvalidProjectFileExceptions and its aggregates have already been logged.
-                        if (exception.GetType() != typeof(InvalidProjectFileException)
+                        if (exception is not InvalidProjectFileException
                             && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
                         {
-                            if
-                                (
-                                exception.GetType() == typeof(LoggerException) ||
-                                exception.GetType() == typeof(InternalLoggerException)
-                                )
+                            if (exception is LoggerException or InternalLoggerException or ProjectCacheException)
                             {
-                                // We will rethrow this so the outer exception handler can catch it, but we don't
+                                // We will rethrow these so the outer exception handler can catch them, but we don't
                                 // want to log the outer exception stack here.
                                 throw exception;
                             }
 
-                            if (exception.GetType() == typeof(BuildAbortedException))
+                            if (exception is BuildAbortedException)
                             {
                                 // this is not a bug and should not dump stack. It will already have been logged
                                 // appropriately, there is no need to take any further action with it.
@@ -1421,20 +1440,31 @@ namespace Microsoft.Build.CommandLine
             restoreGlobalProperties["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D");
 
             // Create a new request with a Restore target only and specify:
-            //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
-            //  - BuildRequestDataFlags.SkipNonexistentNonEntryTargets to ignore missing non-entry targets since Restore does not require that all targets
-            //      exist, only top-level ones like Restore itself
-            //  - BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports to ignore imports that don't exist, are empty, or are invalid because restore might
-            //     make available an import that doesn't exist yet and the <Import /> might be missing a condition.
-            //  - BuildRequestDataFlags.FailOnUnresolvedSdk to still fail in the case when an MSBuild project SDK can't be resolved since this is fatal and should
-            //     fail the build.
+            BuildRequestDataFlags flags;
+
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+            {
+                flags =   BuildRequestDataFlags.ClearCachesAfterBuild                // ensure the projects will be reloaded from disk for subsequent builds
+                        | BuildRequestDataFlags.SkipNonexistentNonEntryTargets       // ignore missing non-entry targets since Restore does not require that all targets
+                                                                                     // exist, only top-level ones like Restore itself
+                        | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports  // ignore imports that don't exist, are empty, or are invalid because restore might
+                                                                                     // make available an import that doesn't exist yet and the <Import /> might be missing a condition.
+                        | BuildRequestDataFlags.FailOnUnresolvedSdk;                 // still fail in the case when an MSBuild project SDK can't be resolved since this is fatal and should
+                                                                                     // fail the build.
+            }
+            else
+            {
+                // pre-16.10 flags allowed `-restore` to pass when there was no `Restore` target
+                flags = BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports;
+            }
+
             BuildRequestData restoreRequest = new BuildRequestData(
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentNonEntryTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk);
+                flags);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }

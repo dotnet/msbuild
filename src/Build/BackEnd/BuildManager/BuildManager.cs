@@ -1279,11 +1279,14 @@ namespace Microsoft.Build.Execution
                 _buildParameters.ProjectCacheDescriptor == null)
             {
                 _projectCacheServiceInstantiatedByVSWorkaround = true;
-                ErrorUtilities.VerifyThrowInvalidOperation(
-                    ProjectCacheItems.Count == 1,
-                    "OnlyOneCachePluginMustBeSpecified",
-                    string.Join("; ", ProjectCacheItems.Values.Select(c => c.PluginPath)));
 
+                if (ProjectCacheItems.Count != 1)
+                {
+                    ProjectCacheException.ThrowForMSBuildIssueWithTheProjectCache(
+                        "OnlyOneCachePluginMustBeSpecified",
+                        string.Join("; ", ProjectCacheItems.Values.Select(c => c.PluginPath)));
+                }
+                
                 // Plugin needs the graph root (aka top BuildSubmission path, aka the solution path when in VS) which, under VS, is accessible
                 // only by evaluating the submission and retrieving the 'SolutionPath' property set by VS. This is also the reason why
                 // this method cannot be called from BeginBuild, because no build submissions are available there to extract the solution path from.
@@ -1300,6 +1303,7 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrow(
                     solutionPath != null && !string.IsNullOrWhiteSpace(solutionPath) && solutionPath != "*Undefined*",
                     $"Expected VS to set a valid SolutionPath property but got: {solutionPath}");
+
                 ErrorUtilities.VerifyThrow(
                     FileSystems.Default.FileExists(solutionPath),
                     $"Solution file does not exist: {solutionPath}");
@@ -1943,16 +1947,18 @@ namespace Microsoft.Build.Execution
                 return new DisposablePluginService(null);
             }
 
-            ErrorUtilities.VerifyThrowInvalidOperation(
-                cacheItems.Count == 1,
-                "OnlyOneCachePluginMustBeSpecified",
-                string.Join("; ", cacheItems.Select(ci => ci.PluginPath)));
+            if (cacheItems.Count != 1)
+            {
+                ProjectCacheException.ThrowForMSBuildIssueWithTheProjectCache(
+                    "OnlyOneCachePluginMustBeSpecified",
+                    string.Join("; ", cacheItems.Select(ci => ci.PluginPath)));
+            }
 
             var nodesWithoutCacheItems = nodeToCacheItems.Where(kvp => kvp.Value.Length == 0).ToArray();
 
             if (nodesWithoutCacheItems.Length > 0)
             {
-                ErrorUtilities.ThrowInvalidOperation(
+                ProjectCacheException.ThrowForMSBuildIssueWithTheProjectCache(
                     "NotAllNodesDefineACacheItem",
                     ItemTypeNames.ProjectCachePlugin,
                     string.Join(", ", nodesWithoutCacheItems.Select(kvp => kvp.Key.ProjectInstance.FullPath)));

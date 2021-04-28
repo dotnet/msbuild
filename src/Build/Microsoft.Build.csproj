@@ -800,5 +800,4 @@
   <ItemGroup>
     <Compile Remove="Collections\RetrievableEntryHashSet\Originals\*" />
   </ItemGroup>
-
 </Project>

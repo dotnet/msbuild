@@ -138,9 +138,9 @@
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>"Loading the following project cache plugin:
-    {0}"</source>
-        <target state="translated">"Caricamento del plug-in seguente della cache del progetto:
+        <source>Loading the following project cache plugin:
+    {0}</source>
+        <target state="needs-review-translation">"Caricamento del plug-in seguente della cache del progetto:
     {0}"</target>
         <note />
       </trans-unit>
@@ -217,6 +217,11 @@
       <trans-unit id="OnlyOneCachePluginMustBeSpecified">
         <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
         <target state="translated">MSB4265: è necessario specificare un singolo plug-in della cache del progetto, ma ne sono trovati più di uno: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheException">
+        <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
+        <target state="new">MSB4273: The project cache threw an unhandled exception from the {0} method.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
