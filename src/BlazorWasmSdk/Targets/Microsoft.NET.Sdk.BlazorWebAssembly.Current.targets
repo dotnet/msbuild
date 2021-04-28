@@ -72,6 +72,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PreserveCompilationReferences>false</PreserveCompilationReferences>
     <IsWebConfigTransformDisabled>true</IsWebConfigTransformDisabled>
 
+    <!-- Don't generate a NETSDK1151 error if a non self-contained Exe references a Blazor Exe -->
+    <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
+
     <!-- Internal properties -->
     <_BlazorOutputPath>wwwroot\_framework\</_BlazorOutputPath>
 

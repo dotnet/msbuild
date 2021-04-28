@@ -104,7 +104,7 @@ Commands:
         public void WhenInvalidSolutionIsPassedItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("InvalidSolution")
+                .CopyTestAsset("InvalidSolution", identifier: "GivenDotnetSlnList")
                 .WithSource()
                 .Path;
             
@@ -154,7 +154,7 @@ Commands:
         public void WhenMoreThanOneSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithMultipleSlnFiles")
+                .CopyTestAsset("TestAppWithMultipleSlnFiles", identifier: "GivenDotnetSlnList")
                 .WithSource()
                 .Path;
 
