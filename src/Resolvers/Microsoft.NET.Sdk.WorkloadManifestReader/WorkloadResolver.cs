@@ -124,9 +124,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
 
                 var aliasedPath = ResolvePackPath(pack.Value);
-                if (aliasedPath != null && PackExists(aliasedPath, pack.Value.Kind))
+                var resolvedPackageId = pack.Value.IsAlias ? pack.Value.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers)?.ToString() : pack.Value.Id.ToString();
+                if (aliasedPath != null && resolvedPackageId != null && PackExists(aliasedPath, pack.Value.Kind))
                 {
-                    yield return CreatePackInfo(pack.Value, aliasedPath);
+                    yield return CreatePackInfo(pack.Value, aliasedPath, resolvedPackageId);
                 }
             }
         }
@@ -137,12 +138,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _directoryExistOverride = directoryExists;
         }
 
-        private PackInfo CreatePackInfo(WorkloadPack pack, string aliasedPath) => new PackInfo(
+        private PackInfo CreatePackInfo(WorkloadPack pack, string aliasedPath, string resolvedPackageId) => new PackInfo(
                 pack.Id.ToString(),
                 pack.Version,
                 pack.Kind,
                 aliasedPath,
-                pack.IsAlias ? pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers)?.ToString() : pack.Id.ToString()
+                resolvedPackageId
             );
 
         private bool PackExists (string packPath, WorkloadPackKind packKind)
@@ -324,9 +325,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             if (_packs.TryGetValue(new WorkloadPackId (packId), out var pack))
             {
-                if (ResolvePackPath(pack) is string packPath)
+                var packPath = ResolvePackPath(pack);
+                var resolvedPackageId = pack.IsAlias ? pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers)?.ToString() : pack.Id.ToString();
+                if (packPath != null && resolvedPackageId != null)
                 {
-                    return CreatePackInfo(pack, packPath);
+                    return CreatePackInfo(pack, packPath, resolvedPackageId);
                 }
             }
 
@@ -353,13 +356,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public class PackInfo
         {
-            public PackInfo(string id, string version, WorkloadPackKind kind, string path, string? aliasedPackageId)
+            public PackInfo(string id, string version, WorkloadPackKind kind, string path, string resolvedPackageId)
             {
                 Id = id;
                 Version = version;
                 Kind = kind;
                 Path = path;
-                AliasedPackageId = aliasedPackageId;
+                ResolvedPackageId = resolvedPackageId;
             }
 
             public string Id { get; }
@@ -368,7 +371,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             public WorkloadPackKind Kind { get; }
 
-            public string? AliasedPackageId { get; }
+            public string ResolvedPackageId { get; }
 
             /// <summary>
             /// Path to the pack. If it's a template or library pack, <see cref="IsStillPacked"/> will be <code>true</code> and this will be a path to the <code>nupkg</code>,
