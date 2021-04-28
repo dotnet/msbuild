@@ -358,7 +358,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (forceCacheRebuild)
                 {
-                    await _settingsLoader.RebuildCacheAsync(CancellationToken.None).ConfigureAwait(false);
+                    await _settingsLoader.RebuildTemplateCacheAsync(CancellationToken.None).ConfigureAwait(false);
                 }
             }
             catch (EngineInitializationException eiex)
