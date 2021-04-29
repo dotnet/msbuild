@@ -1,0 +1,45 @@
+  
+From 7b16b05fbf94dab369f3198be59e2e911500b579 Mon Sep 17 00:00:00 2001
+From: dseefeld <dseefeld@microsoft.com>
+Date: Wed, 9 Oct 2019 14:55:27 +0000
+Subject: [PATCH] Remove runtime identifiers to break runtime prebuilt restore
+
+---
+ src/MSBuild/MSBuild.csproj                 | 5 -----
+ src/MSBuildTaskHost/MSBuildTaskHost.csproj | 5 -----
+ 2 files changed, 10 deletions(-)
+
+diff --git a/src/MSBuild/MSBuild.csproj b/src/MSBuild/MSBuild.csproj
+index 80e9e7d..7db4996 100644
+--- a/src/MSBuild/MSBuild.csproj
++++ b/src/MSBuild/MSBuild.csproj
+@@ -8,11 +8,6 @@
+          MSBuild.exe AND MSBuild.dll when they should only find MSBuild.dll. -->
+     <UseAppHost>false</UseAppHost>
+ 
+-    <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
+-         This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
+-         versions of this project -->
+-    <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
+-
+     <EnableDefaultItems>false</EnableDefaultItems>
+     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+     <AssemblyName>MSBuild</AssemblyName>
+diff --git a/src/MSBuildTaskHost/MSBuildTaskHost.csproj b/src/MSBuildTaskHost/MSBuildTaskHost.csproj
+index 2e10ebd..9a89161 100644
+--- a/src/MSBuildTaskHost/MSBuildTaskHost.csproj
++++ b/src/MSBuildTaskHost/MSBuildTaskHost.csproj
+@@ -10,11 +10,6 @@
+     <PlatformTarget Condition="'$(Platform)' == 'x64'">x64</PlatformTarget>
+     <PlatformTarget Condition="'$(Platform)' == 'AnyCPU'">x86</PlatformTarget>
+ 
+-    <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
+-         This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
+-         versions of this project -->
+-    <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
+-
+     <EnableDefaultItems>false</EnableDefaultItems>
+     <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY;TASKHOST</DefineConstants>
+     <!-- Need pointers for getting environment block -->
+-- 
+1.8.3.1

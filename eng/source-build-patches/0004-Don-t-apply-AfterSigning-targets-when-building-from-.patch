@@ -1,0 +1,29 @@
+From 85e76e462161f7574657c7ced7593f210273cd63 Mon Sep 17 00:00:00 2001
+From: dseefeld <dseefeld@microsoft.com>
+Date: Thu, 7 May 2020 21:27:12 +0000
+Subject: [PATCH] Don't apply AfterSigning targets when building from source
+
+---
+ eng/AfterSigning.targets | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/eng/AfterSigning.targets b/eng/AfterSigning.targets
+index e699c81..c28b84a 100644
+--- a/eng/AfterSigning.targets
++++ b/eng/AfterSigning.targets
+@@ -1,5 +1,5 @@
+ <Project>
+-    <Target Name="CopyAMD64Symbols" Condition="'$(OfficialBuild)' == 'true'" BeforeTargets="Build">
++    <Target Name="CopyAMD64Symbols" Condition="'$(OfficialBuild)' == 'true' AND '$(DotNetBuildFromSource)' != 'true'" BeforeTargets="Build">
+         <Copy 
+             SourceFiles="$(ArtifactsBinDir)MSBuild\x64\Release\net472\MSBuild.pdb"
+             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuild\net472\amd64"
+@@ -9,4 +9,4 @@
+             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuildTaskHost\net35\amd64"
+             />
+     </Target>
+-</Project>
+\ No newline at end of file
++</Project>
+-- 
+1.8.3.1
