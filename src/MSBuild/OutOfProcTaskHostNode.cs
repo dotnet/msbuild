@@ -29,7 +29,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        INodePacketFactory, INodePacketHandler,
+        INodePacketFactory, INodePacketHandler, IBuildEngineInternal,
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
@@ -493,6 +493,15 @@ namespace Microsoft.Build.CommandLine
 
         #endregion
 #endif
+
+        #region IBuildEngineInternal Members
+
+        /// <summary>
+        /// No logging verbosity optimization in OOP nodes.
+        /// </summary>
+        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
+
+        #endregion
 
         #region INodePacketFactory Members
 

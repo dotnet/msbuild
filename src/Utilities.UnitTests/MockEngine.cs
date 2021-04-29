@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine3
+    internal sealed class MockEngine : IBuildEngine3, IBuildEngineInternal
     {
         private StringBuilder _log = new StringBuilder();
 
@@ -120,6 +120,8 @@ namespace Microsoft.Build.UnitTests
         public void Reacquire()
         {
         }
+
+        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
 
         /// <summary>
         /// Assert that the log doesn't contain the given string.

@@ -34,6 +34,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
+        IBuildEngineInternal,
         IBuildEngine9
     {
         /// <summary>
@@ -871,6 +872,11 @@ namespace Microsoft.Build.BackEnd
                 ReleaseCores(coresToRelease);
             }
         }
+
+        /// <summary>
+        /// Returns the minimum message importance not guaranteed to be ignored by registered loggers.
+        /// </summary>
+        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
 
         #endregion
 

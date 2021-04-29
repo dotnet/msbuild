@@ -22,7 +22,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine
+        IBuildEngine,
+        IBuildEngineInternal
     {
         /// <summary>
         /// Location of the task node in the original file
@@ -242,6 +243,12 @@ namespace Microsoft.Build.BackEnd
         {
             throw new NotImplementedException();
         }
+
+        #endregion
+
+        #region IBuildEngineInternal Members
+
+        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
 
         #endregion
 
