@@ -974,6 +974,10 @@ namespace Microsoft.Build.Construction
                 _submissionId
                 );
 
+            // Traversal meta project entire state has to be serialized as it was generated and hence
+            // does not have disk representation to load project from.
+            traversalInstance.TranslateEntireState = true;
+
             // Make way for the real ones
             foreach (string targetName in dummyTargetsForEvaluationTime)
             {
@@ -1180,6 +1184,10 @@ namespace Microsoft.Build.Construction
         {
             // Create a new project instance with global properties and tools version from the existing project
             ProjectInstance metaprojectInstance = new ProjectInstance(EscapingUtilities.UnescapeAll(GetMetaprojectName(project)), traversalProject, GetMetaprojectGlobalProperties(traversalProject));
+
+            // Traversal meta project entire state has to be serialized as it was generated and hence
+            // does not have disk representation to load project from.
+            metaprojectInstance.TranslateEntireState = true;
 
             // Add the project references which must build before this one.
             AddMetaprojectReferenceItems(traversalProject, metaprojectInstance, project);
