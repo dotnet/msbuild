@@ -275,6 +275,7 @@ namespace Microsoft.Build.Utilities
         public void LogWarningFromResources(string subcategoryResourceName, string warningCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string messageResourceName, params object[] messageArgs) { }
         public void LogWarningWithCodeFromResources(string messageResourceName, params object[] messageArgs) { }
         public void LogWarningWithCodeFromResources(string subcategoryResourceName, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string messageResourceName, params object[] messageArgs) { }
+        public bool ShouldLogMessage(Microsoft.Build.Framework.MessageImportance importance) { throw null; }
     }
     public static partial class ToolLocationHelper
     {
