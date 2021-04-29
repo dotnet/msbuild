@@ -65,8 +65,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _sdkVersion = new ReleaseVersion(version ?? Product.Version);
 
             var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity);
             userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
@@ -228,7 +228,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             _workloadInstaller.GetWorkloadInstallationRecordRepository()
                                 .WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
-
                     },
                     rollback: () => {
                         try
@@ -256,7 +255,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             // Don't hide the original error if roll back fails
                             _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
                         }
-
                     });
             }
             else

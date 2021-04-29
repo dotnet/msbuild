@@ -79,11 +79,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, SdkFeatureBand featureBand, bool includePreviews)
         {
             string packagePath = null;
+            string extractionPath = null;
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(featureBand, manifestId);
                 packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(featureBand, manifestId), includePreview: includePreviews);
-                var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, adManifestPath);
+                extractionPath = Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp", $"{manifestId}-extracted");
+                Directory.CreateDirectory(extractionPath);
+                var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, extractionPath);
+
+                if (Directory.Exists(adManifestPath))
+                {
+                    Directory.Delete(adManifestPath, true);
+                }
+                Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
+                FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(Path.Combine(extractionPath, "data"), adManifestPath));
+
                 _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
             }
             catch (Exception e)
@@ -92,6 +103,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             finally
             {
+                if (!string.IsNullOrEmpty(extractionPath) && Directory.Exists(extractionPath))
+                {
+                    Directory.Delete(extractionPath, true);
+                }
+
                 if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
                 {
                     File.Delete(packagePath);

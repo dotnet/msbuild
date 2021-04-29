@@ -16,7 +16,6 @@ using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using NuGet.Common;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -182,15 +181,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                        {
                            // Backup existing manifest data for roll back purposes
                            tempBackupDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-backup");
+                           if (Directory.Exists(tempBackupDir))
+                           {
+                               Directory.Delete(tempBackupDir, true);
+                           }
                            FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(manifestPath, tempBackupDir));
-                           Directory.Delete(manifestPath, true);
                        }
-
                        Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
-                       FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, manifestPath));
+                       FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(Path.Combine(tempExtractionDir, "data"), manifestPath));
                    },
                     rollback: () => {
-                        if (!string.IsNullOrEmpty(tempBackupDir))
+                        if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
                         {
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempBackupDir, manifestPath));
                         }

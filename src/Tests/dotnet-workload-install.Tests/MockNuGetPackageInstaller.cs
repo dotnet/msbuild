@@ -13,6 +13,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     internal class MockNuGetPackageDownloader : INuGetPackageDownloader
     {
         private readonly string _downloadPath;
+        private readonly bool _manifestDownload;
 
         public List<(PackageId, NuGetVersion)> DownloadCallParams = new List<(PackageId, NuGetVersion)>();
 
@@ -20,8 +21,9 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         public List<(string, string)> ExtractCallParams = new List<(string, string)>();
 
-        public MockNuGetPackageDownloader(string dotnetRoot)
+        public MockNuGetPackageDownloader(string dotnetRoot, bool manifestDownload = false)
         {
+            _manifestDownload = manifestDownload;
             _downloadPath = Path.Combine(dotnetRoot, "metadata", "temp");
             Directory.CreateDirectory(_downloadPath);
         }
@@ -41,6 +43,10 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder)
         {
             ExtractCallParams.Add((packagePath, targetFolder));
+            if (_manifestDownload)
+            {
+                Directory.CreateDirectory(Path.Combine(targetFolder, "data"));
+            }
             return Task.FromResult(new List<string>() as IEnumerable<string>);
         }
     }
