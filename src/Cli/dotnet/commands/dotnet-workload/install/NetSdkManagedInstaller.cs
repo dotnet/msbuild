@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir =  null)
         {
-            _dotnetDir = dotnetDir ?? EnvironmentProvider.GetDotnetExeDirectory();
+            _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
             _nugetPackageInstaller = nugetPackageDownloader ?? new NuGetPackageDownloader(_tempPackagesDir);
             _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
