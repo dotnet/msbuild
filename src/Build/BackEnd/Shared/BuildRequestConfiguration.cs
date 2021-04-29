@@ -878,9 +878,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
 
             // if the  entire state is translated, then the transferred state represents the full evaluation data
-            if (translator.Mode == TranslationDirection.ReadFromStream && 
-                _transferredState != null &&
-                _transferredState.TranslateEntireState)
+            if (translator.Mode == TranslationDirection.ReadFromStream && _transferredState?.TranslateEntireState == true)
             {
                 SetProjectBasedState(_transferredState);
             }

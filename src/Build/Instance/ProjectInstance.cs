@@ -2025,12 +2025,19 @@ namespace Microsoft.Build.Execution
             var forcedProjectInstanceTranslationMode = Traits.Instance.EscapeHatches.ProjectInstanceTranslation;
             if (forcedProjectInstanceTranslationMode != null)
             {
-                _translateEntireState = forcedProjectInstanceTranslationMode switch
+                switch (forcedProjectInstanceTranslationMode)
                 {
-                    EscapeHatches.ProjectInstanceTranslationMode.Full => true,
-                    EscapeHatches.ProjectInstanceTranslationMode.Partial => false,
-                    _ => throw new InvalidOperationException($"Unexpected ProjectInstanceTranslationMode '{forcedProjectInstanceTranslationMode}'"),
-                };
+                    case EscapeHatches.ProjectInstanceTranslationMode.Full:
+                        _translateEntireState = true;
+                        break;
+                    case EscapeHatches.ProjectInstanceTranslationMode.Partial:
+                        _translateEntireState = false;
+                        break;
+                    default:
+                        // if EscapeHatches.ProjectInstanceTranslation have unexpected value, do not force TranslateEntireStateMode
+                        // and keep it as is
+                        break;
+                }
             }
         }
 
