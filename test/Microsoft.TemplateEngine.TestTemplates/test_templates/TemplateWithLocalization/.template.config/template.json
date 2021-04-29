@@ -31,14 +31,17 @@
             "choices": [
                 {
                     "choice": "choice0",
+                    "displayName": "sym1_choice0_displayName",
                     "description": "sym1_choice0"
                 },
                 {
                     "choice": "choice1",
+                    "displayName": "sym1_choice1_displayName",
                     "description": "sym1_choice1"
                 },
                 {
                     "choice": "choice2",
+                    "displayName": "sym1_choice2_displayName",
                     "description": "sym1_choice2"
                 }
             ],
