@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -39,7 +40,7 @@ namespace Microsoft.DotNet.NativeWrapper
 
                     searchPaths.AddRange(
                         _getEnvironmentVariable("PATH")
-                        .Split(Path.PathSeparator)
+                        .Split(new char[] { Path.PathSeparator }, options: StringSplitOptions.RemoveEmptyEntries)
                         .Select(p => p.Trim('"')));
 
                     _searchPaths = searchPaths;
@@ -75,6 +76,11 @@ namespace Microsoft.DotNet.NativeWrapper
                 // e.g. on Linux the 'dotnet' command from PATH is a symlink so we need to
                 // resolve it to get the actual path to the binary
                 dotnetExe = Interop.Unix.realpath(dotnetExe) ?? dotnetExe;
+            }
+
+            if (string.IsNullOrWhiteSpace(dotnetExe))
+            {
+                dotnetExe = Process.GetCurrentProcess().MainModule.FileName;
             }
 
             return Path.GetDirectoryName(dotnetExe);

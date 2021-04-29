@@ -58,7 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </RazorTargetAssemblyAttribute>
     </ItemGroup>
 
-    <ItemGroup 
+    <ItemGroup
       Condition="'$(GenerateRazorAssemblyInfo)'=='true'
         AND '$(ResolvedRazorCompileToolset)'=='RazorSdk'
         AND ('$(RazorCompileOnBuild)' == 'true'

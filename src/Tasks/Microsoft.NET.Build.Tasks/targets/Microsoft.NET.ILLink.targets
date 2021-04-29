@@ -203,7 +203,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_ExtraTrimmerArgs>--skip-unresolved true $(_ExtraTrimmerArgs)</_ExtraTrimmerArgs>
       <TrimmerSingleWarn Condition=" '$(TrimmerSingleWarn)' == '' ">true</TrimmerSingleWarn>
     </PropertyGroup>
-    
+
     <!-- Suppress warnings produced by the linker. Any warnings shared with the analyzer should be
          moved to the global PropertyGroup above. -->
     <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == 'true'">
@@ -316,7 +316,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <TrimmerSingleWarn Condition=" '%(ManagedAssemblyToLink.TrimmerSingleWarn)' == '' ">false</TrimmerSingleWarn>
       </ManagedAssemblyToLink>
     </ItemGroup>
-  
+
     <ItemGroup>
       <_TrimmerFeatureSettings Include="@(RuntimeHostConfigurationOption)" Condition="'%(RuntimeHostConfigurationOption.Trim)' == 'true'" />
     </ItemGroup>

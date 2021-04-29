@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         {
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            var arguments = _parseResult.ValueForArgument<IReadOnlyCollection<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>();
+            var arguments = (_parseResult.ValueForArgument<IEnumerable<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
             if (arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);

@@ -20,7 +20,7 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    internal class CompilationHandler : IDisposable
+    internal sealed class CompilationHandler : IDisposable
     {
         private readonly IReporter _reporter;
         private Task<(Solution, WatchHotReloadService)>? _initializeTask;
@@ -107,8 +107,11 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             var (updates, hotReloadDiagnostics) = await _hotReloadService.EmitSolutionUpdateAsync(updatedSolution, cancellationToken);
+            // hotReloadDiagnostics currently includes semantic Warnings and Errors for types being updated. We want to limit rude edits to the class
+            // of unrecoverable errors that a user cannot fix and requires an app rebuild.
+            var rudeEdits = hotReloadDiagnostics.RemoveAll(d => d.Severity == DiagnosticSeverity.Warning || !d.Descriptor.Id.StartsWith("ENC", StringComparison.Ordinal));
 
-            if (hotReloadDiagnostics.IsDefaultOrEmpty && updates.IsDefaultOrEmpty)
+            if (rudeEdits.IsDefaultOrEmpty && updates.IsDefaultOrEmpty)
             {
                 // It's possible that there are compilation errors which prevented the solution update
                 // from being updated. Let's look to see if there are compilation errors.
@@ -127,7 +130,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return true;
             }
 
-            if (!hotReloadDiagnostics.IsDefaultOrEmpty)
+            if (!rudeEdits.IsDefaultOrEmpty)
             {
                 // Rude edit.
                 _reporter.Output("Unable to apply hot reload because of a rude edit. Rebuilding the app...");

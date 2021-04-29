@@ -12,26 +12,45 @@ using Microsoft.DotNet.Watcher.Tools;
 internal sealed class StartupHook
 {
     private static readonly bool LogDeltaClientMessages = Environment.GetEnvironmentVariable("HOTRELOAD_DELTA_CLIENT_LOG_MESSAGES") == "1";
+    private static volatile UpdateHandlerActions? s_beforeAfterUpdates;
 
     public static void Initialize()
     {
         Task.Run(async () =>
         {
+            AssemblyLoadEventHandler handler = (s, e) => s_beforeAfterUpdates = null;
             try
             {
+                AppDomain.CurrentDomain.AssemblyLoad += handler;
                 await ReceiveDeltas();
             }
             catch (Exception ex)
             {
                 Log(ex.Message);
             }
+            finally
+            {
+                AppDomain.CurrentDomain.AssemblyLoad -= handler;
+            }
         });
     }
 
-    private static (List<Action<Type[]?>> BeforeUpdates, List<Action<Type[]?>> AfterUpdates) GetMetadataUpdateHandlerActions()
+    private sealed class UpdateHandlerActions
     {
-        var beforeUpdates = new List<Action<Type[]?>>();
-        var afterUpdates = new List<Action<Type[]?>>();
+        public UpdateHandlerActions(List<Action<Type[]?>> before, List<Action<Type[]?>> after)
+        {
+            Before = before;
+            After = after;
+        }
+
+        public List<Action<Type[]?>> Before { get; }
+        public List<Action<Type[]?>> After { get; }
+    }
+
+    private static UpdateHandlerActions GetMetadataUpdateHandlerActions()
+    {
+        var before = new List<Action<Type[]?>>();
+        var after = new List<Action<Type[]?>>();
 
         foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
@@ -54,13 +73,13 @@ internal sealed class StartupHook
 
                 if (GetUpdateMethod(handlerType, "BeforeUpdate") is MethodInfo beforeUpdate)
                 {
-                    beforeUpdates.Add(CreateAction(beforeUpdate));
+                    before.Add(CreateAction(beforeUpdate));
                     methodFound = true;
                 }
 
                 if (GetUpdateMethod(handlerType, "AfterUpdate") is MethodInfo afterUpdate)
                 {
-                    afterUpdates.Add(CreateAction(afterUpdate));
+                    after.Add(CreateAction(afterUpdate));
                     methodFound = true;
                 }
 
@@ -107,7 +126,7 @@ internal sealed class StartupHook
             }
         }
 
-        return (beforeUpdates, afterUpdates);
+        return new UpdateHandlerActions(before, after);
     }
 
     private static List<Action> GetAssembliesReceivingDeltas()
@@ -172,8 +191,6 @@ internal sealed class StartupHook
         }
 
         List<Action>? receiveDeltaNotifications = null;
-        List<Action<Type[]?>>? beforeUpdates = null;
-        List<Action<Type[]?>>? afterUpdates = null;
 
         while (pipeClient.IsConnected)
         {
@@ -182,12 +199,9 @@ internal sealed class StartupHook
 
             try
             {
-                if (beforeUpdates is null || afterUpdates is null)
-                {
-                    (beforeUpdates, afterUpdates) = GetMetadataUpdateHandlerActions();
-                }
+                UpdateHandlerActions beforeAfterUpdates = s_beforeAfterUpdates ??= GetMetadataUpdateHandlerActions();
 
-                beforeUpdates.ForEach(b => b(null)); // TODO: Get types to pass in
+                beforeAfterUpdates.Before.ForEach(b => b(null)); // TODO: Get types to pass in
 
                 foreach (var item in update.Deltas)
                 {
@@ -210,7 +224,7 @@ internal sealed class StartupHook
                 receiveDeltaNotifications ??= GetAssembliesReceivingDeltas();
                 receiveDeltaNotifications.ForEach(r => r.Invoke());
 
-                afterUpdates.ForEach(a => a(null)); // TODO: Get types to pass in
+                beforeAfterUpdates.After.ForEach(a => a(null)); // TODO: Get types to pass in
 
                 Log("Deltas applied.");
             }

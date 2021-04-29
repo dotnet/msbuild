@@ -14,17 +14,17 @@ namespace Microsoft.DotNet.Help.Tests
     public class GivenThatIWantToShowHelpForDotnetHelpCommand : SdkTest
     {
         private const string HelpText =
-@"help:
+@"help
   .NET CLI help utility
 
 Usage:
-  dotnet help [options] [<COMMAND_NAME>]
+  dotnet [options] help [<COMMAND_NAME>]
 
 Arguments:
-  <COMMAND_NAME>    The SDK command to launch online help for.
+  <COMMAND_NAME>  The SDK command to launch online help for.
 
 Options:
-  -?, -h, --help    Show help and usage information";
+  -?, -h, --help  Show help and usage information";
 
         public GivenThatIWantToShowHelpForDotnetHelpCommand(ITestOutputHelper log) : base(log)
         {

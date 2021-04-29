@@ -69,9 +69,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var location = collection.GetLocation(length);
 
             // Assert
-            // Conditional check to account for line endings on Windows
-            var lineLength = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 39 : 38;
-            var expected = new SourceLocation("dummy", length, 1, lineLength);
+            var expected = new SourceLocation("dummy", length, 1, 15);
             Assert.Equal(expected, location);
         }
 

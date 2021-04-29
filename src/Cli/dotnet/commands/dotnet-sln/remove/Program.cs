@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
         public RemoveProjectFromSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
-            _arguments = parseResult.ValueForArgument<IReadOnlyCollection<string>>(SlnRemoveParser.ProjectPathArgument) ?? Array.Empty<string>();
+            _arguments = (parseResult.ValueForArgument<IEnumerable<string>>(SlnRemoveParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
             if (_arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);

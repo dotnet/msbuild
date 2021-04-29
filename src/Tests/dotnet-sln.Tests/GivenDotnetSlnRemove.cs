@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
   Remove one or more projects from a solution file.
 
 Usage:
-  dotnet sln <SLN_FILE> remove [options] <PROJECT_PATH>...
+  dotnet [options] sln <SLN_FILE> remove <PROJECT_PATH>...
 
 Arguments:
   <SLN_FILE>        The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
@@ -31,23 +31,6 @@ Arguments:
 
 Options:
   -?, -h, --help    Show help and usage information";
-
-        private Func<string, string> SlnCommandHelpText = (defaultVal) => $@"sln:
-  .NET modify solution file command
-
-Usage:
-  dotnet sln [options] <SLN_FILE> [command]
-
-Arguments:
-  <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
-
-Options:
-  -?, -h, --help    Show help and usage information
-
-Commands:
-  add <PROJECT_PATH>       Add one or more projects to a solution file.
-  list                     List all projects in a solution file.
-  remove <PROJECT_PATH>    Remove one or more projects from a solution file.";
 
         private const string ExpectedSlnContentsAfterRemove = @"
 Microsoft Visual Studio Solution File, Format Version 12.00
@@ -319,7 +302,7 @@ EndGlobal
         public void WhenInvalidSolutionIsPassedItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("InvalidSolution")
+                .CopyTestAsset("InvalidSolution", identifier: "GivenDotnetSlnRemove")
                 .WithSource()
                 .Path;
 
@@ -354,7 +337,7 @@ EndGlobal
         public void WhenNoProjectIsPassedItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "GivenDotnetSlnRemove")
                 .WithSource()
                 .Path;
 
@@ -387,7 +370,7 @@ EndGlobal
         public void WhenMoreThanOneSolutionExistsInTheDirectoryItPrintsErrorAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithMultipleSlnFiles")
+                .CopyTestAsset("TestAppWithMultipleSlnFiles", identifier: "GivenDotnetSlnRemove")
                 .WithSource()
                 .Path;
 

@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.VSTest.Tests
         public void TestsFromAGivenContainerShouldRunWithExpectedOutput()
         {
             var testAppName = "VSTestCore";
-            var testAsset = _testAssetsManager.CopyTestAsset(testAppName)
+            var testAsset = _testAssetsManager.CopyTestAsset(testAppName, identifier: "VSTestTests")
                 .WithSource()
                 .WithVersionVariables();
 

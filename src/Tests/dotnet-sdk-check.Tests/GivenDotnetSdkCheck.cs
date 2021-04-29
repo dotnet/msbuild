@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
       .NET SDK Check Command
     
     Usage:
-      dotnet sdk check [options]
+      dotnet [options] sdk check
     
     Options:
       -?, -h, --help    Show help and usage information";
