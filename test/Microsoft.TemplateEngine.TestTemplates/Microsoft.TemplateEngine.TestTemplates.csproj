@@ -21,4 +21,8 @@
     <Content Include="nupkg_templates\**" />
     <None Include="nupkg_templates\**" CopyToOutputDirectory="Always" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="test_templates\TemplateWithFileRenameDate\.template.config\template.json" />
+    <None Remove="test_templates\TemplateWithFileRenameDate\date_name.cs" />
+  </ItemGroup>
 </Project>
