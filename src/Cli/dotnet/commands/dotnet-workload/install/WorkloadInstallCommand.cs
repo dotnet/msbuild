@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
             _sdkVersion = new ReleaseVersion(version ?? Product.Version);
 
-            var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
+            var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
