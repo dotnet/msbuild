@@ -876,7 +876,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the minimum message importance not guaranteed to be ignored by registered loggers.
         /// </summary>
-        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
+        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance =>
+            _taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
 
         #endregion
 
