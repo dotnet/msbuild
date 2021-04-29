@@ -259,6 +259,30 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
+        /// Returns the minimum importance of messages logged by this logger.
+        /// </summary>
+        /// <returns>
+        /// The minimum message importance corresponding to this logger's verbosity or (MessageImportance.High - 1)
+        /// if this logger does not log messages of any importance.
+        /// </returns>
+        internal MessageImportance GetMinimumMessageImportance()
+        {
+            if (_forwardingTable[LowMessageEventDescription] == 1)
+            {
+                return MessageImportance.Low;
+            }
+            if (_forwardingTable[NormalMessageEventDescription] == 1)
+            {
+                return MessageImportance.Normal;
+            }
+            if (_forwardingTable[HighMessageEventDescription] == 1)
+            {
+                return MessageImportance.High;
+            }
+            return MessageImportance.High - 1;
+        }
+
+        /// <summary>
         /// Reset the states of per-build member variables.
         /// Used when a build is finished, but the logger might be needed for the next build.
         /// </summary>
