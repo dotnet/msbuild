@@ -158,9 +158,4 @@ if ($dotnet5Source -ne $null) {
     AddPackageSource -Sources $sources -SourceName "dotnet5-internal-transport" -SourceEndPoint "https://pkgs.dev.azure.com/dnceng/internal/_packaging/dotnet5-internal-transport/nuget/v2" -Creds $creds -Username $userName -Password $Password
 }
 
-$dotnetToolsSource = $sources.SelectSingleNode("add[@key='dotnet-tools']")
-if ($dotnetToolsSource -ne $null) {
-    AddPackageSource -Sources $sources -SourceName "dotnet-tools-internal" -SourceEndPoint "https://pkgs.dev.azure.com/dnceng/internal/_packaging/dotnet-tools-internal/nuget/v2" -Creds $creds -Username $userName -Password $Password
-}
-
 $doc.Save($filename)
