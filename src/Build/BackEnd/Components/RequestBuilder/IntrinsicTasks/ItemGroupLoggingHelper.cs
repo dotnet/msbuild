@@ -272,7 +272,7 @@ namespace Microsoft.Build.BackEnd
             bool logItemMetadata,
             DateTime timestamp)
         {
-            // Only run this method if we use AppDomains and not in the default AppDomain
+            // Only create a snapshot of items if we use AppDomains
 #if FEATURE_APPDOMAIN
             CreateItemsSnapshot(ref items);
 #endif
@@ -287,6 +287,7 @@ namespace Microsoft.Build.BackEnd
             return args;
         }
 
+#if FEATURE_APPDOMAIN
         private static void CreateItemsSnapshot(ref IList items)
         {
             if (items == null)
@@ -294,7 +295,6 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-#if FEATURE_APPDOMAIN
             // If we're in the default AppDomain, but any of the items come from a different AppDomain
             // we need to take a snapshot of the items right now otherwise that AppDomain might get
             // unloaded by the time we want to consume the items.
@@ -320,7 +320,6 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
             }
-#endif
 
             int count = items.Count;
             var cloned = new object[count];
@@ -340,6 +339,7 @@ namespace Microsoft.Build.BackEnd
 
             items = cloned;
         }
+#endif
 
         internal static string GetTaskParameterText(TaskParameterEventArgs args)
             => GetTaskParameterText(args.Kind, args.ItemType, args.Items, args.LogItemMetadata);
