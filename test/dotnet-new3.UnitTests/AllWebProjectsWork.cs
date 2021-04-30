@@ -10,12 +10,12 @@ using Xunit.Abstractions;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class AllProjectsWork : IClassFixture<AllProjectsWorkFixture>
+    public class AllWebProjectsWork : IClassFixture<AllProjectsWorkFixture>
     {
         private readonly AllProjectsWorkFixture _fixture;
         private readonly ITestOutputHelper _log;
 
-        public AllProjectsWork(AllProjectsWorkFixture fixture, ITestOutputHelper log)
+        public AllWebProjectsWork(AllProjectsWorkFixture fixture, ITestOutputHelper log)
         {
             _fixture = fixture;
             _log = log;
@@ -30,8 +30,6 @@ namespace Dotnet_new3.IntegrationTests
         [InlineData("mvc_cs-31", "mvc", "-f", "netcoreapp3.1")]
         [InlineData("mvc_fs-31", "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
         [InlineData("api_cs-31", "api", "-f", "netcoreapp3.1")]
-        [InlineData("console_cs-31", "console", "-f", "netcoreapp3.1")]
-        [InlineData("library_cs-50", "classlib", "-f", "net5.0")]
         public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
         {
             string workingDir = Path.Combine(_fixture.BaseWorkingDirectory, testName);
@@ -70,7 +68,7 @@ namespace Dotnet_new3.IntegrationTests
     {
         public AllProjectsWorkFixture(IMessageSink messageSink) : base(messageSink)
         {
-            BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllProjectsWork));
+            BaseWorkingDirectory = TestUtils.CreateTemporaryFolder(nameof(AllWebProjectsWork));
             // create nuget.config file with nuget.org listed
             new DotnetNewCommand(Log, "nugetconfig")
                 .WithCustomHive(HomeDirectory)

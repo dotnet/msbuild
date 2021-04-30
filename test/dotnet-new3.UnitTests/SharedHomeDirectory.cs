@@ -61,7 +61,7 @@ namespace Dotnet_new3.IntegrationTests
             var dn3Path = Environment.GetEnvironmentVariable("DN3");
             if (string.IsNullOrEmpty(dn3Path))
             {
-                var path = typeof(AllProjectsWork).Assembly.Location;
+                var path = typeof(AllWebProjectsWork).Assembly.Location;
                 while (path != null && !File.Exists(Path.Combine(path, "Microsoft.TemplateEngine.sln")))
                 {
                     path = Path.GetDirectoryName(path);

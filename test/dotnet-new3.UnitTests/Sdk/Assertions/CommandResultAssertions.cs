@@ -164,12 +164,14 @@ namespace Microsoft.NET.TestFramework.Assertions
 
         private string AppendDiagnosticsTo(string s)
         {
-            return s + $"{Environment.NewLine}" +
+            return (s + $"{Environment.NewLine}" +
                        $"File Name: {_commandResult.StartInfo.FileName}{Environment.NewLine}" +
                        $"Arguments: {_commandResult.StartInfo.Arguments}{Environment.NewLine}" +
                        $"Exit Code: {_commandResult.ExitCode}{Environment.NewLine}" +
                        $"StdOut:{Environment.NewLine}{_commandResult.StdOut}{Environment.NewLine}" +
-                       $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}";
+                       $"StdErr:{Environment.NewLine}{_commandResult.StdErr}{Environment.NewLine}")
+                       //escape curly braces for String.Format
+                       .Replace("{", "{{").Replace("}", "}}");
         }
     }
 }
