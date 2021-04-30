@@ -25,6 +25,26 @@ namespace Microsoft.Build.Framework
             Metadata = metadata ?? _emptyMetadata;
         }
 
+        /// <summary>
+        /// Clone the task item and all metadata to create a snapshot
+        /// </summary>
+        /// <param name="original">An <see cref="ITaskItem"/> to clone</param>
+        public TaskItemData(ITaskItem original)
+        {
+            ItemSpec = original.ItemSpec;
+            var metadata = original.EnumerateMetadata();
+
+            // Can't preallocate capacity because we don't know how large it will get
+            // without enumerating the enumerable
+            var dictionary = new Dictionary<string, string>();
+            foreach (var item in metadata)
+            {
+                dictionary.Add(item.Key, item.Value);
+            }
+
+            Metadata = dictionary;
+        }
+
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => Metadata;
 
         public int MetadataCount => Metadata.Count;
