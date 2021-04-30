@@ -79,7 +79,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_BlazorOutputPath>wwwroot\_framework\</_BlazorOutputPath>
 
     <!-- Properties for AOT -->
-    <MicrosoftNetCoreAppRuntimePackRidDir>$(NuGetPackageRoot)microsoft.netcore.app.runtime.mono.browser-wasm\$(BundledNETCoreAppPackageVersion)\runtimes\browser-wasm\</MicrosoftNetCoreAppRuntimePackRidDir>
+    <MicrosoftNetCoreAppRuntimePackRidDir>$([MSBuild]::NormalizeDirectory($(NuGetPackageRoot), 'microsoft.netcore.app.runtime.mono.browser-wasm', '$(BundledNETCoreAppPackageVersion)', 'runtimes', 'browser-wasm'))</MicrosoftNetCoreAppRuntimePackRidDir>
     <AOTMode>AotInterp</AOTMode>
     <WasmStripAOTAssemblies>false</WasmStripAOTAssemblies>
     <WasmGenerateAppBundle>false</WasmGenerateAppBundle>
