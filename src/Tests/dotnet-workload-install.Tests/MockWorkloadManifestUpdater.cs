@@ -25,6 +25,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return Task.CompletedTask;
         }
 
+        public IEnumerable<string> GetManifestsUrls(SdkFeatureBand featureBand, bool includePreview)
+        {
+            return new List<string>();
+        }
+
         public IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> CalculateManifestUpdates(SdkFeatureBand featureBand)
         {
             CalculateManifestUpdatesCallParams.Add(featureBand);

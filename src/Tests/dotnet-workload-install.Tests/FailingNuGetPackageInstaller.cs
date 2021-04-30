@@ -36,5 +36,14 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             File.WriteAllText(Path.Combine(targetFolder, "testfile.txt"), string.Empty);
             throw new Exception("Test Failure");
         }
+
+
+        public Task<string> GetPackageUrl(PackageId packageId,
+            NuGetVersion packageVersion,
+            PackageSourceLocation packageSourceLocation = null,
+            bool includePreview = false)
+        {
+            return Task.FromResult("mock-url-" + packageId.ToString());
+        }
     }
 }

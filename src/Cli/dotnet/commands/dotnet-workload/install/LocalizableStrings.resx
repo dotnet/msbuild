@@ -243,4 +243,7 @@
   <data name="IncludePreviewOptionDescription" xml:space="preserve">
     <value>Allow prerelease workload manifests.</value>
   </data>
+  <data name="ResolvingPackageUrls" xml:space="preserve">
+    <value>Resolving package urls for workload(s) {0}...</value>
+  </data>
 </root>

@@ -16,6 +16,11 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             bool includePreview = false,
             string downloadFolder = null);
 
+        Task<string> GetPackageUrl(PackageId packageId,
+            NuGetVersion packageVersion = null,
+            PackageSourceLocation packageSourceLocation = null,
+            bool includePreview = false);
+
         Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder);
     }
 }

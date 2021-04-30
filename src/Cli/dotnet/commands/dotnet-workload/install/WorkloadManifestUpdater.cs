@@ -42,6 +42,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
+        public IEnumerable<string> GetManifestsUrls(SdkFeatureBand featureBand, bool includePreviews)
+        {
+            return GetInstalledManifestIds()
+                .Select(manifest => _nugetPackageDownloader.GetPackageUrl(GetManifestPackageId(featureBand, manifest), includePreview: includePreviews).Result);
+        }
+
         public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestUpdates(SdkFeatureBand featureBand)
         {
             var manifestUpdates = new List<(ManifestId, ManifestVersion, ManifestVersion)>();

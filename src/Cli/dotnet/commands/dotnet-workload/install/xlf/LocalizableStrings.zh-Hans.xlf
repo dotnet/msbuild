@@ -87,6 +87,11 @@
         <target state="new">No manifest with id {0} exists.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResolvingPackageUrls">
+        <source>Resolving package urls for workload(s) {0}...</source>
+        <target state="new">Resolving package urls for workload(s) {0}...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollBackFailedMessage">
         <source>Installation roll back failed: {0}</source>
         <target state="new">Installation roll back failed: {0}</target>

@@ -11,6 +11,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand, bool includePreviews);
 
+        IEnumerable<string> GetManifestsUrls(SdkFeatureBand featureBand, bool includePreviews);
+
         IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestUpdates(SdkFeatureBand featureBand);
     }
 }

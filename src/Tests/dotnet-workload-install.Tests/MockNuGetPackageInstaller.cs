@@ -49,5 +49,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             }
             return Task.FromResult(new List<string>() as IEnumerable<string>);
         }
+
+        public Task<string> GetPackageUrl(PackageId packageId,
+            NuGetVersion packageVersion,
+            PackageSourceLocation packageSourceLocation = null,
+            bool includePreview = false)
+        {
+            return Task.FromResult("mock-url-" + packageId.ToString());
+        }
     }
 }

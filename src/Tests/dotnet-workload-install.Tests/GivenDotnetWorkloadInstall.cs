@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 		
         [Fact]
-        public void GivenWorkloadInstallItCanDownloadToOfflineCache() // TODO make sure manifest packages are included 
+        public void GivenWorkloadInstallItCanDownloadToOfflineCache()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = "mockCachePath";
@@ -155,6 +155,18 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.InstalledPacks.Count.Should().Be(8);
             installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
             nugetDownloader.DownloadCallParams.Count().Should().Be(0);
+        }
+		
+        [Fact]
+		public void GivenWorkloadInstallItPrintsDownloadUrls()
+        {
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--print-download-link-only" });
+            (_, var installManager, _, _, _, _) = GetTestInstallers(parseResult);
+
+            installManager.Execute();
+
+            _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
+            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.sdk");
         }
 
         private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
