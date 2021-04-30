@@ -220,15 +220,15 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(27, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void RarOverallStart()
+        public void RarOverallStart(int assembliesCount, int assemblyFilesCount, bool findDependencies)
         {
-            WriteEvent(27);
+            WriteEvent(27, assembliesCount, assemblyFilesCount, findDependencies);
         }
 
         [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void RarOverallStop()
+        public void RarOverallStop(int resolvedFilesCount, int resolvedDependencyFilesCount, int copyLocalFilesCount)
         {
-            WriteEvent(28);
+            WriteEvent(28, resolvedFilesCount, resolvedDependencyFilesCount, copyLocalFilesCount);
         }
 
         /// <summary>
