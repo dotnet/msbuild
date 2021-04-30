@@ -39,34 +39,39 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.GetInstallationUnit().Should().Be(InstallationUnit.Packs);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void GivenManagedInstallItCanGetFeatureBands(bool writeRecords)
+        [Fact]
+        public void GivenManagedInstallItCanGetFeatureBandsWhenFilesArePresent()
         {
             var versions = new string[] { "6.0.100", "6.0.300", "7.0.100" };
-            var (dotnetRoot, installer, _) = GetTestInstaller(identifier: writeRecords.ToString());
+            var (dotnetRoot, installer, _) = GetTestInstaller();
 
             // Write fake workloads
             foreach (var version in versions)
             {
                 var path = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads");
                 Directory.CreateDirectory(path);
-                if (writeRecords)
-                {
-                    File.Create(Path.Combine(path, "6.0.100"));
-                }
+                File.Create(Path.Combine(path, "6.0.100"));
             }
 
             var featureBands = installer.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords();
-            if (writeRecords)
+            featureBands.ShouldBeEquivalentTo(versions);
+        }
+
+        [Fact]
+        public void GivenManagedInstallItCanNotGetFeatureBandsWhenFilesAreNotPresent()
+        {
+            var versions = new string[] { "6.0.100", "6.0.300", "7.0.100" };
+            var (dotnetRoot, installer, _) = GetTestInstaller();
+
+            // Write fake workloads
+            foreach (var version in versions)
             {
-                featureBands.ShouldBeEquivalentTo(versions);
+                var path = Path.Combine(dotnetRoot, "metadata", "workloads", version, "InstalledWorkloads");
+                Directory.CreateDirectory(path);
             }
-            else
-            {
-                featureBands.Should().BeEmpty();
-            }
+
+            var featureBands = installer.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords();
+            featureBands.Should().BeEmpty();
         }
 
         [Fact]
@@ -111,10 +116,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
             var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
-            mockNugetInstaller.InstallCallParams.Count.Should().Be(1);
-            mockNugetInstaller.InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
+            mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
+            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
             mockNugetInstaller.ExtractCallParams.Count.Should().Be(1);
-            mockNugetInstaller.ExtractCallParams[0].ShouldBeEquivalentTo((mockNugetInstaller.InstallCallResult[0], Path.Combine(dotnetRoot, "metadata", "temp", $"{packInfo.Id}-{packInfo.Version}-extracted")));
+            mockNugetInstaller.ExtractCallParams[0].ShouldBeEquivalentTo((mockNugetInstaller.DownloadCallResult[0], Path.Combine(dotnetRoot, "metadata", "temp", $"{packInfo.Id}-{packInfo.Version}-extracted")));
 
             var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
             File.Exists(installationRecordPath).Should().BeTrue();
@@ -130,8 +135,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var version = "6.0.100";
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
-            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(1);
-            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
+            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams.Count.Should().Be(1);
+            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
             (nugetInstaller as MockNuGetPackageDownloader).ExtractCallParams.Count.Should().Be(0);
 
             var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
@@ -149,8 +154,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var version = "6.0.100";
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
-            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(1);
-            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams[0].ShouldBeEquivalentTo((new PackageId(alias), new NuGetVersion(packInfo.Version)));
+            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams.Count.Should().Be(1);
+            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(alias), new NuGetVersion(packInfo.Version)));
         }
 
         [Fact]
@@ -165,7 +170,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
-            (nugetInstaller as MockNuGetPackageDownloader).InstallCallParams.Count.Should().Be(0);
+            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams.Count.Should().Be(0);
         }
 
         [Fact]
@@ -283,11 +288,26 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             }
         }
 
-        private (string, NetSdkManagedInstaller, INuGetPackageDownloader) GetTestInstaller([CallerMemberName] string testName = "", bool failingInstaller = false, string identifier = "")
+        [Fact]
+        public void GivenManagedInstallItCanInstallManifestVersion()
+        {
+            var (_, installer, nugetDownloader) = GetTestInstaller(manifestDownload: true);
+            var featureBand = new SdkFeatureBand("6.0.100");
+            var manifestId = new ManifestId("test-manifest-1");
+            var manifestVersion = new ManifestVersion("5.0.0");
+
+            installer.InstallWorkloadManifest(manifestId, manifestVersion, featureBand);
+
+            var mockNugetInstaller = nugetDownloader as MockNuGetPackageDownloader;
+            mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
+            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId($"{manifestId}.manifest-{featureBand}"), new NuGetVersion(manifestVersion.ToString())));
+        }
+
+        private (string, NetSdkManagedInstaller, INuGetPackageDownloader) GetTestInstaller([CallerMemberName] string testName = "", bool failingInstaller = false, string identifier = "", bool manifestDownload = false)
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName, identifier: identifier).Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            INuGetPackageDownloader nugetInstaller = failingInstaller ? new FailingNuGetPackageDownloader(testDirectory) :  new MockNuGetPackageDownloader(dotnetRoot);
+            INuGetPackageDownloader nugetInstaller = failingInstaller ? new FailingNuGetPackageDownloader(testDirectory) :  new MockNuGetPackageDownloader(dotnetRoot, manifestDownload);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
             var sdkFeatureBand = new SdkFeatureBand("6.0.100");
             return (dotnetRoot, new NetSdkManagedInstaller(_reporter, sdkFeatureBand, workloadResolver, nugetInstaller, dotnetRoot), nugetInstaller);

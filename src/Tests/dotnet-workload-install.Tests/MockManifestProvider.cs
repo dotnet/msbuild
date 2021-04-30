@@ -16,7 +16,13 @@ namespace ManifestReaderTests
             _filePaths = filePaths;
         }
 
-        public IEnumerable<string> GetManifestDirectories() => throw new System.NotImplementedException();
+        public IEnumerable<string> GetManifestDirectories()
+        {
+            foreach (var filePath in _filePaths)
+            {
+                yield return Path.GetDirectoryName(filePath);
+            }
+        }
 
         public IEnumerable<(string manifestId, Stream manifestStream)> GetManifests()
             {
@@ -25,5 +31,5 @@ namespace ManifestReaderTests
                     yield return (filePath, new FileStream(filePath, FileMode.Open, FileAccess.Read));
                 }
             }
-        }
+    }
 }

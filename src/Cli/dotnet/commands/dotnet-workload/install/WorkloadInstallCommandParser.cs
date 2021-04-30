@@ -39,6 +39,9 @@ namespace Microsoft.DotNet.Cli
                 IsHidden = true
             };
 
+        public static readonly Option IncludePreviewOption =
+            new Option<bool>("--include-previews", LocalizableStrings.IncludePreviewOptionDescription);
+
         public static readonly Option FromCacheOption =
             new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription) { };
 
@@ -57,6 +60,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SkipManifestUpdateOption);
             command.AddOption(PrintDownloadLinkOnlyOption);
             command.AddOption(FromCacheOption);
+            command.AddOption(IncludePreviewOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.NoCacheOption);

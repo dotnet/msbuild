@@ -2,6 +2,21 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="AdManifestUpdated">
+        <source>Updated advertising manifest {0}.</source>
+        <target state="new">Updated advertising manifest {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedAdManifestUpdate">
+        <source>Failed to update the advertising manifest {0}: {1}</source>
+        <target state="new">Failed to update the advertising manifest {0}: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallWorkloadManifest">
+        <source>Failed to install manifest {0} version {1}: {2}.</source>
+        <target state="new">Failed to install manifest {0} version {1}: {2}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FromCacheOptionDescription">
         <source>Complete the operation from cache (offline).</source>
         <target state="new">Complete the operation from cache (offline).</target>
@@ -12,6 +27,11 @@
         <target state="new">Garbage collecting for SDK feature bands {0}...</target>
         <note />
       </trans-unit>
+      <trans-unit id="IncludePreviewOptionDescription">
+        <source>Allow prerelease workload manifests.</source>
+        <target state="new">Allow prerelease workload manifests.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>Successfully installed workload(s) {0}.</source>
         <target state="new">Successfully installed workload(s) {0}.</target>
@@ -20,6 +40,11 @@
       <trans-unit id="InstallingPackVersionMessage">
         <source>Installing pack {0} version {1}...</source>
         <target state="new">Installing pack {0} version {1}...</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallingWorkloadManifest">
+        <source>Installing workload manifest {0} version {1}.</source>
+        <target state="new">Installing workload manifest {0} version {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
@@ -40,6 +65,11 @@
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to install the workload for.</source>
         <target state="needs-review-translation">도구를 설치할 대상 프레임워크입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDoesNotExist">
+        <source>No manifest with id {0} exists.</source>
+        <target state="new">No manifest with id {0} exists.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollBackFailedMessage">

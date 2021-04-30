@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-
 using Microsoft.DotNet.MSBuildSdkResolver;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
@@ -20,6 +19,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         private readonly Dictionary<WorkloadDefinitionId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
         private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
+        private readonly IWorkloadManifestProvider _manifestProvider;
         private string[] _currentRuntimeIdentifiers;
         private readonly string [] _dotnetRootPaths;
 
@@ -61,10 +61,20 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             _dotnetRootPaths = dotnetRootPaths;
             _currentRuntimeIdentifiers = currentRuntimeIdentifiers;
+            _manifestProvider = manifestProvider;
+
+            RefreshWorkloadManifests();
+        }
+
+        public void RefreshWorkloadManifests()
+        {
+            _workloads.Clear();
+            _packs.Clear();
 
             var manifests = new Dictionary<string,WorkloadManifest>(StringComparer.OrdinalIgnoreCase);
 
-            foreach ((string manifestId, Stream manifestStream) in manifestProvider.GetManifests())
+            foreach ((string manifestId, Stream manifestStream) in _manifestProvider.GetManifests())
+
             {
                 using (manifestStream)
                 {

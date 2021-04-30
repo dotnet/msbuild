@@ -17,7 +17,11 @@ using Microsoft.DotNet.Configurer;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Common;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -27,10 +31,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly bool _skipManifestUpdate;
         private readonly string _fromCacheOption;
         private readonly bool _printDownloadLinkOnly;
+        private readonly bool _includePreviews;
         private readonly VerbosityOptions _verbosity;
         private readonly IReadOnlyCollection<string> _workloadIds; 
         private readonly IInstaller _workloadInstaller;
         private readonly IWorkloadResolver _workloadResolver;
+        private readonly IWorkloadManifestProvider _workloadManifestProvider;
+        private readonly INuGetPackageDownloader _nugetPackageDownloader;
+        private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly ReleaseVersion _sdkVersion;
 
         public readonly string MockInstallDirectory = Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath,
@@ -41,11 +49,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IReporter reporter = null,
             IWorkloadResolver workloadResolver = null,
             IInstaller workloadInstaller = null,
+            INuGetPackageDownloader nugetPackageDownloader = null,
+            IWorkloadManifestUpdater workloadManifestUpdater = null,
+            string userHome = null,
             string version = null)
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
             _skipManifestUpdate = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.SkipManifestUpdateOption);
+            _includePreviews = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.IncludePreviewOption);
             _printDownloadLinkOnly = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
             _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
@@ -53,10 +65,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _sdkVersion = new ReleaseVersion(version ?? Product.Version);
 
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity);
+            userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
+            var tempPackagesDir = new DirectoryPath(Path.Combine(userHome, ".dotnet", "sdk-advertising-temp"));
+            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, new NullLogger());
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, userHome);
         }
 
         public override int Execute()
@@ -122,9 +138,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
-                    InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate);
+                    InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
@@ -149,17 +165,23 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             "." +
             version.ToNormalizedString() + ".nupkg";
 
-        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false)
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false, bool includePreviews = false)
         {
             _reporter.WriteLine();
             var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
+            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestsToUpdate = new List<(ManifestId,  ManifestVersion, ManifestVersion)>();
             if (!skipManifestUpdate)
             {
-                throw new NotImplementedException();
+                // Update currently installed workloads
+                var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
+                workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
+
+                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(featureBand, includePreviews).Wait();
+                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates(featureBand);
             }
 
-            InstallWorkloadsWithInstallRecord(workloadIds, featureBand);
+            InstallWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate);
 
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -171,19 +193,31 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter.WriteLine();
         }
 
-        private void InstallWorkloadsWithInstallRecord(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
+        private void InstallWorkloadsWithInstallRecord(
+            IEnumerable<WorkloadId> workloadIds,
+            SdkFeatureBand sdkFeatureBand,
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
                 var installer = _workloadInstaller.GetPackInstaller();
+                IEnumerable<PackInfo> workloadPackToInstall = new List<PackInfo>();
 
-                var workloadPackToInstall = workloadIds
-                    .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
-                    .Distinct()
-                    .Select(packId => _workloadResolver.TryGetPackInfo(packId));
                 TransactionalAction.Run(
                     action: () =>
                     {
+                        foreach (var manifest in manifestsToUpdate)
+                        {
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand);
+                        }
+
+                        _workloadResolver.RefreshWorkloadManifests();
+
+                        workloadPackToInstall = workloadIds
+                            .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                            .Distinct()
+                            .Select(packId => _workloadResolver.TryGetPackInfo(packId));
+
                         foreach (var packId in workloadPackToInstall)
                         {
                             installer.InstallWorkloadPack(packId, sdkFeatureBand);
@@ -194,12 +228,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             _workloadInstaller.GetWorkloadInstallationRecordRepository()
                                 .WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
-
                     },
                     rollback: () => {
                         try
                         {
                             _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+							
+							 foreach (var manifest in manifestsToUpdate)
+                             {
+                                 _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand);
+                             }
+							
                             foreach (var packId in workloadPackToInstall)
                             {
                                 installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
@@ -216,7 +255,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             // Don't hide the original error if roll back fails
                             _reporter.WriteLine(string.Format(LocalizableStrings.RollBackFailedMessage, e.Message));
                         }
-
                     });
             }
             else

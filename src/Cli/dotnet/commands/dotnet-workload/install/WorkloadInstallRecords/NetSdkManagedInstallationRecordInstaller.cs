@@ -32,17 +32,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             }
         }
 
-        public IEnumerable<string> GetInstalledWorkloads(SdkFeatureBand featureBand)
+        public IEnumerable<WorkloadId> GetInstalledWorkloads(SdkFeatureBand featureBand)
         {
             var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir);
             if (Directory.Exists(path))
             {
                 return Directory.EnumerateFiles(path)
-                    .Select(file => Path.GetFileName(file));
+                    .Select(file => new WorkloadId(Path.GetFileName(file)));
             }
             else
             {
-                return new List<string>();
+                return new List<WorkloadId>();
             }
         }
 

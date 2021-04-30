@@ -218,7 +218,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!accumulativeSearchResults.Any())
             {
-                _logger.LogWarning(
+                throw new Exception(
                     string.Format(
                         LocalizableStrings.FailedToLoadNuGetSourceSourceIsNotValid,
                         packageIdentifier,
