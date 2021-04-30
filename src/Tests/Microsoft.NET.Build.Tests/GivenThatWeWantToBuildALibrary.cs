@@ -412,6 +412,9 @@ namespace Microsoft.NET.Build.Tests
                     var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
                     propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
 
+                    //  Disable workloads for this test so we can test iOS and Android TargetFrameworks without having those workloads installed
+                    propGroup.Add(new XElement(ns + "MSBuildEnableWorkloadResolver", false));
+
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);
                     foreach (var targetPlatform in sdkSupportedTargetPlatformVersion)
