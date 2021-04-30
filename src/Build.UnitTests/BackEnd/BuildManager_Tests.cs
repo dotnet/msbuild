@@ -2133,10 +2133,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that disabling the in-proc node when a project requires it will cause the build to fail, but not crash.
+        /// Verify that disabling the in-proc node when a project requires it will cause the project to build on the out of proc node.
         /// </summary>
         [Fact]
-        public void Regress239661_NodeUnavailable()
+        public void ExplicitInprocAffinityGetsOverruledByDisableInprocNode()
         {
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -2151,14 +2151,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
             BuildRequestData data = GetBuildRequestData(contents);
+            _env.CreateFile(data.ProjectFullPath, data.ProjectInstance.ToProjectRootElement().RawXml);
             _parameters.DisableInProcNode = true;
 
             // Require that this project build on the in-proc node, which will not be available.
             data.HostServices.SetNodeAffinity(data.ProjectFullPath, NodeAffinity.InProc);
             BuildResult result = _buildManager.Build(_parameters, data);
-            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
-            _logger.AssertLogDoesntContain("[success]");
-            _logger.AssertLogContains("MSB4223");
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+            _logger.AssertLogContains("[success]");
+            _logger.AssertLogDoesntContain("MSB4223");
         }
 
         /// <summary>

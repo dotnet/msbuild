@@ -141,7 +141,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag used for debugging by forcing all scheduling to go out-of-proc.
         /// </summary>
-        private bool _forceAffinityOutOfProc;
+        internal bool ForceAffinityOutOfProc { get; private set; }
 
         /// <summary>
         /// The path into which debug files will be written.
@@ -177,7 +177,6 @@ namespace Microsoft.Build.BackEnd
         public Scheduler()
         {
             _debugDumpState = Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER") == "1";
-            _forceAffinityOutOfProc = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
             _debugDumpPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
             _nodeLimitOffset = 0;
@@ -616,6 +615,7 @@ namespace Microsoft.Build.BackEnd
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
             _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
+			ForceAffinityOutOfProc = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1" || _componentHost.BuildParameters.DisableInProcNode;
         }
 
         /// <summary>
@@ -1360,7 +1360,7 @@ namespace Microsoft.Build.BackEnd
             // and produce more references (more work to do.)  This just verifies we do not attempt to send a traversal to
             // an out-of-proc node because doing so is inefficient and presently will cause the engine to fail on the remote
             // node because these projects cannot be found.
-            ErrorUtilities.VerifyThrow(nodeId == InProcNodeId || _forceAffinityOutOfProc || !IsTraversalRequest(request.BuildRequest), "Can't assign traversal request to out-of-proc node!");
+            ErrorUtilities.VerifyThrow(nodeId == InProcNodeId || ForceAffinityOutOfProc || !IsTraversalRequest(request.BuildRequest), "Can't assign traversal request to out-of-proc node!");
             request.VerifyState(SchedulableRequestState.Unscheduled);
 
             // Determine if this node has seen our configuration before.  If not, we must send it along with this request.
@@ -2097,7 +2097,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private NodeAffinity GetNodeAffinityForRequest(BuildRequest request)
         {
-            if (_forceAffinityOutOfProc)
+            if (ForceAffinityOutOfProc)
             {
                 return NodeAffinity.OutOfProc;
             }
