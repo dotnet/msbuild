@@ -232,5 +232,106 @@ namespace CompatTests
                 Assert.Empty(differences);
             }
         }
+
+        [Fact]
+        public static void MembersWithDifferentNullableAnnotationsNoErrors()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public string? MyMethod(string? a) => null;
+  }
+}
+";
+
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public string MyMethod(string a) => null;
+  }
+}
+";
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable: true, includeDefaultReferences: true);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new();
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Empty(differences);
+        }
+
+        [Fact]
+        public static void ParametersWithDifferentModifiersNoErrors()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public string MyMethod(ref string a) => throw null;
+    public void MyOutMethod(out string a) => throw null;
+  }
+}
+";
+
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public string MyMethod(string a) => throw null;
+    public void MyOutMethod(string a) { }
+  }
+}
+";
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new();
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            Assert.Empty(differences);
+        }
+
+        [Fact]
+        public static void ParametersWithDifferentModifiersReportedWhenMissing()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public string MyMethod(string? a) => throw null;
+    public void MyOutMethod(out string a) => throw null;
+    public void MyRefMethod(ref string a) { }
+  }
+}
+";
+
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public void OneMethod => { }
+  }
+}
+";
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable: true, includeDefaultReferences: true);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+            ApiComparer differ = new();
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            CompatDifference[] expected = new[]
+            {
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MyMethod(string?)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MyMethod(System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MyOutMethod(out string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MyOutMethod(System.String@)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MyRefMethod(ref string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MyRefMethod(System.String@)"),
+            };
+
+            Assert.Equal(expected, differences);
+        }
     }
 }

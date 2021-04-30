@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
 using System;
 using System.Collections.Generic;
 
@@ -18,11 +19,11 @@ namespace Microsoft.DotNet.ApiCompatibility
         private static string GetKey(ISymbol symbol) =>
             symbol switch
             {
-                IMethodSymbol => symbol.ToDisplayString(),
-                IFieldSymbol => symbol.ToDisplayString(),
-                IPropertySymbol => symbol.ToDisplayString(),
-                IEventSymbol => symbol.ToDisplayString(),
-                ITypeSymbol => symbol.ToDisplayString(),
+                IMethodSymbol => symbol.ToComparisonDisplayString(),
+                IFieldSymbol => symbol.ToComparisonDisplayString(),
+                IPropertySymbol => symbol.ToComparisonDisplayString(),
+                IEventSymbol => symbol.ToComparisonDisplayString(),
+                ITypeSymbol => symbol.ToComparisonDisplayString(),
                 _ => symbol.Name,
             };
     }

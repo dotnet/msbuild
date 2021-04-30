@@ -364,7 +364,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
         RootPath="$(TargetFrameworkRootPath)"
         TargetFrameworkFallbackSearchPaths="$(TargetFrameworkFallbackSearchPaths)"
-        BypassFrameworkInstallChecks="$(BypassFrameworkInstallChecks)"
+        BypassFrameworkInstallChecks="true"
         SuppressNotFoundError="true">
       <Output TaskParameter="FullFrameworkReferenceAssemblyPaths" PropertyName="_FullFrameworkReferenceAssemblyPaths"/>
     </GetReferenceAssemblyPaths>
