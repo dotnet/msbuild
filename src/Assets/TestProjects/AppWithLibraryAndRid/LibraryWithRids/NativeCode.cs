@@ -10,6 +10,7 @@ namespace LibraryWithRids
         {
             switch(GetRidStoredInAssemblyDescriptionAttribute())
             {
+                case "'ubuntu.18.04-x64'":
                 case "'ubuntu.16.04-x64'":
                 case "'ubuntu.14.04-x64'":
                     return Marshal.PtrToStringAnsi(LinuxNativeMethods.sqlite3_libversion());
