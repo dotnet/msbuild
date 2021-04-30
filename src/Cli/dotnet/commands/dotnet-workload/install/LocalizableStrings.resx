@@ -165,6 +165,9 @@
   <data name="WorkloadInstallationFailed" xml:space="preserve">
     <value>Workload installation failed: {0}</value>
   </data>
+  <data name="WorkloadCacheDownloadFailed" xml:space="preserve">
+    <value>Downloading workload packs to offline cache failed: {0}</value>
+  </data>
   <data name="WorkloadAlreadyInstalled" xml:space="preserve">
     <value>Workload '{0}' is already installed.</value>
   </data>
@@ -180,6 +183,9 @@
   <data name="PrintDownloadLinkOnlyDescription" xml:space="preserve">
     <value>Only print the list of links to download without downloading it.</value>
   </data>
+  <data name="DownloadToCacheOptionDescription" xml:space="preserve">
+    <value>Download packs to the offline cache.</value>
+  </data>
   <data name="FromCacheOptionDescription" xml:space="preserve">
     <value>Complete the operation from cache (offline).</value>
   </data>
@@ -188,6 +194,9 @@
   </data>
   <data name="InstallingPackVersionMessage" xml:space="preserve">
     <value>Installing pack {0} version {1}...</value>
+  </data>
+  <data name="DownloadingPackToCacheMessage" xml:space="preserve">
+    <value>Downloading pack {0} version {1} to offline cache {2}...</value>
   </data>
   <data name="WorkloadPackAlreadyInstalledMessage" xml:space="preserve">
     <value>Pack {0} version {1} is already installed.</value>
@@ -209,6 +218,12 @@
   </data>
   <data name="RollingBackPackInstall" xml:space="preserve">
     <value>Rolling back pack {0} installation...</value>
+  </data>
+  <data name="CacheMissingPackage" xml:space="preserve">
+    <value>Package {0} version {1} does not exist in offline cache {2}.</value>
+  </data>
+  <data name="UsingCacheForPackInstall" xml:space="preserve">
+    <value>Installing package {0} version {1} from offline cache {2}.</value>
   </data>
   <data name="AdManifestUpdated" xml:space="preserve">
     <value>Updated advertising manifest {0}.</value>

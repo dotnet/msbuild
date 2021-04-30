@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
             mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
-            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
+            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version), null as string));
             mockNugetInstaller.ExtractCallParams.Count.Should().Be(1);
             mockNugetInstaller.ExtractCallParams[0].ShouldBeEquivalentTo((mockNugetInstaller.DownloadCallResult[0], Path.Combine(dotnetRoot, "metadata", "temp", $"{packInfo.Id}-{packInfo.Version}-extracted")));
 
@@ -136,7 +136,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
             (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams.Count.Should().Be(1);
-            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version)));
+            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version), null as string));
             (nugetInstaller as MockNuGetPackageDownloader).ExtractCallParams.Count.Should().Be(0);
 
             var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version));
 
             (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams.Count.Should().Be(1);
-            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(alias), new NuGetVersion(packInfo.Version)));
+            (nugetInstaller as MockNuGetPackageDownloader).DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(alias), new NuGetVersion(packInfo.Version), null as string));
         }
 
         [Fact]
@@ -300,7 +300,69 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var mockNugetInstaller = nugetDownloader as MockNuGetPackageDownloader;
             mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
-            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId($"{manifestId}.manifest-{featureBand}"), new NuGetVersion(manifestVersion.ToString())));
+            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId($"{manifestId}.manifest-{featureBand}"), new NuGetVersion(manifestVersion.ToString()), null as string));
+        }
+		
+	    [Fact]
+        public void GivenManagedInstallItCanDownloadToOfflineCache()
+        {
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
+            var version = "6.0.100";
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk");
+            var cachePath = Path.Combine(dotnetRoot, "MockCache");
+            installer.DownloadToOfflineCache(packInfo, cachePath);
+
+            var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
+            mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
+            mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version), cachePath));
+            Directory.Exists(cachePath).Should().BeTrue();
+
+            // Should have only been downloaded, not installed
+            mockNugetInstaller.ExtractCallParams.Count.Should().Be(0);
+            var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
+            File.Exists(installationRecordPath).Should().BeFalse();
+            Directory.Exists(packInfo.Path).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenManagedInstallItCanInstallPacksFromOfflineCache()
+        {
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk");
+            var version = "6.0.100";
+            var cachePath = Path.Combine(dotnetRoot, "MockCache");
+
+            // Write mock cache
+            Directory.CreateDirectory(cachePath);
+            var nupkgPath = Path.Combine(cachePath, $"{packInfo.ResolvedPackageId}.{packInfo.Version}.nupkg");
+            File.Create(nupkgPath);
+
+            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version), cachePath);
+            var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
+            
+            // We shouldn't download anything, use the cache
+            mockNugetInstaller.DownloadCallParams.Count.Should().Be(0);
+
+            // Otherwise install should be normal
+            mockNugetInstaller.ExtractCallParams.Count.Should().Be(1);
+            mockNugetInstaller.ExtractCallParams[0].ShouldBeEquivalentTo((nupkgPath, Path.Combine(dotnetRoot, "metadata", "temp", $"{packInfo.Id}-{packInfo.Version}-extracted")));
+            var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
+            File.Exists(installationRecordPath).Should().BeTrue();
+            Directory.Exists(packInfo.Path).Should().BeTrue();
+        }
+
+        [Fact]
+        public void GivenManagedInstallItCanErrorsWhenMissingOfflineCache()
+        {
+            var (dotnetRoot, installer, nugetInstaller) = GetTestInstaller();
+            var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk");
+            var version = "6.0.100";
+            var cachePath = Path.Combine(dotnetRoot, "MockCache");
+            
+            var exceptionThrown = Assert.Throws<Exception>(() => installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version), cachePath));
+            exceptionThrown.Message.Should().Contain(packInfo.ResolvedPackageId);
+            exceptionThrown.Message.Should().Contain(packInfo.Version);
+            exceptionThrown.Message.Should().Contain(cachePath);
         }
 
         private (string, NetSdkManagedInstaller, INuGetPackageDownloader) GetTestInstaller([CallerMemberName] string testName = "", bool failingInstaller = false, string identifier = "", bool manifestDownload = false)

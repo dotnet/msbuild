@@ -9,11 +9,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal interface IWorkloadPackInstaller : IInstaller
     {
-        void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false);
+        void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, string offlineCache = null);
 
         void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand);
 
-        void DownloadToOfflineCache(IEnumerable<string> manifests);
+        void DownloadToOfflineCache(PackInfo packInfo, string offlineCache);
 
         void GarbageCollectInstalledWorkloadPacks();
     }

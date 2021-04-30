@@ -14,7 +14,6 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -70,13 +69,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return _installationRecordRepository;
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
+        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, string offlineCache = null)
         {
-            if (useOfflineCache)
-            {
-                throw new NotImplementedException();
-            }
-
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallingPackVersionMessage, packInfo.Id, packInfo.Version));
             var tempDirsToDelete = new List<string>();
             var tempFilesToDelete = new List<string>();
@@ -87,8 +81,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         if (!PackIsInstalled(packInfo))
                         {
-                            var packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version)).Result;
-                            tempFilesToDelete.Add(packagePath);
+                            string packagePath;
+                            if (string.IsNullOrWhiteSpace(offlineCache))
+                            {
+                                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version)).Result;
+                                tempFilesToDelete.Add(packagePath);
+                            }
+                            else
+                            {
+                                _reporter.WriteLine(string.Format(LocalizableStrings.UsingCacheForPackInstall, packInfo.Id, packInfo.Version, offlineCache));
+                                packagePath = Path.Combine(offlineCache, $"{packInfo.ResolvedPackageId}.{packInfo.Version}.nupkg");
+                                if (!File.Exists(packagePath))
+                                {
+                                    throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, packInfo.ResolvedPackageId, packInfo.Version, offlineCache));
+                                }
+                            }
 
                             if (!Directory.Exists(Path.GetDirectoryName(packInfo.Path)))
                             {
@@ -230,7 +237,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void DownloadToOfflineCache(IEnumerable<string> manifests) => throw new NotImplementedException();
+        public void DownloadToOfflineCache(PackInfo packInfo, string cachePath)
+        {
+            _reporter.WriteLine(string.Format(LocalizableStrings.DownloadingPackToCacheMessage, packInfo.Id, packInfo.Version, cachePath));
+            if (!Directory.Exists(cachePath))
+            {
+                Directory.CreateDirectory(cachePath);
+            }
+            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), downloadFolder: cachePath).Wait();
+        }
 
         public void GarbageCollectInstalledWorkloadPacks()
         {

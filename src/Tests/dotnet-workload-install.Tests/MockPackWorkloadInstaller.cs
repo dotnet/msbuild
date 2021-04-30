@@ -15,6 +15,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
         public IList<(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand)> InstalledManifests = 
             new List<(ManifestId, ManifestVersion, SdkFeatureBand)>();
+        public IList<PackInfo> CachedPacks = new List<PackInfo>();
+        public string CachePath;
         public bool GarbageCollectionCalled = false;
         public MockInstallationRecordRepository InstallationRecordRepository;
         public bool FailingRollback;
@@ -25,9 +27,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingRollback = failingRollback;
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, bool useOfflineCache = false)
+        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, string offlineCache = null)
         {
             InstalledPacks.Add(packInfo);
+            CachePath = offlineCache;
         }
 
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
@@ -64,7 +67,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             InstalledManifests.Add((manifestId, manifestVersion, sdkFeatureBand));
         }
 
-        public void DownloadToOfflineCache(IEnumerable<string> manifests) => throw new System.NotImplementedException();
+        public void DownloadToOfflineCache(PackInfo pack, string cachePath)
+        {
+            CachedPacks.Add(pack);
+            CachePath = cachePath;
+        }
+		
         public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();
     }
 

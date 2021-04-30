@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly string _downloadPath;
         private readonly bool _manifestDownload;
 
-        public List<(PackageId, NuGetVersion)> DownloadCallParams = new List<(PackageId, NuGetVersion)>();
+        public List<(PackageId, NuGetVersion, string)> DownloadCallParams = new List<(PackageId, NuGetVersion, string)>();
 
         public List<string> DownloadCallResult = new List<string>();
 
@@ -31,9 +30,10 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public Task<string> DownloadPackageAsync(PackageId packageId,
             NuGetVersion packageVersion = null,
             PackageSourceLocation packageSourceLocation = null,
-            bool includePreview = false)
+            bool includePreview = false,
+			string downloadFolder = null)
         {
-            DownloadCallParams.Add((packageId, packageVersion));
+            DownloadCallParams.Add((packageId, packageVersion, downloadFolder));
             var path = Path.Combine(_downloadPath, "mock.nupkg");
             DownloadCallResult.Add(path);
             File.WriteAllText(path, string.Empty);

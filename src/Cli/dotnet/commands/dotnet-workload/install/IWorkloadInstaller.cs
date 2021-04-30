@@ -8,9 +8,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal interface IWorkloadInstaller : IInstaller
     {
-        void InstallWorkload(WorkloadId workloadId, bool useOfflineCache = false);
+        void InstallWorkload(WorkloadId workloadId, string offlineCache = null);
 
-        void DownloadToOfflineCache(IEnumerable<string> manifests);
+        void DownloadToOfflineCache(WorkloadId workload, string offlineCache);
 
         void UninstallWorkload(WorkloadId workloadId);
 

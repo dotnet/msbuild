@@ -42,8 +42,9 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option IncludePreviewOption =
             new Option<bool>("--include-previews", LocalizableStrings.IncludePreviewOptionDescription);
 
-        public static readonly Option FromCacheOption =
-            new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription) { };
+        public static readonly Option FromCacheOption = new Option<string>("--from-cache", LocalizableStrings.FromCacheOptionDescription);
+
+        public static readonly Option DownloadToCacheOption = new Option<string>("--download-to-cache", LocalizableStrings.DownloadToCacheOptionDescription);
 
         public static readonly Option SkipManifestUpdateOption = new Option<bool>("--skip-manifest-update", LocalizableStrings.SkipManifestUpdateOptionDescription);
 
@@ -60,6 +61,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(SkipManifestUpdateOption);
             command.AddOption(PrintDownloadLinkOnlyOption);
             command.AddOption(FromCacheOption);
+            command.AddOption(DownloadToCacheOption);
             command.AddOption(IncludePreviewOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);

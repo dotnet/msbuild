@@ -10,9 +10,11 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
     internal interface INuGetPackageDownloader
     {
-        Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion = null,
+        Task<string> DownloadPackageAsync(PackageId packageId,
+            NuGetVersion packageVersion = null,
             PackageSourceLocation packageSourceLocation = null,
-            bool includePreview = false);
+            bool includePreview = false,
+            string downloadFolder = null);
 
         Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder);
     }

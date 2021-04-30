@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         public Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion,
             PackageSourceLocation packageSourceLocation = null,
-            bool includePreview = false)
+            bool includePreview = false,
+            string downloadFolder = null)
         {
             var mockPackagePath = Path.Combine(MockPackageDir, $"{packageId}.{packageVersion}.nupkg");
             File.WriteAllText(mockPackagePath, string.Empty);

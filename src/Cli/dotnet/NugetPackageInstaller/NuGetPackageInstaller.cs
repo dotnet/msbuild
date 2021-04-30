@@ -37,7 +37,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public async Task<string> DownloadPackageAsync(PackageId packageId,
             NuGetVersion packageVersion = null,
             PackageSourceLocation packageSourceLocation = null,
-            bool includePreview = false)
+            bool includePreview = false,
+            string downloadFolder = null)
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -73,9 +74,9 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
             }
 
-            string nupkgPath = Path.Combine(_packageInstallDir.Value, packageId.ToString(),
-                packageVersion.ToNormalizedString(),
-                $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
+            string nupkgPath = downloadFolder == null ?
+                Path.Combine(_packageInstallDir.Value, packageId.ToString(), packageVersion.ToNormalizedString(), $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg") :
+                Path.Combine(downloadFolder, $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
             bool success = await resource.CopyNupkgToStreamAsync(
