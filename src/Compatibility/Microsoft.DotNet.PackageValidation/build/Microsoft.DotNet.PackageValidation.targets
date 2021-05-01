@@ -1,0 +1,83 @@
+<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. -->
+<Project>
+  <UsingTask TaskName="Microsoft.DotNet.PackageValidation.ValidatePackage" AssemblyFile="$(DotNetPackageValidationAssembly)" />
+  <UsingTask TaskName="Microsoft.DotNet.PackageValidation.GetLastStablePackage" AssemblyFile="$(DotNetPackageValidationAssembly)" />
+
+  <Target Name="RunPackageValidation"
+          AfterTargets="Pack"
+          Condition="$(IsPackable) == 'true'">
+    <PropertyGroup Condition="'$(EnablePackageBaselineValidation)' == 'true' and
+                              '$(PackageValidationBaselinePath)' == ''">
+      <PackageValidationBaselinePath>$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName)', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
+    </PropertyGroup>
+
+    <!-- PackageTargetPath isn't exposed by NuGet: https://github.com/NuGet/Home/issues/6671. -->
+    <Microsoft.DotNet.PackageValidation.ValidatePackage
+      PackageTargetPath="$([MSBuild]::ValueOrDefault('$(PackageTargetPath)', '$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg'))"
+      RuntimeGraph="$(RuntimeIdentifierGraphPath)"
+      NoWarn="$(NoWarn)"
+      RunApiCompat="$([MSBuild]::ValueOrDefault('$(RunApiCompat)', 'true'))"
+      BaselineValidation="$(EnablePackageBaselineValidation)"
+      BaselinePackageTargetPath="$(PackageValidationBaselinePath)" />
+  </Target>
+
+  <!-- If package validation against a baseline is enabled and a local path to a baseline package
+       isn't specified, try to find the baseline package on the feeds. Achieving this by hooking
+       onto the CollectPackageDownloads extension point in cross-targeting builds.
+       
+       Static graph restore invokes CollectPackageDownloads from an outer build, non static graph restore doesn't.
+       To avoid multiple target invocations, hook onto an outer build extension point for non static graph restore.
+       
+       Using the private _GetRestoreSettings target which makes the restore settings (i.e. the feeds) available for
+       consumption. -->
+  <Target Name="AddPackageValidationBaselinePackageAsPackageDownload"
+          BeforeTargets="Restore;CollectPackageDownloads"
+          DependsOnTargets="_GetRestoreSettings"
+          Condition="'$(EnablePackageBaselineValidation)' == 'true' and
+                     '$(PackageValidationBaselinePath)' == '' and
+                     '$(IsCrossTargetingBuild)' == 'true'">
+    <PropertyGroup>
+      <PackageValidationBaselineName Condition="'$(PackageValidationBaselineName)' == ''">$(PackageId)</PackageValidationBaselineName>
+    </PropertyGroup>
+
+    <!-- Relying on the private _OutputSources property to pass in the current feeds. -->
+    <Microsoft.DotNet.PackageValidation.GetLastStablePackage
+      PackageId="$(PackageValidationBaselineName)"
+      PackageVersion="$(Version)"
+      NugetFeeds="$(_OutputSources)"
+      Condition="'$(PackageValidationBaselineVersion)' == ''">
+      <Output TaskParameter="LastStableVersion" PropertyName="PackageValidationBaselineVersion" />
+    </Microsoft.DotNet.PackageValidation.GetLastStablePackage>
+
+    <ItemGroup>
+      <PackageDownload Include="$(PackageValidationBaselineName)"
+                       Version="[$(PackageValidationBaselineVersion)]" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_PackageValidationIntermediateBaselineFile>$(MSBuildProjectExtensionsPath)$(MSBuildProjectFile).packagevalidation.g.props</_PackageValidationIntermediateBaselineFile>
+      <_PackageValidationIntermediateBaselineFileContent>
+<![CDATA[<Project Condition="'%24(EnablePackageBaselineValidation)' == 'true'">
+  <PropertyGroup>
+    <PackageValidationBaselineName Condition="'%24(PackageValidationBaselineName)' == ''">$(PackageValidationBaselineName)</PackageValidationBaselineName>
+    <PackageValidationBaselineVersion Condition="'%24(PackageValidationBaselineVersion)' == ''">$(PackageValidationBaselineVersion)</PackageValidationBaselineVersion>
+  </PropertyGroup>
+</Project>]]>
+      </_PackageValidationIntermediateBaselineFileContent>
+    </PropertyGroup>
+
+    <!-- Write the baseline path to disk for it to be accessible during Pack which
+         usually doesn't share evaluation (nodes) with restore.
+         PackageDownload doesn't support GeneratePathProperty which is why the path needs
+         to be written into a separate file than the NuGet generated props file:
+         https://github.com/NuGet/Home/issues/8476. -->
+    <WriteLinesToFile File="$(_PackageValidationIntermediateBaselineFile)"
+                      Lines="$(_PackageValidationIntermediateBaselineFileContent)"
+                      Overwrite="true"
+                      Encoding="Unicode" />
+
+    <ItemGroup>
+      <FileWrites Include="$(PackageValidationIntermediateBaselineFile)" />
+    </ItemGroup>
+  </Target>
+</Project>
