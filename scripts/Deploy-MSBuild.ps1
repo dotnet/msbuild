@@ -60,6 +60,19 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.Utilities.Core.dll"
     FileToCopy "$bootstrapBinDirectory\Microsoft.NET.StringTools.dll"
 
+    FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Buffers.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
+    FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
+    FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"
+
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.resources.dll" "en"
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Tasks.Core.resources.dll" "en"
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Utilities.Core.resources.dll" "en"
@@ -87,6 +100,7 @@ $filesToCopyToBin = @(
 if ($runtime -eq "Desktop") {
     $runtimeSpecificFiles = @(
         FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
+        FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
         FileToCopy "artifacts\bin\Microsoft.Build.Conversion\$configuration\$targetFramework\Microsoft.Build.Conversion.Core.dll"
         FileToCopy "artifacts\bin\Microsoft.Build.Engine\$configuration\$targetFramework\Microsoft.Build.Engine.dll"
 
