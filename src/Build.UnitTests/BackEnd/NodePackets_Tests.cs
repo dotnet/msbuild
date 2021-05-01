@@ -195,7 +195,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new BuildFinishedEventArgs("Message", "Keyword", true),
                     new BuildStartedEventArgs("Message", "Help"),
                     new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low),
-                    new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName"),
+                    new TaskStartedEventArgs("message", "help", "projectFile", "taskFile", "taskName")
+                    {
+                        LineNumber = 345,
+                        ColumnNumber = 123
+                    },
                     new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true),
                     new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low),
                     CreateTaskParameter(),
@@ -454,6 +458,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTaskStarted.ProjectFile, rightTaskStarted.ProjectFile);
                     Assert.Equal(leftTaskStarted.TaskFile, rightTaskStarted.TaskFile);
                     Assert.Equal(leftTaskStarted.TaskName, rightTaskStarted.TaskName);
+                    Assert.Equal(leftTaskStarted.LineNumber, rightTaskStarted.LineNumber);
+                    Assert.Equal(leftTaskStarted.ColumnNumber, rightTaskStarted.ColumnNumber);
                     break;
 
                 default:

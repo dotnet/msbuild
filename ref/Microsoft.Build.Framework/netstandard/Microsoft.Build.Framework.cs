@@ -651,6 +651,8 @@ namespace Microsoft.Build.Framework
         protected TaskStartedEventArgs() { }
         public TaskStartedEventArgs(string message, string helpKeyword, string projectFile, string taskFile, string taskName) { }
         public TaskStartedEventArgs(string message, string helpKeyword, string projectFile, string taskFile, string taskName, System.DateTime eventTimestamp) { }
+        public int ColumnNumber { get { throw null; } }
+        public int LineNumber { get { throw null; } }
         public override string Message { get { throw null; } }
         public string ProjectFile { get { throw null; } }
         public string TaskFile { get { throw null; } }
