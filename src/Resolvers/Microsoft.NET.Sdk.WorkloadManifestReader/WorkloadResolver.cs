@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
+using Microsoft.DotNet.MSBuildSdkResolver;
+
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     /// <remarks>
@@ -60,19 +62,40 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _dotnetRootPaths = dotnetRootPaths;
             _currentRuntimeIdentifiers = currentRuntimeIdentifiers;
 
-            var manifests = new List<WorkloadManifest>();
+            var manifests = new Dictionary<string,WorkloadManifest>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var manifestStream in manifestProvider.GetManifests())
+            foreach ((string manifestId, Stream manifestStream) in manifestProvider.GetManifests())
             {
                 using (manifestStream)
                 {
-                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestStream);
-                    manifests.Add(manifest);
+                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
+                    if (manifests.ContainsKey(manifestId))
+                    {
+                        throw new Exception($"Duplicate workload manifest {manifestId}");
+                    }
+                    manifests.Add(manifestId, manifest);
                 }
             }
 
-            foreach (var manifest in manifests)
+            foreach (var manifest in manifests.Values)
             {
+                if (manifest.DependsOnManifests != null)
+                {
+                    foreach (var dependency in manifest.DependsOnManifests)
+                    {
+                        if (manifests.TryGetValue(dependency.Key, out var resolvedDependency))
+                        {
+                            if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
+                            {
+                                throw new Exception($"Inconsistency in workload manifest '{manifest.Id}': requires '{dependency.Key}' version at least {dependency.Value} but found {resolvedDependency.Version}");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception($"Inconsistency in workload manifest '{manifest.Id}': missing dependency '{dependency.Key}'");
+                        }
+                    }
+                }
                 foreach (var workload in manifest.Workloads)
                 {
                     _workloads.Add(workload.Key, workload.Value);

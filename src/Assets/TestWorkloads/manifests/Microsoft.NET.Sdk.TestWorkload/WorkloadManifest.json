@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": "6.0.0-preview1",
   "workloads": {
     "microsoft-net-sdk-testworkload": {
       "description": "SDK Test Workload",

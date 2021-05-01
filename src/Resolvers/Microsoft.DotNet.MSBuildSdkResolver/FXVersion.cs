@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using System.Text;
+
 namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     // Note: This is SemVer 2.0.0 https://semver.org/spec/v2.0.0.html
@@ -313,5 +315,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
             return true;
         }
+
+        public override string ToString()
+            => (!string.IsNullOrEmpty(Pre), !string.IsNullOrEmpty(Build)) switch
+            {
+                (false, false) => $"{Major}.{Minor}.{Patch}",
+                (true, false) => $"{Major}.{Minor}.{Patch}{Pre}",
+                (false, true) => $"{Major}.{Minor}.{Patch}{Build}",
+                (true, true) => $"{Major}.{Minor}.{Patch}{Pre}{Build}",
+            };
     }
 }

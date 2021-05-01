@@ -6,11 +6,17 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.IO;
 using Xunit;
 using System.Linq;
+using Microsoft.NET.TestFramework;
+using Xunit.Abstractions;
 
 namespace ManifestReaderTests
 {
-    public class ManifestReaderFunctionalTests
+    public class ManifestReaderFunctionalTests : SdkTest
     {
+        public ManifestReaderFunctionalTests(ITestOutputHelper log) : base(log)
+        {
+        }
+
         [Fact]
         public void ItShouldGetAllTemplatesPacks()
         {
@@ -69,6 +75,25 @@ namespace ManifestReaderTests
             workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => false);
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
             result.Should().HaveCount(0);
+        }
+
+        [Fact]
+        public void ItCanReadIntegerVersion()
+        {
+            var testFolder = _testAssetsManager.CreateTestDirectory().Path;
+            var manifestPath = Path.Combine(testFolder, "manifest.json");
+            File.WriteAllText(manifestPath, @"
+{
+    ""version"": 5
+}");
+
+            var workloadResolver =
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(manifestPath), new[] { "fakepath" });
+
+            workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
+
+            workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template).Should().BeEmpty();
+
         }
     }
 }
