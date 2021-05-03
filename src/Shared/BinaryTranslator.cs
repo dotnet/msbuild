@@ -189,7 +189,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    byteArray = Array.Empty<byte>();
+                    byteArray = new byte[0];
                 }
             }
 
