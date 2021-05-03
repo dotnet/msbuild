@@ -2034,8 +2034,8 @@ namespace Microsoft.Build.Execution
                         _translateEntireState = false;
                         break;
                     default:
-                        // if EscapeHatches.ProjectInstanceTranslation have unexpected value, do not force TranslateEntireStateMode
-                        // and keep it as is
+                        // if EscapeHatches.ProjectInstanceTranslation has an unexpected value, do not force TranslateEntireStateMode.
+                        // Just leave it as is.
                         break;
                 }
             }
