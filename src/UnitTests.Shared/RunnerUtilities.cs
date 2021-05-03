@@ -96,8 +96,8 @@ namespace Microsoft.Build.UnitTests.Shared
                         output += args.Data + "\r\n";
 
                         //TODO: DELETE
-                        outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
-                        Console.WriteLine("Executing [{0} {1}]", process, parameters);
+                        outputHelper?.WriteLine(args.Data);
+                        Console.WriteLine(args.Data);
                     }
                 };
 
@@ -108,8 +108,8 @@ namespace Microsoft.Build.UnitTests.Shared
                         output += args.Data + "\r\n";
 
                         //TODO: DELETE
-                        outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
-                        Console.WriteLine("Executing [{0} {1}]", process, parameters);
+                        outputHelper?.WriteLine(args.Data);
+                        Console.WriteLine(args.Data);
                     }
                 };
 
