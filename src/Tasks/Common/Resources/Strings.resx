@@ -760,11 +760,31 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="CompressionInSingleFileRequires60" xml:space="preserve">
     <value>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</value>
-    <comment>{StrBegin="NETSDK1142: "}</comment>
+    <comment>{StrBegin="NETSDK1164: "}</comment>
   </data>
   <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
     <value>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
-    <comment>{StrBegin="NETSDK1142: "}</comment>
+    <comment>{StrBegin="NETSDK1164: "}</comment>
+  </data>
+  <data name="DuplicateTypeLibraryIds" xml:space="preserve">
+    <value>NETSDK1165: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</value>
+    <comment>{StrBegin="NETSDK1165: "}</comment>
+  </data>
+  <data name="InvalidTypeLibraryId" xml:space="preserve">
+    <value>NETSDK1166: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</value>
+    <comment>{StrBegin="NETSDK1166: "}</comment>
+  </data>
+  <data name="MissingTypeLibraryId" xml:space="preserve">
+    <value>NETSDK1167: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</value>
+    <comment>{StrBegin="NETSDK1167: "}</comment>
+  </data>
+  <data name="TypeLibraryDoesNotExist" xml:space="preserve">
+    <value>NETSDK1168: The provided type library '{0}' does not exist.</value>
+    <comment>{StrBegin="NETSDK1168: "}</comment>
+  </data>
+  <data name="InvalidTypeLibrary" xml:space="preserve">
+    <value>NETSDK1169: The provided type library '{0}' is in an invalid format.</value>
+    <comment>{StrBegin="NETSDK1169: "}</comment>
   </data>
   <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
     <value>NETSDK1164: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>

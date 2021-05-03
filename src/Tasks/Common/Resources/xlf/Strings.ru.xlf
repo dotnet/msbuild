@@ -215,12 +215,12 @@
       <trans-unit id="CompressionInSingleFileRequires60">
         <source>NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</source>
         <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</target>
-        <note>{StrBegin="NETSDK1142: "}</note>
+        <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
         <source>NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
         <target state="new">NETSDK1164: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
-        <note>{StrBegin="NETSDK1142: "}</note>
+        <note>{StrBegin="NETSDK1164: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
         <source>NETSDK1133: There was conflicting information about runtime packs available for {0}:
@@ -348,6 +348,11 @@
         <source>NETSDK1110: More than one asset in the runtime pack has the same destination sub-path of '{0}'. Report this error to the .NET team here: https://aka.ms/dotnet-sdk-issue.</source>
         <target state="translated">NETSDK1110: сразу несколько ресурсов в пакете среды выполнения имеют один и тот же конечный вложенный путь "{0}". Сообщите об этой ошибке группе разработчиков .NET по следующему адресу: https://aka.ms/dotnet-sdk-issue.</target>
         <note>{StrBegin="NETSDK1110: "}</note>
+      </trans-unit>
+      <trans-unit id="DuplicateTypeLibraryIds">
+        <source>NETSDK1165: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</source>
+        <target state="new">NETSDK1165: The same resource ID {0} was specified for two type libraries '{1}' and '{2}'. Duplicate type library IDs are not allowed.</target>
+        <note>{StrBegin="NETSDK1165: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict_Info">
         <source>Encountered conflict between '{0}' and '{1}'.</source>
@@ -487,6 +492,16 @@ The following are names of parameters or literal values and should not be transl
 {2}</target>
         <note>{StrBegin="NETSDK1140: "}</note>
       </trans-unit>
+      <trans-unit id="InvalidTypeLibrary">
+        <source>NETSDK1169: The provided type library '{0}' is in an invalid format.</source>
+        <target state="new">NETSDK1169: The provided type library '{0}' is in an invalid format.</target>
+        <note>{StrBegin="NETSDK1169: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidTypeLibraryId">
+        <source>NETSDK1166: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</source>
+        <target state="new">NETSDK1166: The provided type library ID '{0}' for type libary '{1}' is invalid. The ID must be a positive integer less than 65536.</target>
+        <note>{StrBegin="NETSDK1166: "}</note>
+      </trans-unit>
       <trans-unit id="JitLibraryNotFound">
         <source>NETSDK1154: JIT library '{0}' not found.</source>
         <target state="new">NETSDK1154: JIT library '{0}' not found.</target>
@@ -514,6 +529,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1162: Missing output R2R image path (OutputR2RImage metadata).</source>
         <target state="new">NETSDK1162: Missing output R2R image path (OutputR2RImage metadata).</target>
         <note>{StrBegin="NETSDK1162: "}</note>
+      </trans-unit>
+      <trans-unit id="MissingTypeLibraryId">
+        <source>NETSDK1167: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</source>
+        <target state="new">NETSDK1167: An integer ID less than 65536 must be provided for type library '{0}' because more than one type library is specified.</target>
+        <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
         <source>NETSDK1021: More than one file found for {0}</source>
@@ -729,6 +749,11 @@ The following are names of parameters or literal values and should not be transl
         <source>NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
         <target state="new">NETSDK1165: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
         <note>{StrBegin="NETSDK1165: "}</note>
+      </trans-unit>
+      <trans-unit id="TypeLibraryDoesNotExist">
+        <source>NETSDK1168: The provided type library '{0}' does not exist.</source>
+        <target state="new">NETSDK1168: The provided type library '{0}' does not exist.</target>
+        <note>{StrBegin="NETSDK1168: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
         <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>

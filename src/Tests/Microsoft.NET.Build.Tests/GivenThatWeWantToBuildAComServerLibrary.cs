@@ -182,5 +182,139 @@ namespace Microsoft.NET.Build.Tests
                 .And
                 .HaveStdOutContaining("NETSDK1092: ");
         }
+
+        [WindowsOnlyFact]
+        public void It_embeds_single_typelib_with_default_id()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj => proj.Root.Add(new XElement("ItemGroup", new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_multiple_typelibs_without_ids_specified()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb")),
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy2.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1167: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_multiple_typelibs_with_same_ids_specified()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb"), new XAttribute("Id", 1)),
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy2.tlb"), new XAttribute("Id", 1)))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1165: ");
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData("non-integer-id")]
+        [InlineData(ushort.MaxValue + 1)]
+        [InlineData(0)]
+        [InlineData(3.14)]
+        public void It_fails_when_typelib_with_invalid_id_specified(object id)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs", identifier: id.ToString())
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb"), new XAttribute("Id", id)))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1166: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_embeds_multiple_typelibs_with_distinct_ids()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj =>
+                    proj.Root.Add(
+                        new XElement("ItemGroup",
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy1.tlb"), new XAttribute("Id", 1)),
+                            new XElement("ComHostTypeLibrary", new XAttribute("Include", "dummy2.tlb"), new XAttribute("Id", 2)))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_typelib_does_not_exist()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj => proj.Root.Add(new XElement("ItemGroup", new XElement("ComHostTypeLibrary", new XAttribute("Include", "doesnotexist.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1168: ");
+        }
+
+        [WindowsOnlyFact]
+        public void It_fails_when_typelib_is_invalid()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("ComServerWithTypeLibs")
+                .WithSource()
+                .WithProjectChanges(proj => proj.Root.Add(new XElement("ItemGroup", new XElement("ComHostTypeLibrary", new XAttribute("Include", "invalid.tlb")))));
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1169: ");
+        }
     }
 }
