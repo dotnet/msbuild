@@ -94,6 +94,10 @@ namespace Microsoft.Build.UnitTests.Shared
                     if (args != null)
                     {
                         output += args.Data + "\r\n";
+
+                        //TODO: DELETE
+                        outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
+                        Console.WriteLine("Executing [{0} {1}]", process, parameters);
                     }
                 };
 
@@ -102,6 +106,10 @@ namespace Microsoft.Build.UnitTests.Shared
                     if (args != null)
                     {
                         output += args.Data + "\r\n";
+
+                        //TODO: DELETE
+                        outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
+                        Console.WriteLine("Executing [{0} {1}]", process, parameters);
                     }
                 };
 
