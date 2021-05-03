@@ -52,13 +52,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (resource == null)
             {
-                throw new NuGetPackageInstallerException(
+                throw new NuGetPackageDownloaderException(
                     string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
             }
 
             string nupkgPath = downloadFolder == null ?
-                Path.Combine(_packageInstallDir.Value, packageId.ToString(), packageVersion.ToNormalizedString(), $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg") :
-                Path.Combine(downloadFolder, $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
+                Path.Combine(_packageInstallDir.Value, packageId.ToString(), resolvedPackageVersion.ToNormalizedString(), $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg") :
+                Path.Combine(downloadFolder, $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg");
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
             bool success = await resource.CopyNupkgToStreamAsync(
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!success)
             {
-                throw new NuGetPackageInstallerException(
+                throw new NuGetPackageDownloaderException(
                     $"Downloading {packageId} version {resolvedPackageVersion.ToNormalizedString()} failed");
             }
 
@@ -174,7 +174,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             {
                 if (!defaultSources.Any())
                 {
-                    throw new NuGetPackageInstallerException("No NuGet sources are defined or enabled");
+                    throw new NuGetPackageDownloaderException("No NuGet sources are defined or enabled");
                 }
 
                 return defaultSources;
@@ -212,7 +212,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!retrievedSources.Any())
             {
-                throw new NuGetPackageInstallerException("No NuGet sources are defined or enabled");
+                throw new NuGetPackageDownloaderException("No NuGet sources are defined or enabled");
             }
 
             return retrievedSources;
@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!foundPackagesBySource.Any())
             {
-                throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
+                throw new NuGetPackageDownloaderException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
                     string.Join(" ", packageSources.Select(s => s.Source))));
             }
 
@@ -318,11 +318,11 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!atLeastOneSourceValid)
             {
-                throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
+                throw new NuGetPackageDownloaderException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
                     string.Join(";", sources.Select(s => s.Source))));
             }
 
-            throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
+            throw new NuGetPackageDownloaderException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
                 $"{packageIdentifier}::{packageVersion}", string.Join(";", sources.Select(s => s.Source))));
         }
 

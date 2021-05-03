@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
 
         [Fact]
         public async Task GivenNoFeedInstallFailsWithException() =>
-            await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
+            await Assert.ThrowsAsync<NuGetPackageDownloaderException>(() =>
                 _installer.DownloadPackageAsync(TestPackageId, new NuGetVersion(TestPackageVersion)));
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             DirectoryPath nonExistFeed =
                 new DirectoryPath(Path.GetTempPath()).WithSubDirectories(Path.GetRandomFileName());
 
-            await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
+            await Assert.ThrowsAsync<NuGetPackageDownloaderException>(() =>
                 _installer.DownloadPackageAsync(
                     TestPackageId,
                     new NuGetVersion(TestPackageVersion),
@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             WriteNugetConfigFileToPointToTheFeed(fileSystem, validNugetConfigPath);
 
             // "source" option will override everything like nuget.config just like "dotner restore --source ..."
-            await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
+            await Assert.ThrowsAsync<NuGetPackageDownloaderException>(() =>
                 _installer.DownloadPackageAsync(
                     TestPackageId,
                     new NuGetVersion(TestPackageVersion),
