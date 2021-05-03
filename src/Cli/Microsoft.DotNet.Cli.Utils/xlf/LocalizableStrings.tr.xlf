@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
@@ -92,7 +92,7 @@ Bunun nedeni şunlardan biri olabilir:
       </trans-unit>
       <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
         <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
+        <target state="translated">Belirtilen dosya adı '{0}' 1024 bayttan uzun</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindCommandAvailableAsTool">
