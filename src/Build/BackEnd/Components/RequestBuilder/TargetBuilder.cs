@@ -564,6 +564,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
+                    bool success = targetResult.ResultCode == TargetResultCode.Success;
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
                         BuildEventContext = _projectLoggingContext.BuildEventContext,
@@ -571,7 +572,9 @@ namespace Microsoft.Build.BackEnd
                         TargetFile = currentTargetEntry.Target.Location.File,
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
                         BuildReason = currentTargetEntry.BuildReason,
-                        OriginallySucceeded = targetResult.ResultCode == TargetResultCode.Success
+                        OriginallySucceeded = success,
+                        SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltSuccessfully,
+                        OriginalBuildEventContext = targetResult.OriginalBuildEventContext
                     };
 
                     _projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);

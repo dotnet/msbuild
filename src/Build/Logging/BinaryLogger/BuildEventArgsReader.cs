@@ -297,6 +297,8 @@ namespace Microsoft.Build.Logging
             string condition = null;
             string evaluatedCondition = null;
             bool originallySucceeded = false;
+            TargetSkipReason skipReason = TargetSkipReason.None;
+            BuildEventContext originalBuildEventContext = null;
             if (fileFormatVersion >= 13)
             {
                 condition = ReadOptionalString();
@@ -305,6 +307,12 @@ namespace Microsoft.Build.Logging
             }
 
             var buildReason = (TargetBuiltReason)ReadInt32();
+
+            if (fileFormatVersion >= 14)
+            {
+                skipReason = (TargetSkipReason)ReadInt32();
+                originalBuildEventContext = binaryReader.ReadOptionalBuildEventContext();
+            }
 
             var e = new TargetSkippedEventArgs(
                 fields.Message,
@@ -320,6 +328,8 @@ namespace Microsoft.Build.Logging
             e.Condition = condition;
             e.EvaluatedCondition = evaluatedCondition;
             e.OriginallySucceeded = originallySucceeded;
+            e.SkipReason = skipReason;
+            e.OriginalBuildEventContext = originalBuildEventContext;
 
             return e;
         }

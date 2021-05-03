@@ -443,20 +443,31 @@ namespace Microsoft.Build.UnitTests
                 ProjectFile = "foo.csproj",
                 TargetName = "target",
                 ParentTarget = "bar",
-                BuildReason = TargetBuiltReason.DependsOn
+                BuildReason = TargetBuiltReason.DependsOn,
+                SkipReason = TargetSkipReason.PreviouslyBuiltSuccessfully,
+                Condition = "$(condition) == true",
+                EvaluatedCondition = "true == true",
+                OriginalBuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7),
+                OriginallySucceeded = false,
+                TargetFile = "foo.csproj"
             };
 
             Roundtrip(args,
+                e => e.BuildEventContext.ToString(),
                 e => e.ParentTarget,
                 e => e.Importance.ToString(),
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString(),
-                e => e.LineNumber.ToString(),
                 e => e.Message,
                 e => e.ProjectFile,
                 e => e.TargetFile,
                 e => e.TargetName,
-                e => e.BuildReason.ToString());
+                e => e.BuildReason.ToString(),
+                e => e.SkipReason.ToString(),
+                e => e.Condition,
+                e => e.EvaluatedCondition,
+                e => e.OriginalBuildEventContext.ToString(),
+                e => e.OriginallySucceeded.ToString());
         }
 
         [Fact]

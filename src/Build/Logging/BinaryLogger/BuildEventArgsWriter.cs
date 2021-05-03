@@ -454,6 +454,8 @@ Build
             WriteDeduplicatedString(e.EvaluatedCondition);
             Write(e.OriginallySucceeded);
             Write((int)e.BuildReason);
+            Write((int)e.SkipReason);
+            binaryWriter.WriteOptionalBuildEventContext(e.OriginalBuildEventContext);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)

@@ -45,16 +45,23 @@ namespace Microsoft.Build.Execution
         private CacheInfo _cacheInfo;
 
         /// <summary>
+        /// The (possibly null) <see cref="BuildEventContext"/> from the original target build
+        /// </summary>
+        private BuildEventContext _originalBuildEventContext;
+
+        /// <summary>
         /// Initializes the results with specified items and result.
         /// </summary>
         /// <param name="items">The items produced by the target.</param>
         /// <param name="result">The overall result for the target.</param>
-        internal TargetResult(TaskItem[] items, WorkUnitResult result)
+        /// <param name="originalBuildEventContext">The original build event context from when the target was first built, if available. Can be null.</param>
+        internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
             ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
             _items = items;
             _result = result;
+            _originalBuildEventContext = originalBuildEventContext;
         }
 
         /// <summary>
@@ -129,6 +136,11 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             get => _result;
         }
+
+        /// <summary>
+        /// The (possibly null) <see cref="BuildEventContext"/> from the original target build
+        /// </summary>
+        internal BuildEventContext OriginalBuildEventContext => _originalBuildEventContext;
 
         /// <summary>
         /// Sets or gets a flag indicating whether or not a failure results should cause the build to fail.
@@ -253,6 +265,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _result, WorkUnitResult.FactoryForDeserialization);
             translator.Translate(ref _targetFailureDoesntCauseBuildFailure);
             translator.Translate(ref _afterTargetsHaveFailed);
+            translator.TranslateOptionalBuildEventContext(ref _originalBuildEventContext);
             TranslateItems(translator);
         }
 
