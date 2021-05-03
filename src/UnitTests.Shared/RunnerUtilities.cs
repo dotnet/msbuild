@@ -96,8 +96,8 @@ namespace Microsoft.Build.UnitTests.Shared
                         output += args.Data + "\r\n";
 
                         //TODO: DELETE
-                        outputHelper?.WriteLine(args.Data);
-                        Console.WriteLine(args.Data);
+                        outputHelper?.WriteLine(args.Data ?? string.Empty);
+                        Console.WriteLine(args.Data ?? string.Empty);
                     }
                 };
 
@@ -108,8 +108,8 @@ namespace Microsoft.Build.UnitTests.Shared
                         output += args.Data + "\r\n";
 
                         //TODO: DELETE
-                        outputHelper?.WriteLine(args.Data);
-                        Console.WriteLine(args.Data);
+                        outputHelper?.WriteLine(args.Data ?? string.Empty);
+                        Console.WriteLine(args.Data ?? string.Empty);
                     }
                 };
 
