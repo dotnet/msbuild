@@ -352,9 +352,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup>
     <RuntimeHostConfigurationOption Include=" System.Runtime.InteropServices.Marshal.IsBuiltInComSupported"
-                                        Condition="'$(BuiltInComSupport)' != ''"
-                                        Value="$(BuiltInComSupport)"
-                                        Trim="true" />
+                                    Condition="'$(BuiltInComSupport)' != ''"
+                                    Value="$(BuiltInComSupport)"
+                                    Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"
                                     Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' != ''"
