@@ -301,8 +301,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserializedConfig.Project.ShouldNotBeNull();
 
             // Verify that at least some data from 'entire project state' has been deserialized.
-            deserializedConfig.Project.GlobalProperties.ShouldNotBeEmpty();
-            deserializedConfig.Project.GlobalProperties.ShouldBe(configuration.Project.GlobalProperties);
+            deserializedConfig.Project.Directory.ShouldNotBeEmpty();
+            deserializedConfig.Project.Directory.ShouldBe(configuration.Project.Directory);
         }
 
         [Fact]
