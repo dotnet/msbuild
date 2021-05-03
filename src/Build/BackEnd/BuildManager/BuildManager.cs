@@ -567,6 +567,14 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
+            var processNameToBreakInto = Environment.GetEnvironmentVariable("MSBuildDebugBuildManagerOnStartProcessName");
+            var thisProcessMatchesName = string.IsNullOrWhiteSpace(processNameToBreakInto) || Process.GetCurrentProcess().ProcessName.Contains(processNameToBreakInto);
+
+            if (!thisProcessMatchesName)
+            {
+                return;
+            }
+
             switch (Environment.GetEnvironmentVariable("MSBuildDebugBuildManagerOnStart"))
             {
 #if FEATURE_DEBUG_LAUNCH
