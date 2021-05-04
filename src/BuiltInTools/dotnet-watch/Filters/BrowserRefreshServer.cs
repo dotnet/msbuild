@@ -32,8 +32,6 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly TaskCompletionSource _taskCompletionSource;
         private IHost _refreshServer;
 
-        private const int MESSAGE_TIMEOUT = 5000;
-
         public BrowserRefreshServer(IReporter reporter)
         {
             _reporter = reporter;
@@ -143,9 +141,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask<ValueWebSocketReceiveResult?> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
-            var linkedCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(
-                cancellationToken,
-                new CancellationTokenSource(MESSAGE_TIMEOUT).Token);
             for (int i = 0; i < _clientSockets.Count; i++)
             {
                 var clientSocket = _clientSockets[i];
@@ -157,7 +152,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                 try
                 {
-                    return await clientSocket.ReceiveAsync(buffer, linkedCancellationToken.Token);
+                    return await clientSocket.ReceiveAsync(buffer, cancellationToken);
                 }
                 catch (Exception ex)
                 {
