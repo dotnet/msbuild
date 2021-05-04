@@ -54,6 +54,7 @@ namespace MockCacheFromAssembly
             switch (errorKind)
             {
                 case "Exception":
+                    pluginLoggerBase?.LogMessage($"{errorLocation} is going to throw an exception", MessageImportance.High);
                     throw new Exception($"Cache plugin exception from {errorLocation}");
                 case "LoggedError":
                     pluginLoggerBase?.LogError($"Cache plugin logged error from {errorLocation}");
