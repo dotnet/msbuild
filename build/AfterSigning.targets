@@ -1,0 +1,13 @@
+<Project>
+  <!-- Workaround for a failure in RepoToolset targets
+       .nuget\packages\roslyntools.repotoolset\1.1.0-beta3.21251.1\tools\VisualStudio.InsertionManifests.targets(19,11): error MSB4057: The target "GetVsixVersion" does not exist in the project. [C:\Users\raines\.nuget\packages\roslyntools.repotoolset\1.1.0-beta3.21251.1\tools\AfterSigning.proj]
+   -->
+
+   <!-- Copied from https://github.com/dotnet/roslyn-tools/blob/fbd0a65566cbb0654e7a77fdee762d85ac638f85/src/RepoToolset/tools/VisualStudio.targets#L246-L254 -->
+    <Target Name="GetVsixVersion" Outputs="$(_VsixVersion)">
+    <PropertyGroup>
+      <_VsixVersion Condition="'$(OfficialBuild)' == 'true'">$(VersionPrefix).$(_BuildNumberFiveDigitDateStamp)$(_BuildNumberBuildOfTheDayPadded)</_VsixVersion>
+      <_VsixVersion Condition="'$(OfficialBuild)' != 'true'">42.42.42.42</_VsixVersion>
+    </PropertyGroup>
+  </Target>
+</Project>
