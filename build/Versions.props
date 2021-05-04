@@ -9,10 +9,6 @@
     <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
     <RestoreSources  Condition="'$(DotNetBuildOffline)' != 'true'">
         $(RestoreSources);
-        https://dotnet.myget.org/F/roslyn/api/v3/index.json;
-        https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
-        https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
-        https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
     </RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
