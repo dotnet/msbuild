@@ -15,13 +15,13 @@ using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
-    internal class AspNetCoreDeltaApplier : IDeltaApplier
+    internal class DefaultDeltaApplier : IDeltaApplier
     {
         private readonly IReporter _reporter;
         private Task _task;
         private NamedPipeServerStream _pipe;
 
-        public AspNetCoreDeltaApplier(IReporter reporter)
+        public DefaultDeltaApplier(IReporter reporter)
         {
             _reporter = reporter;
         }

@@ -11,7 +11,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
@@ -35,26 +34,22 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public async ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
+            Debug.Assert(context.ProjectGraph is not null);
+
             if (_deltaApplier is null)
             {
-                _deltaApplier = context.DefaultLaunchSettingsProfile.HotReloadProfile switch
+                var hotReloadProfile = HotReloadProfileReader.InferHotReloadProfile(context.ProjectGraph, _reporter);
+                _deltaApplier = hotReloadProfile switch
                 {
-                    "blazorwasm" => new BlazorWebAssemblyDeltaApplier(_reporter),
-                    "blazorwasmhosted" => new BlazorWebAssemblyHostedDeltaApplier(_reporter),
-                    _ => new AspNetCoreDeltaApplier(_reporter),
+                    HotReloadProfile.BlazorWebAssembly => new BlazorWebAssemblyDeltaApplier(_reporter),
+                    HotReloadProfile.BlazorHosted => new BlazorWebAssemblyHostedDeltaApplier(_reporter),
+                    _ => new DefaultDeltaApplier(_reporter),
                 };
             }
 
             await _deltaApplier.InitializeAsync(context, cancellationToken);
 
-            if (context.Iteration == 0)
-            {
-                var instance = MSBuildLocator.QueryVisualStudioInstances().First();
-
-                _reporter.Verbose($"Using MSBuild at '{instance.MSBuildPath}' to load projects.");
-                MSBuildLocator.RegisterInstance(instance);
-            }
-            else if (_currentSolution is not null)
+            if (_currentSolution is not null)
             {
                 _currentSolution.Workspace.Dispose();
                 _currentSolution = null;
@@ -246,5 +241,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 _currentSolution.Workspace.Dispose();
             }
         }
+
+        
     }
 }
