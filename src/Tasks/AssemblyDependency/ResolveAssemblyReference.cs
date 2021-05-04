@@ -2579,7 +2579,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
                     }
-                    MSBuildEventSource.Log.RarOverallStop(_resolvedFiles.Length, _resolvedDependencyFiles.Length, _copyLocalFiles.Length);
+                    MSBuildEventSource.Log.RarOverallStop(_assemblyNames.Length, _assemblyFiles.Length, _resolvedFiles.Length, _resolvedDependencyFiles.Length, _copyLocalFiles.Length);
                     return success && !Log.HasLoggedErrors;
                 }
                 catch (ArgumentException e)
