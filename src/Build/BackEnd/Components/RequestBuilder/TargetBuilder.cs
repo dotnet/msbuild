@@ -573,7 +573,7 @@ namespace Microsoft.Build.BackEnd
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
                         BuildReason = currentTargetEntry.BuildReason,
                         OriginallySucceeded = success,
-                        SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltSuccessfully,
+                        SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltUnsuccessfully,
                         OriginalBuildEventContext = targetResult.OriginalBuildEventContext
                     };
 
