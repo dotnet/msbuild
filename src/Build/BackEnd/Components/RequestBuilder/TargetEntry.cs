@@ -378,6 +378,7 @@ namespace Microsoft.Build.BackEnd
                         TargetFile = _target.Location.File,
                         ParentTarget = ParentEntry?.Target?.Name,
                         BuildReason = BuildReason,
+                        SkipReason = TargetSkipReason.ConditionWasFalse,
                         Condition = _target.Condition,
                         EvaluatedCondition = expanded
                     };
