@@ -257,6 +257,11 @@
         <target state="new">Property initial value: $({0})="{1}" Source: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
+        <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
+        <target state="new">MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="new">MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</target>

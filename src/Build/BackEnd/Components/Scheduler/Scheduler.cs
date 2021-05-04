@@ -167,6 +167,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private AssignUnscheduledRequestsDelegate _customRequestSchedulingAlgorithm;
 
+        private NodeLoggingContext _inprocNodeContext;
+
+        private int _loggedWarningsForProxyBuildsOnOutOfProcNodes = 0;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -611,6 +615,7 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
+            _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
         }
 
         /// <summary>
@@ -1381,7 +1386,27 @@ namespace Microsoft.Build.BackEnd
 
             responses.Add(ScheduleResponse.CreateScheduleResponse(nodeId, request.BuildRequest, mustSendConfigurationToNode));
             TraceScheduler("Executing request {0} on node {1} with parent {2}", request.BuildRequest.GlobalRequestId, nodeId, (request.Parent == null) ? -1 : request.Parent.BuildRequest.GlobalRequestId);
+
+            WarnWhenProxyBuildsGetScheduledOnOutOfProcNode();
+
             request.ResumeExecution(nodeId);
+
+            void WarnWhenProxyBuildsGetScheduledOnOutOfProcNode()
+            {
+                if (request.BuildRequest.ProxyTargets != null && nodeId != InProcNodeId)
+                {
+                    ErrorUtilities.VerifyThrow(
+                        _componentHost.BuildParameters.DisableInProcNode || _forceAffinityOutOfProc,
+                        "Proxy requests should only get scheduled to out of proc nodes when the inproc node is disabled");
+
+                    var loggedWarnings = Interlocked.CompareExchange(ref _loggedWarningsForProxyBuildsOnOutOfProcNodes, 1, 0);
+
+                    if (loggedWarnings == 0)
+                    {
+                        _inprocNodeContext.LogWarning("ProxyRequestNotScheduledOnInprocNode");
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -484,6 +484,57 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RunningProxyBuildsOnOutOfProcNodesShouldIssueWarning(bool disableInprocNodeViaEnvironmentVariable)
+        {
+            var testData = new GraphCacheResponse(
+                new Dictionary<int, int[]>
+                {
+                    {1, new[] {2}}
+                },
+                new Dictionary<int, CacheResult>
+                {
+                    {1, GraphCacheResponse.SuccessfulProxyTargetResult()},
+                    {2, GraphCacheResponse.SuccessfulProxyTargetResult()}
+                });
+
+            var graph = testData.CreateGraph(_env);
+            var mockCache = new InstanceMockCache(testData);
+
+            var buildParameters = new BuildParameters
+            {
+                MaxNodeCount = Environment.ProcessorCount,
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+                    mockCache,
+                    null,
+                    graph)
+            };
+
+            if (disableInprocNodeViaEnvironmentVariable)
+            {
+                _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+            }
+            else
+            {
+                buildParameters.DisableInProcNode = true;
+            }
+
+            using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
+
+            var graphResult = buildSession.BuildGraph(graph);
+
+            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            buildSession.Dispose();
+
+            buildSession.Logger.FullLog.ShouldContain("Static graph based");
+
+            buildSession.Logger.AssertMessageCount("MSB4274", 1);
+
+        }
+
         private void AssertCacheBuild(
             ProjectGraph graph,
             GraphCacheResponse testData,
