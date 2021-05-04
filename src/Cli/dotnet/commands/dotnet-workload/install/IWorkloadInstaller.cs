@@ -13,7 +13,5 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         void DownloadToOfflineCache(IEnumerable<string> manifests);
 
         void UninstallWorkload(WorkloadId workloadId);
-
-        IEnumerable<string> ListInstalledWorkloads();
     }
 }
