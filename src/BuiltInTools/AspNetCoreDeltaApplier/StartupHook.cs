@@ -129,56 +129,15 @@ internal sealed class StartupHook
         return new UpdateHandlerActions(before, after);
     }
 
-    private static List<Action> GetAssembliesReceivingDeltas()
-    {
-        var receipients = new List<Action>();
-
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            var customAttributes = assembly.GetCustomAttributes<AssemblyMetadataAttribute>();
-            var deltaReceiverAttributes = customAttributes.Where(a => a.Key == "ReceiveHotReloadDeltaNotification" && !string.IsNullOrEmpty(a.Value));
-            foreach (var deltaReceiverAttribute in deltaReceiverAttributes)
-            {
-                Log($"Attempting to locate receiver {deltaReceiverAttribute.Value} in assembly {assembly}");
-                var type = assembly.GetType(deltaReceiverAttribute.Value!, throwOnError: false);
-                if (type is null)
-                {
-                    Log($"Could not find delta receiver type {deltaReceiverAttribute.Value} in assembly {assembly}.");
-                    continue;
-                }
-
-                if (type.GetMethod("DeltaApplied", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static) is MethodInfo methodInfo)
-                {
-                    var action = methodInfo.CreateDelegate<Action>();
-                    Action safeAction = () =>
-                    {
-                        try 
-                        { 
-                            action(); 
-                        } 
-                        catch (Exception ex) 
-                        { 
-                            Log(ex.ToString()); 
-                        }
-                    };
-
-                    receipients.Add(safeAction);
-                }
-                else
-                {
-                    Log($"Could not find method 'DeltaApplied' on type {type}.");
-                }
-            }
-        }
-
-        return receipients;
-    }
-
     public static async Task ReceiveDeltas()
     {
         Log("Attempting to receive deltas.");
 
-        using var pipeClient = new NamedPipeClientStream(".", "netcore-hot-reload", PipeDirection.InOut, PipeOptions.CurrentUserOnly | PipeOptions.Asynchronous);
+        // This value is configured by dotnet-watch when the app is to be launched.
+        var namedPipeName = Environment.GetEnvironmentVariable("DOTNET_HOTRELOAD_NAMEDPIPE_NAME") ?? 
+            throw new InvalidOperationException("DOTNET_HOTRELOAD_NAMEDPIPE_NAME was not specified.");
+
+        using var pipeClient = new NamedPipeClientStream(".", namedPipeName, PipeDirection.InOut, PipeOptions.CurrentUserOnly | PipeOptions.Asynchronous);
         try
         {
             await pipeClient.ConnectAsync(5000);
@@ -189,8 +148,6 @@ internal sealed class StartupHook
             Log("Unable to connect to hot-reload server.");
             return;
         }
-
-        List<Action>? receiveDeltaNotifications = null;
 
         while (pipeClient.IsConnected)
         {
@@ -218,11 +175,8 @@ internal sealed class StartupHook
                     ApplyResult.Success_RefreshBrowser;
                 pipeClient.WriteByte((byte)applyResult);
 
-                // TODO: Remove once https://github.com/dotnet/aspnetcore/issues/31806 is addressed
                 // Defer discovering the receiving deltas until the first hot reload delta.
                 // This should give enough opportunity for AppDomain.GetAssemblies() to be sufficiently populated.
-                receiveDeltaNotifications ??= GetAssembliesReceivingDeltas();
-                receiveDeltaNotifications.ForEach(r => r.Invoke());
 
                 beforeAfterUpdates.After.ForEach(a => a(null)); // TODO: Get types to pass in
 

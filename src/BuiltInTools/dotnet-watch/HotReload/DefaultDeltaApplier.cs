@@ -18,6 +18,7 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal class DefaultDeltaApplier : IDeltaApplier
     {
         private readonly IReporter _reporter;
+        private readonly string _namedPipeName = Guid.NewGuid().ToString();
         private Task _task;
         private NamedPipeServerStream _pipe;
 
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 await _pipe.DisposeAsync();
             }
 
-            _pipe = new NamedPipeServerStream("netcore-hot-reload", PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+            _pipe = new NamedPipeServerStream(_namedPipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
             _task = _pipe.WaitForConnectionAsync(cancellationToken);
 
             if (context.Iteration == 0)
@@ -46,6 +47,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
                 // Configure the app for EnC
                 context.ProcessSpec.EnvironmentVariables["DOTNET_MODIFIABLE_ASSEMBLIES"] = "debug";
+                context.ProcessSpec.EnvironmentVariables["DOTNET_HOTRELOAD_NAMEDPIPE_NAME"] = _namedPipeName;
             }
         }
 
