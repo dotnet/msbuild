@@ -445,6 +445,8 @@ Build
 
         private void Write(TargetSkippedEventArgs e)
         {
+            ErrorUtilities.VerifyThrow(e.SkipReason != TargetSkipReason.None, "TargetSkippedEventArgs.SkipReason needs to be set");
+
             Write(BinaryLogRecordKind.TargetSkipped);
             WriteMessageFields(e, writeMessage: false);
             WriteDeduplicatedString(e.TargetFile);
