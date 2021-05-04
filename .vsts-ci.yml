@@ -142,6 +142,12 @@ stages:
               _PublishType: none
               _SignType: test
 
+    - template: /eng/common/templates/job/source-build.yml
+      parameters:
+        platform:
+          name: 'Managed'
+          container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/common/templates/job/publish-build-assets.yml
       parameters:
