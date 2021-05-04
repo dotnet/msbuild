@@ -54,7 +54,13 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="items">The items produced by the target.</param>
         /// <param name="result">The overall result for the target.</param>
-        /// <param name="originalBuildEventContext">The original build event context from when the target was first built, if available. Can be null.</param>
+        /// <param name="originalBuildEventContext">The original build event context from when the target was first built, if available.
+        /// Non-null when creating a <see cref="TargetResult"/> after building the target initially (or skipping due to false condition).
+        /// Null when the <see cref="TargetResult"/> is being created in other scenarios:
+        ///  * Target that never ran because a dependency had an error
+        ///  * in <see cref="ITargetBuilderCallback.LegacyCallTarget"/> when Cancellation was requested
+        ///  * in ProjectCache.CacheResult.ConstructBuildResult
+        /// </param>
         internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
