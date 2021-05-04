@@ -1628,12 +1628,16 @@ namespace Microsoft.Build.Execution
                 ? ae.InnerExceptions.First()
                 : ex;
 
-            if (submission.IsStarted)
+            lock (_syncLock)
             {
-                submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, ex));
+                if (submission.IsStarted)
+                {
+                    submission.CompleteResults(new GraphBuildResult(submission.SubmissionId, ex));
+                }
+
+                _overallBuildSuccess = false;
             }
 
-            _overallBuildSuccess = false;
             CheckSubmissionCompletenessAndRemove(submission);
         }
 
@@ -1684,20 +1688,24 @@ namespace Microsoft.Build.Execution
                     throw;
                 }
 
-                if (resetMainThreadOnFailure)
+                lock (_syncLock)
                 {
-                    _legacyThreadingData.MainThreadSubmissionId = -1;
-                }
 
-                if (projectException == null)
-                {
-                    BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                    ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
-                }
+                    if (resetMainThreadOnFailure)
+                    {
+                        _legacyThreadingData.MainThreadSubmissionId = -1;
+                    }
 
-                submission.CompleteLogging(true);
-                ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
-                _overallBuildSuccess = false;
+                    if (projectException == null)
+                    {
+                        BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                        ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
+                    }
+
+                    submission.CompleteLogging(true);
+                    ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
+                    _overallBuildSuccess = false;
+                }
             }
         }
 
@@ -1824,7 +1832,10 @@ namespace Microsoft.Build.Execution
 
                 ReportResultsToSubmission(result);
 
-                _overallBuildSuccess = false;
+                lock (_syncLock)
+                {
+                    _overallBuildSuccess = false;
+                }
             }
         }
 
