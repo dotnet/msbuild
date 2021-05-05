@@ -84,9 +84,9 @@ stages:
 
     - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
       inputs:
-        signType: $(SignType)
+        signType: ${{parameters.SignType}}
         zipSources: false
-      condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
+      condition: and(succeeded(), in(${{parameters.SignType}}, 'test', 'real'))
 
     - task: ms-vseng.MicroBuildTasks.965C8DC6-1483-45C9-B384-5AC75DA1F1A4.MicroBuildOptProfPlugin@1
       inputs:
@@ -101,7 +101,7 @@ stages:
     - script: eng/CIBuild.cmd
                 -configuration $(BuildConfiguration)
                 -officialBuildId $(Build.BuildNumber)
-                -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
+                -officialSkipApplyOptimizationData ${{parameters.SkipApplyOptimizationData}}
                 /p:RepositoryName=$(Build.Repository.Name)
                 /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
