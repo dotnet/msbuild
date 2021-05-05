@@ -341,6 +341,37 @@ namespace Microsoft.NET.Build.Tests
             GetPropertyValue(testAsset, "TargetPlatformMoniker").Should().Be("Windows,Version=10.0.19041.0");
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("net5.0", true)]
+        [InlineData("net5.0-windows10.0.19041.0", true)]
+        [InlineData("netcoreapp3.1", false)]
+        [InlineData("net472", false)]
+        public void WindowsWorkloadIsInstalledForNet5AndUp(string targetFramework, bool supportsWindowsTargetPlatformIdentifier)
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = targetFramework
+            };
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
+
+            var getValueCommand = new GetValuesCommand(testAsset, "SdkSupportedTargetPlatformIdentifier", GetValuesCommand.ValueType.Item);
+            getValueCommand.Execute()
+                .Should()
+                .Pass();
+
+            if (supportsWindowsTargetPlatformIdentifier)
+            {
+                getValueCommand.GetValues()
+                    .Should()
+                    .Contain("windows");
+            } 
+            else
+            {
+                getValueCommand.GetValues()
+                    .Should()
+                    .NotContain("windows");
+            }
+        }
 
         private string GetPropertyValue(TestAsset testAsset, string propertyName)
         {

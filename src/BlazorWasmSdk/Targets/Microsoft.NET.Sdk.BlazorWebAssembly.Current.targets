@@ -72,11 +72,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PreserveCompilationReferences>false</PreserveCompilationReferences>
     <IsWebConfigTransformDisabled>true</IsWebConfigTransformDisabled>
 
+    <!-- Don't generate a NETSDK1151 error if a non self-contained Exe references a Blazor Exe -->
+    <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
+
     <!-- Internal properties -->
     <_BlazorOutputPath>wwwroot\_framework\</_BlazorOutputPath>
 
     <!-- Properties for AOT -->
-    <MicrosoftNetCoreAppRuntimePackRidDir>$(NuGetPackageRoot)microsoft.netcore.app.runtime.mono.browser-wasm\$(BundledNETCoreAppPackageVersion)\runtimes\browser-wasm\</MicrosoftNetCoreAppRuntimePackRidDir>
+    <MicrosoftNetCoreAppRuntimePackRidDir>$([MSBuild]::NormalizeDirectory($(NuGetPackageRoot), 'microsoft.netcore.app.runtime.mono.browser-wasm', '$(BundledNETCoreAppPackageVersion)', 'runtimes', 'browser-wasm'))</MicrosoftNetCoreAppRuntimePackRidDir>
     <AOTMode>AotInterp</AOTMode>
     <WasmStripAOTAssemblies>false</WasmStripAOTAssemblies>
     <WasmGenerateAppBundle>false</WasmGenerateAppBundle>

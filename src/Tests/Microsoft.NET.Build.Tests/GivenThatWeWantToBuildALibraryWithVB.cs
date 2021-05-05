@@ -203,7 +203,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibraryVB", "ImplicitFrameworkConstantsVB", identifier: targetFramework)
+                .CopyTestAsset("AppWithLibraryVB", "ImplicitFrameworkConstantsVB", targetFramework, identifier: targetFramework)
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
