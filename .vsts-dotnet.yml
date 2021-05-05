@@ -86,7 +86,7 @@ stages:
       inputs:
         signType: ${{parameters.SignType}}
         zipSources: false
-      condition: and(succeeded(), in(${{parameters.SignType}}, 'test', 'real'))
+      condition: and(succeeded(), in('${{parameters.SignType}}', 'test', 'real'))
 
     - task: ms-vseng.MicroBuildTasks.965C8DC6-1483-45C9-B384-5AC75DA1F1A4.MicroBuildOptProfPlugin@1
       inputs:
