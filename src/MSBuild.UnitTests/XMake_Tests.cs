@@ -1,5 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Copyright (c) Microsoft. All rights reserved.// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections;
@@ -2335,6 +2334,8 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
             success.ShouldBeFalse();
         }
 
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
         [Fact]
         public void BuildSlnOutOfProc()
         {

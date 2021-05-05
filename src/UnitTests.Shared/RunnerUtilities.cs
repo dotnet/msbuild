@@ -94,10 +94,6 @@ namespace Microsoft.Build.UnitTests.Shared
                     if (args != null)
                     {
                         output += args.Data + "\r\n";
-
-                        //TODO: DELETE
-                        outputHelper?.WriteLine(args.Data ?? string.Empty);
-                        Console.WriteLine(args.Data ?? string.Empty);
                     }
                 };
 
@@ -106,10 +102,6 @@ namespace Microsoft.Build.UnitTests.Shared
                     if (args != null)
                     {
                         output += args.Data + "\r\n";
-
-                        //TODO: DELETE
-                        outputHelper?.WriteLine(args.Data ?? string.Empty);
-                        Console.WriteLine(args.Data ?? string.Empty);
                     }
                 };
 
