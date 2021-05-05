@@ -2,7 +2,7 @@
   "solution": {
     "path": "..\\..\\..\\sdk.sln",
     "projects": [
-      "src\\BuiltInTools\\AspNetCoreDeltaApplier\\Microsoft.Extensions.AspNetCoreDeltaApplier.csproj",
+      "src\\BuiltInTools\\DotNetDeltaApplier\\Microsoft.Extensions.DotNetDeltaApplier.csproj",
       "src\\BuiltInTools\\BrowserRefresh\\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj",
       "src\\BuiltInTools\\DotNetWatchTasks\\DotNetWatchTasks.csproj",
       "src\\BuiltInTools\\dotnet-watch\\dotnet-watch.csproj",

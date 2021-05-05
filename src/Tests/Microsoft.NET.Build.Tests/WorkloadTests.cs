@@ -38,7 +38,6 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(testProject);
 
             new BuildCommand(testAsset)
-                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
                 .Execute()
                 .Should()
                 .Pass();
@@ -57,7 +56,6 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(testProject);
 
             new BuildCommand(testAsset)
-                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
                 .Execute()
                 .Should()
                 .Fail()
@@ -78,7 +76,6 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(testProject);
 
             new BuildCommand(testAsset)
-                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
                 .Execute()
                 .Should()
                 .Fail()
@@ -99,7 +96,6 @@ namespace Microsoft.NET.Build.Tests
                 .CreateTestProject(testProject);
 
             new BuildCommand(testAsset)
-                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
                 .Execute()
                 .Should()
                 .Fail()
@@ -109,7 +105,7 @@ namespace Microsoft.NET.Build.Tests
 
 
         [Fact]
-        public void It_should_fail_without_resolver_enabled()
+        public void It_should_fail_with_resolver_disabled()
         {
             var testProject = new TestProject()
             {
@@ -122,6 +118,7 @@ namespace Microsoft.NET.Build.Tests
 
             //  NETSDK1139: The target platform identifier workloadtestplatform was not recognized.
             new BuildCommand(testAsset)
+                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "false")
                 .Execute()
                 .Should()
                 .Fail()
@@ -145,7 +142,6 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(testAsset, expectedProperty);
 
             getValuesCommand
-                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
                 .Execute()
                 .Should()
                 .Pass();
@@ -175,7 +171,6 @@ namespace Microsoft.NET.Build.Tests
             var getValuesCommand = new GetValuesCommand(testAsset, expectedProperty);
 
             getValuesCommand
-                .WithEnvironmentVariable("MSBuildEnableWorkloadResolver", "true")
                 .Execute()
                 .Should()
                 .Pass();

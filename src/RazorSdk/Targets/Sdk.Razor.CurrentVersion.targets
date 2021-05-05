@@ -330,23 +330,33 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <ItemGroup>
     <!--
-      Add all cshtml files to UpToDateCheckInput - a collection of files used by FastUpToDateCheck to determine
-      if any of the the project inputs have changed.
-    -->
-    <UpToDateCheckInput Condition="'$(RazorCompileOnBuild)'=='true'" Include="@(Content->WithMetadataValue('Extension', '.cshtml'))" Set="RazorViews" />
-
-    <!--
       Add all .razor files to UpToDateCheckInput. Component compilation is not controlled by RazorCompileOnBuild,
       which is why this itemgroup is unconditional.
     -->
     <UpToDateCheckInput Include="@(Content->WithMetadataValue('Extension', '.razor'))" />
+  </ItemGroup>
 
+  <!-- For .NET 5 and below, a separate Views assembly is produced out of the source
+  CSHTML files. In that scenario, the source CSHTML files and the output assembly
+  are treated in a separate set. -->
+  <ItemGroup Condition="'$(_UseRazorSourceGenerator)' != 'true'">
+    <!--
+      Add all cshtml files to UpToDateCheckInput - a collection of files used by FastUpToDateCheck to determine
+      if any of the the project inputs have changed.
+    -->
+    <UpToDateCheckInput Condition="'$(RazorCompileOnBuild)'=='true'" Include="@(Content->WithMetadataValue('Extension', '.cshtml'))" Set="RazorViews" />
     <!--
       Add Razor output files to UpToDateCheckBuilt - a collection of files used by FastUpToDateCheck to determine
       if any of the project's outputs have changed.
     -->
     <UpToDateCheckBuilt Include="@(RazorIntermediateAssembly)"
-      Condition="'$(RazorCompileOnBuild)'=='true' AND '@(Content->WithMetadataValue('Extension', '.cshtml'))' != '' AND '$(_UseRazorSourceGenerator)' != 'true'" Set="RazorViews" />
+      Condition="'$(RazorCompileOnBuild)'=='true' AND '@(Content->WithMetadataValue('Extension', '.cshtml'))' != ''" Set="RazorViews" />
+  </ItemGroup>
+
+  <!-- For .NET 6 and above, we add CSHTML files to the default set since they
+  are compiled into the app binary. -->
+  <ItemGroup Condition="'$(_UseRazorSourceGenerator)' == 'true'">
+    <UpToDateCheckInput Include="@(Content->WithMetadataValue('Extension', '.cshtml'))" />
   </ItemGroup>
 
   <!--

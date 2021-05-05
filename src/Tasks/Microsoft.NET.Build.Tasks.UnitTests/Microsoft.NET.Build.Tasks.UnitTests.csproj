@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.Build.Tasks\Microsoft.NET.Build.Tasks.csproj" />
+    <ProjectReference Include="..\..\Tests\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>

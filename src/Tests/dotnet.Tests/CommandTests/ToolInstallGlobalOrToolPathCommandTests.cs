@@ -480,6 +480,10 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             public void SetUserExecutionPermission(string path)
             {
             }
+
+            public void Set755Permission(string path)
+            {
+            }
         }
     }
 }

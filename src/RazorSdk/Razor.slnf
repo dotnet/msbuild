@@ -2,7 +2,6 @@
   "solution": {
     "path": "..\\..\\sdk.sln",
     "projects": [
-      "src\\BuiltInTools\\AspNetCoreDeltaApplier\\Microsoft.Extensions.AspNetCoreDeltaApplier.csproj",
       "src\\RazorSdk\\SourceGenerators\\Microsoft.NET.Sdk.Razor.SourceGenerators.csproj",
       "src\\RazorSdk\\Tasks\\Microsoft.NET.Sdk.Razor.Tasks.csproj",
       "src\\RazorSdk\\Tool\\Microsoft.NET.Sdk.Razor.Tool.csproj",

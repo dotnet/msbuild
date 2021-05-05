@@ -29,13 +29,26 @@ Copyright (c) .NET Foundation. All rights reserved.
       <EditorConfigFiles Include="$(RazorEncConfigFile)" Condition="'$(DesignTimeBuild)' == 'true' AND '$(BuildingInsideVisualStudio)' == 'true'"/>
     </ItemGroup>
 
+    <!-- Assemblies in the SDK are cross-genned to improve performance. However, these
+    cross-genned assemblies cannot be loaded into 32-bit VS. To work around these, we load
+    the binaries that are not cross-genned (those in the source-generators directory) when
+    building in VS. However, we want to continue to leverage the cross-genned assemblies in
+    environments where it makes sense so we load them in the CLI and elsewhere.
+    For more info, see https://github.com/dotnet/aspnetcore/issues/32296. -->
+    <PropertyGroup>
+      <_RazorCompilerBinaryPath Condition="'$(MSBuildRuntimeType)' != 'Core'">$(_RazorSdkSourceGeneratorDirectoryRoot)</_RazorCompilerBinaryPath>
+      <_RazorCompilerBinaryPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$(_RazorSdkToolsDirectoryRoot)</_RazorCompilerBinaryPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_RazorAnalyzer Include="$(_RazorCompilerBinaryPath)Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
+      <_RazorAnalyzer Include="$(_RazorCompilerBinaryPath)Microsoft.AspNetCore.Razor.Language.dll" />
+      <_RazorAnalyzer Include="$(_RazorCompilerBinaryPath)Microsoft.CodeAnalysis.Razor.dll" />
+      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
+    </ItemGroup>
+
     <!-- Configure analyzers -->
     <ItemGroup>
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.AspNetCore.Mvc.Razor.Extensions.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.AspNetCore.Razor.Language.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.CodeAnalysis.Razor.dll" />
-      <_RazorAnalyzer Include="$(_RazorSdkSourceGeneratorDirectoryRoot)Microsoft.NET.Sdk.Razor.SourceGenerators.dll" />
-
       <Analyzer Include="@(_RazorAnalyzer)" />
 
       <RazorComponentWithTargetPath

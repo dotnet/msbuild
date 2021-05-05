@@ -13,12 +13,12 @@ namespace Microsoft.DotNet.Watcher.Tools
     internal class BlazorWebAssemblyHostedDeltaApplier : IDeltaApplier
     {
         private readonly BlazorWebAssemblyDeltaApplier _wasmApplier;
-        private readonly AspNetCoreDeltaApplier _hostApplier;
+        private readonly DefaultDeltaApplier _hostApplier;
 
         public BlazorWebAssemblyHostedDeltaApplier(IReporter reporter)
         {
             _wasmApplier = new BlazorWebAssemblyDeltaApplier(reporter);
-            _hostApplier = new AspNetCoreDeltaApplier(reporter)
+            _hostApplier = new DefaultDeltaApplier(reporter)
             {
                 SuppressBrowserRefreshAfterApply = true,
             };

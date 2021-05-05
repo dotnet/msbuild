@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             _tempDirectory = GetUniqueTempProjectPathEachTest();
             _logger = new NuGetTestLogger();
-            _installer = new NuGetPackageDownloader(_tempDirectory, _logger);
+            _installer = new NuGetPackageDownloader(_tempDirectory, null, _logger);
         }
 
         [Fact]
