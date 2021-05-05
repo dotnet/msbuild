@@ -10,15 +10,28 @@ trigger:
 #   SignType: real
 #   SkipApplyOptimizationData: false
 
+parameters:
+- name: OptProfDropName
+  displayName: Optional OptProfDrop Override
+  type: string
+  default: 'default'
+
 variables:
+  # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
-    value: $(OptProfDropName)
-  - ${{ if eq(variables['Build.OptProfDrop'], '') }}:
+    value: ''
+  - name: SourceBranch
+    value: $(IbcSourceBranchName)
+  # If we're not on a vs* branch, use main as our optprof collection branch
+  - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
-      value: $(IbcSourceBranchName)
-    - ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'))) }}:
-      - name: SourceBranch
-        value: main
+      value: main
+  # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
+  - ${{ if ne(parameters.OptProfDropName, 'default') }}:
+    - name: OptProfDrop
+      value: ${{parameters.OptProfDropName}}
+    - name: SourceBranch
+      value: ''
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
