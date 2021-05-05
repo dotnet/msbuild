@@ -2579,7 +2579,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
                     }
-                    MSBuildEventSource.Log.RarOverallStop(_assemblyNames.Length, _assemblyFiles.Length, _resolvedFiles?.Length ?? 0, _resolvedDependencyFiles?.Length ?? 0, _copyLocalFiles?.Length ?? 0);
+                    MSBuildEventSource.Log.RarOverallStop(_assemblyNames?.Length ?? 0, _assemblyFiles?.Length ?? 0, _resolvedFiles?.Length ?? 0, _resolvedDependencyFiles?.Length ?? 0, _copyLocalFiles?.Length ?? 0);
                     return success && !Log.HasLoggedErrors;
                 }
                 catch (ArgumentException e)
@@ -2596,7 +2596,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            MSBuildEventSource.Log.RarOverallStop(_assemblyNames.Length, _assemblyFiles.Length, _resolvedFiles?.Length ?? 0, _resolvedDependencyFiles?.Length ?? 0, _copyLocalFiles?.Length ?? 0);
+            MSBuildEventSource.Log.RarOverallStop(_assemblyNames?.Length ?? 0, _assemblyFiles?.Length ?? 0, _resolvedFiles?.Length ?? 0, _resolvedDependencyFiles?.Length ?? 0, _copyLocalFiles?.Length ?? 0);
 
             return success && !Log.HasLoggedErrors;
         }
