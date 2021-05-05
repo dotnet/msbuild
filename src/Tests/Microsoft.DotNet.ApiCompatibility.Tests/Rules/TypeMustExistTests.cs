@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -204,7 +205,8 @@ namespace CompatTests
 }
 ";
 
-            ApiComparer differ = new(includeInternalSymbols);
+            ApiComparer differ = new();
+            differ.IncludeInternalSymbols = includeInternalSymbols;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
@@ -257,7 +259,8 @@ namespace CompatTests
 }
 ";
 
-            ApiComparer differ = new(includeInternalSymbols);
+            ApiComparer differ = new();
+            differ.IncludeInternalSymbols = includeInternalSymbols;
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
@@ -273,6 +276,272 @@ namespace CompatTests
                   new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.InternalNested.DoubleNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.InternalNested.DoubleNested")
                 );
             }
+
+            Assert.Equal(expected, differences);
+        }
+
+        [Fact]
+        public static void MultipleRightsMissingTypesReported()
+        {
+            string leftSyntax = @"
+
+namespace CompatTests
+{
+  public class First { }
+  public class Second { }
+}
+";
+
+            string[] rightSyntaxes = new[]
+            { @"
+namespace CompatTests
+{
+  public class First { }
+  public class Second { }
+}
+",
+            @"
+namespace CompatTests
+{
+  public class Second { }
+}
+",
+            @"
+namespace CompatTests
+{
+  public class First { }
+}
+"};
+
+            ApiComparer differ = new();
+            ElementContainer<IAssemblySymbol> left =
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
+
+            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+
+            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
+                differ.GetDifferences(left, right);
+
+            List<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> expected = new()
+            {
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-0"), Array.Empty<CompatDifference>()),
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-1"), new CompatDifference[]
+                {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First"),
+                }),
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-2"), new CompatDifference[]
+                {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Second' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Second"),
+                }),
+            };
+
+            Assert.Equal(expected, differences);
+        }
+
+        [Fact]
+        public static void MultipleRightsMissingNestedTypesAreReported()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public class FirstNested
+    {
+      public class SecondNested
+      {
+        public class ThirdNested
+        {
+          public string MyField;
+        }
+      }
+    }
+  }
+}
+";
+
+            string[] rightSyntaxes = new[]
+            { @"
+namespace CompatTests
+{
+  public class First
+  {
+    public class FirstNested
+    {
+      public class SecondNested
+      {
+      }
+    }
+  }
+}
+",
+            @"
+namespace CompatTests
+{
+  public class First
+  {
+  }
+}
+",
+            @"
+namespace CompatTests
+{
+  public class First
+  {
+    public class FirstNested
+    {
+    }
+  }
+}
+",
+            @"
+namespace CompatTests
+{
+}
+"};
+
+            ApiComparer differ = new();
+            ElementContainer<IAssemblySymbol> left =
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
+
+            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+
+            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
+                differ.GetDifferences(left, right);
+
+            List<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> expected = new()
+            {
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-0"), new CompatDifference[]
+                {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested.SecondNested.ThirdNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested.ThirdNested"),
+                }),
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-1"), new CompatDifference[]
+                {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
+                }),
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-2"), new CompatDifference[]
+                {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested.SecondNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested"),
+                }),
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-3"), new CompatDifference[]
+                {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First"),
+                }),
+            };
+
+            Assert.Equal(expected, differences);
+        }
+
+        [Fact]
+        public static void MultipleRightsNoDifferences()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    public class FirstNested
+    {
+      public class SecondNested
+      {
+        public class ThirdNested
+        {
+          public string MyField;
+        }
+      }
+    }
+  }
+}
+";
+
+            string[] rightSyntaxes = new[] { leftSyntax, leftSyntax, leftSyntax, leftSyntax };
+
+            ApiComparer differ = new();
+            ElementContainer<IAssemblySymbol> left =
+                new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
+
+            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes);
+
+            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
+                differ.GetDifferences(left, right);
+
+            int i = 0;
+            foreach ((MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences) diff in differences)
+            {
+                Assert.Equal(left.MetadataInformation, diff.left);
+                MetadataInformation expectedRightMetadata = new(string.Empty, string.Empty, $"runtime-{i++}");
+                Assert.Equal(expectedRightMetadata, diff.right);
+                Assert.Empty(diff.differences);
+            }
+
+            Assert.Equal(4, i);
+        }
+
+        [Fact]
+        public void MultipleRightsTypeForwardExistsOnAll()
+        {
+            string forwardedTypeSyntax = @"
+namespace CompatTests
+{
+  public class ForwardedTestType { }
+}
+";
+            string rightSyntax = @"
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(CompatTests.ForwardedTestType))]
+";
+            string[] rightSyntaxes = new[] { rightSyntax, rightSyntax, rightSyntax, rightSyntax, rightSyntax };
+            IEnumerable<string> references = new[] { forwardedTypeSyntax };
+            ElementContainer<IAssemblySymbol> left =
+                new(SymbolFactory.GetAssemblyFromSyntax(forwardedTypeSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
+            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references, includeDefaultReferences: true);
+
+            ApiComparer differ = new();
+            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
+                differ.GetDifferences(left, right);
+
+            int i = 0;
+            foreach ((MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences) diff in differences)
+            {
+                Assert.Equal(left.MetadataInformation, diff.left);
+                MetadataInformation expectedRightMetadata = new(string.Empty, string.Empty, $"runtime-{i++}");
+                Assert.Equal(expectedRightMetadata, diff.right);
+                Assert.Empty(diff.differences);
+            }
+
+            Assert.Equal(5, i);
+        }
+
+        [Fact]
+        public void MultipleRightsMissingTypeForwardIsReported()
+        {
+            string forwardedTypeSyntax = @"
+namespace CompatTests
+{
+  public class ForwardedTestType { }
+}
+";
+            string rightWithForward = @"
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(CompatTests.ForwardedTestType))]
+";
+            string[] rightSyntaxes = new[] { rightWithForward, "namespace CompatTests { internal class Foo { } }", rightWithForward };
+            IEnumerable<string> references = new[] { forwardedTypeSyntax };
+            ElementContainer<IAssemblySymbol> left =
+                new(SymbolFactory.GetAssemblyFromSyntax(forwardedTypeSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
+            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references, includeDefaultReferences: true);
+
+            ApiComparer differ = new();
+            IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
+                differ.GetDifferences(left, right);
+
+            List<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> expected = new()
+            {
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-0"), Array.Empty<CompatDifference>()),
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-1"), new CompatDifference[]
+                {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.ForwardedTestType' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.ForwardedTestType"),
+                }),
+                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-2"), Array.Empty<CompatDifference>()),
+            };
 
             Assert.Equal(expected, differences);
         }

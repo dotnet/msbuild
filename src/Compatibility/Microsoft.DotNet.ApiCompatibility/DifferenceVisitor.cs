@@ -10,18 +10,29 @@ namespace Microsoft.DotNet.ApiCompatibility
     /// <summary>
     /// The visitor that traverses the mappers' tree and gets it's differences in a <see cref="DiagnosticBag{CompatDifference}"/>.
     /// </summary>
-    public class DiferenceVisitor : MapperVisitor
+    public class DifferenceVisitor : MapperVisitor
     {
-        private readonly DiagnosticBag<CompatDifference> _differenceBag;
+        private readonly DiagnosticBag<CompatDifference>[] _diagnosticBags;
 
         /// <summary>
         /// Instantiates the visitor with the desired settings.
         /// </summary>
+        /// <param name="rightCount">Represents the number of elements that the mappers contain on the right hand side.</param>
         /// <param name="noWarn">A comma separated list of diagnostic IDs to ignore.</param>
         /// <param name="ignoredDifferences">A list of tuples to ignore diagnostic IDs by symbol.</param>
-        public DiferenceVisitor(string noWarn = null, (string diagnosticId, string symbolId)[] ignoredDifferences = null)
+        public DifferenceVisitor(int rightCount = 1, string noWarn = null, (string diagnosticId, string symbolId)[] ignoredDifferences = null)
         {
-            _differenceBag = new DiagnosticBag<CompatDifference>(noWarn ?? string.Empty, ignoredDifferences ?? Array.Empty<(string, string)>());
+            if (rightCount < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rightCount));
+            }
+
+            _diagnosticBags = new DiagnosticBag<CompatDifference>[rightCount];
+
+            for (int i = 0; i < rightCount; i++)
+            {
+                _diagnosticBags[i] = new DiagnosticBag<CompatDifference>(noWarn ?? string.Empty, ignoredDifferences ?? Array.Empty<(string, string)>());
+            }
         }
 
         /// <summary>
@@ -35,7 +46,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 throw new ArgumentNullException(nameof(assembly));
             }
 
-            _differenceBag.AddRange(assembly.GetDifferences());
+            AddDifferences(assembly);
             base.Visit(assembly);
         }
 
@@ -50,7 +61,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 throw new ArgumentNullException(nameof(type));
             }
 
-            _differenceBag.AddRange(type.GetDifferences());
+            AddDifferences(type);
 
             if (type.ShouldDiffMembers)
             {
@@ -69,12 +80,28 @@ namespace Microsoft.DotNet.ApiCompatibility
                 throw new ArgumentNullException(nameof(member));
             }
 
-            _differenceBag.AddRange(member.GetDifferences());
+            AddDifferences(member);
         }
 
         /// <summary>
-        /// The differences that the <see cref="DiagnosticBag{CompatDifference}"/> has at this point.
+        /// A list of <see cref="DiagnosticBag{CompatDifference}"/>.
+        /// One per element compared in the right hand side.
         /// </summary>
-        public IEnumerable<CompatDifference> Differences => _differenceBag.Differences;
+        public IEnumerable<DiagnosticBag<CompatDifference>> DiagnosticBags => _diagnosticBags;
+
+        private void AddDifferences<T>(ElementMapper<T> mapper)
+        {
+            IReadOnlyList<IEnumerable<CompatDifference>> differences = mapper.GetDifferences();
+
+            if (_diagnosticBags.Length != differences.Count)
+            {
+                throw new InvalidOperationException($"The provided rightCount when creating the visitor should match the number of rights that are mapped in the mappers.");
+            }
+
+            for (int i = 0; i < differences.Count; i++)
+            {
+                _diagnosticBags[i].AddRange(differences[i]);
+            }
+        }
     }
 }
