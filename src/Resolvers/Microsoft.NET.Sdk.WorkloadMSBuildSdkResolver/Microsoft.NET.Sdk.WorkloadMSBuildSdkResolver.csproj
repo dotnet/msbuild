@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
-    <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(SdkTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>$(SdkTargetFramework)</TargetFrameworks>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
-
-
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <None Update="SdkResolvers\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver\Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver.xml" CopyToOutputDirectory="PreserveNewest" />
@@ -32,6 +29,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <ProjectReference Include="..\Microsoft.DotNet.SdkResolver\Microsoft.DotNet.SdkResolver.csproj" />
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
 
   <Target Name="WriteFullFrameworkResolverManifest" AfterTargets="AfterBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

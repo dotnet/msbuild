@@ -1,0 +1,22 @@
+//*********************************************************
+//
+// Copyright (c) Microsoft. All rights reserved.
+// This code is licensed under the MIT License (MIT).
+// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
+// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY
+// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
+// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
+//
+//*********************************************************
+namespace SimpleMathComponent
+{
+    [default_interface]
+    runtimeclass SimpleMath
+    {
+        SimpleMath();
+        Double add(Double firstNumber, Double secondNumber);
+        Double subtract(Double firstNumber, Double secondNumber);
+        Double multiply(Double firstNumber, Double secondNumber);
+        Double divide(Double firstNumber, Double secondNumber);
+    }
+}

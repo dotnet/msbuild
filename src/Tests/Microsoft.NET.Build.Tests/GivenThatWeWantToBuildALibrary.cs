@@ -332,7 +332,7 @@ namespace Microsoft.NET.Build.Tests
         public void It_implicitly_defines_compilation_constants_for_the_target_framework(string targetFramework, string[] expectedDefines)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", identifier: expectedDefines.GetHashCode().ToString())
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework, identifier: expectedDefines.GetHashCode().ToString())
                 .WithSource()
                 .WithProjectChanges(project =>
                 {
@@ -393,7 +393,7 @@ namespace Microsoft.NET.Build.Tests
         {
             var targetFramework = "net5.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", identifier: expectedDefines.GetHashCode().ToString())
+                .CopyTestAsset("AppWithLibrary", "ImplicitFrameworkConstants", targetFramework, identifier: expectedDefines.GetHashCode().ToString())
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges(project =>
@@ -411,6 +411,9 @@ namespace Microsoft.NET.Build.Tests
                     propGroup.Add(platformSupported);
                     var disableUnnecessaryImplicitFrameworkReferencesForThisTest = new XElement(ns + "DisableImplicitFrameworkReferences", "true");
                     propGroup.Add(disableUnnecessaryImplicitFrameworkReferencesForThisTest);
+
+                    //  Disable workloads for this test so we can test iOS and Android TargetFrameworks without having those workloads installed
+                    propGroup.Add(new XElement(ns + "MSBuildEnableWorkloadResolver", false));
 
                     var itemGroup = new XElement(ns + "ItemGroup");
                     project.Root.Add(itemGroup);

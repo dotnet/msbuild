@@ -216,12 +216,35 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private async ValueTask<SourceText> GetSourceTextAsync(string filePath)
         {
+            var zeroLengthRetryPerformed = false;
             for (var attemptIndex = 0; attemptIndex < 6; attemptIndex++)
             {
                 try
                 {
-                    using var stream = File.OpenRead(filePath);
-                    return SourceText.From(stream, Encoding.UTF8);
+                    // File.OpenRead opens the file with FileShare.Read. This may prevent IDEs from saving file
+                    // contents to disk
+                    SourceText sourceText;
+                    using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        sourceText = SourceText.From(stream, Encoding.UTF8);
+                    }
+
+                    if (!zeroLengthRetryPerformed && sourceText.Length == 0)
+                    {
+                        zeroLengthRetryPerformed = true;
+
+                        // VSCode (on Windows) will sometimes perform two separate writes when updating a file on disk.
+                        // In the first update, it clears the file contents, and in the second, it writes the intended
+                        // content.
+                        // It's atypical that a file being watched for hot reload would be empty. We'll use this as a
+                        // hueristic to identify this case and perform an additional retry reading the file after a delay.
+                        await Task.Delay(20);
+
+                        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                        sourceText = SourceText.From(stream, Encoding.UTF8);
+                    }
+
+                    return sourceText;
                 }
                 catch (IOException) when (attemptIndex < 5)
                 {
