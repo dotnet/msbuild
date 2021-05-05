@@ -38,7 +38,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
         /// </summary>
-        private static bool s_onlyUseOutOfProcNodes = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+        private static bool s_disableInprocNodeByEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
         /// <summary>
         /// Help diagnose tasks that log after they return.
@@ -104,6 +104,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _yieldThreadId = -1;
 
+        private bool _disableInprocNode;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -124,6 +126,7 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = false;
             _activeProxy = true;
             _callbackMonitor = new Object();
+            _disableInprocNode = s_disableInprocNodeByEnvironmentVariable || host.BuildParameters.DisableInProcNode;
         }
 
         /// <summary>
@@ -137,7 +140,7 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 VerifyActiveProxy();
-                return _host.BuildParameters.MaxNodeCount > 1 || s_onlyUseOutOfProcNodes;
+                return _host.BuildParameters.MaxNodeCount > 1 || _disableInprocNode;
             }
         }
 
