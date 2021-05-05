@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
-using Microsoft.TemplateEngine.Edge;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.New
@@ -53,12 +52,14 @@ namespace Microsoft.DotNet.Tools.New
 
         private static IEnumerable<string> GetTemplateFolders(IEngineEnvironmentSettings environmentSettings)
         {
-            var paths = new Paths(environmentSettings);
             var templateFoldersToInstall = new List<string>();
 
+            var sdkDirectory = Path.GetDirectoryName(typeof(Microsoft.DotNet.Cli.DotnetFiles).Assembly.Location);
+            var dotnetRootPath = Path.GetDirectoryName(Path.GetDirectoryName(sdkDirectory));
+
             // First grab templates from dotnet\templates\M.m folders, in ascending order, up to our version
-            string templatesRootFolder = Path.GetFullPath(Path.Combine(paths.Global.BaseDir, "..", "..", "templates"));
-            if (paths.Exists(templatesRootFolder))
+            string templatesRootFolder = Path.GetFullPath(Path.Combine(dotnetRootPath, "templates"));
+            if (Directory.Exists(templatesRootFolder))
             {
                 IReadOnlyDictionary<string, SemanticVersion> parsedNames = GetVersionDirectoriesInDirectory(templatesRootFolder);
                 IList<string> versionedFolders = GetBestVersionsByMajorMinor(parsedNames);
@@ -68,8 +69,8 @@ namespace Microsoft.DotNet.Tools.New
             }
 
             // Now grab templates from our base folder, if present.
-            string templatesDir = Path.Combine(paths.Global.BaseDir, "Templates");
-            if (paths.Exists(templatesDir))
+            string templatesDir = Path.Combine(sdkDirectory, "Templates");
+            if (Directory.Exists(templatesDir))
             {
                 templateFoldersToInstall.Add(templatesDir);
             }
