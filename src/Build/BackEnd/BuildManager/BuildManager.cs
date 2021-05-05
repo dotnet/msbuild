@@ -1597,16 +1597,19 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // BuildRequest may be null if the submission fails early on.
-            if (submission.BuildRequest != null)
+            lock(_syncLock)
             {
-                var result = new BuildResult(submission.BuildRequest, ex);
-                submission.CompleteResults(result);
-                submission.CompleteLogging(true);
-            }
+                // BuildRequest may be null if the submission fails early on.
+                if (submission.BuildRequest != null)
+                {
+                    var result = new BuildResult(submission.BuildRequest, ex);
+                    submission.CompleteResults(result);
+                    submission.CompleteLogging(true);
+                }
 
-            _overallBuildSuccess = false;
-            CheckSubmissionCompletenessAndRemove(submission);
+                _overallBuildSuccess = false;
+                CheckSubmissionCompletenessAndRemove(submission);
+            }
         }
 
         /// <summary>
@@ -1636,9 +1639,8 @@ namespace Microsoft.Build.Execution
                 }
 
                 _overallBuildSuccess = false;
+                CheckSubmissionCompletenessAndRemove(submission);
             }
-
-            CheckSubmissionCompletenessAndRemove(submission);
         }
 
         /// <summary>
