@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using System.Reflection;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -125,8 +126,10 @@ namespace Microsoft.Build.BackEnd
             _targetBuilderCallback = targetBuilderCallback;
             _continueOnError = false;
             _activeProxy = true;
-            _callbackMonitor = new Object();
-            _disableInprocNode = s_disableInprocNodeByEnvironmentVariable || host.BuildParameters.DisableInProcNode;
+            _callbackMonitor = new object();
+            _disableInprocNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                ? s_disableInprocNodeByEnvironmentVariable || host.BuildParameters.DisableInProcNode
+                : s_disableInprocNodeByEnvironmentVariable;
         }
 
         /// <summary>
