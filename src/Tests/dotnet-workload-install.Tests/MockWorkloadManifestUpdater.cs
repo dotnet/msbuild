@@ -4,14 +4,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Workloads.Workload.Install;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
     internal class MockWorkloadManifestUpdater : IWorkloadManifestUpdater
     {
-        public List<SdkFeatureBand> UpdateAdvertisingManifestsCallParams = new List<SdkFeatureBand>();
-        public List<SdkFeatureBand> CalculateManifestUpdatesCallParams = new List<SdkFeatureBand>();
+        public int UpdateAdvertisingManifestsCallCount = 0;
+        public int CalculateManifestUpdatesCallCount = 0;
         private IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> _manifestUpdates;
 
         public MockWorkloadManifestUpdater(IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestUpdates = null)
@@ -19,15 +18,15 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             _manifestUpdates = manifestUpdates ?? new List<(ManifestId, ManifestVersion, ManifestVersion)>();
         }
 
-        public Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand, bool includePreview)
+        public Task UpdateAdvertisingManifestsAsync(bool includePreview)
         {
-            UpdateAdvertisingManifestsCallParams.Add(featureBand);
+            UpdateAdvertisingManifestsCallCount++;
             return Task.CompletedTask;
         }
 
-        public IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> CalculateManifestUpdates(SdkFeatureBand featureBand)
+        public IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> CalculateManifestUpdates()
         {
-            CalculateManifestUpdatesCallParams.Add(featureBand);
+            CalculateManifestUpdatesCallCount++;
             return _manifestUpdates;
         }
     }

@@ -106,5 +106,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
             }
         }
+
+        public string GetSdkFeatureBand()
+        {
+            return _sdkVersionBand;
+        }
     }
 }
