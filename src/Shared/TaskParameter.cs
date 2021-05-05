@@ -759,6 +759,41 @@ namespace Microsoft.Build.BackEnd
 
             public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
             {
+#if FEATURE_APPDOMAIN
+                if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+                {
+                    return EnumerateMetadataEager();
+                }
+#endif
+
+                return EnumerateMetadataLazy();
+            }
+
+            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
+            {
+                if (_customEscapedMetadata == null || _customEscapedMetadata.Count == 0)
+                {
+#if TASKHOST
+                    // MSBuildTaskHost.dll compiles against .NET 3.5 which doesn't have Array.Empty()
+                    return new KeyValuePair<string, string>[0];
+#else
+                    return Array.Empty<KeyValuePair<string, string>>();
+#endif
+                }
+
+                var result = new KeyValuePair<string, string>[_customEscapedMetadata.Count];
+                int index = 0;
+                foreach (var kvp in _customEscapedMetadata)
+                {
+                    var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                    result[index++] = unescaped;
+                }
+
+                return result;
+            }
+
+            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
+            {
                 if (_customEscapedMetadata == null)
                 {
                     yield break;

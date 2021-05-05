@@ -1,4 +1,8 @@
 <Project>
+  <!--
+    Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
+    the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
+     -->
   <ItemGroup>
     <PackageReference Update="BenchmarkDotNet" Version="0.12.1" />
     <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
