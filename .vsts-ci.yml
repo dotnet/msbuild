@@ -60,6 +60,11 @@ stages:
               _PublishType: blob
               _SignType: real
               _Test: ''
+  - template: /eng/common/templates/job/source-build.yml
+    parameters:
+      platform:
+        name: 'Managed'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
   - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
@@ -141,12 +146,6 @@ stages:
               _BuildConfig: Release
               _PublishType: none
               _SignType: test
-
-    - template: /eng/common/templates/job/source-build.yml
-      parameters:
-        platform:
-          name: 'Managed'
-          container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/common/templates/job/publish-build-assets.yml
