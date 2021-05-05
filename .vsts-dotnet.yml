@@ -106,7 +106,7 @@ stages:
                 /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
                 /p:VisualStudioDropAccessToken=$(System.AccessToken)
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
-                /p:DotNetSignType=$(SignType)
+                /p:DotNetSignType=${{parameters.SignType}}
                 /p:DotNetPublishToBlobFeed=true
                 /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                 /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
