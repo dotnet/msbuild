@@ -335,7 +335,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SourceGenerators", "SourceG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Sdk.Razor.SourceGenerators", "src\RazorSdk\SourceGenerators\Microsoft.NET.Sdk.Razor.SourceGenerators.csproj", "{56C34654-DE8F-4F14-B2F8-6C37285B786E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.AspNetCoreDeltaApplier", "src\BuiltInTools\AspNetCoreDeltaApplier\Microsoft.Extensions.AspNetCoreDeltaApplier.csproj", "{1BBFA19C-03F0-4D27-9D0D-0F8172642107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.DotNetDeltaApplier", "src\BuiltInTools\DotNetDeltaApplier\Microsoft.Extensions.DotNetDeltaApplier.csproj", "{1BBFA19C-03F0-4D27-9D0D-0F8172642107}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.NativeWrapper", "src\Resolvers\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj", "{E97E9E7F-11B4-42F7-8B55-D0451F5E82A0}"
 EndProject

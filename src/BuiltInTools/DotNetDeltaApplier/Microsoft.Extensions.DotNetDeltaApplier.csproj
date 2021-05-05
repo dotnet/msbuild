@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\dotnet-watch\HotReload\AspNetCoreContract.cs" />
+    <Compile Include="..\dotnet-watch\HotReload\NamedPipeContract.cs" />
   </ItemGroup>
 
 </Project>
