@@ -7,24 +7,9 @@
         <target state="needs-review-translation">グローバルまたはローカルにインストールされているツールを一覧表示します。</target>
         <note />
       </trans-unit>
-      <trans-unit id="VersionColumn">
-        <source>Version</source>
-        <target state="translated">バージョン</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandsColumn">
-        <source>Commands</source>
-        <target state="translated">コマンド</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageIdColumn">
-        <source>Package Id</source>
-        <target state="translated">パッケージ ID</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="new">PATH</target>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Workload Id</source>
+        <target state="new">Workload Id</target>
         <note />
       </trans-unit>
     </body>

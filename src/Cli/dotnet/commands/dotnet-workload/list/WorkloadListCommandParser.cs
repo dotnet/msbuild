@@ -14,10 +14,13 @@ namespace Microsoft.DotNet.Cli
             IsHidden = true
         };
 
+        public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
+
         public static Command GetCommand()
         {
             var command = new Command("list", LocalizableStrings.CommandDescription);
             command.AddOption(MachineReadableOption);
+            command.AddOption(VerbosityOption);
             return command;
         }
     }
