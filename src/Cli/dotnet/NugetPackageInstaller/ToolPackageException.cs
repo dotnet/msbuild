@@ -19,4 +19,19 @@ namespace Microsoft.DotNet.ToolPackage
         {
         }
     }
+
+    internal class NuGetPackageNotFoundException : NuGetPackageInstallerException
+    {
+        public NuGetPackageNotFoundException()
+        {
+        }
+
+        public NuGetPackageNotFoundException(string message) : base(message)
+        {
+        }
+
+        public NuGetPackageNotFoundException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
 }

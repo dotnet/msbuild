@@ -177,8 +177,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
                 workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
 
-                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(featureBand, includePreviews).Wait();
-                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates(featureBand);
+                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews).Wait();
+                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
             }
 
             InstallWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate);
@@ -232,7 +232,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     rollback: () => {
                         try
                         {
-                            _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+                             _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
 							
 							 foreach (var manifest in manifestsToUpdate)
                              {
