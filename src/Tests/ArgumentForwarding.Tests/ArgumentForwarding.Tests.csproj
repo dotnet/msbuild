@@ -4,6 +4,7 @@
     <TargetFramework>$(ToolsetTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
     <CanRunTestAsTool>false</CanRunTestAsTool>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +12,7 @@
     <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
   </ItemGroup>
 
-  <Target Name="PrecompileScriptBuild" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' and '$(DotNetBuildFromSource)' != 'true'">
+  <Target Name="PrecompileScriptBuild" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
     <MSBuild
       BuildInParallel="False"
       Projects="../ArgumentsReflector/ArgumentsReflector.csproj"
