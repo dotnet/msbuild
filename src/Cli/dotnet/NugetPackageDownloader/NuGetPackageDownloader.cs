@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             NuGetVersion packageVersion = null,
             PackageSourceLocation packageSourceLocation = null,
             bool includePreview = false,
-            string downloadFolder = null)
+            DirectoryPath? downloadFolder = null)
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -56,9 +56,9 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
             }
 
-            string nupkgPath = downloadFolder == null ?
+            string nupkgPath = downloadFolder == null || !downloadFolder.HasValue ?
                 Path.Combine(_packageInstallDir.Value, packageId.ToString(), resolvedPackageVersion.ToNormalizedString(), $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg") :
-                Path.Combine(downloadFolder, $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg");
+                Path.Combine(downloadFolder.Value.Value, $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg");
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
             bool success = await resource.CopyNupkgToStreamAsync(
@@ -94,20 +94,20 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             return GetNupkgUrl(packageBaseAddress.First().ToString(), packageId, resolvedPackageVersion);
         }
 
-        public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder)
+        public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, DirectoryPath targetFolder)
         {
             await using FileStream packageStream = File.OpenRead(packagePath);
-            PackageFolderReader packageReader = new PackageFolderReader(targetFolder);
+            PackageFolderReader packageReader = new PackageFolderReader(targetFolder.ToString());
             PackageExtractionContext packageExtractionContext = new PackageExtractionContext(
                 PackageSaveMode.Defaultv3,
                 XmlDocFileSaveMode.None,
                 null,
                 _logger);
-            NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder);
+            NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder.ToString());
             CancellationToken cancellationToken = CancellationToken.None;
 
             return await PackageExtractor.ExtractPackageAsync(
-                targetFolder,
+                targetFolder.ToString(),
                 packageStream,
                 packagePathResolver,
                 packageExtractionContext,

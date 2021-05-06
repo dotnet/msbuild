@@ -14,6 +14,7 @@ using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -54,7 +55,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir);
 
             manifestUpdater.UpdateAdvertisingManifestsAsync(new SdkFeatureBand(featureBand), true).Wait();
-            var expectedDownloadedPackages = installedManifests.Select(id => ((PackageId, NuGetVersion, string))(new PackageId($"{id}.manifest-{featureBand}"), null, null));
+            var expectedDownloadedPackages = installedManifests.Select(id => ((PackageId, NuGetVersion, DirectoryPath?))(new PackageId($"{id}.manifest-{featureBand}"), null, null));
             nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
         }
 

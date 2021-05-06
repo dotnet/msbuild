@@ -11,6 +11,7 @@ using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -92,7 +93,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(featureBand, manifestId), includePreview: includePreviews);
                 extractionPath = Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp", $"{manifestId}-extracted");
                 Directory.CreateDirectory(extractionPath);
-                var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, extractionPath);
+                var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionPath));
 
                 if (Directory.Exists(adManifestPath))
                 {

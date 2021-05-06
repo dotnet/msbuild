@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             string packagePath =
                 await installer.DownloadPackageAsync(new PackageId(packageId), new NuGetVersion(packageVersion));
             string targetPath = Path.Combine(Directory.GetCurrentDirectory(), "ExtractedPackage");
-            IEnumerable<string> result = await installer.ExtractPackageAsync(packagePath, targetPath);
+            IEnumerable<string> result = await installer.ExtractPackageAsync(packagePath, new DirectoryPath(targetPath));
 
             Directory.Exists(targetPath).Should().BeTrue();
             string[] extractedFiles = Directory.GetFiles(targetPath, "*", SearchOption.AllDirectories);

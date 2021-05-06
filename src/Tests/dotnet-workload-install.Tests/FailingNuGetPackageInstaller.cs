@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
@@ -23,17 +24,17 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public Task<string> DownloadPackageAsync(PackageId packageId, NuGetVersion packageVersion,
             PackageSourceLocation packageSourceLocation = null,
             bool includePreview = false,
-            string downloadFolder = null)
+            DirectoryPath? downloadFolder = null)
         {
             var mockPackagePath = Path.Combine(MockPackageDir, $"{packageId}.{packageVersion}.nupkg");
             File.WriteAllText(mockPackagePath, string.Empty);
             return Task.FromResult(mockPackagePath);
         }
 
-        public Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder)
+        public Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, DirectoryPath targetFolder)
         {
-            Directory.CreateDirectory(targetFolder);
-            File.WriteAllText(Path.Combine(targetFolder, "testfile.txt"), string.Empty);
+            Directory.CreateDirectory(targetFolder.Value);
+            File.WriteAllText(Path.Combine(targetFolder.Value, "testfile.txt"), string.Empty);
             throw new Exception("Test Failure");
         }
 
