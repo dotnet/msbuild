@@ -1200,19 +1200,22 @@ namespace Microsoft.Build.Evaluation
                             propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties);
                         }
 
-                        if (IsTruncationEnabled(options) && propertyValue != null)
+                        if (propertyValue != null)
                         {
-                            var value = propertyValue.ToString();
-                            if (value.Length > CharacterLimitPerExpansion)
+                            if (IsTruncationEnabled(options))
                             {
-                                propertyValue = value.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                                var value = propertyValue.ToString();
+                                if (value.Length > CharacterLimitPerExpansion)
+                                {
+                                    propertyValue = value.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                                }
                             }
-                        }
 
-                        // Record our result, and advance
-                        // our sourceIndex pointer to the character just after the closing
-                        // parenthesis.
-                        results.Add(propertyValue);
+                            // Record our result, and advance
+                            // our sourceIndex pointer to the character just after the closing
+                            // parenthesis.
+                            results.Add(propertyValue);
+                        }
                         sourceIndex = propertyEndIndex + 1;
                     }
 
