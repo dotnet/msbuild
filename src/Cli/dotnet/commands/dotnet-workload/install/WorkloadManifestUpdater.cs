@@ -83,47 +83,56 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string packagePath = null;
             string extractionPath = null;
 
-            var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
             try
             {
-                packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifestId), includePreview: includePreviews);
-            }
-            catch
-            {
-                _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
-            }
-            extractionPath = Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp", $"{manifestId}-extracted");
-            Directory.CreateDirectory(extractionPath);
-            var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, extractionPath);
-
-            if (Directory.Exists(adManifestPath))
-            {
-                Directory.Delete(adManifestPath, true);
-            }
-            Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
-            FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(Path.Combine(extractionPath, "data"), adManifestPath));
-
-            _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
-
-            // Clean up temp dirs
-            if (!string.IsNullOrEmpty(extractionPath) && Directory.Exists(extractionPath))
-            {
-                Directory.Delete(extractionPath, true);
-            }
-
-            if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
-            {
-                File.Delete(packagePath);
-            }
-
-            var versionDir = Path.GetDirectoryName(packagePath);
-            if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
-            {
-                Directory.Delete(versionDir);
-                var idDir = Path.GetDirectoryName(versionDir);
-                if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
+                try
                 {
-                    Directory.Delete(idDir);
+                    packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifestId), includePreview: includePreviews);
+                }
+                catch (NuGetPackageNotFoundException)
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                }
+                extractionPath = Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp", $"{manifestId}-extracted");
+                Directory.CreateDirectory(extractionPath);
+                var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, extractionPath);
+
+                if (Directory.Exists(adManifestPath))
+                {
+                    Directory.Delete(adManifestPath, true);
+                }
+                Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
+                FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(Path.Combine(extractionPath, "data"), adManifestPath));
+
+                _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
+
+            }
+            catch (Exception e)
+            {
+                _reporter.WriteLine(string.Format(LocalizableStrings.FailedAdManifestUpdate, manifestId, e.Message));
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(extractionPath) && Directory.Exists(extractionPath))
+                {
+                    Directory.Delete(extractionPath, true);
+                }
+
+                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
+                {
+                    File.Delete(packagePath);
+                }
+
+                var versionDir = Path.GetDirectoryName(packagePath);
+                if (Directory.Exists(versionDir) && !Directory.GetFileSystemEntries(versionDir).Any())
+                {
+                    Directory.Delete(versionDir);
+                    var idDir = Path.GetDirectoryName(versionDir);
+                    if (Directory.Exists(idDir) && !Directory.GetFileSystemEntries(idDir).Any())
+                    {
+                        Directory.Delete(idDir);
+                    }
                 }
             }
         }

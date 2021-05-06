@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (resource == null)
             {
-                throw new NuGetPackageInstallerException(
+                throw new NuGetPackageNotFoundException(
                     string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
             }
 

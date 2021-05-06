@@ -12,6 +12,11 @@
         <target state="new">Updated advertising manifest {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedAdManifestUpdate">
+        <source>Failed to update the advertising manifest {0}: {1}.</source>
+        <target state="new">Failed to update the advertising manifest {0}: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
         <source>Failed to install manifest {0} version {1}: {2}.</source>
         <target state="new">Failed to install manifest {0} version {1}: {2}.</target>
