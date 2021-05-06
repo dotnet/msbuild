@@ -363,6 +363,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.PackageVal
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.PackageValidation.Tests", "src\Tests\Microsoft.DotNet.PackageValidation.Tests\Microsoft.DotNet.PackageValidation.Tests.csproj", "{69C03400-12AC-4E4D-B970-6A880616BF68}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.DotNetDeltaApplier.Tests", "src\Tests\Microsoft.Extensions.DotNetDeltaApplier.Tests\Microsoft.Extensions.DotNetDeltaApplier.Tests.csproj", "{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -665,6 +667,10 @@ Global
 		{69C03400-12AC-4E4D-B970-6A880616BF68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69C03400-12AC-4E4D-B970-6A880616BF68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69C03400-12AC-4E4D-B970-6A880616BF68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -786,6 +792,7 @@ Global
 		{EEF4C7DD-CDC9-44B6-8B4F-725647D54ED8} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{E56BEA9A-B52A-4781-9FF4-217439923319} = {AF683E5C-421E-4DE0-ADD7-9841E5D12BFA}
 		{69C03400-12AC-4E4D-B970-6A880616BF68} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{FAAC2E23-A460-40FE-9207-C10EEE5A6A07} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}
