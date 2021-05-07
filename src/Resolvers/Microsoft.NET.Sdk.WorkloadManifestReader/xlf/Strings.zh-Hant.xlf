@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="ExpectedIntegerAtOffset">
         <source>Expected integer value at offset {0}</source>
-        <target state="new">Expected integer value at offset {0}</target>
+        <target state="translated">預期在位移 {0} 處的整數值</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedStringAtOffset">
