@@ -75,6 +75,13 @@ namespace Microsoft.Build.Execution
         /// This is especially useful during a restore since some imports might come from packages that haven't been restored yet.
         /// </summary>
         IgnoreMissingEmptyAndInvalidImports = 1 << 6,
+
+        /// <summary>
+        /// When this flag is present, an unresolved MSBuild project SDK will fail the build.  This flag is used to
+        /// change the <see cref="IgnoreMissingEmptyAndInvalidImports" /> behavior to still fail when an SDK is missing
+        /// because those are more fatal.
+        /// </summary>
+        FailOnUnresolvedSdk = 1 << 7,
     }
 
     /// <summary>

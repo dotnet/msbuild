@@ -1785,7 +1785,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (!sdkResult.Success)
                 {
-                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports))
+                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))
                     {
                         ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                             importElement.Location.Line,

@@ -466,6 +466,10 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
                 }
 
+                if (buildRequestDataFlags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                {
+                    projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                }
                 return new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,
