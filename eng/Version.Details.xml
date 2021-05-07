@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.300-preview.21256.2">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.300-preview.21257.1">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>468ca46a193f9f935a42efaaebaf6c2bdea94b49</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="5.0.300-preview.21256.2">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="5.0.300-preview.21257.1">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>468ca46a193f9f935a42efaaebaf6c2bdea94b49</Sha>
     </Dependency>
@@ -13,19 +13,19 @@
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>c83d98dbae2262798e804236fb3edabe517d50f5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.300-preview.21256.2">
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.300-preview.21257.1">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>468ca46a193f9f935a42efaaebaf6c2bdea94b49</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="5.0.300-preview.21256.2">
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="5.0.300-preview.21257.1">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>468ca46a193f9f935a42efaaebaf6c2bdea94b49</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateSearch.Common" Version="5.0.300-preview.21256.2">
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="5.0.300-preview.21257.1">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>468ca46a193f9f935a42efaaebaf6c2bdea94b49</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.300-preview.21256.2">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.300-preview.21257.1">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>468ca46a193f9f935a42efaaebaf6c2bdea94b49</Sha>
     </Dependency>
