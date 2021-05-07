@@ -519,6 +519,8 @@ namespace Microsoft.Build.Execution
 
             void InitializeCaches()
             {
+                Debug.Assert(Monitor.IsEntered(_syncLock));
+
                 var usesInputCaches = _buildParameters.UsesInputCaches();
 
                 if (usesInputCaches)
@@ -562,6 +564,8 @@ namespace Microsoft.Build.Execution
             ProjectCacheDescriptor pluginDescriptor,
             CancellationToken cancellationToken)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             if (_projectCacheService != null)
             {
                 ErrorUtilities.ThrowInternalError("Only one project cache plugin may be set on the BuildManager during a begin / end build session");
@@ -1221,6 +1225,7 @@ namespace Microsoft.Build.Execution
                 catch
                 {
                     // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
+                    Debug.Assert(Monitor.IsEntered(_syncLock));
                     _projectCacheService = null;
                     throw;
                 }
@@ -1272,6 +1277,8 @@ namespace Microsoft.Build.Execution
             BuildSubmission submission,
             BuildRequestConfiguration config)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             if (BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
                 ProjectCacheItems.Count > 0 &&
                 !_projectCacheServiceInstantiatedByVSWorkaround &&
@@ -1412,6 +1419,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void LoadSolutionIntoConfiguration(BuildRequestConfiguration config, BuildRequest request)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             if (config.IsLoaded)
             {
                 // We've already processed it, nothing to do.
@@ -2029,17 +2038,20 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void ShutdownConnectedNodes(bool abort)
         {
-            _shuttingDown = true;
-
-            // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-            _nodeManager.ShutdownConnectedNodes(!abort && _buildParameters.EnableNodeReuse);
-
-            // if we are aborting, the task host will hear about it in time through the task building infrastructure;
-            // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
-            // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).
-            if (!abort)
+            lock (_syncLock)
             {
-                _taskHostNodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
+                _shuttingDown = true;
+
+                // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
+                _nodeManager.ShutdownConnectedNodes(!abort && _buildParameters.EnableNodeReuse);
+
+                // if we are aborting, the task host will hear about it in time through the task building infrastructure;
+                // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
+                // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).
+                if (!abort)
+                {
+                    _taskHostNodeManager.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
+                }
             }
         }
 
@@ -2154,6 +2166,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildRequestConfiguration ResolveConfiguration(BuildRequestConfiguration unresolvedConfiguration, BuildRequestConfiguration matchingConfigurationFromCache, bool replaceProjectInstance)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             BuildRequestConfiguration resolvedConfiguration = matchingConfigurationFromCache ?? _configCache.GetMatchingConfiguration(unresolvedConfiguration);
             if (resolvedConfiguration == null)
             {
@@ -2185,12 +2199,16 @@ namespace Microsoft.Build.Execution
 
         private void ReplaceExistingProjectInstance(BuildRequestConfiguration newConfiguration, BuildRequestConfiguration existingConfiguration)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             existingConfiguration.Project = newConfiguration.Project;
             _resultsCache.ClearResultsForConfiguration(existingConfiguration.ConfigurationId);
         }
 
         private BuildRequestConfiguration AddNewConfiguration(BuildRequestConfiguration unresolvedConfiguration)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             var newConfigurationId = _scheduler.GetConfigurationIdFromPlan(unresolvedConfiguration.ProjectFullPath);
 
             if (_configCache.HasConfiguration(newConfigurationId) || (newConfigurationId == BuildRequestConfiguration.InvalidConfigurationId))
@@ -2245,6 +2263,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleResourceRequest(int node, ResourceRequest request)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             if (request.IsResourceAcquire)
             {
                 // Resource request requires a response and may be blocking. Our continuation is effectively a callback
@@ -2269,6 +2289,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleConfigurationRequest(int node, BuildRequestConfiguration unresolvedConfiguration)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             BuildRequestConfiguration resolvedConfiguration = ResolveConfiguration(unresolvedConfiguration, null, false);
 
             var response = new BuildRequestConfigurationResponse(unresolvedConfiguration.ConfigurationId, resolvedConfiguration.ConfigurationId, resolvedConfiguration.ResultsNodeId);
@@ -2317,6 +2339,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void HandleNodeShutdown(int node, NodeShutdown shutdownPacket)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             _shuttingDown = true;
             ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
             _activeNodes.Remove(node);
@@ -2379,6 +2403,8 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         private void CheckForActiveNodesAndCleanUpSubmissions()
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             if (_activeNodes.Count == 0)
             {
                 var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
@@ -2429,6 +2455,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void PerformSchedulingActions(IEnumerable<ScheduleResponse> responses)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             foreach (ScheduleResponse response in responses)
             {
                 switch (response.Action)
@@ -2600,6 +2628,8 @@ namespace Microsoft.Build.Execution
 
         private void CheckAllSubmissionsComplete(BuildRequestDataFlags? flags)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             if (_buildSubmissions.Count == 0 && _graphBuildSubmissions.Count == 0)
             {
                 if (flags.HasValue && flags.Value.HasFlag(BuildRequestDataFlags.ClearCachesAfterBuild))
@@ -2624,6 +2654,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private NodeConfiguration GetNodeConfiguration()
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             if (_nodeConfiguration == null)
             {
                 // Get the remote loggers
@@ -2734,9 +2766,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            if (!_projectStartedEvents.ContainsKey(e.BuildEventContext.SubmissionId))
+            lock (_syncLock)
             {
-                _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
+                if (!_projectStartedEvents.ContainsKey(e.BuildEventContext.SubmissionId))
+                {
+                    _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
+                }
             }
         }
 
@@ -2745,6 +2780,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsAsMessages)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             int cpuCount = _buildParameters.MaxNodeCount;
 
             LoggerMode loggerMode = cpuCount == 1 && _buildParameters.UseSynchronousLogging
@@ -2912,6 +2949,8 @@ namespace Microsoft.Build.Execution
 
         private bool ReuseOldCaches(string[] inputCacheFiles)
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             ErrorUtilities.VerifyThrowInternalNull(inputCacheFiles, nameof(inputCacheFiles));
             ErrorUtilities.VerifyThrow(_configCache == null, "caches must not be set at this point");
             ErrorUtilities.VerifyThrow(_resultsCache == null, "caches must not be set at this point");
@@ -2991,6 +3030,8 @@ namespace Microsoft.Build.Execution
 
         private void CancelAndMarkAsFailure()
         {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
             CancelAllSubmissions();
 
             // CancelAllSubmissions also ends up setting _shuttingDown and _overallBuildSuccess but it does so in a separate thread to avoid deadlocks.
