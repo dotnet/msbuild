@@ -59,10 +59,5 @@ namespace Microsoft.Build.Evaluation
         /// Whether to profile the evaluation
         /// </summary>
         ProfileEvaluation = 128,
-
-        /// <summary>
-        /// Used in combination with <see cref="IgnoreMissingImports" /> to still treat an unresolved MSBuild project SDK as an error.
-        /// </summary>
-        FailOnUnresolvedSdk = 256,
     }
 }
