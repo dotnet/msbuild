@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
@@ -140,8 +140,8 @@
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin:
     {0}</source>
-        <target state="needs-review-translation">"Folgendes Projektcache-Plug-In wird geladen:
-    {0}"</target>
+        <target state="translated">Folgendes Projektcache-Plug-In wird geladen:
+    {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -221,7 +221,7 @@
       </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
-        <target state="new">MSB4273: The project cache threw an unhandled exception from the {0} method.</target>
+        <target state="translated">MSB4273: Der Projektcache hat über die Methode {0} eine unbehandelte Ausnahme ausgelöst.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
@@ -305,17 +305,17 @@
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <target state="translated">Die Aufgabe "{0}" hat {1} Kerne angefordert und {2} Kerne erhalten und belegt jetzt insgesamt {3} Kerne.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
-        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <target state="translated">Die Aufgabe "{0}" hat {1} Kerne freigegeben und belegt jetzt insgesamt {2} Kerne.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCoresWarning">
         <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <target state="translated">Die Aufgabe "{0}" hat die Freigabe von {1} Kernen angefordert, während sie nur {2} Kerne verwendet, und belegt jetzt insgesamt {3} Kerne.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">

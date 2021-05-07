@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
@@ -946,7 +946,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
+        <target state="translated">  -detailedSummary[:True|False]
                      Muestra información detallada al final de la compilación
                      sobre las configuraciones compiladas y el modo en que
                      se programaron en los nodos.
@@ -968,7 +968,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: El valor de resumen detallado no es válido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1566,23 +1566,19 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializa todos los eventos de compilación en un archivo
-                     binario comprimido. De manera predeterminada,
-                     el archivo se encuentra en el directorio actual y tiene
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializa todos los eventos de compilación en un archivo                     binario comprimido.
+ De manera predeterminada, el archivo se encuentra en el directorio actual y tiene
                      el nombre "msbuild.binlog". El registro binario es una
                      descripción detallada del proceso de compilación que
                      se puede utilizar más adelante para reconstruir registros
-                     de texto y que otras herramientas de análisis pueden
-                     emplear. Un registro binario suele ser de 10 a 20 veces
-                     más pequeño que el registro de nivel de diagnóstico de
-                     texto más detallado, pero contiene más información
-                     (Forma corta: -bl).
+                     de texto y que otras herramientas de análisis pueden emplear. Un registro binario suele ser de 10 a 20 veces
+                     más pequeño que el registro de nivel de diagnóstico de texto más detallado, pero contiene más información
+                    (Forma corta: -bl).
 
                      De manera predeterminada, el registrador binario recopila
                      el texto de origen de los archivos del proyecto, incluidos
-                     todos los proyectos y archivos de destino importados
-                     que se encuentren durante la compilación. El modificador
+                     todos los proyectos y archivos de destino importados que se encuentren durante la compilación. El modificador
                      opcional ProjectImports controla este comportamiento:
 
                       ProjectImports=None     - No recopilar importaciones
@@ -1594,27 +1590,25 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                                                 donde "salida" es el mismo nombre que
                                                 el del archivo de registro binario.
 
-                     La configuración predeterminada de ProjectImports es
-                     Embed.
+                     La configuración predeterminada de ProjectImports es Embed.
                      Nota: El registrador no recopila archivos de código fuente
                      que no sean de MSBuild, como .cs, .cpp, etc.
 
                      Un archivo .binlog se puede "reproducir" pasándolo a
-                     msbuild.exe como argumento en lugar de proyecto o
-                     solución. Otros registradores recibirán la información
+                     msbuild.exe como argumento en lugar de proyecto o                     solución.
+ Otros registradores recibirán la información
                      que contiene el archivo de registro como si se estuviera
-                     ejecutando la compilación original. Encontrará más
-                     información sobre el registro binario y su uso en:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     ejecutando la compilación original. Encontrará más información sobre el registro binario y su uso en:
+                     https://aka.ms/msbuild/binlog
 
                      Ejemplos:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
-                       -bl:output.binlog;ProjectImports=ZipFile
+                      -bl:output.binlog;ProjectImports=ZipFile
                        -bl:..\..\custom.binlog
-                       -binaryLogger
-    </target>
+                     -binaryLogger
+   </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"

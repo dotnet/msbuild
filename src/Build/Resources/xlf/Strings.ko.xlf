@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -140,8 +140,8 @@
       <trans-unit id="LoadingProjectCachePlugin">
         <source>Loading the following project cache plugin:
     {0}</source>
-        <target state="needs-review-translation">"다음 프로젝트 캐시 플러그 인을 로드하는 중:
-    {0}"</target>
+        <target state="translated">다음 프로젝트 캐시 플러그 인을 로드하는 중:
+    {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -221,7 +221,7 @@
       </trans-unit>
       <trans-unit id="ProjectCacheException">
         <source>MSB4273: The project cache threw an unhandled exception from the {0} method.</source>
-        <target state="new">MSB4273: The project cache threw an unhandled exception from the {0} method.</target>
+        <target state="translated">MSB4273: 프로젝트 캐시는 {0} 메서드에서 처리되지 않은 예외를 발생시켰습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
@@ -305,17 +305,17 @@
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</target>
+        <target state="translated">"{0}" 작업에서 코어 {1}개를 요청했고 코어 {2}개를 획득했으며 지금 총 {3}개의 코어를 보유하고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
-        <target state="new">Task "{0}" released {1} cores and now holds {2} cores total.</target>
+        <target state="translated">"{0}" 작업에서 코어 {1}개를 해제했고 지금 총 {2}개의 코어를 보유하고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCoresWarning">
         <source>Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</source>
-        <target state="new">Task "{0}" asked to release {1} cores while holding only {2} and now holds {3} cores total.</target>
+        <target state="translated">"{0}" 작업에서 코어 {2}개만 보유하고 있는 동안 코어 {1}개를 해제하도록 요청했고 지금 총 {3}개의 코어를 보유하고 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
