@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
@@ -937,7 +937,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
+        <target state="translated">  -detailedSummary[:True|False]
                      Zeigt am Ende der Erstellung detaillierte Informationen
                      zu den erstellten Konfigurationen an und enthält eine Erläuterung, wie sie
                      in Knoten geplant wurden.
@@ -959,7 +959,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: Der detaillierte Zusammenfassungswert ist ungültig. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1557,10 +1557,10 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serialisiert alle Buildereignisse in eine komprimierte Binärdatei.
                      Standardmäßig befindet sich die Datei im aktuellen Verzeichnis und hat den Namen
-                     "msbuild.binlog". Das binäre Protokoll ist eine detaillierte Beschreibung
+                     „msbuild.binlog“. Das binäre Protokoll ist eine detaillierte Beschreibung
                      des Buildprozesses, der später zum Rekonstruieren von
                      Textprotokollen dient und der von anderen Analysetools verwendet wird. Detaillierte
                      Textprotokolle auf Diagnoseebene sind in der Regel 10–20-mal so groß wie
@@ -1572,25 +1572,25 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      Projekte und Zieldateien. Der optionale Schalter
                      ProjectImports steuert dieses Verhalten:
 
-                      ProjectImports=None:      Projektimporte nicht
+                      ProjectImports=None:      – Projektimporte nicht
                                                 erfassen
-                      ProjectImports=Embed:     Projektimporte in die
+                      ProjectImports=Embed:     – Projektimporte in die
                                                 Protokolldatei einbetten
-                      ProjectImports=ZipFile:   Projektdateien in
+                      ProjectImports=ZipFile:   – Projektdateien in
                                                 output.projectimports.zip
-                                                speichern, wobei "output" dem Namen
+                                                speichern, wobei „output“ dem Namen
                                                 der binären Protokolldatei entspricht.
 
-                     Die Standardeinstellung für "ProjectImports" ist "Embed".
+                     Die Standardeinstellung für „ProjectImports“ ist „Embed“.
                      Hinweis: Die Protokollierung erfasst nur MSBuild-Quelldateien.
                      Andere Dateien wie etwa CS, CPP usw. werden nicht erfasst.
 
-                     Eine BINLOG-Datei kann wiedergegeben werden, indem sie an
-                     "msbuild.exe" als Argument und nicht als Projekt/Projektmappe übergeben wird.
+                     Eine BINLOG-Datei kann „wiedergegeben“ werden, indem sie an
+                     „msbuild.exe“ als Argument und nicht als Projekt/Lösung übergeben wird.
                      Andere Protokollierungen erhalten die Informationen, die
                      wie beim ursprünglichen Buildvorgang in der Protokolldatei enthalten sind.
                      Weitere Informationen zu binären Protokollen und ihrer Verwendung erhalten Sie unter:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     https://aka.ms/msbuild/binlog
 
                      Beispiele:
                        -bl

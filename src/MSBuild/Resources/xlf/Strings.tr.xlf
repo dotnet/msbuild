@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../Strings.resx">
     <body>
@@ -941,10 +941,10 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
+        <target state="translated">  -detailedSummary[:True|False]
                      Derleme sonunda, derlenen yapılandırmalar ve
                      bu yapılandırmaların düğümlere nasıl zamanlandıkları
-                     hakkında ayrıntılı bilgi içerir.
+                     ile ilgili ayrıntılı bilgileri gösterir.
                      (Kısa biçim: -ds)
     </target>
         <note>
@@ -963,7 +963,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: Ayrıntılı özet değeri geçerli değil. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1561,7 +1561,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Tüm derleme olaylarını sıkıştırılmış bir ikili dosyada seri hale getirir.
                      Varsayılan olarak, dosya geçerli dizinde bulunur ve "msbuild.binlog"
                      olarak adlandırılır. Daha sonra metin günlüklerini yeniden
@@ -1594,7 +1594,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Diğer günlükçüler, günlük dosyasındaki bilgileri özgün
                      derleme gerçekleşiyormuş gibi alır.
                      İkili günlük ve kullanımı hakkında daha fazla bilgiyi aşağıdaki adreste bulabilirsiniz:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     https://aka.ms/msbuild/binlog
 
                      Örnekler:
                        -bl

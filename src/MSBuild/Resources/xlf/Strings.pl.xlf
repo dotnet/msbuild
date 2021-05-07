@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../Strings.resx">
     <body>
@@ -950,11 +950,11 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
-                     Powoduje wyświetlenie na zakończenie kompilacji
-                     szczegółowych informacji o utworzonych konfiguracjach
-                     i ich planowanym wykorzystaniu węzłów.
-                     (Krótka wersja: -ds)
+        <target state="translated">  -detailedSummary
+                     Pokazuje szczegółowe informacje na zakończenie kompilacji
+                     o utworzonych konfiguracjach i jak zostały one
+                     zaplanowane dla węzłów.
+                     (Krótka forma: -ds)
     </target>
         <note>
       LOCALIZATION: "detailedSummary", "True" and "False" should not be localized.
@@ -972,7 +972,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: wartość szczegółowego podsumowania jest nieprawidłowa. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1570,27 +1570,27 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializuje wszystkie zdarzenia kompilacji do skompresowanego pliku
-                     binarnego. Domyślnie plik znajduje się w bieżącym katalogu i ma
-                     nazwę „msbuild.binlog”. Dziennik binarny to szczegółowy opis procesu
-                     kompilacji, którego można później użyć do odtworzenia dzienników
-                     tekstowych i wykorzystać w innych narzędziach do analizy. Dziennik
-                     binarny jest zwykle 10–20 razy mniejszy od najbardziej szczegółowych
-                     tekstowych dzienników na poziomie diagnostycznym, ale zawiera
-                     więcej informacji. (Krótka forma: -bl)
+        <target state="translated">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializuje wszystkie zdarzenia kompilacji do skompresowanego pliku binarnego.
+                     Domyślnie plik znajduje się w bieżącym katalogu i ma nazwę
+                     „msbuild.binlog”. Dziennik binarny to szczegółowy opis procesu
+                     kompilacji, którego można później użyć do odtworzenia
+dzienników                     tekstowych i wykorzystać w innych narzędziach do analizy. Dziennik binarny
+                     jest zwykle 10–20 razy mniejszy od najbardziej szczegółowych
+                     tekstowych dzienników na poziomie diagnostycznym, ale zawiera więcej informacji.
+                     (Krótka forma: -bl)
 
-                     Rejestrator binarny domyślnie zbiera tekst źródłowy plików
-                     projektu, w tym wszystkie zaimportowane projekty i pliki
+                     Rejestrator binarny domyślnie zbiera tekst źródłowy
+                     plików projektu, w tym wszystkie zaimportowane projekty i pliki
                      docelowe napotkane podczas kompilowania. Tym zachowaniem
                      steruje opcjonalny przełącznik ProjectImports:
 
                       ProjectImports=None     — Nie zbieraj importów
                                                 projektu.
-                      ProjectImports=Embed    — Osadź importy projektu
-                                                w pliku dziennika.
+                      ProjectImports=Embed    — Osadź importy projektu w
+                                                pliku dziennika.
                       ProjectImports=ZipFile  — Zapisz pliki projektu w pliku
-                                                wyjście.projectimports.zip,
+                                                output.projectimports.zip,
                                                 gdzie wyjście to ciąg podany
                                                 dla nazwy pliku dziennika binarnego.
 
@@ -1602,15 +1602,15 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      msbuild.exe jako argument zamiast projektu/rozwiązania.
                      Inne rejestratory otrzymają informacje zawarte w pliku
                      dziennika tak, jak podczas wykonywania pierwotnej kompilacji.
-                     Więcej informacji o dzienniku binarnym i jego zastosowaniach:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     Więcej informacji o dzienniku binarnym i jego zastosowaniach można uzyskać na stronie:
+                     https://aka.ms/msbuild/binlog
 
                      Przykłady:
                        -bl
-                       -bl:wyjście.binlog
-                       -bl:wyjście.binlog;ProjectImports=None
-                       -bl:wyjście.binlog;ProjectImports=ZipFile
-                       -bl:..\..\niestandardowy.binlog
+                       -bl:output.binlog
+                       -bl:output.binlog;ProjectImports=None
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
                        -binaryLogger
     </target>
         <note>
