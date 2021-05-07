@@ -2383,8 +2383,7 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
-        /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>
-        /// if they are in a directory other than the MSBuild directory.
+        /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>.
         /// </summary>
         /// <remarks>
         /// When loading a task from a test assembly in a test within that assembly, the assembly is already loaded
@@ -2394,10 +2393,7 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
         [Fact]
         public void TasksGetAssemblyLoadContexts()
         {
-            string customTaskPath = Path.Combine(
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                "Task",
-                Path.GetFileName(Assembly.GetExecutingAssembly().Location));
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
 
             string projectContents = $@"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <UsingTask TaskName=`ValidateAssemblyLoadContext` AssemblyFile=`{customTaskPath}` />
@@ -2409,6 +2405,7 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
 
             ExecuteMSBuildExeExpectSuccess(projectContents);
         }
+
 #endif
 
         private string CopyMSBuild()

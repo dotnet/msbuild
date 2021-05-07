@@ -23,14 +23,7 @@ namespace Microsoft.Build.Shared
 
         private bool _resolvingHandlerHookedUp = false;
 
-        private static readonly string _msbuildDirPath;
         private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
-
-        static CoreClrAssemblyLoader()
-        {
-            _msbuildDirPath = FileUtilities.NormalizePath(typeof(CoreClrAssemblyLoader).Assembly.Location);
-            _msbuildDirPath = Path.GetDirectoryName(_msbuildDirPath);
-        }
 
         public void AddDependencyLocation(string fullPath)
         {
@@ -59,12 +52,7 @@ namespace Microsoft.Build.Shared
             // folders in a NuGet package).
             fullPath = FileUtilities.NormalizePath(fullPath);
 
-            // If the requested load comes from the same directory as MSBuild, assume that
-            // the load is part of the platform, and load it using the Default ALC.
-            string assemblyDir = Path.GetDirectoryName(fullPath);
-
-            if (Traits.Instance.EscapeHatches.UseSingleLoadContext ||
-                FileUtilities.ComparePathsNoThrow(assemblyDir, _msbuildDirPath, string.Empty))
+            if (Traits.Instance.EscapeHatches.UseSingleLoadContext)
             {
                 return LoadUsingLegacyDefaultContext(fullPath);
             }
