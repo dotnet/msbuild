@@ -564,20 +564,26 @@ namespace Microsoft.Build.Execution
             ProjectCacheDescriptor pluginDescriptor,
             CancellationToken cancellationToken)
         {
-            Debug.Assert(Monitor.IsEntered(_syncLock));
-
             if (_projectCacheService != null)
             {
                 ErrorUtilities.ThrowInternalError("Only one project cache plugin may be set on the BuildManager during a begin / end build session");
             }
 
-            LogMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoadingProjectCachePlugin", pluginDescriptor.GetDetailedDescription()));
+            lock (_syncLock)
+            {
+                if (_projectCacheService != null)
+                {
+                    return;
+                }
 
-            _projectCacheService = ProjectCacheService.FromDescriptorAsync(
-                pluginDescriptor,
-                this,
-                ((IBuildComponentHost) this).LoggingService,
-                cancellationToken);
+                LogMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoadingProjectCachePlugin", pluginDescriptor.GetDetailedDescription()));
+
+                _projectCacheService = ProjectCacheService.FromDescriptorAsync(
+                    pluginDescriptor,
+                    this,
+                    ((IBuildComponentHost) this).LoggingService,
+                    cancellationToken);
+            }
         }
 
         /// <summary>
@@ -1073,8 +1079,12 @@ namespace Microsoft.Build.Execution
                     }
 
                     VerifyStateInternal(BuildManagerState.Building);
+                }
 
-                    try
+                try
+                {
+                    BuildRequestConfiguration newConfiguration;
+                    lock (_syncLock)
                     {
                         // If we have an unnamed project, assign it a temporary name.
                         if (string.IsNullOrEmpty(submission.BuildRequestData.ProjectFullPath))
@@ -1099,27 +1109,36 @@ namespace Microsoft.Build.Execution
                         // Create/Retrieve a configuration for each request
                         var buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
                         var matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
-                        var newConfiguration = ResolveConfiguration(
+                        newConfiguration = ResolveConfiguration(
                             buildRequestConfiguration,
                             matchingConfiguration,
                             submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
 
                         newConfiguration.ExplicitlyLoaded = true;
+                    }
 
-                        submission.BuildRequest = CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
-
+                    CacheResult cacheResult = null;
+                    // Don't lock on _syncLock to avoid calling the cache serially.
+                    // Ideally, we should lock on the <configuration, targets> tuple, but that would make the code even more convoluted
+                    // so lock just on the configuration. Realistically it should not cause overlocking because the cache is only called on
+                    // top level submissions and those tend to be unique.
+                    lock (newConfiguration)
+                    {
                         // TODO: Remove this when VS gets updated to setup project cache plugins.
                         AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio(submission, newConfiguration);
 
-                        CacheResult cacheResult = null;
                         if (_projectCacheService != null)
                         {
                             cacheResult = QueryCache(submission, newConfiguration);
                         }
+                    }
 
+                    lock (_syncLock)
+                    {
                         if (cacheResult == null || cacheResult.ResultType != CacheResultType.CacheHit)
                         {
                             // Issue the real build request.
+                            submission.BuildRequest = CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
                             SubmitBuildRequest();
                         }
                         else if (cacheResult?.ResultType == CacheResultType.CacheHit && cacheResult.ProxyTargets != null)
@@ -1149,45 +1168,47 @@ namespace Microsoft.Build.Execution
                             ReportResultsToSubmission(result);
                         }
                     }
-                    // This catch should always be the first one because when this method runs in a separate thread
-                    // and throws an exception there is nobody there to observe the exception.
-                    catch (Exception ex) when (thisMethodIsAsync)
-                    {
-                        HandleExecuteSubmissionException(submission, ex);
-                    }
-                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                    {
-                        HandleExecuteSubmissionException(submission, ex);
-                        throw;
-                    }
-                    void SubmitBuildRequest()
-                    {
-                        if (CheckForShutdown())
-                        {
-                            return;
-                        }
+                }
+                // This catch should always be the first one because when this method runs in a separate thread
+                // and throws an exception there is nobody there to observe the exception.
+                catch (Exception ex) when (thisMethodIsAsync)
+                {
+                    HandleExecuteSubmissionException(submission, ex);
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    HandleExecuteSubmissionException(submission, ex);
+                    throw;
+                }
+                void SubmitBuildRequest()
+                {
+                    Debug.Assert(Monitor.IsEntered(_syncLock));
 
-                        _workQueue.Post(
-                            () =>
-                            {
-                                try
-                                {
-                                    IssueBuildSubmissionToScheduler(submission, allowMainThreadBuild);
-                                }
-                                catch (BuildAbortedException bae)
-                                {
-                                    // We were canceled before we got issued by the work queue.
-                                    var result = new BuildResult(submission.BuildRequest, bae);
-                                    submission.CompleteResults(result);
-                                    submission.CompleteLogging(true);
-                                    CheckSubmissionCompletenessAndRemove(submission);
-                                }
-                                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                                {
-                                    HandleExecuteSubmissionException(submission, ex);
-                                }
-                            });
+                    if (CheckForShutdown())
+                    {
+                        return;
                     }
+
+                    _workQueue.Post(
+                        () =>
+                        {
+                            try
+                            {
+                                IssueBuildSubmissionToScheduler(submission, allowMainThreadBuild);
+                            }
+                            catch (BuildAbortedException bae)
+                            {
+                                // We were canceled before we got issued by the work queue.
+                                var result = new BuildResult(submission.BuildRequest, bae);
+                                submission.CompleteResults(result);
+                                submission.CompleteLogging(true);
+                                CheckSubmissionCompletenessAndRemove(submission);
+                            }
+                            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                            {
+                                HandleExecuteSubmissionException(submission, ex);
+                            }
+                        });
                 }
             }
 
@@ -1200,6 +1221,8 @@ namespace Microsoft.Build.Execution
 
             bool CheckForShutdown()
             {
+                Debug.Assert(Monitor.IsEntered(_syncLock));
+
                 if (!_shuttingDown)
                 {
                     return false;
@@ -1224,21 +1247,23 @@ namespace Microsoft.Build.Execution
                 }
                 catch
                 {
-                    // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
-                    Debug.Assert(Monitor.IsEntered(_syncLock));
-                    _projectCacheService = null;
-                    throw;
+                    lock (_syncLock)
+                    {
+                        // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
+                        _projectCacheService = null;
+                        throw;
+                    }
                 }
 
                 // Project cache plugins require an evaluated project. Evaluate the submission if it's by path.
                 LoadSubmissionProjectIntoConfiguration(buildSubmission, newConfiguration);
 
                 var cacheResult = cacheService.GetCacheResultAsync(
-                        new BuildRequestData(
-                            newConfiguration.Project,
-                            buildSubmission.BuildRequestData.TargetNames.ToArray()))
-                    .GetAwaiter()
-                    .GetResult();
+                    new BuildRequestData(
+                        newConfiguration.Project,
+                        buildSubmission.BuildRequestData.TargetNames.ToArray()))
+                .GetAwaiter()
+                .GetResult();
 
                 return cacheResult;
             }
@@ -1277,15 +1302,21 @@ namespace Microsoft.Build.Execution
             BuildSubmission submission,
             BuildRequestConfiguration config)
         {
-            Debug.Assert(Monitor.IsEntered(_syncLock));
-
             if (BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
                 ProjectCacheItems.Count > 0 &&
                 !_projectCacheServiceInstantiatedByVSWorkaround &&
                 _projectCacheService == null &&
                 _buildParameters.ProjectCacheDescriptor == null)
             {
-                _projectCacheServiceInstantiatedByVSWorkaround = true;
+                lock (_syncLock)
+                {
+                    if (_projectCacheServiceInstantiatedByVSWorkaround)
+                    {
+                        return;
+                    }
+
+                    _projectCacheServiceInstantiatedByVSWorkaround = true;
+                }
 
                 if (ProjectCacheItems.Count != 1)
                 {
