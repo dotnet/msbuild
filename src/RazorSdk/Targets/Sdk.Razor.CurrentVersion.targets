@@ -49,7 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
         <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
         <_TargetingNET60OrLater>true</_TargetingNET60OrLater>
-        <_UseRazorSourceGenerator>true</_UseRazorSourceGenerator>
+        <_UseRazorSourceGenerator Condition="'$(_UseRazorSourceGenerator)' == '' ">true</_UseRazorSourceGenerator>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">5.0</RazorLangVersion>
       </PropertyGroup>
     </When>

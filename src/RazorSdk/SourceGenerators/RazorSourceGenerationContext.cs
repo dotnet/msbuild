@@ -46,6 +46,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         /// </summary>
         public bool SuppressRazorSourceGenerator { get; private set; }
 
+        /// <summary>
+        /// Gets a flag that determines if the source generator should produce
+        /// heap dumps from failing assertions.
+        /// </summary>
+        public bool ProduceHeapDumps { get; private set; }
+
         public RazorSourceGenerationContext(GeneratorExecutionContext context)
         {
             var globalOptions = context.AnalyzerConfigOptions.GlobalOptions;
@@ -71,10 +77,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
 
             globalOptions.TryGetValue("build_property._RazorSourceGeneratorDebug", out var waitForDebugger);
-
             globalOptions.TryGetValue("build_property.SuppressRazorSourceGenerator", out var suppressRazorSourceGenerator);
-
             globalOptions.TryGetValue("build_property.GenerateRazorMetadataSourceChecksumAttributes", out var generateMetadataSourceChecksumAttributes);
+            globalOptions.TryGetValue("build_property._RazorSourceGeneratorHeapDumps", out var produceHeapDumps);
 
             var razorConfiguration = RazorConfiguration.Create(razorLanguageVersion, configurationName, Enumerable.Empty<RazorExtension>(), true);
             var (razorFiles, cshtmlFiles) = GetRazorInputs(context);
@@ -88,6 +93,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             WaitForDebugger = waitForDebugger == "true";
             SuppressRazorSourceGenerator = suppressRazorSourceGenerator == "true";
             GenerateMetadataSourceChecksumAttributes = generateMetadataSourceChecksumAttributes == "true";
+            ProduceHeapDumps = produceHeapDumps == "true";
         }
 
         private static VirtualRazorProjectFileSystem GetVirtualFileSystem(GeneratorExecutionContext context, IReadOnlyList<RazorInputItem> razorFiles, IReadOnlyList<RazorInputItem> cshtmlFiles)
