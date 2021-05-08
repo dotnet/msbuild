@@ -209,14 +209,19 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         public class InstanceMockCache : ProjectCachePluginBase
         {
             private readonly GraphCacheResponse? _testData;
-            public ConcurrentQueue<BuildRequestData> Requests { get; } = new ConcurrentQueue<BuildRequestData>();
+            private readonly TimeSpan? _projectQuerySleepTime;
+            public ConcurrentQueue<BuildRequestData> Requests { get; } = new();
 
             public bool BeginBuildCalled { get; set; }
             public bool EndBuildCalled { get; set; }
 
-            public InstanceMockCache(GraphCacheResponse? testData = null)
+            private int _nextId;
+            public ConcurrentQueue<int> QueryStartStops = new();
+
+            public InstanceMockCache(GraphCacheResponse? testData = null, TimeSpan? projectQuerySleepTime = null)
             {
                 _testData = testData;
+                _projectQuerySleepTime = projectQuerySleepTime;
             }
 
             public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
@@ -228,18 +233,27 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 return Task.CompletedTask;
             }
 
-            public override Task<CacheResult> GetCacheResultAsync(
+            public override async Task<CacheResult> GetCacheResultAsync(
                 BuildRequestData buildRequest,
                 PluginLoggerBase logger,
                 CancellationToken cancellationToken)
             {
+                var queryId = Interlocked.Increment(ref _nextId);
+
                 Requests.Enqueue(buildRequest);
+                QueryStartStops.Enqueue(queryId);
+
                 logger.LogMessage($"MockCache: GetCacheResultAsync for {buildRequest.ProjectFullPath}", MessageImportance.High);
 
-                return
-                    Task.FromResult(
-                        _testData?.GetExpectedCacheResultForProjectNumber(GetProjectNumber(buildRequest.ProjectFullPath))
-                        ?? CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss));
+                if (_projectQuerySleepTime is not null)
+                {
+                    await Task.Delay(_projectQuerySleepTime.Value);
+                }
+
+                QueryStartStops.Enqueue(queryId);
+
+                return _testData?.GetExpectedCacheResultForProjectNumber(GetProjectNumber(buildRequest.ProjectFullPath))
+                        ?? CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss);
             }
 
             public override Task EndBuildAsync(PluginLoggerBase logger, CancellationToken cancellationToken)
@@ -1068,6 +1082,49 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             buildSession.Dispose();
 
             StringShouldContainSubstring(logger.FullLog, $"{nameof(AssemblyMockCache)}: EndBuildAsync", expectedOccurrences: 1);
+        }
+
+        [Fact]
+        public void CacheShouldBeQueriedInParallelDuringGraphBuilds()
+        {
+            var referenceNumbers = Enumerable.Range(2, NativeMethodsShared.GetLogicalCoreCount() * 2).ToArray();
+
+            var testData = new GraphCacheResponse(
+                new Dictionary<int, int[]>
+                {
+                    {1, referenceNumbers}
+                },
+                referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult())
+            );
+
+            var graph = testData.CreateGraph(_env);
+            var cache = new InstanceMockCache(testData, TimeSpan.FromMilliseconds(50));
+
+            using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters()
+            {
+                MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+                    cache,
+                    entryPoints: null,
+                    graph)
+            });
+
+            var graphResult = buildSession.BuildGraph(graph);
+
+            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
+
+            var cacheCallsAreSerialized = true;
+
+            foreach (var i in Enumerable.Range(0, cache.QueryStartStops.Count).Where(i => i % 2 == 0))
+            {
+                if (cache.QueryStartStops.ElementAt(i) != cache.QueryStartStops.ElementAt(i + 1))
+                {
+                    cacheCallsAreSerialized = false;
+                }
+            }
+
+            cacheCallsAreSerialized.ShouldBeFalse(string.Join(" ", cache.QueryStartStops));
         }
 
         private static void StringShouldContainSubstring(string aString, string substring, int expectedOccurrences)
