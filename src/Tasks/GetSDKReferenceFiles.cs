@@ -1271,16 +1271,16 @@ namespace Microsoft.Build.Tasks
                     info.ImageRuntime = imageRuntime;
                     info.IsManagedWinmd = isManagedWinmd;
                     info.IsWinMD = isWinmd;
-                }, count => new Dictionary<string, SdkReferenceInfo>(count));
+                }, count => new Dictionary<string, SdkReferenceInfo>(count, StringComparer.OrdinalIgnoreCase));
 
                 translator.TranslateDictionary(ref _directoryToFileList, (ITranslator t, ref string s) => t.Translate(ref s), (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
-                }, count => new Dictionary<string, List<string>>(count));
+                }, count => new Dictionary<string, List<string>>(count, StringComparer.OrdinalIgnoreCase));
                 translator.TranslateDictionary(ref _directoryToFileList, (ITranslator t, ref string s) => t.Translate(ref s), (ITranslator t, ref List<string> fileList) =>
                 {
                     t.Translate(ref fileList, (ITranslator t, ref string str) => { t.Translate(ref str); });
-                }, count => new Dictionary<string, List<string>>(count));
+                }, count => new Dictionary<string, List<string>>(count, StringComparer.OrdinalIgnoreCase));
 
                 translator.Translate(ref _hash);
             }
