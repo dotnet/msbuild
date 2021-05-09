@@ -259,18 +259,31 @@ namespace Microsoft.Build.Evaluation
         /// <param name="location">The location of this property's reassignment.</param>
         private void TrackPropertyReassignment(P predecessor, P property, string location)
         {
-            if ((_settings & PropertyTrackingSetting.PropertyReassignment) != PropertyTrackingSetting.PropertyReassignment) return;
+            if ((_settings & PropertyTrackingSetting.PropertyReassignment) != PropertyTrackingSetting.PropertyReassignment)
+            {
+                return;
+            }
+
+            if (string.Equals(property.Name, "MSBuildAllProjects", StringComparison.OrdinalIgnoreCase))
+            {
+                // There's a huge perf cost to logging this and it increases the binlog size significantly.
+                // Meanwhile the usefulness of logging this is very low.
+                return;
+            }
 
             string newValue = property.EvaluatedValue;
             string oldValue = predecessor.EvaluatedValue;
-            if (newValue == oldValue) return;
+            if (newValue == oldValue)
+            {
+                return;
+            }
 
             var args = new PropertyReassignmentEventArgs(
                 property.Name,
                 oldValue,
                 newValue,
                 location,
-                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", property.Name, newValue, oldValue, location));
+                message: null);
             args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
 
             _evaluationLoggingContext.LogBuildEvent(args);

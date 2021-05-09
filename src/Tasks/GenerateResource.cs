@@ -1065,13 +1065,20 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(_sdkToolsPath))
             {
-                _resgenPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35);
+                // Important: the GenerateResource task is declared twice in Microsoft.Common.CurrentVersion.targets:
+                // https://github.com/dotnet/msbuild/blob/369631b4b21ef485f4d6f35e16b0c839a971b0e9/src/Tasks/Microsoft.Common.CurrentVersion.targets#L3177-L3178
+                // First for CLR >= 4.0, where SdkToolsPath is passed $(ResgenToolPath) which in turn is set to
+                // $(TargetFrameworkSDKToolsDirectory).
+                // But for CLR < 4.0 the SdkToolsPath is not passed, so we need to explicitly assume 3.5:
+                var version = TargetDotNetFrameworkVersion.Version35;
+
+                _resgenPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", version);
 
                 if (_resgenPath == null && ExecuteAsTool)
                 {
                     Log.LogErrorWithCodeFromResources("General.PlatformSDKFileNotFound", "resgen.exe",
-                        ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(TargetDotNetFrameworkVersion.Version35),
-                        ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version35));
+                        ToolLocationHelper.GetDotNetFrameworkSdkInstallKeyValue(version),
+                        ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(version));
                 }
             }
             else

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -28,7 +30,20 @@ namespace Microsoft.Build.Framework
             string message,
             params object[] messageArgs
         )
-            : base(null, null, null, lineNumber, columnNumber, 0, 0, message, null, null, MessageImportance.Low, DateTime.UtcNow, messageArgs)
+            : base(
+                  subcategory: null,
+                  code: null,
+                  file: null,
+                  lineNumber: lineNumber,
+                  columnNumber: columnNumber,
+                  endLineNumber: 0,
+                  endColumnNumber: 0,
+                  message: message,
+                  helpKeyword: null,
+                  senderName: null,
+                  importance: MessageImportance.Low,
+                  eventTimestamp: DateTime.UtcNow,
+                  messageArgs: messageArgs)
         {
         }
 
@@ -51,5 +66,23 @@ namespace Microsoft.Build.Framework
         /// no matches, or a conditioned import that evaluated to false.
         /// </summary>
         public bool ImportIgnored { get; set; }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            writer.WriteOptionalString(UnexpandedProject);
+            writer.WriteOptionalString(ImportedProjectFile);
+            writer.Write(ImportIgnored);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            UnexpandedProject = reader.ReadOptionalString();
+            ImportedProjectFile = reader.ReadOptionalString();
+            ImportIgnored = reader.ReadBoolean();
+        }
     }
 }

@@ -56,6 +56,101 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ResolveAssemblyReference()
         {
+            Strings.Initialize(Log);
+        }
+
+        private static class Strings
+        {
+            public const string FourSpaces = "    ";
+            public const string EightSpaces = "        ";
+            public const string TenSpaces = "          ";
+            public const string TwelveSpaces = "            ";
+
+            public static string ConsideredAndRejectedBecauseFusionNamesDidntMatch;
+            public static string ConsideredAndRejectedBecauseNoFile;
+            public static string ConsideredAndRejectedBecauseNotAFileNameOnDisk;
+            public static string ConsideredAndRejectedBecauseNotInGac;
+            public static string ConsideredAndRejectedBecauseTargetDidntHaveFusionName;
+            public static string Dependency;
+            public static string FormattedAssemblyInfo;
+            public static string FoundRelatedFile;
+            public static string FoundSatelliteFile;
+            public static string FoundScatterFile;
+            public static string ImageRuntimeVersion;
+            public static string IsAWinMdFile;
+            public static string LogAttributeFormat;
+            public static string LogTaskPropertyFormat;
+            public static string NoBecauseParentReferencesFoundInGac;
+            public static string NotCopyLocalBecauseConflictVictim;
+            public static string NotCopyLocalBecauseEmbedded;
+            public static string NotCopyLocalBecauseFrameworksFiles;
+            public static string NotCopyLocalBecauseIncomingItemAttributeOverrode;
+            public static string NotCopyLocalBecausePrerequisite;
+            public static string NotCopyLocalBecauseReferenceFoundInGAC;
+            public static string PrimaryReference;
+            public static string RemappedReference;
+            public static string RequiredBy;
+            public static string Resolved;
+            public static string ResolvedFrom;
+            public static string SearchedAssemblyFoldersEx;
+            public static string SearchPath;
+            public static string TargetedProcessorArchitectureDoesNotMatch;
+            public static string UnificationByAppConfig;
+            public static string UnificationByAutoUnify;
+            public static string UnificationByFrameworkRetarget;
+            public static string UnifiedDependency;
+            public static string UnifiedPrimaryReference;
+
+            private static bool initialized = false;
+
+            internal static void Initialize(TaskLoggingHelper log)
+            {
+                if (initialized)
+                {
+                    return;
+                }
+
+                initialized = true;
+
+                string GetResource(string name) => log.GetResourceMessage(name);
+                string GetResourceFourSpaces(string name) => FourSpaces + log.GetResourceMessage(name);
+                string GetResourceEightSpaces(string name) => EightSpaces + log.GetResourceMessage(name);
+
+                ConsideredAndRejectedBecauseFusionNamesDidntMatch = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch");
+                ConsideredAndRejectedBecauseNoFile = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile");
+                ConsideredAndRejectedBecauseNotAFileNameOnDisk = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk");
+                ConsideredAndRejectedBecauseNotInGac = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac");
+                ConsideredAndRejectedBecauseTargetDidntHaveFusionName = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName");
+                Dependency = GetResource("ResolveAssemblyReference.Dependency");
+                FormattedAssemblyInfo = GetResourceFourSpaces("ResolveAssemblyReference.FormattedAssemblyInfo");
+                FoundRelatedFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundRelatedFile");
+                FoundSatelliteFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundSatelliteFile");
+                FoundScatterFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundScatterFile");
+                ImageRuntimeVersion = GetResourceFourSpaces("ResolveAssemblyReference.ImageRuntimeVersion");
+                IsAWinMdFile = GetResourceFourSpaces("ResolveAssemblyReference.IsAWinMdFile");
+                LogAttributeFormat = GetResourceEightSpaces("ResolveAssemblyReference.LogAttributeFormat");
+                LogTaskPropertyFormat = GetResource("ResolveAssemblyReference.LogTaskPropertyFormat");
+                NoBecauseParentReferencesFoundInGac = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac");
+                NotCopyLocalBecauseConflictVictim = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim");
+                NotCopyLocalBecauseEmbedded = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseEmbedded");
+                NotCopyLocalBecauseFrameworksFiles = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseFrameworksFiles");
+                NotCopyLocalBecauseIncomingItemAttributeOverrode = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseIncomingItemAttributeOverrode");
+                NotCopyLocalBecausePrerequisite = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecausePrerequisite");
+                NotCopyLocalBecauseReferenceFoundInGAC = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseReferenceFoundInGAC");
+                PrimaryReference = GetResource("ResolveAssemblyReference.PrimaryReference");
+                RemappedReference = GetResourceFourSpaces("ResolveAssemblyReference.RemappedReference");
+                RequiredBy = GetResourceFourSpaces("ResolveAssemblyReference.RequiredBy");
+                Resolved = GetResourceFourSpaces("ResolveAssemblyReference.Resolved");
+                ResolvedFrom = GetResourceFourSpaces("ResolveAssemblyReference.ResolvedFrom");
+                SearchedAssemblyFoldersEx = GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx");
+                SearchPath = EightSpaces + GetResource("ResolveAssemblyReference.SearchPath");
+                TargetedProcessorArchitectureDoesNotMatch = GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch");
+                UnificationByAppConfig = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAppConfig");
+                UnificationByAutoUnify = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAutoUnify");
+                UnificationByFrameworkRetarget = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByFrameworkRetarget");
+                UnifiedDependency = GetResource("ResolveAssemblyReference.UnifiedDependency");
+                UnifiedPrimaryReference = GetResource("ResolveAssemblyReference.UnifiedPrimaryReference");
+            }
         }
 
         #region Properties
@@ -1201,8 +1296,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log)
         {
-            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, "ConflictCandidate");
-            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", fusionName, conflictCandidate.FullPath)));
+            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, nameof(conflictCandidate));
+            log.Append(Strings.FourSpaces);
+            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", fusionName, conflictCandidate.FullPath));
 
             if (conflictCandidate.IsPrimary)
             {
@@ -1212,7 +1308,10 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    log.AppendLine().Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.EightSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.UnResolvedPrimaryItemSpec", conflictCandidate.PrimarySourceItem)));
+                    log
+                        .AppendLine()
+                        .Append(Strings.EightSpaces)
+                        .Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.UnResolvedPrimaryItemSpec", conflictCandidate.PrimarySourceItem));
                 }
             }
 
@@ -1230,12 +1329,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">The means by which messages should be logged.</param>
         private void LogDependeeReferenceToStringBuilder(Reference dependeeReference, StringBuilder log)
         {
-            log.AppendLine().AppendLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.EightSpaceIndent", dependeeReference.FullPath));
+            log.AppendLine().Append(Strings.EightSpaces).AppendLine(dependeeReference.FullPath);
 
-            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.TenSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.PrimarySourceItemsForReference", dependeeReference.FullPath)));
+            log.Append(Strings.TenSpaces).Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.PrimarySourceItemsForReference", dependeeReference.FullPath));
             foreach (ITaskItem sourceItem in dependeeReference.GetSourceItems())
             {
-                log.AppendLine().Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.TwelveSpaceIndent", sourceItem.ItemSpec));
+                log.AppendLine().Append(Strings.TwelveSpaces).Append(sourceItem.ItemSpec);
             }
         }
 
@@ -1314,151 +1413,152 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogInputs()
         {
-            if (Traits.Instance.EscapeHatches.LogTaskInputs)
+            if (Traits.Instance.EscapeHatches.LogTaskInputs || Silent)
             {
                 // the inputs will be logged automatically anyway, avoid duplication in the logs
                 return;
             }
 
-            if (!Silent)
+            string indent = Strings.FourSpaces;
+            string property = Strings.LogTaskPropertyFormat;
+            MessageImportance importance = MessageImportance.Low;
+
+            Log.LogMessage(importance, property, "TargetFrameworkMoniker");
+            Log.LogMessage(importance, indent + _targetedFrameworkMoniker);
+
+            Log.LogMessage(importance, property, "TargetFrameworkMonikerDisplayName");
+            Log.LogMessage(importance, indent + TargetFrameworkMonikerDisplayName);
+
+            Log.LogMessage(importance, property, "TargetedRuntimeVersion");
+            Log.LogMessage(importance, indent + _targetedRuntimeVersionRawValue);
+
+            Log.LogMessage(importance, property, "Assemblies");
+            foreach (ITaskItem item in Assemblies)
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "TargetFrameworkMoniker");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", _targetedFrameworkMoniker);
+                Log.LogMessage(importance, indent + item.ItemSpec);
+                LogAttribute(item, ItemMetadataNames.privateMetadata);
+                LogAttribute(item, ItemMetadataNames.hintPath);
+                LogAttribute(item, ItemMetadataNames.specificVersion);
+                LogAttribute(item, ItemMetadataNames.embedInteropTypes);
+                LogAttribute(item, ItemMetadataNames.executableExtension);
+                LogAttribute(item, ItemMetadataNames.subType);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "TargetFrameworkMonikerDisplayName");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", TargetFrameworkMonikerDisplayName);
+            Log.LogMessage(importance, property, "AssemblyFiles");
+            foreach (ITaskItem item in AssemblyFiles)
+            {
+                Log.LogMessage(importance, indent + item.ItemSpec);
+                LogAttribute(item, ItemMetadataNames.privateMetadata);
+                LogAttribute(item, ItemMetadataNames.fusionName);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "TargetedRuntimeVersion");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", _targetedRuntimeVersionRawValue);
-
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "Assemblies");
-                foreach (ITaskItem item in Assemblies)
+            Log.LogMessage(importance, property, "CandidateAssemblyFiles");
+            foreach (string file in CandidateAssemblyFiles)
+            {
+                try
                 {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", item.ItemSpec);
-                    LogAttribute(item, ItemMetadataNames.privateMetadata);
-                    LogAttribute(item, ItemMetadataNames.hintPath);
-                    LogAttribute(item, ItemMetadataNames.specificVersion);
-                    LogAttribute(item, ItemMetadataNames.embedInteropTypes);
-                    LogAttribute(item, ItemMetadataNames.executableExtension);
-                    LogAttribute(item, ItemMetadataNames.subType);
-                }
-
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "AssemblyFiles");
-                foreach (ITaskItem item in AssemblyFiles)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", item.ItemSpec);
-                    LogAttribute(item, ItemMetadataNames.privateMetadata);
-                    LogAttribute(item, ItemMetadataNames.fusionName);
-                }
-
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "CandidateAssemblyFiles");
-                foreach (string file in CandidateAssemblyFiles)
-                {
-                    try
+                    if (FileUtilities.HasExtension(file, _allowedAssemblyExtensions))
                     {
-                        if (FileUtilities.HasExtension(file, _allowedAssemblyExtensions))
-                        {
-                            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", file);
-                        }
-                    }
-                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                    {
-                        throw new InvalidParameterValueException("CandidateAssemblyFiles", file, e.Message);
+                        Log.LogMessage(importance, indent + file);
                     }
                 }
-
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "TargetFrameworkDirectories");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", String.Join(",", TargetFrameworkDirectories));
-
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "InstalledAssemblyTables");
-                foreach (ITaskItem installedAssemblyTable in InstalledAssemblyTables)
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", installedAssemblyTable);
-                    LogAttribute(installedAssemblyTable, ItemMetadataNames.frameworkDirectory);
+                    throw new InvalidParameterValueException("CandidateAssemblyFiles", file, e.Message);
                 }
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "IgnoreInstalledAssemblyTable");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", _ignoreDefaultInstalledAssemblyTables);
+            Log.LogMessage(importance, property, "TargetFrameworkDirectories");
+            Log.LogMessage(importance, indent + String.Join(",", TargetFrameworkDirectories));
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "SearchPaths");
-                foreach (string path in SearchPaths)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", path);
-                }
+            Log.LogMessage(importance, property, "InstalledAssemblyTables");
+            foreach (ITaskItem installedAssemblyTable in InstalledAssemblyTables)
+            {
+                Log.LogMessage(importance, indent + installedAssemblyTable);
+                LogAttribute(installedAssemblyTable, ItemMetadataNames.frameworkDirectory);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "AllowedAssemblyExtensions");
-                foreach (string allowedAssemblyExtension in _allowedAssemblyExtensions)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", allowedAssemblyExtension);
-                }
+            Log.LogMessage(importance, property, "IgnoreInstalledAssemblyTable");
+            Log.LogMessage(importance, indent + _ignoreDefaultInstalledAssemblyTables);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "AllowedRelatedFileExtensions");
-                foreach (string allowedRelatedFileExtension in _relatedFileExtensions)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", allowedRelatedFileExtension);
-                }
+            Log.LogMessage(importance, property, "SearchPaths");
+            foreach (string path in SearchPaths)
+            {
+                Log.LogMessage(importance, indent + path);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "AppConfigFile");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", AppConfigFile);
+            Log.LogMessage(importance, property, "AllowedAssemblyExtensions");
+            foreach (string allowedAssemblyExtension in _allowedAssemblyExtensions)
+            {
+                Log.LogMessage(importance, indent + allowedAssemblyExtension);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "AutoUnify");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", AutoUnify.ToString());
+            Log.LogMessage(importance, property, "AllowedRelatedFileExtensions");
+            foreach (string allowedRelatedFileExtension in _relatedFileExtensions)
+            {
+                Log.LogMessage(importance, indent + allowedRelatedFileExtension);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "CopyLocalDependenciesWhenParentReferenceInGac");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", _copyLocalDependenciesWhenParentReferenceInGac);
+            Log.LogMessage(importance, property, "AppConfigFile");
+            Log.LogMessage(importance, indent + AppConfigFile);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "FindDependencies");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", _findDependencies);
+            Log.LogMessage(importance, property, "AutoUnify");
+            Log.LogMessage(importance, indent + AutoUnify.ToString());
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "TargetProcessorArchitecture");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", TargetProcessorArchitecture);
+            Log.LogMessage(importance, property, "CopyLocalDependenciesWhenParentReferenceInGac");
+            Log.LogMessage(importance, indent + _copyLocalDependenciesWhenParentReferenceInGac);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "StateFile");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", StateFile);
+            Log.LogMessage(importance, property, "FindDependencies");
+            Log.LogMessage(importance, indent + _findDependencies);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "InstalledAssemblySubsetTables");
-                foreach (ITaskItem installedAssemblySubsetTable in InstalledAssemblySubsetTables)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", installedAssemblySubsetTable);
-                    LogAttribute(installedAssemblySubsetTable, ItemMetadataNames.frameworkDirectory);
-                }
+            Log.LogMessage(importance, property, "TargetProcessorArchitecture");
+            Log.LogMessage(importance, indent + TargetProcessorArchitecture);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "IgnoreInstalledAssemblySubsetTable");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", _ignoreDefaultInstalledAssemblySubsetTables);
+            Log.LogMessage(importance, property, "StateFile");
+            Log.LogMessage(importance, indent + StateFile);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "TargetFrameworkSubsets");
-                foreach (string subset in _targetFrameworkSubsets)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", subset);
-                }
+            Log.LogMessage(importance, property, "InstalledAssemblySubsetTables");
+            foreach (ITaskItem installedAssemblySubsetTable in InstalledAssemblySubsetTables)
+            {
+                Log.LogMessage(importance, indent + installedAssemblySubsetTable);
+                LogAttribute(installedAssemblySubsetTable, ItemMetadataNames.frameworkDirectory);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "FullTargetFrameworkSubsetNames");
-                foreach (string subset in FullTargetFrameworkSubsetNames)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", subset);
-                }
+            Log.LogMessage(importance, property, "IgnoreInstalledAssemblySubsetTable");
+            Log.LogMessage(importance, indent + _ignoreDefaultInstalledAssemblySubsetTables);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "ProfileName");
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", ProfileName);
+            Log.LogMessage(importance, property, "TargetFrameworkSubsets");
+            foreach (string subset in _targetFrameworkSubsets)
+            {
+                Log.LogMessage(importance, indent + subset);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "FullFrameworkFolders");
-                foreach (string fullFolder in FullFrameworkFolders)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", fullFolder);
-                }
+            Log.LogMessage(importance, property, "FullTargetFrameworkSubsetNames");
+            foreach (string subset in FullTargetFrameworkSubsetNames)
+            {
+                Log.LogMessage(importance, indent + subset);
+            }
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "LatestTargetFrameworkDirectories");
-                foreach (string latestFolder in _latestTargetFrameworkDirectories)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", latestFolder);
-                }
+            Log.LogMessage(importance, property, "ProfileName");
+            Log.LogMessage(importance, indent + ProfileName);
 
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.LogTaskPropertyFormat", "ProfileTablesLocation");
-                foreach (ITaskItem profileTable in FullFrameworkAssemblyTables)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", profileTable);
-                    LogAttribute(profileTable, ItemMetadataNames.frameworkDirectory);
-                }
+            Log.LogMessage(importance, property, "FullFrameworkFolders");
+            foreach (string fullFolder in FullFrameworkFolders)
+            {
+                Log.LogMessage(importance, indent + fullFolder);
+            }
+
+            Log.LogMessage(importance, property, "LatestTargetFrameworkDirectories");
+            foreach (string latestFolder in _latestTargetFrameworkDirectories)
+            {
+                Log.LogMessage(importance, indent + latestFolder);
+            }
+
+            Log.LogMessage(importance, property, "ProfileTablesLocation");
+            foreach (ITaskItem profileTable in FullFrameworkAssemblyTables)
+            {
+                Log.LogMessage(importance, indent + profileTable);
+                LogAttribute(profileTable, ItemMetadataNames.frameworkDirectory);
             }
         }
 
@@ -1472,7 +1572,7 @@ namespace Microsoft.Build.Tasks
             string metadataValue = item.GetMetadata(metadataName);
             if (!string.IsNullOrEmpty(metadataValue))
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.LogAttributeFormat", metadataName, metadataValue));
+                Log.LogMessage(MessageImportance.Low, Strings.LogAttributeFormat, metadataName, metadataValue);
             }
         }
 
@@ -1488,22 +1588,22 @@ namespace Microsoft.Build.Tasks
             {
                 if (reference.IsUnified)
                 {
-                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.UnifiedPrimaryReference", fusionName);
+                    Log.LogMessage(importance, Strings.UnifiedPrimaryReference, fusionName);
                 }
                 else
                 {
-                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.PrimaryReference", fusionName);
+                    Log.LogMessage(importance, Strings.PrimaryReference, fusionName);
                 }
             }
             else
             {
                 if (reference.IsUnified)
                 {
-                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.UnifiedDependency", fusionName);
+                    Log.LogMessage(importance, Strings.UnifiedDependency, fusionName);
                 }
                 else
                 {
-                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.Dependency", fusionName);
+                    Log.LogMessage(importance, Strings.Dependency, fusionName);
                 }
             }
 
@@ -1514,16 +1614,16 @@ namespace Microsoft.Build.Tasks
                     case UnificationReason.BecauseOfBindingRedirect:
                         if (AutoUnify)
                         {
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.UnificationByAutoUnify", unificationVersion.version, unificationVersion.referenceFullPath));
+                            Log.LogMessage(importance, Strings.UnificationByAutoUnify, unificationVersion.version, unificationVersion.referenceFullPath);
                         }
                         else
                         {
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.UnificationByAppConfig", unificationVersion.version, _appConfigFile, unificationVersion.referenceFullPath));
+                            Log.LogMessage(importance, Strings.UnificationByAppConfig, unificationVersion.version, _appConfigFile, unificationVersion.referenceFullPath);
                         }
                         break;
 
                     case UnificationReason.FrameworkRetarget:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.UnificationByFrameworkRetarget", unificationVersion.version, unificationVersion.referenceFullPath));
+                        Log.LogMessage(importance, Strings.UnificationByFrameworkRetarget, unificationVersion.version, unificationVersion.referenceFullPath);
                         break;
 
                     case UnificationReason.DidntUnify:
@@ -1537,7 +1637,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (AssemblyRemapping remapping in reference.RemappedAssemblyNames())
             {
-                Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.RemappedReference", remapping.From.FullName, remapping.To.FullName));
+                Log.LogMessage(importance, Strings.RemappedReference, remapping.From.FullName, remapping.To.FullName);
             }
         }
 
@@ -1584,12 +1684,21 @@ namespace Microsoft.Build.Tasks
                 if (reference.IsPrimary && !dependencyProblem)
                 {
                     // Treat it as a warning
-                    Log.LogWarning(null, warningCode, helpKeyword, null, 0, 0, 0, 0, messageOnly);
+                    Log.LogWarning(
+                        subcategory: null,
+                        warningCode,
+                        helpKeyword,
+                        file: null,
+                        lineNumber: 0,
+                        columnNumber: 0,
+                        endLineNumber: 0,
+                        endColumnNumber: 0,
+                        message: messageOnly);
                 }
                 else
                 {
                     // Just show the the message as a comment.
-                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", messageOnly);
+                    Log.LogMessage(importance, Strings.FourSpaces + messageOnly);
                 }
             }
         }
@@ -1605,8 +1714,8 @@ namespace Microsoft.Build.Tasks
 
             if (reference.IsResolved)
             {
-                Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.Resolved", reference.FullPath));
-                Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ResolvedFrom", reference.ResolvedSearchPath));
+                Log.LogMessage(importance, Strings.Resolved, reference.FullPath);
+                Log.LogMessage(importance, Strings.ResolvedFrom, reference.ResolvedSearchPath);
             }
         }
 
@@ -1650,10 +1759,10 @@ namespace Microsoft.Build.Tasks
                     if (lastSearchPath != location.SearchPath)
                     {
                         lastSearchPath = location.SearchPath;
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.SearchPath", lastSearchPath));
+                        Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
                         if (logAssemblyFoldersMinimal)
                         {
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.SearchedAssemblyFoldersEx"));
+                            Log.LogMessage(importance, Strings.SearchedAssemblyFoldersEx);
                         }
                     }
 
@@ -1664,33 +1773,38 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (!logAssemblyFoldersMinimal)
                                 {
-                                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile", location.FileNameAttempted));
+                                    Log.LogMessage(importance, Strings.ConsideredAndRejectedBecauseNoFile, location.FileNameAttempted);
                                 }
                                 break;
                             }
                         case NoMatchReason.FusionNamesDidNotMatch:
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch", location.FileNameAttempted, location.AssemblyName.FullName, fusionName));
+                            Log.LogMessage(importance, Strings.ConsideredAndRejectedBecauseFusionNamesDidntMatch, location.FileNameAttempted, location.AssemblyName.FullName, fusionName);
                             break;
 
                         case NoMatchReason.TargetHadNoFusionName:
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName", location.FileNameAttempted));
+                            Log.LogMessage(importance, Strings.ConsideredAndRejectedBecauseTargetDidntHaveFusionName, location.FileNameAttempted);
                             break;
 
                         case NoMatchReason.NotInGac:
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac", location.FileNameAttempted));
+                            Log.LogMessage(importance, Strings.ConsideredAndRejectedBecauseNotInGac, location.FileNameAttempted);
                             break;
 
                         case NoMatchReason.NotAFileNameOnDisk:
                             {
                                 if (!logAssemblyFoldersMinimal)
                                 {
-                                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk", location.FileNameAttempted));
+                                    Log.LogMessage(importance, Strings.ConsideredAndRejectedBecauseNotAFileNameOnDisk, location.FileNameAttempted);
                                 }
 
                                 break;
                             }
                         case NoMatchReason.ProcessorArchitectureDoesNotMatch:
-                            Log.LogMessageFromResources(importance, "ResolveAssemblyReference.EightSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", location.FileNameAttempted, location.AssemblyName.AssemblyName.ProcessorArchitecture.ToString(), _targetProcessorArchitecture));
+                            Log.LogMessage(
+                                importance,
+                                Strings.TargetedProcessorArchitectureDoesNotMatch,
+                                location.FileNameAttempted,
+                                location.AssemblyName.AssemblyName.ProcessorArchitecture.ToString(),
+                                _targetProcessorArchitecture);
                             break;
                         default:
                             Debug.Assert(false, "Should have handled this case.");
@@ -1712,7 +1826,7 @@ namespace Microsoft.Build.Tasks
                 ICollection<ITaskItem> dependees = reference.GetSourceItems();
                 foreach (ITaskItem dependee in dependees)
                 {
-                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.RequiredBy", dependee.ItemSpec));
+                    Log.LogMessage(importance, Strings.RequiredBy, dependee.ItemSpec);
                 }
             }
         }
@@ -1730,7 +1844,7 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (string relatedFileExtension in reference.GetRelatedFileExtensions())
                     {
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FoundRelatedFile", reference.FullPathWithoutExtension + relatedFileExtension));
+                        Log.LogMessage(importance, Strings.FoundRelatedFile, reference.FullPathWithoutExtension + relatedFileExtension);
                     }
                 }
             }
@@ -1745,12 +1859,12 @@ namespace Microsoft.Build.Tasks
         {
             foreach (string satelliteFile in reference.GetSatelliteFiles())
             {
-                Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FoundSatelliteFile", satelliteFile));
+                Log.LogMessage(importance, Strings.FoundSatelliteFile, satelliteFile);
             }
         }
 
         /// <summary>
-        /// Log the satellite files.
+        /// Log scatter files.
         /// </summary>
         /// <param name="reference">The reference.</param>
         /// <param name="importance">The importance of the message.</param>
@@ -1758,7 +1872,7 @@ namespace Microsoft.Build.Tasks
         {
             foreach (string scatterFile in reference.GetScatterFiles())
             {
-                Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FoundScatterFile", scatterFile));
+                Log.LogMessage(importance, Strings.FoundScatterFile, scatterFile);
             }
         }
 
@@ -1778,32 +1892,32 @@ namespace Microsoft.Build.Tasks
                         break;
 
                     case CopyLocalState.NoBecausePrerequisite:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecausePrerequisite"));
+                        Log.LogMessage(importance, Strings.NotCopyLocalBecausePrerequisite);
                         break;
 
                     case CopyLocalState.NoBecauseReferenceItemHadMetadata:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecauseIncomingItemAttributeOverrode"));
+                        Log.LogMessage(importance, Strings.NotCopyLocalBecauseIncomingItemAttributeOverrode);
                         break;
 
                     case CopyLocalState.NoBecauseFrameworkFile:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecauseFrameworksFiles"));
+                        Log.LogMessage(importance, Strings.NotCopyLocalBecauseFrameworksFiles);
                         break;
 
                     case CopyLocalState.NoBecauseReferenceResolvedFromGAC:
                     case CopyLocalState.NoBecauseReferenceFoundInGAC:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecauseReferenceFoundInGAC"));
+                        Log.LogMessage(importance, Strings.NotCopyLocalBecauseReferenceFoundInGAC);
                         break;
 
                     case CopyLocalState.NoBecauseConflictVictim:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim"));
+                        Log.LogMessage(importance, Strings.NotCopyLocalBecauseConflictVictim);
                         break;
 
                     case CopyLocalState.NoBecauseEmbedded:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NotCopyLocalBecauseEmbedded"));
+                        Log.LogMessage(importance, Strings.NotCopyLocalBecauseEmbedded);
                         break;
 
                     case CopyLocalState.NoBecauseParentReferencesFoundInGAC:
-                        Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac"));
+                        Log.LogMessage(importance, Strings.NoBecauseParentReferencesFoundInGac);
                         break;
 
                     default:
@@ -1820,11 +1934,15 @@ namespace Microsoft.Build.Tasks
         {
             if (!reference.IsUnresolvable && !reference.IsBadImage)
             {
-                Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.ImageRuntimeVersion", reference.ImageRuntime));
+                // Don't log the overwhelming default as it just pollutes the logs.
+                if (reference.ImageRuntime != "v4.0.30319")
+                {
+                    Log.LogMessage(importance, Strings.ImageRuntimeVersion, reference.ImageRuntime);
+                }
 
                 if (reference.IsWinMDFile)
                 {
-                    Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.IsAWinMdFile"));
+                    Log.LogMessage(importance, Strings.IsAWinMdFile);
                 }
             }
         }
@@ -1844,14 +1962,14 @@ namespace Microsoft.Build.Tasks
                     {
                         Debug.Assert(!reference.IsPrimary, "A primary reference should never lose a conflict because of version. This is an insoluble conflict instead.");
                         string message = Log.FormatResourceString("ResolveAssemblyReference.ConflictHigherVersionChosen", reference.ConflictVictorName);
-                        log.AppendLine().Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", message));
+                        log.AppendLine().Append(Strings.FourSpaces).Append(message);
                         break;
                     }
 
                 case ConflictLossReason.WasNotPrimary:
                     {
                         string message = Log.FormatResourceString("ResolveAssemblyReference.ConflictPrimaryChosen", reference.ConflictVictorName, fusionName);
-                        log.AppendLine().Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", message));
+                        log.AppendLine().Append(Strings.FourSpaces).Append(message);
                         break;
                     }
 
@@ -2035,7 +2153,7 @@ namespace Microsoft.Build.Tasks
 
                     // Validate the contents of the InstalledAssemblyTables parameter.
                     AssemblyTableInfo[] installedAssemblyTableInfo = GetInstalledAssemblyTableInfo(_ignoreDefaultInstalledAssemblyTables, _installedAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), TargetFrameworkDirectories);
-                    AssemblyTableInfo[] whiteListSubsetTableInfo = null;
+                    AssemblyTableInfo[] inclusionListSubsetTableInfo = null;
 
                     InstalledAssemblies installedAssemblies = null;
                     RedistList redistList = null;
@@ -2045,7 +2163,7 @@ namespace Microsoft.Build.Tasks
                         redistList = RedistList.GetRedistList(installedAssemblyTableInfo);
                     }
 
-                    Dictionary<string, string> blackList = null;
+                    Dictionary<string, string> exclusionList = null;
 
                     // The name of the subset if it is generated or the name of the profile. This will be used for error messages and logging.
                     string subsetOrProfileName = null;
@@ -2053,21 +2171,21 @@ namespace Microsoft.Build.Tasks
                     // Are we targeting a profile
                     bool targetingProfile = !String.IsNullOrEmpty(ProfileName) && ((FullFrameworkFolders.Length > 0) || (FullFrameworkAssemblyTables.Length > 0));
                     bool targetingSubset = false;
-                    List<Exception> whiteListErrors = new List<Exception>();
-                    List<string> whiteListErrorFilesNames = new List<string>();
+                    List<Exception> inclusionListErrors = new List<Exception>();
+                    List<string> inclusionListErrorFilesNames = new List<string>();
 
                     // Check for partial success in GetRedistList and log any tolerated exceptions.
-                    if (redistList?.Count > 0 || targetingProfile || ShouldUseSubsetBlackList())
+                    if (redistList?.Count > 0 || targetingProfile || ShouldUseSubsetExclusionList())
                     {
                         // If we are not targeting a dev 10 profile and we have the required components to generate a orcas style subset, do so
-                        if (!targetingProfile && ShouldUseSubsetBlackList())
+                        if (!targetingProfile && ShouldUseSubsetExclusionList())
                         {
                             // Based in the target framework subset names find the paths to the files
-                            SubsetListFinder whiteList = new SubsetListFinder(_targetFrameworkSubsets);
-                            whiteListSubsetTableInfo = GetInstalledAssemblyTableInfo(IgnoreDefaultInstalledAssemblySubsetTables, InstalledAssemblySubsetTables, new GetListPath(whiteList.GetSubsetListPathsFromDisk), TargetFrameworkDirectories);
-                            if (whiteListSubsetTableInfo.Length > 0 && (redistList?.Count > 0))
+                            SubsetListFinder inclusionList = new SubsetListFinder(_targetFrameworkSubsets);
+                            inclusionListSubsetTableInfo = GetInstalledAssemblyTableInfo(IgnoreDefaultInstalledAssemblySubsetTables, InstalledAssemblySubsetTables, new GetListPath(inclusionList.GetSubsetListPathsFromDisk), TargetFrameworkDirectories);
+                            if (inclusionListSubsetTableInfo.Length > 0 && (redistList?.Count > 0))
                             {
-                                blackList = redistList.GenerateBlackList(whiteListSubsetTableInfo, whiteListErrors, whiteListErrorFilesNames);
+                                exclusionList = redistList.GenerateBlackList(inclusionListSubsetTableInfo, inclusionListErrors, inclusionListErrorFilesNames);
                             }
                             else
                             {
@@ -2075,7 +2193,7 @@ namespace Microsoft.Build.Tasks
                             }
 
                             // Could get into this situation if the redist list files were full of junk and no assemblies were read in.
-                            if (blackList == null)
+                            if (exclusionList == null)
                             {
                                 Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList");
                             }
@@ -2093,15 +2211,15 @@ namespace Microsoft.Build.Tasks
                                 AssemblyTableInfo[] fullRedistAssemblyTableInfo = null;
                                 RedistList fullFrameworkRedistList = null;
 
-                                HandleProfile(installedAssemblyTableInfo /*This is the table info related to the profile*/, out fullRedistAssemblyTableInfo, out blackList, out fullFrameworkRedistList);
+                                HandleProfile(installedAssemblyTableInfo /*This is the table info related to the profile*/, out fullRedistAssemblyTableInfo, out exclusionList, out fullFrameworkRedistList);
 
                                 // Make sure the redist list and the installedAsemblyTableInfo structures point to the full framework, we replace the installedAssemblyTableInfo
                                 // which contained the information about the profile redist files with the one from the full framework because when doing anything with the RAR cache
                                 // we want to use the full frameworks redist list. Essentailly after generating the exclusion list the job of the profile redist list is done.
                                 redistList = fullFrameworkRedistList;
 
-                                // Save the profile redist list file locations as the whiteList
-                                whiteListSubsetTableInfo = installedAssemblyTableInfo;
+                                // Save the profile redist list file locations as the inclusionList
+                                inclusionListSubsetTableInfo = installedAssemblyTableInfo;
 
                                 // Set the installed assembly table to the full redist list values
                                 installedAssemblyTableInfo = fullRedistAssemblyTableInfo;
@@ -2129,10 +2247,10 @@ namespace Microsoft.Build.Tasks
                         }
 
                         // Some files may have been skipped. Log warnings for these.
-                        for (int i = 0; i < whiteListErrors.Count; ++i)
+                        for (int i = 0; i < inclusionListErrors.Count; ++i)
                         {
-                            Exception e = whiteListErrors[i];
-                            string filename = whiteListErrorFilesNames[i];
+                            Exception e = inclusionListErrors[i];
+                            string filename = inclusionListErrorFilesNames[i];
 
                             // Give the user a warning about the bad file (or files).
                             Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.InvalidInstalledAssemblySubsetTablesFile", filename, SubsetListFinder.SubsetListFolder, e.Message);
@@ -2251,7 +2369,7 @@ namespace Microsoft.Build.Tasks
                             excludedReferencesExist = false;
                             if (redistList?.Count > 0)
                             {
-                                excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(blackList);
+                                excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(exclusionList);
                             }
                         }
                         catch (InvalidOperationException e)
@@ -2289,7 +2407,7 @@ namespace Microsoft.Build.Tasks
                             excludedReferencesExist = false;
                             if (redistList?.Count > 0)
                             {
-                                excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(blackList);
+                                excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(exclusionList);
                             }
                         }
                         catch (InvalidOperationException e)
@@ -2403,7 +2521,7 @@ namespace Microsoft.Build.Tasks
                     // Log the results.
                     success = LogResults(dependencyTable, idealAssemblyRemappings, idealAssemblyRemappingsIdentities, generalResolutionExceptions);
 
-                    DumpTargetProfileLists(installedAssemblyTableInfo, whiteListSubsetTableInfo, dependencyTable);
+                    DumpTargetProfileLists(installedAssemblyTableInfo, inclusionListSubsetTableInfo, dependencyTable);
 
                     if (processorArchitecture != SystemProcessorArchitecture.None && _warnOrErrorOnTargetArchitectureMismatch != WarnOrErrorOnTargetArchitectureMismatchBehavior.None)
                     {
@@ -2563,13 +2681,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="installedAssemblyTableInfo">Installed assembly info of the profile redist lists</param>
         /// <param name="fullRedistAssemblyTableInfo">Installed assemblyInfo for the full framework redist lists</param>
-        /// <param name="blackList">Generated exclusion list</param>
+        /// <param name="exclusionList">Generated exclusion list</param>
         /// <param name="fullFrameworkRedistList">Redist list which will contain the full framework redist list.</param>
-        private void HandleProfile(AssemblyTableInfo[] installedAssemblyTableInfo, out AssemblyTableInfo[] fullRedistAssemblyTableInfo, out Dictionary<string, string> blackList, out RedistList fullFrameworkRedistList)
+        private void HandleProfile(AssemblyTableInfo[] installedAssemblyTableInfo, out AssemblyTableInfo[] fullRedistAssemblyTableInfo, out Dictionary<string, string> exclusionList, out RedistList fullFrameworkRedistList)
         {
             // Redist list which will contain the full framework redist list.
             fullFrameworkRedistList = null;
-            blackList = null;
+            exclusionList = null;
             fullRedistAssemblyTableInfo = null;
 
             // Make sure the framework directory is on the FullFrameworkTablesLocation if it is being used.
@@ -2590,18 +2708,18 @@ namespace Microsoft.Build.Tasks
                 fullFrameworkRedistList = RedistList.GetRedistList(fullRedistAssemblyTableInfo);
                 if (fullFrameworkRedistList != null)
                 {
-                    // Generate the black list by determining what assemblies are in the full framework but not in the profile.
-                    // The installedAssemblyTableInfo is the list of xml files for the Client Profile redist, these are the whitelist xml files.
+                    // Generate the exclusion list by determining what assemblies are in the full framework but not in the profile.
+                    // The installedAssemblyTableInfo is the list of xml files for the Client Profile redist, these are the inclusionList xml files.
                     Log.LogMessageFromResources("ResolveAssemblyReference.ProfileExclusionListWillBeGenerated");
 
                     // Any errors reading the profile redist list will already be logged, we do not need to re-log the errors here.
-                    List<Exception> whiteListErrors = new List<Exception>();
-                    List<string> whiteListErrorFilesNames = new List<string>();
-                    blackList = fullFrameworkRedistList.GenerateBlackList(installedAssemblyTableInfo, whiteListErrors, whiteListErrorFilesNames);
+                    List<Exception> inclusionListErrors = new List<Exception>();
+                    List<string> inclusionListErrorFilesNames = new List<string>();
+                    exclusionList = fullFrameworkRedistList.GenerateBlackList(installedAssemblyTableInfo, inclusionListErrors, inclusionListErrorFilesNames);
                 }
 
                 // Could get into this situation if the redist list files were full of junk and no assemblies were read in.
-                if (blackList == null)
+                if (exclusionList == null)
                 {
                     Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList");
                 }
@@ -2696,60 +2814,63 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Log the target framework subset information.
         /// </summary>
-        private void DumpTargetProfileLists(AssemblyTableInfo[] installedAssemblyTableInfo, AssemblyTableInfo[] whiteListSubsetTableInfo, ReferenceTable referenceTable)
+        private void DumpTargetProfileLists(AssemblyTableInfo[] installedAssemblyTableInfo, AssemblyTableInfo[] inclusionListSubsetTableInfo, ReferenceTable referenceTable)
         {
-            if (installedAssemblyTableInfo != null)
+            if (installedAssemblyTableInfo == null)
             {
-                string dumpFrameworkSubsetList = Environment.GetEnvironmentVariable("MSBUILDDUMPFRAMEWORKSUBSETLIST");
+                return;
+            }
 
-                if (dumpFrameworkSubsetList != null)
+            string dumpFrameworkSubsetList = Environment.GetEnvironmentVariable("MSBUILDDUMPFRAMEWORKSUBSETLIST");
+            if (dumpFrameworkSubsetList == null)
+            {
+                return;
+            }
+
+            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkSubsetLogHeader");
+
+            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkRedistLogHeader");
+            foreach (AssemblyTableInfo redistInfo in installedAssemblyTableInfo)
+            {
+                if (redistInfo != null)
                 {
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkSubsetLogHeader");
+                    Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, redistInfo.Path);
+                }
+            }
 
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkRedistLogHeader");
-                    foreach (AssemblyTableInfo redistInfo in installedAssemblyTableInfo)
+            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader");
+            if (inclusionListSubsetTableInfo != null)
+            {
+                foreach (AssemblyTableInfo inclusionListInfo in inclusionListSubsetTableInfo)
+                {
+                    if (inclusionListInfo != null)
                     {
-                        if (redistInfo != null)
-                        {
-                            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FormattedAssemblyInfo", redistInfo.Path));
-                        }
+                        Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, inclusionListInfo.Path);
                     }
+                }
+            }
 
-                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader");
-                    if (whiteListSubsetTableInfo != null)
-                    {
-                        foreach (AssemblyTableInfo whiteListInfo in whiteListSubsetTableInfo)
-                        {
-                            if (whiteListInfo != null)
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.FormattedAssemblyInfo", whiteListInfo.Path));
-                            }
-                        }
-                    }
-
-                    if (referenceTable.ListOfExcludedAssemblies != null)
-                    {
-                        Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader");
-                        foreach (string assemblyFullName in referenceTable.ListOfExcludedAssemblies)
-                        {
-                            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", assemblyFullName);
-                        }
-                    }
+            if (referenceTable.ListOfExcludedAssemblies != null)
+            {
+                Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader");
+                foreach (string assemblyFullName in referenceTable.ListOfExcludedAssemblies)
+                {
+                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", assemblyFullName);
                 }
             }
         }
 
         /// <summary>
-        /// Determine if a black list should be used or not
+        /// Determine if an exclusion list should be used or not
         ///
-        /// The black list should only be used if there are TargetFrameworkSubsets to use or TargetFrameworkProfiles.
+        /// The exclusion list should only be used if there are TargetFrameworkSubsets to use or TargetFrameworkProfiles.
         ///
-        /// 1) If we find a Full or equivalent marker in the list of subsets passed in we do not want to generate a black list even if installedAssemblySubsets are passed in
-        /// 2) If we are ignoring the default installed subset tables and we have not passed in any additional subset tables, we do not want to generate a black list
-        /// 3) If no targetframework subsets were passed in and no additional subset tables were passed in, we do not want to generate a blacklist
+        /// 1) If we find a Full or equivalent marker in the list of subsets passed in we do not want to generate an exclusion list even if installedAssemblySubsets are passed in
+        /// 2) If we are ignoring the default installed subset tables and we have not passed in any additional subset tables, we do not want to generate an exclusion list
+        /// 3) If no targetframework subsets were passed in and no additional subset tables were passed in, we do not want to generate an exclusion list
         /// </summary>
-        /// <returns>True if we should generate a black list, false if a blacklist should not be generated</returns>
-        private bool ShouldUseSubsetBlackList()
+        /// <returns>True if we should generate an exclusion list</returns>
+        private bool ShouldUseSubsetExclusionList()
         {
             // Check for full subset names in the passed in list of subsets to search for
             foreach (string fullSubsetName in _fullTargetFrameworkSubsetNames)
@@ -2774,7 +2895,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // No subset names were passed in to search for in the targetframework directories and no installed subset tables were provided, we have nothing to use to 
-            // generate the black list with, so do not continue.
+            // generate the exclusion list with, so do not continue.
             if (_targetFrameworkSubsets.Length == 0 && _installedAssemblySubsetTables.Length == 0)
             {
                 return false;

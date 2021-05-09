@@ -66,9 +66,11 @@ namespace Microsoft.Build.Shared
         internal static readonly Version visualStudioVersion120 = new Version(12, 0);
         internal static readonly Version visualStudioVersion140 = new Version(14, 0);
         internal static readonly Version visualStudioVersion150 = new Version(15, 0);
+        internal static readonly Version visualStudioVersion160 = new Version(16, 0);
+        internal static readonly Version visualStudioVersion170 = new Version(17, 0);
 
         // keep this up-to-date; always point to the latest visual studio version.
-        internal static readonly Version visualStudioVersionLatest = visualStudioVersion150;
+        internal static readonly Version visualStudioVersionLatest = visualStudioVersion160;
 
         private const string dotNetFrameworkRegistryPath = "SOFTWARE\\Microsoft\\.NETFramework";
         private const string dotNetFrameworkSetupRegistryPath = "SOFTWARE\\Microsoft\\NET Framework Setup\\NDP";
@@ -286,6 +288,44 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
             }),
+
+            // VS16
+            new VisualStudioSpec(visualStudioVersion160, "NETFXSDK\\{0}", "v10.0", "InstallationFolder", new []
+            {
+                dotNetFrameworkVersion11,
+                dotNetFrameworkVersion20,
+                dotNetFrameworkVersion35,
+                dotNetFrameworkVersion40,
+                dotNetFrameworkVersion45,
+                dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452,
+                dotNetFrameworkVersion46,
+                dotNetFrameworkVersion461,
+                dotNetFrameworkVersion462,
+                dotNetFrameworkVersion47,
+                dotNetFrameworkVersion471,
+                dotNetFrameworkVersion472,
+                dotNetFrameworkVersion48,
+            }),
+
+            // VS17
+            new VisualStudioSpec(visualStudioVersion170, "NETFXSDK\\{0}", "v10.0", "InstallationFolder", new []
+            {
+                dotNetFrameworkVersion11,
+                dotNetFrameworkVersion20,
+                dotNetFrameworkVersion35,
+                dotNetFrameworkVersion40,
+                dotNetFrameworkVersion45,
+                dotNetFrameworkVersion451,
+                dotNetFrameworkVersion452,
+                dotNetFrameworkVersion46,
+                dotNetFrameworkVersion461,
+                dotNetFrameworkVersion462,
+                dotNetFrameworkVersion47,
+                dotNetFrameworkVersion471,
+                dotNetFrameworkVersion472,
+                dotNetFrameworkVersion48,
+            }),
         };
 
 #if FEATURE_WIN32_REGISTRY
@@ -320,6 +360,17 @@ namespace Microsoft.Build.Shared
             { (dotNetFrameworkVersion471, visualStudioVersion150), (dotNetFrameworkVersion47, visualStudioVersion150) },
             { (dotNetFrameworkVersion472, visualStudioVersion150), (dotNetFrameworkVersion471, visualStudioVersion150) },
             { (dotNetFrameworkVersion48, visualStudioVersion150), (dotNetFrameworkVersion472, visualStudioVersion150) },
+
+            // VS16
+            { (dotNetFrameworkVersion451, visualStudioVersion160), (dotNetFrameworkVersion45, visualStudioVersion160) },
+            { (dotNetFrameworkVersion452, visualStudioVersion160), (dotNetFrameworkVersion451, visualStudioVersion160) },
+            { (dotNetFrameworkVersion46, visualStudioVersion160), (dotNetFrameworkVersion451, visualStudioVersion160) },
+            { (dotNetFrameworkVersion461, visualStudioVersion160), (dotNetFrameworkVersion46, visualStudioVersion160) },
+            { (dotNetFrameworkVersion462, visualStudioVersion160), (dotNetFrameworkVersion461, visualStudioVersion160) },
+            { (dotNetFrameworkVersion47, visualStudioVersion160), (dotNetFrameworkVersion462, visualStudioVersion160) },
+            { (dotNetFrameworkVersion471, visualStudioVersion160), (dotNetFrameworkVersion47, visualStudioVersion160) },
+            { (dotNetFrameworkVersion472, visualStudioVersion160), (dotNetFrameworkVersion471, visualStudioVersion160) },
+            { (dotNetFrameworkVersion48, visualStudioVersion160), (dotNetFrameworkVersion472, visualStudioVersion160) },
        };
 #endif // FEATURE_WIN32_REGISTRY
 
