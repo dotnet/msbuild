@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../Strings.resx">
     <body>
@@ -938,7 +938,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
+        <target state="translated">  -detailedSummary[:True|False]
                      À la fin de la build, affiche des informations détaillées
                      sur les configurations générées et la façon dont elles
                      étaient planifiées sur les nœuds.
@@ -960,7 +960,7 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: une valeur de résumé détaillée n’est pas valide. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1559,20 +1559,28 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Sérialise tous les événements de build dans un fichier binaire compressé.
                      Par défaut, le fichier se trouve dans le répertoire actif et se nomme
                      "msbuild.binlog". Le journal binaire est une description détaillée
                      du processus de génération, qui peut servir plus tard à reconstruire
                      les journaux texte et être utilisé par d'autres outils d'analyse. Un journal binaire
-                     est généralement 10 à 20 fois plus petit que le journal
+                     est généralement
+10 à 20
+fois plus petit que le journal
                      de diagnostic de type texte le plus détaillé, mais il contient plus d'informations.
-                     (Forme abrégée : -bl)
+                     (Forme abrégée
+: -bl)
+
 
                      Le journaliseur binaire par défaut collecte le texte source
+
                      des fichiers projet, notamment tous les projets importés et les
+
                      fichiers cibles rencontrés pendant la build. Le commutateur
-                     ProjectImports facultatif contrôle ce comportement :
+
+                     ProjectImports facultatif contrôle ce comportement
+:
 
                       ProjectImports=None     - Ne collecte pas les importations
                                                 du projet.
@@ -1584,24 +1592,33 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
                                                 le fichier journal binaire.
 
                      Le paramètre par défaut de ProjectImports est Embed.
-                     Remarque : Le journaliseur ne collecte pas les
+                     Remarque
+: Le journaliseur ne collecte pas les
+
                      fichiers sources non MSBuild tels que .cs, .cpp etc.
 
-                     Vous pouvez "lire" un fichier .binlog en le passant à
-                     msbuild.exe en tant qu'argument plutôt qu'en tant que projet/solution.
-                     D'autres enregistreurs d'événements reçoivent les informations
-                     contenues dans le fichier journal comme si la build d'origine était en cours de création.
-                     Pour plus d'informations sur le journal binaire et ses usages, consultez :
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
 
-                     Exemples :
+                     Vous pouvez "lire" un fichier .binlog en le passant à
+
+                     msbuild.exe en tant qu'argument plutôt qu'en tant que projet/solution.
+
+                     D'autres enregistreurs d'événements reçoivent les informations
+
+                     contenues dans le fichier journal comme si la build d'origine était en cours de création.
+
+                     Pour plus d'informations sur le journal binaire et ses usages, consultez
+:
+                    https://aka.ms/msbuild/binlog
+
+                     Exemples
+:
+
                        -bl
+
                        -bl:output.binlog
+
                        -bl:output.binlog;ProjectImports=None
-                       -bl:output.binlog;ProjectImports=ZipFile
-                       -bl:..\..\custom.binlog
-                       -binaryLogger
-    </target>
+                       -bl:output.binlog;ProjectImports=ZipFile                       -bl:..\..\custom.binlog                       -binaryLogger    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"

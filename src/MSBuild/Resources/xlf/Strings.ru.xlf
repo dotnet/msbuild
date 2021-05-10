@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
     <body>
@@ -937,7 +937,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
+        <target state="translated">  -detailedSummary[:True|False]
                      Показывает в конце сборки подробные сведения
                      о созданных конфигурациях и графике их передачи
                      на узлы.
@@ -959,7 +959,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: значение подробной сводки недопустимо. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1559,40 +1559,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Сериализует все события сборки в сжатый двоичный файл.
                      По умолчанию файл находится в текущем каталоге и называется
                      "msbuild.binlog". Двоичный журнал включает подробное описание
                      процесса сборки, которое затем можно использовать для воссоздания
                      текстовых журналов. Он также может использоваться другими средствами анализа. Двоичный журнал
-                     обычно в 10–20 раз меньше самого подробного текстового
+                     обычно в 10–20 раз меньше самого подробного текстового
                      журнала уровня диагностики, но содержит больше информации.
                      (Краткая форма: -bl)
 
                      Средство ведения двоичного журнала по умолчанию собирает исходный текст
                      файлов проекта, включая все импортированные проекты и целевые
                      файлы, найденные во время сборки. Дополнительный
-                     параметр ProjectImports управляет этим поведением.
+                     параметр ProjectImports управляет этим поведением:
 
-                      ProjectImports=None — не собирать импортированные файлы
+                      ProjectImports=None     — не собирать импортированные файлы
                                                 проекта.
-                      ProjectImports=Embed — внедрять импортированные файлы проекта в
+                      ProjectImports=Embed    — внедрять импортированные файлы проекта в
                                                 файл журнала.
-                      ProjectImports=ZipFile — сохранять файлы проекта в
-                                                &lt;вывод&gt;.projectimports.zip,
-                                                где &lt;вывод&gt; — это то же имя,
+                      ProjectImports=ZipFile  — сохранять файлы проекта в
+                                                вывод.projectimports.zip,
+                                                где вывод — это то же имя,
                                                 что и у двоичного файла журнала.
 
-                     Значение по умолчанию для ProjectImports — Embed.
-                     Примечание. Средство ведения журнала не собирает исходные файлы
-                     не от MSBuild, например с расширениями CS, CPP и др.
+                     Значение по умолчанию для ProjectImports — Embed.
+                     Примечание. Средство ведения журнала не собирает исходные файлы, не от MSBuild,
+                     например с расширениями CS, CPP и др.
 
                      BINLOG-файл можно "воспроизвести", передав его в
                      msbuild.exe в качестве аргумента вместо проекта или решения.
                      Другие средства ведения журнала получат содержащиеся
                      в файле журнала сведения, как если бы происходила собственно сборка.
                      Дополнительные сведения о двоичных журналах и их использовании:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     https://aka.ms/msbuild/binlog
 
                      Примеры:
                        -bl
