@@ -860,5 +860,62 @@ class Program
                 .Pass();
         }
 
+        [Fact]
+        public void It_builds_the_project_successfully_with_only_reference_assembly_set()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MainProject",
+                TargetFrameworks = "net5.0",
+                IsSdkProject = true,
+                IsExe = true
+
+            };
+
+            testProject.AdditionalProperties["ProduceOnlyReferenceAssembly"] = "true";
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testProjectInstance);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
+            var refPath = Path.Combine(outputPath, "ref");
+            Directory.Exists(refPath)
+                .Should()
+                .BeFalse();
+        }
+
+        [Fact]
+        public void It_builds_the_project_successfully_with_only_reference_assembly_false()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "MainProject",
+                TargetFrameworks = "net5.0",
+                IsSdkProject = true,
+                IsExe = true
+
+            };
+
+            testProject.AdditionalProperties["ProduceOnlyReferenceAssembly"] = "false";
+
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+
+            var buildCommand = new BuildCommand(testProjectInstance);
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
+            var refPath = Path.Combine(outputPath, "ref", "MainProject.dll");
+            File.Exists(refPath)
+                .Should()
+                .BeTrue();
+        }
     }
 }
