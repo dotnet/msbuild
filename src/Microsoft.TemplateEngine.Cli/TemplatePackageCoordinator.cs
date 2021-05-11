@@ -14,7 +14,6 @@ using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.NuGet;
-using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateEngine.Utils;
 using NuGet.Credentials;
@@ -557,7 +556,7 @@ namespace Microsoft.TemplateEngine.Cli
                 if (templates.Any())
                 {
                     Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
-                    foreach (TemplateInfo info in templates)
+                    foreach (ITemplateInfo info in templates)
                     {
                         string templateLanguage = info.GetLanguage();
                         string shortNames = string.Join(",", info.ShortNameList);
