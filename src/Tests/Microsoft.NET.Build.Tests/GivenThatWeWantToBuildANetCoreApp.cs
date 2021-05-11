@@ -393,11 +393,15 @@ public static class Program
             };
 
             var buildCommand = new BuildCommand(_testAssetsManager.CreateTestProject(proj, identifier: targetFramework));
+
             var runtimeconfigFile = Path.Combine(
                 buildCommand.GetOutputDirectory(targetFramework).FullName,
                 $"{proj.Name}.runtimeconfig.dev.json");
 
-            buildCommand.Execute();
+            buildCommand.Execute().StdOut
+                        .Should()
+                        .NotContain("NETSDK1048");
+
             File.Exists(runtimeconfigFile).Should().Be(shouldGenerateRuntimeConfigDevJson);
         }
 
@@ -423,10 +427,14 @@ public static class Program
                 $"{proj.Name}.runtimeconfig.dev.json");
 
             // GenerateRuntimeConfigDevFile overrides default behavior
-            buildCommand.Execute("/p:GenerateRuntimeConfigDevFile=true");
+            buildCommand.Execute("/p:GenerateRuntimeConfigDevFile=true").StdOut
+                        .Should()
+                        .NotContain("NETSDK1048"); ;
             File.Exists(runtimeconfigFile).Should().BeTrue();
 
-            buildCommand.Execute("/p:GenerateRuntimeConfigDevFile=false");
+            buildCommand.Execute("/p:GenerateRuntimeConfigDevFile=false").StdOut
+                        .Should()
+                        .NotContain("NETSDK1048"); ;
             File.Exists(runtimeconfigFile).Should().BeFalse();
         }
 

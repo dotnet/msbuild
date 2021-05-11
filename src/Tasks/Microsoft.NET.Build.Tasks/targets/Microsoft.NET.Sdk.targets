@@ -265,7 +265,8 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        HostConfigurationOptions="@(RuntimeHostConfigurationOption)"
                                        AdditionalProbingPaths="@(AdditionalProbingPath)"
                                        IsSelfContained="$(SelfContained)"
-                                       WriteIncludedFrameworks="$(_WriteIncludedFrameworks)">
+                                       WriteIncludedFrameworks="$(_WriteIncludedFrameworks)"
+                                       GenerateRuntimeConfigDevFile="$(GenerateRuntimeConfigDevFile)">
 
     </GenerateRuntimeConfigurationFiles>
 

@@ -54,6 +54,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool WriteIncludedFrameworks { get; set; }
 
+        public bool GenerateRuntimeConfigDevFile { get; set; }
+
         List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         private static readonly string[] RollForwardValues = new string[]
@@ -74,11 +76,12 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            bool writeDevRuntimeConfig = !string.IsNullOrEmpty(RuntimeConfigDevPath);
-
             if (!WriteAdditionalProbingPathsToMainConfig)
             {
-                if (AdditionalProbingPaths?.Any() == true && !writeDevRuntimeConfig)
+                // If we want to generate the runtimeconfig.dev.json file
+                // and we have additional probing paths to add to it
+                // BUT the runtimeconfigdevpath is empty, log a warning.
+                if (GenerateRuntimeConfigDevFile && AdditionalProbingPaths?.Any() == true && string.IsNullOrEmpty(RuntimeConfigDevPath))
                 {
                     Log.LogWarning(Strings.SkippingAdditionalProbingPaths);
                 }
@@ -138,7 +141,7 @@ namespace Microsoft.NET.Build.Tasks
                     projectContext.IsFrameworkDependent,
                     projectContext.LockFile.PackageFolders);
 
-                if (writeDevRuntimeConfig)
+                if (GenerateRuntimeConfigDevFile && !string.IsNullOrEmpty(RuntimeConfigDevPath))
                 {
                     WriteDevRuntimeConfig(projectContext.LockFile.PackageFolders);
                 }
