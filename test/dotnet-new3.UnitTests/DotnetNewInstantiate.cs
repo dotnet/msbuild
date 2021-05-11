@@ -1,7 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
@@ -201,6 +204,47 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("100")
                 .And.HaveStdErrContaining($"{Path.DirectorySeparatorChar}test_templates{Path.DirectorySeparatorChar}TemplateResolution{Path.DirectorySeparatorChar}SamePrecedenceGroup{Path.DirectorySeparatorChar}BasicTemplate2")
                 .And.HaveStdErrContaining($"{Path.DirectorySeparatorChar}test_templates{Path.DirectorySeparatorChar}TemplateResolution{Path.DirectorySeparatorChar}SamePrecedenceGroup{Path.DirectorySeparatorChar}BasicTemplate1");
+        }
+
+        [Fact]
+        public void CanInstantiateTemplateWithAlias()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "console", "--alias", "csharpconsole")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("Successfully created alias named 'csharpconsole' with value 'console'");
+
+            new DotnetNewCommand(_log, "console", "-n", "MyConsole", "-o", "no-alias")
+             .WithCustomHive(home)
+             .WithWorkingDirectory(workingDirectory)
+             .Execute()
+             .Should()
+             .ExitWith(0)
+             .And.NotHaveStdErr()
+             .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+
+            new DotnetNewCommand(_log, "csharpconsole", "-n", "MyConsole", "-o", "alias")
+               .WithCustomHive(home)
+               .WithWorkingDirectory(workingDirectory)
+               .Execute()
+               .Should()
+               .ExitWith(0)
+               .And.NotHaveStdErr()
+               .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.")
+               .And.HaveStdOutContaining("After expanding aliases, the command is:")
+               .And.HaveStdOutContaining("dotnet new3 console -n MyConsole -o alias");
+
+            Assert.Equal(
+                new DirectoryInfo(Path.Combine(workingDirectory, "no-alias")).EnumerateFileSystemInfos().Select(fi => fi.Name),
+                new DirectoryInfo(Path.Combine(workingDirectory, "alias")).EnumerateFileSystemInfos().Select(fi => fi.Name));
+
         }
     }
 }

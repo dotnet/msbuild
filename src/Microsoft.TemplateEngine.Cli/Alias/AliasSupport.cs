@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +10,9 @@ using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
-using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Edge.Template;
 
-namespace Microsoft.TemplateEngine.Cli
+namespace Microsoft.TemplateEngine.Cli.Alias
 {
     internal static class AliasSupport
     {
@@ -99,7 +100,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!string.IsNullOrEmpty(commandInput.ShowAliasesAliasName))
             {
-                if (aliasRegistry.AllAliases.TryGetValue(commandInput.ShowAliasesAliasName, out IReadOnlyList<string> aliasValue))
+                if (aliasRegistry.AllAliases.TryGetValue(commandInput.ShowAliasesAliasName, out IReadOnlyList<string>? aliasValue))
                 {
                     aliasesToShow = new Dictionary<string, IReadOnlyList<string>>()
                     {
@@ -172,7 +173,8 @@ namespace Microsoft.TemplateEngine.Cli
         {
             List<string> aliasTokens = new List<string>();
             bool nextIsAliasName = false;
-            string aliasName = null;
+            bool skipNextToken = false;
+            string? aliasName = null;
 
             foreach (string token in inputTokens)
             {
@@ -180,6 +182,11 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     aliasName = token;
                     nextIsAliasName = false;
+                }
+                else if (skipNextToken)
+                {
+                    skipNextToken = false;
+                    continue;
                 }
                 else if (string.Equals(token, "-a", StringComparison.Ordinal) || string.Equals(token, "--alias", StringComparison.Ordinal))
                 {
@@ -192,6 +199,10 @@ namespace Microsoft.TemplateEngine.Cli
                     }
 
                     nextIsAliasName = true;
+                }
+                else if (token.Equals("--debug:custom-hive", StringComparison.Ordinal))
+                {
+                    skipNextToken = true;
                 }
                 else if (!token.StartsWith("--debug:", StringComparison.Ordinal))
                 {
