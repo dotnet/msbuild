@@ -1,41 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>$(NETStandardTargetFramework)</TargetFrameworks>
-        <Description>Template creation for the dotnet CLI</Description>
-        <IsPackable>true</IsPackable>
-        <IsShippingPackage>false</IsShippingPackage>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>$(NETStandardTargetFramework)</TargetFrameworks>
+    <Description>Template creation for the dotnet CLI</Description>
+    <IsPackable>true</IsPackable>
+    <IsShippingPackage>false</IsShippingPackage>
+    <EnablePublicApiAnalyzer>true</EnablePublicApiAnalyzer>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <None Include="CommandParsing\NewCommandInputCli.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Include="CommandParsing\NewCommandInputCli.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
-        <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
-        <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
-        <ProjectReference Include="$(SrcDir)Microsoft.TemplateSearch.Common\Microsoft.TemplateSearch.Common.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
+    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Abstractions\Microsoft.TemplateEngine.Abstractions.csproj" />
+    <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Utils\Microsoft.TemplateEngine.Utils.csproj" />
+    <ProjectReference Include="$(SrcDir)Microsoft.TemplateSearch.Common\Microsoft.TemplateSearch.Common.csproj" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" />
-        <PackageReference Include="NuGet.Credentials" Version="5.8.1" />
-        <PackageReference Include="System.Diagnostics.Process" />
-        <PackageReference Include="Newtonsoft.Json" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" />
+    <PackageReference Include="NuGet.Credentials" Version="5.8.1" />
+    <PackageReference Include="System.Diagnostics.Process" />
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Update="LocalizableStrings.Designer.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>LocalizableStrings.resx</DependentUpon>
-        </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Update="LocalizableStrings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LocalizableStrings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Update="LocalizableStrings.resx">
-            <Generator>ResXFileCodeGenerator</Generator>
-            <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-    </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="LocalizableStrings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LocalizableStrings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

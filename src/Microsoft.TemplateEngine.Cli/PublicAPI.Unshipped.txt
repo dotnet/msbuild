@@ -1,0 +1,30 @@
+﻿Microsoft.TemplateEngine.Cli.CommandParserException
+Microsoft.TemplateEngine.Cli.CommandParserException.Argument.get -> string!
+Microsoft.TemplateEngine.Cli.HostSpecificDataLoader
+Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.HostSpecificDataLoader(Microsoft.TemplateEngine.Abstractions.ISettingsLoader! settingsLoader) -> void
+Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.ReadHostSpecificTemplateData(Microsoft.TemplateEngine.Abstractions.ITemplateInfo! templateInfo) -> Microsoft.TemplateEngine.Cli.HostSpecificTemplateData!
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.HiddenParameterNames.get -> System.Collections.Generic.HashSet<string!>!
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.IsHidden.get -> bool
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.IsHidden.set -> void
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.LongNameOverrides.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.ParametersToAlwaysShow.get -> System.Collections.Generic.HashSet<string!>!
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.ShortNameOverrides.get -> System.Collections.Generic.Dictionary<string!, string!>!
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.SymbolInfo.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyDictionary<string!, string!>!>!
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.UsageExamples.get -> System.Collections.Generic.List<string!>?
+Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.UsageExamples.set -> void
+Microsoft.TemplateEngine.Cli.IHostSpecificDataLoader
+Microsoft.TemplateEngine.Cli.IHostSpecificDataLoader.ReadHostSpecificTemplateData(Microsoft.TemplateEngine.Abstractions.ITemplateInfo! templateInfo) -> Microsoft.TemplateEngine.Cli.HostSpecificTemplateData!
+Microsoft.TemplateEngine.Cli.ITelemetryLogger
+~Microsoft.TemplateEngine.Cli.ITelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
+Microsoft.TemplateEngine.Cli.New3Callbacks
+Microsoft.TemplateEngine.Cli.New3Callbacks.New3Callbacks() -> void
+~Microsoft.TemplateEngine.Cli.New3Callbacks.OnFirstRun.get -> System.Action<Microsoft.TemplateEngine.Abstractions.IEngineEnvironmentSettings>
+~Microsoft.TemplateEngine.Cli.New3Callbacks.OnFirstRun.set -> void
+~Microsoft.TemplateEngine.Cli.New3Callbacks.RestoreProject.get -> System.Func<string, bool>
+~Microsoft.TemplateEngine.Cli.New3Callbacks.RestoreProject.set -> void
+Microsoft.TemplateEngine.Cli.New3Command
+Microsoft.TemplateEngine.Cli.TelemetryLogger
+~Microsoft.TemplateEngine.Cli.TelemetryLogger.TelemetryLogger(System.Action<string, System.Collections.Generic.IDictionary<string, string>, System.Collections.Generic.IDictionary<string, double>> trackEvent, bool writeToConsole = false) -> void
+~Microsoft.TemplateEngine.Cli.TelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
+static Microsoft.TemplateEngine.Cli.New3Command.Run(string! commandName, Microsoft.TemplateEngine.Abstractions.ITemplateEngineHost! host, Microsoft.TemplateEngine.Cli.ITelemetryLogger! telemetryLogger, Microsoft.TemplateEngine.Cli.New3Callbacks! callbacks, string![]! args, string? hivePath = null) -> int
