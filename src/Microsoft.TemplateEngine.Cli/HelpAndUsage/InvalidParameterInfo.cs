@@ -29,22 +29,22 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         internal enum Kind
         {
             /// <summary>
-            /// The parameter name is invalid
+            /// The parameter name is invalid.
             /// </summary>
             InvalidParameterName,
 
             /// <summary>
-            /// The value is invalid
+            /// The value is invalid.
             /// </summary>
             InvalidParameterValue,
 
             /// <summary>
-            /// The default name is invalid
+            /// The default name is invalid.
             /// </summary>
             InvalidDefaultValue,
 
             /// <summary>
-            /// The value provided leads to ambiguous choice (for choice parameters only)
+            /// The value provided leads to ambiguous choice (for choice parameters only).
             /// </summary>
             AmbiguousParameterValue
         }

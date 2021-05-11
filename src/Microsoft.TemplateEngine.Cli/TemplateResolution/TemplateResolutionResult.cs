@@ -56,27 +56,27 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal enum Status
         {
             /// <summary>
-            /// the status is not evaluated yet
+            /// the status is not evaluated yet.
             /// </summary>
             NotEvaluated,
 
             /// <summary>
-            /// no matched template groups were resolved
+            /// no matched template groups were resolved.
             /// </summary>
             NoMatch,
 
             /// <summary>
-            /// single template group and single template to use in the group is resolved
+            /// single template group and single template to use in the group is resolved.
             /// </summary>
             SingleMatch,
 
             /// <summary>
-            /// multiple template groups were resolved; not possible to determing the group to use
+            /// multiple template groups were resolved; not possible to determing the group to use.
             /// </summary>
             AmbiguousTemplateGroupChoice,
 
             /// <summary>
-            /// single template group was resolved, but it is not possible to resolve choice parameter value to use
+            /// single template group was resolved, but it is not possible to resolve choice parameter value to use.
             /// </summary>
             AmbiguousParameterValueChoice,
 
@@ -86,7 +86,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             AmbiguousTemplateChoice,
 
             /// <summary>
-            /// single template group was resolved, but there is an ambiguous choice for template inside the group with templates having different languages and the language was not selected by user and no default language match
+            /// single template group was resolved, but there is an ambiguous choice for template inside the group with templates having different languages and the language was not selected by user and no default language match.
             /// </summary>
             AmbiguousLanguageChoice,
 
@@ -102,22 +102,22 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal enum UnambiguousTemplateGroupStatus
         {
             /// <summary>
-            /// the status is not evaluated yet
+            /// the status is not evaluated yet.
             /// </summary>
             NotEvaluated,
 
             /// <summary>
-            /// no matched template groups were resolved
+            /// no matched template groups were resolved.
             /// </summary>
             NoMatch,
 
             /// <summary>
-            /// single template group is resolved
+            /// single template group is resolved.
             /// </summary>
             SingleMatch,
 
             /// <summary>
-            /// multiple template groups were resolved; not possible to determing the group to use
+            /// multiple template groups were resolved; not possible to determing the group to use.
             /// </summary>
             Ambiguous
         }

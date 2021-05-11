@@ -16,7 +16,7 @@ using Microsoft.TemplateEngine.Utils;
 
 namespace Dotnet_new3
 {
-    public class Program
+    public static class Program
     {
         private const string HostIdentifier = "dotnetcli-preview";
         private const string HostVersion = "v2.0.0";
