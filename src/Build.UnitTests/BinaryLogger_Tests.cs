@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
+
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -153,6 +158,49 @@ namespace Microsoft.Build.UnitTests
 </Project>";
 
             ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/6323.
+        /// </summary>
+        /// <remarks>
+        /// This isn't strictly a binlog test, but it fits here because
+        /// all log event types will be used when the binlog is attached.
+        /// </remarks>
+        [Fact]
+        public void MessagesCanBeLoggedWhenProjectsAreCached()
+        {
+            using var env = TestEnvironment.Create();
+
+            env.SetEnvironmentVariable("MSBUILDDEBUGFORCECACHING", "1");
+
+            using var buildManager = new BuildManager();
+
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = $"LogFile={_logFile}"
+            };
+
+            // To trigger #6323, there must be at least two project instances.
+            var referenceProject = _env.CreateTestProjectWithFiles("reference.proj", @"
+         <Project>
+            <Target Name='Target2'>
+               <Exec Command='echo a'/>
+            </Target>
+         </Project>");
+
+            var entryProject = _env.CreateTestProjectWithFiles("entry.proj", $@"
+         <Project>
+            <Target Name='BuildSelf'>
+               <Message Text='MessageOutputText'/>
+               <MSBuild Projects='{referenceProject.ProjectFile}' Targets='Target2' />
+               <MSBuild Projects='{referenceProject.ProjectFile}' Targets='Target2' /><!-- yes, again. That way it's a cached result -->
+            </Target>
+         </Project>");
+
+            buildManager.Build(new BuildParameters() { Loggers = new ILogger[] { binaryLogger } },
+                new BuildRequestData(entryProject.ProjectFile, new Dictionary<string, string>(), null, new string[] { "BuildSelf" }, null))
+                .OverallResult.ShouldBe(BuildResultCode.Success);
         }
 
 

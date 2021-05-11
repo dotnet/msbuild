@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
     <body>
@@ -958,9 +958,9 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
-                     Visualizza informazioni dettagliate al termine della
-                     compilazione relative alle configurazioni compilate e alla
+        <target state="translated">  -detailedSummary[:True|False]
+                     Al termine della compilazione visualizza informazioni
+                     dettagliate sulle configurazioni compilate e sulla
                      relativa modalità di pianificazione nei nodi. Forma breve:
                      -ds.
     </target>
@@ -980,7 +980,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: il valore del riepilogo dettagliato non è valido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1580,48 +1580,42 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializza tutti gli eventi di compilazione in un file
-                     binario compresso. Per impostazione predefinita, il file
-                     si trova nella directory corrente e si chiama
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializza tutti gli eventi di compilazione in un file binario compresso.
+                     Per impostazione predefinita, il file csi trova nella directory corrente e si chiama
                      "msbuild.binlog". Il log binario è una descrizione
                      dettagliata del processo di compilazione utilizzabile in
-                     seguito per ricostruire i log di testo e viene usato da
-                     altri strumenti di analisi. Un log binario è in genere
+                     seguito per ricostruire i log di testo e viene usato da altri strumenti di analisi. Un log binario è in genere
                      10-20 volte più piccolo del più dettagliato log di testo
                      di livello diagnostico, ma contiene maggiori informazioni.
-                     Forma breve: -bl.
-                     Per impostazione predefinita, il logger binario raccoglie
-                     il testo di origine di file di progetto, inclusi tutti i
-                     progetti importati e i file di destinazione rilevati
-                     durante la compilazione. L'opzione facoltativa
+                     (Froma breve: -bl)
+
+                     Per impostazione predefinita, il logger binario raccoglie il testo di origine di
+                     file di progetto, inclusi tutti i
+                     progetti importati e i file di destinazione rilevati durante la compilazione. L'opzione facoltativa
                      ProjectImports controlla questo comportamento:
 
-                      ProjectImports=None    - Non viene eseguita la raccolta
-                                               delle importazioni del progetto.
-                      ProjectImports=Embed   - Le importazioni del progetto
-                                               vengono incorporate nel file
-                                               di log.
-                      ProjectImports=ZipFile - I file del progetto vengono
-                                               salvati in 
-                                               output.projectimports.zip
-                                               dove output corrisponde allo
-                                               stesso nome del file di log
-                                               binario.
+                      ProjectImports=None     - Non viene eseguita la raccolta
+                                                delle importazioni del progetto.
+                      ProjectImports=Embed    - Le importazioni del progetto vengono incorporate nel
+                                                file di log.
+                      ProjectImports=ZipFile  - I file del progetto vengono salvati in
+                                                output.projectimports.zip
+                                                dove output corrisponde allo
+                                                as stesso nome del file di log binario.
 
                      L'impostazione predefinita di ProjectImports è Embed.
-                     Nota: il logger non raccoglie i file di origine non
-                     MSBuild, ad esempio quelli con estensione cs, cpp
-                     e così via.
-                     È possibile riprodurre un file con estensione binlog
-                     passandolo a msbuild.exe come argomento invece di un
-                     progetto o di una soluzione. Altri logger riceveranno le
-                     informazioni contenute nel file di log come se fosse in
-                     corso la compilazione originale. Per maggiori informazioni
-                     sul file di log e su come usarlo, vedere:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     Nota: il logger non raccoglie i file di origine non-MSBuild,
+                     ad esempio quelli con estensione .cs, .cpp e così via.
 
-                     Esempi: 
+                     È possibile riprodurre un file con estensione binlog
+                     passandolo a msbuild.exe come argomento invece di un progetto o di una soluzione.
+                     Altri logger riceveranno le
+                     informazioni contenute nel file di log come se fosse in corso la compilazione originale.
+                     Per maggiori informazioni sul file di log e su come usarlo, vedere:
+                     https://aka.ms/msbuild/binlog
+
+                     Esempi:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None

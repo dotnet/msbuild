@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANS" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
       <trans-unit id="AmbiguousProjectError">
         <source>MSBUILD : error MSB1011: Specify which project or solution file to use because this folder contains more than one project or solution file.</source>
@@ -937,10 +937,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
+        <target state="translated">  -detailedSummary
                     在生成的结尾显示有关
-                    所生成的配置以及如何向节点安排
-                    这些配置的详细信息。
+                    所生成配置的详细信息，以及如何向节点安排
+                    这些配置。
                     (缩写: -ds)
     </target>
         <note>
@@ -959,7 +959,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: 详细汇总值无效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1557,7 +1557,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      将所有生成事件序列化为压缩的二进制文件。
                      默认情况下该文件位于当前目录并且名为 "msbuild.binlog"。
                      二进制日志是生成过程的详细描述，
@@ -1571,27 +1571,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      包括生成期间所有导入的
                      项目和目标文件。可选的
                      ProjectImports 开关控制此行为:
-                     
 
                       ProjectImports=None     - 不收集项目
                                                 导入项。
-                      ProjectImports=Embed    - 在日志文件中
-                                                嵌入项目导入项。
-                      ProjectImports=ZipFile  - 将项目文件保存到
-                                                output.projectimports.zip，
+                     ProjectImports=Embed    - 在日志文件中
+                                                 嵌入项目导入项。
+                    ProjectImports=ZipFile  - 将项目文件保存到
+                                              output.projectimports.zip，
                                                 其中输出的名称
                                                 与二进制日志文件名称相同。
 
-                     ProjectImports 的默认设置为 Embed。
-                     注意: 记录器不会收集非 MSBuild 源文件，
-                     例如 .cs、.cpp 等。
+                    ProjectImports 的默认设置为 Embed。
+                    注意: 记录器不会收集非 MSBuild 源文件，
+                    例如 .cs、.cpp 等。
 
                      可将 .binlog 文件以参数(而不是项目/解决方案)的形式传递给
-                     msbuild.exe 对其进行“播放”。
+                   msbuild.exe 对其进行“播放”。
                      其他记录器将接收日志文件中的信息，
-                     就像原始的生成正在发生一样。
-                     你可以通过以下网址阅读有关二进制文件及其用法的详细信息:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                    就像原始的生成正在发生一样。
+                    你可以通过以下网址阅读有关二进制文件及其用法的详细信息:
+                    https://aka.ms/msbuild/binlog
 
                      示例:
                        -bl
@@ -1600,7 +1599,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        -bl:output.binlog;ProjectImports=ZipFile
                        -bl:..\..\custom.binlog
                        -binaryLogger
-    </target>
+</target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"

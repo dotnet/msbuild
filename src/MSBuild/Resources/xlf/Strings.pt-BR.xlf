@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.resx">
     <body>
@@ -938,10 +938,10 @@ isoladamente.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
-                     Mostra informações detalhadas ao final do build
-                     sobre as configurações compiladas e o modo como elas foram
-                     agendadas para nós. 
+        <target state="translated">  -detailedSummary[:True|False]
+                     Mostra informações detalhadas no final da compilação
+                     sobre as configurações compiladas e como elas foram
+                     agendadas para os nós.
                      (Forma abreviada: -ds)
     </target>
         <note>
@@ -960,7 +960,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: O valor do resumo detalhado é inválido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -970,7 +970,7 @@ isoladamente.
       </trans-unit>
       <trans-unit id="InvalidGraphBuildValue">
         <source>MSBUILD : error MSB1057: Graph build value is not valid.</source>
-        <target state="translated">MSBUILD : error MSB1057: o valor de build do grafo não é válido.</target>
+        <target state="translated">MSBUILD : error MSB1057: O valor de build do gráfico não é válido.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1057: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1558,40 +1558,40 @@ isoladamente.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializa todos os eventos de build para um arquivo binário compactado.
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializa todos os eventos da compilação em um arquivo binário compactado.
                      Por padrão, o arquivo está no diretório atual e é chamado de
-                     "msbuild.binlog". O log binário é uma descrição detalhada 
-                     do processo de build que pode mais tarde ser usado para reconstruir
-                     logs de texto e ser usado por outras ferramentas de análise. Um log binário
-                     normalmente é 10 a 20 vezes menor que a maioria dos logs de nível
-                     de diagnóstico de texto mais detalhado, mas contém mais informações.
+                     "msbuild.binlog". O log binário é uma descrição detalhada
+                     do processo de compilação que pode mais tarde ser usado para reconstruir
+                     logs de texto e usados por outras ferramentas de análise. Um log binário
+                     normalmente é 10 a 20x menor do que os log de nível
+                     de diagnóstico do texto mais detalhado, mas contém mais informações.
                      (Forma abreviada: -bl)
 
-                     O agente binário por padrão coleta o texto fonte dos
+                     O agente binário, por padrão, coleta o texto fonte dos
                      arquivos de projeto, incluindo todos os projetos importados e arquivos
-                     de destino encontrados durante o build. A opção
-                     ProjectImports opcional controla esse comportamento:
+                     de destino encontrados durante a compilação. A opção
+                     ProjectImports opcional controla este comportamento:
 
-                      ProjectImports=None     – Não coletar as importações 
+                      ProjectImports=None     - Não coletar as importações
                                                 do projeto.
-                      ProjectImports=Embed    – Inserir as importações do projeto
-                                                no arquivo de log.
-                      ProjectImports=ZipFile  – Salvar os arquivos de projeto no 
-                                                output.projectimports.zip,
+                      ProjectImports=Embed    - Inserir as importações do projeto no
+                                                arquivo de log.
+                      ProjectImports=ZipFile  - Salvar os arquivos de projeto em
+                                                output.projectimports.zip
                                                 em que a saída tem o mesmo nome que o
                                                 nome do arquivo de log binário.
 
                      A configuração padrão para ProjectImports é Embed.
-                     Nota: o agente não coleta arquivos de origem não MSBuild,
-                     como .cs, .cpp etc.
+                     Observação: o agente não coleta arquivos de origem não MSBuild
+                     tais como .cs, .cpp etc.
 
-                     Um arquivo .binlog pode ser "reproduzido novamente" passando-o para
-                     msbuild.exe como um argumento, em vez de como um projeto/solução.
-                     Outros agentes receberão as informações contidas no arquivo de log
-                     como se o build original estivesse acontecendo.
+                     Um arquivo .binlog pode ser "reproduzido novamente", passando-o para
+                     msbuild.exe como um argumento em vez de um projeto/solução.
+                     Outros agentes receberão as informações contidas
+                     no arquivo de log como se a compilação original estivesse acontecendo.
                      Você pode ler mais sobre o log binário e seus usos em:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     https://aka.ms/msbuild/binlog
 
                      Exemplos:
                        -bl
