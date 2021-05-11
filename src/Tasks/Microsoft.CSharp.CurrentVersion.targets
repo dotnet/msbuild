@@ -190,7 +190,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                  @(CustomAdditionalCompileOutputs)"
         Condition="'@(Page)' != '' Or '@(ApplicationDefinition)' != ''"
         Returns=""
-        DependsOnTargets="$(CoreCompileDependsOn)"
+        DependsOnTargets="$(CoreCompileDependsOn);GenerateMSBuildEditorConfigFile"
     >
        <!-- These two compiler warnings are raised when a reference is bound to a different version
              than specified in the assembly reference version number.  MSBuild raises the same warning in this case,
@@ -239,6 +239,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               AddModules="@(AddModules)"
               AdditionalFiles="@(AdditionalFiles)"
               AllowUnsafeBlocks="$(AllowUnsafeBlocks)"
+              AnalyzerConfigFiles="@(EditorConfigFiles)"
               Analyzers="@(Analyzer)"
               ApplicationConfiguration="$(AppConfigForCompiler)"
               BaseAddress="$(BaseAddress)"
