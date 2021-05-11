@@ -49,7 +49,7 @@ stages:
     - name: VisualStudio.MajorVersion
       value: 16
     - name: VisualStudio.ChannelName
-      value: 'int.main'
+      value: 'int.d16.10'
     - name: VisualStudio.DropName
       value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
