@@ -36,11 +36,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             foreach (string preferredName in preferredNameList)
             {
-                ITemplateInfo template = templateList.FirstOrDefault(x => x.ShortNameList.Contains(preferredName, StringComparer.OrdinalIgnoreCase));
+                ITemplateInfo? template = templateList.FirstOrDefault(x => x.ShortNameList.Contains(preferredName, StringComparer.OrdinalIgnoreCase));
 
                 if (template != null)
                 {
-                    string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity!;
+                    string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
                     if (usedGroupIds.Add(identity))
                     {
                         GenerateUsageForTemplate(template, hostDataLoader, commandName);
@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 int index = rnd.Next(0, templateList.Count - 1);
                 ITemplateInfo template = templateList[index];
-                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity!;
+                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
                 if (usedGroupIds.Add(identity) && !GenerateUsageForTemplate(template, hostDataLoader, commandName))
                 {
                     --i;
@@ -105,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 // Lookup the input param formats - userParamsWithInvalidValues has canonical.
                 foreach (string canonical in userParamsWithInvalidValues)
                 {
-                    commandInput.InputTemplateParams.TryGetValue(canonical, out string specifiedValue);
+                    commandInput.InputTemplateParams.TryGetValue(canonical, out string? specifiedValue);
                     string inputFormat = commandInput.TemplateParamInputFormat(canonical);
                     InvalidParameterInfo invalidParam = new InvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, inputFormat, specifiedValue, canonical);
                     invalidParameters.Add(invalidParam);
@@ -118,7 +118,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
                 foreach (string defaultParamName in defaultsWithUnresolvedInvalidValues)
                 {
-                    ITemplateParameter param = templateParams.ParameterDefinitions.FirstOrDefault(x => string.Equals(x.Name, defaultParamName, StringComparison.Ordinal));
+                    ITemplateParameter? param = templateParams.ParameterDefinitions.FirstOrDefault(x => string.Equals(x.Name, defaultParamName, StringComparison.Ordinal));
 
                     if (param != null)
                     {

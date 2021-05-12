@@ -46,10 +46,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 IPostActionProcessor actionProcessor = null;
 
-                if (action.ActionId != null)
-                {
-                    _environment.SettingsLoader.Components.TryGetComponent(action.ActionId, out actionProcessor);
-                }
+                _environment.SettingsLoader.Components.TryGetComponent(action.ActionId, out actionProcessor);
 
                 bool result = false;
 

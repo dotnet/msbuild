@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             _telemetryLogger = telemetryLogger;
             _engineEnvironmentSettings = environmentSettings;
-            _defaultLanguage = defaultLanguage!;
+            _defaultLanguage = defaultLanguage;
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace Microsoft.TemplateEngine.Cli
                     if (templatePackage.Identifier.Equals(templatePackageIdentifier, StringComparison.OrdinalIgnoreCase))
                     {
                         templatePackageIdentified = true;
-                        if (packagesToUninstall.TryGetValue(templatePackage.ManagedProvider, out List<IManagedTemplatePackage> packages))
+                        if (packagesToUninstall.TryGetValue(templatePackage.ManagedProvider, out List<IManagedTemplatePackage>? packages))
                         {
                             packages.Add(templatePackage);
                         }

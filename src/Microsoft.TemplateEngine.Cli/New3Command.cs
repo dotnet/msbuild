@@ -43,7 +43,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IHostSpecificDataLoader _hostDataLoader;
         private readonly string? _defaultLanguage;
         private readonly New3Callbacks _callbacks;
-        private readonly Func<string> _inputGetter = () => Console.ReadLine();
+        private readonly Func<string> _inputGetter = () => Console.ReadLine() ?? string.Empty;
 
         internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput)
             : this(commandName, host, telemetryLogger, callbacks, commandInput, null)
@@ -201,7 +201,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 AggregateException? ax = ex as AggregateException;
 
-                while (ax != null && ax.InnerExceptions.Count == 1)
+                while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
                 {
                     ex = ax.InnerException;
                     ax = ex as AggregateException;
@@ -214,7 +214,7 @@ namespace Microsoft.TemplateEngine.Cli
                     ex = ex.InnerException;
                     ax = ex as AggregateException;
 
-                    while (ax != null && ax.InnerExceptions.Count == 1)
+                    while (ax != null && ax.InnerExceptions.Count == 1 && ax.InnerException is not null)
                     {
                         ex = ax.InnerException;
                         ax = ex as AggregateException;
@@ -449,15 +449,15 @@ namespace Microsoft.TemplateEngine.Cli
             TableFormatter.Print(EnvironmentSettings.SettingsLoader.Components.OfType<IMountPointFactory>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IMountPointFactory, object>>
             {
                 { LocalizableStrings.MountPointFactories, x => x.Id },
-                { LocalizableStrings.Type, x => x.GetType().FullName },
-                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName }
+                { LocalizableStrings.Type, x => x.GetType().FullName ?? string.Empty },
+                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty }
             });
 
             TableFormatter.Print(EnvironmentSettings.SettingsLoader.Components.OfType<IGenerator>(), LocalizableStrings.NoItems, "   ", '-', new Dictionary<string, Func<IGenerator, object>>
             {
                 { LocalizableStrings.Generators, x => x.Id },
-                { LocalizableStrings.Type, x => x.GetType().FullName },
-                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName }
+                { LocalizableStrings.Type, x => x.GetType().FullName ?? string.Empty },
+                { LocalizableStrings.Assembly, x => x.GetType().GetTypeInfo().Assembly.FullName ?? string.Empty }
             });
         }
     }

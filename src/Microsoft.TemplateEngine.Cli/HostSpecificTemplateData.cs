@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
                 HashSet<string> hiddenNames = new HashSet<string>();
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
-                    if (paramInfo.Value.TryGetValue(IsHiddenKey, out string hiddenStringValue)
+                    if (paramInfo.Value.TryGetValue(IsHiddenKey, out string? hiddenStringValue)
                         && bool.TryParse(hiddenStringValue, out bool hiddenBoolValue)
                         && hiddenBoolValue)
                     {
@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli
                 HashSet<string> parametersToAlwaysShow = new HashSet<string>(StringComparer.Ordinal);
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
-                    if (paramInfo.Value.TryGetValue(AlwaysShowKey, out string alwaysShowValue)
+                    if (paramInfo.Value.TryGetValue(AlwaysShowKey, out string? alwaysShowValue)
                         && bool.TryParse(alwaysShowValue, out bool alwaysShowBoolValue)
                         && alwaysShowBoolValue)
                     {
@@ -83,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
-                    if (paramInfo.Value.TryGetValue(LongNameKey, out string longNameOverride))
+                    if (paramInfo.Value.TryGetValue(LongNameKey, out string? longNameOverride))
                     {
                         map.Add(paramInfo.Key, longNameOverride);
                     }
@@ -101,7 +101,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 foreach (KeyValuePair<string, IReadOnlyDictionary<string, string>> paramInfo in SymbolInfo)
                 {
-                    if (paramInfo.Value.TryGetValue(ShortNameKey, out string shortNameOverride))
+                    if (paramInfo.Value.TryGetValue(ShortNameKey, out string? shortNameOverride))
                     {
                         map.Add(paramInfo.Key, shortNameOverride);
                     }
@@ -115,8 +115,8 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal string DisplayNameForParameter(string parameterName)
         {
-            if (SymbolInfo.TryGetValue(parameterName, out IReadOnlyDictionary<string, string> configForParam)
-                && configForParam.TryGetValue(LongNameKey, out string longName))
+            if (SymbolInfo.TryGetValue(parameterName, out IReadOnlyDictionary<string, string>? configForParam)
+                && configForParam.TryGetValue(LongNameKey, out string? longName))
             {
                 return longName;
             }

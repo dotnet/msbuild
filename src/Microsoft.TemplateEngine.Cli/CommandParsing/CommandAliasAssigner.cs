@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             List<string> aliasAssignments = new List<string>();
             HashSet<string> invalidParams = new HashSet<string>();
 
-            if (parameterName.IndexOf(':') >= 0)
+            if (parameterName.Contains(':'))
             {
                 // Colon is reserved, template param names cannot have any.
                 invalidParams.Add(parameterName);

@@ -318,8 +318,17 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         private class OrdinalIgnoreCaseMatchInfoComparer : IEqualityComparer<ParameterMatchInfo>
         {
-            public bool Equals(ParameterMatchInfo x, ParameterMatchInfo y)
+            public bool Equals(ParameterMatchInfo? x, ParameterMatchInfo? y)
             {
+                if (x is null && y is null)
+                {
+                    return true;
+                }
+                if (x is null || y is null)
+                {
+                    return false;
+                }
+
                 return x.Kind == y.Kind
                     && string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase)
                     && string.Equals(x.Value, y.Value, StringComparison.OrdinalIgnoreCase);

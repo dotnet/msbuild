@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(NETStandardTargetFramework)</TargetFrameworks>
+    <TargetFrameworks>$(NETCoreTargetFramework)</TargetFrameworks>
     <Description>Template creation for the dotnet CLI</Description>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>false</IsShippingPackage>

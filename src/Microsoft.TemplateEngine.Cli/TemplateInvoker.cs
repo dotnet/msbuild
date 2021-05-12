@@ -65,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal async Task<CreationResultStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke)
         {
-            templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag language);
+            templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag? language);
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
             string? framework = null;
             string? auth = null;
@@ -73,10 +73,10 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (isMicrosoftAuthored)
             {
-                _commandInput.InputTemplateParams.TryGetValue("Framework", out string inputFrameworkValue);
+                _commandInput.InputTemplateParams.TryGetValue("Framework", out string? inputFrameworkValue);
                 framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "Framework", inputFrameworkValue));
 
-                _commandInput.InputTemplateParams.TryGetValue("auth", out string inputAuthValue);
+                _commandInput.InputTemplateParams.TryGetValue("auth", out string? inputAuthValue);
                 auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "auth", inputAuthValue));
             }
 

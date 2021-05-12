@@ -282,7 +282,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                         string paramValue = matchedParamInfo.Value;
                         MatchKind matchKind;
 
-                        if (template.Info.Tags.TryGetValue(paramName, out ICacheTag paramDetails))
+                        if (template.Info.Tags.TryGetValue(paramName, out ICacheTag? paramDetails))
                         {
                             if (string.IsNullOrEmpty(paramValue)
                                 && paramDetails is IAllowDefaultIfOptionWithoutValue paramDetailsWithNoValueDefault
@@ -382,10 +382,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             foreach (ITemplateInfo template in templateList)
             {
                 string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
-                    ? template.GroupIdentity!
+                    ? template.GroupIdentity
                     : template.Identity;
 
-                if (!shortNamesByGroup.TryGetValue(effectiveGroupIdentity, out HashSet<string> shortNames))
+                if (!shortNamesByGroup.TryGetValue(effectiveGroupIdentity, out HashSet<string>? shortNames))
                 {
                     shortNames = new HashSet<string>();
                     shortNamesByGroup[effectiveGroupIdentity] = shortNames;
@@ -399,7 +399,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             foreach (ITemplateInfo template in templateList)
             {
                 string effectiveGroupIdentity = !string.IsNullOrEmpty(template.GroupIdentity)
-                    ? template.GroupIdentity!
+                    ? template.GroupIdentity
                     : template.Identity;
 
                 templateListWithGroupNames.Add(new TemplateInfoWithGroupShortNames(template, shortNamesByGroup[effectiveGroupIdentity]));
