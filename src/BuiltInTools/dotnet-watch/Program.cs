@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Runtime.Loader;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -76,6 +77,9 @@ Examples:
             _cts = new CancellationTokenSource();
             console.CancelKeyPress += OnCancelKeyPress;
             _reporter = CreateReporter(verbose: true, quiet: false, console: _console);
+
+            // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
+            RegisterAssemblyResolutionEvents(sdkRootDirectory);
         }
 
         public static async Task<int> Main(string[] args)
@@ -377,6 +381,20 @@ Examples:
         {
             _console.CancelKeyPress -= OnCancelKeyPress;
             _cts.Dispose();
+        }
+
+        private static void RegisterAssemblyResolutionEvents(string sdkRootDirectory)
+        {
+            var roslynPath = Path.Combine(sdkRootDirectory, "Roslyn", "bincore");
+
+            AssemblyLoadContext.Default.Resolving += (context, assembly) =>
+            {
+                if (assembly.Name is "Microsoft.CodeAnalysis" or "Microsoft.CodeAnalysis.CSharp")
+                {
+                    return context.LoadFromAssemblyPath(Path.Combine(roslynPath, assembly.Name + ".dll"));
+                }
+                return null;
+            };
         }
     }
 }
