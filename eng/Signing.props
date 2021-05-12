@@ -2,4 +2,11 @@
     <ItemGroup>
 		<ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" />
 	</ItemGroup>
+
+    <!-- Since this repo isn't on Arcade 6, UseDotNetCertificate is not available. Do the update here instead. -->
+    <ItemGroup>
+      <FileExtensionSignInfo Update="@(FileExtensionSignInfo->WithMetadataValue('CertificateName','Microsoft400'))" CertificateName="MicrosoftDotNet500" />
+      <StrongNameSignInfo Update="@(StrongNameSignInfo->WithMetadataValue('CertificateName','Microsoft400'))" CertificateName="MicrosoftDotNet500" />
+      <FileSignInfo Update="@(FileSignInfo->WithMetadataValue('CertificateName','Microsoft400'))" CertificateName="MicrosoftDotNet500" />
+    </ItemGroup>
 </Project>
