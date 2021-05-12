@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Utils;
 
@@ -43,7 +44,7 @@ namespace Dotnet_new3
 
 #pragma warning disable CS0067
 
-            public event Action TemplatePackagesChanged;
+            public event Action? TemplatePackagesChanged;
 
 #pragma warning restore CS0067
 
@@ -52,12 +53,12 @@ namespace Dotnet_new3
             public Task<IReadOnlyList<ITemplatePackage>> GetAllTemplatePackagesAsync(CancellationToken cancellationToken)
             {
                 List<ITemplatePackage> templatePackages = new List<ITemplatePackage>();
-                string assemblyLocation = Path.GetDirectoryName(typeof(Program).Assembly.Location);
-                string dn3Path = _settings.Environment.GetEnvironmentVariable("DN3");
+                string? assemblyLocation = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+                string? dn3Path = _settings.Environment.GetEnvironmentVariable("DN3");
 
                 if (string.IsNullOrEmpty(dn3Path))
                 {
-                    string path = assemblyLocation;
+                    string? path = assemblyLocation;
                     while (path != null && !File.Exists(Path.Combine(path, "Microsoft.TemplateEngine.sln")))
                     {
                         path = Path.GetDirectoryName(path);
@@ -70,16 +71,18 @@ namespace Dotnet_new3
                     Environment.SetEnvironmentVariable("DN3", path);
                 }
 
-                string defaultPackagesFilePath = Path.Combine(assemblyLocation, "defaultinstall.template.list");
+                string defaultPackagesFilePath = assemblyLocation != null
+                    ? Path.Combine(assemblyLocation, "defaultinstall.template.list")
+                    : "defaultinstall.template.list";
+
                 if (_settings.Host.FileSystem.FileExists(defaultPackagesFilePath))
                 {
-                    IFileLastWriteTimeSource fileSystem = _settings.Host.FileSystem as IFileLastWriteTimeSource;
                     string packagesToInstall = _settings.Host.FileSystem.ReadAllText(defaultPackagesFilePath);
                     foreach (string sourceLocation in packagesToInstall.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         string expandedPath = Environment.ExpandEnvironmentVariables(sourceLocation).Replace('\\', Path.DirectorySeparatorChar);
                         IEnumerable<string> expandedPaths = InstallRequestPathResolution.ExpandMaskedPath(expandedPath, _settings);
-                        templatePackages.AddRange(expandedPaths.Select(path => new TemplatePackage(this, path, fileSystem?.GetLastWriteTimeUtc(path) ?? File.GetLastWriteTime(path))));
+                        templatePackages.AddRange(expandedPaths.Select(path => new TemplatePackage(this, path, _settings.Host.FileSystem.GetLastWriteTimeUtc(path))));
                     }
                 }
 

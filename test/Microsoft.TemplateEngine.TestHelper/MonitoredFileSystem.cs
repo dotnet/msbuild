@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +10,7 @@ using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 
 namespace Microsoft.TemplateEngine.TestHelper
 {
-    public class MonitoredFileSystem : IPhysicalFileSystem, IFileLastWriteTimeSource
+    public class MonitoredFileSystem : IPhysicalFileSystem
     {
         private readonly IPhysicalFileSystem _baseFileSystem;
         private List<DirectoryScanParameters> _directoriesScanned = new List<DirectoryScanParameters>();
@@ -73,9 +75,9 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public IDisposable WatchFileChanges(string filepath, FileSystemEventHandler fileChanged) => _baseFileSystem.WatchFileChanges(filepath, fileChanged);
 
-        public DateTime GetLastWriteTimeUtc(string file) => (_baseFileSystem as IFileLastWriteTimeSource)?.GetLastWriteTimeUtc(file) ?? throw new NotImplementedException();
+        public DateTime GetLastWriteTimeUtc(string file) => _baseFileSystem.GetLastWriteTimeUtc(file);
 
-        public void SetLastWriteTimeUtc(string file, DateTime lastWriteTimeUtc) => (_baseFileSystem as IFileLastWriteTimeSource)?.SetLastWriteTimeUtc(file, lastWriteTimeUtc);
+        public void SetLastWriteTimeUtc(string file, DateTime lastWriteTimeUtc) => _baseFileSystem.SetLastWriteTimeUtc(file, lastWriteTimeUtc);
 
         private void RecordDirectoryScan(string directoryName, string pattern, SearchOption searchOption)
         {
@@ -89,9 +91,9 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public class DirectoryScanParameters
         {
-            public string DirectoryName { get; set; }
+            public string? DirectoryName { get; set; }
 
-            public string Pattern { get; set; }
+            public string? Pattern { get; set; }
 
             public SearchOption SearchOption { get; set; }
         }

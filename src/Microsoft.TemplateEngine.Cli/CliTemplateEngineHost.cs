@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         workingPath = Path.GetDirectoryName(workingPath.TrimEnd('/', '\\'));
 
-                        if (!FileSystem.DirectoryExists(workingPath))
+                        if (string.IsNullOrWhiteSpace(workingPath) || !FileSystem.DirectoryExists(workingPath))
                         {
                             workingPath = null;
                         }
