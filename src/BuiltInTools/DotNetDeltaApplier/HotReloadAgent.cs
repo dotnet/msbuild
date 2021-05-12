@@ -44,8 +44,6 @@ namespace Microsoft.Extensions.HotReload
 
         internal sealed class UpdateHandlerActions
         {
-            public List<Action<Type[]?>> Before { get; } = new();
-            public List<Action<Type[]?>> After { get; } = new();
             public List<Action<Type[]?>> ClearCache { get; } = new();
             public List<Action<Type[]?>> UpdateApplication { get; } = new();
         }
@@ -88,20 +86,6 @@ namespace Microsoft.Extensions.HotReload
         internal void GetHandlerActions(UpdateHandlerActions handlerActions, Type handlerType)
         {
             bool methodFound = false;
-
-            // Temporarily allow BeforeUpdate and AfterUpdate to be invoked until
-            // everything is updated to use the new names.
-            if (GetUpdateMethod(handlerType, "BeforeUpdate") is MethodInfo beforeUpdate)
-            {
-                handlerActions.Before.Add(CreateAction(beforeUpdate));
-                methodFound = true;
-            }
-
-            if (GetUpdateMethod(handlerType, "AfterUpdate") is MethodInfo afterUpdate)
-            {
-                handlerActions.After.Add(CreateAction(afterUpdate));
-                methodFound = true;
-            }
 
             if (GetUpdateMethod(handlerType, "ClearCache") is MethodInfo clearCache)
             {
@@ -204,8 +188,6 @@ namespace Microsoft.Extensions.HotReload
                 // TODO: Get types to pass in
                 Type[]? updatedTypes = null;
 
-                handlerActions.Before.ForEach(b => b(updatedTypes));
-
                 for (var i = 0; i < deltas.Count; i++)
                 {
                     var item = deltas[i];
@@ -217,7 +199,6 @@ namespace Microsoft.Extensions.HotReload
                 }
 
                 handlerActions.ClearCache.ForEach(a => a(updatedTypes));
-                handlerActions.After.ForEach(c => c(updatedTypes));
                 handlerActions.UpdateApplication.ForEach(a => a(updatedTypes));
 
                 _log("Deltas applied.");
