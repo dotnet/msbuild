@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
@@ -22,7 +22,7 @@ Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cl
         <target state="translated">----------------
 Ein ASP.NET Core-HTTPS-Entwicklungszertifikat wurde installiert.
 Um das Zertifikat als vertrauenswürdig einzustufen, führen Sie "dotnet dev-certs https --trust" aus (nur Windows und macOS).
-Weitere Informationen zu HTTPS: https://aka.ms/dotnet-HTTPS
+Weitere Informationen zu HTTPS: https://aka.ms/dotnet-https
 ----------------
 Schreiben Sie Ihre erste App: https://aka.ms/dotnet-hello-world
 Neuigkeiten: https://aka.ms/dotnet-whats-new

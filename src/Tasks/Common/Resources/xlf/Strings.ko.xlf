@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -607,7 +607,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
         <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.</source>
-        <target state="new">NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.</target>
+        <target state="translated">NETSDK1151: 참조된 프로젝트 '{0}'은(는) self-contained 실행 파일입니다. self-contained 실행 파일은 self-contained가 아닌 실행 파일에서 참조할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1151: "}</note>
       </trans-unit>
       <trans-unit id="PDBGeneratorInputExecutableNotFound">
@@ -722,7 +722,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
         <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.</source>
-        <target state="new">NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.</target>
+        <target state="translated">NETSDK1150: 참조된 프로젝트 '{0}'은(는) self-contained가 아닌 실행 파일입니다. self-contained가 아닌  실행 파일은 self-contained 실행 파일에서 참조할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1150: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
@@ -842,12 +842,12 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="WinMDReferenceNotSupportedOnTargetFramework">
         <source>NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</source>
-        <target state="new">NETSDK1130: {1} cannot be referenced. Referencing a Windows Metadata component directly when targeting .NET 5 or higher is not supported. For more information, see https://aka.ms/netsdk1130</target>
+        <target state="translated">NETSDK1130: {1}을(를) 참조할 수 없습니다. .NET 5 이상을 대상으로 하는 경우 Windows 메타데이터 구성 요소를 직접 참조하는 것은 지원되지 않습니다. 자세한 내용은 다음 링크를 참조하세요. https://aka.ms/netsdk1130</target>
         <note>{StrBegin="NETSDK1130: "}</note>
       </trans-unit>
       <trans-unit id="WinMDTransitiveReferenceNotSupported">
         <source>NETSDK1149: {0} cannot be referenced because it uses built-in support for WinRT, which is no longer supported in .NET 5 and higher.  An updated version of the component supporting .NET 5 is needed. For more information, see https://aka.ms/netsdk1149</source>
-        <target state="new">NETSDK1149: {0} cannot be referenced because it uses built-in support for WinRT, which is no longer supported in .NET 5 and higher.  An updated version of the component supporting .NET 5 is needed. For more information, see https://aka.ms/netsdk1149</target>
+        <target state="translated">NETSDK1149: {0}은(는) 더 이상 .NET 5 이상에서 지원되지 않는 WinRT에 대한 기본 제공 지원을 사용하므로 참조할 수 없습니다.  .NET 5를 지원하는 업데이트된 버전의 구성 요소가 필요합니다. 자세한 내용은 다음 링크를 참조하세요. https://aka.ms/netsdk1149</target>
         <note>{StrBegin="NETSDK1149: "}</note>
       </trans-unit>
       <trans-unit id="WindowsDesktopFrameworkRequiresUseWpfOrUseWindowsForms">
