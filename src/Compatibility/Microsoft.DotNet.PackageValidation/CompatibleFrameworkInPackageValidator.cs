@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NuGet.Client;
-using NuGet.Common;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
 
@@ -17,12 +16,10 @@ namespace Microsoft.DotNet.PackageValidation
     public class CompatibleFrameworkInPackageValidator
     {
         private readonly ApiCompatRunner _apiCompatRunner;
-        private readonly ILogger _log;
-
-        public CompatibleFrameworkInPackageValidator(string noWarn, (string, string)[] ignoredDifferences, ILogger log)
+        
+        public CompatibleFrameworkInPackageValidator(string noWarn, (string, string)[] ignoredDifferences, IPackageLogger log)
         {
-            _log = log;
-            _apiCompatRunner = new(noWarn, ignoredDifferences, _log);
+            _apiCompatRunner = new(noWarn, ignoredDifferences, log);
         }
 
         /// <summary>
@@ -61,7 +58,7 @@ namespace Microsoft.DotNet.PackageValidation
                         package.PackagePath,
                         compileTimeAsset.Path,
                         Path.GetFileName(package.PackagePath),
-                        Resources.CompatibleFrameworkInPackageValidatorHeader,
+                        string.Format(Resources.CompatibleFrameworkInPackageValidatorHeader, ((NuGetFramework)compatibleFrameworkAsset.Properties["tfm"]).ToString(), framework.ToString()),
                         string.Format(Resources.ApiCompatibilityHeader, compatibleFrameworkAsset.Path, compileTimeAsset.Path));
                 }
             }

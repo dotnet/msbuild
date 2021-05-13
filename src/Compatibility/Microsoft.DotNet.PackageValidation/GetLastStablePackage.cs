@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.Build.Framework;
@@ -31,7 +30,6 @@ namespace Microsoft.DotNet.PackageValidation
         {
             NuGetVersion currentPackageVersion = new NuGetVersion(PackageVersion);
             NuGetVersion version = null;
-
             foreach (string nugetFeed in NugetFeeds)
             {
                 SourceRepository repository = Repository.Factory.GetCoreV3(nugetFeed);
@@ -39,7 +37,7 @@ namespace Microsoft.DotNet.PackageValidation
                 SourceCacheContext cache = new SourceCacheContext();
                 IEnumerable<NuGetVersion> versions = resource.GetAllVersionsAsync(PackageId, cache, NullLogger.Instance, CancellationToken.None).Result;
 
-                NuGetVersion packageVersion = versions?.Where(t => !t.IsPrerelease).OrderByDescending(t => t.Version).FirstOrDefault();
+                NuGetVersion packageVersion = versions?.Where(t => !t.IsPrerelease && t != currentPackageVersion).OrderByDescending(t => t.Version).FirstOrDefault();
 
                 if (packageVersion != null)
                 {
@@ -50,11 +48,9 @@ namespace Microsoft.DotNet.PackageValidation
                 }
             }
             
-            // If no suitable package was found, error out.
-            // TODO: Localize error message and add more diagnostics.
             if (version == null)
             {
-                throw new Exception("No baseline package with id '" + PackageId + "' found in feeds: " + Environment.NewLine + string.Join(Environment.NewLine + " - ", NugetFeeds));
+                throw new Exception(string.Format(Resources.BaselinePackageNotFound, PackageId, Environment.NewLine + string.Join(Environment.NewLine + " - ", NugetFeeds)));
             }
 
             LastStableVersion = version?.ToNormalizedString();
