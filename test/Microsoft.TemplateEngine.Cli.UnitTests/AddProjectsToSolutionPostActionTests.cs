@@ -45,13 +45,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 }
             };
 
-            ICreationResult creationResult = new MockCreationResult()
-            {
-                PrimaryOutputs = new List<ICreationPath>()
-                {
-                    new MockCreationPath() { Path = "outputProj1.csproj" }
-                }
-            };
+            ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath("outputProj1.csproj") });
 
             Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(_engineEnvironmentSettings, postAction, creationResult, string.Empty, out IReadOnlyList<string> foundProjectFiles));
             Assert.Equal(1, foundProjectFiles.Count);
@@ -70,15 +64,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 }
             };
 
-            ICreationResult creationResult = new MockCreationResult()
-            {
-                PrimaryOutputs = new List<ICreationPath>()
+            ICreationResult creationResult = new MockCreationResult(
+                primaryOutputs: new[]
                 {
-                    new MockCreationPath() { Path = "outputProj1.csproj" },
-                    new MockCreationPath() { Path = "dontFindMe.csproj" },
-                    new MockCreationPath() { Path = "outputProj2.csproj" },
-                }
-            };
+                    new MockCreationPath("outputProj1.csproj"),
+                    new MockCreationPath("dontFindMe.csproj"),
+                    new MockCreationPath("outputProj2.csproj")
+                });
 
             Assert.True(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(_engineEnvironmentSettings, postAction, creationResult, string.Empty, out IReadOnlyList<string> foundProjectFiles));
             Assert.Equal(2, foundProjectFiles.Count);
@@ -100,13 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 }
             };
 
-            ICreationResult creationResult = new MockCreationResult()
-            {
-                PrimaryOutputs = new List<ICreationPath>()
-                {
-                    new MockCreationPath() { Path = "outputProj1.csproj" },
-                }
-            };
+            ICreationResult creationResult = new MockCreationResult(primaryOutputs: new[] { new MockCreationPath("outputProj1.csproj") });
 
             Assert.False(AddProjectsToSolutionPostAction.TryGetProjectFilesToAdd(_engineEnvironmentSettings, postAction, creationResult, string.Empty, out IReadOnlyList<string> foundProjectFiles));
             Assert.Null(foundProjectFiles);
@@ -126,15 +112,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 }
             };
 
-            ICreationResult creationResult = new MockCreationResult()
-            {
-                PrimaryOutputs = new List<ICreationPath>()
+            ICreationResult creationResult = new MockCreationResult(
+                primaryOutputs: new[]
                 {
-                    new MockCreationPath() { Path = "outputProj1.csproj" },
-                    new MockCreationPath() { Path = "dontFindMe.csproj" },
-                    new MockCreationPath() { Path = "outputProj2.csproj" },
-                }
-            };
+                    new MockCreationPath("outputProj1.csproj"),
+                    new MockCreationPath("dontFindMe.csproj"),
+                    new MockCreationPath("outputProj2.csproj")
+                });
             string outputFileFullPath0 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[0].Path);
             string dontFindMeFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
             string outputFileFullPath2 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[2].Path);
@@ -158,14 +142,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 Args = new Dictionary<string, string>()
             };
 
-            ICreationResult creationResult = new MockCreationResult()
-            {
-                PrimaryOutputs = new List<ICreationPath>()
+            ICreationResult creationResult = new MockCreationResult(
+                primaryOutputs: new []
                 {
-                    new MockCreationPath() { Path = "outputProj1.csproj" },
-                    new MockCreationPath() { Path = "outputProj2.csproj" },
-                }
-            };
+                    new MockCreationPath("outputProj1.csproj"),
+                    new MockCreationPath("outputProj2.csproj"),
+                });
             string outputFileFullPath0 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[0].Path);
             string outputFileFullPath1 = Path.Combine(outputBasePath, creationResult.PrimaryOutputs[1].Path);
 
