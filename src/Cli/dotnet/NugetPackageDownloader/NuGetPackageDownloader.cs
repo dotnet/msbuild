@@ -23,7 +23,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     {
         private readonly SourceCacheContext _cacheSettings = new SourceCacheContext
         {
-            NoCache = true, DirectDownload = true
+            NoCache = true,
+            DirectDownload = true
         };
 
         private readonly IFilePermissionSetter _filePermissionSetter;
@@ -40,7 +41,97 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public async Task<string> DownloadPackageAsync(PackageId packageId,
             NuGetVersion packageVersion = null,
             PackageSourceLocation packageSourceLocation = null,
+            bool includePreview = false,
+            DirectoryPath? downloadFolder = null)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion, packageSourceLocation, includePreview);
+
+            FindPackageByIdResource resource = null;
+            SourceRepository repository = Repository.Factory.GetCoreV3(source);
+
+            resource = await repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (resource == null)
+            {
+                throw new NuGetPackageNotFoundException(
+                    string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
+            }
+
+            string nupkgPath = downloadFolder == null || !downloadFolder.HasValue ?
+                Path.Combine(_packageInstallDir.Value, packageId.ToString(), resolvedPackageVersion.ToNormalizedString(), $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg") :
+                Path.Combine(downloadFolder.Value.Value, $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg");
+            Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
+            using FileStream destinationStream = File.Create(nupkgPath);
+            bool success = await resource.CopyNupkgToStreamAsync(
+                packageId.ToString(),
+                resolvedPackageVersion,
+                destinationStream,
+                _cacheSettings,
+                _logger,
+                cancellationToken);
+
+            if (!success)
+            {
+                throw new NuGetPackageInstallerException(
+                    $"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed");
+            }
+
+            return nupkgPath;
+        }
+
+        public async Task<string> GetPackageUrl(PackageId packageId,
+            NuGetVersion packageVersion = null,
+            PackageSourceLocation packageSourceLocation = null,
             bool includePreview = false)
+        {
+            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion, packageSourceLocation, includePreview);
+
+            SourceRepository repository = Repository.Factory.GetCoreV3(source);
+
+            ServiceIndexResourceV3 serviceIndexResource = repository.GetResourceAsync<ServiceIndexResourceV3>().Result;
+            IReadOnlyList<Uri> packageBaseAddress =
+                serviceIndexResource?.GetServiceEntryUris(ServiceTypes.PackageBaseAddress);
+
+            return GetNupkgUrl(packageBaseAddress.First().ToString(), packageId, resolvedPackageVersion);
+        }
+
+        public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, DirectoryPath targetFolder)
+        {
+            await using FileStream packageStream = File.OpenRead(packagePath);
+            PackageFolderReader packageReader = new PackageFolderReader(targetFolder.Value);
+            PackageExtractionContext packageExtractionContext = new PackageExtractionContext(
+                PackageSaveMode.Defaultv3,
+                XmlDocFileSaveMode.None,
+                null,
+                _logger);
+            NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder.Value);
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            var allFilesInPackage = await PackageExtractor.ExtractPackageAsync(
+                targetFolder.Value,
+                packageStream,
+                packagePathResolver,
+                packageExtractionContext,
+                cancellationToken);
+
+            if (!OperatingSystem.IsWindows())
+            {
+                foreach (FilePath filePath in FindAllFilesNeedExecutablePermission(allFilesInPackage, targetFolder.Value))
+                {
+                    _filePermissionSetter.Set755Permission(filePath.Value);
+                }
+            }
+
+            return allFilesInPackage;
+        }
+
+        private async Task<(PackageSource, NuGetVersion)> GetPackageSourceAndVerion(PackageId packageId,
+             NuGetVersion packageVersion = null,
+             PackageSourceLocation packageSourceLocation = null,
+             bool includePreview = false)
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -64,69 +155,12 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             packageVersion = packageMetadata.Identity.Version;
 
-            FindPackageByIdResource resource = null;
-            SourceRepository repository = Repository.Factory.GetCoreV3(source);
-
-            resource = await repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken)
-                .ConfigureAwait(false);
-
-            if (resource == null)
-            {
-                throw new NuGetPackageNotFoundException(
-                    string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
-            }
-
-            string nupkgPath = Path.Combine(_packageInstallDir.Value, packageId.ToString(),
-                packageVersion.ToNormalizedString(),
-                $"{packageId}.{packageVersion.ToNormalizedString()}.nupkg");
-            Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
-            using FileStream destinationStream = File.Create(nupkgPath);
-            bool success = await resource.CopyNupkgToStreamAsync(
-                packageId.ToString(),
-                packageVersion,
-                destinationStream,
-                _cacheSettings,
-                _logger,
-                cancellationToken);
-
-            if (!success)
-            {
-                throw new NuGetPackageInstallerException(
-                    $"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed");
-            }
-
-            return nupkgPath;
+            return (source, packageVersion);
         }
 
-        public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, string targetFolder)
-        {
-            await using FileStream packageStream = File.OpenRead(packagePath);
-            PackageFolderReader packageReader = new PackageFolderReader(targetFolder);
-            PackageExtractionContext packageExtractionContext = new PackageExtractionContext(
-                PackageSaveMode.Defaultv3,
-                XmlDocFileSaveMode.None,
-                null,
-                _logger);
-            NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder);
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            var allFilesInPackage = await PackageExtractor.ExtractPackageAsync(
-                targetFolder,
-                packageStream,
-                packagePathResolver,
-                packageExtractionContext,
-                cancellationToken);
-
-            if (!OperatingSystem.IsWindows())
-            {
-                foreach (FilePath filePath in FindAllFilesNeedExecutablePermission(allFilesInPackage, targetFolder))
-                {
-                    _filePermissionSetter.Set755Permission(filePath.Value);
-                }
-            }
-
-            return allFilesInPackage;
-        }
+        private string GetNupkgUrl(string baseUri, PackageId id, NuGetVersion version) =>
+            baseUri + id.ToString() + "/" + version.ToNormalizedString() + "/" + id.ToString() +
+            "." + version.ToNormalizedString() + ".nupkg";
 
         internal IEnumerable<FilePath> FindAllFilesNeedExecutablePermission(IEnumerable<string> files,
             string targetPath)

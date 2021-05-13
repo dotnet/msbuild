@@ -12,6 +12,21 @@
         <target state="new">Updated advertising manifest {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissingPackage">
+        <source>Package {0} version {1} does not exist in offline cache {2}.</source>
+        <target state="new">Package {0} version {1} does not exist in offline cache {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadToCacheOptionDescription">
+        <source>Download packages needed to install a workload to a folder which can be used for offline installation.</source>
+        <target state="new">Download packages needed to install a workload to a folder which can be used for offline installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadingPackToCacheMessage">
+        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
+        <target state="new">Downloading pack {0} version {1} to offline cache {2}...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
         <source>Failed to update the advertising manifest {0}: {1}.</source>
         <target state="new">Failed to update the advertising manifest {0}: {1}.</target>
@@ -77,6 +92,11 @@
         <target state="new">No manifest with id {0} exists.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ResolvingPackageUrls">
+        <source>Resolving package urls for workload(s) {0}...</source>
+        <target state="new">Resolving package urls for workload(s) {0}...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollBackFailedMessage">
         <source>Installation roll back failed: {0}</source>
         <target state="new">Installation roll back failed: {0}</target>
@@ -105,6 +125,11 @@
       <trans-unit id="PrintDownloadLinkOnlyDescription">
         <source>Only print the list of links to download without downloading it.</source>
         <target state="new">Only print the list of links to download without downloading it.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UsingCacheForPackInstall">
+        <source>Installing package {0} version {1} from offline cache {2}.</source>
+        <target state="new">Installing package {0} version {1} from offline cache {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
@@ -150,6 +175,11 @@
       <trans-unit id="WorkloadAlreadyInstalled">
         <source>Workload '{0}' is already installed.</source>
         <target state="new">Workload '{0}' is already installed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Downloading workload packs to offline cache failed: {0}</source>
+        <target state="new">Downloading workload packs to offline cache failed: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdArgumentDescription">
