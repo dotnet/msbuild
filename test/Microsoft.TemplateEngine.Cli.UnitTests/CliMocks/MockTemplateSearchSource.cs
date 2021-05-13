@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateSearch.Common;
+using ISearchPackFilter = Microsoft.TemplateSearch.Common.ISearchPackFilter;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
