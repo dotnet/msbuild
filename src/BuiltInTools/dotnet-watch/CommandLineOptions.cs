@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Watcher
         public bool Quiet { get; set; }
         public bool Verbose { get; set; }
         public bool List { get; set; }
+        public bool NoHotReload { get; set; }
 
         public string[] RemainingArguments { get; set; }
 

@@ -133,6 +133,9 @@ Examples:
             {
                  quiet,
                  verbose,
+                 new Option<bool>(
+                    new[] { "--no-hot-reload" },
+                    "Suppress hot reload for supported apps."),
                  new Option<string>(
                     new[] { "--project", "-p" },
                     "The project to watch"),
@@ -181,10 +184,7 @@ Examples:
                 }
                 else
                 {
-                    return await MainInternalAsync(_reporter,
-                        options.Project,
-                        options.RemainingArguments,
-                        _cts.Token);
+                    return await MainInternalAsync(_reporter, options, _cts.Token);
                 }
             }
             catch (Exception ex)
@@ -214,17 +214,13 @@ Examples:
             _cts.Cancel();
         }
 
-        private async Task<int> MainInternalAsync(
-            IReporter reporter,
-            string project,
-            IReadOnlyList<string> args,
-            CancellationToken cancellationToken)
+        private async Task<int> MainInternalAsync(IReporter reporter, CommandLineOptions options, CancellationToken cancellationToken)
         {
             // TODO multiple projects should be easy enough to add here
             string projectFile;
             try
             {
-                projectFile = MsBuildProjectFinder.FindMsBuildProject(_workingDirectory, project);
+                projectFile = MsBuildProjectFinder.FindMsBuildProject(_workingDirectory, options.Project);
             }
             catch (FileNotFoundException ex)
             {
@@ -232,12 +228,14 @@ Examples:
                 return 1;
             }
 
+            var args = options.RemainingArguments;
+
             var isDefaultRunCommand = false;
-            if (args.Count == 1 && args[0] == "run")
+            if (args.Length == 1 && args[0] == "run")
             {
                 isDefaultRunCommand = true;
             }
-            else if (args.Count == 0)
+            else if (args.Length == 0)
             {
                 isDefaultRunCommand = true;
                 args = new[] { "run" };
@@ -276,7 +274,7 @@ Examples:
                 DefaultLaunchSettingsProfile = defaultProfile,
             };
 
-            if (isDefaultRunCommand && TryReadProject(projectFile, out var projectGraph) && IsHotReloadSupported(projectGraph))
+            if (!options.NoHotReload && isDefaultRunCommand && TryReadProject(projectFile, out var projectGraph) && IsHotReloadSupported(projectGraph))
             {
                 context.ProjectGraph = projectGraph;
                 _reporter.Verbose($"Project supports hot reload and was configured to run with the default run-command. Watching with hot-reload");
