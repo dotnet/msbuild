@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Runtime.Loader;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -10,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Graph;
+using Microsoft.Build.Locator;
 using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
@@ -59,6 +62,13 @@ Examples:
 
         public Program(IConsole console, string workingDirectory)
         {
+            // We can register the MSBuild that is bundled with the SDK to perform MSBuild things. dotnet-watch is in
+            // a nested folder of the SDK's root, we'll back up to it.
+            // AppContext.BaseDirectory = $sdkRoot\$sdkVersion\DotnetTools\dotnet-watch\$version\tools\net6.0\any\
+            // MSBuild.dll is located at $sdkRoot\$sdkVersion\MSBuild.dll
+            var sdkRootDirectory = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..");
+            MSBuildLocator.RegisterMSBuildPath(sdkRootDirectory);
+
             Ensure.NotNull(console, nameof(console));
             Ensure.NotNullOrEmpty(workingDirectory, nameof(workingDirectory));
 
@@ -67,6 +77,9 @@ Examples:
             _cts = new CancellationTokenSource();
             console.CancelKeyPress += OnCancelKeyPress;
             _reporter = CreateReporter(verbose: true, quiet: false, console: _console);
+
+            // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
+            RegisterAssemblyResolutionEvents(sdkRootDirectory);
         }
 
         public static async Task<int> Main(string[] args)
@@ -247,7 +260,7 @@ Examples:
                 _reporter.Output("Polling file watcher is enabled");
             }
 
-            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(_workingDirectory, reporter);
+            var defaultProfile = LaunchSettingsProfile.ReadDefaultProfile(_workingDirectory, reporter) ?? new();
 
             var context = new DotNetWatchContext
             {
@@ -257,9 +270,10 @@ Examples:
                 DefaultLaunchSettingsProfile = defaultProfile,
             };
 
-            if (isDefaultRunCommand && !string.IsNullOrEmpty(defaultProfile?.HotReloadProfile))
+            if (isDefaultRunCommand && TryReadProject(projectFile, out var projectGraph) && IsHotReloadSupported(projectGraph))
             {
-                _reporter.Verbose($"Found HotReloadProfile={defaultProfile.HotReloadProfile}. Watching with hot-reload");
+                context.ProjectGraph = projectGraph;
+                _reporter.Verbose($"Project supports hot reload and was configured to run with the default run-command. Watching with hot-reload");
 
                 // Use hot-reload based watching if
                 // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
@@ -279,6 +293,41 @@ Examples:
             }
 
             return 0;
+        }
+
+        private bool TryReadProject(string project, out ProjectGraph projectInstance)
+        {
+            projectInstance = default;
+            try
+            {
+                projectInstance = new ProjectGraph(project);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _reporter.Verbose("Reading the project instance failed.");
+                _reporter.Verbose(ex.ToString());
+                return false;
+            }
+        }
+
+        private static bool IsHotReloadSupported(ProjectGraph projectGraph)
+        {
+            var projectInstance = projectGraph.EntryPointNodes.FirstOrDefault()?.ProjectInstance;
+            if (projectInstance is null)
+            {
+                return false;
+            }
+
+            var projectCapabilities = projectInstance.GetItems("ProjectCapability");
+            foreach (var item in projectCapabilities)
+            {
+                if (item.EvaluatedInclude == "SupportsHotReload")
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private async Task<int> ListFilesAsync(
@@ -332,6 +381,20 @@ Examples:
         {
             _console.CancelKeyPress -= OnCancelKeyPress;
             _cts.Dispose();
+        }
+
+        private static void RegisterAssemblyResolutionEvents(string sdkRootDirectory)
+        {
+            var roslynPath = Path.Combine(sdkRootDirectory, "Roslyn", "bincore");
+
+            AssemblyLoadContext.Default.Resolving += (context, assembly) =>
+            {
+                if (assembly.Name is "Microsoft.CodeAnalysis" or "Microsoft.CodeAnalysis.CSharp")
+                {
+                    return context.LoadFromAssemblyPath(Path.Combine(roslynPath, assembly.Name + ".dll"));
+                }
+                return null;
+            };
         }
     }
 }

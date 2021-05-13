@@ -107,8 +107,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
 
             installer.InstalledManifests.Should().BeEmpty(); // Didn't try to alter any installed manifests
-            manifestUpdater.CalculateManifestUpdatesCallParams.Should().BeEquivalentTo(new SdkFeatureBand[] { new SdkFeatureBand("6.0.100") });
-            manifestUpdater.UpdateAdvertisingManifestsCallParams.Should().BeEquivalentTo(new SdkFeatureBand[] { new SdkFeatureBand("6.0.100") });
+            manifestUpdater.CalculateManifestUpdatesCallCount.Should().Be(1);
+            manifestUpdater.UpdateAdvertisingManifestsCallCount.Should().Be(1);
         }
 
         [Fact]

@@ -3,6 +3,8 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -24,6 +26,24 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 
             compilation = compilation.AddReferences(compilationWithReferences.ToMetadataReference());
             return compilation.Assembly;
+        }
+
+        internal static IList<ElementContainer<IAssemblySymbol>> GetElementContainersFromSyntaxes(IEnumerable<string> syntaxes, IEnumerable<string> referencesSyntax = null, bool enableNullable = false, bool includeDefaultReferences = false, [CallerMemberName] string assemblyName = "")
+        {
+            int i = 0;
+            List<ElementContainer<IAssemblySymbol>> result = new();
+            foreach (string syntax in syntaxes)
+            {
+                MetadataInformation info = new(string.Empty, string.Empty, $"runtime-{i++}");
+                IAssemblySymbol symbol = referencesSyntax != null ?
+                    GetAssemblyFromSyntaxWithReferences(syntax, referencesSyntax, enableNullable, includeDefaultReferences, assemblyName) :
+                    GetAssemblyFromSyntax(syntax, enableNullable, includeDefaultReferences, assemblyName);
+
+                ElementContainer<IAssemblySymbol> container = new(symbol, info);
+                result.Add(container);
+            }
+
+            return result;
         }
 
         private static CSharpCompilation CreateCSharpCompilationFromSyntax(string syntax, string name, bool enableNullable, bool includeDefaultReferences)

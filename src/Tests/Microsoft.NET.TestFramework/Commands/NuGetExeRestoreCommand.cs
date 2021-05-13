@@ -23,6 +23,8 @@ namespace Microsoft.NET.TestFramework.Commands
 
         public string FullPathProjectFile => Path.Combine(ProjectRootPath, ProjectFile);
 
+        public string PackagesDirectory { get; set; }
+
         public NuGetExeRestoreCommand(ITestOutputHelper log, string projectRootPath, string relativePathToProject = null) : base(log)
         {
             _projectRootPath = projectRootPath;
@@ -38,7 +40,7 @@ namespace Microsoft.NET.TestFramework.Commands
             newArgs.Add(FullPathProjectFile);
 
             newArgs.Add("-PackagesDirectory");
-            newArgs.Add(TestContext.Current.NuGetCachePath);
+            newArgs.Add(PackagesDirectory ?? TestContext.Current.NuGetCachePath);
 
             newArgs.AddRange(args);
 

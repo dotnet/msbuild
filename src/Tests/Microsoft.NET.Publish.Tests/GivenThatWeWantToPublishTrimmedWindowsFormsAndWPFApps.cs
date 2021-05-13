@@ -39,7 +39,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("NETSDK1164");
+                .HaveStdOutContaining("NETSDK1167");
         }
 
         [WindowsOnlyFact]
@@ -55,7 +55,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
             testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
-            testProject.AdditionalProperties["NoWarn"] = "NETSDK1164";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1167";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                //cannot check for absence of NETSDK1164 since that is used with /nowarn: in some configurations
+                //cannot check for absence of NETSDK1167 since that is used with /nowarn: in some configurations
                 .NotHaveStdOutContaining(Strings.@TrimmingWindowsFormsIsNotSupported);
         }
 
@@ -88,7 +88,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("NETSDK1165");
+                .HaveStdOutContaining("NETSDK1168");
         }
 
         [WindowsOnlyFact]
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["UseWPF"] = "true";
             testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
-            testProject.AdditionalProperties["NoWarn"] = "NETSDK1165";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1168";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";            
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -113,7 +113,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                //cannot check for absence of NETSDK1165 since that is used with /nowarn: in some configurations
+                //cannot check for absence of NETSDK1168 since that is used with /nowarn: in some configurations
                 .NotHaveStdOutContaining(Strings.@TrimmingWpfIsNotSupported);
         }
     }

@@ -7,24 +7,9 @@
         <target state="needs-review-translation">Liste les outils installés globalement ou localement.</target>
         <note />
       </trans-unit>
-      <trans-unit id="VersionColumn">
-        <source>Version</source>
-        <target state="translated">Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandsColumn">
-        <source>Commands</source>
-        <target state="translated">Commandes</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageIdColumn">
-        <source>Package Id</source>
-        <target state="translated">ID de package</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="new">PATH</target>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Workload Id</source>
+        <target state="new">Workload Id</target>
         <note />
       </trans-unit>
     </body>

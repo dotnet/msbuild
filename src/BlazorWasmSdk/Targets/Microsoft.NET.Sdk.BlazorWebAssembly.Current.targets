@@ -72,14 +72,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PreserveCompilationReferences>false</PreserveCompilationReferences>
     <IsWebConfigTransformDisabled>true</IsWebConfigTransformDisabled>
 
+    <!-- Don't generate a NETSDK1151 error if a non self-contained Exe references a Blazor Exe -->
+    <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
+
     <!-- Internal properties -->
     <_BlazorOutputPath>wwwroot\_framework\</_BlazorOutputPath>
-
-    <!-- Properties for AOT -->
-    <MicrosoftNetCoreAppRuntimePackRidDir>$(NuGetPackageRoot)microsoft.netcore.app.runtime.mono.browser-wasm\$(BundledNETCoreAppPackageVersion)\runtimes\browser-wasm\</MicrosoftNetCoreAppRuntimePackRidDir>
-    <AOTMode>AotInterp</AOTMode>
-    <WasmStripAOTAssemblies>false</WasmStripAOTAssemblies>
-    <WasmGenerateAppBundle>false</WasmGenerateAppBundle>
 
     <_TargetingNET60OrLater Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '6.0'))">true</_TargetingNET60OrLater>
   </PropertyGroup>
@@ -567,36 +564,36 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target
-      Name="_BlazorWasmAOT"
-      DependsOnTargets="_EnsureWasmAOTWorkload;_GatherWasmFilesToAOT;WasmBuildApp"
+      Name="_BlazorWasmNative"
+      DependsOnTargets="_EnsureWasmRuntimeWorkload;_GatherWasmFilesToBuild;WasmBuildApp"
       BeforeTargets="_ProcessPublishFilesForBlazor"
-      Condition="'$(RunAOTCompilation)' == 'true'">
+      Condition="'$(UsingBrowserRuntimeWorkload)' == 'true'">
 
     <!--
-      AOT compilation produces a copy of the dotnet.js and dotnet.wasm file that are required to run the app. Replace the regular js and wams files with the AOTed version.
-      But first, mangle the AOTed dotnet.js file to include the runtime version.
+      Native compilation produces a copy of the dotnet.js and dotnet.wasm file that are required to run the app. Replace the regular js and wams files with the AOTed version.
+      But first, mangle the new dotnet.js file to include the runtime version.
     -->
 
     <Copy SourceFiles="@(WasmNativeAsset)" DestinationFiles="%(RootDir)%(Directory)\dotnet.$(_DotNetJsVersion).js" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.js'">
-      <Output TaskParameter="CopiedFiles" ItemName="_PublishAotDotnetJsFile" />
+      <Output TaskParameter="CopiedFiles" ItemName="_PublishNativeDotnetJsFile" />
     </Copy>
 
     <ItemGroup>
-      <ResolvedFileToPublish Remove="$(_BlazorDotNetJSFilePath)" />
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.wasm'" />
+      <ResolvedFileToPublish Remove="$(_BlazorDotNetJSFilePath)" Condition="'@(WasmNativeAsset->Count())' != '0'"/>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="(%(FileName) == 'dotnet' AND %(Extension) == '.wasm') AND '@(WasmNativeAsset->Count())' != '0'" />
 
-      <ResolvedFileToPublish Include="@(_PublishAotDotnetJsFile)" AssetType="native" RelativePath="%(FileName)%(Extension)" />
+      <ResolvedFileToPublish Include="@(_PublishNativeDotnetJsFile)" AssetType="native" RelativePath="%(FileName)%(Extension)" />
       <ResolvedFileToPublish Include="@(WasmNativeAsset)" AssetType="native" RelativePath="dotnet.wasm" Condition="%(FileName) == 'dotnet' AND %(Extension) == '.wasm'"/>
     </ItemGroup>
   </Target>
 
-  <Target Name="_EnsureWasmAOTWorkload" Condition="'$(UsingBlazorAOTWorkloadManifest)' != 'true'">
+  <Target Name="_EnsureWasmRuntimeWorkload" Condition="'$(UsingBlazorAOTWorkloadManifest)' != 'true'">
     <Error
       Text="Publishing with AOT enabled requires the .NET WebAssembly AOT workload to be installed. To learn more, visit https://aka.ms/AAb4uzl."
       Code="BLAZORSDK1002" />
   </Target>
 
-  <Target Name="_GatherWasmFilesToAOT">
+  <Target Name="_GatherWasmFilesToBuild">
     <ItemGroup>
       <WasmAssembliesToBundle Include="%(ResolvedFileToPublish.FullPath)" Exclude="@(_Exclude)" Condition="%(Extension) == '.dll' AND %(FileName) != 'Microsoft.JSInterop.WebAssembly'" />
     </ItemGroup>

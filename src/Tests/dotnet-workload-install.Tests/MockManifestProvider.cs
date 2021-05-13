@@ -31,5 +31,7 @@ namespace ManifestReaderTests
                     yield return (filePath, new FileStream(filePath, FileMode.Open, FileAccess.Read));
                 }
             }
+
+        public string GetSdkFeatureBand() => "6.0.100";
     }
 }

@@ -17,7 +17,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
-        public AssemblySetMapper(ComparingSettings settings) : base(settings) { }
+        /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
+        public AssemblySetMapper(ComparingSettings settings, int rightSetSize = 1)
+            : base(settings, rightSetSize) { }
 
         /// <summary>
         /// Gets the assembly mappers built from the provided lists of <see cref="IAssemblySymbol"/>.
@@ -27,27 +29,36 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             if (_assemblies == null)
             {
                 _assemblies = new Dictionary<IAssemblySymbol, AssemblyMapper>(Settings.EqualityComparer);
+                AddOrCreateMappers(Left, ElementSide.Left);
 
-                if (Left != null)
+                if (Right.Length == 1)
                 {
-                    AddOrCreateMappers(Left, 0);
+                    AddOrCreateMappers(Right[0], ElementSide.Right);
+                }
+                else
+                {
+                    for (int i = 0; i < Right.Length; i++)
+                    {
+                        AddOrCreateMappers(Right[i], ElementSide.Right, i);
+                    }
                 }
 
-                if (Right != null)
+                void AddOrCreateMappers(IEnumerable<IAssemblySymbol> symbols, ElementSide side, int setIndex = 0)
                 {
-                    AddOrCreateMappers(Right, 1);
-                }
+                    if (symbols == null)
+                    {
+                        return;
+                    }
 
-                void AddOrCreateMappers(IEnumerable<IAssemblySymbol> elements, int index)
-                {
-                    foreach (IAssemblySymbol assembly in elements)
+                    foreach (IAssemblySymbol assembly in symbols)
                     {
                         if (!_assemblies.TryGetValue(assembly, out AssemblyMapper mapper))
                         {
-                            mapper = new AssemblyMapper(Settings);
+                            mapper = new AssemblyMapper(Settings, Right.Length);
                             _assemblies.Add(assembly, mapper);
                         }
-                        mapper.AddElement(assembly, index);
+
+                        mapper.AddElement(assembly, side, setIndex);
                     }
                 }
             }

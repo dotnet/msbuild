@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Extensions;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -15,15 +16,37 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     public class MembersMustExist : Rule
     {
         /// <summary>
+        /// Method that is called when the rules are created by the <see cref="IRuleRunner"/> in
+        /// order to do the initial setup for the rule.
+        /// </summary>
+        /// <param name="context">The context that the <see cref="IRuleRunner"/> creates holding callbacks to get the differences.</param>
+        public override void Initialize(RuleRunnerContext context)
+        {
+            context.RegisterOnTypeSymbolAction(RunOnTypeSymbol);
+            context.RegisterOnMemberSymbolAction(RunOnMemberSymbol);
+        }
+
+        /// <summary>
         /// Evaluates whether a type exists on both sides of the <see cref="TypeMapper"/>.
         /// </summary>
         /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        public override void Run(TypeMapper mapper, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol left, ITypeSymbol right, IList<CompatDifference> differences)
         {
-            ITypeSymbol left = mapper.Left;
-            if (left != null && mapper.Right == null)
-                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, $"Type '{left.ToDisplayString()}' exists on the left but not on the right", DifferenceType.Removed, left));
+            if (left != null && right == null)
+            {
+                AddDifference(left, DifferenceType.Removed, "Type '{0}' exists on the left but not on the right");
+            }
+            else if (Settings.StrictMode && left == null && right != null)
+            {
+                AddDifference(right, DifferenceType.Added, "Type '{0}' exists on the right but not on the left");
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void AddDifference(ITypeSymbol symbol, DifferenceType type, string format)
+            {
+                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, string.Format(format, symbol.ToDisplayString()), type, symbol));
+            }
         }
 
         /// <summary>
@@ -31,10 +54,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        public override void Run(MemberMapper mapper, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol left, ISymbol right, IList<CompatDifference> differences)
         {
-            ISymbol left = mapper.Left;
-            if (left != null && mapper.Right == null)
+            if (left != null && right == null)
             {
                 // Events and properties are handled via their accessors.
                 if (left.Kind == SymbolKind.Property || left.Kind == SymbolKind.Event)
@@ -84,7 +106,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         private bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
-            method.ReturnType.ToDisplayString() == candidate.ReturnType.ToDisplayString();
+            method.ReturnType.ToComparisonDisplayString() == candidate.ReturnType.ToComparisonDisplayString();
 
         private bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
         {
@@ -93,7 +115,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             for (int i = 0; i < method.Parameters.Length; i++)
             {
-                if (method.Parameters[i].Type.ToDisplayString() != method.Parameters[i].Type.ToDisplayString())
+                if (method.Parameters[i].Type.ToComparisonDisplayString() != method.Parameters[i].Type.ToComparisonDisplayString())
                     return false;
             }
 

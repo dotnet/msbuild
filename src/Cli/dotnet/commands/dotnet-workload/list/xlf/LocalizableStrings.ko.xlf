@@ -7,24 +7,9 @@
         <target state="needs-review-translation">전역으로 또는 로컬로 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="VersionColumn">
-        <source>Version</source>
-        <target state="translated">버전</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandsColumn">
-        <source>Commands</source>
-        <target state="translated">명령</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageIdColumn">
-        <source>Package Id</source>
-        <target state="translated">패키지 ID</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="new">PATH</target>
+      <trans-unit id="WorkloadIdColumn">
+        <source>Workload Id</source>
+        <target state="new">Workload Id</target>
         <note />
       </trans-unit>
     </body>

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="fr" original="../Resources.resx">
+    <body>
+      <trans-unit id="ApiCompatibilityHeader">
+        <source>There are API Compatibility errors in between {0} (left) and {1} (right).</source>
+        <target state="new">There are API Compatibility errors in between {0} (left) and {1} (right).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CompatibleFrameworkInPackageValidatorHeader">
+        <source>Api surface area should be compatible among compatible frameworks.</source>
+        <target state="new">Api surface area should be compatible among compatible frameworks.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CompatibleTfmValidatorHeader">
+        <source>The runtime assets should be compatible with the compile time assets for all target frameworks and rids.</source>
+        <target state="new">The runtime assets should be compatible with the compile time assets for all target frameworks and rids.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackagePath">
+        <source>Package Path {0} is invalid. Please Check the path .</source>
+        <target state="new">Package Path {0} is invalid. Please Check the path .</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingTargetFramework">
+        <source>TargetFramework {0} is no longer supported in the latest version.</source>
+        <target state="new">TargetFramework {0} is no longer supported in the latest version.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingTargetFrameworkAndRid">
+        <source>TargetFramework {0} and Rid {1} is no longer supported in the latest version.</source>
+        <target state="new">TargetFramework {0} and Rid {1} is no longer supported in the latest version.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoCompatibleCompileTimeAsset">
+        <source>There is no compatible compile time asset for target framework {0}.</source>
+        <target state="new">There is no compatible compile time asset for target framework {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoCompatibleRidSpecificRuntimeAsset">
+        <source>There is no compatible runtime asset for target framework {0}-{1}.</source>
+        <target state="new">There is no compatible runtime asset for target framework {0}-{1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoCompatibleRuntimeAsset">
+        <source>There is no compatible runtime asset for target framework {0} in the package.</source>
+        <target state="new">There is no compatible runtime asset for target framework {0} in the package.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BaselineVersionValidatorHeader">
+        <source>There should not be any breaking changes between the packages.</source>
+        <target state="new">There should not be any breaking changes between the packages.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetFramework">
+        <source>TargetFramework {0}</source>
+        <target state="new">TargetFramework {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TargetFrameworkRid">
+        <source>TargetFramework {0} Rid {1}</source>
+        <target state="new">TargetFramework {0} Rid {1}</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

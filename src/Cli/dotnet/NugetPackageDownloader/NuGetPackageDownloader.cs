@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using NuGet.Configuration;
@@ -25,13 +26,15 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             NoCache = true, DirectDownload = true
         };
 
+        private readonly IFilePermissionSetter _filePermissionSetter;
         private readonly ILogger _logger;
         private readonly DirectoryPath _packageInstallDir;
 
-        public NuGetPackageDownloader(DirectoryPath packageInstallDir, ILogger logger = null)
+        public NuGetPackageDownloader(DirectoryPath packageInstallDir, IFilePermissionSetter filePermissionSetter = null, ILogger logger = null)
         {
             _packageInstallDir = packageInstallDir;
             _logger = logger ?? new NuGetConsoleLogger();
+            _filePermissionSetter = new FilePermissionSetter();
         }
 
         public async Task<string> DownloadPackageAsync(PackageId packageId,
@@ -251,23 +254,21 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!accumulativeSearchResults.Any())
             {
-                throw new Exception(
+                throw new NuGetPackageInstallerException(
                     string.Format(
-                        LocalizableStrings.FailedToLoadNuGetSourceSourceIsNotValid,
+                        LocalizableStrings.IsNotFoundInNuGetFeeds,
                         packageIdentifier,
                         string.Join(", ", packageSources.Select(source => source.Source))));
             }
 
             if (!includePreview)
             {
-                (PackageSource, IPackageSearchMetadata) latestStableVersion = accumulativeSearchResults
-                    .Where(r => !r.package.Identity.Version.IsPrerelease)
-                    .DefaultIfEmpty(default)
-                    .MaxBy(r => r.package.Identity.Version);
+                var stableVersions = accumulativeSearchResults
+                    .Where(r => !r.package.Identity.Version.IsPrerelease);
 
-                if (latestStableVersion != default)
+                if (stableVersions.Any())
                 {
-                    return latestStableVersion;
+                    return stableVersions.MaxBy(r => r.package.Identity.Version);
                 }
             }
 

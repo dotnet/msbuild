@@ -15,8 +15,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FrameworkReference Include="Microsoft.Windows.SDK.NET.Ref" IsImplicitlyDefined="true" Pack="false" PrivateAssets="All" />
   </ItemGroup>
 
-  <!--https://github.com/dotnet/sdk/issues/12403-->
   <PropertyGroup>
+    <MicrosoftNETWindowsWorkloadInstalled>true</MicrosoftNETWindowsWorkloadInstalled>
+    
+    <!--https://github.com/dotnet/sdk/issues/12403-->
     <_TargetFrameworkVersionValue>0.0</_TargetFrameworkVersionValue>
     <_WindowsDesktopSdkTargetFrameworkVersionFloor>3.0</_WindowsDesktopSdkTargetFrameworkVersionFloor>
   </PropertyGroup>

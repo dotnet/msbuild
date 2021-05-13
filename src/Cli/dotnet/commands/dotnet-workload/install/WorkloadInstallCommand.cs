@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity);
             userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(userHome, ".dotnet", "sdk-advertising-temp"));
-            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, new NullLogger());
+            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, userHome);
         }
 
@@ -125,8 +125,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
                 workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
 
-                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(featureBand, includePreviews).Wait();
-                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates(featureBand);
+                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews).Wait();
+                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
             }
 
             InstallWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
@@ -181,7 +181,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     rollback: () => {
                         try
                         {
-                            _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+                             _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
 							
 							 foreach (var manifest in manifestsToUpdate)
                              {

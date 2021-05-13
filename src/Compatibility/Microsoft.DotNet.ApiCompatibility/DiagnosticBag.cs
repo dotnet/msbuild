@@ -15,7 +15,6 @@ namespace Microsoft.DotNet.ApiCompatibility
     {
         private readonly Dictionary<string, HashSet<string>> _ignore;
         private readonly HashSet<string> _noWarn;
-
         private readonly List<T> _differences = new();
 
         /// <summary>
@@ -23,20 +22,27 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="noWarn">Comma separated list of diagnostic IDs to ignore.</param>
         /// <param name="ignoredDifferences">An array of differences to ignore based on diagnostic ID and reference ID.</param>
-        public DiagnosticBag(string noWarn, (string diagnosticId, string referenceId)[] ignoredDifferences)
+        public DiagnosticBag(string noWarn, (string diagnosticId, string referenceId)[] ignoredDifferences) : this (noWarn?.Split(';'), ignoredDifferences)
         {
-            _noWarn = new HashSet<string>(noWarn?.Split(';'));
+        }
+
+        public DiagnosticBag(IEnumerable<string> noWarn, (string diagnosticId, string referenceId)[] ignoredDifferences)
+        {
+            _noWarn = new HashSet<string>(noWarn);
             _ignore = new Dictionary<string, HashSet<string>>();
 
-            foreach ((string diagnosticId, string referenceId) in ignoredDifferences)
+            if (ignoredDifferences != null)
             {
-                if (!_ignore.TryGetValue(diagnosticId, out HashSet<string> members))
+                foreach ((string diagnosticId, string referenceId) in ignoredDifferences)
                 {
-                    members = new HashSet<string>();
-                    _ignore.Add(diagnosticId, members);
-                }
+                    if (!_ignore.TryGetValue(diagnosticId, out HashSet<string> members))
+                    {
+                        members = new HashSet<string>();
+                        _ignore.Add(diagnosticId, members);
+                    }
 
-                members.Add(referenceId);
+                    members.Add(referenceId);
+                }
             }
         }
 
@@ -50,24 +56,37 @@ namespace Microsoft.DotNet.ApiCompatibility
                 Add(difference);
         }
 
+        public void Add(DiagnosticBag<T> bag)
+        {
+            AddRange(bag.Differences);
+        }
+
         /// <summary>
         /// Adds a difference to the diagnostic bag if they are not found in the exclusion settings.
         /// </summary>
         /// <param name="difference">The difference to add.</param>
         public void Add(T difference)
         {
-            if (_noWarn.Contains(difference.DiagnosticId))
-                return;
-
-            if (_ignore.TryGetValue(difference.DiagnosticId, out HashSet<string> members))
+            if (!Filter(difference.DiagnosticId, difference.ReferenceId))
             {
-                if (members.Contains(difference.ReferenceId))
+                _differences.Add(difference);
+            }
+        }
+
+        public bool Filter(string diagnosticId, string referenceId)
+        {
+            if (_noWarn.Contains(diagnosticId))
+                return true;
+
+            if (_ignore.TryGetValue(diagnosticId, out HashSet<string> members))
+            {
+                if (members.Contains(referenceId))
                 {
-                    return;
+                    return true;
                 }
             }
 
-            _differences.Add(difference);
+            return false;
         }
 
         /// <summary>

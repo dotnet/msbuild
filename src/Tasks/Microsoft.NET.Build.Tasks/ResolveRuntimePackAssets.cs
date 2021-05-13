@@ -126,7 +126,7 @@ namespace Microsoft.NET.Build.Tasks
                     {
                         throw new BuildErrorException($"Culture not set in runtime manifest for {assetPath}");
                     }
-                    if (this.SatelliteResourceLanguages.Length > 1 &&
+                    if (this.SatelliteResourceLanguages.Length >= 1 &&
                         !this.SatelliteResourceLanguages.Any(lang => string.Equals(lang.ItemSpec, culture, StringComparison.OrdinalIgnoreCase)))
                     {
                         continue;

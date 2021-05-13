@@ -153,14 +153,10 @@ setTimeout(function () {
   }
 
   function sendDeltaApplied() {
-    const webAssemblyHotReloadSuccessPayload = new ArrayBuffer(1);
-    webAssemblyHotReloadSuccessPayload[0] = 1;
-    connection.send(webAssemblyHotReloadSuccessPayload);
+    connection.send(new Uint8Array([1]).buffer);
   }
 
   function sendDeltaNotApplied() {
-    const webAssemblyHotReloadFailurePayload = new ArrayBuffer(1);
-    webAssemblyHotReloadFailurePayload[0] = 0;
-    connection.send(webAssemblyHotReloadFailurePayload);
+    connection.send(new Uint8Array([0]).buffer);
   }
 }, 500);

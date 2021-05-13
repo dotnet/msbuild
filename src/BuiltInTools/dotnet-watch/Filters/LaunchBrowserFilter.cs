@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         private void LaunchBrowser(string launchUrl)
         {
-            var fileName = launchUrl + "/" + _launchPath;
+            var fileName = Uri.TryCreate(_launchPath, UriKind.Absolute, out _) ? _launchPath : launchUrl + "/" + _launchPath;
             var args = string.Empty;
             if (!string.IsNullOrEmpty(_browserPath))
             {

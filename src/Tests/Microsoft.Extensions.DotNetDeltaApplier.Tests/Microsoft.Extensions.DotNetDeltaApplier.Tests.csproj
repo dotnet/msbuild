@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(SdkTargetFramework)</TargetFramework>
+    <RootNamespace>Microsoft.Extensions.DotNetDeltaApplier</RootNamespace>
+    <Nullable>enable</Nullable>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuiltInTools\DotNetDeltaApplier\Microsoft.Extensions.DotNetDeltaApplier.csproj" />
+    <ProjectReference Include="..\Microsoft.NET.TestFramework\Microsoft.NET.TestFramework.csproj" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+  </ItemGroup>
+
+</Project>

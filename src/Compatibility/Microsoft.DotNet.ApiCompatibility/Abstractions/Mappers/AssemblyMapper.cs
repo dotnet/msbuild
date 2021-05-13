@@ -19,7 +19,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
-        public AssemblyMapper(ComparingSettings settings) : base(settings) { }
+        /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
+        public AssemblyMapper(ComparingSettings settings, int rightSetSize = 1)
+            : base(settings, rightSetSize) { }
 
         /// <summary>
         /// Gets the mappers for the namespaces contained in <see cref="ElementMapper{T}.Left"/> and <see cref="ElementMapper{T}.Right"/>
@@ -30,40 +32,63 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             if (_namespaces == null)
             {
                 _namespaces = new Dictionary<INamespaceSymbol, NamespaceMapper>(Settings.EqualityComparer);
-                Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards;
-                if (Left != null)
+                AddOrCreateMappers(Left, ElementSide.Left);
+
+                if (Right.Length == 1)
                 {
-                    typeForwards = ResolveTypeForwards(Left, Settings.EqualityComparer);
-                    AddOrCreateMappers(Left.GlobalNamespace, 0);
+                    AddOrCreateMappers(Right[0], ElementSide.Right);
+                }
+                else
+                {
+                    for (int i = 0; i < Right.Length; i++)
+                    {
+                        AddOrCreateMappers(Right[i], ElementSide.Right, i);
+                    }
                 }
 
-                if (Right != null)
+                void AddOrCreateMappers(IAssemblySymbol symbol, ElementSide side, int setIndex = 0)
                 {
-                    typeForwards = ResolveTypeForwards(Right, Settings.EqualityComparer);
-                    AddOrCreateMappers(Right.GlobalNamespace, 1);
-                }
+                    if (symbol == null)
+                    {
+                        return;
+                    }
 
-                void AddOrCreateMappers(INamespaceSymbol ns, int index)
-                {
                     Stack<INamespaceSymbol> stack = new();
-                    stack.Push(ns);
+                    stack.Push(symbol.GlobalNamespace);
                     while (stack.Count > 0)
                     {
-                        INamespaceSymbol symbol = stack.Pop();
-                        if (typeForwards.TryGetValue(symbol, out List<INamedTypeSymbol> forwardedTypes) || symbol.GetTypeMembers().Length > 0)
+                        INamespaceSymbol nsSymbol = stack.Pop();
+                        if (nsSymbol.GetTypeMembers().Length > 0)
                         {
-                            if (!_namespaces.TryGetValue(symbol, out NamespaceMapper mapper))
-                            {
-                                mapper = new NamespaceMapper(Settings);
-                                _namespaces.Add(symbol, mapper);
-                            }
-
-                            mapper.AddElement(symbol, index);
-                            mapper.AddForwardedTypes(forwardedTypes ?? new List<INamedTypeSymbol>(), index);
+                            AddMapper(nsSymbol);
                         }
 
-                        foreach (INamespaceSymbol child in symbol.GetNamespaceMembers())
+                        foreach (INamespaceSymbol child in nsSymbol.GetNamespaceMembers())
                             stack.Push(child);
+                    }
+
+                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer);
+                    foreach (KeyValuePair<INamespaceSymbol, List<INamedTypeSymbol>> kvp in typeForwards)
+                    {
+                        NamespaceMapper mapper = AddMapper(kvp.Key, checkIfExists: true);
+                        mapper.AddForwardedTypes(kvp.Value, side, setIndex);
+                    }
+
+                    NamespaceMapper AddMapper(INamespaceSymbol ns, bool checkIfExists = false)
+                    {
+                        if (!_namespaces.TryGetValue(ns, out NamespaceMapper mapper))
+                        {
+                            mapper = new NamespaceMapper(Settings, Right.Length);
+                            _namespaces.Add(ns, mapper);
+                        }
+
+                        if (checkIfExists && mapper.GetElement(side, setIndex) != null)
+                        {
+                            return mapper;
+                        }
+
+                        mapper.AddElement(ns, side, setIndex);
+                        return mapper;
                     }
                 }
 

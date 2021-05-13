@@ -170,8 +170,9 @@ namespace Microsoft.DotNet.Watcher
                         context.ChangedFile = changedFile;
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    _reporter.Verbose($"Caught top-level exception from hot reload: {e}");
                     if (!currentRunCancellationSource.IsCancellationRequested)
                     {
                         currentRunCancellationSource.Cancel();

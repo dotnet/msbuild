@@ -120,16 +120,7 @@
   <data name="CommandDescription" xml:space="preserve">
     <value>List workloads available.</value>
   </data>
-  <data name="WorkloadPathOptionName" xml:space="preserve">
-    <value>PATH</value>
-  </data>
-  <data name="PackageIdColumn" xml:space="preserve">
-    <value>Package Id</value>
-  </data>
-  <data name="VersionColumn" xml:space="preserve">
-    <value>Version</value>
-  </data>
-  <data name="CommandsColumn" xml:space="preserve">
-    <value>Commands</value>
+  <data name="WorkloadIdColumn" xml:space="preserve">
+    <value>Workload Id</value>
   </data>
 </root>

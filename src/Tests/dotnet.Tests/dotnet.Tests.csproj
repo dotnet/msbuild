@@ -41,6 +41,7 @@
     <Compile Include="..\dotnet-test.Tests\**\*.cs" LinkBase="dotnet-test" />
     <Compile Include="..\dotnet-vstest.Tests\**\*.cs" LinkBase="dotnet-vstest" />
     <Compile Include="..\dotnet-workload-install.Tests\**\*.cs" LinkBase="dotnet-workload-install" />
+    <Compile Include="..\dotnet-workload-list.Tests\**\*.cs" LinkBase="dotnet-workload-list" />
     <Compile Include="..\Microsoft.DotNet.Cli.Telemetry.PersistenceChannel.Tests\**\*.cs" LinkBase="Telemetry.PersistenceChannel" />
     <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory" />
     <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer" />

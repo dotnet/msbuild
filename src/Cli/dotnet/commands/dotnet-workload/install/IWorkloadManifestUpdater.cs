@@ -3,14 +3,13 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal interface IWorkloadManifestUpdater
     {
-        Task UpdateAdvertisingManifestsAsync(SdkFeatureBand featureBand, bool includePreviews);
+        Task UpdateAdvertisingManifestsAsync(bool includePreviews);
 
-        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestUpdates(SdkFeatureBand featureBand);
+        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestUpdates();
     }
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="VersionDescription">
         <source>Display the version of the .NET SDK, including the effects of any global.json</source>
-        <target state="needs-review-translation">Muestra el número de versión de la CLI de .NET</target>
+        <target state="translated">Muestra la versión del SDK de .NET, incluidos los efectos de cualquier archivo global.json.</target>
         <note />
       </trans-unit>
       <trans-unit id="InfoDescription">

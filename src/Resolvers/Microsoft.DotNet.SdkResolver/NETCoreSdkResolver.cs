@@ -11,11 +11,15 @@ using Microsoft.DotNet.NativeWrapper;
 
 namespace Microsoft.DotNet.DotNetSdkResolver
 {
+
+    //  Thread safety note:
+    //  This class is used by the MSBuild SDK resolvers, which can be called on multiple threads.
     public class NETCoreSdkResolver
     {
         private readonly Func<string, string> _getEnvironmentVariable;
         private readonly VSSettings _vsSettings;
 
+        // Caches of minimum versions, compatible SDKs are static to benefit multiple IDE evaluations.
         private static readonly ConcurrentDictionary<string, Version> s_minimumMSBuildVersions
             = new ConcurrentDictionary<string, Version>();
 

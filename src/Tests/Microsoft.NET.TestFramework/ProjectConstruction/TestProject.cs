@@ -61,6 +61,8 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, Dictionary<string, string>> AdditionalItems { get; } = new Dictionary<string, Dictionary<string, string>>();
 
+        public List<Action<XDocument>> ProjectChanges { get; } = new List<Action<XDocument>>();
+
         public IEnumerable<string> TargetFrameworkIdentifiers
         {
             get
@@ -310,6 +312,11 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                     target.Add(copyElement);
                     projectXml.Root.Add(target);
                 }
+            }
+
+            foreach (var projectChange in ProjectChanges)
+            {
+                projectChange(projectXml);
             }
 
             using (var file = File.CreateText(targetProjectPath))

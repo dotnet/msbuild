@@ -3,7 +3,9 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
@@ -12,30 +14,10 @@ namespace Microsoft.DotNet.ApiCompatibility
     /// </summary>
     public class ApiComparer
     {
-        private readonly ComparingSettings _settings;
-
         /// <summary>
-        /// Instantiate an object with the default <see cref="ComparingSettings"/>.
+        /// Flag indicating whether internal symbols should be included in the comparisons or not.
         /// </summary>
-        public ApiComparer() : this(new ComparingSettings()) { }
-
-        /// <summary>
-        /// Instantiate an object with the provided <see cref="ComparingSettings"/>
-        /// </summary>
-        /// <param name="settings">Settings to use for comparison.</param>
-        public ApiComparer(ComparingSettings settings)
-        {
-            _settings = settings;
-        }
-
-        /// <summary>
-        /// Instantiate an object that includes comparing internal symbols.
-        /// </summary>
-        /// <param name="includeInternalSymbols">Indicates whether internal symbols should be included or not.</param>
-        public ApiComparer(bool includeInternalSymbols)
-        {
-            _settings = new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(includeInternalSymbols));
-        }
+        public bool IncludeInternalSymbols { get; set; }
 
         /// <summary>
         /// Comma separated list to ignore diagnostic IDs.
@@ -48,7 +30,21 @@ namespace Microsoft.DotNet.ApiCompatibility
         public (string diagnosticId, string memberId)[] IgnoredDifferences { get; set; }
 
         /// <summary>
-        /// Get's the differences when comparing Left vs Right based on the settings when instanciating the object.
+        /// Flag indicating whether we should run on strict mode or not.
+        /// If StrictMode is set, the behavior of some rules will change and some other rules will be
+        /// executed when getting the differences. This is useful when you want both sides we are comparing
+        /// to be strictly the same on their surface area.
+        /// </summary>
+        public bool StrictMode { get; set; }
+
+        /// <summary>
+        /// Callback function to get the <see cref="ComparingSettings"/> to be used when creating the settings to get the differences.
+        /// This callback is called at the beginning of every <see cref="GetDifferences"/> overload.
+        /// </summary>
+        public Func<ComparingSettings> GetComparingSettings { get; set; }
+
+        /// <summary>
+        /// Get's the differences when comparing Left vs Right based on the settings at the moment this method is called.
         /// It compares two lists of symbols.
         /// </summary>
         /// <param name="left">Left symbols to compare against.</param>
@@ -56,17 +52,27 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <returns>List of found differences.</returns>
         public IEnumerable<CompatDifference> GetDifferences(IEnumerable<IAssemblySymbol> left, IEnumerable<IAssemblySymbol> right)
         {
-            AssemblySetMapper mapper = new(_settings);
-            mapper.AddElement(left, 0);
-            mapper.AddElement(right, 1);
+            if (left == null)
+            {
+                throw new ArgumentNullException(nameof(left));
+            }
 
-            DiferenceVisitor visitor = new(noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
+            if (right == null)
+            {
+                throw new ArgumentNullException(nameof(right));
+            }
+
+            AssemblySetMapper mapper = new(GetComparingSettingsCore());
+            mapper.AddElement(left, ElementSide.Left);
+            mapper.AddElement(right, ElementSide.Right);
+
+            DifferenceVisitor visitor = new(noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
             visitor.Visit(mapper);
-            return visitor.Differences;
+            return visitor.DiagnosticBags.First().Differences;
         }
 
         /// <summary>
-        /// Get's the differences when comparing Left vs Right based on the settings when instanciating the object.
+        /// Get's the differences when comparing Left vs Right based on the settings at the moment this method is called.
         /// It compares two symbols.
         /// </summary>
         /// <param name="left">Left symbol to compare against.</param>
@@ -74,13 +80,81 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <returns>List of found differences.</returns>
         public IEnumerable<CompatDifference> GetDifferences(IAssemblySymbol left, IAssemblySymbol right)
         {
-            AssemblyMapper mapper = new(_settings);
-            mapper.AddElement(left, 0);
-            mapper.AddElement(right, 1);
+            if (left == null)
+            {
+                throw new ArgumentNullException(nameof(left));
+            }
 
-            DiferenceVisitor visitor = new(noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
+            if (right == null)
+            {
+                throw new ArgumentNullException(nameof(right));
+            }
+
+            AssemblyMapper mapper = new(GetComparingSettingsCore());
+            mapper.AddElement(left, ElementSide.Left);
+            mapper.AddElement(right, ElementSide.Right);
+
+            DifferenceVisitor visitor = new(noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
             visitor.Visit(mapper);
-            return visitor.Differences;
+            return visitor.DiagnosticBags.First().Differences;
+        }
+
+        /// <summary>
+        /// Get the differences for all the combinations of <paramref name="left"/> against each <paramref name="right"/>
+        /// </summary>
+        /// <param name="left">The left that we are going to use to compare against the multiple rights.</param>
+        /// <param name="right">Multiple elements to compare as the right hand side against the provided left.</param>
+        /// <returns>Return a list containing the (left, right) tuple and it's list of <see cref="CompatDifference"/>.
+        /// The returning list contains one element per (left, right) combination, which is the same length as <paramref name="right"/>.
+        /// </returns>
+        public IEnumerable<(MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences)> GetDifferences(ElementContainer<IAssemblySymbol> left, IList<ElementContainer<IAssemblySymbol>> right)
+        {
+            if (left == null)
+            {
+                throw new ArgumentNullException(nameof(left));
+            }
+
+            if (right == null)
+            {
+                throw new ArgumentNullException(nameof(right));
+            }
+
+            int rightCount = right.Count;
+            AssemblyMapper mapper = new(GetComparingSettingsCore(), rightSetSize: rightCount);
+            mapper.AddElement(left.Element, ElementSide.Left);
+
+            
+            for (int i = 0; i < rightCount; i++)
+            {
+                if (right[i] == null)
+                {
+                    throw new ArgumentNullException(nameof(right), $"Found null at index: {i}.");
+                }
+
+                mapper.AddElement(right[i].Element, ElementSide.Right, i);
+            }
+
+            DifferenceVisitor visitor = new(rightCount: rightCount, noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
+            visitor.Visit(mapper);
+
+            (MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[] result = new (MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)[rightCount];
+
+            int count = 0;
+            foreach (DiagnosticBag<CompatDifference> bag in visitor.DiagnosticBags)
+            {
+                result[count] = (left.MetadataInformation, right[count].MetadataInformation, bag.Differences);
+                count++;
+            }
+            
+            return result;
+        }
+
+        private ComparingSettings GetComparingSettingsCore()
+        {
+            if (GetComparingSettings != null)
+                return GetComparingSettings();
+
+            return new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(IncludeInternalSymbols), strictMode: StrictMode);
         }
     }
 }

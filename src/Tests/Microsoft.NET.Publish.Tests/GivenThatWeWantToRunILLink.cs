@@ -682,6 +682,9 @@ namespace Microsoft.NET.Publish.Tests
             {
                 JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
                 runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.Runtime.InteropServices.Marshal.IsBuiltInComSupported"].Value<bool>()
+                    .Should().Be(false);
+                runtimeConfig["runtimeOptions"]["configProperties"]
                     ["System.StartupHookProvider.IsSupported"].Value<bool>()
                     .Should().Be(false);
                 runtimeConfig["runtimeOptions"]["configProperties"]
@@ -693,6 +696,7 @@ namespace Microsoft.NET.Publish.Tests
             }
             else
             {
+                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.Marshal.IsBuiltInComSupported");
                 runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
                 runtimeConfigContents.Should().NotContain("System.Resources.ResourceManager.AllowCustomResourceTypes");
                 runtimeConfigContents.Should().NotContain("System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization");
