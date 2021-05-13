@@ -1081,18 +1081,6 @@ namespace Microsoft.Build.Execution
 
                     newConfiguration.ExplicitlyLoaded = true;
 
-                    // Now create the build request
-                    submission.BuildRequest = new BuildRequest(
-                        submission.SubmissionId,
-                        BackEnd.BuildRequest.InvalidNodeRequestId,
-                        newConfiguration.ConfigurationId,
-                        submission.BuildRequestData.TargetNames,
-                        submission.BuildRequestData.HostServices,
-                        BuildEventContext.Invalid,
-                        null,
-                        submission.BuildRequestData.Flags,
-                        submission.BuildRequestData.RequestedProjectState);
-
                     if (_shuttingDown)
                     {
                         // We were already canceled!
@@ -1103,27 +1091,8 @@ namespace Microsoft.Build.Execution
                         return;
                     }
 
-                    // Submit the build request.
-                    _workQueue.Post(
-                        () =>
-                        {
-                            try
-                            {
-                                IssueBuildSubmissionToScheduler(submission, allowMainThreadBuild);
-                            }
-                            catch (BuildAbortedException bae)
-                            {
-                                // We were canceled before we got issued by the work queue.
-                                var result = new BuildResult(submission.BuildRequest, bae);
-                                submission.CompleteResults(result);
-                                submission.CompleteLogging(true);
-                                CheckSubmissionCompletenessAndRemove(submission);
-                            }
-                            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                            {
-                                HandleExecuteSubmissionException(submission, ex);
-                            }
-                        });
+                    AddBuildRequestToSubmission(submission, newConfiguration.ConfigurationId);
+                    IssueBuildSubmissionToScheduler(submission, allowMainThreadBuild);
                 }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
@@ -1512,70 +1481,108 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private static void AddBuildRequestToSubmission(BuildSubmission submission, int configurationId)
+        {
+            submission.BuildRequest = new BuildRequest(
+                submission.SubmissionId,
+                BackEnd.BuildRequest.InvalidNodeRequestId,
+                configurationId,
+                submission.BuildRequestData.TargetNames,
+                submission.BuildRequestData.HostServices,
+                BuildEventContext.Invalid,
+                null,
+                submission.BuildRequestData.Flags,
+                submission.BuildRequestData.RequestedProjectState);
+        }
+
         /// <summary>
         /// The submission is a top level build request entering the BuildManager.
         /// Sends the request to the scheduler with optional legacy threading semantics behavior.
         /// </summary>
-        private void IssueBuildSubmissionToScheduler(BuildSubmission submission, bool allowMainThreadBuild)
+        private void IssueBuildSubmissionToScheduler(BuildSubmission submission, bool allowMainThreadBuild = false)
         {
-            bool resetMainThreadOnFailure = false;
-            try
-            {
-                lock (_syncLock)
+            _workQueue.Post(
+                () =>
                 {
-                    if (_shuttingDown)
+                    try
                     {
-                        throw new BuildAbortedException();
+                        IssueBuildSubmissionToSchedulerImpl(submission, allowMainThreadBuild);
                     }
-
-                    if (allowMainThreadBuild && _buildParameters.LegacyThreadingSemantics)
+                    catch (BuildAbortedException bae)
                     {
-                        if (_legacyThreadingData.MainThreadSubmissionId == -1)
+                        // We were canceled before we got issued by the work queue.
+                        var result = new BuildResult(submission.BuildRequest, bae);
+                        submission.CompleteResults(result);
+                        submission.CompleteLogging(true);
+                        CheckSubmissionCompletenessAndRemove(submission);
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        HandleExecuteSubmissionException(submission, ex);
+                    }
+                });
+
+            void IssueBuildSubmissionToSchedulerImpl(BuildSubmission submission, bool allowMainThreadBuild)
+            {
+                var resetMainThreadOnFailure = false;
+                try
+                {
+                    lock (_syncLock)
+                    {
+                        if (_shuttingDown)
                         {
-                            resetMainThreadOnFailure = true;
-                            _legacyThreadingData.MainThreadSubmissionId = submission.SubmissionId;
+                            throw new BuildAbortedException();
+                        }
+
+                        if (allowMainThreadBuild && _buildParameters.LegacyThreadingSemantics)
+                        {
+                            if (_legacyThreadingData.MainThreadSubmissionId == -1)
+                            {
+                                resetMainThreadOnFailure = true;
+                                _legacyThreadingData.MainThreadSubmissionId = submission.SubmissionId;
+                            }
+                        }
+
+                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] {submission.BuildRequest});
+
+                        HandleNewRequest(Scheduler.VirtualNode, blocker);
+                    }
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    var projectException = ex as InvalidProjectFileException;
+                    if (projectException != null)
+                    {
+                        if (!projectException.HasBeenLogged)
+                        {
+                            BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
+                            projectException.HasBeenLogged = true;
                         }
                     }
-
-                    BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] {submission.BuildRequest});
-
-                    HandleNewRequest(Scheduler.VirtualNode, blocker);
-                }
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                InvalidProjectFileException projectException = ex as InvalidProjectFileException;
-                if (projectException != null)
-                {
-                    if (!projectException.HasBeenLogged)
+                    else if ((ex is BuildAbortedException) || ExceptionHandling.NotExpectedException(ex))
                     {
-                        BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                        ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
-                        projectException.HasBeenLogged = true;
-                    }
-                }
-                else if ((ex is BuildAbortedException) || ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                lock (_syncLock)
-                {
-
-                    if (resetMainThreadOnFailure)
-                    {
-                        _legacyThreadingData.MainThreadSubmissionId = -1;
+                        throw;
                     }
 
-                    if (projectException == null)
+                    lock (_syncLock)
                     {
-                        BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                        ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
-                    }
 
-                    submission.CompleteLogging(true);
-                    ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
-                    _overallBuildSuccess = false;
+                        if (resetMainThreadOnFailure)
+                        {
+                            _legacyThreadingData.MainThreadSubmissionId = -1;
+                        }
+
+                        if (projectException == null)
+                        {
+                            var buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
+                        }
+
+                        submission.CompleteLogging(true);
+                        ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
+                        _overallBuildSuccess = false;
+                    }
                 }
             }
         }
