@@ -80,5 +80,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         {
             return _differences ??= Settings.RuleRunnerFactory.GetRuleRunner().Run(this);
         }
+
+        internal T GetElement(ElementSide side, int setIndex)
+        {
+            if (side == ElementSide.Left)
+            {
+                return Left;
+            }
+
+            return Right[setIndex];
+        }
     }
 }
