@@ -66,7 +66,11 @@ namespace Microsoft.Build.Construction
             "Build",
             "Clean",
             "Rebuild",
-            "Publish"
+            "Publish",
+            "ValidateSolutionConfiguration",
+            "ValidateToolsVersions",
+            "ValidateProjects",
+            "GetSolutionConfigurationContents"
             );
 
 #if FEATURE_ASPNET_COMPILER
