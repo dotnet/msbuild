@@ -219,10 +219,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private IEnumerable<string> GetPackageDownloadUrls(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate, bool includePreview)
         {
             var packageUrls = new List<string>();
-            if (!skipManifestUpdate)
-            {
-                packageUrls.AddRange(_workloadManifestUpdater.GetManifestsUrls(new SdkFeatureBand(_sdkVersion), includePreview));
-            }
 
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -243,7 +239,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return packageUrls;
         }
 		
-		private void DownloadToOfflineCache(IEnumerable<WorkloadId> workloadIds, string offlineCache)
+        private void DownloadToOfflineCache(IEnumerable<WorkloadId> workloadIds, string offlineCache)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {

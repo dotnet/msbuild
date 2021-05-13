@@ -184,7 +184,7 @@
     <value>Only print the list of links to download without downloading it.</value>
   </data>
   <data name="DownloadToCacheOptionDescription" xml:space="preserve">
-    <value>Download packs to the offline cache.</value>
+    <value>Download packages needed to install a workload to a folder which can be used for offline installation.</value>
   </data>
   <data name="FromCacheOptionDescription" xml:space="preserve">
     <value>Complete the operation from cache (offline).</value>

@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionDescription">
-        <source>Download packs to the offline cache.</source>
-        <target state="new">Download packs to the offline cache.</target>
+        <source>Download packages needed to install a workload to a folder which can be used for offline installation.</source>
+        <target state="new">Download packages needed to install a workload to a folder which can be used for offline installation.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
