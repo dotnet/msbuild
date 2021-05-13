@@ -63,7 +63,7 @@ namespace Microsoft.TemplateEngine.Cli
             return argsError;
         }
 
-        internal async Task<CreationResultStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke)
+        internal async Task<New3CommandStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke)
         {
             templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag? language);
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
@@ -94,7 +94,7 @@ namespace Microsoft.TemplateEngine.Cli
                 });
 
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{_commandName} {_commandInput.TemplateName}").Bold().Red());
-                return CreationResultStatus.InvalidParamValues;
+                return New3CommandStatus.InvalidParamValues;
             }
             else
             {
@@ -113,7 +113,7 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
                     }
 
-                    return CreationResultStatus.CreateFailed;
+                    return New3CommandStatus.CreateFailed;
                 }
                 catch (Exception ex)
                 {
@@ -134,7 +134,7 @@ namespace Microsoft.TemplateEngine.Cli
                     });
                 }
 
-                return CreationResultStatus.CreateFailed;
+                return New3CommandStatus.CreateFailed;
             }
         }
 
@@ -153,7 +153,7 @@ namespace Microsoft.TemplateEngine.Cli
         // Warning: The _commandInput cannot be assumed to be in a state that is parsed for the template being invoked.
         //      So be sure to only get template-agnostic information from it. Anything specific to the template must be gotten from the ITemplateMatchInfo
         //      Or do a reparse if necessary (currently occurs in one error case).
-        private async Task<CreationResultStatus> CreateTemplateAsync(ITemplateMatchInfo templateMatchDetails)
+        private async Task<New3CommandStatus> CreateTemplateAsync(ITemplateMatchInfo templateMatchDetails)
         {
             ITemplateInfo template = templateMatchDetails.Info;
 
@@ -164,7 +164,7 @@ namespace Microsoft.TemplateEngine.Cli
                 string printableChars = string.Join(", ", invalidChars.Where(x => !char.IsControl(x)).Select(x => $"'{x}'"));
                 string nonPrintableChars = string.Join(", ", invalidChars.Where(char.IsControl).Select(x => $"char({(int)x})"));
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidNameParameter, printableChars, nonPrintableChars).Bold().Red());
-                return CreationResultStatus.CreateFailed;
+                return New3CommandStatus.CreateFailed;
             }
 
             string? fallbackName = new DirectoryInfo(
@@ -212,12 +212,12 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(cx.InnerException.Message.Bold().Red());
                 }
 
-                return CreationResultStatus.CreateFailed;
+                return New3CommandStatus.CreateFailed;
             }
             catch (TemplateAuthoringException tae)
             {
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());
-                return CreationResultStatus.CreateFailed;
+                return New3CommandStatus.CreateFailed;
             }
 
             string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? _commandInput.TemplateName : instantiateResult.TemplateFullName;
@@ -247,7 +247,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
 
                     HandlePostActions(instantiateResult);
-                    break;
+                    return New3CommandStatus.Success;
                 case CreationResultStatus.CreateFailed:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
                     return New3CommandStatus.CreateFailed;
@@ -269,10 +269,10 @@ namespace Microsoft.TemplateEngine.Cli
                         string fixedMessage = string.Join(", ", missingParamNamesCanonical);
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
                     }
-                    break;
+                    return New3CommandStatus.MissingMandatoryParam;
                 case CreationResultStatus.NotFound:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, _commandName).Bold().Red());
-                    break;
+                    return New3CommandStatus.NotFound;
                 case CreationResultStatus.InvalidParamValues:
                     TemplateUsageInformation? usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, _environment, _commandInput, _hostDataLoader, _templateCreator);
 
@@ -285,9 +285,9 @@ namespace Microsoft.TemplateEngine.Cli
                     else
                     {
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, _commandName).Bold().Red());
-                        return CreationResultStatus.NotFound;
+                        return New3CommandStatus.NotFound;
                     }
-                    break;
+                    return New3CommandStatus.InvalidParamValues;
                 case CreationResultStatus.DestructiveChangesDetected:
                     Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
                     if (instantiateResult.CreationEffects != null)
@@ -304,12 +304,10 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Error.WriteLine();
                     }
                     Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
-                    return CreationResultStatus.DestructiveChangesDetected;
+                    return New3CommandStatus.DestructiveChangesDetected;
                 default:
-                    break;
+                    return New3CommandStatus.UnexpectedResult;
             }
-
-            return instantiateResult.Status;
         }
 
         private void HandlePostActions(Edge.Template.ITemplateCreationResult creationResult)

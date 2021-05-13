@@ -20,7 +20,6 @@ using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Utils;
-using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -244,7 +243,7 @@ namespace Microsoft.TemplateEngine.Cli
         }
 
         // TODO: make sure help / usage works right in these cases.
-        private async Task<CreationResultStatus> EnterMaintenanceFlowAsync()
+        private async Task<New3CommandStatus> EnterMaintenanceFlowAsync()
         {
             if (!TemplateResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
             {
@@ -259,7 +258,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
                 }
 
-                return CreationResultStatus.InvalidParamValues;
+                return New3CommandStatus.InvalidParamValues;
             }
 
             // No other cases specified, we've fallen through to "Optional usage help + List"
@@ -277,10 +276,10 @@ namespace Microsoft.TemplateEngine.Cli
                 _templateCreator,
                 _defaultLanguage);
 
-            return CreationResultStatus.Success;
+            return New3CommandStatus.Success;
         }
 
-        private async Task<CreationResultStatus> EnterTemplateManipulationFlowAsync()
+        private async Task<New3CommandStatus> EnterTemplateManipulationFlowAsync()
         {
             if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
             {
@@ -311,7 +310,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private async Task<CreationResultStatus> ExecuteAsync()
+        private async Task<New3CommandStatus> ExecuteAsync()
         {
             // this is checking the initial parse, which is template agnostic.
             if (_commandInput.HasParseError)
@@ -340,9 +339,9 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 // The --alias param is for creating / updating / deleting aliases.
                 // If it's not present, try expanding aliases now.
-                CreationResultStatus aliasExpansionResult = AliasSupport.CoordinateAliasExpansion(_commandInput, _aliasRegistry, _telemetryLogger);
+                New3CommandStatus aliasExpansionResult = AliasSupport.CoordinateAliasExpansion(_commandInput, _aliasRegistry, _telemetryLogger);
 
-                if (aliasExpansionResult != CreationResultStatus.Success)
+                if (aliasExpansionResult != New3CommandStatus.Success)
                 {
                     return aliasExpansionResult;
                 }
@@ -350,7 +349,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (!Initialize())
             {
-                return CreationResultStatus.Success;
+                return New3CommandStatus.Success;
             }
 
             bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
@@ -365,7 +364,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 Reporter.Error.WriteLine(eiex.Message.Bold().Red());
                 Reporter.Error.WriteLine(LocalizableStrings.SettingsReadError);
-                return CreationResultStatus.CreateFailed;
+                return New3CommandStatus.CreateFailed;
             }
 
             try
@@ -396,7 +395,7 @@ namespace Microsoft.TemplateEngine.Cli
             catch (TemplateAuthoringException tae)
             {
                 Reporter.Error.WriteLine(tae.Message.Bold().Red());
-                return CreationResultStatus.CreateFailed;
+                return New3CommandStatus.CreateFailed;
             }
         }
 

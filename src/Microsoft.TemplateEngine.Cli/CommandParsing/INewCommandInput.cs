@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -93,7 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool HasDebuggingFlag(string flag);
 
-        void OnExecute(Func<Task<CreationResultStatus>> invoke);
+        void OnExecute(Func<Task<New3CommandStatus>> invoke);
 
         void ReparseForTemplate(ITemplateInfo templateInfo, HostSpecificTemplateData hostSpecificTemplateData);
 

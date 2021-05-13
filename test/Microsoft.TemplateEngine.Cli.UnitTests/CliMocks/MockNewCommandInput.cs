@@ -174,7 +174,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             throw new NotImplementedException();
         }
 
-        public void OnExecute(Func<Task<CreationResultStatus>> invoke)
+        public void OnExecute(Func<Task<New3CommandStatus>> invoke)
         {
             throw new NotImplementedException();
         }

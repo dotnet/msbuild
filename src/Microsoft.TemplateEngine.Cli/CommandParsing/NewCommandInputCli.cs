@@ -290,7 +290,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return _parseResult.HasAppliedOption(new[] { _commandName, flag });
         }
 
-        public void OnExecute(Func<Task<CreationResultStatus>> invoke)
+        public void OnExecute(Func<Task<New3CommandStatus>> invoke)
         {
             _invoke = async () => (int)await invoke().ConfigureAwait(false);
         }

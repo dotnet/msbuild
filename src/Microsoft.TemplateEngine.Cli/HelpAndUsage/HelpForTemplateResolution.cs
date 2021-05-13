@@ -14,14 +14,13 @@ using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TableOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Utils;
-using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class HelpForTemplateResolution
     {
-        internal static CreationResultStatus CoordinateHelpAndUsageDisplay(
+        internal static New3CommandStatus CoordinateHelpAndUsageDisplay(
             TemplateListResolutionResult templateResolutionResult,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
@@ -34,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (commandInput.IsHelpFlagSpecified && string.IsNullOrEmpty(commandInput.TemplateName))
             {
                 ShowUsageHelp(commandInput, telemetryLogger);
-                return CreationResultStatus.Success;
+                return New3CommandStatus.Success;
             }
 
             // in case list is specified we always need to list templates
@@ -65,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="commandInput">command input used in CLI.</param>
         /// <param name="defaultLanguage">default language for the host.</param>
         /// <returns></returns>
-        internal static Task<CreationResultStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
+        internal static Task<New3CommandStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
             TemplateResolutionResult resolutionResult,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
@@ -78,17 +77,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(commandInput)).Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.CommandName).Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.CommandName, commandInput.TemplateName).Bold().Red());
-                    return Task.FromResult(CreationResultStatus.NotFound);
+                    return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
                     DisplayTemplateList(resolutionResult.TemplateGroups, environmentSettings, commandInput, defaultLanguage, useErrorOutput: true);
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousLanguageHint.Bold().Red());
-                    return Task.FromResult(CreationResultStatus.NotFound);
+                    return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousTemplateGroupChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
                     DisplayTemplateList(resolutionResult.TemplateGroups, environmentSettings, commandInput, defaultLanguage, useErrorOutput: true);
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
-                    return Task.FromResult(CreationResultStatus.NotFound);
+                    return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousParameterValueChoice:
                     Reporter.Verbose.WriteLine(LocalizableStrings.Authoring_AmbiguousChoiceParameterValue);
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
@@ -98,7 +97,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 case TemplateResolutionResult.Status.InvalidParameter:
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
             }
-            return Task.FromResult(CreationResultStatus.CreateFailed);
+            return Task.FromResult(New3CommandStatus.CreateFailed);
         }
 
         // Displays the list of templates in a table, one row per template group.
@@ -177,7 +176,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine();
         }
 
-        internal static CreationResultStatus HandleParseError(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
+        internal static New3CommandStatus HandleParseError(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
         {
             TemplateResolver.ValidateRemainingParameters(commandInput, out IReadOnlyList<string> invalidParams);
             DisplayInvalidParameters(invalidParams);
@@ -197,7 +196,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 Reporter.Error.WriteLine(commandInput.ColumnsParseError.Bold().Red());
             }
 
-            return CreationResultStatus.InvalidParamValues;
+            return New3CommandStatus.InvalidParamValues;
         }
 
         /// <summary>
@@ -215,7 +214,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return null;
         }
 
-        private static CreationResultStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string? defaultLanguage)
+        private static New3CommandStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string? defaultLanguage)
         {
             // sanity check: should never happen; as condition for unambiguous template group is checked above
             if (!templateResolutionResult.UnambiguousTemplateGroup.Any())
@@ -241,12 +240,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static CreationResultStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
+        private static New3CommandStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
         {
             // sanity check: should never happen; as condition for unambiguous template group is checked above
             if (!unambiguousTemplateGroup.Any())
             {
-                return CreationResultStatus.NotFound;
+                return New3CommandStatus.NotFound;
             }
 
             GetParametersInvalidForTemplatesInList(unambiguousTemplateGroup, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
@@ -273,11 +272,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             return invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0
-                ? CreationResultStatus.InvalidParamValues
-                : CreationResultStatus.Success;
+                ? New3CommandStatus.InvalidParamValues
+                : New3CommandStatus.Success;
         }
 
-        private static CreationResultStatus DisplayListOrHelpForAmbiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string? defaultLanguage)
+        private static New3CommandStatus DisplayListOrHelpForAmbiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string? defaultLanguage)
         {
             // The following occurs when:
             //      --alias <value> is specifed
@@ -287,7 +286,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 Reporter.Error.WriteLine("  " + commandInput.TemplateParamInputFormat("--alias").Bold().Red());
-                return CreationResultStatus.NotFound;
+                return New3CommandStatus.NotFound;
             }
 
             bool hasInvalidParameters = false;
@@ -317,15 +316,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (hasInvalidParameters)
             {
-                return CreationResultStatus.NotFound;
+                return New3CommandStatus.NotFound;
             }
             else if (commandInput.IsListFlagSpecified || commandInput.IsHelpFlagSpecified)
             {
-                return templateResolutionResult.HasExactMatches ? CreationResultStatus.Success : CreationResultStatus.NotFound;
+                return templateResolutionResult.HasExactMatches ? New3CommandStatus.Success : New3CommandStatus.NotFound;
             }
             else
             {
-                return CreationResultStatus.OperationNotSpecified;
+                return New3CommandStatus.NotFound;
             }
         }
 
@@ -334,10 +333,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// </summary>
         /// <param name="unambiguousTemplateGroup">the unambigious template group to use based on the command input.</param>
         /// <param name="commandInput">the command input.</param>
-        /// <returns><see cref="CreationResultStatus.InvalidParamValues"/>.</returns>
+        /// <returns><see cref="New3CommandStatus.InvalidParamValues"/>.</returns>
         /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/>.</exception>
         /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/>.</exception>
-        private static CreationResultStatus DisplayInvalidParameterError(TemplateGroup unambiguousTemplateGroup, INewCommandInput commandInput)
+        private static New3CommandStatus DisplayInvalidParameterError(TemplateGroup unambiguousTemplateGroup, INewCommandInput commandInput)
         {
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(commandInput));
@@ -355,7 +354,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                             LocalizableStrings.InvalidParameterTemplateHint,
                             GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.ShortNames[0])).Bold().Red());
             }
-            return CreationResultStatus.InvalidParamValues;
+            return New3CommandStatus.InvalidParamValues;
         }
 
         /// <summary>
@@ -367,7 +366,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/>.</exception>
         /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/>.</exception>
-        private static async Task<CreationResultStatus> DisplayAmbiguousPrecedenceErrorAsync(
+        private static async Task<New3CommandStatus> DisplayAmbiguousPrecedenceErrorAsync(
             TemplateGroup unambiguousTemplateGroup,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput)
@@ -420,7 +419,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
             }
             Reporter.Error.WriteLine(hintMessage.Bold().Red());
-            return CreationResultStatus.NotFound;
+            return New3CommandStatus.NotFound;
         }
 
         private static void DisplayTemplateList(
