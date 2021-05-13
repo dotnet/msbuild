@@ -395,7 +395,13 @@ Examples:
             {
                 if (assembly.Name is "Microsoft.CodeAnalysis" or "Microsoft.CodeAnalysis.CSharp")
                 {
-                    return context.LoadFromAssemblyPath(Path.Combine(roslynPath, assembly.Name + ".dll"));
+                    var loadedAssembly = context.LoadFromAssemblyPath(Path.Combine(roslynPath, assembly.Name + ".dll"));
+                    // Avoid scenarioes where the assembly in rosylnPath is older than what we expect
+                    if (loadedAssembly.GetName().Version < assembly.Version)
+                    {
+                        throw new Exception($"Found a version of {assembly.Name} that was lower than the target version of {assembly.Version}");
+                    }
+                    return loadedAssembly;
                 }
                 return null;
             };
