@@ -53,4 +53,8 @@
     <FileSignInfo Include="xunit.performance.execution.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="xunit.performance.metrics.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <UseDotNetCertificate>true</UseDotNetCertificate>
+  </PropertyGroup>
 </Project>
