@@ -8,15 +8,25 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
+    internal record CacheRequest(BuildSubmission Submission, BuildRequestConfiguration Configuration);
+
+    internal record VolatileNullableBool(bool Value)
+    {
+        public static implicit operator bool(VolatileNullableBool? d) => d is not null && d.Value;
+    }
+
     internal class ProjectCacheService
     {
         private readonly BuildManager _buildManager;
@@ -24,6 +34,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private readonly ProjectCacheDescriptor _projectCacheDescriptor;
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
+
+        // Volatile because one thread writes it, another reads it.
+        // The BuildManager thread reads this to cheaply back off when the cache is disabled.
+        // It is written to only once by a ThreadPool thread.
+        // null means no decision has been made yet. bool? cannot be marked volatile so use a class wrapper instead.
+        // TODO: remove after we change VS to set the cache descriptor via build parameters.
+        public volatile VolatileNullableBool? DesignTimeBuildsDetected;
 
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
@@ -49,9 +66,30 @@ namespace Microsoft.Build.Experimental.ProjectCache
             var plugin = await Task.Run(() => GetPluginInstance(pluginDescriptor), cancellationToken)
                 .ConfigureAwait(false);
 
-            // TODO: Detect and use the highest verbosity from all the user defined loggers. That's tricky because right now we can't discern between user set loggers and msbuild's internally added loggers.
+            // TODO: Detect and use the highest verbosity from all the user defined loggers. That's tricky because right now we can't query loggers about
+            // their verbosity levels.
             var loggerFactory = new Func<PluginLoggerBase>(() => new LoggingServiceToPluginLoggerAdapter(LoggerVerbosity.Normal, loggingService));
 
+            // TODO: remove after we change VS to set the cache descriptor via build parameters.
+            if (pluginDescriptor.VsWorkaround)
+            {
+                // When running under VS we can't initialize the plugin until we evaluate a project (any project) and extract
+                // further information (set by VS) from it required by the plugin.
+                return new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
+            }
+
+            await InitializePlugin(pluginDescriptor, cancellationToken, loggerFactory, plugin);
+
+            return new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
+        }
+
+        private static async Task InitializePlugin(
+            ProjectCacheDescriptor pluginDescriptor,
+            CancellationToken cancellationToken,
+            Func<PluginLoggerBase> loggerFactory,
+            ProjectCachePluginBase plugin
+        )
+        {
             var logger = loggerFactory();
 
             try
@@ -75,8 +113,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheInitializationFailed");
             }
-
-            return new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
         }
 
         private static ProjectCachePluginBase GetPluginInstance(ProjectCacheDescriptor pluginDescriptor)
@@ -148,9 +184,112 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private static readonly CoreClrAssemblyLoader _loader = new CoreClrAssemblyLoader();
 #endif
 
-        public async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest)
+        public void PostCacheRequest(CacheRequest cacheRequest)
         {
-            // TODO: Parent these logs under the project build event so they appear nested under the project in the binlog viewer.
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var cacheResult = await ProcessCacheRequest(cacheRequest);
+                    _buildManager.PostCacheResult(cacheRequest, cacheResult);
+                }
+                catch (Exception e)
+                {
+                    _buildManager.PostCacheResult(cacheRequest, CacheResult.IndicateException(e));
+                }
+            }, _cancellationToken);
+
+            async Task<CacheResult> ProcessCacheRequest(CacheRequest request)
+            {
+                EvaluateProjectIfNecessary(request);
+                if (DesignTimeBuildsDetected)
+                {
+                    throw new NotImplementedException();
+                    // The BuildManager should disable the cache after the first query that finds
+                    // a design time build.
+                    return CacheResult.IndicateNonCacheHit(CacheResultType.CacheNotApplicable);
+                }
+
+                if (_projectCacheDescriptor.VsWorkaround)
+                {
+                    // TODO: remove after we change VS to set the cache descriptor via build parameters.
+                    await LateInitializePluginForVsWorkaround(request);
+                }
+
+                return await GetCacheResultAsync(cacheRequest.Submission.BuildRequestData);
+            }
+
+            void EvaluateProjectIfNecessary(CacheRequest request)
+            {
+                // TODO: only do this if the project cache requests evaluation. QB needs evaluations, but the Anybuild implementation
+                // TODO: might not need them, so no point evaluating if it's not necessary. As a caveat, evaluations would still be optimal
+                // TODO: when proxy builds are issued by the plugin ( scheduled on the inproc node, no point re-evaluating on out-of-proc nodes).
+                lock (request.Configuration)
+                {
+                    if (!request.Configuration.IsLoaded)
+                    {
+                        request.Configuration.LoadProjectIntoConfiguration(
+                            _buildManager,
+                            request.Submission.BuildRequestData.Flags,
+                            request.Submission.SubmissionId,
+                            Scheduler.InProcNodeId
+                        );
+
+                        // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
+                        // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
+                        request.Configuration.Project.TranslateEntireState = true;
+                    }
+                }
+
+                // Attribute is volatile and reference writes are atomic.
+                // Assume that if one request is a design time build, all of them are.
+                DesignTimeBuildsDetected ??= new VolatileNullableBool(IsDesignTimeBuild(request.Configuration.Project));
+            }
+
+            static bool IsDesignTimeBuild(ProjectInstance project)
+            {
+                var designTimeBuild = project.GetPropertyValue(DesignTimeProperties.DesignTimeBuild);
+                var buildingProject = project.GlobalPropertiesDictionary[DesignTimeProperties.BuildingProject]?.EvaluatedValue;
+
+                return MSBuildStringIsTrue(designTimeBuild) ||
+                       buildingProject != null && !MSBuildStringIsTrue(buildingProject);
+            }
+
+            async Task LateInitializePluginForVsWorkaround(CacheRequest request)
+            {
+                var (_, configuration) = request;
+                var solutionPath = configuration.Project.GetPropertyValue(SolutionProjectGenerator.SolutionPathPropertyName);
+
+                ErrorUtilities.VerifyThrow(
+                    solutionPath != null && !string.IsNullOrWhiteSpace(solutionPath) && solutionPath != "*Undefined*",
+                    $"Expected VS to set a valid SolutionPath property but got: {solutionPath}");
+
+                ErrorUtilities.VerifyThrow(
+                    FileSystems.Default.FileExists(solutionPath),
+                    $"Solution file does not exist: {solutionPath}");
+
+                await InitializePlugin(
+                    ProjectCacheDescriptor.FromAssemblyPath(
+                        _projectCacheDescriptor.PluginAssemblyPath,
+                        new[]
+                        {
+                            new ProjectGraphEntryPoint(
+                                solutionPath,
+                                configuration.Project.GlobalProperties)
+                        },
+                        projectGraph: null,
+                        _projectCacheDescriptor.PluginSettings),
+                    _cancellationToken,
+                    _loggerFactory,
+                    _projectCachePlugin);
+            }
+
+            static bool MSBuildStringIsTrue(string msbuildString) =>
+                ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
+        }
+
+        private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest)
+        {
             var queryDescription = $"{buildRequest.ProjectFullPath}" +
                                    $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
                                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
@@ -176,7 +315,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheQueryFailed", queryDescription);
             }
 
-            var message = $"Plugin result: {cacheResult.ResultType}.";
+            var message = $"------  Plugin result: {cacheResult.ResultType}.";
 
             switch (cacheResult.ResultType)
             {

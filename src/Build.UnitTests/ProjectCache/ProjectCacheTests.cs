@@ -484,8 +484,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
-                        true,
-                        currentBuildEnvironment.VisualStudioInstallRootDirectory));
+                        runningInVisualStudio: true,
+                        visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
                 BuildManager.ProjectCacheItems.ShouldBeEmpty();
 
@@ -502,12 +502,13 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         node.ProjectInstance.FullPath,
                         globalProperties:
                             new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}});
+
                     buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
 
                     nodesToBuildResults[node] = buildResult;
                 }
 
-                buildSession.Logger.FullLog.ShouldContain("Graph entrypoint based");
+                buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
 
                 AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
             }
@@ -746,7 +747,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            buildSession.Logger.FullLog.ShouldContain("Graph entrypoint based");
+            buildSession.Logger.FullLog.ShouldContain("Explicit entry-point based");
 
             AssertCacheBuild(graph, testData, null, buildSession.Logger, graphResult.ResultsByNode);
         }
@@ -893,7 +894,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // Plugin constructors cannot log errors, they can only throw exceptions.
                 yield return new object[] { ErrorLocations.Constructor, ErrorKind.Exception };
 
-                foreach (var errorKind in new[]{ErrorKind.Exception, ErrorKind.LoggedError})
+                foreach (var errorKind in new[] { ErrorKind.Exception, ErrorKind.LoggedError })
                 {
                     yield return new object[] { ErrorLocations.BeginBuildAsync, errorKind };
                     yield return new object[] { ErrorLocations.BeginBuildAsync | ErrorLocations.GetCacheResultAsync, errorKind };

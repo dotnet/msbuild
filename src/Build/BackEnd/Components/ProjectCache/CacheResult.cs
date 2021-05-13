@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
@@ -46,6 +47,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
     /// </summary>
     public class CacheResult
     {
+        public Exception Exception { get; }
+
         private CacheResult(
             CacheResultType resultType,
             BuildResult? buildResult = null,
@@ -61,6 +64,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ResultType = resultType;
             BuildResult = buildResult;
             ProxyTargets = proxyTargets;
+        }
+
+        private CacheResult(Exception exception)
+        {
+            ResultType = CacheResultType.None;
+            Exception = exception;
         }
 
         public CacheResultType ResultType { get; }
@@ -88,6 +97,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             ErrorUtilities.VerifyThrowInvalidOperation(resultType != CacheResultType.CacheHit, "CantBeCacheHit");
             return new CacheResult(resultType);
+        }
+
+        internal static CacheResult IndicateException(Exception e)
+        {
+            return new CacheResult(e);
         }
 
         private static BuildResult ConstructBuildResult(IReadOnlyCollection<PluginTargetResult> targetResults)
