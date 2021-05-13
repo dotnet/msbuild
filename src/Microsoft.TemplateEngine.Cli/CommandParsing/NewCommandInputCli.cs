@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge.Template;
-using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -420,13 +419,15 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             _templateParamCanonicalToVariantMap = null;
             _templateParamVariantToCanonicalMap = null;
 
-            IReadOnlyList<string> templateNameList = _parseResult.GetArgumentListAtPath(new[] { _commandName })?.ToList() ?? Empty<string>.List.Value;
-            if ((templateNameList.Count > 0) &&
-                !templateNameList[0].StartsWith("-", StringComparison.Ordinal)
+            IReadOnlyCollection<string> templateNameList = _parseResult.GetArgumentListAtPath(new[] { _commandName });
+            string firstTemplateName = templateNameList?.FirstOrDefault();
+
+            if (firstTemplateName != null &&
+                !firstTemplateName.StartsWith("-", StringComparison.Ordinal)
                 && (_parseResult.Tokens.Count >= 2)
-                && string.Equals(templateNameList[0], _parseResult.Tokens.ElementAt(1), StringComparison.Ordinal))
+                && string.Equals(firstTemplateName, _parseResult.Tokens.ElementAt(1), StringComparison.Ordinal))
             {
-                _templateNameArg = templateNameList[0];
+                _templateNameArg = firstTemplateName;
             }
             else
             {
