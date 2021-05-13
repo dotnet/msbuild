@@ -47,7 +47,7 @@ stages:
     - name: TeamName
       value: MSBuild
     - name: VisualStudio.MajorVersion
-      value: 16
+      value: 17
     - name: VisualStudio.ChannelName
       value: 'int.main'
     - name: VisualStudio.DropName

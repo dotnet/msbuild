@@ -1440,31 +1440,19 @@ namespace Microsoft.Build.CommandLine
             restoreGlobalProperties["MSBuildRestoreSessionId"] = Guid.NewGuid().ToString("D");
 
             // Create a new request with a Restore target only and specify:
-            BuildRequestDataFlags flags;
-
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
-            {
-                flags =   BuildRequestDataFlags.ClearCachesAfterBuild                // ensure the projects will be reloaded from disk for subsequent builds
-                        | BuildRequestDataFlags.SkipNonexistentNonEntryTargets       // ignore missing non-entry targets since Restore does not require that all targets
-                                                                                     // exist, only top-level ones like Restore itself
-                        | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports  // ignore imports that don't exist, are empty, or are invalid because restore might
-                                                                                     // make available an import that doesn't exist yet and the <Import /> might be missing a condition.
-                        | BuildRequestDataFlags.FailOnUnresolvedSdk;                 // still fail in the case when an MSBuild project SDK can't be resolved since this is fatal and should
-                                                                                     // fail the build.
-            }
-            else
-            {
-                // pre-16.10 flags allowed `-restore` to pass when there was no `Restore` target
-                flags = BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports;
-            }
-
+            //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
+            //  - BuildRequestDataFlags.SkipNonexistentTargets to ignore missing targets since Restore does not require that all targets exist
+            //  - BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports to ignore imports that don't exist, are empty, or are invalid because restore might
+            //     make available an import that doesn't exist yet and the <Import /> might be missing a condition.
+            //  - BuildRequestDataFlags.FailOnUnresolvedSdk to still fail in the case when an MSBuild project SDK can't be resolved since this is fatal and should
+            //     fail the build.
             BuildRequestData restoreRequest = new BuildRequestData(
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
                 targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
                 hostServices: null,
-                flags);
+                flags: BuildRequestDataFlags.ClearCachesAfterBuild | BuildRequestDataFlags.SkipNonexistentTargets | BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports | BuildRequestDataFlags.FailOnUnresolvedSdk);
 
             return ExecuteBuild(buildManager, restoreRequest);
         }

@@ -19,7 +19,6 @@ using Xunit.Abstractions;
 using Shouldly;
 using System.IO.Compression;
 using System.Reflection;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -2129,105 +2128,6 @@ $@"<Project>
         }
 
         /// <summary>
-        /// When specifying /t:restore under an old changewave, do not fail when an SDK can't be resolved.
-        /// Previous behavior was to try and continue anyway but then "restore" would succeed and build workflows continue on.
-        /// </summary>
-        [Fact]
-        public void RestorePassesOnUnresolvedSdkUnderChangewave()
-        {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(
-$@"<Project>
-  <Sdk Name=""UnresolvedSdk"" />
-  <Target Name=""Restore"">
-    <Message Text=""Restore target ran"" />
-  </Target>
-</Project>");
-
-            using TestEnvironment env = Microsoft.Build.UnitTests.TestEnvironment.Create();
-
-            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents,
-                envsToCreate: new Dictionary<string, string>() { ["MSBUILDDISABLEFEATURESFROMVERSION"]=ChangeWaves.Wave16_10.ToString() },
-                arguments: " /t:restore");
-
-            logContents.ShouldNotContain("MSB4236");
-        }
-
-
-        /// <summary>
-        /// Verifies a non-existent target doesn't fail restore as long as its not considered an entry target, in this case Restore.
-        /// </summary>
-        [Fact]
-        public void RestoreSkipsNonExistentNonEntryTargets()
-        {
-            string restoreFirstProps = $"{Guid.NewGuid():N}.props";
-
-            string projectContents = ObjectModelHelpers.CleanupFileContents(
-$@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore"">
-  <PropertyGroup>
-    <RestoreFirstProps>{restoreFirstProps}</RestoreFirstProps>
-  </PropertyGroup>
-  
-  <Import Project=""$(RestoreFirstProps)"" />
-  <Target Name=""Restore"">
-    <Message Text=""Restore target ran"" />
-    <ItemGroup>
-      <Lines Include=""&lt;Project&gt;&lt;Target Name=&quot;TargetThatComesFromRestore&quot;&gt;&lt;Message Text=&quot;Initial target ran&quot; /&gt;&lt;/Target&gt;&lt;/Project&gt;"" />
-    </ItemGroup>
-    
-    <WriteLinesToFile File=""$(RestoreFirstProps)"" Lines=""@(Lines)"" Overwrite=""true"" />
-  </Target>
-
-  <Target Name=""Build"">
-    <Message Text=""Build target ran&quot;"" />
-  </Target>
-</Project>");
-
-            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/restore");
-
-            logContents.ShouldContain("Restore target ran");
-            logContents.ShouldContain("Build target ran");
-            logContents.ShouldContain("Initial target ran");
-        }
-
-        /// <summary>
-        /// Verifies restore will fail if the entry target doesn't exist, in this case Restore.
-        /// </summary>
-        [Fact]
-        public void RestoreFailsWhenEntryTargetIsNonExistent()
-        {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(
-@"<Project DefaultTargets=""Build"">
-  <Target Name=""Build"">
-    <Message Text=""Build target ran&quot;"" />
-  </Target>
-</Project>");
-
-            string logContents = ExecuteMSBuildExeExpectFailure(projectContents, arguments: "/t:restore");
-            
-            logContents.ShouldContain("error MSB4057: The target \"Restore\" does not exist in the project.");
-        }
-
-        /// <summary>
-        /// Verifies restore will not fail if the entry target doesn't exist, when changewave applied.
-        /// </summary>
-        [Fact]
-        public void RestorePassesWhenEntryTargetIsNonExistentUnderChangewave()
-        {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(
-@"<Project DefaultTargets=""Build"">
-  <Target Name=""Build"">
-    <Message Text=""Build target ran&quot;"" />
-  </Target>
-</Project>");
-
-            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents,
-                envsToCreate: new Dictionary<string, string>() { ["MSBUILDDISABLEFEATURESFROMVERSION"] = ChangeWaves.Wave16_10.ToString() },
-                arguments: "/t:restore");
-
-            logContents.ShouldNotContain("MSB4057");
-        }
-
-        /// <summary>
         /// Verifies restore will run InitialTargets.
         /// </summary>
         [Fact]
@@ -2238,11 +2138,9 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
   <Target Name=""InitialTarget"">
     <Message Text=""InitialTarget target ran&quot;"" />
   </Target>
-
   <Target Name=""Restore"">
     <Message Text=""Restore target ran&quot;"" />
   </Target>
-
   <Target Name=""Build"">
     <Message Text=""Build target ran&quot;"" />
   </Target>
@@ -2383,8 +2281,7 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
-        /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>
-        /// if they are in a directory other than the MSBuild directory.
+        /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>.
         /// </summary>
         /// <remarks>
         /// When loading a task from a test assembly in a test within that assembly, the assembly is already loaded
@@ -2394,10 +2291,7 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
         [Fact]
         public void TasksGetAssemblyLoadContexts()
         {
-            string customTaskPath = Path.Combine(
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                "Task",
-                Path.GetFileName(Assembly.GetExecutingAssembly().Location));
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
 
             string projectContents = $@"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <UsingTask TaskName=`ValidateAssemblyLoadContext` AssemblyFile=`{customTaskPath}` />
@@ -2409,6 +2303,7 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
 
             ExecuteMSBuildExeExpectSuccess(projectContents);
         }
+
 #endif
 
         private string CopyMSBuild()
@@ -2500,7 +2395,7 @@ $@"<Project DefaultTargets=""Build"" InitialTargets=""TargetThatComesFromRestore
                 bool success;
 
                 string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success, _output);
-                
+
                 return (success, output);
             }
         }

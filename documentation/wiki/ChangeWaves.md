@@ -27,7 +27,7 @@ The opt-out comes in the form of setting the environment variable `MSBuildDisabl
 - [Error when a property expansion in a condition has whitespace](https://github.com/dotnet/msbuild/pull/5672)
 - [Allow Custom CopyToOutputDirectory Location With TargetPath](https://github.com/dotnet/msbuild/pull/6237)
 - [Allow users that have certain special characters in their username to build successfully when using exec](https://github.com/dotnet/msbuild/pull/6223)
-- [Fail restore operations when there is no `Restore` target or an SDK is unresolveable](https://github.com/dotnet/msbuild/pull/6312)
+- [Fail restore operations when an SDK is unresolveable](https://github.com/dotnet/msbuild/pull/6430)
 ### 17.0
 
 ## Change Waves No Longer In Rotation

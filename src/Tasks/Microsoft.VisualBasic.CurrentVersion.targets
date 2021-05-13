@@ -191,7 +191,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                  $(NonExistentFile);
                  @(CustomAdditionalCompileOutputs)"
         Returns=""
-        DependsOnTargets="$(CoreCompileDependsOn)"
+        DependsOnTargets="$(CoreCompileDependsOn);GenerateMSBuildEditorConfigFile"
         Condition="'@(Page)' != '' Or '@(ApplicationDefinition)' != ''"
     >
         <PropertyGroup>
@@ -232,6 +232,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               AdditionalLibPaths="$(AdditionalLibPaths)"
               AddModules="@(AddModules)"
               AdditionalFiles="@(AdditionalFiles)"
+              AnalyzerConfigFiles="@(EditorConfigFiles)"
+              Analyzers="@(Analyzer)"
               BaseAddress="$(BaseAddress)"
               CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
               CodePage="$(CodePage)"
@@ -277,6 +279,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               RootNamespace="$(RootNamespace)"
               PdbFile="$(PdbFile)"
               SdkPath="$(FrameworkPathOverride)"
+              SkipAnalyzers="$(_SkipAnalyzers)"
               Sources="@(Compile)"
               SubsystemVersion="$(SubsystemVersion)"
               TargetCompactFramework="$(TargetCompactFramework)"
