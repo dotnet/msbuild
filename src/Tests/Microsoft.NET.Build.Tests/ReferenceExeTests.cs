@@ -283,7 +283,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass();
 
-            new DotnetCommand(Log, "add", "reference", $@"..\{testConsoleProject.Name}")
+            new DotnetCommand(Log, "add", "reference", ".." + Path.DirectorySeparatorChar + testConsoleProject.Name)
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute()
                 .Should()
