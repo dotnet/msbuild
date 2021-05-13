@@ -189,7 +189,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
             }
 
-            Edge.Template.TemplateCreationResult instantiateResult;
+            Edge.Template.ITemplateCreationResult instantiateResult;
 
             try
             {
@@ -199,7 +199,6 @@ namespace Microsoft.TemplateEngine.Cli
                     fallbackName,
                     _commandInput.OutputPath,
                     templateMatchDetails.GetValidTemplateParameters(),
-                    _commandInput.SkipUpdateCheck,
                     _commandInput.IsForceFlagSpecified,
                     _commandInput.BaselineName,
                     _commandInput.IsDryRun)
@@ -233,9 +232,12 @@ namespace Microsoft.TemplateEngine.Cli
                     else
                     {
                         Reporter.Output.WriteLine(LocalizableStrings.FileActionsWouldHaveBeenTaken);
-                        foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
+                        if (instantiateResult.CreationEffects != null)
                         {
-                            Reporter.Output.WriteLine($"  {change.ChangeKind}: {change.TargetRelativePath}");
+                            foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
+                            {
+                                Reporter.Output.WriteLine($"  {change.ChangeKind}: {change.TargetRelativePath}");
+                            }
                         }
                     }
 
@@ -247,28 +249,26 @@ namespace Microsoft.TemplateEngine.Cli
                     HandlePostActions(instantiateResult);
                     break;
                 case CreationResultStatus.CreateFailed:
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.Message).Bold().Red());
-                    break;
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
+                    return New3CommandStatus.CreateFailed;
                 case CreationResultStatus.MissingMandatoryParam:
-                    if (string.Equals(instantiateResult.Message, "--name", StringComparison.Ordinal))
+                    if (string.Equals(instantiateResult.ErrorMessage, "--name", StringComparison.Ordinal))
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.Message, resultTemplateName).Bold().Red());
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, instantiateResult.ErrorMessage, resultTemplateName).Bold().Red());
                     }
-                    else
+                    else if (!string.IsNullOrWhiteSpace(instantiateResult.ErrorMessage))
                     {
                         // TODO: rework to avoid having to reparse.
                         // The canonical info could be in the ITemplateMatchInfo, but currently isn't.
                         TemplateResolver.ParseTemplateArgs(template, _hostDataLoader, _commandInput);
 
-                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.Message.Split(new[] { ',' })
+                        IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' })
                             .Select(x => _commandInput.VariantsForCanonical(x.Trim())
                                                         .DefaultIfEmpty(x.Trim()).First())
                             .ToList();
                         string fixedMessage = string.Join(", ", missingParamNamesCanonical);
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingRequiredParameter, fixedMessage, resultTemplateName).Bold().Red());
                     }
-                    break;
-                case CreationResultStatus.OperationNotSpecified:
                     break;
                 case CreationResultStatus.NotFound:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, _commandName).Bold().Red());
@@ -290,17 +290,19 @@ namespace Microsoft.TemplateEngine.Cli
                     break;
                 case CreationResultStatus.DestructiveChangesDetected:
                     Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
-                    IReadOnlyList<IFileChange> destructiveChanges = instantiateResult.CreationEffects.FileChanges.Where(x => x.ChangeKind != ChangeKind.Create).ToList();
-                    int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
-                    int padLen = 5 + longestChangeTextLength;
-
-                    foreach (IFileChange change in destructiveChanges)
+                    if (instantiateResult.CreationEffects != null)
                     {
-                        string changeKind = GetChangeString(change.ChangeKind);
-                        Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
-                    }
+                        IReadOnlyList<IFileChange> destructiveChanges = instantiateResult.CreationEffects.FileChanges.Where(x => x.ChangeKind != ChangeKind.Create).ToList();
+                        int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
+                        int padLen = 5 + longestChangeTextLength;
 
-                    Reporter.Error.WriteLine();
+                        foreach (IFileChange change in destructiveChanges)
+                        {
+                            string changeKind = GetChangeString(change.ChangeKind);
+                            Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
+                        }
+                        Reporter.Error.WriteLine();
+                    }
                     Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
                     return CreationResultStatus.DestructiveChangesDetected;
                 default:
@@ -310,7 +312,7 @@ namespace Microsoft.TemplateEngine.Cli
             return instantiateResult.Status;
         }
 
-        private void HandlePostActions(Edge.Template.TemplateCreationResult creationResult)
+        private void HandlePostActions(Edge.Template.ITemplateCreationResult creationResult)
         {
             if (creationResult.Status != CreationResultStatus.Success)
             {

@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             {
                 if (_argsForBuiltInCommands == null)
                 {
-                    Option[] allBuiltInArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, NewCommandReservedArgs, DebuggingCommandArgs);
+                    Option[] allBuiltInArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
 
                     _argsForBuiltInCommands = VariantsForOptions(allBuiltInArgs);
                 }
@@ -80,17 +80,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("-all|--show-all", string.Empty, Accept.NoArguments()),
                     Create.Option("--allow-scripts", string.Empty, Accept.ZeroOrOneArgument()),
                     Create.Option("--baseline", string.Empty, Accept.ExactlyOneArgument()),
-                };
-            }
-        }
-
-        private static Option[] NewCommandReservedArgs
-        {
-            get
-            {
-                return new[]
-                {
-                    Create.Option("--skip-update-check", string.Empty, Accept.NoArguments()),
                 };
             }
         }

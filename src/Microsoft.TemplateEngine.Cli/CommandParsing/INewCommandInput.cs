@@ -77,8 +77,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool ShowAllColumns { get; }
 
-        bool SkipUpdateCheck { get; }
-
         string TagFilter { get; }
 
         string TemplateName { get; }

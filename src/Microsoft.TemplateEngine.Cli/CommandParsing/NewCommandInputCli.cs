@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -201,8 +200,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         public bool ShowAliasesSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "show-alias" });
 
         public bool ShowAllColumns => _parseResult.HasAppliedOption(new[] { _commandName, "columns-all" });
-
-        public bool SkipUpdateCheck => _parseResult.HasAppliedOption(new[] { _commandName, "skip-update-check" });
 
         public string TagFilter => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "tag" });
 

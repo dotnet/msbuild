@@ -93,10 +93,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             TemplateResolver.ParseTemplateArgs(templateInfo, hostDataLoader, commandInput);
+#pragma warning disable CS0618 // Type or member is obsolete
             allParams = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
             templateCreator.ResolveUserParameters(template, allParams, commandInput.InputTemplateParams, out userParamsWithInvalidValues);
             hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template, environmentSettings, commandInput, templateCreator);
             templateCreator.ReleaseMountPoints(template);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             List<InvalidParameterInfo> invalidParameters = new List<InvalidParameterInfo>();
 
@@ -112,7 +114,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
             }
 
+#pragma warning disable CS0618 // Type or member is obsolete
             if (templateCreator.AnyParametersWithInvalidDefaultsUnresolved(defaultParamsWithInvalidValues, userParamsWithInvalidValues, commandInput.InputTemplateParams, out IReadOnlyList<string> defaultsWithUnresolvedInvalidValues))
+#pragma warning restore CS0618 // Type or member is obsolete
             {
                 IParameterSet templateParams = template.Generator.GetParametersForTemplate(environmentSettings, template);
 
@@ -213,8 +217,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         {
             // use a throwaway set of params for getting the creation effects - it makes changes to them.
             string targetDir = commandInput.OutputPath ?? environmentSettings.Host.FileSystem.GetCurrentDirectory();
+#pragma warning disable CS0618 // Type or member is obsolete
             IParameterSet paramsForCreationEffects = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> throwaway);
             templateCreator.ResolveUserParameters(template, paramsForCreationEffects, commandInput.InputTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
+#pragma warning restore CS0618 // Type or member is obsolete
             ICreationEffects creationEffects = template.Generator.GetCreationEffects(environmentSettings, template, paramsForCreationEffects, environmentSettings.SettingsLoader.Components, targetDir);
             return creationEffects.CreationResult.PostActions.Any(x => x.ActionId == ProcessStartPostActionProcessor.ActionProcessorId);
         }

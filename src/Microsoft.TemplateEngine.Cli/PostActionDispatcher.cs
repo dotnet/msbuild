@@ -18,13 +18,13 @@ namespace Microsoft.TemplateEngine.Cli
 
     internal class PostActionDispatcher
     {
-        private readonly TemplateCreationResult _creationResult;
+        private readonly ITemplateCreationResult _creationResult;
         private readonly IEngineEnvironmentSettings _environment;
         private readonly New3Callbacks _callbacks;
         private readonly AllowPostActionsSetting _canRunScripts;
         private readonly bool _isDryRun;
 
-        internal PostActionDispatcher(IEngineEnvironmentSettings environment, New3Callbacks callbacks, TemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus, bool isDryRun)
+        internal PostActionDispatcher(IEngineEnvironmentSettings environment, New3Callbacks callbacks, ITemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus, bool isDryRun)
         {
             _environment = environment;
             _callbacks = callbacks;
@@ -35,7 +35,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal void Process(Func<string> inputGetter)
         {
-            IReadOnlyList<IPostAction> postActions = _creationResult.ResultInfo?.PostActions ?? _creationResult.CreationEffects.CreationResult.PostActions;
+            IReadOnlyList<IPostAction> postActions = _creationResult.CreationResult?.PostActions ?? _creationResult.CreationEffects.CreationResult.PostActions;
             if (postActions.Count > 0)
             {
                 Reporter.Output.WriteLine();
@@ -166,10 +166,10 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (actionProcessor is IPostActionProcessor2 actionProcessor2 && _creationResult.CreationEffects is ICreationEffects2 creationEffects)
             {
-                return actionProcessor2.Process(_environment, action, creationEffects, _creationResult.ResultInfo, _creationResult.OutputBaseDirectory);
+                return actionProcessor2.Process(_environment, action, creationEffects, _creationResult.CreationResult, _creationResult.OutputBaseDirectory);
             }
 
-            return actionProcessor.Process(_environment, action, _creationResult.ResultInfo, _creationResult.OutputBaseDirectory);
+            return actionProcessor.Process(_environment, action, _creationResult.CreationResult, _creationResult.OutputBaseDirectory);
         }
 
         private bool DisplayInstructionsForAction(IPostAction action)
