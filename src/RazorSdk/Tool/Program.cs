@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.Loader;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 
@@ -12,18 +11,6 @@ namespace Microsoft.NET.Sdk.Razor.Tool
     internal static class Program
     {
         public static int Main(string[] args)
-        {
-            // To minimize the size of the SDK, we resolve all Rosyln-related assemblies
-            // from the `Roslyn/bincore` location in the SDK. The `RegisterAssemblyResolutionEvents`
-            // method registers the event that will handle loading the assemblies from the correct
-            // path. Note: since assembly resolution starts immediately when the `Main` method is
-            // invoked, so we register the event listener here to ensure they are registered before
-            // we `Main` is invoked.
-            RegisterAssemblyResolutionEvents();
-            return RunApplication(args);
-        }
-
-        private static int RunApplication(string[] args)
         {
             DebugMode.HandleDebugSwitch(ref args);
 
@@ -61,20 +48,6 @@ namespace Microsoft.NET.Sdk.Razor.Tool
             ServerLogger.Log(error);
 
             return result;
-        }
-
-        private static void RegisterAssemblyResolutionEvents()
-        {
-            var roslynPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Roslyn", "bincore");
-
-            AssemblyLoadContext.Default.Resolving += (context, assembly) =>
-            {
-                if (assembly.Name is "Microsoft.CodeAnalysis" or "Microsoft.CodeAnalysis.CSharp")
-                {
-                    return context.LoadFromAssemblyPath(Path.Combine(roslynPath, assembly.Name + ".dll"));
-                }
-                return null;
-            };
         }
     }
 }
