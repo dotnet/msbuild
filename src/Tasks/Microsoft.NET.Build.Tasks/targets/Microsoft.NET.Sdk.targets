@@ -1060,6 +1060,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true' And '$(ValidateExecutableReferencesMatchSelfContained)' == ''">
+    <!-- Don't generate an error if a test project references a self-contained Exe.  Test projects
+         use an OutputType of Exe but will usually call APIs in a referenced Exe rather than try
+         to run it. -->
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+  </PropertyGroup>
+
   <UsingTask TaskName="ValidateExecutableReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="ValidateExecutableReferences"
