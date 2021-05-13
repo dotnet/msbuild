@@ -14,6 +14,7 @@ using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Linq;
+using Microsoft.DotNet.Workloads.Workload.Update;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
@@ -24,6 +25,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly bool _machineReadableOption;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
         private readonly SdkFeatureBand _sdkFeatureBand;
+
 
         public WorkloadListCommand(
             ParseResult result,
@@ -40,8 +42,11 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion.ToString());
             var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion.ToString());
             _sdkFeatureBand = new SdkFeatureBand(sdkVersion);
-            _workloadRecordRepo = workloadRecordRepo ?? 
-                WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, _sdkFeatureBand, workloadResolver, _verbosity).GetWorkloadInstallationRecordRepository();
+            _workloadRecordRepo = workloadRecordRepo ??
+                                  WorkloadInstallerFactory
+                                      .GetWorkloadInstaller(_reporter, _sdkFeatureBand, workloadResolver, _verbosity)
+                                      .GetWorkloadInstallationRecordRepository();
+            _sdkVersion = result.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption);
         }
 
         public override int Execute()
@@ -49,14 +54,14 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             var installedList = _workloadRecordRepo.GetInstalledWorkloads(_sdkFeatureBand);
             if (_machineReadableOption)
             {
-                var outputJson = new Dictionary<string, string[]>()
-                {
-                    ["installed"] = installedList.Select(id => id.ToString()).ToArray()
-                };
+                var updateAvailable = MockUpdateAvailable();
+                var listOutput = new ListOutput(Installed: installedList.Select(id => id.ToString()).ToArray(),
+                    UpdateAvailable: updateAvailable);
 
                 _reporter.WriteLine("==workloadListJsonOutputStart==");
                 _reporter.WriteLine(
-                    JsonSerializer.Serialize(outputJson));
+                    JsonSerializer.Serialize(listOutput,
+                        options: new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase}));
                 _reporter.WriteLine("==workloadListJsonOutputEnd==");
             }
             else
@@ -71,5 +76,40 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
             return 0;
         }
+
+        private UpdateAvailableEntry[] MockUpdateAvailable()
+        {
+            var updateList = new List<UpdateAvailableEntry>();
+
+            if (!File.Exists(Path.Combine(WorkloadUpdateCommand.MockUpdateDirectory,
+                "Microsoft.NET.Workload.Android.6.0.100.nupkg")))
+            {
+                updateList.Add(new UpdateAvailableEntry("6.0.100",
+                    _mockAndroidDescription,
+                    "microsoft-android-sdk-full"));
+            }
+
+            if (!File.Exists(Path.Combine(WorkloadUpdateCommand.MockUpdateDirectory,
+                "Microsoft.iOS.Bundle.6.0.100.nupkg")))
+            {
+                updateList.Add(new UpdateAvailableEntry("6.0.100",
+                    _mockIosDescription,
+                    "microsoft-ios-sdk-full"));
+            }
+
+            return updateList.ToArray();
+        }
+
+        internal record ListOutput(string[] Installed, UpdateAvailableEntry[] UpdateAvailable);
+
+        internal record UpdateAvailableEntry(string ManifestVersion, string Description, string WorkloadId);
+
+        private readonly string _mockIosDescription =
+            $"ios-workload-description: for testing you can delete the content of {WorkloadUpdateCommand.MockUpdateDirectory} to revert the mock update";
+
+        private readonly string _mockAndroidDescription =
+            $"android-workload-description: for testing you can delete the content of {WorkloadUpdateCommand.MockUpdateDirectory} to revert the mock update";
+
+        private readonly string _sdkVersion;
     }
 }
