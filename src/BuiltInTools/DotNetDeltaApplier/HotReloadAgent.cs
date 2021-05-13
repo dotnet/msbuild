@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.HotReload
     {
         private readonly Action<string> _log;
         private readonly AssemblyLoadEventHandler _assemblyLoad;
-        private readonly ConcurrentDictionary<Guid, IReadOnlyList<UpdateDelta>> _deltas = new();
+        private readonly ConcurrentDictionary<Guid, List<UpdateDelta>> _deltas = new();
         private readonly ConcurrentDictionary<Assembly, Assembly> _appliedAssemblies = new();
         private volatile UpdateHandlerActions? _handlerActions;
 
@@ -196,6 +196,10 @@ namespace Microsoft.Extensions.HotReload
                     {
                         System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
                     }
+
+                    // Additionally stash the deltas away so it may be applied to assemblies loaded later.
+                    var cachedDeltas = _deltas.GetOrAdd(item.ModuleId, static _ => new());
+                    cachedDeltas.Add(item);
                 }
 
                 handlerActions.ClearCache.ForEach(a => a(updatedTypes));

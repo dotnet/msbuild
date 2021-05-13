@@ -115,6 +115,8 @@ namespace Microsoft.DotNet.Watcher.Tools
                 {
                     _reporter.Verbose("No deltas modified. Applying changes to clear diagnostics.");
                     await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+                    // Even if there were diagnostics, continue treating this as a success
+                    _reporter.Output("No hot reload changes to apply.");
                 }
                 else
                 {
@@ -123,7 +125,8 @@ namespace Microsoft.DotNet.Watcher.Tools
                 }
 
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
-                // Even if there were diagnostics, continue treating this as a success
+                // Return true so that the watcher continues to keep the current hot reload session alive. If there were errors, this allows the user to fix errors and continue
+                // working on the running app.
                 return true;
             }
 
@@ -145,6 +148,11 @@ namespace Microsoft.DotNet.Watcher.Tools
             var applyState = await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
             _reporter.Verbose($"Received {(applyState ? "successful" : "failed")} apply from delta applier.");
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
+            if (applyState)
+            {
+                _reporter.Output($"Hot reload of changes succeeded.");
+            }
+
             return applyState;
         }
 
@@ -171,7 +179,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     if (item.Severity == DiagnosticSeverity.Error)
                     {
                         var diagnostic = CSharpDiagnosticFormatter.Instance.Format(item);
-                        _reporter.Output(diagnostic);
+                        _reporter.Output("\x1B[40m\x1B[31m" + diagnostic);
                         projectDiagnostics = projectDiagnostics.Add(diagnostic);
                     }
                 }

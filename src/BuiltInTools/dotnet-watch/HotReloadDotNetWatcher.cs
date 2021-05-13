@@ -128,8 +128,7 @@ namespace Microsoft.DotNet.Watcher
                             if (await hotReload.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
                             {
                                 var totalTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
-                                _reporter.Output($"Hot reload of changes succeeded.");
-                                _reporter.Verbose($"Hot reload applied in {totalTime.TotalMilliseconds}ms.");
+                                _reporter.Verbose($"Hot reload change handled in {totalTime.TotalMilliseconds}ms.");
                             }
                             else
                             {

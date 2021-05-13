@@ -53,11 +53,6 @@ internal sealed class StartupHook
             Log("Attempting to apply deltas.");
 
             hotReloadAgent.ApplyDeltas(update.Deltas);
-
-            // We want to base this off of mvids, but we'll figure that out eventually.
-            var applyResult = update.ChangedFile is string changedFile && changedFile.EndsWith(".razor", StringComparison.Ordinal) ?
-                ApplyResult.Success :
-                ApplyResult.Success_RefreshBrowser;
             pipeClient.WriteByte((byte)ApplyResult.Success);
 
         }

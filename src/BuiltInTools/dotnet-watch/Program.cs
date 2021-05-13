@@ -67,7 +67,13 @@ Examples:
             // AppContext.BaseDirectory = $sdkRoot\$sdkVersion\DotnetTools\dotnet-watch\$version\tools\net6.0\any\
             // MSBuild.dll is located at $sdkRoot\$sdkVersion\MSBuild.dll
             var sdkRootDirectory = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..");
+#if DEBUG
+            // In the usual case, use the SDK that contains the dotnet-watch. However during local testing, it's
+            // much more common to run dotnet-watch from a different SDK. Use the ambient SDK in that case.
+            MSBuildLocator.RegisterDefaults();
+#else
             MSBuildLocator.RegisterMSBuildPath(sdkRootDirectory);
+#endif
 
             Ensure.NotNull(console, nameof(console));
             Ensure.NotNullOrEmpty(workingDirectory, nameof(workingDirectory));
