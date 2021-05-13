@@ -3,19 +3,34 @@
 
 using System;
 
-namespace Microsoft.DotNet.ToolPackage
+namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
-    internal class NuGetPackageDownloaderException : Exception
+    internal class NuGetPackageInstallerException : Exception
     {
-        public NuGetPackageDownloaderException()
+        public NuGetPackageInstallerException()
         {
         }
 
-        public NuGetPackageDownloaderException(string message) : base(message)
+        public NuGetPackageInstallerException(string message) : base(message)
         {
         }
 
-        public NuGetPackageDownloaderException(string message, Exception innerException) : base(message, innerException)
+        public NuGetPackageInstallerException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+
+    internal class NuGetPackageNotFoundException : NuGetPackageInstallerException
+    {
+        public NuGetPackageNotFoundException()
+        {
+        }
+
+        public NuGetPackageNotFoundException(string message) : base(message)
+        {
+        }
+
+        public NuGetPackageNotFoundException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }

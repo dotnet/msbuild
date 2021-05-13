@@ -23,7 +23,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
     {
         private readonly SourceCacheContext _cacheSettings = new SourceCacheContext
         {
-            NoCache = true, DirectDownload = true
+            NoCache = true,
+            DirectDownload = true
         };
 
         private readonly IFilePermissionSetter _filePermissionSetter;
@@ -55,7 +56,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (resource == null)
             {
-                throw new NuGetPackageDownloaderException(
+                throw new NuGetPackageNotFoundException(
                     string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
             }
 
@@ -74,8 +75,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!success)
             {
-                throw new NuGetPackageDownloaderException(
-                    $"Downloading {packageId} version {resolvedPackageVersion.ToNormalizedString()} failed");
+                throw new NuGetPackageInstallerException(
+                    $"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed");
             }
 
             return nupkgPath;
@@ -100,27 +101,37 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public async Task<IEnumerable<string>> ExtractPackageAsync(string packagePath, DirectoryPath targetFolder)
         {
             await using FileStream packageStream = File.OpenRead(packagePath);
-            PackageFolderReader packageReader = new PackageFolderReader(targetFolder.ToString());
+            PackageFolderReader packageReader = new PackageFolderReader(targetFolder.Value);
             PackageExtractionContext packageExtractionContext = new PackageExtractionContext(
                 PackageSaveMode.Defaultv3,
                 XmlDocFileSaveMode.None,
                 null,
                 _logger);
-            NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder.ToString());
+            NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder.Value);
             CancellationToken cancellationToken = CancellationToken.None;
 
-            return await PackageExtractor.ExtractPackageAsync(
-                targetFolder.ToString(),
+            var allFilesInPackage = await PackageExtractor.ExtractPackageAsync(
+                targetFolder.Value,
                 packageStream,
                 packagePathResolver,
                 packageExtractionContext,
                 cancellationToken);
+
+            if (!OperatingSystem.IsWindows())
+            {
+                foreach (FilePath filePath in FindAllFilesNeedExecutablePermission(allFilesInPackage, targetFolder.Value))
+                {
+                    _filePermissionSetter.Set755Permission(filePath.Value);
+                }
+            }
+
+            return allFilesInPackage;
         }
 
         private async Task<(PackageSource, NuGetVersion)> GetPackageSourceAndVerion(PackageId packageId,
-            NuGetVersion packageVersion = null,
-            PackageSourceLocation packageSourceLocation = null,
-            bool includePreview = false)
+             NuGetVersion packageVersion = null,
+             PackageSourceLocation packageSourceLocation = null,
+             bool includePreview = false)
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -151,6 +162,45 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             baseUri + id.ToString() + "/" + version.ToNormalizedString() + "/" + id.ToString() +
             "." + version.ToNormalizedString() + ".nupkg";
 
+        internal IEnumerable<FilePath> FindAllFilesNeedExecutablePermission(IEnumerable<string> files,
+            string targetPath)
+        {
+            if (!PackageIsInAllowList(files))
+            {
+                return Array.Empty<FilePath>();
+            }
+
+            bool FileUnderToolsWithoutSuffix(string p)
+            {
+                return Path.GetRelativePath(targetPath, p).StartsWith("tools" + Path.DirectorySeparatorChar) &&
+                       (Path.GetFileName(p) == Path.GetFileNameWithoutExtension(p));
+            }
+
+            return files
+                .Where(FileUnderToolsWithoutSuffix)
+                .Select(f => new FilePath(f));
+        }
+
+        private static bool PackageIsInAllowList(IEnumerable<string> files)
+        {
+            var allowListOfPackage = new string[] {
+                "microsoft.android.sdk.darwin",
+                "Microsoft.MacCatalyst.Sdk",
+                "Microsoft.iOS.Sdk",
+                "Microsoft.macOS.Sdk",
+                "Microsoft.tvOS.Sdk"};
+
+            var allowListNuspec = allowListOfPackage.Select(s => s + ".nuspec");
+
+            if (!files.Any(f =>
+                allowListNuspec.Contains(Path.GetFileName(f), comparer: StringComparer.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private IEnumerable<PackageSource> LoadNuGetSources(PackageSourceLocation packageSourceLocation = null)
         {
             IEnumerable<PackageSource> defaultSources = new List<PackageSource>();
@@ -177,7 +227,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             {
                 if (!defaultSources.Any())
                 {
-                    throw new NuGetPackageDownloaderException("No NuGet sources are defined or enabled");
+                    throw new NuGetPackageInstallerException("No NuGet sources are defined or enabled");
                 }
 
                 return defaultSources;
@@ -215,7 +265,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!retrievedSources.Any())
             {
-                throw new NuGetPackageDownloaderException("No NuGet sources are defined or enabled");
+                throw new NuGetPackageInstallerException("No NuGet sources are defined or enabled");
             }
 
             return retrievedSources;
@@ -244,7 +294,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!foundPackagesBySource.Any())
             {
-                throw new NuGetPackageDownloaderException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
+                throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
                     string.Join(" ", packageSources.Select(s => s.Source))));
             }
 
@@ -319,11 +369,11 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!atLeastOneSourceValid)
             {
-                throw new NuGetPackageDownloaderException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
+                throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.FailedToLoadNuGetSource,
                     string.Join(";", sources.Select(s => s.Source))));
             }
 
-            throw new NuGetPackageDownloaderException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
+            throw new NuGetPackageInstallerException(string.Format(LocalizableStrings.IsNotFoundInNuGetFeeds,
                 $"{packageIdentifier}::{packageVersion}", string.Join(";", sources.Select(s => s.Source))));
         }
 
