@@ -40,9 +40,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly ReleaseVersion _sdkVersion;
 
-        public readonly string MockInstallDirectory = Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath,
-            "DEV_mockworkloads");
-
         public WorkloadInstallCommand(
             ParseResult parseResult,
             IReporter reporter = null,
