@@ -20,6 +20,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_LinkSemaphore>$(IntermediateOutputPath)Link.semaphore</_LinkSemaphore>
   </PropertyGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Condition="'$(IsTrimmable)' == 'true'" Include="System.Reflection.AssemblyMetadata">
+      <_Parameter1>IsTrimmable</_Parameter1>
+      <_Parameter2>True</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <!-- We disable startup hooks for trimmed apps here so that the feature
        switch can flow to the runtimeconfig.json. Startup hooks are disabled
        by default since they may require assemblies, types or members that

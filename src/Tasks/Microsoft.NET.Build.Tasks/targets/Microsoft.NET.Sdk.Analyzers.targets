@@ -54,7 +54,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == '' And
                                          '$(PublishSingleFile)' == 'true'">true</EnableSingleFileAnalyzer>
     <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And
-                                   '$(PublishTrimmed)' == 'true'">true</EnableTrimAnalyzer>
+                                   ('$(IsTrimmable)' == 'true' Or '$(PublishTrimmed)' == 'true')">true</EnableTrimAnalyzer>
 
     <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
     <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
