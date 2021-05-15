@@ -259,5 +259,41 @@ namespace Microsoft.NET.Build.Tests
 
             RunTest();
         }
+
+        [Theory]
+        [InlineData("xunit")]
+        [InlineData("mstest")]
+        public void TestProjectCanReferenceExe(string testTemplateName)
+        {
+            var testConsoleProject = new TestProject("ConsoleApp")
+            {
+                IsExe = true,
+                TargetFrameworks = "net5.0",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testConsoleProject, identifier: testTemplateName);
+
+            var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
+            Directory.CreateDirectory(testProjectDirectory);
+
+            new DotnetCommand(Log, "new", testTemplateName)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new DotnetCommand(Log, "add", "reference", ".." + Path.DirectorySeparatorChar + testConsoleProject.Name)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new BuildCommand(Log, testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+        }
     }
 }
