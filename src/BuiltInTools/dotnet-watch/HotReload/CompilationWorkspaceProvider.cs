@@ -19,7 +19,14 @@ namespace Microsoft.DotNet.Watcher.Tools
         public static Task<(Solution, WatchHotReloadService)> CreateWorkspaceAsync(string projectPath, IReporter reporter, CancellationToken cancellationToken)
         {
             var taskCompletionSource = new TaskCompletionSource<(Solution, WatchHotReloadService)>(TaskCreationOptions.RunContinuationsAsynchronously);
-            CreateProject(taskCompletionSource, projectPath, reporter, cancellationToken);
+            try
+            {
+                CreateProject(taskCompletionSource, projectPath, reporter, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                taskCompletionSource.TrySetException(ex);
+            }
 
             return taskCompletionSource.Task;
         }
