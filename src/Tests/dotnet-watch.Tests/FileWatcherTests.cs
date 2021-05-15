@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             watcher.OnFileChange += (_, f) =>
             {
-                filesChanged.Add(f);
+                filesChanged.Add(f.filePath);
                 changedEv.TrySetResult();
             };
             watcher.EnableRaisingEvents = true;
@@ -68,13 +68,13 @@ namespace Microsoft.DotNet.Watcher.Tools
             var changedEv = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             var filesChanged = new HashSet<string>();
 
-            EventHandler<string> handler = null;
+            EventHandler<(string, bool)> handler = null;
             handler = (_, f) =>
             {
                 watcher.EnableRaisingEvents = false;
                 watcher.OnFileChange -= handler;
 
-                filesChanged.Add(f);
+                filesChanged.Add(f.Item1);
                 changedEv.TrySetResult();
             };
 
@@ -110,10 +110,10 @@ namespace Microsoft.DotNet.Watcher.Tools
             var changedEv = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             var filesChanged = new HashSet<string>();
 
-            EventHandler<string> handler = null;
+            EventHandler<(string, bool)> handler = null;
             handler = (_, f) =>
             {
-                filesChanged.Add(f);
+                filesChanged.Add(f.Item1);
 
                 if (filesChanged.Count >= 2)
                 {
@@ -150,10 +150,10 @@ namespace Microsoft.DotNet.Watcher.Tools
             var changedEv = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             var filesChanged = new HashSet<string>();
 
-            EventHandler<string> handler = null;
+            EventHandler<(string, bool)> handler = null;
             handler = (_, f) =>
             {
-                filesChanged.Add(f);
+                filesChanged.Add(f.Item1);
 
                 if (filesChanged.Count >= 2)
                 {
@@ -260,12 +260,12 @@ namespace Microsoft.DotNet.Watcher.Tools
             var changedEv = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             var filesChanged = new HashSet<string>();
 
-            EventHandler<string> handler = null;
+            EventHandler<(string, bool)> handler = null;
             handler = (_, f) =>
             {
                 watcher.EnableRaisingEvents = false;
                 watcher.OnFileChange -= handler;
-                filesChanged.Add(f);
+                filesChanged.Add(f.Item1);
                 changedEv.TrySetResult(0);
             };
 
@@ -301,12 +301,12 @@ namespace Microsoft.DotNet.Watcher.Tools
         {
             var changedEv = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             var expectedPath = Path.Combine(directory, Path.GetRandomFileName());
-            EventHandler<string> handler = (object _, string f) =>
+            EventHandler<(string, bool)> handler = (_, f) =>
             {
                 _output.WriteLine("File changed: " + f);
                 try
                 {
-                    if (string.Equals(f, expectedPath, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(f.Item1, expectedPath, StringComparison.OrdinalIgnoreCase))
                     {
                         changedEv.TrySetResult(0);
                     }
@@ -361,10 +361,10 @@ namespace Microsoft.DotNet.Watcher.Tools
             var changedEv = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             var filesChanged = new HashSet<string>();
 
-            EventHandler<string> handler = null;
+            EventHandler<(string, bool)> handler = null;
             handler = (_, f) =>
             {
-                filesChanged.Add(f);
+                filesChanged.Add(f.Item1);
 
                 if (filesChanged.Count >= 4)
                 {

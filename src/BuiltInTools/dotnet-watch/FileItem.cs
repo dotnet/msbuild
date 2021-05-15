@@ -12,5 +12,7 @@ namespace Microsoft.DotNet.Watcher
         public bool IsStaticFile { get; init; }
 
         public string StaticWebAssetPath { get; init; }
+
+        public bool IsNewFile { get; init; }
     }
 }

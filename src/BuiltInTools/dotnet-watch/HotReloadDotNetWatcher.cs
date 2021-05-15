@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.Watcher
                     cancellationToken,
                     currentRunCancellationSource.Token,
                     forceReload);
-                using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter);
+                using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter) { WatchForNewFiles = true };
                 try
                 {
                     using var hotReload = new HotReload(_processRunner, _reporter);
@@ -122,8 +122,20 @@ namespace Microsoft.DotNet.Watcher
                         }
                         else
                         {
-                            _reporter.Output($"File changed: {fileItem.FilePath}.");
+                            if (fileItem.IsNewFile)
+                            {
+                                if (MayRequireRecompilation(fileItem.FilePath))
+                                {
+                                    _reporter.Output($"New file: {fileItem.FilePath}. Rebuilding the application.");
+                                    context.RequiresMSBuildRevaluation = true;
+                                    break;
+                                }
 
+                                // If it's not a file that requires recompilation (such as a css, js etc) file, we do not have to do anything special.
+                                continue;
+                            }
+
+                            _reporter.Output($"File changed: {fileItem.FilePath}.");
                             var start = Stopwatch.GetTimestamp();
                             if (await hotReload.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
                             {
@@ -164,8 +176,10 @@ namespace Microsoft.DotNet.Watcher
                     }
                     else
                     {
+
                         Debug.Assert(finishedTask == fileSetTask);
                         var changedFile = fileSetTask.Result;
+                        context.RequiresMSBuildRevaluation = changedFile.Value.IsNewFile;
                         context.ChangedFile = changedFile;
                     }
                 }
@@ -184,6 +198,14 @@ namespace Microsoft.DotNet.Watcher
                     }
                 }
             }
+        }
+
+        private bool MayRequireRecompilation(string filePath)
+        {
+            return filePath is not null &&
+                (filePath.EndsWith(".cs", StringComparison.Ordinal) ||
+                filePath.EndsWith(".razor", StringComparison.Ordinal) ||
+                filePath.EndsWith(".cshtml", StringComparison.Ordinal));
         }
 
         private static void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
