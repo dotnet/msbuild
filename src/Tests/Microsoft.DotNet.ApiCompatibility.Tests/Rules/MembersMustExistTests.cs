@@ -6,7 +6,7 @@ using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
+namespace Microsoft.DotNet.ApiCompatibility.Tests
 {
     public class MembersMustExistTests
     {
@@ -48,15 +48,15 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMethod(string, string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.ShouldReportMethod(System.String,System.String)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingProperty.get' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.get_ShouldReportMissingProperty"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.this[int].get' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.get_Item(System.Int32)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingEvent.add' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.add_ShouldReportMissingEvent(CompatTests.EventHandler)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ShouldReportMissingEvent.remove' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.remove_ShouldReportMissingEvent(CompatTests.EventHandler)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.ReportMissingField' exists on the left but not on the right", DifferenceType.Removed, "F:CompatTests.First.ReportMissingField"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.ShouldReportMethod(System.String,System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.get_ShouldReportMissingProperty"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.get_Item(System.Int32)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.add_ShouldReportMissingEvent(CompatTests.EventHandler)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.remove_ShouldReportMissingEvent(CompatTests.EventHandler)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "F:CompatTests.First.ReportMissingField"),
             };
 
-            Assert.Equal(expected, differences);
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
 
         [Fact]
@@ -171,11 +171,11 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.String)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, int, string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.String)"),
             };
 
-            Assert.Equal(expected, differences);
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
 
         [Theory]
@@ -222,11 +222,11 @@ namespace CompatTests
             {
                 CompatDifference[] expected = new[]
                 {
-                    new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MultipleOverrides(string, int, int)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.Int32)"),
-                    new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.InternalProperty.set' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.set_InternalProperty(System.Int32)"),
+                    new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MultipleOverrides(System.String,System.Int32,System.Int32)"),
+                    new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.set_InternalProperty(System.Int32)"),
                 };
 
-                Assert.Equal(expected, differences);
+                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
             }
             else
             {
@@ -327,12 +327,12 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MyMethod(string?)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MyMethod(System.String)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MyOutMethod(out string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MyOutMethod(System.String@)"),
-                new CompatDifference(DiagnosticIds.MemberMustExist, "Member 'CompatTests.First.MyRefMethod(ref string)' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.MyRefMethod(System.String@)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MyMethod(System.String)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MyOutMethod(System.String@)"),
+                new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.MyRefMethod(System.String@)"),
             };
 
-            Assert.Equal(expected, differences);
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
 
         [Fact]
@@ -426,24 +426,24 @@ namespace CompatTests
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
-            List<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> expected = new()
+            CompatDifference[][] expectedDiffs =
             {
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-0"), new CompatDifference[]
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.MemberMustExist, $"Member 'CompatTests.First.FirstNested.SecondNested.ThirdNested.MyField' exists on the left but not on the right", DifferenceType.Removed, "F:CompatTests.First.FirstNested.SecondNested.ThirdNested.MyField"),
-                    new CompatDifference(DiagnosticIds.MemberMustExist, $"Member 'CompatTests.First.FirstNested.SecondNested.MyMethod()' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.FirstNested.SecondNested.MyMethod"),
-                }),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-1"), new CompatDifference[]
+                    new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "F:CompatTests.First.FirstNested.SecondNested.ThirdNested.MyField"),
+                    new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.FirstNested.SecondNested.MyMethod"),
+                },
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.MemberMustExist, $"Member 'CompatTests.First.FirstNested.MyProperty.get' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.FirstNested.get_MyProperty"),
-                }),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-2"), new CompatDifference[]
+                    new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.FirstNested.get_MyProperty"),
+                },
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.MemberMustExist, $"Member 'CompatTests.First.FirstNested.SecondNested.MyMethod()' exists on the left but not on the right", DifferenceType.Removed, "M:CompatTests.First.FirstNested.SecondNested.MyMethod"),
-                }),
+                    new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.FirstNested.SecondNested.MyMethod"),
+                },
             };
 
-            Assert.Equal(expected, differences);
+            AssertExtensions.MultiRightResult(left.MetadataInformation, expectedDiffs, differences);
         }
 
         [Fact]
@@ -481,16 +481,7 @@ namespace CompatTests
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
-            int i = 0;
-            foreach ((MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences) diff in differences)
-            {
-                Assert.Equal(expectedLeftMetadata, diff.left);
-                MetadataInformation expectedRightMetadata = new(string.Empty, string.Empty, $"runtime-{i++}");
-                Assert.Equal(expectedRightMetadata, diff.right);
-                Assert.Empty(diff.differences);
-            }
-
-            Assert.Equal(4, i);
+            AssertExtensions.MultiRightEmptyDifferences(expectedLeftMetadata, rightSyntaxes.Length, differences);
         }
     }
 }

@@ -35,11 +35,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             if (left != null && right == null)
             {
-                AddDifference(left, DifferenceType.Removed, "Type '{0}' exists on the left but not on the right");
+                AddDifference(left, DifferenceType.Removed, Resources.TypeExistsOnLeft);
             }
             else if (Settings.StrictMode && left == null && right != null)
             {
-                AddDifference(right, DifferenceType.Added, "Type '{0}' exists on the right but not on the left");
+                AddDifference(right, DifferenceType.Added, Resources.TypeExistsOnRight);
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                         return;
                 }
 
-                differences.Add(new CompatDifference(DiagnosticIds.MemberMustExist, $"Member '{left.ToDisplayString()}' exists on the left but not on the right", DifferenceType.Removed, left));
+                differences.Add(new CompatDifference(DiagnosticIds.MemberMustExist, string.Format(Resources.MemberExistsOnLeft, left.ToDisplayString()), DifferenceType.Removed, left));
             }
         }
 

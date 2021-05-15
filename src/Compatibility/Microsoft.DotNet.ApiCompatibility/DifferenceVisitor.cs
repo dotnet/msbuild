@@ -95,7 +95,7 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             if (_diagnosticBags.Length != differences.Count)
             {
-                throw new InvalidOperationException($"The provided rightCount when creating the visitor should match the number of rights that are mapped in the mappers.");
+                throw new InvalidOperationException(Resources.VisitorRightCountShouldMatchMappersSetSize);
             }
 
             for (int i = 0; i < differences.Count; i++)
