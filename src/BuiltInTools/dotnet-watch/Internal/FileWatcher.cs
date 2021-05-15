@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             _watchers = new Dictionary<string, IFileSystemWatcher>();
         }
 
-        public event Action<string> OnFileChange;
+        public event Action<string, bool> OnFileChange;
 
         public void WatchDirectory(string directory)
         {
@@ -95,16 +95,16 @@ namespace Microsoft.DotNet.Watcher.Internal
             }
         }
 
-        private void WatcherChangedHandler(object sender, string changedPath)
+        private void WatcherChangedHandler(object sender, (string changedPath, bool newFile) args)
         {
-            NotifyChange(changedPath);
+            NotifyChange(args.changedPath, args.newFile);
         }
 
-        private void NotifyChange(string path)
+        private void NotifyChange(string path, bool newFile)
         {
             if (OnFileChange != null)
             {
-                OnFileChange(path);
+                OnFileChange(path, newFile);
             }
         }
 

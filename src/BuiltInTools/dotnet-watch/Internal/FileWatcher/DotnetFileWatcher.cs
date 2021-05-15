@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Watcher.Internal
             CreateFileSystemWatcher();
         }
 
-        public event EventHandler<string> OnFileChange;
+        public event EventHandler<(string, bool)> OnFileChange;
 
         public event EventHandler<Exception> OnError;
 
@@ -99,10 +99,20 @@ namespace Microsoft.DotNet.Watcher.Internal
             NotifyChange(e.FullPath);
         }
 
-        private void NotifyChange(string fullPath)
+        private void WatcherAddedHandler(object sender, FileSystemEventArgs e)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            NotifyChange(e.FullPath, newFile: true);
+        }
+
+        private void NotifyChange(string fullPath, bool newFile = false)
         {
             // Only report file changes
-            OnFileChange?.Invoke(this, fullPath);
+            OnFileChange?.Invoke(this, (fullPath, newFile));
         }
 
         private void CreateFileSystemWatcher()
@@ -121,7 +131,7 @@ namespace Microsoft.DotNet.Watcher.Internal
                 _fileSystemWatcher = _watcherFactory(BasePath);
                 _fileSystemWatcher.IncludeSubdirectories = true;
 
-                _fileSystemWatcher.Created += WatcherChangeHandler;
+                _fileSystemWatcher.Created += WatcherAddedHandler;
                 _fileSystemWatcher.Deleted += WatcherChangeHandler;
                 _fileSystemWatcher.Changed += WatcherChangeHandler;
                 _fileSystemWatcher.Renamed += WatcherRenameHandler;
@@ -135,7 +145,7 @@ namespace Microsoft.DotNet.Watcher.Internal
         {
             _fileSystemWatcher.EnableRaisingEvents = false;
 
-            _fileSystemWatcher.Created -= WatcherChangeHandler;
+            _fileSystemWatcher.Created -= WatcherAddedHandler;
             _fileSystemWatcher.Deleted -= WatcherChangeHandler;
             _fileSystemWatcher.Changed -= WatcherChangeHandler;
             _fileSystemWatcher.Renamed -= WatcherRenameHandler;
