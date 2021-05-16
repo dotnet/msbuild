@@ -52,15 +52,37 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
   </PropertyGroup>
 
-  <!-- We disable in-built COM support for trimmed apps here so that the feature
-       switch can flow to the runtimeconfig.json. Built-in COM support is disabled
+  <!-- We disable in-built COM Interop support for trimmed apps here so that the feature
+       switch can flow to the runtimeconfig.json. Built-in COM Interop support is disabled
        by default since they may require assemblies, types or members that
        could be removed by the linker, causing a trimmed app to crash. -->
-  <PropertyGroup Condition="'$(BuiltInComSupport)' == '' And
+  <PropertyGroup Condition="'$(BuiltInComInteropSupport)' == '' And
                             '$(PublishTrimmed)' == 'true' And
                             $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <BuiltInComSupport>false</BuiltInComSupport>
-  </PropertyGroup>  
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+  </PropertyGroup>
+
+  <!-- We disable Native Host entry point support for IJW (C++/CLI Assemblies) for trimmed
+       apps here so that the feature switch can flow to the runtimeconfig.json. 
+       Native Host entry point support is disabled
+       by default since they may require assemblies, types or members that
+       could be removed by the linker, causing a trimmed app to crash. -->
+  <PropertyGroup Condition="'$(EnableCPlusPlusCLIHostActivation)' == '' And
+                            '$(PublishTrimmed)' == 'true' And
+                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
+    <EnableCPlusPlusCLIHostActivation>false</EnableCPlusPlusCLIHostActivation>
+  </PropertyGroup>
+
+  <!-- We disable Native Host entry point support for loading managed components for trimmed
+       apps here so that the feature switch can flow to the runtimeconfig.json. 
+       Native Host entry point support is disabled
+       by default since they may require assemblies, types or members that
+       could be removed by the linker, causing a trimmed app to crash. -->
+  <PropertyGroup Condition="'$(_EnableCallingManagedFunctionFromNativeHosting)' == '' And
+                            '$(PublishTrimmed)' == 'true' And
+                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
+    <_EnableCallingManagedFunctionFromNativeHosting>false</_EnableCallingManagedFunctionFromNativeHosting>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And ('$(EnableTrimAnalyzer)' == 'true' Or '$(PublishTrimmed)' == 'true')">
     <!-- Trim analysis warnings are suppressed for .NET < 6. -->
