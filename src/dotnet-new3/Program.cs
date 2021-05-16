@@ -8,8 +8,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Text;
+using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
 
@@ -54,14 +55,13 @@ namespace Dotnet_new3
             { }
 
             // Keep this in sync with dotnet/sdk repo
-            var builtIns = new List<KeyValuePair<Guid, Func<Type>>>(new AssemblyComponentCatalog(new[]
-            {
-                typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly
-            }));
-
+            var builtIns = new List<(Type, IIdentifiedComponent)>();
+            builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
             if (!disableSdkTemplates)
             {
-                builtIns.Add(new KeyValuePair<Guid, Func<Type>>(BuiltInTemplatePackagesProviderFactory.FactoryId, () => typeof(BuiltInTemplatePackagesProviderFactory)));
+                builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackagesProviderFactory()));
             }
 
             ConfigureLocale();

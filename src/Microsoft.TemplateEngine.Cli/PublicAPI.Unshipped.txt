@@ -1,5 +1,6 @@
 ﻿Microsoft.TemplateEngine.Cli.CommandParserException
 Microsoft.TemplateEngine.Cli.CommandParserException.Argument.get -> string!
+Microsoft.TemplateEngine.Cli.Components
 Microsoft.TemplateEngine.Cli.HostSpecificDataLoader
 Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.HostSpecificDataLoader(Microsoft.TemplateEngine.Abstractions.ISettingsLoader! settingsLoader) -> void
 Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.ReadHostSpecificTemplateData(Microsoft.TemplateEngine.Abstractions.ITemplateInfo! templateInfo) -> Microsoft.TemplateEngine.Cli.HostSpecificTemplateData!
@@ -20,6 +21,7 @@ Microsoft.TemplateEngine.Cli.New3Callbacks
 Microsoft.TemplateEngine.Cli.New3Callbacks.New3Callbacks() -> void
 Microsoft.TemplateEngine.Cli.New3Command
 Microsoft.TemplateEngine.Cli.TelemetryLogger
+static Microsoft.TemplateEngine.Cli.Components.AllComponents.get -> System.Collections.Generic.IReadOnlyList<(System.Type! Type, Microsoft.TemplateEngine.Abstractions.IIdentifiedComponent! Instance)>!
 static Microsoft.TemplateEngine.Cli.New3Command.Run(string! commandName, Microsoft.TemplateEngine.Abstractions.ITemplateEngineHost! host, Microsoft.TemplateEngine.Cli.ITelemetryLogger! telemetryLogger, Microsoft.TemplateEngine.Cli.New3Callbacks! callbacks, string![]! args, string? hivePath = null) -> int
 ~Microsoft.TemplateEngine.Cli.ITelemetryLogger.TrackEvent(string eventName, System.Collections.Generic.IDictionary<string, string> properties = null, System.Collections.Generic.IDictionary<string, double> measurements = null) -> void
 ~Microsoft.TemplateEngine.Cli.New3Callbacks.OnFirstRun.get -> System.Action<Microsoft.TemplateEngine.Abstractions.IEngineEnvironmentSettings>

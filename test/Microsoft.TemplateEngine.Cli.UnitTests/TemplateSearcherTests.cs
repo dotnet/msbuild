@@ -38,8 +38,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [Fact(DisplayName = nameof(TwoSourcesAreBothSearched))]
         public void TwoSourcesAreBothSearched()
         {
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockTemplateSearchSource));
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockTemplateSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockTemplateSearchSource());
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockTemplateSearchSource());
 
             IList<ITemplateSearchSource> searchSources = _engineEnvironmentSettings.SettingsLoader.Components.OfType<ITemplateSearchSource>().ToList();
 

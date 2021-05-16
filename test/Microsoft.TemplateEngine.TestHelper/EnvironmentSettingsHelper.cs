@@ -30,15 +30,16 @@ namespace Microsoft.TemplateEngine.TestHelper
             {
                 locale = "en-US";
             }
-            List<Assembly> builtIns = new List<Assembly>();
+            var builtIns = new List<(Type, IIdentifiedComponent)>();
+            builtIns.AddRange(Edge.Components.AllComponents);
             if (loadDefaultGenerator)
             {
-                builtIns.Add(typeof(Orchestrator.RunnableProjects.Abstractions.IMacro).Assembly);
+                builtIns.AddRange(Orchestrator.RunnableProjects.Components.AllComponents);
             }
 
             ITemplateEngineHost host = new TestHost(hostIdentifier: string.IsNullOrWhiteSpace(hostIdentifier) ? "TestRunner" : hostIdentifier)
             {
-                BuiltInComponents = new AssemblyComponentCatalog(builtIns),
+                BuiltInComponents = builtIns,
                 FileSystem = new MonitoredFileSystem(new PhysicalFileSystem()),
                 FallbackHostTemplateConfigNames = new[] { "dotnetcli" }
             };

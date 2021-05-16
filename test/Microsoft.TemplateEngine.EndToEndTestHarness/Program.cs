@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli;
-using Microsoft.TemplateEngine.Edge;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.EndToEndTestHarness
@@ -209,14 +208,11 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
             catch
             { }
 
-            var builtIns = new AssemblyComponentCatalog(new[]
-            {
-                typeof(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Abstractions.IMacro).GetTypeInfo().Assembly,            // for assembly: Microsoft.TemplateEngine.Orchestrator.RunnableProjects
-                typeof(Microsoft.TemplateEngine.Edge.AssemblyComponentCatalog).GetTypeInfo().Assembly,   // for assembly: Microsoft.TemplateEngine.Edge
-                typeof(New3Command).GetTypeInfo().Assembly,    // for assembly: Microsoft.TemplateEngine.Cli
-                typeof(Microsoft.TemplateSearch.Common.NuGetSearchCacheConfig).GetTypeInfo().Assembly, // for assembly: Microsoft.TemplateSearch.Common
-                typeof(Program).GetTypeInfo().Assembly
-            });
+            var builtIns = new List<(Type, IIdentifiedComponent)>();
+            builtIns.AddRange(Edge.Components.AllComponents);
+            builtIns.AddRange(Orchestrator.RunnableProjects.Components.AllComponents);
+            builtIns.AddRange(Cli.Components.AllComponents);
+            builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackagesProviderFactory()));
 
             return new Edge.DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { "dotnetcli" });
         }

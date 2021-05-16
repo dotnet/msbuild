@@ -47,7 +47,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public string Version => _baseHost.Version;
 
-        public virtual IReadOnlyList<KeyValuePair<Guid, Func<Type>>> BuiltInComponents => _baseHost.BuiltInComponents;
+        public virtual IReadOnlyList<(Type, IIdentifiedComponent)> BuiltInComponents => _baseHost.BuiltInComponents;
 
         public ILogger Logger => _logger;
 

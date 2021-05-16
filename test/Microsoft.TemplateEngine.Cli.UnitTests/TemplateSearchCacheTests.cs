@@ -66,7 +66,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             INewCommandInput commandInput = new MockNewCommandInput("foo");
 
@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(true);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             INewCommandInput commandInput = new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp2.0");
 
@@ -117,7 +117,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(true);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             // "tfm" is not a vaild symbol for the "foo" template. So it should not match.
             INewCommandInput commandInput = new MockNewCommandInput("foo").WithTemplateOption("tfm", "netcoreapp2.0");
@@ -135,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
             MockNewCommandInput commandInput = new MockNewCommandInput("bar", "F#");
@@ -157,7 +157,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--author", commandAuthor);
 
@@ -184,7 +184,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate, type: commandType);
 
@@ -212,7 +212,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--package", commandPackage);
 
@@ -242,7 +242,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--tag", commandTag);
 
@@ -267,7 +267,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             TemplateDiscoveryMetadata mockTemplateDiscoveryMetadata = SetupDiscoveryMetadata(false);
             MockCliNuGetMetadataSearchSource.SetupMockData(mockTemplateDiscoveryMetadata);
-            _engineEnvironmentSettings.SettingsLoader.Components.Register(typeof(MockCliNuGetMetadataSearchSource));
+            _engineEnvironmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockCliNuGetMetadataSearchSource());
 
             MockNewCommandInput commandInput = new MockNewCommandInput("bar", "VB");
 

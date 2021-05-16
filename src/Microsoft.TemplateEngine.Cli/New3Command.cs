@@ -423,7 +423,6 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(LocalizableStrings.GettingReady);
             }
             _callbacks.OnFirstRun?.Invoke(environmentSettings);
-            environmentSettings.SettingsLoader.Components.RegisterMany(typeof(New3Command).GetTypeInfo().Assembly.GetTypes());
         }
 
         private async Task<HashSet<string>> GetAllTemplateShortNamesAsync()
