@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
-using NuGet.Common;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
 
@@ -22,11 +21,11 @@ namespace Microsoft.DotNet.PackageValidation
         private static Dictionary<NuGetFramework, HashSet<NuGetFramework>> s_packageTfmMapping = InitializeTfmMappings();
 
         private readonly bool _runApiCompat;
-        private readonly ApiCompatRunner _apiCompatRunner;
-        private readonly ILogger _log;
         private readonly DiagnosticBag<IDiagnostic> _diagnosticBag;
+        private readonly ApiCompatRunner _apiCompatRunner;
+        private readonly IPackageLogger _log;
 
-        public CompatibleTfmValidator(string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, ILogger log)
+        public CompatibleTfmValidator(string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, IPackageLogger log)
         {
             _runApiCompat = runApiCompat;
             _log = log;
@@ -59,8 +58,7 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.ApplicableCompileTimeAsset, framework.ToString()))
                     {
-                        string message = string.Format(Resources.NoCompatibleCompileTimeAsset, framework.ToString());
-                        _log.LogError(DiagnosticIds.ApplicableCompileTimeAsset + " " + message);
+                        _log.LogError(DiagnosticIds.ApplicableCompileTimeAsset, Resources.NoCompatibleCompileTimeAsset, framework.ToString());
                     }
                     break;
                 }
@@ -70,8 +68,7 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.CompatibleRuntimeRidLessAsset, framework.ToString()))
                     {
-                        string message = string.Format(Resources.NoCompatibleRuntimeAsset, framework.ToString());
-                        _log.LogError(DiagnosticIds.CompatibleRuntimeRidLessAsset + " " + message);
+                        _log.LogError(DiagnosticIds.CompatibleRuntimeRidLessAsset, Resources.NoCompatibleRuntimeAsset, framework.ToString());
                     }
                 }
                 else
@@ -95,8 +92,7 @@ namespace Microsoft.DotNet.PackageValidation
                     {
                         if (!_diagnosticBag.Filter(DiagnosticIds.CompatibleRuntimeRidSpecificAsset, framework.ToString() + "-" + rid))
                         {
-                            string message = string.Format(Resources.NoCompatibleRidSpecificRuntimeAsset, framework.ToString(), rid);
-                            _log.LogError(DiagnosticIds.CompatibleRuntimeRidSpecificAsset + " " + message);
+                            _log.LogError(DiagnosticIds.CompatibleRuntimeRidSpecificAsset, Resources.NoCompatibleRidSpecificRuntimeAsset, framework.ToString(), rid);
                         }
                     }
                     else

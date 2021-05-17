@@ -9,18 +9,16 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Product = Microsoft.DotNet.Cli.Utils.Product;
-using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.DotNet.Configurer;
-using NuGet.Protocol;
-using NuGet.Protocol.Core.Types;
+using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.DotNet.ToolPackage;
 using NuGet.Versioning;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
@@ -30,6 +28,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly IReporter _reporter;
         private readonly bool _skipManifestUpdate;
         private readonly string _fromCacheOption;
+        private readonly string _downloadToCacheOption;
         private readonly bool _printDownloadLinkOnly;
         private readonly bool _includePreviews;
         private readonly VerbosityOptions _verbosity;
@@ -60,6 +59,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.IncludePreviewOption);
             _printDownloadLinkOnly = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
+            _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.DownloadToCacheOption);
             _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
             _sdkVersion = new ReleaseVersion(version ?? Product.Version);
@@ -77,68 +77,31 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override int Execute()
         {
-            if (_printDownloadLinkOnly || !string.IsNullOrWhiteSpace(_fromCacheOption))
+            if (_printDownloadLinkOnly)
             {
-                Reporter.Output.WriteLine($"WIP workload install {string.Join("; ", _workloadIds)}");
-                List<string> allowedMockWorkloads = new List<string> {"mobile-ios", "mobile-android"};
+                _reporter.WriteLine(string.Format(LocalizableStrings.ResolvingPackageUrls, string.Join(", ", _workloadIds)));
+                var packageUrls = GetPackageDownloadUrls(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews);
 
-                if (_workloadIds.Except(allowedMockWorkloads).Any())
+                _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
+                _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
+                _reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
+            }
+			else if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
+            {
+                try
                 {
-                    Reporter.Output.WriteLine("Only support \"mobile-ios\", \"mobile-android\" in the mock");
+                    DownloadToOfflineCache(_workloadIds.Select(id => new WorkloadId(id)), _downloadToCacheOption);
                 }
-
-                SourceRepository source =
-                    Repository.Factory.GetCoreV3("https://www.myget.org/F/mockworkloadfeed/api/v3/index.json");
-                ServiceIndexResourceV3 serviceIndexResource = source.GetResourceAsync<ServiceIndexResourceV3>().Result;
-                IReadOnlyList<Uri> packageBaseAddress =
-                    serviceIndexResource?.GetServiceEntryUris(ServiceTypes.PackageBaseAddress);
-                List<string> allPackageUrl = new List<string>();
-
-                if (_printDownloadLinkOnly)
+                catch (Exception e)
                 {
-                    if (_workloadIds.Contains("mobile-ios"))
-                    {
-                        allPackageUrl.Add(nupkgUrl(packageBaseAddress.First().ToString(), "Microsoft.iOS.Bundle",
-                            NuGetVersion.Parse("6.0.100")));
-
-                        AddNewtonsoftJson(allPackageUrl);
-                    }
-
-                    if (_workloadIds.Contains("mobile-android"))
-                    {
-                        allPackageUrl.Add(nupkgUrl(packageBaseAddress.First().ToString(), "Microsoft.NET.Workload.Android",
-                            NuGetVersion.Parse("6.0.100")));
-
-
-                        AddNewtonsoftJson(allPackageUrl);
-                    }
-
-                    Reporter.Output.WriteLine("==allPackageLinksJsonOutputStart==");
-                    Reporter.Output.WriteLine(JsonSerializer.Serialize(allPackageUrl));
-                    Reporter.Output.WriteLine("==allPackageLinksJsonOutputEnd==");
-                }
-
-                if (!string.IsNullOrWhiteSpace(_fromCacheOption))
-                {
-                    Directory.CreateDirectory(MockInstallDirectory);
-                    if (_workloadIds.Contains("mobile-android"))
-                    {
-                        File.Copy(Path.Combine(_fromCacheOption, "Microsoft.NET.Workload.Android.6.0.100.nupkg"),
-                            Path.Combine(MockInstallDirectory, "Microsoft.NET.Workload.Android.6.0.100.nupkg"));
-                    }
-
-                    if (_workloadIds.Contains("mobile-ios"))
-                    {
-                        File.Copy(Path.Combine(_fromCacheOption, "Microsoft.iOS.Bundle.6.0.100.nupkg"),
-                            Path.Combine(MockInstallDirectory, "Microsoft.iOS.Bundle.6.0.100.nupkg"));
-                    }
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e);
                 }
             }
             else
             {
                 try
                 {
-                    InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews);
+                    InstallWorkloads(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews, _fromCacheOption);
                 }
                 catch (Exception e)
                 {
@@ -150,22 +113,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return 0;
         }
 
-        // Add a Newtonsoft.Json to make sure caller can handle multiple packages
-        private static void AddNewtonsoftJson(List<string> allPackageUrl)
-        {
-            string newtonsoftJsonUrl = "https://www.nuget.org/api/v2/package/Newtonsoft.Json/13.0.1-beta2";
-            if (!allPackageUrl.Contains(newtonsoftJsonUrl))
-            {
-                allPackageUrl.Add(newtonsoftJsonUrl);
-            }
-        }
-
-        public string nupkgUrl(string baseUri, string id, NuGetVersion version) =>
-            baseUri + id.ToLowerInvariant() + "/" + version.ToNormalizedString() + "/" + id.ToLowerInvariant() +
-            "." +
-            version.ToNormalizedString() + ".nupkg";
-
-        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false, bool includePreviews = false)
+        public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false, bool includePreviews = false, string offlineCache = null)
         {
             _reporter.WriteLine();
             var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
@@ -181,7 +129,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
             }
 
-            InstallWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate);
+            InstallWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -196,7 +144,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private void InstallWorkloadsWithInstallRecord(
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate)
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate,
+			string offlineCache)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -220,7 +169,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                         foreach (var packId in workloadPackToInstall)
                         {
-                            installer.InstallWorkloadPack(packId, sdkFeatureBand);
+                            installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
                         }
 
                         foreach (var workloadId in workloadIds)
@@ -263,6 +212,55 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 foreach (var workloadId in workloadIds)
                 {
                     installer.InstallWorkload(workloadId);
+                }
+            }
+        }
+
+        private IEnumerable<string> GetPackageDownloadUrls(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate, bool includePreview)
+        {
+            var packageUrls = new List<string>();
+
+            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+            {
+                var installer = _workloadInstaller.GetPackInstaller();
+
+                var packUrls = workloadIds
+                    .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                    .Distinct()
+                    .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                    .Select(pack => _nugetPackageDownloader.GetPackageUrl(new PackageId(pack.ResolvedPackageId), new NuGetVersion(pack.Version), includePreview: includePreview).Result);
+                packageUrls.AddRange(packUrls);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return packageUrls;
+        }
+		
+        private void DownloadToOfflineCache(IEnumerable<WorkloadId> workloadIds, string offlineCache)
+        {
+            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+            {
+                var installer = _workloadInstaller.GetPackInstaller();
+
+                var workloadPacks = workloadIds
+                    .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                    .Distinct()
+                    .Select(packId => _workloadResolver.TryGetPackInfo(packId));
+
+                foreach (var pack in workloadPacks)
+                {
+                    installer.DownloadToOfflineCache(pack, offlineCache);
+                }
+            }
+            else
+            {
+                var installer = _workloadInstaller.GetWorkloadInstaller();
+                foreach (var workloadId in workloadIds)
+                {
+                    installer.DownloadToOfflineCache(workloadId, offlineCache);
                 }
             }
         }

@@ -8,8 +8,6 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadUpdateCommandParser
     {
-        public static readonly Argument PackageIdArgument = WorkloadInstallCommandParser.WorkloadIdArgument;
-
         public static readonly Option ConfigOption = WorkloadInstallCommandParser.ConfigOption;
 
         public static readonly Option AddSourceOption = WorkloadInstallCommandParser.AddSourceOption;
@@ -18,14 +16,29 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
 
+        public static readonly Option PrintDownloadLinkOnlyOption =
+            WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption;
+
+        public static readonly Option FromCacheOption =
+            WorkloadInstallCommandParser.FromCacheOption;
+
+        /// <summary>
+        /// VSMac updater could update SDK across feature band. This option is only for VSMac updater
+        /// scenario. If there are breaking change between manifests, we would fail to load the new available update
+        /// we will do best effort in that case.
+        /// </summary>
+        public static readonly Option SdkVersionOption = new Option<string>("--target-sdk-version") {IsHidden = true};
+
         public static Command GetCommand()
         {
             Command command = new("update", LocalizableStrings.CommandDescription);
 
-            command.AddArgument(PackageIdArgument);
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
             command.AddOption(VersionOption);
+            command.AddOption(PrintDownloadLinkOnlyOption);
+            command.AddOption(FromCacheOption);
+            command.AddOption(SdkVersionOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.NoCacheOption);

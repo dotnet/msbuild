@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.HotReload
     {
         private readonly Action<string> _log;
         private readonly AssemblyLoadEventHandler _assemblyLoad;
-        private readonly ConcurrentDictionary<Guid, IReadOnlyList<UpdateDelta>> _deltas = new();
+        private readonly ConcurrentDictionary<Guid, List<UpdateDelta>> _deltas = new();
         private readonly ConcurrentDictionary<Assembly, Assembly> _appliedAssemblies = new();
         private volatile UpdateHandlerActions? _handlerActions;
 
@@ -38,14 +38,12 @@ namespace Microsoft.Extensions.HotReload
             if (_deltas.TryGetValue(moduleId.Value, out var updateDeltas) && _appliedAssemblies.TryAdd(loadedAssembly, loadedAssembly))
             {
                 // A delta for this specific Module exists and we haven't called ApplyUpdate on this instance of Assembly as yet.
-                ApplyDeltas(updateDeltas);
+                ApplyDeltas(loadedAssembly, updateDeltas);
             }
         }
 
         internal sealed class UpdateHandlerActions
         {
-            public List<Action<Type[]?>> Before { get; } = new();
-            public List<Action<Type[]?>> After { get; } = new();
             public List<Action<Type[]?>> ClearCache { get; } = new();
             public List<Action<Type[]?>> UpdateApplication { get; } = new();
         }
@@ -88,20 +86,6 @@ namespace Microsoft.Extensions.HotReload
         internal void GetHandlerActions(UpdateHandlerActions handlerActions, Type handlerType)
         {
             bool methodFound = false;
-
-            // Temporarily allow BeforeUpdate and AfterUpdate to be invoked until
-            // everything is updated to use the new names.
-            if (GetUpdateMethod(handlerType, "BeforeUpdate") is MethodInfo beforeUpdate)
-            {
-                handlerActions.Before.Add(CreateAction(beforeUpdate));
-                methodFound = true;
-            }
-
-            if (GetUpdateMethod(handlerType, "AfterUpdate") is MethodInfo afterUpdate)
-            {
-                handlerActions.After.Add(CreateAction(afterUpdate));
-                methodFound = true;
-            }
 
             if (GetUpdateMethod(handlerType, "ClearCache") is MethodInfo clearCache)
             {
@@ -204,21 +188,46 @@ namespace Microsoft.Extensions.HotReload
                 // TODO: Get types to pass in
                 Type[]? updatedTypes = null;
 
-                handlerActions.Before.ForEach(b => b(updatedTypes));
-
                 for (var i = 0; i < deltas.Count; i++)
                 {
                     var item = deltas[i];
-                    var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.Modules.FirstOrDefault() is Module m && m.ModuleVersionId == item.ModuleId);
-                    if (assembly is not null)
+                    foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                     {
-                        System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
+                        if (assembly.GetModules().Any(m => m.ModuleVersionId == item.ModuleId))
+                        {
+                            System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
+                        }
                     }
+
+                    // Additionally stash the deltas away so it may be applied to assemblies loaded later.
+                    var cachedDeltas = _deltas.GetOrAdd(item.ModuleId, static _ => new());
+                    cachedDeltas.Add(item);
                 }
 
                 handlerActions.ClearCache.ForEach(a => a(updatedTypes));
-                handlerActions.After.ForEach(c => c(updatedTypes));
                 handlerActions.UpdateApplication.ForEach(a => a(updatedTypes));
+
+                _log("Deltas applied.");
+            }
+            catch (Exception ex)
+            {
+                _log(ex.ToString());
+            }
+        }
+
+        public void ApplyDeltas(Assembly assembly, IReadOnlyList<UpdateDelta> deltas)
+        {
+            try
+            {
+                // Defer discovering the receiving deltas until the first hot reload delta.
+                // This should give enough opportunity for AppDomain.GetAssemblies() to be sufficiently populated.
+                _handlerActions ??= GetMetadataUpdateHandlerActions();
+                var handlerActions = _handlerActions;
+
+                foreach (var item in deltas)
+                {
+                    System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
+                }
 
                 _log("Deltas applied.");
             }

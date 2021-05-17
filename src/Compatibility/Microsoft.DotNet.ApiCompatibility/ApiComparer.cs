@@ -30,6 +30,14 @@ namespace Microsoft.DotNet.ApiCompatibility
         public (string diagnosticId, string memberId)[] IgnoredDifferences { get; set; }
 
         /// <summary>
+        /// Flag indicating whether we should run on strict mode or not.
+        /// If StrictMode is set, the behavior of some rules will change and some other rules will be
+        /// executed when getting the differences. This is useful when you want both sides we are comparing
+        /// to be strictly the same on their surface area.
+        /// </summary>
+        public bool StrictMode { get; set; }
+
+        /// <summary>
         /// Callback function to get the <see cref="ComparingSettings"/> to be used when creating the settings to get the differences.
         /// This callback is called at the beginning of every <see cref="GetDifferences"/> overload.
         /// </summary>
@@ -146,7 +154,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             if (GetComparingSettings != null)
                 return GetComparingSettings();
 
-            return new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(IncludeInternalSymbols));
+            return new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(IncludeInternalSymbols), strictMode: StrictMode);
         }
     }
 }

@@ -320,9 +320,9 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             => (!string.IsNullOrEmpty(Pre), !string.IsNullOrEmpty(Build)) switch
             {
                 (false, false) => $"{Major}.{Minor}.{Patch}",
-                (true, false) => $"{Major}.{Minor}.{Patch}-{Pre}",
-                (false, true) => $"{Major}.{Minor}.{Patch}+{Build}",
-                (true, true) => $"{Major}.{Minor}.{Patch}-{Pre}+{Build}",
+                (true, false) => $"{Major}.{Minor}.{Patch}{Pre}",
+                (false, true) => $"{Major}.{Minor}.{Patch}{Build}",
+                (true, true) => $"{Major}.{Minor}.{Patch}{Pre}{Build}",
             };
     }
 }

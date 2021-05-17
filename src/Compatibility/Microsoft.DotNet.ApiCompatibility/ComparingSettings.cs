@@ -34,9 +34,9 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="ruleRunnerFactory">The factory to create a <see cref="IRuleRunner"/></param>
         /// <param name="filter">The symbol filter.</param>
         /// <param name="equalityComparer">The comparer to map metadata.</param>
-        public ComparingSettings(IRuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null)
+        public ComparingSettings(IRuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool strictMode = false)
         {
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory();
+            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(strictMode);
             Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: false);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
         }

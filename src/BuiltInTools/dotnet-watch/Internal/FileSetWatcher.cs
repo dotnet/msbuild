@@ -22,6 +22,8 @@ namespace Microsoft.DotNet.Watcher.Internal
             _fileWatcher = new FileWatcher(reporter);
         }
 
+        public bool WatchForNewFiles { get; init; }
+
         public async Task<FileItem?> GetChangedFileAsync(CancellationToken cancellationToken, Action startedWatching)
         {
             foreach (var file in _fileSet)
@@ -29,21 +31,25 @@ namespace Microsoft.DotNet.Watcher.Internal
                 _fileWatcher.WatchDirectory(Path.GetDirectoryName(file.FilePath));
             }
 
-            var tcs = new TaskCompletionSource<FileItem?>();
+            var tcs = new TaskCompletionSource<FileItem?>(TaskCreationOptions.RunContinuationsAsynchronously);
             cancellationToken.Register(() => tcs.TrySetResult(null));
 
-            void callback(string path)
+            void FileChangedCallback(string path, bool newFile)
             {
                 if (_fileSet.TryGetValue(path, out var fileItem))
                 {
                     tcs.TrySetResult(fileItem);
                 }
+                else if (WatchForNewFiles && newFile)
+                {
+                    tcs.TrySetResult(new FileItem { FilePath = path, IsNewFile = newFile });
+                }
             }
 
-            _fileWatcher.OnFileChange += callback;
+            _fileWatcher.OnFileChange += FileChangedCallback;
             startedWatching();
             var changedFile = await tcs.Task;
-            _fileWatcher.OnFileChange -= callback;
+            _fileWatcher.OnFileChange -= FileChangedCallback;
 
             return changedFile;
         }

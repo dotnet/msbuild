@@ -25,7 +25,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string TargetFramework = "TargetFramework";
         public const string FrameworkName = "FrameworkName";
         public const string FrameworkVersion = "FrameworkVersion";
-        public const string IsTrimmable = "IsTrimmable"; 
+        public const string IsTrimmable = "IsTrimmable";
         public const string RuntimeFrameworkName = "RuntimeFrameworkName";
         public const string RuntimePackRuntimeIdentifiers = "RuntimePackRuntimeIdentifiers";
 
@@ -123,5 +123,6 @@ namespace Microsoft.NET.Build.Tasks
         public const string OutputPDBImage = "OutputPDBImage";
         public const string EmitSymbols = "EmitSymbols";
         public const string IsVersion5 = "IsVersion5";
+        public const string CreateCompositeImage = "CreateCompositeImage";
     }
 }

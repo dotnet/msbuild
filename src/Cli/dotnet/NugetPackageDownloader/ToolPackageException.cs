@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.DotNet.ToolPackage
+namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
     internal class NuGetPackageInstallerException : Exception
     {

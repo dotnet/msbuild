@@ -1,37 +1,17 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using NuGet.Common;
 
 namespace Microsoft.DotNet.PackageValidation.Tests
 {
-    public class TestLogger : ILogger
+    public class TestLogger : IPackageLogger
     {
-        public List<string> warnings = new();
         public List<string> errors = new();
 
-        public void Log(LogLevel level, string data) => throw new NotImplementedException();
-        public void Log(ILogMessage message) => throw new NotImplementedException();
-        public Task LogAsync(LogLevel level, string data) => throw new NotImplementedException();
-        public Task LogAsync(ILogMessage message) => throw new NotImplementedException();
-        public void LogDebug(string data) => throw new NotImplementedException();
-        public void LogInformation(string data) => throw new NotImplementedException();
-        public void LogInformationSummary(string data) => throw new NotImplementedException();
-        public void LogMinimal(string data) => throw new NotImplementedException();
-        public void LogVerbose(string data) => throw new NotImplementedException();
-       
-        public void LogWarning(string data)
+        public void LogError(string code, string format, params string[] args)
         {
-            warnings.Add(data);
-        }
-
-        public void LogError(string data)
-        {
-            errors.Add(data);
+            errors.Add(code + " " + string.Format(format, args));
         }
     }
 }

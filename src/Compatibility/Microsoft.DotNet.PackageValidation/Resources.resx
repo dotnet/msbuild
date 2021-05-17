@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CompatibleFrameworkInPackageValidatorHeader" xml:space="preserve">
-    <value>Api surface area should be compatible among compatible frameworks.</value>
+    <value>{0} assembly api surface area should be compatible with {1} assembly surface area so we can compile against {0} and run on {1} .framework.</value>
   </data>
   <data name="CompatibleTfmValidatorHeader" xml:space="preserve">
-    <value>The runtime assets should be compatible with the compile time assets for all target frameworks and rids.</value>
+    <value>The compile time assemblies public api surface area should be compatible with the runtime assemblies for all target frameworks and RIDs. Please add the following apis to the runtime assemblies.</value>
   </data>
   <data name="InvalidPackagePath" xml:space="preserve">
     <value>Package Path {0} is invalid. Please Check the path .</value>
   </data>
   <data name="ApiCompatibilityHeader" xml:space="preserve">
-    <value>There are API Compatibility errors in between {0} (left) and {1} (right).</value>
+    <value>API Compatibility errors between {0} (left) and {1} (right):</value>
   </data>
   <data name="MissingTargetFramework" xml:space="preserve">
     <value>TargetFramework {0} is no longer supported in the latest version.</value>
@@ -136,21 +136,27 @@
     <value>TargetFramework {0} and Rid {1} is no longer supported in the latest version.</value>
   </data>
   <data name="NoCompatibleCompileTimeAsset" xml:space="preserve">
-    <value>There is no compatible compile time asset for target framework {0}.</value>
+    <value>There is no compatible compile time asset for target framework {0} in the package.</value>
   </data>
   <data name="NoCompatibleRidSpecificRuntimeAsset" xml:space="preserve">
-    <value>There is no compatible runtime asset for target framework {0}-{1}.</value>
+    <value>There is no compatible runtime asset for target framework {0}-{1} in the package.</value>
   </data>
   <data name="NoCompatibleRuntimeAsset" xml:space="preserve">
     <value>There is no compatible runtime asset for target framework {0} in the package.</value>
   </data>
   <data name="BaselineVersionValidatorHeader" xml:space="preserve">
-    <value>There should not be any breaking changes between the packages.</value>
+    <value>There are breaking changes between the versions. Please add or modify the apis in the recent version or suppress the intentional breaking changes.</value>
   </data>
-  <data name="TargetFramework" xml:space="preserve">
-    <value>TargetFramework {0}</value>
+  <data name="ApiCompatibilityBaselineHeader" xml:space="preserve">
+    <value>API compatibility errors in between {0} (left) and {1} (right) for versions {2} and {3} respectively:</value>
   </data>
-  <data name="TargetFrameworkRid" xml:space="preserve">
-    <value>TargetFramework {0} Rid {1}</value>
+  <data name="BaselinePackageNotFound" xml:space="preserve">
+    <value>No baseline package with id {0} found in feeds: {1}.</value>
+  </data>
+  <data name="EmptyPackagePath" xml:space="preserve">
+    <value>{0} is empty or null.  Please provide a valid package path.</value>
+  </data>
+  <data name="NonExistentPackagePath" xml:space="preserve">
+    <value>{0} does not exist. Please provide a valid package path.</value>
   </data>
 </root>

@@ -98,6 +98,5 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         Failed = -1,
         Success = 0,
-        Success_RefreshBrowser = 1,
     }
 }

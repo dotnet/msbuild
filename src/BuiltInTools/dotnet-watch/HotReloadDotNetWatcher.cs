@@ -6,8 +6,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Graph;
 using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
@@ -22,6 +25,9 @@ namespace Microsoft.DotNet.Watcher
         private readonly ProcessRunner _processRunner;
         private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly IWatchFilter[] _filters;
+
+        public bool SuppressHotRestart { get; init; }
+        public ProjectGraph ProjectGraph { get; init; }
 
         public HotReloadDotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, IConsole console)
         {
@@ -95,7 +101,7 @@ namespace Microsoft.DotNet.Watcher
                     cancellationToken,
                     currentRunCancellationSource.Token,
                     forceReload);
-                using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter);
+                using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter) { WatchForNewFiles = true };
                 try
                 {
                     using var hotReload = new HotReload(_processRunner, _reporter);
@@ -122,14 +128,25 @@ namespace Microsoft.DotNet.Watcher
                         }
                         else
                         {
-                            _reporter.Output($"File changed: {fileItem.FilePath}.");
+                            if (fileItem.IsNewFile)
+                            {
+                                if (MayRequireRecompilation(fileItem.FilePath))
+                                {
+                                    _reporter.Output($"New file: {fileItem.FilePath}. Rebuilding the application.");
+                                    context.RequiresMSBuildRevaluation = true;
+                                    break;
+                                }
 
+                                // If it's not a file that requires recompilation (such as a css, js etc) file, we do not have to do anything special.
+                                continue;
+                            }
+
+                            _reporter.Output($"File changed: {fileItem.FilePath}.");
                             var start = Stopwatch.GetTimestamp();
                             if (await hotReload.TryHandleFileChange(context, fileItem, combinedCancellationSource.Token))
                             {
                                 var totalTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
-                                _reporter.Output($"Hot reload of changes succeeded.");
-                                _reporter.Verbose($"Hot reload applied in {totalTime.TotalMilliseconds}ms.");
+                                _reporter.Verbose($"Hot reload change handled in {totalTime.TotalMilliseconds}ms.");
                             }
                             else
                             {
@@ -165,8 +182,10 @@ namespace Microsoft.DotNet.Watcher
                     }
                     else
                     {
+
                         Debug.Assert(finishedTask == fileSetTask);
                         var changedFile = fileSetTask.Result;
+                        context.RequiresMSBuildRevaluation = changedFile.Value.IsNewFile;
                         context.ChangedFile = changedFile;
                     }
                 }
@@ -187,13 +206,49 @@ namespace Microsoft.DotNet.Watcher
             }
         }
 
-        private static void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
+        private bool MayRequireRecompilation(string filePath)
+        {
+            return filePath is not null &&
+                (filePath.EndsWith(".cs", StringComparison.Ordinal) ||
+                filePath.EndsWith(".razor", StringComparison.Ordinal) ||
+                filePath.EndsWith(".cshtml", StringComparison.Ordinal));
+        }
+
+        private void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
         {
             var project = context.FileSet.Project;
+
+            // For webapps, we can support changes to Program.Main and Startup by restarting the host (aka hot restart).
+            // First determine if we can perform hot restarts.
+            if (!SuppressHotRestart &&
+                ProjectGraph.EntryPointNodes?.FirstOrDefault()?.ProjectInstance is { } projectInstance &&
+                !string.IsNullOrEmpty(projectInstance.GetPropertyValue("UsingMicrosoftNETSdkWeb")))
+            {
+                // When performing a hot restart, we have to use Microsoft.Extensions.HotRestart assembly as the app's entry assembly. This
+                // is similar to how the inside dll works in tools such as dotnet-ef. Infer metadata from the project required to run the
+                // alternate entry point.
+                var projectDll = projectInstance.GetPropertyValue("TargetPath");
+                var runtimeConfigPath = projectInstance.GetPropertyValue("ProjectRuntimeConfigFilePath");
+                var depsFilePath = projectInstance.GetPropertyValue("ProjectDepsFilePath");
+
+                var hotRestartAssembly = Path.Combine(AppContext.BaseDirectory, "hotreload", "Microsoft.Extensions.HotRestart.dll");
+                processSpec.Executable = DotnetMuxer.MuxerPath;
+                processSpec.EscapedArguments = $"exec --runtimeconfig \"{runtimeConfigPath}\" --depsfile \"{depsFilePath}\" \"{hotRestartAssembly}\"";
+                if (!string.IsNullOrEmpty(project.RunArguments))
+                {
+                    processSpec.EscapedArguments += " -- " + project.RunArguments;
+                }
+
+                processSpec.EnvironmentVariables["_DOTNET_WATCH_APP_ASSEMBLY_PATH"] = projectDll;
+                processSpec.EnvironmentVariables["_DOTNET_WATCH_HOT_RESTART"] = "1";
+            }
+            else
+            {
             processSpec.Executable = project.RunCommand;
             if (!string.IsNullOrEmpty(project.RunArguments))
             {
                 processSpec.EscapedArguments = project.RunArguments;
+            }
             }
 
             if (!string.IsNullOrEmpty(project.RunWorkingDirectory))
@@ -214,7 +269,7 @@ namespace Microsoft.DotNet.Watcher
 
             if (context.DefaultLaunchSettingsProfile.EnvironmentVariables is IDictionary<string, string> envVariables)
             {
-                foreach (var entry in context.DefaultLaunchSettingsProfile.EnvironmentVariables)
+                foreach (var entry in envVariables)
                 {
                     var value = Environment.ExpandEnvironmentVariables(entry.Value);
                     // NOTE: MSBuild variables are not expanded like they are in VS

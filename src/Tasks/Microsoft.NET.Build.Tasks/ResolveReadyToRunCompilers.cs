@@ -59,7 +59,7 @@ namespace Microsoft.NET.Build.Tasks
             _crossgen2Pack = Crossgen2Packs?.FirstOrDefault();
             _targetRuntimeIdentifier = _runtimePack?.GetMetadata(MetadataKeys.RuntimeIdentifier);
 
-            // Get the list of runtime identifiers that we support and can target 
+            // Get the list of runtime identifiers that we support and can target
             ITaskItem targetingPack = GetNETCoreAppTargetingPack();
             string supportedRuntimeIdentifiers = targetingPack?.GetMetadata(MetadataKeys.RuntimePackRuntimeIdentifiers);
 
@@ -122,7 +122,7 @@ namespace Microsoft.NET.Build.Tasks
             // Create tool task item
             CrossgenTool = new TaskItem(_crossgenTool.ToolPath);
             CrossgenTool.SetMetadata(MetadataKeys.JitPath, _crossgenTool.ClrJitPath);
-            if (!String.IsNullOrEmpty(_crossgenTool.DiaSymReaderPath))
+            if (!string.IsNullOrEmpty(_crossgenTool.DiaSymReaderPath))
             {
                 CrossgenTool.SetMetadata(MetadataKeys.DiaSymReader, _crossgenTool.DiaSymReaderPath);
             }

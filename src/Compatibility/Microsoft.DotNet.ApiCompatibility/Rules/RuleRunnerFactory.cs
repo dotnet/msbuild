@@ -7,11 +7,18 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
     public class RuleRunnerFactory : IRuleRunnerFactory
     {
+        private readonly bool _strictMode;
         private RuleRunner _driver;
+
+        public RuleRunnerFactory(bool strictMode = false)
+        {
+            _strictMode = strictMode;
+        }
+
         public IRuleRunner GetRuleRunner()
         {
             if (_driver == null)
-                _driver = new RuleRunner();
+                _driver = new RuleRunner(_strictMode);
 
             return _driver;
         }

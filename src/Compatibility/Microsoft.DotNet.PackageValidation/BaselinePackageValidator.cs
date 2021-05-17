@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
-using NuGet.Common;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
 
@@ -18,15 +17,14 @@ namespace Microsoft.DotNet.PackageValidation
     /// </summary>
     public class BaselinePackageValidator
     {
-        private static HashSet<string> s_diagList = new HashSet<string>{ DiagnosticIds.TargetFrameworkDropped, DiagnosticIds.TargetFrameworkAndRidPairDropped };
-
+        private static HashSet<string> s_diagList = new HashSet<string>{ DiagnosticIds.TargetFrameworkDropped, DiagnosticIds.TargetFrameworkAndRidPairDropped }; 
         private readonly Package _baselinePackage;
         private readonly bool _runApiCompat;
-        private readonly ApiCompatRunner _apiCompatRunner;
-        private readonly ILogger _log;
         private readonly DiagnosticBag<IDiagnostic> _diagnosticBag;
+        private readonly ApiCompatRunner _apiCompatRunner;
+        private readonly IPackageLogger _log;
 
-        public BaselinePackageValidator(Package baselinePackage, string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, ILogger log)
+        public BaselinePackageValidator(Package baselinePackage, string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, IPackageLogger log)
         {
             _baselinePackage = baselinePackage;
             _runApiCompat = runApiCompat;
@@ -41,7 +39,7 @@ namespace Microsoft.DotNet.PackageValidation
         /// <param name="package">Nuget Package that needs to be validated.</param>
         public void Validate(Package package)
         {
-            foreach (ContentItem baselineCompileTimeAsset in _baselinePackage.CompileAssets)
+            foreach (ContentItem baselineCompileTimeAsset in _baselinePackage.RefAssets)
             {
                 NuGetFramework baselineTargetFramework = (NuGetFramework)baselineCompileTimeAsset.Properties["tfm"];
                 ContentItem latestCompileTimeAsset = package.FindBestCompileAssetForFramework(baselineTargetFramework);
@@ -49,8 +47,7 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString()))
                     {
-                        string message = string.Format(Resources.MissingTargetFramework, baselineTargetFramework.ToString());
-                        _log.LogError(DiagnosticIds.TargetFrameworkDropped + " " + message);
+                        _log.LogError(DiagnosticIds.TargetFrameworkDropped, Resources.MissingTargetFramework, baselineTargetFramework.ToString());
                     }
                 }
                 else if (_runApiCompat)
@@ -61,7 +58,7 @@ namespace Microsoft.DotNet.PackageValidation
                         latestCompileTimeAsset.Path,
                         Path.GetFileName(package.PackagePath),
                         Resources.BaselineVersionValidatorHeader,
-                        string.Format(Resources.ApiCompatibilityHeader, baselineCompileTimeAsset.Path, latestCompileTimeAsset.Path));
+                        string.Format(Resources.ApiCompatibilityBaselineHeader, baselineCompileTimeAsset.Path, latestCompileTimeAsset.Path, _baselinePackage.Version, package.Version));
                 }
             }
 
@@ -73,8 +70,7 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString()))
                     {
-                        string message = string.Format(Resources.MissingTargetFramework, baselineTargetFramework.ToString());
-                        _log.LogError(DiagnosticIds.TargetFrameworkDropped + " " + message);
+                        _log.LogError(DiagnosticIds.TargetFrameworkDropped, Resources.MissingTargetFramework, baselineTargetFramework.ToString());
                     }
                 }
                 else
@@ -87,7 +83,7 @@ namespace Microsoft.DotNet.PackageValidation
                             latestRuntimeAsset.Path,
                             Path.GetFileName(package.PackagePath),
                             Resources.BaselineVersionValidatorHeader,
-                            string.Format(Resources.ApiCompatibilityHeader, baselineRuntimeAsset.Path, latestRuntimeAsset.Path));
+                            string.Format(Resources.ApiCompatibilityBaselineHeader, baselineRuntimeAsset.Path, latestRuntimeAsset.Path, _baselinePackage.Version, package.Version));
                     }
                 }
             }
@@ -101,8 +97,7 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString() + "-" + baselineRid))
                     {
-                        string message = string.Format(Resources.MissingTargetFrameworkAndRid, baselineTargetFramework.ToString(), baselineRid);
-                        _log.LogError(DiagnosticIds.TargetFrameworkAndRidPairDropped + " " + message);
+                        _log.LogError(DiagnosticIds.TargetFrameworkAndRidPairDropped, Resources.MissingTargetFrameworkAndRid, baselineTargetFramework.ToString(), baselineRid);
                     }
                 }
                 else
@@ -115,7 +110,7 @@ namespace Microsoft.DotNet.PackageValidation
                             latestRuntimeSpecificAsset.Path,
                             Path.GetFileName(package.PackagePath),
                             Resources.BaselineVersionValidatorHeader,
-                            string.Format(Resources.ApiCompatibilityHeader, baselineRuntimeSpecificAsset.Path, latestRuntimeSpecificAsset.Path));
+                            string.Format(Resources.BaselineVersionValidatorHeader, baselineRuntimeSpecificAsset.Path, latestRuntimeSpecificAsset.Path, _baselinePackage.Version, package.Version));
                     }
                 }
             }

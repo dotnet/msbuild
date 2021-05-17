@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
     <IsPackable>true</IsPackable>
-    <IsShipping>true</IsShipping>
+    <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <PackageType>MSBuildSdk</PackageType>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>1.0.0</VersionPrefix>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
@@ -24,10 +24,6 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\Tasks\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
     <EmbeddedResource Update="Resources.resx" GenerateSource="true" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="Microsoft.DotNet.PackageValidation.Tests" />
   </ItemGroup>
 
   <!--

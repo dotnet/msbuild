@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Runtime.Loader;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -66,7 +67,13 @@ Examples:
             // AppContext.BaseDirectory = $sdkRoot\$sdkVersion\DotnetTools\dotnet-watch\$version\tools\net6.0\any\
             // MSBuild.dll is located at $sdkRoot\$sdkVersion\MSBuild.dll
             var sdkRootDirectory = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "..");
+#if DEBUG
+            // In the usual case, use the SDK that contains the dotnet-watch. However during local testing, it's
+            // much more common to run dotnet-watch from a different SDK. Use the ambient SDK in that case.
+            MSBuildLocator.RegisterDefaults();
+#else
             MSBuildLocator.RegisterMSBuildPath(sdkRootDirectory);
+#endif
 
             Ensure.NotNull(console, nameof(console));
             Ensure.NotNullOrEmpty(workingDirectory, nameof(workingDirectory));
@@ -76,6 +83,9 @@ Examples:
             _cts = new CancellationTokenSource();
             console.CancelKeyPress += OnCancelKeyPress;
             _reporter = CreateReporter(verbose: true, quiet: false, console: _console);
+
+            // Register listeners that load Roslyn-related assemblies from the `Rosyln/bincore` directory.
+            RegisterAssemblyResolutionEvents(sdkRootDirectory);
         }
 
         public static async Task<int> Main(string[] args)
@@ -123,6 +133,12 @@ Examples:
             {
                  quiet,
                  verbose,
+                 new Option<bool>(
+                    new[] { "--no-hot-reload" },
+                    "Suppress hot reload for supported apps."),
+                 new Option<bool>(
+                    new[] { "--no-hot-restart" },
+                    "Suppress hot restart for supported apps."),
                  new Option<string>(
                     new[] { "--project", "-p" },
                     "The project to watch"),
@@ -171,10 +187,7 @@ Examples:
                 }
                 else
                 {
-                    return await MainInternalAsync(_reporter,
-                        options.Project,
-                        options.RemainingArguments,
-                        _cts.Token);
+                    return await MainInternalAsync(_reporter, options, _cts.Token);
                 }
             }
             catch (Exception ex)
@@ -204,17 +217,13 @@ Examples:
             _cts.Cancel();
         }
 
-        private async Task<int> MainInternalAsync(
-            IReporter reporter,
-            string project,
-            IReadOnlyList<string> args,
-            CancellationToken cancellationToken)
+        private async Task<int> MainInternalAsync(IReporter reporter, CommandLineOptions options, CancellationToken cancellationToken)
         {
             // TODO multiple projects should be easy enough to add here
             string projectFile;
             try
             {
-                projectFile = MsBuildProjectFinder.FindMsBuildProject(_workingDirectory, project);
+                projectFile = MsBuildProjectFinder.FindMsBuildProject(_workingDirectory, options.Project);
             }
             catch (FileNotFoundException ex)
             {
@@ -222,12 +231,14 @@ Examples:
                 return 1;
             }
 
+            var args = options.RemainingArguments;
+
             var isDefaultRunCommand = false;
-            if (args.Count == 1 && args[0] == "run")
+            if (args.Length == 1 && args[0] == "run")
             {
                 isDefaultRunCommand = true;
             }
-            else if (args.Count == 0)
+            else if (args.Length == 0)
             {
                 isDefaultRunCommand = true;
                 args = new[] { "run" };
@@ -266,7 +277,7 @@ Examples:
                 DefaultLaunchSettingsProfile = defaultProfile,
             };
 
-            if (isDefaultRunCommand && TryReadProject(projectFile, out var projectGraph) && IsHotReloadSupported(projectGraph))
+            if (!options.NoHotReload && isDefaultRunCommand && TryReadProject(projectFile, out var projectGraph) && IsHotReloadSupported(projectGraph))
             {
                 context.ProjectGraph = projectGraph;
                 _reporter.Verbose($"Project supports hot reload and was configured to run with the default run-command. Watching with hot-reload");
@@ -275,7 +286,11 @@ Examples:
                 // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
                 // b) The launch profile supports hot-reload based watching.
                 // The watcher will complain if users configure this for runtimes that would not support it.
-                await using var watcher = new HotReloadDotNetWatcher(reporter, fileSetFactory, watchOptions, _console);
+                await using var watcher = new HotReloadDotNetWatcher(reporter, fileSetFactory, watchOptions, _console)
+                {
+                    SuppressHotRestart = options.NoHotRestart,
+                    ProjectGraph = projectGraph,
+                };
                 await watcher.WatchAsync(context, cancellationToken);
             }
             else
@@ -377,6 +392,26 @@ Examples:
         {
             _console.CancelKeyPress -= OnCancelKeyPress;
             _cts.Dispose();
+        }
+
+        private static void RegisterAssemblyResolutionEvents(string sdkRootDirectory)
+        {
+            var roslynPath = Path.Combine(sdkRootDirectory, "Roslyn", "bincore");
+
+            AssemblyLoadContext.Default.Resolving += (context, assembly) =>
+            {
+                if (assembly.Name is "Microsoft.CodeAnalysis" or "Microsoft.CodeAnalysis.CSharp")
+                {
+                    var loadedAssembly = context.LoadFromAssemblyPath(Path.Combine(roslynPath, assembly.Name + ".dll"));
+                    // Avoid scenarioes where the assembly in rosylnPath is older than what we expect
+                    if (loadedAssembly.GetName().Version < assembly.Version)
+                    {
+                        throw new Exception($"Found a version of {assembly.Name} that was lower than the target version of {assembly.Version}");
+                    }
+                    return loadedAssembly;
+                }
+                return null;
+            };
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             var command = new WorkloadListCommand(_machineReadableParseResult, _reporter, workloadInstaller, "6.0.100");
             command.Execute();
 
-            _reporter.Lines.Should().Contain(@"{""installed"":[]}");
+            _reporter.Lines.Should().Contain(l => l.Contains(@"""installed"":[]"));
         }
 
         [Fact]
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             var command = new WorkloadListCommand(_machineReadableParseResult, _reporter, workloadInstaller, "6.0.100");
             command.Execute();
 
-            _reporter.Lines.Should().Contain(@"{""installed"":[""mock-workload-1"",""mock-workload-2"",""mock-workload-3""]}");
+            _reporter.Lines.Should().Contain(l => l.Contains("{\"installed\":[\"mock-workload-1\",\"mock-workload-2\",\"mock-workload-3\"]"));
         }
     }
 }

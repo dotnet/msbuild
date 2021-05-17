@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
-using NuGet.Common;
 
 namespace Microsoft.DotNet.PackageValidation
 {
@@ -18,14 +17,14 @@ namespace Microsoft.DotNet.PackageValidation
     public class ApiCompatRunner
     {
         private List<(string leftAssemblyPackagePath, string leftAssemblyRelativePath, string rightAssemblyPackagePath, string rightAssemblyRelativePath, string assemblyName, string compatibilityReason, string header)> _queue = new();
-        private readonly ILogger _log;
         private readonly ApiComparer _differ = new();
+        private readonly IPackageLogger _log;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, ILogger log)
+        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, IPackageLogger log)
         {
-            _log = log;
             _differ.NoWarn = noWarn;
             _differ.IgnoredDifferences = ignoredDifferences;
+            _log = log;
         }
 
         /// <summary>
@@ -35,9 +34,7 @@ namespace Microsoft.DotNet.PackageValidation
         {
             foreach (var apicompatTuples in _queue.Distinct())
             {
-                // TODO: Add Assembly version check.
                 // TODO: Add optimisations tuples.
-                // TODO: Run it Asynchronously.
                 using (Stream leftAssemblyStream = GetFileStreamFromPackage(apicompatTuples.leftAssemblyPackagePath, apicompatTuples.leftAssemblyRelativePath))
                 using (Stream rightAssemblyStream = GetFileStreamFromPackage(apicompatTuples.rightAssemblyPackagePath, apicompatTuples.rightAssemblyRelativePath))
                 {
@@ -48,13 +45,13 @@ namespace Microsoft.DotNet.PackageValidation
 
                     if (differences.Any())
                     {
-                        _log.LogError(apicompatTuples.compatibilityReason);
-                        _log.LogError(apicompatTuples.header);
+                        _log.LogError(null, apicompatTuples.compatibilityReason);
+                        _log.LogError(null, apicompatTuples.header);
                     }
 
                     foreach (CompatDifference difference in differences)
                     {
-                        _log.LogError(difference.ToString());
+                        _log.LogError(difference.DiagnosticId, difference.Message);
                     }
                 }
             }

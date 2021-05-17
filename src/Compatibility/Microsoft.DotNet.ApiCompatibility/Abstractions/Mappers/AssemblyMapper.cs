@@ -70,16 +70,21 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                     Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer);
                     foreach (KeyValuePair<INamespaceSymbol, List<INamedTypeSymbol>> kvp in typeForwards)
                     {
-                        NamespaceMapper mapper = AddMapper(kvp.Key);
+                        NamespaceMapper mapper = AddMapper(kvp.Key, checkIfExists: true);
                         mapper.AddForwardedTypes(kvp.Value, side, setIndex);
                     }
 
-                    NamespaceMapper AddMapper(INamespaceSymbol ns)
+                    NamespaceMapper AddMapper(INamespaceSymbol ns, bool checkIfExists = false)
                     {
                         if (!_namespaces.TryGetValue(ns, out NamespaceMapper mapper))
                         {
                             mapper = new NamespaceMapper(Settings, Right.Length);
                             _namespaces.Add(ns, mapper);
+                        }
+
+                        if (checkIfExists && mapper.GetElement(side, setIndex) != null)
+                        {
+                            return mapper;
                         }
 
                         mapper.AddElement(ns, side, setIndex);

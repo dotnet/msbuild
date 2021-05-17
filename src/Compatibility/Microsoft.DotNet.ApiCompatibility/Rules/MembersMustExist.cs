@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Extensions;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.ApiCompatibility.Rules
 {
@@ -33,7 +34,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         private void RunOnTypeSymbol(ITypeSymbol left, ITypeSymbol right, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
-                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, $"Type '{left.ToDisplayString()}' exists on the left but not on the right", DifferenceType.Removed, left));
+            {
+                AddDifference(left, DifferenceType.Removed, "Type '{0}' exists on the left but not on the right");
+            }
+            else if (Settings.StrictMode && left == null && right != null)
+            {
+                AddDifference(right, DifferenceType.Added, "Type '{0}' exists on the right but not on the left");
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void AddDifference(ITypeSymbol symbol, DifferenceType type, string format)
+            {
+                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, string.Format(format, symbol.ToDisplayString()), type, symbol));
+            }
         }
 
         /// <summary>
@@ -93,7 +106,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         }
 
         private bool ReturnTypesMatch(IMethodSymbol method, IMethodSymbol candidate) =>
-            method.ReturnType.ToDisplayString() == candidate.ReturnType.ToDisplayString();
+            method.ReturnType.ToComparisonDisplayString() == candidate.ReturnType.ToComparisonDisplayString();
 
         private bool ParametersMatch(IMethodSymbol method, IMethodSymbol candidate)
         {
@@ -102,7 +115,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             for (int i = 0; i < method.Parameters.Length; i++)
             {
-                if (method.Parameters[i].Type.ToDisplayString() != method.Parameters[i].Type.ToDisplayString())
+                if (method.Parameters[i].Type.ToComparisonDisplayString() != method.Parameters[i].Type.ToComparisonDisplayString())
                     return false;
             }
 
