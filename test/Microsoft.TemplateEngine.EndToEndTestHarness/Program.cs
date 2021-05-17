@@ -13,7 +13,6 @@ using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.EndToEndTestHarness
@@ -219,7 +218,7 @@ namespace Microsoft.TemplateEngine.EndToEndTestHarness
                 typeof(Program).GetTypeInfo().Assembly
             });
 
-            return new DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { "dotnetcli" });
+            return new Edge.DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { "dotnetcli" });
         }
 
         /// <summary>

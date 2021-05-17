@@ -5,6 +5,7 @@
 
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
@@ -155,6 +156,27 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching($"Success: Microsoft\\.TemplateEngine\\.TestTemplates::([\\d\\.a-z-])+ installed the following templates:")
                 .And.HaveStdOutContaining("TestAssets.TemplateWithTags")
                 .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
+        }
+
+        [Fact]
+        public void CanPrintDebugOutputWhenInstalling()
+        {
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "--quiet")
+                .WithCustomHive()
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .WithEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE", "true")
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.NotHaveStdOutContaining("Determining projects to restore...")
+                .And.HaveStdOutContaining("The following template packages will be installed:")
+                .And.HaveStdOutMatching($"Success: Microsoft\\.DotNet\\.Web\\.ProjectTemplates\\.5\\.0::([\\d\\.a-z-])+ installed the following templates:")
+                .And.HaveStdOutContaining("web")
+                .And.HaveStdOutContaining("blazorwasm")
+                .And.HaveStdOutMatching("\\[\\d{4}\\-\\d{2}\\-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{1,3}\\] " + Regex.Escape("[Debug] [Microsoft.TemplateEngine.Edge.Installers.NuGet.NuGetInstaller] => [Execute]: Microsoft.DotNet.Web.ProjectTemplates.5.0 is not a local NuGet package."))
+                .And.HaveStdOutMatching("\\[\\d{4}\\-\\d{2}\\-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{1,3}\\] " + Regex.Escape("[Debug] [Microsoft.TemplateEngine.Edge.Installers.NuGet.NuGetInstaller] => [Execute]: Microsoft.DotNet.Web.ProjectTemplates.5.0 is identified as the downloadable NuGet package."));
         }
 
         [Fact]

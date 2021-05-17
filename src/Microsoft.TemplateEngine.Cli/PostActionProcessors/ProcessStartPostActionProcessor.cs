@@ -30,7 +30,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 redirectStandardOutput = false;
             }
 
-            settings.Host.LogMessage(string.Format(LocalizableStrings.RunningCommand, actionConfig.Args["executable"] + " " + args));
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.RunningCommand, actionConfig.Args["executable"] + " " + args));
 
             string resolvedExecutablePath = ResolveExecutableFilePath(settings.Host.FileSystem, actionConfig.Args["executable"], outputBasePath);
 
@@ -50,14 +50,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             if (commandResult.ExitCode != 0)
             {
                 string error = commandResult.StandardError.ReadToEnd();
-                settings.Host.LogMessage(LocalizableStrings.CommandFailed);
-                settings.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, error));
-                settings.Host.LogMessage(string.Empty);
+                Reporter.Error.WriteLine(LocalizableStrings.CommandFailed);
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CommandOutput, error));
+                Reporter.Error.WriteLine(string.Empty);
                 allSucceeded = false;
             }
             else
             {
-                settings.Host.LogMessage(LocalizableStrings.CommandSucceeded);
+                Reporter.Output.WriteLine(LocalizableStrings.CommandSucceeded);
             }
 
             return allSucceeded;

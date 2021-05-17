@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli
         internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string? hivePath, bool virtualize = false)
         {
             _telemetryLogger = telemetryLogger;
-            host = new ExtendedTemplateEngineHost(host, this);
+            host = new CliTemplateEngineHost(host, this);
             EnvironmentSettings = new EngineEnvironmentSettings(host, settingsLocation: hivePath, onFirstRun: FirstRun, virtualizeSettings: virtualize);
             _settingsLoader = EnvironmentSettings.SettingsLoader;
             _templateCreator = new TemplateCreator(EnvironmentSettings);
@@ -192,7 +192,7 @@ namespace Microsoft.TemplateEngine.Cli
             int result;
             try
             {
-                using (Timing.Over(host, "Execute"))
+                using (Timing.Over(instance.EnvironmentSettings.Host.Logger, "Execute"))
                 {
                     result = commandInput.Execute(args);
                 }

@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
             if (targetFiles is null)
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.CouldntDetermineFilesToRestore));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CouldntDetermineFilesToRestore));
                 return false;
             }
 
@@ -73,7 +73,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                     continue;
                 }
 
-                environment.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
 
                 // Prefer to restore the project in-proc vs. creating a new process.
                 bool succeeded = false;
@@ -90,12 +90,12 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 if (!succeeded)
                 {
-                    environment.Host.LogMessage(LocalizableStrings.RestoreFailed);
+                    Reporter.Error.WriteLine(LocalizableStrings.RestoreFailed);
                     allSucceeded = false;
                 }
                 else
                 {
-                    environment.Host.LogMessage(LocalizableStrings.RestoreSucceeded);
+                    Reporter.Output.WriteLine(LocalizableStrings.RestoreSucceeded);
                 }
             }
 
@@ -106,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
             if (templateCreationResult.PrimaryOutputs.Count == 0)
             {
-                environment.Host.LogMessage(LocalizableStrings.NoPrimaryOutputsToRestore);
+                Reporter.Output.WriteLine(LocalizableStrings.NoPrimaryOutputsToRestore);
                 return true;
             }
 
@@ -125,7 +125,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                     continue;
                 }
 
-                environment.Host.LogMessage(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.RunningDotnetRestoreOn, pathToRestore));
 
                 // Prefer to restore the project in-proc vs. creating a new process.
                 bool succeeded = false;
@@ -142,12 +142,12 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 if (!succeeded)
                 {
-                    environment.Host.LogMessage(LocalizableStrings.RestoreFailed);
+                    Reporter.Error.WriteLine(LocalizableStrings.RestoreFailed);
                     allSucceeded = false;
                 }
                 else
                 {
-                    environment.Host.LogMessage(LocalizableStrings.RestoreSucceeded);
+                    Reporter.Output.WriteLine(LocalizableStrings.RestoreSucceeded);
                 }
             }
 

@@ -106,14 +106,10 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--debug:ephemeral-hive", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:reinit", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:showconfig", string.Empty, Accept.NoArguments()),
-                    Create.Option("--debug:emit-timings", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:emit-telemetry", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:custom-hive", string.Empty, Accept.ExactlyOneArgument()),
                     Create.Option("--debug:version", string.Empty, Accept.NoArguments()),
                     Create.Option("--debug:disable-sdk-templates", string.Empty, Accept.NoArguments()),
-
-                    Create.Option("--trace:authoring", string.Empty, Accept.NoArguments()),
-                    Create.Option("--trace:install", string.Empty, Accept.NoArguments()),
                 };
             }
         }

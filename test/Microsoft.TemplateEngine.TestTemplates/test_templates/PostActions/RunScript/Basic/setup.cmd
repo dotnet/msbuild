@@ -1,1 +1,1 @@
-﻿echo Hello Windows
+echo Hello Windows

@@ -1,24 +1,43 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal class ExtendedTemplateEngineHost : ITemplateEngineHost
+    internal class CliTemplateEngineHost : ITemplateEngineHost
     {
         private readonly New3Command _new3Command;
         private readonly ITemplateEngineHost _baseHost;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ILogger _logger;
 
-        internal ExtendedTemplateEngineHost(ITemplateEngineHost baseHost, New3Command new3Command)
+        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, New3Command new3Command)
         {
             _baseHost = baseHost;
             _new3Command = new3Command;
+
+            bool enableVerboseLogging = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE"), out bool value) && value;
+            _loggerFactory =
+                Extensions.Logging.LoggerFactory.Create(builder =>
+                    builder
+                        .SetMinimumLevel(enableVerboseLogging ? LogLevel.Trace : LogLevel.Information)
+                        .AddConsole(config => config.FormatterName = nameof(CliConsoleFormatter))
+                        .AddConsoleFormatter<CliConsoleFormatter, ConsoleFormatterOptions>(config =>
+                        {
+                            config.IncludeScopes = true;
+                            config.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
+                        }));
+            _logger = _loggerFactory.CreateLogger<CliTemplateEngineHost>();
         }
 
         public IPhysicalFileSystem FileSystem => _baseHost.FileSystem;
@@ -31,13 +50,17 @@ namespace Microsoft.TemplateEngine.Cli
 
         public virtual IReadOnlyList<KeyValuePair<Guid, Func<Type>>> BuiltInComponents => _baseHost.BuiltInComponents;
 
+        public ILogger Logger => _logger;
+
+        public ILoggerFactory LoggerFactory => _loggerFactory;
+
         private bool GlobalJsonFileExistsInPath
         {
             get
             {
                 const string fileName = "global.json";
 
-                string workingPath = Path.Combine(FileSystem.GetCurrentDirectory(), _new3Command.OutputPath);
+                string? workingPath = Path.Combine(FileSystem.GetCurrentDirectory(), _new3Command.OutputPath);
                 bool found = false;
 
                 do
@@ -60,30 +83,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public virtual void LogMessage(string message)
-        {
-            Reporter.Output.WriteLine(message);
-        }
-
-        public virtual void OnCriticalError(string code, string message, string currentFile, long currentPosition)
-        {
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericError, message));
-        }
-
-        public virtual bool OnNonCriticalError(string code, string message, string currentFile, long currentPosition)
-        {
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.GenericWarning, message));
-            return false;
-        }
-
-        public virtual bool OnParameterError(ITemplateParameter parameter, string receivedValue, string message, out string newValue)
-        {
-            return _baseHost.OnParameterError(parameter, receivedValue, message, out newValue);
-        }
-
-        public virtual void OnSymbolUsed(string symbol, object value) => _baseHost.OnSymbolUsed(symbol, value);
-
-        public virtual bool TryGetHostParamDefault(string paramName, out string value)
+        public virtual bool TryGetHostParamDefault(string paramName, out string? value)
         {
             switch (paramName)
             {
@@ -117,20 +117,58 @@ namespace Microsoft.TemplateEngine.Cli
             return false;
         }
 
-        public bool OnConfirmPartialMatch(string name)
+        #region Obsolete
+        [Obsolete]
+        void ITemplateEngineHost.LogMessage(string message)
+        {
+            //do nothing
+        }
+
+        [Obsolete]
+        void ITemplateEngineHost.OnCriticalError(string code, string message, string currentFile, long currentPosition)
+        {
+            //do nothing
+        }
+
+        [Obsolete]
+        bool ITemplateEngineHost.OnNonCriticalError(string code, string message, string currentFile, long currentPosition)
+        {
+            //do nothing
+            return false;
+        }
+
+        [Obsolete]
+        bool ITemplateEngineHost.OnParameterError(ITemplateParameter parameter, string receivedValue, string message, out string newValue)
+        {
+            //do nothing
+            newValue = "";
+            return false;
+        }
+
+        [Obsolete]
+        void ITemplateEngineHost.OnSymbolUsed(string symbol, object value)
+        {
+            //do nothing
+        }
+
+        [Obsolete]
+        bool ITemplateEngineHost.OnConfirmPartialMatch(string name)
         {
             return true;
         }
 
-        public void LogDiagnosticMessage(string message, string category, params string[] details)
+        [Obsolete]
+        void ITemplateEngineHost.LogDiagnosticMessage(string message, string category, params string[] details)
         {
-            _baseHost.LogDiagnosticMessage(message, category, details);
+            //do nothing
         }
 
-        public virtual void LogTiming(string label, TimeSpan duration, int depth)
+        [Obsolete]
+        void ITemplateEngineHost.LogTiming(string label, TimeSpan duration, int depth)
         {
-            _baseHost.LogTiming(label, duration, depth);
+            //do nothing
         }
+        #endregion
 
         private static string GetChangeString(ChangeKind kind)
         {

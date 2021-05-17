@@ -90,10 +90,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
                     return Task.FromResult(CreationResultStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousParameterValueChoice:
-                    environmentSettings.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousChoiceParameterValue, "Authoring");
+                    Reporter.Verbose.WriteLine(LocalizableStrings.Authoring_AmbiguousChoiceParameterValue);
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
                 case TemplateResolutionResult.Status.AmbiguousTemplateChoice:
-                    environmentSettings.Host.LogDiagnosticMessage(LocalizableStrings.Authoring_AmbiguousBestPrecedence, "Authoring");
+                    Reporter.Verbose.WriteLine(LocalizableStrings.Authoring_AmbiguousBestPrecedence);
                     return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, environmentSettings, commandInput);
                 case TemplateResolutionResult.Status.InvalidParameter:
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));

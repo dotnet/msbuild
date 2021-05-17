@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -63,7 +64,7 @@ namespace Dotnet_new3
                     }
                     if (path == null)
                     {
-                        _settings.Host.LogDiagnosticMessage("Couldn't the setup package location, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.", "Install");
+                        _settings.Host.Logger.LogDebug("Couldn't the setup package location, because \"Microsoft.TemplateEngine.sln\" is not in any of parent directories.");
                         return Task.FromResult((IReadOnlyList<ITemplatePackage>)templatePackages);
                     }
                     Environment.SetEnvironmentVariable("DN3", path);

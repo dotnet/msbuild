@@ -22,20 +22,20 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
             if (string.IsNullOrEmpty(outputBasePath))
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile));
                 return false;
             }
 
             IReadOnlyList<string> nearestSlnFilesFound = FindSolutionFilesAtOrAbovePath(environment.Host.FileSystem, outputBasePath);
             if (nearestSlnFilesFound.Count != 1)
             {
-                environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile);
+                Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile);
                 return false;
             }
 
             if (!TryGetProjectFilesToAdd(environment, actionConfig, templateCreationResult, outputBasePath, out IReadOnlyList<string> projectFiles))
             {
-                environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
+                Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
                 return false;
             }
 
@@ -43,19 +43,19 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
             addProjToSlnCommand.CaptureStdOut();
             addProjToSlnCommand.CaptureStdErr();
-            environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, addProjToSlnCommand.Command));
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, addProjToSlnCommand.Command));
             Dotnet.Result commandResult = addProjToSlnCommand.Execute();
 
             if (commandResult.ExitCode != 0)
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
-                environment.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
-                environment.Host.LogMessage(string.Empty);
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
+                Reporter.Error.WriteLine(string.Empty);
                 return false;
             }
             else
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
                 return true;
             }
         }
@@ -64,14 +64,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
             if (string.IsNullOrEmpty(outputBasePath))
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile));
                 return false;
             }
 
             IReadOnlyList<string> nearestSlnFilesFound = FindSolutionFilesAtOrAbovePath(environment.Host.FileSystem, outputBasePath);
             if (nearestSlnFilesFound.Count != 1)
             {
-                environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile);
+                Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile);
                 return false;
             }
 
@@ -113,7 +113,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 if (allProjects.Count == 0)
                 {
-                    environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
+                    Reporter.Error.WriteLine(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
                     return false;
                 }
 
@@ -129,19 +129,19 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFound[0], projectFiles, solutionFolder);
             addProjToSlnCommand.CaptureStdOut();
             addProjToSlnCommand.CaptureStdErr();
-            environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, addProjToSlnCommand.Command));
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, addProjToSlnCommand.Command));
             Dotnet.Result commandResult = addProjToSlnCommand.Execute();
 
             if (commandResult.ExitCode != 0)
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
-                environment.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
-                environment.Host.LogMessage(string.Empty);
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
+                Reporter.Error.WriteLine(string.Empty);
                 return false;
             }
             else
             {
-                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFound[0], solutionFolder));
                 return true;
             }
         }

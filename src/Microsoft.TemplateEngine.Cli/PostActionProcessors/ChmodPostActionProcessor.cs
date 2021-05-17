@@ -53,7 +53,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                     if (commandResult.ExitCode != 0)
                     {
-                        environment.Host.LogMessage(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
                         allSucceeded = false;
                     }
                 }

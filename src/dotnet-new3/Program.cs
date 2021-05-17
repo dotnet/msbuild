@@ -12,7 +12,6 @@ using System.Reflection;
 using System.Text;
 using Microsoft.TemplateEngine.Cli;
 using Microsoft.TemplateEngine.Edge;
-using Microsoft.TemplateEngine.Utils;
 
 namespace Dotnet_new3
 {
@@ -24,33 +23,19 @@ namespace Dotnet_new3
         private const string LanguageOverrideEnvironmentVar = "DOTNET_CLI_UI_LANGUAGE";
         private const string VsLanguageOverrideEnvironmentVar = "VSLANG";
         private const string CompilerLanguageEnvironmentVar = "PreferredUILang";
-        private const string V = "dotnetcli";
 
         public static int Main(string[] args)
         {
-            bool emitTimings = args.Any(x => string.Equals(x, "--debug:emit-timings", StringComparison.OrdinalIgnoreCase));
             bool debugTelemetry = args.Any(x => string.Equals(x, "--debug:emit-telemetry", StringComparison.OrdinalIgnoreCase));
-
             bool disableSdkTemplates = args.Any(x => string.Equals(x, "--debug:disable-sdk-templates", StringComparison.OrdinalIgnoreCase));
-            DefaultTemplateEngineHost host = CreateHost(emitTimings, disableSdkTemplates);
 
-            bool debugAuthoring = args.Any(x => string.Equals(x, "--trace:authoring", StringComparison.OrdinalIgnoreCase));
-            bool debugInstall = args.Any(x => string.Equals(x, "--trace:install", StringComparison.OrdinalIgnoreCase));
-            if (debugAuthoring)
-            {
-                AddAuthoringLogger(host);
-                AddInstallLogger(host);
-            }
-            else if (debugInstall)
-            {
-                AddInstallLogger(host);
-            }
+            DefaultTemplateEngineHost host = CreateHost(disableSdkTemplates);
 
             var callbacks = new New3Callbacks();
             return New3Command.Run(CommandName, host, new TelemetryLogger(null, debugTelemetry), callbacks, args);
         }
 
-        private static DefaultTemplateEngineHost CreateHost(bool emitTimings, bool disableSdkTemplates)
+        private static DefaultTemplateEngineHost CreateHost(bool disableSdkTemplates)
         {
             var preferences = new Dictionary<string, string>
             {
@@ -81,36 +66,14 @@ namespace Dotnet_new3
 
             ConfigureLocale();
 
-            DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(HostIdentifier, HostVersion, preferences, builtIns, new[] { V });
-
-            if (emitTimings)
-            {
-                host.OnLogTiming = (label, duration, depth) =>
-                {
-                    string indent = string.Join("", Enumerable.Repeat("  ", depth));
-                    Console.WriteLine($"{indent} {label} {duration.TotalMilliseconds}");
-                };
-            }
+            DefaultTemplateEngineHost host = new DefaultTemplateEngineHost(
+                HostIdentifier,
+                HostVersion,
+                preferences,
+                builtIns,
+                new[] { "dotnetcli" });
 
             return host;
-        }
-
-        private static void AddAuthoringLogger(DefaultTemplateEngineHost host)
-        {
-            Action<string, string[]> authoringLogger = (message, additionalInfo) =>
-            {
-                Console.WriteLine(string.Format("Authoring: {0}", message));
-            };
-            host.RegisterDiagnosticLogger("Authoring", authoringLogger);
-        }
-
-        private static void AddInstallLogger(DefaultTemplateEngineHost host)
-        {
-            Action<string, string[]> installLogger = (message, additionalInfo) =>
-            {
-                Console.WriteLine(string.Format("Install: {0}", message));
-            };
-            host.RegisterDiagnosticLogger("Install", installLogger);
         }
 
         private static void ConfigureLocale()
