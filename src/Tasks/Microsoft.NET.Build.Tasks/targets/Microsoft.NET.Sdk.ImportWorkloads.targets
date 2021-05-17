@@ -17,10 +17,22 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="ShowMissingWorkloads" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
+  <Target Name="GetSuggestedWorkloads" Returns="@(SuggestedWorkload)">
+    <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"
+                          NetCoreRoot="$(NetCoreRoot)"
+                          NETCoreSdkVersion="$(NETCoreSdkVersion)"
+                          GenerateErrorsForMissingWorkloads="false">
+      <Output TaskParameter="SuggestedWorkloads" ItemName="SuggestedWorkload" />
+    </ShowMissingWorkloads>
+  </Target>
+  
   <Target Name="_CheckForMissingWorkload"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform;_CheckForUnsupportedTargetPlatformIdentifier"
         Condition="'@(MissingWorkloadPack)' != ''">
-
-    <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"/>
+    
+    <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"
+                          NetCoreRoot="$(NetCoreRoot)"
+                          NETCoreSdkVersion="$(NETCoreSdkVersion)"
+                          GenerateErrorsForMissingWorkloads="true"/>
   </Target>
 </Project>
