@@ -1,6 +1,6 @@
 # MSBuild Changelog
 
-## MSBuild 16.10.0 (in development)
+## MSBuild 16.10.0
 
 This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .NET SDK 5.0.300.
 
@@ -34,7 +34,6 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 #### Changed
 
 * String deduplication is now much more sophisticated, reducing memory usage (#5663).
-* Improved memory usage and JIT time on MSBuild on .NET 5.0 and higher (#6126, #6189).
 * Refactoring and performance improvements in `ResolveAssemblyReferences` (#5929, #6094).
 * Binary logs now store strings only once, dramatically reducing log size (#6017, #6326). Thanks, @KirillOsenkov!
 * Refactoring and code cleanup (#6120, #6159, #6158, #6282). Thanks, @Nirmal4G!
@@ -45,7 +44,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * When evaluated with `IgnoreInvalidImports`, _empty_ imports are also allowed (#6222).
 * `Log.HasLoggedError` now respects `MSBuildWarningsAsErrors` (#6174).
 * `TargetPath` metadata is now respected on items that copy to output directories, and takes precedence over `Link` (#6237).
-* The `Restore` operation now fails when SDKs are unresolvable or no `Restore` target exists (#6312).
+* The `Restore` operation now fails when SDKs are unresolvable (#6312).
 * `MSBuild.exe.config` now has explicit binding redirects for all assemblies in the MSBuild VSIX (#6334).
 
 #### Fixed
@@ -60,6 +59,8 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * Escape special characters in `Exec`’s generated batch files, allowing builds as users with some special characters in their Windows username (#6233).
 * Permit comments and trailing commas in solution filter files (#6346).
 * Exceptions thrown from experimental cache plugins are now handled and logged better (#6345, #6368).
+* Source generators with configuration files can now be used in XamlPreCompile (#6438).
+* Large builds no longer crash with an exception in `LogProjectStarted` (#6437).
 
 #### Infrastructure
 
@@ -70,6 +71,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.0 and .N
 * Correctly mark .NET Framework 3.5 reference assembly package dependency as private (#6214).
 * Our own builds opt into text-based performance logging (#6274).
 * Update to Arcade publishing v3 (#6349).
+* Use OneLocBuild localization process (#6378).
 
 #### Documentation
 

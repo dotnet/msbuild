@@ -465,6 +465,41 @@ namespace Microsoft.Build.Utilities
 
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata()
         {
+#if FEATURE_APPDOMAIN
+            // Can't send a yield-return iterator across AppDomain boundaries
+            // so have to allocate
+            if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+            {
+                return EnumerateMetadataEager();
+            }
+#endif
+
+            // In general case we want to return an iterator without allocating a collection
+            // to hold the result, so we can stream the items directly to the consumer.
+            return EnumerateMetadataLazy();
+        }
+
+        private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
+        {
+            if (_metadata == null)
+            {
+                return Array.Empty<KeyValuePair<string, string>>();
+            }
+
+            int count = _metadata.Count;
+            int index = 0;
+            var result = new KeyValuePair<string, string>[count];
+            foreach (var kvp in _metadata)
+            {
+                var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                result[index++] = unescaped;
+            }
+
+            return result;
+        }
+
+        private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
+        {
             if (_metadata == null)
             {
                 yield break;

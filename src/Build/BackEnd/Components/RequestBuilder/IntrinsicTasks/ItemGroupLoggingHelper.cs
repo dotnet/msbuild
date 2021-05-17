@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.Remoting;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
@@ -271,6 +272,11 @@ namespace Microsoft.Build.BackEnd
             bool logItemMetadata,
             DateTime timestamp)
         {
+            // Only create a snapshot of items if we use AppDomains
+#if FEATURE_APPDOMAIN
+            CreateItemsSnapshot(ref items);
+#endif
+
             var args = new TaskParameterEventArgs(
                 messageKind,
                 itemType,
@@ -280,6 +286,60 @@ namespace Microsoft.Build.BackEnd
             args.BuildEventContext = buildEventContext;
             return args;
         }
+
+#if FEATURE_APPDOMAIN
+        private static void CreateItemsSnapshot(ref IList items)
+        {
+            if (items == null)
+            {
+                return;
+            }
+
+            // If we're in the default AppDomain, but any of the items come from a different AppDomain
+            // we need to take a snapshot of the items right now otherwise that AppDomain might get
+            // unloaded by the time we want to consume the items.
+            // If we're not in the default AppDomain, always take the items snapshot.
+            //
+            // It is unfortunate to need to be doing this check, but ResolveComReference and other tasks
+            // still use AppDomains and create a TaskParameterEventArgs in the default AppDomain, but
+            // pass it Items from another AppDomain.
+            if (AppDomain.CurrentDomain.IsDefaultAppDomain())
+            {
+                bool needsSnapshot = false;
+                foreach (var item in items)
+                {
+                    if (RemotingServices.IsTransparentProxy(item))
+                    {
+                        needsSnapshot = true;
+                        break;
+                    }
+                }
+
+                if (!needsSnapshot)
+                {
+                    return;
+                }
+            }
+
+            int count = items.Count;
+            var cloned = new object[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                var item = items[i];
+                if (item is ITaskItem taskItem)
+                {
+                    cloned[i] = new TaskItemData(taskItem);
+                }
+                else
+                {
+                    cloned[i] = item;
+                }
+            }
+
+            items = cloned;
+        }
+#endif
 
         internal static string GetTaskParameterText(TaskParameterEventArgs args)
             => GetTaskParameterText(args.Kind, args.ItemType, args.Items, args.LogItemMetadata);
