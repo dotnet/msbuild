@@ -246,5 +246,60 @@ namespace Dotnet_new3.IntegrationTests
                 new DirectoryInfo(Path.Combine(workingDirectory, "alias")).EnumerateFileSystemInfos().Select(fi => fi.Name));
 
         }
+        
+        [Fact]
+        public void CannotOverwriteFilesWithoutForce()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "console")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+
+            new DotnetNewCommand(_log, "console")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("Creating this template will make changes to existing files:")
+                .And.HaveStdErrMatching(@$"  Overwrite   \.[\\\/]{Path.GetFileName(workingDirectory)}\.csproj")
+                .And.HaveStdErrMatching(@"  Overwrite   \.[\\\/]Program\.cs")
+                .And.HaveStdErrContaining("Rerun the command and pass --force to accept and create.");
+        }
+
+        [Fact]
+        public void CanOverwriteFilesWithForce()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            var commandResult = new DotnetNewCommand(_log, "console", "--no-restore")
+                .WithCustomHive(home).Quietly()
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+
+            var forceCommandResult = new DotnetNewCommand(_log, "console", "--no-restore", "--force")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            forceCommandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
+
+            Assert.Equal(commandResult.StdOut, forceCommandResult.StdOut);
+        }    
     }
 }

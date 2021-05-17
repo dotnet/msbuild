@@ -138,6 +138,17 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        private static string GetChangeString(ChangeKind kind)
+        {
+            return kind switch
+            {
+                ChangeKind.Change => LocalizableStrings.Change,
+                ChangeKind.Delete => LocalizableStrings.Delete,
+                ChangeKind.Overwrite => LocalizableStrings.Overwrite,
+                _ => LocalizableStrings.UnknownChangeKind
+            };
+        }
+
         // Attempts to invoke the template.
         // Warning: The _commandInput cannot be assumed to be in a state that is parsed for the template being invoked.
         //      So be sure to only get template-agnostic information from it. Anything specific to the template must be gotten from the ITemplateMatchInfo
@@ -277,6 +288,21 @@ namespace Microsoft.TemplateEngine.Cli
                         return CreationResultStatus.NotFound;
                     }
                     break;
+                case CreationResultStatus.DestructiveChangesDetected:
+                    Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
+                    IReadOnlyList<IFileChange> destructiveChanges = instantiateResult.CreationEffects.FileChanges.Where(x => x.ChangeKind != ChangeKind.Create).ToList();
+                    int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
+                    int padLen = 5 + longestChangeTextLength;
+
+                    foreach (IFileChange change in destructiveChanges)
+                    {
+                        string changeKind = GetChangeString(change.ChangeKind);
+                        Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
+                    }
+
+                    Reporter.Error.WriteLine();
+                    Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
+                    return CreationResultStatus.DestructiveChangesDetected;
                 default:
                     break;
             }

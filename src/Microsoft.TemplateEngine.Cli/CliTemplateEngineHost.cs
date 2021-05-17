@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.TemplateEngine.Abstractions;
@@ -100,23 +99,6 @@ namespace Microsoft.TemplateEngine.Cli
             _baseHost.VirtualizeDirectory(path);
         }
 
-        public bool OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
-        {
-            Reporter.Error.WriteLine(LocalizableStrings.DestructiveChangesNotification.Bold().Red());
-            int longestChangeTextLength = destructiveChanges.Max(x => GetChangeString(x.ChangeKind).Length);
-            int padLen = 5 + longestChangeTextLength;
-
-            foreach (IFileChange change in destructiveChanges)
-            {
-                string changeKind = GetChangeString(change.ChangeKind);
-                Reporter.Error.WriteLine(($"  {changeKind}".PadRight(padLen) + change.TargetRelativePath).Bold().Red());
-            }
-
-            Reporter.Error.WriteLine();
-            Reporter.Error.WriteLine(LocalizableStrings.RerunCommandAndPassForceToCreateAnyway.Bold().Red());
-            return false;
-        }
-
         #region Obsolete
         [Obsolete]
         void ITemplateEngineHost.LogMessage(string message)
@@ -168,29 +150,13 @@ namespace Microsoft.TemplateEngine.Cli
         {
             //do nothing
         }
-        #endregion
 
-        private static string GetChangeString(ChangeKind kind)
+        [Obsolete]
+        bool ITemplateEngineHost.OnPotentiallyDestructiveChangesDetected(IReadOnlyList<IFileChange> changes, IReadOnlyList<IFileChange> destructiveChanges)
         {
-            string changeType;
-
-            switch (kind)
-            {
-                case ChangeKind.Change:
-                    changeType = LocalizableStrings.Change;
-                    break;
-                case ChangeKind.Delete:
-                    changeType = LocalizableStrings.Delete;
-                    break;
-                case ChangeKind.Overwrite:
-                    changeType = LocalizableStrings.Overwrite;
-                    break;
-                default:
-                    changeType = LocalizableStrings.UnknownChangeKind;
-                    break;
-            }
-
-            return changeType;
+            //do nothing - CreationStatusResult is handled instead in TemplateInvoker
+            return false;
         }
+        #endregion
     }
 }
