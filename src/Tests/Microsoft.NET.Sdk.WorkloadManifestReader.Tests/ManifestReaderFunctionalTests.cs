@@ -79,5 +79,24 @@ namespace ManifestReaderTests
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
             result.Should().HaveCount(0);
         }
+
+        [Fact]
+        public void ItCanReadIntegerVersion()
+        {
+            var testFolder = _testAssetsManager.CreateTestDirectory().Path;
+            var manifestPath = Path.Combine(testFolder, "manifest.json");
+            File.WriteAllText(manifestPath, @"
+{
+    ""version"": 5
+}");
+
+            var workloadResolver =
+                WorkloadResolver.CreateForTests(new FakeManifestProvider(manifestPath), new[] { "fakepath" });
+
+            workloadResolver.ReplaceFilesystemChecksForTest(fileExists: (_) => true, directoryExists: (_) => true);
+
+            workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template).Should().BeEmpty();
+
+        }
     }
 }
