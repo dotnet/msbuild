@@ -22,15 +22,10 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset("TestAppWithWapAndWpf")
                 .WithSource();
 
-            // var projectDirectory = testInstance.Path;
-            new RestoreCommand(testInstance)
+            new BuildCommand(testInstance, "WapProjTemplate1")
                 .Execute()
                 .Should()
                 .Pass();
-
-            new BuildCommand(testInstance)
-                .Execute()
-                .Should().Pass();
         }
     }
 }
