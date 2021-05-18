@@ -59,7 +59,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 await plugin.BeginBuildAsync(
                     new CacheContext(
                         pluginDescriptor.PluginSettings,
-                        new IFileSystemAdapter(FileSystems.Default),
+                        new MSBuildFileSystemBase(FileSystems.Default),
                         pluginDescriptor.ProjectGraph,
                         pluginDescriptor.EntryPoints),
                     // TODO: Detect verbosity from logging service.

@@ -1495,21 +1495,21 @@ namespace Microsoft.Build.Experimental.ProjectCache
 }
 namespace Microsoft.Build.FileSystem
 {
-    public abstract partial class MSBuildFileSystemBase
+    public partial class MSBuildFileSystemBase
     {
-        protected MSBuildFileSystemBase() { }
-        public abstract bool DirectoryExists(string path);
-        public abstract System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly);
-        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly);
-        public abstract System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly);
-        public abstract bool FileExists(string path);
-        public abstract bool FileOrDirectoryExists(string path);
-        public abstract System.IO.FileAttributes GetAttributes(string path);
-        public abstract System.IO.Stream GetFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share);
-        public abstract System.DateTime GetLastWriteTimeUtc(string path);
-        public abstract System.IO.TextReader ReadFile(string path);
-        public abstract byte[] ReadFileAllBytes(string path);
-        public abstract string ReadFileAllText(string path);
+        public MSBuildFileSystemBase() { }
+        public virtual bool DirectoryExists(string path) { throw null; }
+        public virtual System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly) { throw null; }
+        public virtual System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly) { throw null; }
+        public virtual System.Collections.Generic.IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly) { throw null; }
+        public virtual bool FileExists(string path) { throw null; }
+        public virtual bool FileOrDirectoryExists(string path) { throw null; }
+        public virtual System.IO.FileAttributes GetAttributes(string path) { throw null; }
+        public virtual System.IO.Stream GetFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share) { throw null; }
+        public virtual System.DateTime GetLastWriteTimeUtc(string path) { throw null; }
+        public virtual System.IO.TextReader ReadFile(string path) { throw null; }
+        public virtual byte[] ReadFileAllBytes(string path) { throw null; }
+        public virtual string ReadFileAllText(string path) { throw null; }
     }
 }
 namespace Microsoft.Build.Globbing

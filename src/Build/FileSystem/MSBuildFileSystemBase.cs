@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Shared.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,66 +15,131 @@ namespace Microsoft.Build.FileSystem
     /// - must be thread safe
     /// - may cache some or all the calls.
     /// </summary>
-    public abstract class MSBuildFileSystemBase
+    public class MSBuildFileSystemBase : IFileSystem
     {
+        private IFileSystem _defaultFileSystem;
+        private IFileSystem DefaultFileSystem
+        {
+            get
+            {
+                if (_defaultFileSystem == null)
+                {
+                    var newDefaultFileSystem = new CachingFileSystemWrapper(FileSystems.Default);
+                    System.Threading.Interlocked.CompareExchange(ref _defaultFileSystem, newDefaultFileSystem, null);
+                }
+                return _defaultFileSystem;
+            }
+        }
+
+        public MSBuildFileSystemBase()
+        { }
+
+        internal MSBuildFileSystemBase(IFileSystem defaultFileSystem)
+        {
+            _defaultFileSystem = defaultFileSystem;
+        }
+
         /// <summary>
         /// Use this for var sr = new StreamReader(path)
         /// </summary>
-        public abstract TextReader ReadFile(string path);
+        public virtual TextReader ReadFile(string path) => DefaultFileSystem.ReadFile(path);
 
         /// <summary>
         /// Use this for new FileStream(path, mode, access, share)
         /// </summary>
-        public abstract Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share);
+        public virtual Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => DefaultFileSystem.GetFileStream(path, mode, access, share);
 
         /// <summary>
         /// Use this for File.ReadAllText(path)
         /// </summary>
-        public abstract string ReadFileAllText(string path);
+        public virtual string ReadFileAllText(string path) => DefaultFileSystem.ReadFileAllText(path);
 
         /// <summary>
         /// Use this for File.ReadAllBytes(path)
         /// </summary>
-        public abstract byte[] ReadFileAllBytes(string path);
+        public virtual byte[] ReadFileAllBytes(string path) => DefaultFileSystem.ReadFileAllBytes(path);
 
         /// <summary>
         /// Use this for Directory.EnumerateFiles(path, pattern, option)
         /// </summary>
-        public abstract IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        public virtual IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            => DefaultFileSystem.EnumerateFiles(path, searchPattern, searchOption);
 
         /// <summary>
         /// Use this for Directory.EnumerateFolders(path, pattern, option)
         /// </summary>
-        public abstract IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        public virtual IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            => DefaultFileSystem.EnumerateDirectories(path, searchPattern, searchOption);
 
         /// <summary>
         /// Use this for Directory.EnumerateFileSystemEntries(path, pattern, option)
         /// </summary>
-        public abstract IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        public virtual IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            => DefaultFileSystem.EnumerateFileSystemEntries(path, searchPattern, searchOption);
 
         /// <summary>
         /// Use this for File.GetAttributes()
         /// </summary>
-        public abstract FileAttributes GetAttributes(string path);
+        public virtual FileAttributes GetAttributes(string path) => DefaultFileSystem.GetAttributes(path);
 
         /// <summary>
         /// Use this for File.GetLastWriteTimeUtc(path)
         /// </summary>
-        public abstract DateTime GetLastWriteTimeUtc(string path);
+        public virtual DateTime GetLastWriteTimeUtc(string path) => DefaultFileSystem.GetLastWriteTimeUtc(path);
 
         /// <summary>
         /// Use this for Directory.Exists(path)
         /// </summary>
-        public abstract bool DirectoryExists(string path);
+        public virtual bool DirectoryExists(string path) => DefaultFileSystem.DirectoryExists(path);
 
         /// <summary>
         /// Use this for File.Exists(path)
         /// </summary>
-        public abstract bool FileExists(string path);
+        public virtual bool FileExists(string path) => DefaultFileSystem.FileExists(path);
 
         /// <summary>
         /// Use this for File.Exists(path) || Directory.Exists(path)
         /// </summary>
-        public abstract bool FileOrDirectoryExists(string path);
+        public virtual bool FileOrDirectoryExists(string path) => DefaultFileSystem.DirectoryEntryExists(path);
+
+        #region IFileSystem implementation
+
+        TextReader IFileSystem.ReadFile(string path) => this.ReadFile(path);
+
+        Stream IFileSystem.GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => this.GetFileStream(path, mode, access, share);
+
+        string IFileSystem.ReadFileAllText(string path) => this.ReadFileAllText(path);
+
+        byte[] IFileSystem.ReadFileAllBytes(string path) => this.ReadFileAllBytes(path);
+
+        IEnumerable<string> IFileSystem.EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
+        {
+            return this.EnumerateFiles(path, searchPattern, searchOption);
+        }
+
+        IEnumerable<string> IFileSystem.EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
+        {
+            return this.EnumerateDirectories(path, searchPattern, searchOption);
+        }
+
+        IEnumerable<string> IFileSystem.EnumerateFileSystemEntries(
+            string path,
+            string searchPattern,
+            SearchOption searchOption)
+        {
+            return this.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+        }
+
+        FileAttributes IFileSystem.GetAttributes(string path) => this.GetAttributes(path);
+
+        DateTime IFileSystem.GetLastWriteTimeUtc(string path) => this.GetLastWriteTimeUtc(path);
+
+        bool IFileSystem.DirectoryExists(string path) => this.DirectoryExists(path);
+
+        bool IFileSystem.FileExists(string path) => this.FileExists(path);
+
+        bool IFileSystem.DirectoryEntryExists(string path) => this.FileOrDirectoryExists(path);
+
+        #endregion
     }
 }
