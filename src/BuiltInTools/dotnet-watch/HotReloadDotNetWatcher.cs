@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Graph;
 using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.DotNet.Watcher.Tools;
@@ -25,6 +24,7 @@ namespace Microsoft.DotNet.Watcher
         private readonly ProcessRunner _processRunner;
         private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly IWatchFilter[] _filters;
+        private readonly RudeEditDialog _rudeEditDialog;
 
         public bool SuppressHotRestart { get; init; }
         public ProjectGraph ProjectGraph { get; init; }
@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Watcher
                 new DotNetBuildFilter(_processRunner, _reporter),
                 new LaunchBrowserFilter(_dotNetWatchOptions),
             };
+            _rudeEditDialog = new(reporter, _console);
         }
 
         public async Task WatchAsync(DotNetWatchContext context, CancellationToken cancellationToken)
@@ -57,6 +58,17 @@ namespace Microsoft.DotNet.Watcher
 
             _reporter.Output("Hot reload enabled. For a list of supported edits, see https://aka.ms/dotnet/hot-reload. " +
                 "Press \"Ctrl + R\" to restart.");
+
+            var forceReload = new CancellationTokenSource();
+
+            _console.KeyPressed += (key) =>
+            {
+                if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.R)
+                {
+                    var cancellationTokenSource = Interlocked.Exchange(ref forceReload, new CancellationTokenSource());
+                    cancellationTokenSource.Cancel();
+                }
+            };
 
             while (true)
             {
@@ -96,12 +108,12 @@ namespace Microsoft.DotNet.Watcher
                 }
 
                 using var currentRunCancellationSource = new CancellationTokenSource();
-                var forceReload = _console.ListenForForceReloadRequest();
                 using var combinedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(
                     cancellationToken,
                     currentRunCancellationSource.Token,
-                    forceReload);
+                    forceReload.Token);
                 using var fileSetWatcher = new FileSetWatcher(fileSet, _reporter) { WatchForNewFiles = true };
+
                 try
                 {
                     using var hotReload = new HotReload(_processRunner, _reporter);
@@ -150,7 +162,9 @@ namespace Microsoft.DotNet.Watcher
                             }
                             else
                             {
-                                _reporter.Verbose($"Unable to handle changes to {fileItem.FilePath}. Rebuilding the app.");
+                                _reporter.Output($"Unable to handle changes to {fileItem.FilePath}.");
+                                await _rudeEditDialog.EvaluateAsync(combinedCancellationSource.Token);
+
                                 break;
                             }
                         }
