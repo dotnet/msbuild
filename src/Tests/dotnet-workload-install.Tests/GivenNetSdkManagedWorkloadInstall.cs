@@ -311,7 +311,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var version = "6.0.100";
             var packInfo = new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk");
             var cachePath = Path.Combine(dotnetRoot, "MockCache");
-            installer.DownloadToOfflineCache(packInfo, cachePath);
+            installer.DownloadToOfflineCache(packInfo, new DirectoryPath(cachePath), false);
 
             var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
             mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
@@ -338,7 +338,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nupkgPath = Path.Combine(cachePath, $"{packInfo.ResolvedPackageId}.{packInfo.Version}.nupkg");
             File.Create(nupkgPath);
 
-            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version), cachePath);
+            installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version), new DirectoryPath(cachePath));
             var mockNugetInstaller = nugetInstaller as MockNuGetPackageDownloader;
             
             // We shouldn't download anything, use the cache
@@ -360,7 +360,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var version = "6.0.100";
             var cachePath = Path.Combine(dotnetRoot, "MockCache");
             
-            var exceptionThrown = Assert.Throws<Exception>(() => installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version), cachePath));
+            var exceptionThrown = Assert.Throws<Exception>(() => installer.InstallWorkloadPack(packInfo, new SdkFeatureBand(version), new DirectoryPath(cachePath)));
             exceptionThrown.Message.Should().Contain(packInfo.ResolvedPackageId);
             exceptionThrown.Message.Should().Contain(packInfo.Version);
             exceptionThrown.Message.Should().Contain(cachePath);

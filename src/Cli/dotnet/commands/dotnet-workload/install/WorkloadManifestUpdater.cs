@@ -36,12 +36,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _sdkFeatureBand = new SdkFeatureBand(_workloadManifestProvider.GetSdkFeatureBand());
         }
 
-        public async Task UpdateAdvertisingManifestsAsync(bool includePreviews)
+        public async Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null)
         {
             var manifests = GetInstalledManifestIds();
             foreach (var manifest in manifests)
             {
-                await UpdateAdvertisingManifestAsync(manifest, includePreviews);
+                await UpdateAdvertisingManifestAsync(manifest, includePreviews, offlineCache);
             }
         }
 
@@ -66,6 +66,58 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return manifestUpdates;
         }
 
+        public async Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath)
+        {
+            var manifests = GetInstalledManifestIds();
+            var packagePaths = new List<string>();
+            foreach (var manifest in manifests)
+            {
+                try
+                {
+                    var packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifest), includePreview: includePreviews, downloadFolder: downloadPath);
+                    packagePaths.Add(packagePath);
+                }
+                catch (Exception)
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToDownloadPackageManifest, manifest));
+                }
+            }
+            return packagePaths;
+        }
+
+        public async Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir)
+        {
+            Directory.CreateDirectory(tempDir.Value);
+            foreach (var manifestPackagePath in manifestPackages)
+            {
+                var manifestId = Path.GetFileNameWithoutExtension(manifestPackagePath);
+                var extractionDir = Path.Combine(tempDir.Value, manifestId);
+                Directory.CreateDirectory(extractionDir);
+                await _nugetPackageDownloader.ExtractPackageAsync(manifestPackagePath, new DirectoryPath(extractionDir));
+                File.Copy(Path.Combine(extractionDir, "data", "WorkloadManifest.json"), Path.Combine(tempDir.Value, manifestId, "WorkloadManifest.json"));
+            }
+        }
+
+        public IEnumerable<string> GetManifestPackageUrls(bool includePreviews)
+        {
+            var packageIds = GetInstalledManifestIds()
+                .Select(manifestId => GetManifestPackageId(_sdkFeatureBand, manifestId));
+
+            var packageUrls = new List<string>();
+            foreach (var packageId in packageIds)
+            {
+                try
+                {
+                    packageUrls.Add(_nugetPackageDownloader.GetPackageUrl(packageId, includePreview: includePreviews).Result);
+                }
+                catch
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.FailedToGetPackageManifestUrl, packageId));
+                }
+            }
+            return packageUrls;
+        }
+
         private IEnumerable<ManifestId> GetInstalledManifestIds()
         {
             var manifestDirs = _workloadManifestProvider.GetManifestDirectories();
@@ -79,7 +131,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return manifests;
         }
 
-        private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, bool includePreviews)
+        private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, bool includePreviews, DirectoryPath? offlineCache = null)
         {
             string packagePath = null;
             string extractionPath = null;
@@ -87,14 +139,29 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             try
             {
                 var adManifestPath = GetAdvertisingManifestPath(_sdkFeatureBand, manifestId);
-                try
+                if (offlineCache == null || !offlineCache.HasValue)
                 {
-                    packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifestId), includePreview: includePreviews);
+                    try
+                    {
+                        packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifestId), includePreview: includePreviews);
+                    }
+                    catch (NuGetPackageNotFoundException)
+                    {
+                        _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                    }
                 }
-                catch (NuGetPackageNotFoundException)
+                else
                 {
-                    _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestPackageDoesNotExist, manifestId));
+                    packagePath = Directory.GetFiles(offlineCache.Value.Value)
+                        .Where(path => path.EndsWith(".nupkg"))
+                        .Where(path => Path.GetFileName(path).StartsWith(GetManifestPackageId(_sdkFeatureBand, manifestId).ToString()))
+                        .FirstOrDefault();
+                    if (!File.Exists(packagePath))
+                    {
+                        throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, GetManifestPackageId(_sdkFeatureBand, manifestId), "*", offlineCache));
+                    }
                 }
+
                 extractionPath = Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp", $"{manifestId}-extracted");
                 Directory.CreateDirectory(extractionPath);
                 var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionPath));
@@ -120,7 +187,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Directory.Delete(extractionPath, true);
                 }
 
-                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
+                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath) && (offlineCache == null || !offlineCache.HasValue))
                 {
                     File.Delete(packagePath);
                 }

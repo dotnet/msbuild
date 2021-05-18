@@ -32,6 +32,16 @@
         <target state="new">Failed to update the advertising manifest {0}: {1}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToDownloadPackageManifest">
+        <source>Failed to download manifest package {0}.</source>
+        <target state="new">Failed to download manifest package {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToGetPackageManifestUrl">
+        <source>Failed to resolve manifest package url {0}.</source>
+        <target state="new">Failed to resolve manifest package url {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
         <source>Failed to install manifest {0} version {1}: {2}.</source>
         <target state="new">Failed to install manifest {0} version {1}: {2}.</target>

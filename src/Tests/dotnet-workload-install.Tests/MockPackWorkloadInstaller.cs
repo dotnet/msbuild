@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -27,10 +28,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             FailingRollback = failingRollback;
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, string offlineCache = null)
+        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             InstalledPacks.Add(packInfo);
-            CachePath = offlineCache;
+            CachePath = offlineCache?.Value;
         }
 
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
@@ -62,15 +63,15 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return InstallationRecordRepository;
         }
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand)
+        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             InstalledManifests.Add((manifestId, manifestVersion, sdkFeatureBand));
         }
 
-        public void DownloadToOfflineCache(PackInfo pack, string cachePath)
+        public void DownloadToOfflineCache(PackInfo pack, DirectoryPath cachePath, bool includePreviews)
         {
             CachedPacks.Add(pack);
-            CachePath = cachePath;
+            CachePath = cachePath.Value;
         }
 		
         public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();

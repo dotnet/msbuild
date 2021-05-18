@@ -249,4 +249,10 @@
   <data name="ResolvingPackageUrls" xml:space="preserve">
     <value>Resolving package urls for workload(s) {0}...</value>
   </data>
+  <data name="FailedToDownloadPackageManifest" xml:space="preserve">
+    <value>Failed to download manifest package {0}.</value>
+  </data>
+  <data name="FailedToGetPackageManifestUrl" xml:space="preserve">
+    <value>Failed to resolve manifest package url {0}.</value>
+  </data>
 </root>
