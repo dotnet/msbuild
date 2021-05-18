@@ -11,7 +11,6 @@ using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
-using Microsoft.TemplateEngine.Utils;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
@@ -86,7 +85,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             HashSet<string> userParamsWithDefaultValues;
             bool hasPostActionScriptRunner;
 
-            ITemplate? template = templateInfo.LoadTemplate(environmentSettings, commandInput.BaselineName);
+            ITemplate? template = templateCreator.LoadTemplate(templateInfo, commandInput.BaselineName);
 
             if (template == null)
             {

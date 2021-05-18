@@ -115,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli
             ITemplatePackage templatePackage;
             try
             {
-                templatePackage = await template.GetTemplatePackageAsync(_templatePackageManager).ConfigureAwait(false);
+                templatePackage = await _templatePackageManager.GetTemplatePackageAsync(template, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -403,7 +403,7 @@ namespace Microsoft.TemplateEngine.Cli
                                   templatePackageIdentifier));
                         foreach (IManagedTemplatePackage managedPackage in managedPackages)
                         {
-                            IEnumerable<ITemplateInfo> templates = await managedPackage.GetTemplates(_templatePackageManager).ConfigureAwait(false);
+                            IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetAllTemplatesForTemplatePackageAsync(managedPackage, cancellationToken).ConfigureAwait(false);
                             var templateGroupsCount = templates.GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase).Count();
                             Reporter.Error.WriteLine(
                                   string.Format(
@@ -448,7 +448,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             var templatePackages = await Task.WhenAll(
                 templatesWithMatchedShortName.Select(
-                    t => t.GetTemplatePackageAsync(_templatePackageManager)))
+                    t => _templatePackageManager.GetTemplatePackageAsync(t)))
                 .ConfigureAwait(false);
 
             return templatePackages.Distinct();
@@ -553,7 +553,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
 
-                IEnumerable<ITemplateInfo> templates = await managedSource.GetTemplates(_templatePackageManager).ConfigureAwait(false);
+                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetAllTemplatesForTemplatePackageAsync(managedSource, cancellationToken).ConfigureAwait(false);
                 if (templates.Any())
                 {
                     Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
@@ -596,7 +596,7 @@ namespace Microsoft.TemplateEngine.Cli
                     string.Format(
                         LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                         result.TemplatePackage.DisplayName));
-                IEnumerable<ITemplateInfo> templates = await result.TemplatePackage.GetTemplates(_templatePackageManager).ConfigureAwait(false);
+                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetAllTemplatesForTemplatePackageAsync(result.TemplatePackage, cancellationToken).ConfigureAwait(false);
                 HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
             }
             else

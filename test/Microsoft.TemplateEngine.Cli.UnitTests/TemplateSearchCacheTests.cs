@@ -73,8 +73,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             INewCommandInput commandInput = new MockNewCommandInput("foo");
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
@@ -95,8 +95,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             INewCommandInput commandInput = new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp2.0");
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
@@ -105,8 +105,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             INewCommandInput shortNameCommandInput = new MockNewCommandInput("foo").WithTemplateOption("f", "netcoreapp2.0");
 
-            TemplateSearchCoordinator shortNameSearchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, shortNameCommandInput, DefaultLanguage);
-            SearchResults shortNameSearchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator shortNameSearchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, shortNameCommandInput, DefaultLanguage);
+            SearchResults shortNameSearchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(shortNameSearchResults.AnySources);
             Assert.Equal(1, shortNameSearchResults.MatchesBySource.Count);
@@ -125,8 +125,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             // "tfm" is not a vaild symbol for the "foo" template. So it should not match.
             INewCommandInput commandInput = new MockNewCommandInput("foo").WithTemplateOption("tfm", "netcoreapp2.0");
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             Assert.Equal(0, searchResults.MatchesBySource.Count);
@@ -143,8 +143,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Dictionary<string, string> rawCommandInputs = new Dictionary<string, string>();
             MockNewCommandInput commandInput = new MockNewCommandInput("bar", "F#");
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
@@ -164,8 +164,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--author", commandAuthor);
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             if (matchCount == 0)
@@ -191,8 +191,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate, type: commandType);
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             if (matchCount == 0)
@@ -219,8 +219,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--package", commandPackage);
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             if (packMatchCount == 0)
@@ -249,8 +249,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             MockNewCommandInput commandInput = new MockNewCommandInput(commandTemplate).WithCommandOption("--tag", commandTag);
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             if (packMatchCount == 0)
@@ -274,8 +274,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             MockNewCommandInput commandInput = new MockNewCommandInput("bar", "VB");
 
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, _templatePackageManager, commandInput, DefaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(_engineEnvironmentSettings, commandInput, DefaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await _templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             Assert.True(searchResults.AnySources);
             Assert.Equal(0, searchResults.MatchesBySource.Count);

@@ -389,7 +389,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     TemplateLanguage = template.Info.GetLanguage() ?? string.Empty,
                     TemplatePrecedence = template.Info.Precedence,
                     TemplateAuthor = template.Info.Author ?? string.Empty,
-                    TemplatePackage = await template.Info.GetTemplatePackageAsync(templatePackageManager).ConfigureAwait(false) as IManagedTemplatePackage
+                    TemplatePackage = await templatePackageManager.GetTemplatePackageAsync(template.Info).ConfigureAwait(false) as IManagedTemplatePackage
                 });
             }
 
@@ -415,7 +415,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             string hintMessage = LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint;
             if (unambiguousTemplateGroup.Templates.AllAreTheSame(t => t.Info.MountPointUri))
             {
-                IManagedTemplatePackage? templatePackage = await unambiguousTemplateGroup.Templates.First().Info.GetTemplatePackageAsync(templatePackageManager).ConfigureAwait(false) as IManagedTemplatePackage;
+                IManagedTemplatePackage? templatePackage = await templatePackageManager.GetTemplatePackageAsync(unambiguousTemplateGroup.Templates.First().Info).ConfigureAwait(false) as IManagedTemplatePackage;
                 if (templatePackage != null)
                 {
                     hintMessage = string.Format(LocalizableStrings.AmbiguousTemplatesSamePackageHint, templatePackage.Identifier);

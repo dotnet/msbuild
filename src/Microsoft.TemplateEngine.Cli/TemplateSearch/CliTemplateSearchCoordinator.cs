@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TableOutput;
 using Microsoft.TemplateEngine.Edge.Settings;
-using Microsoft.TemplateEngine.Edge.Template;
 using Microsoft.TemplateSearch.Common;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateSearch
@@ -35,8 +33,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
 
             Reporter.Output.WriteLine(LocalizableStrings.SearchOnlineNotification);
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings, templatePackageManager, commandInput, defaultLanguage);
-            SearchResults searchResults = await searchCoordinator.SearchAsync().ConfigureAwait(false);
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings, commandInput, defaultLanguage);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(await templatePackageManager.GetTemplatePackagesAsync().ConfigureAwait(false)).ConfigureAwait(false);
 
             if (!searchResults.AnySources)
             {
