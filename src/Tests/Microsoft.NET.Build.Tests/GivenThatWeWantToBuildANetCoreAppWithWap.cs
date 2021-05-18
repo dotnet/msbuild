@@ -16,7 +16,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [RequiresSpecificFrameworkFact("net5.0")]
+        [Fact]
         public void WhenNetCoreProjectIsReferencedByAWapProject()
         {
             var testInstance = _testAssetsManager
