@@ -263,7 +263,7 @@ namespace Microsoft.TemplateEngine.Cli
             bool applyUpdates = commandInput.ApplyUpdates;
             bool allTemplatesUpToDate = true;
             New3CommandStatus success = New3CommandStatus.Success;
-            var managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
+            var managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
             foreach (var packagesGrouping in managedTemplatePackages.GroupBy(package => package.ManagedProvider))
             {
@@ -358,7 +358,7 @@ namespace Microsoft.TemplateEngine.Cli
             cancellationToken.ThrowIfCancellationRequested();
 
             New3CommandStatus result = New3CommandStatus.Success;
-            IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
+            IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
             var packagesToUninstall = new Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>();
             foreach (string templatePackageIdentifier in commandInput.ToUninstallList)
@@ -403,7 +403,7 @@ namespace Microsoft.TemplateEngine.Cli
                                   templatePackageIdentifier));
                         foreach (IManagedTemplatePackage managedPackage in managedPackages)
                         {
-                            IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetAllTemplatesForTemplatePackageAsync(managedPackage, cancellationToken).ConfigureAwait(false);
+                            IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(managedPackage, cancellationToken).ConfigureAwait(false);
                             var templateGroupsCount = templates.GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase).Count();
                             Reporter.Error.WriteLine(
                                   string.Format(
@@ -448,7 +448,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             var templatePackages = await Task.WhenAll(
                 templatesWithMatchedShortName.Select(
-                    t => _templatePackageManager.GetTemplatePackageAsync(t)))
+                    t => _templatePackageManager.GetTemplatePackageAsync(t, cancellationToken)))
                 .ConfigureAwait(false);
 
             return templatePackages.Distinct();
@@ -525,7 +525,7 @@ namespace Microsoft.TemplateEngine.Cli
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
 
-            IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
+            IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_InstalledItems);
 
@@ -553,7 +553,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
 
-                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetAllTemplatesForTemplatePackageAsync(managedSource, cancellationToken).ConfigureAwait(false);
+                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(managedSource, cancellationToken).ConfigureAwait(false);
                 if (templates.Any())
                 {
                     Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
@@ -596,7 +596,7 @@ namespace Microsoft.TemplateEngine.Cli
                     string.Format(
                         LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                         result.TemplatePackage.DisplayName));
-                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetAllTemplatesForTemplatePackageAsync(result.TemplatePackage, cancellationToken).ConfigureAwait(false);
+                IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(result.TemplatePackage, cancellationToken).ConfigureAwait(false);
                 HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
             }
             else

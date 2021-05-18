@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
@@ -372,7 +373,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             TemplateGroup unambiguousTemplateGroup,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
-            INewCommandInput commandInput)
+            INewCommandInput commandInput,
+            CancellationToken cancellationToken = default)
         {
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(commandInput));
@@ -389,7 +391,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     TemplateLanguage = template.Info.GetLanguage() ?? string.Empty,
                     TemplatePrecedence = template.Info.Precedence,
                     TemplateAuthor = template.Info.Author ?? string.Empty,
-                    TemplatePackage = await templatePackageManager.GetTemplatePackageAsync(template.Info).ConfigureAwait(false) as IManagedTemplatePackage
+                    TemplatePackage = await templatePackageManager.GetTemplatePackageAsync(template.Info, cancellationToken).ConfigureAwait(false) as IManagedTemplatePackage
                 });
             }
 
@@ -415,7 +417,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             string hintMessage = LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint;
             if (unambiguousTemplateGroup.Templates.AllAreTheSame(t => t.Info.MountPointUri))
             {
-                IManagedTemplatePackage? templatePackage = await templatePackageManager.GetTemplatePackageAsync(unambiguousTemplateGroup.Templates.First().Info).ConfigureAwait(false) as IManagedTemplatePackage;
+                IManagedTemplatePackage? templatePackage = await templatePackageManager.GetTemplatePackageAsync(
+                    unambiguousTemplateGroup.Templates.First().Info, cancellationToken).ConfigureAwait(false) as IManagedTemplatePackage;
                 if (templatePackage != null)
                 {
                     hintMessage = string.Format(LocalizableStrings.AmbiguousTemplatesSamePackageHint, templatePackage.Identifier);
