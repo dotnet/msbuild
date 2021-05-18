@@ -14,6 +14,7 @@ using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.NuGet;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 using NuGet.Credentials;
 
@@ -24,24 +25,25 @@ namespace Microsoft.TemplateEngine.Cli
     /// </summary>
     internal class TemplatePackageCoordinator
     {
-        private ITelemetryLogger _telemetryLogger;
-        private IEngineEnvironmentSettings _engineEnvironmentSettings;
+        private readonly ITelemetryLogger _telemetryLogger;
+        private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
+        private readonly TemplatePackageManager _templatePackageManager;
         private string _defaultLanguage;
 
         internal TemplatePackageCoordinator(
             ITelemetryLogger telemetryLogger,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             string? defaultLanguage = null)
         {
-            _ = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
-            _ = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
+            _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
+            _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
+            _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             if (string.IsNullOrWhiteSpace(defaultLanguage))
             {
                 defaultLanguage = string.Empty;
             }
 
-            _telemetryLogger = telemetryLogger;
-            _engineEnvironmentSettings = environmentSettings;
             _defaultLanguage = defaultLanguage;
         }
 
@@ -113,7 +115,7 @@ namespace Microsoft.TemplateEngine.Cli
             ITemplatePackage templatePackage;
             try
             {
-                templatePackage = await template.GetTemplatePackageAsync(_engineEnvironmentSettings).ConfigureAwait(false);
+                templatePackage = await template.GetTemplatePackageAsync(_templatePackageManager).ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -194,7 +196,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             // In future we might want give user ability to pick IManagerSourceProvider by Name or GUID
-            var managedSourceProvider = _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetBuiltInManagedProvider(InstallationScope.Global);
+            var managedSourceProvider = _templatePackageManager.GetBuiltInManagedProvider(InstallationScope.Global);
             List<InstallRequest> installRequests = new List<InstallRequest>();
 
             foreach (string installArg in commandInput.ToInstallList)
@@ -261,7 +263,7 @@ namespace Microsoft.TemplateEngine.Cli
             bool applyUpdates = commandInput.ApplyUpdates;
             bool allTemplatesUpToDate = true;
             New3CommandStatus success = New3CommandStatus.Success;
-            var managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
+            var managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
 
             foreach (var packagesGrouping in managedTemplatePackages.GroupBy(package => package.ManagedProvider))
             {
@@ -356,7 +358,7 @@ namespace Microsoft.TemplateEngine.Cli
             cancellationToken.ThrowIfCancellationRequested();
 
             New3CommandStatus result = New3CommandStatus.Success;
-            IReadOnlyList<IManagedTemplatePackage> templatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
+            IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
 
             var packagesToUninstall = new Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>();
             foreach (string templatePackageIdentifier in commandInput.ToUninstallList)
@@ -401,7 +403,7 @@ namespace Microsoft.TemplateEngine.Cli
                                   templatePackageIdentifier));
                         foreach (IManagedTemplatePackage managedPackage in managedPackages)
                         {
-                            IEnumerable<ITemplateInfo> templates = await managedPackage.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
+                            IEnumerable<ITemplateInfo> templates = await managedPackage.GetTemplates(_templatePackageManager).ConfigureAwait(false);
                             var templateGroupsCount = templates.GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase).Count();
                             Reporter.Error.WriteLine(
                                   string.Format(
@@ -438,7 +440,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             cancellationToken.ThrowIfCancellationRequested();
 
-            IReadOnlyList<ITemplateInfo> templates = await _engineEnvironmentSettings.SettingsLoader.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
             var templatesWithMatchedShortName = templates.Where(template =>
             {
                 return template.ShortNameList.Contains(sourceIdentifier, StringComparer.OrdinalIgnoreCase);
@@ -446,7 +448,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             var templatePackages = await Task.WhenAll(
                 templatesWithMatchedShortName.Select(
-                    t => t.GetTemplatePackageAsync(_engineEnvironmentSettings)))
+                    t => t.GetTemplatePackageAsync(_templatePackageManager)))
                 .ConfigureAwait(false);
 
             return templatePackages.Distinct();
@@ -460,7 +462,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             cancellationToken.ThrowIfCancellationRequested();
 
-            IReadOnlyList<ITemplateInfo> templates = await _engineEnvironmentSettings.SettingsLoader.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
             return templates.Any(template =>
             {
                 return template.ShortNameList.Contains(sourceIdentifier, StringComparer.OrdinalIgnoreCase);
@@ -523,7 +525,7 @@ namespace Microsoft.TemplateEngine.Cli
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
 
-            IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _engineEnvironmentSettings.SettingsLoader.TemplatePackagesManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
+            IEnumerable<IManagedTemplatePackage> managedTemplatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync().ConfigureAwait(false);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_InstalledItems);
 
@@ -551,7 +553,7 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
 
-                IEnumerable<ITemplateInfo> templates = await managedSource.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
+                IEnumerable<ITemplateInfo> templates = await managedSource.GetTemplates(_templatePackageManager).ConfigureAwait(false);
                 if (templates.Any())
                 {
                     Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
@@ -594,7 +596,7 @@ namespace Microsoft.TemplateEngine.Cli
                     string.Format(
                         LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                         result.TemplatePackage.DisplayName));
-                IEnumerable<ITemplateInfo> templates = await result.TemplatePackage.GetTemplates(_engineEnvironmentSettings).ConfigureAwait(false);
+                IEnumerable<ITemplateInfo> templates = await result.TemplatePackage.GetTemplates(_templatePackageManager).ConfigureAwait(false);
                 HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
             }
             else

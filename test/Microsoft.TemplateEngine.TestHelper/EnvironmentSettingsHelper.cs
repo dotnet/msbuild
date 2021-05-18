@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Edge;
@@ -54,7 +53,6 @@ namespace Microsoft.TemplateEngine.TestHelper
                 var templateEngineRoot = Path.Combine(CreateTemporaryFolder(), ".templateengine");
                 engineEnvironmentSettings = new EngineEnvironmentSettings(host, settingsLocation: templateEngineRoot);
             }
-            _engineEnvironmentToDispose.Add(engineEnvironmentSettings);
             return engineEnvironmentSettings;
         }
 
@@ -67,7 +65,6 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public void Dispose()
         {
-            _engineEnvironmentToDispose.ForEach(e => e.Dispose());
             _foldersToCleanup.ForEach(f => Directory.Delete(f, true));
         }
     }

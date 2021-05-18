@@ -40,7 +40,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             // create the sources initially
             for (int i = 0; i < dataForSources.Count; i++)
             {
-                environmentSettings.SettingsLoader.Components.AddComponent(typeof(ITemplateSearchSource), new MockTemplateSearchSource());
+                environmentSettings.Components.AddComponent(typeof(ITemplateSearchSource), new MockTemplateSearchSource());
             }
 
             // assign the source data to the sources, mapping the source to its id
@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             IList<string> sourceNameOrder = dataForSources.Keys.ToList();
             int sourceIndex = 0;
 
-            foreach (ITemplateSearchSource searchSource in environmentSettings.SettingsLoader.Components.OfType<ITemplateSearchSource>())
+            foreach (ITemplateSearchSource searchSource in environmentSettings.Components.OfType<ITemplateSearchSource>())
             {
                 if (searchSource is MockTemplateSearchSource mockSource)
                 {

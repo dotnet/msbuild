@@ -4,6 +4,7 @@
 using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
+using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,11 +14,11 @@ namespace Microsoft.TemplateEngine.Cli
 {
     public class HostSpecificDataLoader : IHostSpecificDataLoader
     {
-        private readonly ISettingsLoader _settingsLoader;
+        private readonly IEngineEnvironmentSettings _engineEnvironment;
 
-        public HostSpecificDataLoader(ISettingsLoader settingsLoader)
+        public HostSpecificDataLoader(IEngineEnvironmentSettings engineEnvironment)
         {
-            _settingsLoader = settingsLoader;
+            _engineEnvironment = engineEnvironment;
         }
 
         public HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
@@ -26,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                if (!string.IsNullOrEmpty(templateInfo.HostConfigPlace) && _settingsLoader.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint))
+                if (!string.IsNullOrEmpty(templateInfo.HostConfigPlace) && _engineEnvironment.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint))
                 {
                     var file = mountPoint.FileInfo(templateInfo.HostConfigPlace);
                     if (file != null && file.Exists)

@@ -2,7 +2,7 @@
 Microsoft.TemplateEngine.Cli.CommandParserException.Argument.get -> string!
 Microsoft.TemplateEngine.Cli.Components
 Microsoft.TemplateEngine.Cli.HostSpecificDataLoader
-Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.HostSpecificDataLoader(Microsoft.TemplateEngine.Abstractions.ISettingsLoader! settingsLoader) -> void
+Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.HostSpecificDataLoader(Microsoft.TemplateEngine.Abstractions.IEngineEnvironmentSettings! engineEnvironment) -> void
 Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.ReadHostSpecificTemplateData(Microsoft.TemplateEngine.Abstractions.ITemplateInfo! templateInfo) -> Microsoft.TemplateEngine.Cli.HostSpecificTemplateData!
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.HiddenParameterNames.get -> System.Collections.Generic.HashSet<string!>!

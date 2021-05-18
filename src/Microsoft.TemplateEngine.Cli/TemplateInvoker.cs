@@ -42,7 +42,7 @@ namespace Microsoft.TemplateEngine.Cli
             _callbacks = callbacks;
 
             _templateCreator = new TemplateCreator(_environment);
-            _hostDataLoader = new HostSpecificDataLoader(_environment.SettingsLoader);
+            _hostDataLoader = new HostSpecificDataLoader(_environment);
         }
 
         internal static bool CheckForArgsError(ITemplateMatchInfo template)

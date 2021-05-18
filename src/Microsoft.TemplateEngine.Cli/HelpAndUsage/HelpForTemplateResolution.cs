@@ -13,6 +13,7 @@ using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.TableOutput;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
@@ -67,6 +68,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         internal static Task<New3CommandStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
             TemplateResolutionResult resolutionResult,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             INewCommandInput commandInput,
             string? defaultLanguage)
         {
@@ -93,7 +95,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
                 case TemplateResolutionResult.Status.AmbiguousTemplateChoice:
                     Reporter.Verbose.WriteLine(LocalizableStrings.Authoring_AmbiguousBestPrecedence);
-                    return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, environmentSettings, commandInput);
+                    return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, environmentSettings, templatePackageManager, commandInput);
                 case TemplateResolutionResult.Status.InvalidParameter:
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
             }
@@ -369,6 +371,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private static async Task<New3CommandStatus> DisplayAmbiguousPrecedenceErrorAsync(
             TemplateGroup unambiguousTemplateGroup,
             IEngineEnvironmentSettings environmentSettings,
+            TemplatePackageManager templatePackageManager,
             INewCommandInput commandInput)
         {
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
@@ -386,7 +389,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     TemplateLanguage = template.Info.GetLanguage() ?? string.Empty,
                     TemplatePrecedence = template.Info.Precedence,
                     TemplateAuthor = template.Info.Author ?? string.Empty,
-                    TemplatePackage = await template.Info.GetTemplatePackageAsync(environmentSettings).ConfigureAwait(false) as IManagedTemplatePackage
+                    TemplatePackage = await template.Info.GetTemplatePackageAsync(templatePackageManager).ConfigureAwait(false) as IManagedTemplatePackage
                 });
             }
 
@@ -412,7 +415,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             string hintMessage = LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint;
             if (unambiguousTemplateGroup.Templates.AllAreTheSame(t => t.Info.MountPointUri))
             {
-                IManagedTemplatePackage? templatePackage = await unambiguousTemplateGroup.Templates.First().Info.GetTemplatePackageAsync(environmentSettings).ConfigureAwait(false) as IManagedTemplatePackage;
+                IManagedTemplatePackage? templatePackage = await unambiguousTemplateGroup.Templates.First().Info.GetTemplatePackageAsync(templatePackageManager).ConfigureAwait(false) as IManagedTemplatePackage;
                 if (templatePackage != null)
                 {
                     hintMessage = string.Format(LocalizableStrings.AmbiguousTemplatesSamePackageHint, templatePackage.Identifier);

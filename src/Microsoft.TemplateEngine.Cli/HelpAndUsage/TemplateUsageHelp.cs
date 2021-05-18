@@ -11,6 +11,7 @@ using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
+using Microsoft.TemplateEngine.Utils;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
@@ -85,7 +86,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             HashSet<string> userParamsWithDefaultValues;
             bool hasPostActionScriptRunner;
 
-            ITemplate? template = environmentSettings.SettingsLoader.LoadTemplate(templateInfo, commandInput.BaselineName);
+            ITemplate? template = templateInfo.LoadTemplate(environmentSettings, commandInput.BaselineName);
 
             if (template == null)
             {
@@ -221,7 +222,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             IParameterSet paramsForCreationEffects = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> throwaway);
             templateCreator.ResolveUserParameters(template, paramsForCreationEffects, commandInput.InputTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
 #pragma warning restore CS0618 // Type or member is obsolete
-            ICreationEffects creationEffects = template.Generator.GetCreationEffects(environmentSettings, template, paramsForCreationEffects, environmentSettings.SettingsLoader.Components, targetDir);
+            ICreationEffects creationEffects = template.Generator.GetCreationEffects(environmentSettings, template, paramsForCreationEffects, environmentSettings.Components, targetDir);
             return creationEffects.CreationResult.PostActions.Any(x => x.ActionId == ProcessStartPostActionProcessor.ActionProcessorId);
         }
     }

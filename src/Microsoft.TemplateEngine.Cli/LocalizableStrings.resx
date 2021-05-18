@@ -172,9 +172,6 @@
   <data name="Generators" xml:space="preserve">
     <value>Generators</value>
   </data>
-  <data name="GettingReady" xml:space="preserve">
-    <value>Getting ready...</value>
-  </data>
   <data name="InstallHelp" xml:space="preserve">
     <value>Installs a source or a template package.</value>
   </data>
