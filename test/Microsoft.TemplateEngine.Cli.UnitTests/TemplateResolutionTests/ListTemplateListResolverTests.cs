@@ -119,7 +119,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.L2", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
-            Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.Tags["language"].Choices.Keys.FirstOrDefault());
+            Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.TagsCollection["language"]);
             Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
         }
 

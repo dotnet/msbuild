@@ -246,7 +246,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 {
                     return null;
                 }
-                string templateLanguage = template.GetLanguage();
+                string? templateLanguage = template.GetLanguage();
                 // only add default language disposition when there is a language specified for the template.
                 if (string.IsNullOrWhiteSpace(templateLanguage))
                 {
@@ -274,6 +274,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 try
                 {
                     ParseTemplateArgs(template.Info, hostDataLoader, commandInput);
+                    Dictionary<string, ITemplateParameter> templateParameters =
+                        template.Info.Parameters.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
 
                     // parameters are already parsed. But choice values aren't checked
                     foreach (KeyValuePair<string, string> matchedParamInfo in commandInput.InputTemplateParams)
@@ -282,52 +284,54 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                         string paramValue = matchedParamInfo.Value;
                         MatchKind matchKind;
 
-                        if (template.Info.Tags.TryGetValue(paramName, out ICacheTag? paramDetails))
+                        if (templateParameters.TryGetValue(paramName, out ITemplateParameter? paramDetails))
                         {
-                            if (string.IsNullOrEmpty(paramValue)
-                                && paramDetails is IAllowDefaultIfOptionWithoutValue paramDetailsWithNoValueDefault
-                                && !string.IsNullOrEmpty(paramDetailsWithNoValueDefault.DefaultIfOptionWithoutValue))
+                            if (paramDetails.IsChoice() && paramDetails.Choices != null)
                             {
-                                // The user provided the parameter switch on the command line, without a value.
-                                // In this case, the DefaultIfOptionWithoutValue is the effective value.
-                                paramValue = paramDetailsWithNoValueDefault.DefaultIfOptionWithoutValue;
-                            }
+                                if (string.IsNullOrEmpty(paramValue)
+                                && !string.IsNullOrEmpty(paramDetails.DefaultIfOptionWithoutValue))
+                                {
+                                    // The user provided the parameter switch on the command line, without a value.
+                                    // In this case, the DefaultIfOptionWithoutValue is the effective value.
+                                    paramValue = paramDetails.DefaultIfOptionWithoutValue;
+                                }
 
-                            // key is the value user should provide, value is description
-                            if (string.IsNullOrEmpty(paramValue))
-                            {
-                                matchKind = MatchKind.InvalidValue;
-                            }
-                            else if (paramDetails.Choices.ContainsKey(paramValue))
-                            {
-                                matchKind = MatchKind.Exact;
-                            }
-                            //https://github.com/dotnet/templating/issues/2494
-                            //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
-                            else
-                            {
-                                int startsWithCount = paramDetails.Choices.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
-                                if (startsWithCount == 1)
-                                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                                    matchKind = MatchKind.SingleStartsWith;
-#pragma warning restore CS0618 // Type or member is obsolete
-                                }
-                                else if (startsWithCount > 1)
-                                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                                    matchKind = MatchKind.AmbiguousValue;
-#pragma warning restore CS0618 // Type or member is obsolete
-                                }
-                                else
+                                // key is the value user should provide, value is description
+                                if (string.IsNullOrEmpty(paramValue))
                                 {
                                     matchKind = MatchKind.InvalidValue;
                                 }
+                                else if (paramDetails.Choices.ContainsKey(paramValue))
+                                {
+                                    matchKind = MatchKind.Exact;
+                                }
+                                //https://github.com/dotnet/templating/issues/2494
+                                //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
+                                else
+                                {
+                                    int startsWithCount = paramDetails.Choices.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
+                                    if (startsWithCount == 1)
+                                    {
+#pragma warning disable CS0618 // Type or member is obsolete
+                                        matchKind = MatchKind.SingleStartsWith;
+#pragma warning restore CS0618 // Type or member is obsolete
+                                    }
+                                    else if (startsWithCount > 1)
+                                    {
+#pragma warning disable CS0618 // Type or member is obsolete
+                                        matchKind = MatchKind.AmbiguousValue;
+#pragma warning restore CS0618 // Type or member is obsolete
+                                    }
+                                    else
+                                    {
+                                        matchKind = MatchKind.InvalidValue;
+                                    }
+                                }
                             }
-                        }
-                        else if (template.Info.CacheParameters.ContainsKey(paramName))
-                        {
-                            matchKind = MatchKind.Exact;
+                            else // other parameter
+                            {
+                                matchKind = MatchKind.Exact;
+                            }
                         }
                         else
                         {
@@ -507,8 +511,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
             public IReadOnlyList<string> GroupShortNameList { get; } = new List<string>();
 
+            [Obsolete]
             public IReadOnlyDictionary<string, ICacheTag> Tags => _parent.Tags;
 
+            [Obsolete]
             public IReadOnlyDictionary<string, ICacheParameter> CacheParameters => _parent.CacheParameters;
 
             public IReadOnlyList<ITemplateParameter> Parameters => _parent.Parameters;
@@ -524,6 +530,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             public string? ThirdPartyNotices => _parent.ThirdPartyNotices;
 
             public IReadOnlyDictionary<string, IBaselineInfo> BaselineInfo => _parent.BaselineInfo;
+
+            public IReadOnlyDictionary<string, string> TagsCollection => _parent.TagsCollection;
 
             bool ITemplateInfo.HasScriptRunningPostActions { get; set; }
         }

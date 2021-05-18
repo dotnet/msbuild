@@ -30,25 +30,25 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     templateList.Add(
                         new MockTemplateInfo(new string[] { "aaa", "bbb" }, name: "High precedence C# in group", precedence: 2000, identity: "MultiName.Test.High.CSharp", groupIdentity: "MultiName.Test")
                             .WithTag("language", "C#")
-                            .WithTag("foo", "A", "W")
+                            .WithChoiceParameter("foo", "A", "W")
                             .WithParameters("HighC"));
 
                     templateList.Add(
                         new MockTemplateInfo(new string[] { "ccc", "ddd", "eee" }, name: "Low precedence C# in group", precedence: 100, identity: "MultiName.Test.Low.CSharp", groupIdentity: "MultiName.Test")
                             .WithTag("language", "C#")
-                            .WithTag("foo", "A", "X")
+                            .WithChoiceParameter("foo", "A", "X")
                             .WithParameters("LowC"));
 
                     templateList.Add(
                        new MockTemplateInfo(new string[] { "fff" }, name: "Only F# in group", precedence: 100, identity: "Multiname.Test.Only.FSharp", groupIdentity: "MultiName.Test")
                            .WithTag("language", "F#")
-                           .WithTag("foo", "A", "Y")
+                           .WithChoiceParameter("foo", "A", "Y")
                            .WithParameters("OnlyF"));
 
                     templateList.Add(
                         new MockTemplateInfo(new string[] { "other" }, name: "Unrelated template", precedence: 9999, identity: "Unrelated.Template.CSharp", groupIdentity: "Unrelated.Template")
                             .WithTag("language", "C#")
-                            .WithTag("foo", "A", "Z"));
+                            .WithChoiceParameter("foo", "A", "Z"));
 
                     _multiShortNameGroupTemplateInfo = templateList;
                 }

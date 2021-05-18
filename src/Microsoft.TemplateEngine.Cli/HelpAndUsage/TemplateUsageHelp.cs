@@ -194,7 +194,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     continue;
                 }
-                else if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase) && parameter.Choices.Count == 1)
+                else if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase) && parameter.Choices?.Count == 1)
                 {
                     continue;
                 }

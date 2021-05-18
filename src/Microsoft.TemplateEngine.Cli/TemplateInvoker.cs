@@ -65,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal async Task<New3CommandStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke)
         {
-            templateToInvoke.Info.Tags.TryGetValue("language", out ICacheTag? language);
+            string? templateLanguage = templateToInvoke.Info.GetLanguage();
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
             string? framework = null;
             string? auth = null;
@@ -85,7 +85,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                 {
-                    { TelemetryConstants.Language, language?.Choices.Keys.FirstOrDefault() },
+                    { TelemetryConstants.Language, templateLanguage },
                     { TelemetryConstants.ArgError, "True" },
                     { TelemetryConstants.Framework, framework },
                     { TelemetryConstants.TemplateName, templateName },
@@ -124,7 +124,7 @@ namespace Microsoft.TemplateEngine.Cli
                 {
                     _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                     {
-                        { TelemetryConstants.Language, language?.Choices.Keys.FirstOrDefault() },
+                        { TelemetryConstants.Language, templateLanguage },
                         { TelemetryConstants.ArgError, "False" },
                         { TelemetryConstants.Framework, framework },
                         { TelemetryConstants.TemplateName, templateName },

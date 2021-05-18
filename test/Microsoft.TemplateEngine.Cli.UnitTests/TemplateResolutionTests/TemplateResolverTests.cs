@@ -85,8 +85,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp2.1"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", name: "Foo template old", identity: "foo.test.old", groupIdentity: "foo.test.template", precedence: 100).WithTag("framework", "netcoreapp3.1", "netcoreapp2.1"),
-                    new MockTemplateInfo("foo", name: "Foo template new", identity: "foo.test.new", groupIdentity: "foo.test.template", precedence: 200).WithTag("framework", "net5.0")
+                    new MockTemplateInfo("foo", name: "Foo template old", identity: "foo.test.old", groupIdentity: "foo.test.template", precedence: 100).WithChoiceParameter("framework", "netcoreapp3.1", "netcoreapp2.1"),
+                    new MockTemplateInfo("foo", name: "Foo template new", identity: "foo.test.new", groupIdentity: "foo.test.template", precedence: 200).WithChoiceParameter("framework", "net5.0")
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
@@ -112,8 +112,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp3.0"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test.1x", groupIdentity: "foo.test.template", precedence: 100).WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test.2x", groupIdentity: "foo.test.template", precedence: 200).WithTag("framework", "net5.0")
+                    new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test.1x", groupIdentity: "foo.test.template", precedence: 100).WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test.2x", groupIdentity: "foo.test.template", precedence: 200).WithChoiceParameter("framework", "net5.0")
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
@@ -128,9 +128,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1"),
+                                    .WithChoiceParameter("MyChoice", "value_1"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_2")
+                                    .WithChoiceParameter("MyChoice", "value_2")
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
@@ -144,9 +144,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1"),
+                                    .WithChoiceParameter("MyChoice", "value_1"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_2", "value_3")
+                                    .WithChoiceParameter("MyChoice", "value_2", "value_3")
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
@@ -160,9 +160,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1", "value_2"),
+                                    .WithChoiceParameter("MyChoice", "value_1", "value_2"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_3", "value_4")
+                                    .WithChoiceParameter("MyChoice", "value_3", "value_4")
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
@@ -176,11 +176,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1", "other_value")
-                                    .WithTag("OtherChoice", "foo_"),
+                                    .WithChoiceParameter("MyChoice", "value_1", "other_value")
+                                    .WithChoiceParameter("OtherChoice", "foo_"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_")
-                                    .WithTag("OtherChoice", "foo_", "bar_1")
+                                    .WithChoiceParameter("MyChoice", "value_")
+                                    .WithChoiceParameter("OtherChoice", "foo_", "bar_1")
                 },
                 null,
                 TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
@@ -300,8 +300,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
             };
 
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("framework", "net5.0"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
@@ -309,8 +309,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("MyChoice", "value_1_example"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("MyChoice", "value_2_example", "value_3_example"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("MyChoice", "value_1_example"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("MyChoice", "value_2_example", "value_3_example"),
             };
 
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
@@ -327,9 +327,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1"),
+                                    .WithChoiceParameter("MyChoice", "value_1"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_2")
+                                    .WithChoiceParameter("MyChoice", "value_2")
                 },
                 null,
                 TemplateResolutionResult.Status.AmbiguousParameterValueChoice,
@@ -343,9 +343,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1"),
+                                    .WithChoiceParameter("MyChoice", "value_1"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_2", "value_3")
+                                    .WithChoiceParameter("MyChoice", "value_2", "value_3")
                 },
                 null,
                 TemplateResolutionResult.Status.AmbiguousParameterValueChoice,
@@ -359,9 +359,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1", "value_2"),
+                                    .WithChoiceParameter("MyChoice", "value_1", "value_2"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_3", "value_4")
+                                    .WithChoiceParameter("MyChoice", "value_3", "value_4")
                 },
                 null,
                 TemplateResolutionResult.Status.AmbiguousParameterValueChoice,
@@ -375,11 +375,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_1", groupIdentity: "foo.test.template", precedence: 100)
-                                    .WithTag("MyChoice", "value_1", "other_value")
-                                    .WithTag("OtherChoice", "foo_"),
+                                    .WithChoiceParameter("MyChoice", "value_1", "other_value")
+                                    .WithChoiceParameter("OtherChoice", "foo_"),
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test_2", groupIdentity: "foo.test.template", precedence: 200)
-                                    .WithTag("MyChoice", "value_")
-                                    .WithTag("OtherChoice", "foo_", "bar_1")
+                                    .WithChoiceParameter("MyChoice", "value_")
+                                    .WithChoiceParameter("OtherChoice", "foo_", "bar_1")
                 },
                 null,
                 TemplateResolutionResult.Status.SingleMatch,
@@ -506,8 +506,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
             };
 
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("framework", "net5.0"), templates, null, (int)TemplateResolutionResult.Status.SingleMatch, "foo.2" };
@@ -515,34 +515,34 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithTag("MyChoice", "value_1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithTag("MyChoice", "value_2"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithChoiceParameter("MyChoice", "value_1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithChoiceParameter("MyChoice", "value_2"),
             };
 
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousParameterValueChoice, null };
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithTag("MyChoice", "value_1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithTag("MyChoice", "value_2", "value_3"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithChoiceParameter("MyChoice", "value_1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithChoiceParameter("MyChoice", "value_2", "value_3"),
             };
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousParameterValueChoice, null };
 
             templates = new MockTemplateInfo[]
             {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithTag("MyChoice", "value_1", "value_2"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithTag("MyChoice", "value_3", "value_4"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithChoiceParameter("MyChoice", "value_1", "value_2"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithChoiceParameter("MyChoice", "value_3", "value_4"),
             };
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousParameterValueChoice, null };
 
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100)
-                        .WithTag("MyChoice", "value_1", "other_value")
-                        .WithTag("OtherChoice", "foo_"),
+                        .WithChoiceParameter("MyChoice", "value_1", "other_value")
+                        .WithChoiceParameter("OtherChoice", "foo_"),
 
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200)
-                        .WithTag("MyChoice", "value_")
-                        .WithTag("OtherChoice", "foo_", "bar_1"),
+                        .WithChoiceParameter("MyChoice", "value_")
+                        .WithChoiceParameter("OtherChoice", "foo_", "bar_1"),
             };
             yield return new object[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_").WithTemplateOption("OtherChoice", "foo_"), templates, null, (int)TemplateResolutionResult.Status.SingleMatch, "foo.2" };
 

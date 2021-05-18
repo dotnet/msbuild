@@ -101,7 +101,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.True(matchResult.HasUnambiguousTemplateGroupForDefaultLanguage);
             Assert.Equal("console", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.Identity);
-            Assert.Equal("L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.Tags["language"].Choices.Keys.FirstOrDefault());
+            Assert.Equal("L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.TagsCollection["language"]);
             Assert.Equal(2, matchResult.UnambiguousTemplateGroup.Count);
             Assert.Equal(1, matchResult.UnambiguousTemplatesForDefaultLanguage.Count);
         }
@@ -120,7 +120,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             Assert.True(matchResult.HasUnambiguousTemplateGroup);
             Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
             Assert.Equal("Console.App.L2", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
-            Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.Tags["language"].Choices.Keys.FirstOrDefault());
+            Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.TagsCollection["language"]);
             Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
         }
 
@@ -373,7 +373,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
                     .WithTag("language", "L1")
                     .WithTag("type", "project")
-                    .WithTag("framework", "netcoreapp1.0", "netcoreapp1.1")
+                    .WithChoiceParameter("framework", "netcoreapp1.0", "netcoreapp1.1")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(
@@ -413,7 +413,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
                     .WithTag("language", "L1")
                     .WithTag("type", "project")
-                    .WithTag("framework", "netcoreapp1.0", "netcoreapp1.1")
+                    .WithChoiceParameter("framework", "netcoreapp1.0", "netcoreapp1.1")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(

@@ -123,7 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     delegate (ITemplateParameter param)
                     {
                         StringBuilder displayValue = new StringBuilder(255);
-                        displayValue.AppendLine(param.Documentation);
+                        displayValue.AppendLine(param.Description);
 
                         if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase))
                         {
@@ -179,23 +179,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
                             if (parameterDetails.GroupUserParamsWithDefaultValues.Contains(param.Name))
                             {
-                                if (param is IAllowDefaultIfOptionWithoutValue parameterWithNoValueDefault)
+                                if (!string.IsNullOrEmpty(param.DefaultIfOptionWithoutValue))
                                 {
-                                    if (!string.IsNullOrEmpty(parameterWithNoValueDefault.DefaultIfOptionWithoutValue))
-                                    {
-                                        configuredValue = parameterWithNoValueDefault.DefaultIfOptionWithoutValue;
-                                        handled = true;
-                                    }
-                                }
-                                else if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    // Before the introduction of DefaultIfOptionWithoutValue, bool params were handled like this.
-                                    // Other param types didn't have any analogous handling.
-                                    configuredValue = "true";
+                                    configuredValue = param.DefaultIfOptionWithoutValue;
                                     handled = true;
                                 }
                             }
-
                             if (!handled)
                             {
                                 // If the user explicitly specified the switch, the value is in the inputParams, so try to retrieve it here.
@@ -228,24 +217,23 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                             displayValue.AppendLine(string.Format(LocalizableStrings.DefaultValue, param.DefaultValue));
                         }
 
-                        if (param is IAllowDefaultIfOptionWithoutValue paramWithNoValueDefault
-                            && !string.IsNullOrWhiteSpace(paramWithNoValueDefault.DefaultIfOptionWithoutValue))
+                        if (!string.IsNullOrWhiteSpace(param.DefaultIfOptionWithoutValue))
                         {
                             // default if option is provided without a value should not be displayed if:
                             // - it is bool parameter with "DefaultIfOptionWithoutValue": "true"
                             // - it is not bool parameter (int, string, etc) and default value coincides with "DefaultIfOptionWithoutValue"
                             if (string.Equals(param.DataType, "bool", StringComparison.OrdinalIgnoreCase))
                             {
-                                if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, "true", StringComparison.OrdinalIgnoreCase))
+                                if (!string.Equals(param.DefaultIfOptionWithoutValue, "true", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                                    displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, param.DefaultIfOptionWithoutValue));
                                 }
                             }
                             else
                             {
-                                if (!string.Equals(paramWithNoValueDefault.DefaultIfOptionWithoutValue, param.DefaultValue, StringComparison.Ordinal))
+                                if (!string.Equals(param.DefaultIfOptionWithoutValue, param.DefaultValue, StringComparison.Ordinal))
                                 {
-                                    displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, paramWithNoValueDefault.DefaultIfOptionWithoutValue));
+                                    displayValue.AppendLine(string.Format(LocalizableStrings.DefaultIfOptionWithoutValue, param.DefaultIfOptionWithoutValue));
                                 }
                             }
                         }

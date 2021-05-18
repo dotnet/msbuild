@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Mocks;
+using Microsoft.TemplateEngine.Utils;
 using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests
@@ -280,12 +280,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             foreach (string paramName in paramNameList)
             {
-                ITemplateParameter parameter = new MockParameter()
-                {
-                    Name = paramName,
-                    Priority = TemplateParameterPriority.Required,
-                };
-
+                ITemplateParameter parameter = new TemplateParameter(paramName, type: "parameter", datatype: "string", priority: TemplateParameterPriority.Required);
                 parameterList.Add(parameter);
             }
 

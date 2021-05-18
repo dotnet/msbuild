@@ -8,6 +8,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FakeItEasy" Version="6.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Cli\Microsoft.TemplateEngine.Cli.csproj" />
     <ProjectReference Include="$(SrcDir)Microsoft.TemplateEngine.Edge\Microsoft.TemplateEngine.Edge.csproj" />
     <ProjectReference Include="$(SrcDir)Microsoft.TemplateSearch.Common\Microsoft.TemplateSearch.Common.csproj" />

@@ -24,29 +24,19 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (hasPostActionScriptRunner)
             {
-                ITemplateParameter allowScriptsParam = new TemplateParameter()
-                {
-                    Documentation = LocalizableStrings.WhetherToAllowScriptsToRun,
-                    Name = "allow-scripts",
-                    DataType = "choice",
-                    DefaultValue = "prompt",
-                    Choices = new Dictionary<string, ParameterChoice>()
+                ITemplateParameter allowScriptsParam = new TemplateParameter(
+                    description: LocalizableStrings.WhetherToAllowScriptsToRun,
+                    name: "allow-scripts",
+                    type: "parameter",
+                    datatype: "choice",
+                    defaultValue: "prompt",
+                    choices: new Dictionary<string, ParameterChoice>()
                     {
                         { "yes", new ParameterChoice(string.Empty, LocalizableStrings.AllowScriptsYesChoice) },
                         { "no", new ParameterChoice(string.Empty, LocalizableStrings.AllowScriptsNoChoice) },
                         { "prompt", new ParameterChoice(string.Empty, LocalizableStrings.AllowScriptsPromptChoice) }
-                    }
-                };
-
-                if (allowScriptsParam is IAllowDefaultIfOptionWithoutValue allowScriptsParamWithNoValueDefault)
-                {
-                    allowScriptsParamWithNoValueDefault.DefaultIfOptionWithoutValue = null;
-                    filteredParams.Add(allowScriptsParamWithNoValueDefault as TemplateParameter);
-                }
-                else
-                {
-                    filteredParams.Add(allowScriptsParam);
-                }
+                    });
+                filteredParams.Add(allowScriptsParam);
             }
 
             return filteredParams;

@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
+using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
@@ -280,9 +281,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
             foreach (ITemplateMatchInfo template in Templates)
             {
-                if (template.Info.Tags.ContainsKey(parameter))
+                ITemplateParameter? choiceParameter = template.Info.GetChoiceParameter(parameter);
+                if (choiceParameter != null && choiceParameter.Choices != null)
                 {
-                    foreach (var choice in template.Info.Tags[parameter].Choices)
+                    foreach (var choice in choiceParameter.Choices)
                     {
                         validChoices[choice.Key] = choice.Value;
                     }
@@ -302,9 +304,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
             foreach (ITemplateMatchInfo template in Templates)
             {
-                if (template.Info.Tags.ContainsKey(parameter))
+                ITemplateParameter? choiceParameter = template.Info.GetChoiceParameter(parameter);
+                if (choiceParameter != null && choiceParameter.Choices != null)
                 {
-                    foreach (var choice in template.Info.Tags[parameter].Choices)
+                    foreach (var choice in choiceParameter.Choices)
                     {
                         if (choice.Key.StartsWith(value, StringComparison.OrdinalIgnoreCase))
                         {

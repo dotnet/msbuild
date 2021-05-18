@@ -21,8 +21,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp3.0"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
                 },
                 new MockInvalidParameterInfo[]
                 {
@@ -35,8 +35,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("fake", "netcoreapp3.0"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
                 },
                 new MockInvalidParameterInfo[]
                 {
@@ -49,8 +49,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
                 },
                 new MockInvalidParameterInfo[]
                 {
@@ -63,9 +63,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
-                    new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group").WithTag("framework", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.3", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp3.1"),
                 },
                 new MockInvalidParameterInfo[]
                 {
@@ -78,8 +78,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "net").WithTemplateOption("fake", "fake").WithTemplateOption("OtherChoice", "fake"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1").WithTag("OtherChoice", "val1", "val2"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0").WithTag("OtherChoice", "val1", "val2"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1").WithChoiceParameter("OtherChoice", "val1", "val2"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0").WithChoiceParameter("OtherChoice", "val1", "val2"),
                 },
                 new MockInvalidParameterInfo[]
                 {
@@ -97,8 +97,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp3.1"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
                 },
                 System.Array.Empty<MockInvalidParameterInfo>()
             };
@@ -108,8 +108,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
                 },
                 System.Array.Empty<MockInvalidParameterInfo>()
             };
@@ -119,8 +119,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
                 },
                 new MockInvalidParameterInfo[]
                 {
@@ -133,9 +133,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new MockNewCommandInput("foo").WithTemplateOption("framework", "net").WithTemplateOption("OtherChoice", "val1"),
                 new MockTemplateInfo[]
                 {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithTag("framework", "netcoreapp2.1").WithTag("OtherChoice", "val1", "val2"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net5.0").WithTag("OtherChoice", "val1", "val2"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithTag("framework", "net").WithTag("OtherChoice", "val1", "val2"),
+                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1").WithChoiceParameter("OtherChoice", "val1", "val2"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0").WithChoiceParameter("OtherChoice", "val1", "val2"),
+                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net").WithChoiceParameter("OtherChoice", "val1", "val2"),
                 },
                 new MockInvalidParameterInfo[]
                 {

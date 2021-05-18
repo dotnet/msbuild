@@ -155,17 +155,16 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     aliasesForParam.Add(shortVersion);
                 }
 
-                if (parameter is IAllowDefaultIfOptionWithoutValue parameterWithNoValueDefault
-                    && !string.IsNullOrEmpty(parameterWithNoValueDefault.DefaultIfOptionWithoutValue))
+                if (!string.IsNullOrEmpty(parameter.DefaultIfOptionWithoutValue))
                 {
                     // This switch can be provided with or without a value.
                     // If the user doesn't specify a value, it gets the value of DefaultIfOptionWithoutValue
-                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation, Accept.ZeroOrOneArgument());
+                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Description, Accept.ZeroOrOneArgument());
                 }
                 else
                 {
                     // User must provide a value if this switch is specified.
-                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Documentation, Accept.ExactlyOneArgument());
+                    option = Create.Option(string.Join("|", aliasesForParam), parameter.Description, Accept.ExactlyOneArgument());
                 }
 
                 paramOptionList.Add(option);    // add the option

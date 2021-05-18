@@ -557,7 +557,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Output.WriteLine($"{LocalizableStrings.Templates}:".Indent(level: 2));
                     foreach (ITemplateInfo info in templates)
                     {
-                        string templateLanguage = info.GetLanguage();
+                        string? templateLanguage = info.GetLanguage();
                         string shortNames = string.Join(",", info.ShortNameList);
                         if (!string.IsNullOrWhiteSpace(templateLanguage))
                         {

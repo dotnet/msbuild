@@ -79,28 +79,17 @@ namespace Microsoft.TemplateEngine.Cli
                                 choicesAndDescriptions = new Dictionary<string, ParameterChoice>();
                             }
 
-                            ITemplateParameter combinedParameter = new TemplateParameter
-                            {
-                                Documentation = paramInfo.Value.Documentation,
-                                Name = paramInfo.Value.Name,
-                                Priority = paramInfo.Value.Priority,
-                                Type = paramInfo.Value.Type,
-                                IsName = paramInfo.Value.IsName,
-                                DefaultValue = paramInfo.Value.DefaultValue,
-                                DataType = paramInfo.Value.DataType,
-                                Choices = choicesAndDescriptions
-                            };
-
-                            if (combinedParameter is IAllowDefaultIfOptionWithoutValue combinedParamWithDefault
-                                && paramInfo.Value is IAllowDefaultIfOptionWithoutValue paramInfoValueWithDefault)
-                            {
-                                combinedParamWithDefault.DefaultIfOptionWithoutValue = paramInfoValueWithDefault.DefaultIfOptionWithoutValue;
-                                outputParams.Add(combinedParamWithDefault as TemplateParameter);
-                            }
-                            else
-                            {
-                                outputParams.Add(combinedParameter);
-                            }
+                            ITemplateParameter combinedParameter = new TemplateParameter(
+                                description: paramInfo.Value.Description,
+                                name: paramInfo.Value.Name,
+                                priority: paramInfo.Value.Priority,
+                                type: paramInfo.Value.Type,
+                                isName: paramInfo.Value.IsName,
+                                defaultValue: paramInfo.Value.DefaultValue,
+                                datatype: paramInfo.Value.DataType,
+                                choices: choicesAndDescriptions,
+                                defaultIfOptionWithoutValue: paramInfo.Value.DefaultIfOptionWithoutValue);
+                            outputParams.Add(combinedParameter);
                         }
                     }
 
@@ -154,24 +143,11 @@ namespace Microsoft.TemplateEngine.Cli
                 return true;
             }
 
-            parameter = new TemplateParameter
-            {
-                Documentation = string.Empty,
-                Name = name,
-                Priority = TemplateParameterPriority.Optional,
-                Type = "string",
-                IsName = false,
-                DefaultValue = string.Empty,
-                DataType = "string",
-                Choices = null
-            };
-
-            if (parameter is IAllowDefaultIfOptionWithoutValue parameterWithNoValueDefault)
-            {
-                parameterWithNoValueDefault.DefaultIfOptionWithoutValue = null;
-                parameter = parameterWithNoValueDefault as TemplateParameter;
-            }
-
+            parameter = new TemplateParameter(
+             name: name,
+             priority: TemplateParameterPriority.Optional,
+             type: "string",
+             datatype: "string");
             return true;
         }
     }

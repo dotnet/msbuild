@@ -38,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             new MockTemplateInfo("foo1", name: "MockFooTemplateOne", identity: "Mock.Foo.1", groupIdentity: "Mock.Foo", author: "TestAuthor")
                 .WithClassifications("CSharp", "Library")
                 .WithDescription("Mock Foo template one")
-                .WithTag("Framework", "netcoreapp3.0", "netcoreapp3.1")
+                .WithChoiceParameter("Framework", "netcoreapp3.0", "netcoreapp3.1")
                 .WithTag("language", "C#")
                 .WithTag("type", "project");
 
@@ -46,7 +46,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             new MockTemplateInfo("foo2", name: "MockFooTemplateTwo", identity: "Mock.Foo.2", groupIdentity: "Mock.Foo")
                 .WithClassifications("CSharp", "Console")
                 .WithDescription("Mock Foo template two")
-                .WithTag("Framework", "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1")
+                .WithChoiceParameter("Framework", "netcoreapp2.0", "netcoreapp2.1", "netcoreapp3.1")
                 .WithTag("language", "C#");
 
         private static readonly ITemplateInfo _barCSharpTemplate =
