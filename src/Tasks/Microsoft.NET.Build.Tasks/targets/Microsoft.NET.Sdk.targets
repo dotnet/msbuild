@@ -359,16 +359,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <ItemGroup>
-    <RuntimeHostConfigurationOption Include="Internal.Runtime.InteropServices.ComponentActivator.IsSupported"
-                                    Condition="'$(_EnableCallingManagedFunctionFromNativeHosting)' != ''"
-                                    Value="$(_EnableCallingManagedFunctionFromNativeHosting)"
-                                    Trim="true" />
-
-    <RuntimeHostConfigurationOption Include="Internal.Runtime.InteropServices.InMemoryAssemblyLoader.IsSupported"
-                                    Condition="'$(EnableCPlusPlusCLIHostActivation)' != ''"
-                                    Value="$(EnableCPlusPlusCLIHostActivation)"
-                                    Trim="true" />
-
     <RuntimeHostConfigurationOption Include="System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"
                                     Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' != ''"
                                     Value="$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)"
@@ -424,6 +414,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.BuiltInComInterop.IsSupported"
                                     Condition="'$(BuiltInComInteropSupport)' != ''"
                                     Value="$(BuiltInComInteropSupport)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.CallingManagedFunctionFromNativeHosting.IsSupported"
+                                    Condition="'$(_EnableCallingManagedFunctionFromNativeHosting)' != ''"
+                                    Value="$(_EnableCallingManagedFunctionFromNativeHosting)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.CPlusPlusCLIHostActivation.IsSupported"
+                                    Condition="'$(EnableCPlusPlusCLIHostActivation)' != ''"
+                                    Value="$(EnableCPlusPlusCLIHostActivation)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"
