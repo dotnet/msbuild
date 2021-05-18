@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Loader;
 
-namespace Microsoft.Extensions.DotNetDeltaApplier
+namespace Microsoft.Extensions.HotReload
 {
     internal static class Program
     {
@@ -25,9 +25,16 @@ namespace Microsoft.Extensions.DotNetDeltaApplier
             // We need to differentiate between the emulated Control-C and a Control-C performed by the user on the terminal.
             // We use a DiagnosticListener to signal any time the StartupHook emulates Control-C, so that we know
             // when it is not-signaled, it must be a real Control-C.
+
+            var first = true;
             while (observer.EmulatedControlC)
             {
                 observer.EmulatedControlC = false;
+                if (!first)
+                {
+                    Console.WriteLine("[watch] Application restarting because changes were detected to the app's initialization code.");
+                }
+                first = false;
 
                 var currentLoadContext = new HotRestartLoadContext();
                 var mainAssembly = currentLoadContext.LoadFromAssemblyPath(appAssemblyPath);
