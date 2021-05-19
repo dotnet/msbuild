@@ -5,14 +5,21 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal class WorkloadInstallerFactory
     {
-        public static IInstaller GetWorkloadInstaller(IReporter reporter, SdkFeatureBand sdkFeatureBand, IWorkloadResolver workloadResolver, VerbosityOptions verbosity)
+        public static IInstaller GetWorkloadInstaller(
+            IReporter reporter,
+            SdkFeatureBand sdkFeatureBand,
+            IWorkloadResolver workloadResolver, 
+            VerbosityOptions verbosity,
+            INuGetPackageDownloader nugetPackageDownloader = null,
+            string dotnetDir = null)
         {
-            return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver, verbosity: verbosity);
+            return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver, nugetPackageDownloader, verbosity: verbosity, dotnetDir: dotnetDir);
         }
     }
 }

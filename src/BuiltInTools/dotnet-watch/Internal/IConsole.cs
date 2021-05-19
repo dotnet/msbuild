@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Threading;
 
 namespace Microsoft.Extensions.Tools.Internal
 {
@@ -13,8 +12,8 @@ namespace Microsoft.Extensions.Tools.Internal
     /// </summary>
     public interface IConsole
     {
-        CancellationToken ListenForForceReloadRequest();
         event ConsoleCancelEventHandler CancelKeyPress;
+        event Action<ConsoleKeyInfo> KeyPressed;
         TextWriter Out { get; }
         TextWriter Error { get; }
         TextReader In { get; }

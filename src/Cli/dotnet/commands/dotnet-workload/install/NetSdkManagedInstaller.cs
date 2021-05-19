@@ -15,6 +15,7 @@ using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -281,6 +282,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         unneededBandRecords = unneededBandRecords.Append(currentBandRecordPath);
                     }
 
+                    if (!unneededBandRecords.Any())
+                    {
+                        continue;
+                    }
+
+                    // Save the pack info in case we need to delete the pack
+                    var jsonPackInfo = File.ReadAllText(unneededBandRecords.First());
                     foreach (var unneededRecord in unneededBandRecords)
                     {
                         File.Delete(unneededRecord);
@@ -290,6 +298,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         Directory.Delete(packVersionDir);
                         var deletablePack = GetPackInfo(packVersionDir);
+                        if (deletablePack == null)
+                        {
+                            // Pack no longer exists in manifests, get pack info from installation record
+                            deletablePack = JsonSerializer.Deserialize(jsonPackInfo, typeof(PackInfo)) as PackInfo;
+                        }
                         DeletePack(deletablePack);
                     }
                 }
@@ -307,6 +320,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return installedWorkloads
                 .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload.ToString()))
                 .Select(pack => _workloadResolver.TryGetPackInfo(pack))
+                .Where(pack => pack != null)
                 .Select(packInfo => GetPackInstallRecordPath(packInfo, sdkFeatureBand));
         }
 
@@ -368,7 +382,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             }
-            File.Create(path);
+            File.WriteAllText(path, JsonSerializer.Serialize(packInfo));
         }
 
         private void DeletePackInstallationRecord(PackInfo packInfo, SdkFeatureBand featureBand)

@@ -19,6 +19,7 @@ using Xunit.Abstractions;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -217,6 +218,44 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadsRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkVersions.First(), "InstalledWorkloads");
             Directory.CreateDirectory(workloadsRecordPath);
             File.Create(Path.Combine(workloadsRecordPath, "xamarin-empty-mock"));
+
+            installer.GarbageCollectInstalledWorkloadPacks();
+
+            Directory.EnumerateFileSystemEntries(installedPacksPath)
+                .Should()
+                .BeEmpty();
+            foreach (var pack in packs)
+            {
+                Directory.Exists(pack.Path)
+                    .Should()
+                    .BeFalse();
+            }
+        }
+
+        [Fact]
+        public void GivenManagedInstallItCanGarbageCollectPacksMissingFromManifest()
+        {
+            var (dotnetRoot, installer, _) = GetTestInstaller();
+            // Define packs that don't show up in the manifest
+            var packs = new PackInfo[]
+            {
+                new PackInfo("Xamarin.Android.Sdk.fake", "8.4.7", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk.fake", "8.4.7"), "Xamarin.Android.Sdk.fake"),
+                new PackInfo("Xamarin.Android.Framework.mock", "8.4", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework.mock", "8.4"), "Xamarin.Android.Framework.mock")
+            };
+            var sdkVersions = new string[] { "6.0.100", "6.0.300" };
+
+            // Write fake packs
+            var installedPacksPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1");
+            foreach (var sdkVersion in sdkVersions)
+            {
+                foreach (var pack in packs)
+                {
+                    var packRecordPath = Path.Combine(installedPacksPath, pack.Id, pack.Version, sdkVersion);
+                    Directory.CreateDirectory(Path.GetDirectoryName(packRecordPath));
+                    File.WriteAllText(packRecordPath, JsonSerializer.Serialize(pack));
+                    Directory.CreateDirectory(pack.Path);
+                }
+            }
 
             installer.GarbageCollectInstalledWorkloadPacks();
 

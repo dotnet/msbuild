@@ -22,9 +22,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public MockInstallationRecordRepository InstallationRecordRepository;
         public bool FailingRollback;
 
-        public MockPackWorkloadInstaller(string failingWorkload = null, bool failingRollback = false)
+        public MockPackWorkloadInstaller(string failingWorkload = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null)
         {
-            InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload);
+            InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload, installedWorkloads);
             FailingRollback = failingRollback;
         }
 
@@ -81,10 +81,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public IList<WorkloadId> WorkloadInstallRecord = new List<WorkloadId>();
         private readonly string FailingWorkload;
+        public IList<WorkloadId> InstalledWorkloads;
 
-        public MockInstallationRecordRepository(string failingWorkload = null)
+        public MockInstallationRecordRepository(string failingWorkload = null, IList<WorkloadId> installedWorkloads = null)
         {
             FailingWorkload = failingWorkload;
+            InstalledWorkloads = installedWorkloads ?? new List<WorkloadId>();
         }
 
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand sdkFeatureBand)
@@ -102,7 +104,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
         public IEnumerable<WorkloadId> GetInstalledWorkloads(SdkFeatureBand sdkFeatureBand)
         {
-            return new List<WorkloadId>();
+            return InstalledWorkloads;
         }
 
         public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords() => throw new NotImplementedException();

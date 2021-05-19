@@ -49,12 +49,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
         public void WriteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)
         {
             var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
-            var pathDir = Path.GetDirectoryName(path);
-            if (pathDir != null && !Directory.Exists(pathDir))
+            if (!File.Exists(path))
             {
-                Directory.CreateDirectory(pathDir);
+                var pathDir = Path.GetDirectoryName(path);
+                if (pathDir != null && !Directory.Exists(pathDir))
+                {
+                    Directory.CreateDirectory(pathDir);
+                }
+                File.Create(path);
             }
-            File.Create(path);
         }
 
         public void DeleteWorkloadInstallationRecord(WorkloadId workloadId, SdkFeatureBand featureBand)

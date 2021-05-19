@@ -50,6 +50,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IInstaller workloadInstaller = null,
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
+            string dotnetDir = null,
             string userHome = null,
             string version = null)
             : base(parseResult)
@@ -64,15 +65,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
             _sdkVersion = new ReleaseVersion(version ?? Product.Version);
 
-            _dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
+            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity);
+            _workloadInstaller = workloadInstaller ?? 
+                WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader, _dotnetPath);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, userHome);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome);
         }
 
         public override int Execute()

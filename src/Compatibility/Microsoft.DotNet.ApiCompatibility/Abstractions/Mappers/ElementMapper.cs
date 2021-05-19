@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         public ElementMapper(ComparingSettings settings, int rightSetSize)
         {
             if (rightSetSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(rightSetSize), "Should be greater than 0");
+                throw new ArgumentOutOfRangeException(nameof(rightSetSize), Resources.ShouldBeGreaterThanZero);
 
             Settings = settings;
             Right = new T[rightSetSize];
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             else
             {
                 if ((uint)setIndex >= Right.Length)
-                    throw new ArgumentOutOfRangeException(nameof(setIndex), "the index should be within the right set size");
+                    throw new ArgumentOutOfRangeException(nameof(setIndex), Resources.IndexShouldBeWithinSetSizeRange);
 
                 Right[setIndex] = element;
             }
