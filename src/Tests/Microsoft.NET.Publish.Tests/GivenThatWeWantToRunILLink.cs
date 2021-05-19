@@ -691,10 +691,10 @@ namespace Microsoft.NET.Publish.Tests
                     ["System.Runtime.InteropServices.BuiltInComInterop.IsSupported"].Value<bool>()
                     .Should().BeFalse();
                 runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Runtime.InteropServices.CallingManagedFunctionFromNativeHosting.IsSupported"].Value<bool>()
+                    ["System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"].Value<bool>()
                     .Should().BeFalse();
                 runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Runtime.InteropServices.CPlusPlusCLIHostActivation.IsSupported"].Value<bool>()
+                    ["System.Runtime.InteropServices.EnableCppCLIHostActivation"].Value<bool>()
                     .Should().BeFalse();
                 runtimeConfig["runtimeOptions"]["configProperties"]
                     ["System.StartupHookProvider.IsSupported"].Value<bool>()
@@ -705,8 +705,8 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfigContents.Should().NotContain("System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization");
                 runtimeConfigContents.Should().NotContain("System.Resources.ResourceManager.AllowCustomResourceTypes");
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.BuiltInComInterop.IsSupported");
-                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.CallingManagedFunctionFromNativeHosting.IsSupported");
-                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.CPlusPlusCLIHostActivation.IsSupported");
+                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting");
+                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableCppCLIHostActivation");
                 runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
             }
         }

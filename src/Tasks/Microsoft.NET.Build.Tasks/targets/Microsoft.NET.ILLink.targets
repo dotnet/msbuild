@@ -38,8 +38,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CustomResourceTypesSupport Condition="'$(CustomResourceTypesSupport)' == ''">false</CustomResourceTypesSupport>
     <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' == ''">false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
     <BuiltInComInteropSupport Condition="'$(BuiltInComInteropSupport)' == ''">false</BuiltInComInteropSupport>
-    <EnableCPlusPlusCLIHostActivation Condition="'$(EnableCPlusPlusCLIHostActivation)' == ''">false</EnableCPlusPlusCLIHostActivation>
-    <_EnableCallingManagedFunctionFromNativeHosting Condition="'$(_EnableCallingManagedFunctionFromNativeHosting)' == ''">false</_EnableCallingManagedFunctionFromNativeHosting>
+    <EnableCppCLIHostActivation Condition="'$(EnableCppCLIHostActivation)' == ''">false</EnableCppCLIHostActivation>
+    <_EnableConsumingManagedCodeFromNativeHosting Condition="'$(_EnableConsumingManagedCodeFromNativeHosting)' == ''">false</_EnableConsumingManagedCodeFromNativeHosting>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And ('$(EnableTrimAnalyzer)' == 'true' Or '$(PublishTrimmed)' == 'true')">

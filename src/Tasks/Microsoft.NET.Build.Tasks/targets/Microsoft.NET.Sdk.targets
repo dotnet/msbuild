@@ -416,14 +416,14 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(BuiltInComInteropSupport)"
                                     Trim="true" />
 
-    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.CallingManagedFunctionFromNativeHosting.IsSupported"
-                                    Condition="'$(_EnableCallingManagedFunctionFromNativeHosting)' != ''"
-                                    Value="$(_EnableCallingManagedFunctionFromNativeHosting)"
+    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"
+                                    Condition="'$(_EnableConsumingManagedCodeFromNativeHosting)' != ''"
+                                    Value="$(_EnableConsumingManagedCodeFromNativeHosting)"
                                     Trim="true" />
 
-    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.CPlusPlusCLIHostActivation.IsSupported"
-                                    Condition="'$(EnableCPlusPlusCLIHostActivation)' != ''"
-                                    Value="$(EnableCPlusPlusCLIHostActivation)"
+    <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.EnableCppCLIHostActivation"
+                                    Condition="'$(EnableCppCLIHostActivation)' != ''"
+                                    Value="$(EnableCppCLIHostActivation)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"
