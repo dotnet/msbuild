@@ -102,6 +102,37 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
         }
 
+        [Fact]
+        public void GivenWorkloadManifestUpdateItChoosesHighestManifestVersionInCache()
+        {
+            var manifestId = "mock-manifest";
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var featureBand = "6.0.100";
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+
+            // Write mock manifest
+            var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", featureBand);
+            Directory.CreateDirectory(adManifestDir);
+            Directory.CreateDirectory(Path.Combine(installedManifestDir, manifestId));
+            File.WriteAllText(Path.Combine(installedManifestDir, manifestId, _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
+
+            // Write multiple manifest packages to the offline cache
+            var offlineCache = Path.Combine(testDir, "cache");
+            Directory.CreateDirectory(offlineCache);
+            File.Create(Path.Combine(offlineCache, $"{manifestId}.manifest-{featureBand}.2.0.0.nupkg"));
+            File.Create(Path.Combine(offlineCache, $"{manifestId}.manifest-{featureBand}.3.0.0.nupkg"));
+
+            var workloadManifestProvider = new MockManifestProvider(new string[] { Path.Combine(installedManifestDir, manifestId, _manifestFileName) });
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir);
+            manifestUpdater.UpdateAdvertisingManifestsAsync(false, new DirectoryPath(offlineCache)).Wait();
+
+            // We should have chosen the higher version manifest package to install/ extract
+            nugetDownloader.ExtractCallParams.Count().Should().Be(1);
+            nugetDownloader.ExtractCallParams[0].Item1.Should().Be(Path.Combine(offlineCache, $"{manifestId}.manifest-{featureBand}.3.0.0.nupkg"));
+        }
+
         internal static string GetManifestContent(ManifestVersion version)
         {
             return $@"{{

@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     packagePath = Directory.GetFiles(offlineCache.Value.Value)
                         .Where(path => path.EndsWith(".nupkg"))
                         .Where(path => Path.GetFileName(path).StartsWith(GetManifestPackageId(_sdkFeatureBand, manifestId).ToString()))
-                        .FirstOrDefault();
+                        .Max();
                     if (!File.Exists(packagePath))
                     {
                         throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, GetManifestPackageId(_sdkFeatureBand, manifestId), "*", offlineCache));

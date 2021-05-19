@@ -231,16 +231,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 if (!skipManifestUpdate)
                 {
-                    // Add package urls to print
                     var manifestPackageUrls = _workloadManifestUpdater.GetManifestPackageUrls(includePreview);
                     packageUrls.AddRange(manifestPackageUrls);
 
-                    // Use these manifests to resolve packs
                     tempPath = new DirectoryPath(Path.Combine(_userHome, ".dotnet", "manifest-extraction"));
-                    var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath.Value);
-                    await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath.Value);
-                    _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value.Value, _sdkVersion.ToString());
-                    _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+                    await UseTempManifestsToResolvePacksAsync(tempPath.Value, includePreview);
 
                     var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(new SdkFeatureBand(_sdkVersion));
                     workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
@@ -274,6 +269,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 		
+        private async Task UseTempManifestsToResolvePacksAsync(DirectoryPath tempPath, bool includePreview)
+        {
+            var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);
+            await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath);
+            _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
+            _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+        }
+
         private async Task DownloadToOfflineCacheAsync(IEnumerable<WorkloadId> workloadIds, DirectoryPath offlineCache, bool skipManifestUpdate, bool includePreviews)
         {
             string tempManifestDir = null;

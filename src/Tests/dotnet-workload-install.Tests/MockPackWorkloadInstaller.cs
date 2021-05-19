@@ -14,8 +14,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         public IList<PackInfo> InstalledPacks = new List<PackInfo>();
         public IList<PackInfo> RolledBackPacks = new List<PackInfo>();
-        public IList<(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand)> InstalledManifests = 
-            new List<(ManifestId, ManifestVersion, SdkFeatureBand)>();
+        public IList<(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache)> InstalledManifests = 
+            new List<(ManifestId, ManifestVersion, SdkFeatureBand, DirectoryPath?)>();
         public IList<PackInfo> CachedPacks = new List<PackInfo>();
         public string CachePath;
         public bool GarbageCollectionCalled = false;
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            InstalledManifests.Add((manifestId, manifestVersion, sdkFeatureBand));
+            InstalledManifests.Add((manifestId, manifestVersion, sdkFeatureBand, offlineCache));
         }
 
         public void DownloadToOfflineCache(PackInfo pack, DirectoryPath cachePath, bool includePreviews)

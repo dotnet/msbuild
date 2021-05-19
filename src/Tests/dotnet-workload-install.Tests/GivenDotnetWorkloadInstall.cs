@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
-
+using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -115,14 +115,33 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void GivenWorkloadInstallItCanUpdateInstalledManifests()
         {
             var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android" });
-            var manifestsToUpdate = new (ManifestId, ManifestVersion, ManifestVersion)[] { };
+            var manifestsToUpdate = new (ManifestId, ManifestVersion, ManifestVersion)[] { (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0")) };
             (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate);
 
             installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
 
-            installer.InstalledManifests.Should().BeEquivalentTo(manifestsToUpdate);
+            installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].Item1);
+            installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].Item3);
+            installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
+            installer.InstalledManifests[0].offlineCache.Should().Be(null);
         }
-		
+
+        [Fact]
+        public void GivenWorkloadInstallFromCacheItInstallsCachedManifest()
+        {
+            var manifestsToUpdate = new (ManifestId, ManifestVersion, ManifestVersion)[] { (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0")) };
+            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "mockCache").Path, "mockCachePath");
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--from-cache", cachePath });
+            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, tempDirManifestPath: _manifestPath, manifestUpdates: manifestsToUpdate);
+
+            installManager.Execute();
+
+            installer.InstalledManifests[0].manifestId.Should().Be(manifestsToUpdate[0].Item1);
+            installer.InstalledManifests[0].manifestVersion.Should().Be(manifestsToUpdate[0].Item3);
+            installer.InstalledManifests[0].sdkFeatureBand.Should().Be(new SdkFeatureBand("6.0.100"));
+            installer.InstalledManifests[0].offlineCache.Should().Be(new DirectoryPath(cachePath));
+        }
+
         [Fact]
         public void GivenWorkloadInstallItCanDownloadToOfflineCache()
         {
@@ -190,6 +209,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 nugetPackageDownloader: nugetDownloader,
                 workloadManifestUpdater: manifestUpdater,
                 userHome: testDirectory,
+                dotnetDir: dotnetRoot,
                 version: "6.0.100");
 
             return (testDirectory, installManager, installer, workloadResolver, manifestUpdater, nugetDownloader);
