@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             {
                 if (right[i] == null)
                 {
-                    throw new ArgumentNullException(nameof(right), $"Found null at index: {i}.");
+                    throw new ArgumentNullException(nameof(right), string.Format(Resources.ElementShouldNotBeNullAtIndex, i));
                 }
 
                 mapper.AddElement(right[i].Element, ElementSide.Right, i);
