@@ -308,6 +308,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return installedWorkloads
                 .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload.ToString()))
                 .Select(pack => _workloadResolver.TryGetPackInfo(pack))
+                .Where(pack => pack != null)
                 .Select(packInfo => GetPackInstallRecordPath(packInfo, sdkFeatureBand));
         }
 

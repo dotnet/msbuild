@@ -37,6 +37,81 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         }
 
         [Fact]
+        public void GivenWorkloadUpdateItRemovesOldPacksAfterInstall()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var manifestUpdater = new MockWorkloadManifestUpdater();
+            var sdkFeatureVersion = "6.0.100";
+            var installingWorkload = "xamarin-android";
+
+            // Install a workload
+            var installParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
+                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot);
+            installCommand.Execute();
+
+            // 7 packs in packs dir, 1 template pack
+            var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            installPacks.Count().Should().Be(7);
+            foreach (var packDir in installPacks)
+            {
+                Directory.GetDirectories(packDir).Count().Should().Be(1); // 1 version of each pack installed
+            }
+            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", "Xamarin.Android.Sdk", "8.4.7", "6.0.100")) // Original pack version is installed
+                .Should().BeTrue();
+            File.Exists(Path.Combine(dotnetRoot, "template-packs", "xamarin.android.templates.1.0.3.nupkg"))
+                .Should().BeTrue();
+            // Install records are correct
+            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
+                .Should().BeTrue();
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs.Count().Should().Be(8);
+            foreach (var packRecordDir in packRecordDirs)
+            {
+                var packVersionRecordDirs = Directory.GetDirectories(packRecordDir);
+                packVersionRecordDirs.Count().Should().Be(1); // 1 version of each pack installed
+                Directory.GetFiles(packVersionRecordDirs.First()).Count().Should().Be(1); // 1 feature band file for this pack id and version
+            }
+
+            // Mock updating the manifest
+            workloadResolver = WorkloadResolver.CreateForTests(
+                new MockManifestProvider(new[] { Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleUpdatedManifest"), "Sample.json") }),
+                new string[] { dotnetRoot });
+
+            // Update workload
+            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update" });
+            var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
+            workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot);
+            updateCommand.Execute();
+
+            // 6 packs in packs dir, 1 template pack
+            var updatePacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            updatePacks.Count().Should().Be(6);
+            foreach (var packDir in updatePacks)
+            {
+                Directory.GetDirectories(packDir).Count().Should().Be(1); // 1 version of each pack installed
+            }
+            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", "Xamarin.Android.Sdk", "8.5.7", "6.0.100")) // New pack version is installed
+                .Should().BeTrue();
+            File.Exists(Path.Combine(dotnetRoot, "template-packs", "xamarin.android.templates.2.1.3.nupkg"))
+                .Should().BeTrue();
+            // Install records are correct
+            File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload))
+                .Should().BeTrue();
+            packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs.Count().Should().Be(7);
+            foreach (var packRecordDir in packRecordDirs)
+            {
+                var packVersionRecordDirs = Directory.GetDirectories(packRecordDir);
+                packVersionRecordDirs.Count().Should().Be(1); // 1 version of each pack installed
+                Directory.GetFiles(packVersionRecordDirs.First()).Count().Should().Be(1); // 1 feature band file for this pack id and version
+            }
+        }
+
+        [Fact]
         public void GivenWorkloadUpdateItUpdatesOutOfDatePacks()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
