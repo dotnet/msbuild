@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
-using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.Alias;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
@@ -269,14 +268,15 @@ namespace Microsoft.TemplateEngine.Cli
                 _hostDataLoader,
                 _commandInput,
                 _defaultLanguage);
-            HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(
+            await HelpForTemplateResolution.CoordinateHelpAndUsageDisplayAsync(
                 templateResolutionResult,
                 EnvironmentSettings,
                 _commandInput,
                 _hostDataLoader,
                 _telemetryLogger,
                 _templateCreator,
-                _defaultLanguage);
+                _defaultLanguage,
+                default).ConfigureAwait(false);
 
             return New3CommandStatus.Success;
         }
@@ -290,14 +290,15 @@ namespace Microsoft.TemplateEngine.Cli
                     _hostDataLoader,
                     _commandInput,
                     _defaultLanguage);
-                return HelpForTemplateResolution.CoordinateHelpAndUsageDisplay(
+                return await HelpForTemplateResolution.CoordinateHelpAndUsageDisplayAsync(
                     listingTemplateResolutionResult,
                     EnvironmentSettings,
                     _commandInput,
                     _hostDataLoader,
                     _telemetryLogger,
                     _templateCreator,
-                    _defaultLanguage);
+                    _defaultLanguage,
+                    default).ConfigureAwait(false);
             }
 
             TemplateResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
@@ -308,7 +309,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
             else
             {
-                return await HelpForTemplateResolution.CoordinateAmbiguousTemplateResolutionDisplayAsync(templateResolutionResult, EnvironmentSettings, _templatePackageManager, _commandInput, _defaultLanguage).ConfigureAwait(false);
+                return await HelpForTemplateResolution.CoordinateAmbiguousTemplateResolutionDisplayAsync(templateResolutionResult, EnvironmentSettings, _templatePackageManager, _commandInput, _defaultLanguage, default).ConfigureAwait(false);
             }
         }
 

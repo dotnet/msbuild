@@ -35,7 +35,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             Reporter.Output.WriteLine(LocalizableStrings.SearchOnlineNotification);
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings, commandInput, defaultLanguage);
             var templatePackages = await templatePackageManager.GetTemplatePackagesAsync(force: false, cancellationToken: default).ConfigureAwait(false);
-            SearchResults searchResults = await searchCoordinator.SearchAsync(templatePackages).ConfigureAwait(false);
+            SearchResults searchResults = await searchCoordinator.SearchAsync(templatePackages, default).ConfigureAwait(false);
 
             if (!searchResults.AnySources)
             {

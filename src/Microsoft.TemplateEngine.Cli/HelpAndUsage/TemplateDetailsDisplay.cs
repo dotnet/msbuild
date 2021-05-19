@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
@@ -16,15 +18,23 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class TemplateDetailsDisplay
     {
-        internal static void ShowTemplateGroupHelp(IReadOnlyCollection<ITemplateMatchInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, bool showImplicitlyHiddenParams = false)
+        internal static async Task ShowTemplateGroupHelpAsync(
+            IReadOnlyCollection<ITemplateMatchInfo> templateGroup,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IHostSpecificDataLoader hostDataLoader,
+            TemplateCreator templateCreator,
+            bool showImplicitlyHiddenParams,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (templateGroup.Count == 0 || !TemplateResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
             {
                 return;
             }
 
             IReadOnlyList<ITemplateInfo> templateInfoList = templateGroup.Select(x => x.Info).ToList();
-            TemplateGroupParameterDetails? groupParameterDetails = DetermineParameterDispositionsForTemplateGroup(templateInfoList, environmentSettings, commandInput, hostDataLoader, templateCreator);
+            TemplateGroupParameterDetails? groupParameterDetails = await DetermineParameterDispositionsForTemplateGroupAsync(templateInfoList, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken).ConfigureAwait(false);
 
             if (groupParameterDetails != null)
             {
@@ -266,8 +276,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return inputValues;
         }
 
-        private static TemplateGroupParameterDetails? DetermineParameterDispositionsForTemplateGroup(IReadOnlyList<ITemplateInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
+        private static async Task<TemplateGroupParameterDetails?> DetermineParameterDispositionsForTemplateGroupAsync(
+            IReadOnlyList<ITemplateInfo> templateGroup,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IHostSpecificDataLoader hostDataLoader,
+            TemplateCreator templateCreator,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             HashSet<string> groupUserParamsWithInvalidValues = new HashSet<string>(StringComparer.Ordinal);
             bool groupHasPostActionScriptRunner = false;
             List<IParameterSet> parameterSetsForAllTemplatesInGroup = new List<IParameterSet>();
@@ -283,7 +300,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             foreach (ITemplateInfo templateInfo in templateGroup.OrderByDescending(x => x.Precedence))
             {
-                TemplateUsageInformation? usageInformationNullable = TemplateUsageHelp.GetTemplateUsageInformation(templateInfo, environmentSettings, commandInput, hostDataLoader, templateCreator);
+                TemplateUsageInformation? usageInformationNullable = await TemplateUsageHelp.GetTemplateUsageInformationAsync(templateInfo, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken).ConfigureAwait(false);
 
                 if (usageInformationNullable == null)
                 {

@@ -22,26 +22,29 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class HelpForTemplateResolution
     {
-        internal static New3CommandStatus CoordinateHelpAndUsageDisplay(
+        internal static Task<New3CommandStatus> CoordinateHelpAndUsageDisplayAsync(
             TemplateListResolutionResult templateResolutionResult,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
             IHostSpecificDataLoader hostDataLoader,
             ITelemetryLogger telemetryLogger,
             TemplateCreator templateCreator,
-            string? defaultLanguage)
+            string? defaultLanguage,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             //in case only --help option is specified we don't need to show templates list
             if (commandInput.IsHelpFlagSpecified && string.IsNullOrEmpty(commandInput.TemplateName))
             {
                 ShowUsageHelp(commandInput, telemetryLogger);
-                return New3CommandStatus.Success;
+                return Task.FromResult(New3CommandStatus.Success);
             }
 
             // in case list is specified we always need to list templates
             if (commandInput.IsListFlagSpecified)
             {
-                return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
+                return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
             }
             else // help flag specified or no flag specified
             {
@@ -49,11 +52,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     && templateResolutionResult.HasUnambiguousTemplateGroup)
                 {
                     // This will show detailed help on the template group, which only makes sense if there is a single template group adn all templates are the same language.
-                    return DisplayHelpForUnambiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, templateCreator, telemetryLogger, defaultLanguage);
+                    return DisplayHelpForUnambiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, templateCreator, defaultLanguage, cancellationToken);
                 }
                 else
                 {
-                    return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
+                    return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
                 }
             }
         }
@@ -71,8 +74,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             INewCommandInput commandInput,
-            string? defaultLanguage)
+            string? defaultLanguage,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             switch (resolutionResult.ResolutionStatus)
             {
                 case TemplateResolutionResult.Status.NoMatch:
@@ -96,7 +101,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
                 case TemplateResolutionResult.Status.AmbiguousTemplateChoice:
                     Reporter.Verbose.WriteLine(LocalizableStrings.Authoring_AmbiguousBestPrecedence);
-                    return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, environmentSettings, templatePackageManager, commandInput);
+                    return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, environmentSettings, templatePackageManager, commandInput, cancellationToken);
                 case TemplateResolutionResult.Status.InvalidParameter:
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
             }
@@ -217,34 +222,48 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return null;
         }
 
-        private static New3CommandStatus DisplayHelpForUnambiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator, ITelemetryLogger telemetryLogger, string? defaultLanguage)
+        private static Task<New3CommandStatus> DisplayHelpForUnambiguousTemplateGroupAsync(
+            TemplateListResolutionResult templateResolutionResult,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IHostSpecificDataLoader hostDataLoader,
+            TemplateCreator templateCreator,
+            string? defaultLanguage,
+            CancellationToken cancellationToken)
         {
             // sanity check: should never happen; as condition for unambiguous template group is checked above
             if (!templateResolutionResult.UnambiguousTemplateGroup.Any())
             {
-                return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
+                return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
             }
 
             //if language is specified and all templates in unambigiuos group match the language show the help for that template
             if (templateResolutionResult.AllTemplatesInUnambiguousTemplateGroupAreSameLanguage)
             {
                 IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroupForDetailDisplay = templateResolutionResult.UnambiguousTemplateGroup;
-                return TemplateDetailedHelpForSingularTemplateGroup(unambiguousTemplateGroupForDetailDisplay, environmentSettings, commandInput, hostDataLoader, templateCreator);
+                return TemplateDetailedHelpForSingularTemplateGroupAsync(unambiguousTemplateGroupForDetailDisplay, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken);
             }
             //if language is not specified and group has template that matches the language show the help for that the template that matches the language
             if (string.IsNullOrEmpty(commandInput.Language) && !string.IsNullOrEmpty(defaultLanguage) && templateResolutionResult.HasUnambiguousTemplateGroupForDefaultLanguage)
             {
                 IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroupForDetailDisplay = templateResolutionResult.UnambiguousTemplatesForDefaultLanguage;
-                return TemplateDetailedHelpForSingularTemplateGroup(unambiguousTemplateGroupForDetailDisplay, environmentSettings, commandInput, hostDataLoader, templateCreator);
+                return TemplateDetailedHelpForSingularTemplateGroupAsync(unambiguousTemplateGroupForDetailDisplay, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken);
             }
             else
             {
-                return DisplayListOrHelpForAmbiguousTemplateGroup(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, telemetryLogger, defaultLanguage);
+                return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
             }
         }
 
-        private static New3CommandStatus TemplateDetailedHelpForSingularTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
+        private static async Task<New3CommandStatus> TemplateDetailedHelpForSingularTemplateGroupAsync(
+            IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IHostSpecificDataLoader hostDataLoader,
+            TemplateCreator templateCreator,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             // sanity check: should never happen; as condition for unambiguous template group is checked above
             if (!unambiguousTemplateGroup.Any())
             {
@@ -262,7 +281,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (invalidForAllTemplates.Count == 0)
             {
                 bool showImplicitlyHiddenParams = unambiguousTemplateGroup.Count > 1;
-                TemplateDetailsDisplay.ShowTemplateGroupHelp(unambiguousTemplateGroup, environmentSettings, commandInput, hostDataLoader, templateCreator, showImplicitlyHiddenParams);
+                await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(unambiguousTemplateGroup, environmentSettings, commandInput, hostDataLoader, templateCreator, showImplicitlyHiddenParams, cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -279,8 +298,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 : New3CommandStatus.Success;
         }
 
-        private static New3CommandStatus DisplayListOrHelpForAmbiguousTemplateGroup(TemplateListResolutionResult templateResolutionResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, ITelemetryLogger telemetryLogger, string? defaultLanguage)
+        private static Task<New3CommandStatus> DisplayListOrHelpForAmbiguousTemplateGroupAsync(
+            TemplateListResolutionResult templateResolutionResult,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IHostSpecificDataLoader hostDataLoader,
+            string? defaultLanguage,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             // The following occurs when:
             //      --alias <value> is specifed
             //      --help is specified
@@ -289,7 +315,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 Reporter.Error.WriteLine("  " + commandInput.TemplateParamInputFormat("--alias").Bold().Red());
-                return New3CommandStatus.NotFound;
+                return Task.FromResult(New3CommandStatus.NotFound);
             }
 
             bool hasInvalidParameters = false;
@@ -319,15 +345,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (hasInvalidParameters)
             {
-                return New3CommandStatus.NotFound;
+                return Task.FromResult(New3CommandStatus.NotFound);
             }
             else if (commandInput.IsListFlagSpecified || commandInput.IsHelpFlagSpecified)
             {
-                return templateResolutionResult.HasExactMatches ? New3CommandStatus.Success : New3CommandStatus.NotFound;
+                return Task.FromResult(templateResolutionResult.HasExactMatches ? New3CommandStatus.Success : New3CommandStatus.NotFound);
             }
             else
             {
-                return New3CommandStatus.NotFound;
+                return Task.FromResult(New3CommandStatus.NotFound);
             }
         }
 
@@ -374,7 +400,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
             INewCommandInput commandInput,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(commandInput));

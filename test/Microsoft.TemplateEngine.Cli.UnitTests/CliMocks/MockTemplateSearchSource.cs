@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
@@ -77,15 +78,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             _resultsById = new Dictionary<Guid, IReadOnlyList<ITemplateNameSearchResult>>();
         }
 
-        public Task<bool> TryConfigure(IEngineEnvironmentSettings environment, IReadOnlyList<IManagedTemplatePackage> existingTemplatePackage)
+        public Task<bool> TryConfigureAsync(IEngineEnvironmentSettings environment, IReadOnlyList<IManagedTemplatePackage> existingTemplatePackages, CancellationToken cancellationToken)
         {
-            _packFilter = new NupkgHigherVersionInstalledPackFilter(existingTemplatePackage);
+            cancellationToken.ThrowIfCancellationRequested();
+            _packFilter = new NupkgHigherVersionInstalledPackFilter(existingTemplatePackages);
 
             return Task.FromResult(true);
         }
 
-        public Task<IReadOnlyList<ITemplateNameSearchResult>> CheckForTemplateNameMatchesAsync(string templateName)
+        public Task<IReadOnlyList<ITemplateNameSearchResult>> CheckForTemplateNameMatchesAsync(string templateName, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             List<ITemplateNameSearchResult> matches = new List<ITemplateNameSearchResult>();
 
             IReadOnlyList<ITemplateNameSearchResult> possibleSearchResults = GetPossibleResultsOrDefaultForId(_id);
@@ -105,7 +108,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             return Task.FromResult(returnResults);
         }
 
-        public Task<IReadOnlyDictionary<string, PackToTemplateEntry>> CheckForTemplatePackMatchesAsync(IReadOnlyList<string> packNameList)
+        public Task<IReadOnlyDictionary<string, PackToTemplateEntry>> CheckForTemplatePackMatchesAsync(IReadOnlyList<string> packNameList, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

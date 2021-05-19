@@ -6,6 +6,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
@@ -78,8 +80,16 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         // TODO: rework this method... it's a bit of a god-method, for very specific purposes.
         // Number of times I've deferred on reworking this method: 4
-        internal static TemplateUsageInformation? GetTemplateUsageInformation(ITemplateInfo templateInfo, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
+        internal static async Task<TemplateUsageInformation?> GetTemplateUsageInformationAsync(
+            ITemplateInfo templateInfo,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            IHostSpecificDataLoader hostDataLoader,
+            TemplateCreator templateCreator,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             IParameterSet allParams;
             IReadOnlyList<string> userParamsWithInvalidValues;
             HashSet<string> userParamsWithDefaultValues;
@@ -96,7 +106,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 #pragma warning disable CS0618 // Type or member is obsolete
             allParams = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
             templateCreator.ResolveUserParameters(template, allParams, commandInput.InputTemplateParams, out userParamsWithInvalidValues);
-            hasPostActionScriptRunner = CheckIfTemplateHasScriptRunningPostActions(template, environmentSettings, commandInput, templateCreator);
+            hasPostActionScriptRunner = await CheckIfTemplateHasScriptRunningPostActionsAsync(template, environmentSettings, commandInput, templateCreator, cancellationToken).ConfigureAwait(false);
             templateCreator.ReleaseMountPoints(template);
 #pragma warning restore CS0618 // Type or member is obsolete
 
@@ -213,15 +223,26 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return true;
         }
 
-        private static bool CheckIfTemplateHasScriptRunningPostActions(ITemplate template, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, TemplateCreator templateCreator)
+        private static async Task<bool> CheckIfTemplateHasScriptRunningPostActionsAsync(
+            ITemplate template,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            TemplateCreator templateCreator,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             // use a throwaway set of params for getting the creation effects - it makes changes to them.
             string targetDir = commandInput.OutputPath ?? environmentSettings.Host.FileSystem.GetCurrentDirectory();
 #pragma warning disable CS0618 // Type or member is obsolete
             IParameterSet paramsForCreationEffects = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> throwaway);
             templateCreator.ResolveUserParameters(template, paramsForCreationEffects, commandInput.InputTemplateParams, out IReadOnlyList<string> userParamsWithInvalidValues);
 #pragma warning restore CS0618 // Type or member is obsolete
-            ICreationEffects creationEffects = template.Generator.GetCreationEffects(environmentSettings, template, paramsForCreationEffects, environmentSettings.Components, targetDir);
+            ICreationEffects creationEffects = await template.Generator.GetCreationEffectsAsync(
+                environmentSettings,
+                template,
+                paramsForCreationEffects,
+                targetDir,
+                default).ConfigureAwait(false);
             return creationEffects.CreationResult.PostActions.Any(x => x.ActionId == ProcessStartPostActionProcessor.ActionProcessorId);
         }
     }

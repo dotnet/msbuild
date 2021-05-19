@@ -274,7 +274,7 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, _commandName).Bold().Red());
                     return New3CommandStatus.NotFound;
                 case CreationResultStatus.InvalidParamValues:
-                    TemplateUsageInformation? usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, _environment, _commandInput, _hostDataLoader, _templateCreator);
+                    TemplateUsageInformation? usageInformation = await TemplateUsageHelp.GetTemplateUsageInformationAsync(template, _environment, _commandInput, _hostDataLoader, _templateCreator, default).ConfigureAwait(false);
 
                     if (usageInformation != null)
                     {

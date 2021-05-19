@@ -56,7 +56,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             TemplateSearcher searcher = new TemplateSearcher(_engineEnvironmentSettings, "C#", MockTemplateSearchHelpers.DefaultMatchFilter);
             List<IManagedTemplatePackage> existingInstalls = new List<IManagedTemplatePackage>();
-            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, templateName).Result;
+            SearchResults searchResults = searcher.SearchForTemplatesAsync(existingInstalls, templateName, default).Result;
             Assert.True(searchResults.AnySources);
             Assert.Equal(1, searchResults.MatchesBySource.Count);
             Assert.Equal("source one", searchResults.MatchesBySource[0].SourceDisplayName);
@@ -79,7 +79,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
                 new MockManagedTemplatePackage()
             };
 
-            SearchResults searchResults = searcher.SearchForTemplatesAsync(packsToIgnore, templateName).Result;
+            SearchResults searchResults = searcher.SearchForTemplatesAsync(packsToIgnore, templateName, default).Result;
             Assert.Equal(0, searchResults.MatchesBySource.Count);
         }
 
