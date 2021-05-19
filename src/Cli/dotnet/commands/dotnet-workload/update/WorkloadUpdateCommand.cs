@@ -49,6 +49,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             IInstaller workloadInstaller = null,
             INuGetPackageDownloader nugetPackageDownloader = null,
             IWorkloadManifestUpdater workloadManifestUpdater = null,
+            string dotnetDir = null,
             string userHome = null,
             string version = null)
             : base(parseResult)
@@ -63,11 +64,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption)) ?
                 Product.Version : parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption)));
 
-            var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
+            var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity);
+            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader, dotnetDir);
             userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(userHome, ".dotnet", "sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
@@ -166,7 +167,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                         workloadPackToUpdate = workloadIds
                             .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                             .Distinct()
-                            .Select(packId => _workloadResolver.TryGetPackInfo(packId));
+                            .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                            .Where(pack => pack != null);
 
                         foreach (var packId in workloadPackToUpdate)
                         {
