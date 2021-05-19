@@ -34,6 +34,15 @@
     <None Include="**/*.props;**/*.targets" Pack="true">
       <PackagePath>%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
     </None>
+    
+    <!-- 
+      Additionally also copy the props and targets from the build folder into buildMultiTargeting so that
+      NuGet will also have these files automatically imported for consuming projects which multitarget
+      (use TargetFrameworks instead of TargetFramework) 
+    -->
+    <None Include="build/*.props;build/*.targets" Pack="true">
+      <PackagePath>buildMultiTargeting/%(Filename)%(Extension)</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
