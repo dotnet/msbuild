@@ -29,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 if (!string.IsNullOrEmpty(templateInfo.HostConfigPlace) && _engineEnvironment.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint))
                 {
-                    var file = mountPoint.FileInfo(templateInfo.HostConfigPlace);
+                    var file = mountPoint!.FileInfo(templateInfo.HostConfigPlace);
                     if (file != null && file.Exists)
                     {
                         JObject jsonData;

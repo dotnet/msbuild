@@ -100,8 +100,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        public IEnumerable<string> RequiredBrokerCapabilities => Enumerable.Empty<string>();
-
         public IDictionary<ITemplateParameter, object> ResolvedValues
         {
             get
