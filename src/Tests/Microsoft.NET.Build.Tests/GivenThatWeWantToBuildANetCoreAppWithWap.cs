@@ -16,7 +16,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [Fact]
+        [FullMSBuildOnlyFact]
         public void WhenNetCoreProjectIsReferencedByAWapProject()
         {
             var testInstance = _testAssetsManager
