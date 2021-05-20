@@ -16,6 +16,7 @@ using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Utils;
 using CreationResultStatus = Microsoft.TemplateEngine.Edge.Template.CreationResultStatus;
+using ITemplateCreationResult = Microsoft.TemplateEngine.Edge.Template.ITemplateCreationResult;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -31,6 +32,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         private readonly TemplateCreator _templateCreator;
         private readonly IHostSpecificDataLoader _hostDataLoader;
+        private readonly PostActionDispatcher _postActionDispatcher;
 
         internal TemplateInvoker(IEngineEnvironmentSettings environment, INewCommandInput commandInput, ITelemetryLogger telemetryLogger, string commandName, Func<string> inputGetter, New3Callbacks callbacks)
         {
@@ -43,24 +45,22 @@ namespace Microsoft.TemplateEngine.Cli
 
             _templateCreator = new TemplateCreator(_environment);
             _hostDataLoader = new HostSpecificDataLoader(_environment);
+            _postActionDispatcher = new PostActionDispatcher(_environment, _callbacks, _inputGetter);
         }
 
         internal static bool CheckForArgsError(ITemplateMatchInfo template)
         {
-            bool argsError;
             IEnumerable<string> invalidParams = template.GetInvalidParameterNames();
 
             if (invalidParams.Any())
             {
                 HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
-                argsError = true;
+                return true;
             }
             else
             {
-                argsError = false;
+                return false;
             }
-
-            return argsError;
         }
 
         internal async Task<New3CommandStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke)
@@ -246,8 +246,7 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, template.ThirdPartyNotices));
                     }
 
-                    HandlePostActions(instantiateResult);
-                    return New3CommandStatus.Success;
+                    return HandlePostActions(instantiateResult);
                 case CreationResultStatus.CreateFailed:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
                     return New3CommandStatus.CreateFailed;
@@ -310,34 +309,37 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private void HandlePostActions(Edge.Template.ITemplateCreationResult creationResult)
+        private New3CommandStatus HandlePostActions(ITemplateCreationResult creationResult)
         {
-            if (creationResult.Status != CreationResultStatus.Success)
-            {
-                return;
-            }
-
-            AllowPostActionsSetting scriptRunSettings;
+            AllowRunScripts scriptRunSettings;
 
             if (string.IsNullOrEmpty(_commandInput.AllowScriptsToRun) || string.Equals(_commandInput.AllowScriptsToRun, "prompt", StringComparison.OrdinalIgnoreCase))
             {
-                scriptRunSettings = AllowPostActionsSetting.Prompt;
+                scriptRunSettings = AllowRunScripts.Prompt;
             }
             else if (string.Equals(_commandInput.AllowScriptsToRun, "yes", StringComparison.OrdinalIgnoreCase))
             {
-                scriptRunSettings = AllowPostActionsSetting.Yes;
+                scriptRunSettings = AllowRunScripts.Yes;
             }
             else if (string.Equals(_commandInput.AllowScriptsToRun, "no", StringComparison.OrdinalIgnoreCase))
             {
-                scriptRunSettings = AllowPostActionsSetting.No;
+                scriptRunSettings = AllowRunScripts.No;
             }
             else
             {
-                scriptRunSettings = AllowPostActionsSetting.Prompt;
+                scriptRunSettings = AllowRunScripts.Prompt;
             }
 
-            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(_environment, _callbacks, creationResult, scriptRunSettings, _commandInput.IsDryRun);
-            postActionDispatcher.Process(_inputGetter);
+            PostActionExecutionStatus result = _postActionDispatcher.Process(creationResult, _commandInput.IsDryRun, scriptRunSettings);
+
+            return result switch
+            {
+                PostActionExecutionStatus.Success => New3CommandStatus.Success,
+                PostActionExecutionStatus.Failure => New3CommandStatus.PostActionFailed,
+                PostActionExecutionStatus.Cancelled => New3CommandStatus.Cancelled,
+                PostActionExecutionStatus.Failure | PostActionExecutionStatus.Cancelled => New3CommandStatus.PostActionFailed,
+                _ => New3CommandStatus.UnexpectedResult
+            };
         }
     }
 }

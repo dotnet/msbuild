@@ -1143,6 +1143,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to run the command: argument &apos;executable&apos; is missing in post action configuration..
+        /// </summary>
+        internal static string PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable {
+            get {
+                return ResourceManager.GetString("PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Actual command: {0}.
         /// </summary>
         internal static string PostActionCommand {
@@ -1157,6 +1166,24 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string PostActionDescription {
             get {
                 return ResourceManager.GetString("PostActionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The post action {0} is not supported..
+        /// </summary>
+        internal static string PostActionDispatcher_Error_NotSupported {
+            get {
+                return ResourceManager.GetString("PostActionDispatcher_Error_NotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Execution of &apos;Run script&apos; post action is not allowed..
+        /// </summary>
+        internal static string PostActionDispatcher_Error_RunScriptNotAllowed {
+            get {
+                return ResourceManager.GetString("PostActionDispatcher_Error_RunScriptNotAllowed", resourceCulture);
             }
         }
         

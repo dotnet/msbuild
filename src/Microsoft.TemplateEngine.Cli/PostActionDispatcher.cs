@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using Microsoft.TemplateEngine.Abstractions;
@@ -9,139 +11,193 @@ using Microsoft.TemplateEngine.Edge.Template;
 
 namespace Microsoft.TemplateEngine.Cli
 {
-    internal enum AllowPostActionsSetting
+    internal enum AllowRunScripts
     {
         No,
         Yes,
         Prompt
     }
 
+    [Flags]
+    /// <summary>
+    /// Indicates post action execution status.
+    /// </summary>
+    internal enum PostActionExecutionStatus
+    {
+        /// <summary>
+        /// All post actions executed successfully.
+        /// </summary>
+        Success = 0,
+
+        /// <summary>
+        /// One or more post actions failed.
+        /// </summary>
+        Failure = 1,
+
+        /// <summary>
+        /// User has cancelled post action execution.
+        /// </summary>
+        Cancelled = 2
+    }
+
     internal class PostActionDispatcher
     {
-        private readonly ITemplateCreationResult _creationResult;
         private readonly IEngineEnvironmentSettings _environment;
         private readonly New3Callbacks _callbacks;
-        private readonly AllowPostActionsSetting _canRunScripts;
-        private readonly bool _isDryRun;
+        private readonly Func<string> _inputGetter;
 
-        internal PostActionDispatcher(IEngineEnvironmentSettings environment, New3Callbacks callbacks, ITemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus, bool isDryRun)
+        /// <summary>
+        /// Creates the instance.
+        /// </summary>
+        /// <param name="environment">template engine environment settings.</param>
+        /// <param name="callbacks">callbacks that can be used for post actions.</param>
+        /// <param name="inputGetter">the predicate to get user input whether to run the post action.</param>
+        internal PostActionDispatcher(IEngineEnvironmentSettings environment, New3Callbacks callbacks, Func<string> inputGetter)
         {
-            _environment = environment;
-            _callbacks = callbacks;
-            _creationResult = creationResult;
-            _canRunScripts = canRunStatus;
-            _isDryRun = isDryRun;
+            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+            _callbacks = callbacks ?? throw new ArgumentNullException(nameof(callbacks));
+            _inputGetter = inputGetter ?? throw new ArgumentNullException(nameof(inputGetter));
         }
 
-        internal void Process(Func<string> inputGetter)
+        /// <summary>
+        /// Process post actions based on <paramref name="creationResult"/>.
+        /// </summary>
+        /// <param name="creationResult">the result of template creation or dry run.</param>
+        /// <param name="isDryRun">true if dry run should be done, false if post actions should be performed.</param>
+        /// <param name="canRunScripts">indicates if run script post action is allowed to be run.</param>
+        /// <returns>
+        /// <see cref="PostActionExecutionStatus"/> containing result of post action execution.<br />
+        /// Note that if <see cref="IPostAction.ContinueOnError"/> is set to true, the result will be <see cref="PostActionExecutionStatus.Success"/> even if the post action fails.
+        /// If the user cancelled post action with <see cref="IPostAction.ContinueOnError"/> set to true, the result will be <see cref="PostActionExecutionStatus.Cancelled"></see> anyway.<br />
+        /// Note that <see cref="PostActionExecutionStatus"/> is a flags enum, and can contain multiple status if multiple post actions failed with different reason.
+        /// </returns>
+        internal PostActionExecutionStatus Process(ITemplateCreationResult creationResult, bool isDryRun, AllowRunScripts canRunScripts)
         {
-            IReadOnlyList<IPostAction> postActions = _creationResult.CreationResult?.PostActions ?? _creationResult.CreationEffects.CreationResult.PostActions;
+            _ = creationResult ?? throw new ArgumentNullException(nameof(creationResult));
+            _ = creationResult.CreationEffects ?? throw new ArgumentNullException(nameof(creationResult.CreationEffects));
+            if (!isDryRun)
+            {
+            _ = creationResult.CreationResult ?? throw new ArgumentNullException(nameof(creationResult.CreationResult));
+            }
+            if (string.IsNullOrWhiteSpace(creationResult.OutputBaseDirectory))
+            {
+                throw new ArgumentNullException($"{nameof(creationResult.OutputBaseDirectory)} should not be null or whitespace", nameof(creationResult.OutputBaseDirectory));
+            }
+
+            IReadOnlyList<IPostAction> postActions = isDryRun
+                ? creationResult.CreationEffects.CreationResult.PostActions
+                : creationResult.CreationResult!.PostActions;
+
             if (postActions.Count > 0)
             {
                 Reporter.Output.WriteLine();
                 Reporter.Output.WriteLine(LocalizableStrings.ProcessingPostActions);
             }
+            else
+            {
+                return PostActionExecutionStatus.Success;
+            }
 
+            PostActionExecutionStatus result = PostActionExecutionStatus.Success;
             foreach (IPostAction action in postActions)
             {
-                IPostActionProcessor actionProcessor = null;
+                if (isDryRun)
+                {
+                    Reporter.Output.WriteLine(LocalizableStrings.ActionWouldHaveBeenTakenAutomatically);
+                    if (!string.IsNullOrWhiteSpace(action.Description))
+                    {
+                        Reporter.Output.WriteLine(action.Description.Indent());
+                    }
+                    continue;
+                }
 
+                IPostActionProcessor? actionProcessor = null;
                 _environment.Components.TryGetComponent(action.ActionId, out actionProcessor);
-
-                bool result = false;
 
                 if (actionProcessor == null)
                 {
-                    // The host doesn't know how to handle this action, just display instructions.
-                    result = DisplayInstructionsForAction(action);
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostActionDispatcher_Error_NotSupported, action.ActionId));
+                    if (!string.IsNullOrWhiteSpace(action.Description))
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostActionDescription, action.Description));
+                    }
+                    // The host doesn't know how to handle this action, just display manual instructions.
+                    DisplayInstructionsForAction(action, useErrorOutput: true);
+                    result |= PostActionExecutionStatus.Failure;
                 }
                 else if (actionProcessor is ProcessStartPostActionProcessor)
                 {
-                    if (_canRunScripts == AllowPostActionsSetting.No || _isDryRun)
+                    if (canRunScripts == AllowRunScripts.No)
                     {
-                        DisplayInstructionsForAction(action);
-                        result = false; // post action didn't run, it's an error in the sense that continue on error sees it.
+                        Reporter.Error.WriteLine(LocalizableStrings.PostActionDispatcher_Error_RunScriptNotAllowed);
+                        if (!string.IsNullOrWhiteSpace(action.Description))
+                        {
+                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.PostActionDescription, action.Description));
+                        }
+                        DisplayInstructionsForAction(action, useErrorOutput: true);
+                        result |= PostActionExecutionStatus.Cancelled;
                     }
-                    else if (_canRunScripts == AllowPostActionsSetting.Yes)
+                    else if (canRunScripts == AllowRunScripts.Yes)
                     {
-                        result = ProcessAction(action, actionProcessor);
+                        result |= ProcessAction(creationResult.CreationEffects, creationResult.CreationResult!, creationResult.OutputBaseDirectory, action, actionProcessor);
                     }
-                    else if (_canRunScripts == AllowPostActionsSetting.Prompt)
+                    else if (canRunScripts == AllowRunScripts.Prompt)
                     {
-                        result = HandlePromptRequired(action, actionProcessor, inputGetter);
+                        // Ask the user if they want to run the action.
+                        // If they do, run it, and return the result.
+                        // Otherwise return cancelled, indicating the action was not run.
+                        if (AskUserIfActionShouldRun(action))
+                        {
+                            result |= ProcessAction(creationResult.CreationEffects, creationResult.CreationResult!, creationResult.OutputBaseDirectory, action, actionProcessor);
+                        }
+                        else
+                        {
+                            result |= PostActionExecutionStatus.Cancelled;
+                        }
                     }
                     // no trailing else - no other cases.
                 }
-                else
+                else // other post action
                 {
-                    if (!_isDryRun)
+                    result |= ProcessAction(creationResult.CreationEffects, creationResult.CreationResult!, creationResult.OutputBaseDirectory, action, actionProcessor);
+                }
+                if (result != PostActionExecutionStatus.Success)
+                {
+                    if (action.ContinueOnError)
                     {
-                        result = ProcessAction(action, actionProcessor);
+                        result ^= PostActionExecutionStatus.Failure;
                     }
                     else
                     {
-                        Reporter.Output.WriteLine(LocalizableStrings.ActionWouldHaveBeenTakenAutomatically);
-
-                        if (!string.IsNullOrWhiteSpace(action.Description))
-                        {
-                            Reporter.Output.WriteLine("  " + action.Description);
-                            result = true;
-                        }
-                    }
-
-                    if (!result && !string.IsNullOrEmpty(action.ManualInstructions))
-                    {
-                        Reporter.Output.WriteLine(LocalizableStrings.PostActionFailedInstructionHeader);
-                        DisplayInstructionsForAction(action);
+                        break;
                     }
                 }
-
-                if (!result && !action.ContinueOnError)
-                {
-                    break;
-                }
-
                 Reporter.Output.WriteLine();
             }
+            return result;
         }
 
-        // If the action is just instructions, display them and be done with the action.
-        // Otherwise ask the user if they want to run the action.
-        // If they do, run it, and return the result.
-        // Otherwise return false, indicating the action was not run.
-        private bool HandlePromptRequired(IPostAction action, IPostActionProcessor actionProcessor, Func<string> inputGetter)
-        {
-            if (actionProcessor is InstructionDisplayPostActionProcessor)
-            {
-                // it's just instructions, no need to prompt
-                bool result = ProcessAction(action, actionProcessor);
-                return result;
-            }
-
-            // TODO: determine if this is the proper way to get input.
-            bool userWantsToRunAction = AskUserIfActionShouldRun(action, inputGetter);
-
-            if (!userWantsToRunAction)
-            {
-                return false;
-            }
-
-            return ProcessAction(action, actionProcessor);
-        }
-
-        private bool AskUserIfActionShouldRun(IPostAction action, Func<string> inputGetter)
+        private bool AskUserIfActionShouldRun(IPostAction action)
         {
             const string YesAnswer = "Y";
             const string NoAnswer = "N";
 
             Reporter.Output.WriteLine(LocalizableStrings.PostActionPromptHeader);
-            DisplayInstructionsForAction(action);
-
+            if (!string.IsNullOrWhiteSpace(action.Description))
+            {
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionDescription, action.Description));
+            }
+            // actual command that will be run by 'Run script' post action
+            if (action.Args != null && action.Args.TryGetValue("executable", out string? executable))
+            {
+                action.Args.TryGetValue("args", out string? commandArgs);
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionCommand, $"{executable} {commandArgs}").Bold().Red());
+            }
             Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionPromptRequest, YesAnswer, NoAnswer));
 
             do
             {
-                string input = inputGetter();
+                string input = _inputGetter();
 
                 if (input.Equals(YesAnswer, StringComparison.OrdinalIgnoreCase))
                 {
@@ -157,25 +213,58 @@ namespace Microsoft.TemplateEngine.Cli
             while (true);
         }
 
-        private bool ProcessAction(IPostAction action, IPostActionProcessor actionProcessor)
+        private PostActionExecutionStatus ProcessAction(
+            ICreationEffects creationEffects,
+            ICreationResult creationResult,
+            string outputBaseDirectory,
+            IPostAction action,
+            IPostActionProcessor actionProcessor)
         {
             if (actionProcessor is PostActionProcessor2Base actionProcessor2Base)
             {
                 actionProcessor2Base.Callbacks = _callbacks;
             }
 
-            if (actionProcessor is IPostActionProcessor2 actionProcessor2 && _creationResult.CreationEffects is ICreationEffects2 creationEffects)
+            //catch all exceptions on post action execution
+            //post actions can be added using components and it's not sure if they handle exceptions properly
+            try
             {
-                return actionProcessor2.Process(_environment, action, creationEffects, _creationResult.CreationResult, _creationResult.OutputBaseDirectory);
+                if (actionProcessor.Process(_environment, action, creationEffects, creationResult, outputBaseDirectory))
+                {
+                    return PostActionExecutionStatus.Success;
+                }
+
+                Reporter.Error.WriteLine(LocalizableStrings.PostActionFailedInstructionHeader);
+                DisplayInstructionsForAction(action, useErrorOutput: true);
+                return PostActionExecutionStatus.Failure;
+            }
+            catch (Exception e)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.PostActionFailedInstructionHeader);
+                Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, e.ToString()));
+                DisplayInstructionsForAction(action, useErrorOutput: true);
+                return PostActionExecutionStatus.Failure;
             }
 
-            return actionProcessor.Process(_environment, action, _creationResult.CreationResult, _creationResult.OutputBaseDirectory);
         }
 
-        private bool DisplayInstructionsForAction(IPostAction action)
+        private void DisplayInstructionsForAction(IPostAction action, bool useErrorOutput = false)
         {
-            IPostActionProcessor instructionProcessor = new InstructionDisplayPostActionProcessor();
-            return ProcessAction(action, instructionProcessor);
+            if (string.IsNullOrWhiteSpace(action.ManualInstructions))
+            {
+                //no manual instructions was written by template author for post action
+                return;
+            }
+
+            Reporter stream = useErrorOutput ? Reporter.Error : Reporter.Output;
+            stream.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, action.ManualInstructions));
+
+            // if the post action executes the command ('Run script' post action), additionally display command to be executed.
+            if (action.Args != null && action.Args.TryGetValue("executable", out string? executable))
+            {
+                action.Args.TryGetValue("args", out string? commandArgs);
+                stream.WriteLine(string.Format(LocalizableStrings.PostActionCommand, $"{executable} {commandArgs}").Bold().Red());
+            }
         }
     }
 }

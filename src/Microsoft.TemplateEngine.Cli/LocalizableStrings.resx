@@ -712,4 +712,13 @@ Examples:
   <data name="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader" xml:space="preserve">
     <value>To update the package use:</value>
   </data>
+  <data name="PostActionDispatcher_Error_NotSupported" xml:space="preserve">
+    <value>The post action {0} is not supported.</value>
+  </data>
+  <data name="PostActionDispatcher_Error_RunScriptNotAllowed" xml:space="preserve">
+    <value>Execution of 'Run script' post action is not allowed.</value>
+  </data>
+  <data name="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable" xml:space="preserve">
+    <value>Failed to run the command: argument 'executable' is missing in post action configuration.</value>
+  </data>
 </root>

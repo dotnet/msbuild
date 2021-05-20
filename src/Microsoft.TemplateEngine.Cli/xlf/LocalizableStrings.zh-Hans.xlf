@@ -629,6 +629,16 @@ The supported columns are: language, tags, author, type.</target>
         <target state="new">Description: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PostActionDispatcher_Error_NotSupported">
+        <source>The post action {0} is not supported.</source>
+        <target state="new">The post action {0} is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
+        <source>Execution of 'Run script' post action is not allowed.</source>
+        <target state="new">Execution of 'Run script' post action is not allowed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
         <source>Post action failed.</source>
         <target state="new">Post action failed.</target>
@@ -652,6 +662,11 @@ The supported columns are: language, tags, author, type.</target>
       <trans-unit id="PostActionPromptRequest">
         <source>Do you want to run this action [{0}(yes)|{1}(no)]?</source>
         <target state="new">Do you want to run this action [{0}(yes)|{1}(no)]?</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
+        <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
+        <target state="new">Failed to run the command: argument 'executable' is missing in post action configuration.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">

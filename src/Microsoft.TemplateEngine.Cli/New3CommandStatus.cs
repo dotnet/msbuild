@@ -53,6 +53,11 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// The operation is cancelled due to destructive changes to existing files are detected.
         /// </summary>
-        DestructiveChangesDetected = unchecked((int)0x8002000D)
+        DestructiveChangesDetected = unchecked((int)0x8002000D),
+
+        /// <summary>
+        /// Post action failed.
+        /// </summary>
+        PostActionFailed = unchecked((int)0x80010003)
     }
 }
