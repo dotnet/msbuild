@@ -1048,6 +1048,7 @@ namespace Microsoft.Build.Execution
 
                 VerifyStateInternal(BuildManagerState.Building);
 
+                BuildRequestConfiguration resolvedConfiguration = null;
                 try
                 {
                     // If we have an unnamed project, assign it a temporary name.
@@ -1073,12 +1074,12 @@ namespace Microsoft.Build.Execution
                     // Create/Retrieve a configuration for each request
                     var buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
                     var matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
-                    var newConfiguration = ResolveConfiguration(
+                    resolvedConfiguration = ResolveConfiguration(
                         buildRequestConfiguration,
                         matchingConfiguration,
                         submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
 
-                    newConfiguration.ExplicitlyLoaded = true;
+                    resolvedConfiguration.ExplicitlyLoaded = true;
 
                     if (_shuttingDown)
                     {
@@ -1092,27 +1093,49 @@ namespace Microsoft.Build.Execution
 
                     if (ProjectCacheIsPresent())
                     {
-                        IssueCacheRequestForBuildSubmission(new CacheRequest(submission, newConfiguration));
+                        IssueCacheRequestForBuildSubmission(new CacheRequest(submission, resolvedConfiguration));
                     }
                     else
                     {
-                        AddBuildRequestToSubmission(submission, newConfiguration.ConfigurationId);
+                        AddBuildRequestToSubmission(submission, resolvedConfiguration.ConfigurationId);
                         IssueBuildRequestForBuildSubmission(submission, allowMainThreadBuild);
                     }
                 }
+                catch (ProjectCacheException ex)
+                {
+                    ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having ");
+                    CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
+                }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    HandleSubmissionException(submission, ex);
-                    throw;
+                    if (resolvedConfiguration is not null)
+                    {
+                        CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
+                    }
+                    else
+                    {
+                        HandleSubmissionException(submission, ex);
+                        throw;
+                    }
                 }
             }
         }
 
         bool ProjectCacheIsPresent()
         {
-            return _projectCacheService != null ||
-                   _buildParameters.ProjectCacheDescriptor != null ||
-                   ProjectCachePresentViaVisualStudioWorkaround();
+            // TODO: remove after we change VS to set the cache descriptor via build parameters.
+            // TODO: no need to access the service when there's no design time builds.
+            var projectCacheService = GetProjectCacheService();
+
+            if (projectCacheService != null && projectCacheService.DesignTimeBuildsDetected)
+            {
+                return false;
+            }
+
+            return
+                projectCacheService != null ||
+                _buildParameters.ProjectCacheDescriptor != null ||
+                ProjectCachePresentViaVisualStudioWorkaround();
         }
 
         private static bool ProjectCachePresentViaVisualStudioWorkaround()
@@ -1128,30 +1151,45 @@ namespace Microsoft.Build.Execution
             {
                 try
                 {
-                    GetProjectCacheService().PostCacheRequest(cacheRequest);
+                    var projectCacheService = GetProjectCacheService();
+
+                    ErrorUtilities.VerifyThrow(
+                        projectCacheService != null,
+                        "This method should not get called if there's no project cache.");
+
+                    ErrorUtilities.VerifyThrow(
+                        !projectCacheService.DesignTimeBuildsDetected,
+                        "This method should not get called if design time builds are detected.");
+
+                    projectCacheService.PostCacheRequest(cacheRequest);
                 }
                 catch (Exception e)
                 {
                     CompleteSubmissionWithException(cacheRequest.Submission, cacheRequest.Configuration, e);
                 }
             });
+        }
 
-            ProjectCacheService GetProjectCacheService()
+        private ProjectCacheService GetProjectCacheService()
+        {
+            // TODO: remove after we change VS to set the cache descriptor via build parameters.
+            AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio();
+
+            try
             {
-                // TODO: remove after we change VS to set the cache descriptor via build parameters.
-                AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio();
+                return _projectCacheService?.Result;
+            }
+            catch(Exception ex)
+            {
+                if (ex is AggregateException ae && ae.InnerExceptions.Count == 1)
+                {
+                    ex = ae.InnerExceptions.First();
+                }
 
-                try
-                {
-                    return _projectCacheService.Result;
-                }
-                catch
-                {
-                    // These are exceptions thrown during project cache startup (assembly load issues or cache BeginBuild exceptions).
-                    // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
-                    Interlocked.Exchange(ref _projectCacheService, null);
-                    throw;
-                }
+                // These are exceptions thrown during project cache startup (assembly load issues or cache BeginBuild exceptions).
+                // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
+                Interlocked.Exchange(ref _projectCacheService, null);
+                throw ex;
             }
         }
 
@@ -2144,13 +2182,6 @@ namespace Microsoft.Build.Execution
                 {
                     try
                     {
-                        if (_projectCacheService?.Result.DesignTimeBuildsDetected)
-                        {
-                            throw new NotImplementedException();
-                            _projectCacheService.Result.ShutDown().GetAwaiter().GetResult();
-                            _projectCacheService = null;
-                        }
-
                         var submission = cacheRequest.Submission;
                         var configuration = cacheRequest.Configuration;
 

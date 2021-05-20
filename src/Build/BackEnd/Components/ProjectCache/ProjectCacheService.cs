@@ -22,9 +22,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
 {
     internal record CacheRequest(BuildSubmission Submission, BuildRequestConfiguration Configuration);
 
-    internal record VolatileNullableBool(bool Value)
+    internal record NullableBool(bool Value)
     {
-        public static implicit operator bool(VolatileNullableBool? d) => d is not null && d.Value;
+        public static implicit operator bool(NullableBool? d) => d is not null && d.Value;
     }
 
     internal class ProjectCacheService
@@ -35,12 +35,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
 
-        // Volatile because one thread writes it, another reads it.
-        // The BuildManager thread reads this to cheaply back off when the cache is disabled.
-        // It is written to only once by a ThreadPool thread.
-        // null means no decision has been made yet. bool? cannot be marked volatile so use a class wrapper instead.
+        // Use NullableBool to make it work with Interlock.CompareExchange (doesn't accept bool?).
+        // Assume that if one request is a design time build, all of them are.
+        // Volatile because it is read by the BuildManager thread and written by one project cache service thread pool thread.
         // TODO: remove after we change VS to set the cache descriptor via build parameters.
-        public volatile VolatileNullableBool? DesignTimeBuildsDetected;
+        public volatile NullableBool? DesignTimeBuildsDetected;
 
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
@@ -201,13 +200,28 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             async Task<CacheResult> ProcessCacheRequest(CacheRequest request)
             {
-                EvaluateProjectIfNecessary(request);
-                if (DesignTimeBuildsDetected)
+                // Prevent needless evaluation if design time builds detected.
+                if (_projectCacheDescriptor.VsWorkaround && DesignTimeBuildsDetected)
                 {
-                    throw new NotImplementedException();
-                    // The BuildManager should disable the cache after the first query that finds
-                    // a design time build.
-                    return CacheResult.IndicateNonCacheHit(CacheResultType.CacheNotApplicable);
+                    // The BuildManager should disable the cache when it finds its servicing design time builds.
+                    return CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss);
+                }
+
+                EvaluateProjectIfNecessary(request);
+
+                if (_projectCacheDescriptor.VsWorkaround)
+                {
+                    Interlocked.CompareExchange(
+                        ref DesignTimeBuildsDetected,
+                        new NullableBool(IsDesignTimeBuild(request.Configuration.Project)),
+                        null);
+
+                    // No point progressing with expensive plugin initialization or cache query if design time build detected.
+                    if (DesignTimeBuildsDetected)
+                    {
+                        // The BuildManager should disable the cache when it finds its servicing design time builds.
+                        return CacheResult.IndicateNonCacheHit(CacheResultType.CacheMiss);
+                    }
                 }
 
                 if (_projectCacheDescriptor.VsWorkaround)
@@ -217,6 +231,15 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 }
 
                 return await GetCacheResultAsync(cacheRequest.Submission.BuildRequestData);
+            }
+
+            static bool IsDesignTimeBuild(ProjectInstance project)
+            {
+                var designTimeBuild = project.GetPropertyValue(DesignTimeProperties.DesignTimeBuild);
+                var buildingProject = project.GlobalPropertiesDictionary[DesignTimeProperties.BuildingProject]?.EvaluatedValue;
+
+                return MSBuildStringIsTrue(designTimeBuild) ||
+                       buildingProject != null && !MSBuildStringIsTrue(buildingProject);
             }
 
             void EvaluateProjectIfNecessary(CacheRequest request)
@@ -240,19 +263,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         request.Configuration.Project.TranslateEntireState = true;
                     }
                 }
-
-                // Attribute is volatile and reference writes are atomic.
-                // Assume that if one request is a design time build, all of them are.
-                DesignTimeBuildsDetected ??= new VolatileNullableBool(IsDesignTimeBuild(request.Configuration.Project));
-            }
-
-            static bool IsDesignTimeBuild(ProjectInstance project)
-            {
-                var designTimeBuild = project.GetPropertyValue(DesignTimeProperties.DesignTimeBuild);
-                var buildingProject = project.GlobalPropertiesDictionary[DesignTimeProperties.BuildingProject]?.EvaluatedValue;
-
-                return MSBuildStringIsTrue(designTimeBuild) ||
-                       buildingProject != null && !MSBuildStringIsTrue(buildingProject);
             }
 
             async Task LateInitializePluginForVsWorkaround(CacheRequest request)
@@ -270,7 +280,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 await InitializePlugin(
                     ProjectCacheDescriptor.FromAssemblyPath(
-                        _projectCacheDescriptor.PluginAssemblyPath,
+                        _projectCacheDescriptor.PluginAssemblyPath!,
                         new[]
                         {
                             new ProjectGraphEntryPoint(

@@ -62,6 +62,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         public class GraphCacheResponse
         {
+            private readonly IDictionary<int, string>? _extraContentPerProjectNumber;
             public const string CacheHitByProxy = nameof(CacheHitByProxy);
             public const string CacheHitByTargetResult = nameof(CacheHitByTargetResult);
 
@@ -95,8 +96,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             public Dictionary<int, CacheResult> NonCacheMissResults { get; }
 
-            public GraphCacheResponse(Dictionary<int, int[]> graphEdges, Dictionary<int, CacheResult>? nonCacheMissResults = null)
+            public GraphCacheResponse(Dictionary<int, int[]> graphEdges, Dictionary<int, CacheResult>? nonCacheMissResults = null, IDictionary<int, string>? extraContentPerProjectNumber = null)
             {
+                _extraContentPerProjectNumber = extraContentPerProjectNumber;
                 GraphEdges = graphEdges;
                 NonCacheMissResults = nonCacheMissResults ?? new Dictionary<int, CacheResult>();
             }
@@ -106,7 +108,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 return Helpers.CreateProjectGraph(
                     env,
                     GraphEdges,
-                    null,
+                    _extraContentPerProjectNumber,
                     P2PTargets);
             }
 
@@ -437,10 +439,12 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             var graph = testData.CreateGraph(_env);
             var mockCache = new InstanceMockCache(testData);
 
-            buildParameters.ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+            var projectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
                 mockCache,
                 null,
                 graph);
+
+            buildParameters.ProjectCacheDescriptor = projectCacheDescriptor;
 
             using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
             var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
@@ -473,7 +477,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         [Theory]
         [MemberData(nameof(SuccessfulGraphsWithBuildParameters))]
-        public void ProjectCacheByVSWorkaroundWorks(GraphCacheResponse testData, BuildParameters buildParameters)
+        public void ProjectCacheByVsWorkaroundWorks(GraphCacheResponse testData, BuildParameters buildParameters)
         {
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
 
@@ -511,6 +515,76 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
 
                 AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
+            }
+            finally
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
+                BuildManager.ProjectCacheItems.Clear();
+            }
+        }
+
+        [Fact]
+        public void DesignTimeBuildsDuringVsWorkaroundShouldDisableTheCache()
+        {
+            var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
+
+            var designTimeBuildProperty = $"<PropertyGroup> <{DesignTimeProperties.DesignTimeBuild}>true</{DesignTimeProperties.DesignTimeBuild}> </PropertyGroup>";
+
+            // Use a few references to stress test the design time build workaround logic.
+            var referenceNumbers = Enumerable.Range(2, NativeMethodsShared.GetLogicalCoreCount()).ToArray();
+
+            var testData = new GraphCacheResponse(
+                graphEdges: new Dictionary<int, int[]>
+                {
+                    {1, referenceNumbers}
+                },
+                nonCacheMissResults: null,
+                extraContentPerProjectNumber: referenceNumbers.ToDictionary(r => r, _ => designTimeBuildProperty));
+
+            try
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(
+                    new BuildEnvironment(
+                        currentBuildEnvironment.Mode,
+                        currentBuildEnvironment.CurrentMSBuildExePath,
+                        currentBuildEnvironment.RunningTests,
+                        runningInVisualStudio: true,
+                        visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
+
+                var graph = testData.CreateGraph(_env);
+
+                var rootNode = graph.GraphRoots.First();
+                var globalProperties = new Dictionary<string, string> { { "SolutionPath", rootNode.ProjectInstance.FullPath } };
+
+                using var buildSession = new Helpers.BuildManagerSession(_env);
+
+                // Build references in parallel.
+                var referenceBuildTasks = rootNode.ProjectReferences.Select(
+                    r => buildSession.BuildProjectFileAsync(
+                        r.ProjectInstance.FullPath,
+                        globalProperties: globalProperties));
+
+                foreach (var task in referenceBuildTasks)
+                {
+                    var buildResult = task.Result;
+                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+
+                buildSession
+                    .BuildProjectFile(rootNode.ProjectInstance.FullPath, globalProperties: globalProperties)
+                    .OverallResult.ShouldBe(BuildResultCode.Success);
+
+                buildSession.Dispose();
+
+                buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
+
+                // Cache doesn't get initialized and queried.
+                buildSession.Logger.FullLog.ShouldNotContain("BeginBuildAsync");
+                buildSession.Logger.FullLog.ShouldNotContain("GetCacheResultAsync for");
+                buildSession.Logger.FullLog.ShouldNotContain("Querying project cache for project");
+
+                // Cache does get disposed.
+                StringShouldContainSubstring(buildSession.Logger.FullLog, "EndBuildAsync", 1);
             }
             finally
             {

@@ -47,7 +47,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
     /// </summary>
     public class CacheResult
     {
-        public Exception Exception { get; }
+        public CacheResultType ResultType { get; }
+        public BuildResult? BuildResult { get; }
+        public ProxyTargets? ProxyTargets { get; }
+        internal Exception? Exception { get; }
 
         private CacheResult(
             CacheResultType resultType,
@@ -71,10 +74,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ResultType = CacheResultType.None;
             Exception = exception;
         }
-
-        public CacheResultType ResultType { get; }
-        public BuildResult? BuildResult { get; }
-        public ProxyTargets? ProxyTargets { get; }
 
         public static CacheResult IndicateCacheHit(BuildResult buildResult)
         {
