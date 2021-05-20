@@ -11,7 +11,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         void InstallWorkload(WorkloadId workloadId, DirectoryPath? offlineCache = null);
 
-        void DownloadToOfflineCache(WorkloadId workload, string offlineCache);
+        void DownloadToOfflineCache(WorkloadId workload, DirectoryPath offlineCache, bool includePreviews);
 
         void UninstallWorkload(WorkloadId workloadId);
     }

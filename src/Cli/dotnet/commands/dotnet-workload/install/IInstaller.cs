@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -13,7 +14,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         IWorkloadInstaller GetWorkloadInstaller();
 
-        void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand);
+        void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
         IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository();
     }

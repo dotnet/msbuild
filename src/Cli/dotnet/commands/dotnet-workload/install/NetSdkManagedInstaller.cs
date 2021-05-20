@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return _installationRecordRepository;
         }
 
-        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, string offlineCache = null)
+        public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallingPackVersionMessage, packInfo.Id, packInfo.Version));
             var tempDirsToDelete = new List<string>();
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         if (!PackIsInstalled(packInfo))
                         {
                             string packagePath;
-                            if (string.IsNullOrWhiteSpace(offlineCache))
+                            if (offlineCache == null || !offlineCache.HasValue)
                             {
                                 packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version)).Result;
                                 tempFilesToDelete.Add(packagePath);
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             else
                             {
                                 _reporter.WriteLine(string.Format(LocalizableStrings.UsingCacheForPackInstall, packInfo.Id, packInfo.Version, offlineCache));
-                                packagePath = Path.Combine(offlineCache, $"{packInfo.ResolvedPackageId}.{packInfo.Version}.nupkg");
+                                packagePath = Path.Combine(offlineCache.Value.Value, $"{packInfo.ResolvedPackageId}.{packInfo.Version}.nupkg");
                                 if (!File.Exists(packagePath))
                                 {
                                     throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, packInfo.ResolvedPackageId, packInfo.Version, offlineCache));
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand)
+        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             string packagePath = null;
             string tempExtractionDir = null;
@@ -180,7 +180,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 TransactionalAction.Run(
                    action: () =>
                    {
-                       packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), new NuGetVersion(manifestVersion.ToString())).Result;
+                       if (offlineCache == null || !offlineCache.HasValue)
+                       {
+                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), new NuGetVersion(manifestVersion.ToString())).Result;
+                       }
+                       else
+                       {
+                           packagePath = Path.Combine(offlineCache.Value.Value, $"{WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId)}.{manifestVersion}.nupkg");
+                           if (!File.Exists(packagePath))
+                           {
+                               throw new Exception(string.Format(LocalizableStrings.CacheMissingPackage, WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), manifestVersion, offlineCache));
+                           }
+                       }
                        tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-extracted");
                        Directory.CreateDirectory(tempExtractionDir);
                        var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).Result;
@@ -198,7 +209,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                        Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
                        FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(Path.Combine(tempExtractionDir, "data"), manifestPath));
                    },
-                    rollback: () => {
+                    rollback: () =>
+                    {
                         if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
                         {
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempBackupDir, manifestPath));
@@ -206,7 +218,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     });
 
                 // Delete leftover dirs and files
-                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath))
+                if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath) && (offlineCache == null || !offlineCache.HasValue))
                 {
                     File.Delete(packagePath);
                 }
@@ -238,14 +250,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public void DownloadToOfflineCache(PackInfo packInfo, string cachePath)
+        public void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath cachePath, bool includePreviews)
         {
-            _reporter.WriteLine(string.Format(LocalizableStrings.DownloadingPackToCacheMessage, packInfo.Id, packInfo.Version, cachePath));
-            if (!Directory.Exists(cachePath))
+            _reporter.WriteLine(string.Format(LocalizableStrings.DownloadingPackToCacheMessage, packInfo.Id, packInfo.Version, cachePath.Value));
+            if (!Directory.Exists(cachePath.Value))
             {
-                Directory.CreateDirectory(cachePath);
+                Directory.CreateDirectory(cachePath.Value);
             }
-            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), downloadFolder: new DirectoryPath(cachePath)).Wait();
+            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), downloadFolder: cachePath, includePreview: includePreviews).Wait();
         }
 
         public void GarbageCollectInstalledWorkloadPacks()
