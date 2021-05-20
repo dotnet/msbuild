@@ -246,6 +246,44 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Theory]
+        [InlineData("PostActions/RestoreNuGet/Invalid", "TestAssets.PostActions.RestoreNuGet.Invalid", true)]
+        [InlineData("PostActions/RestoreNuGet/Invalid_ContinueOnError", "TestAssets.PostActions.RestoreNuGet.Invalid.ContinueOnError", false)]
+        public void ErrorExitCodeOnFailedPostAction(string templateLocation, string templateName, bool errorExpected)
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, templateName)
+                   .WithCustomHive(home)
+                   .WithWorkingDirectory(workingDirectory)
+                   .Execute();
+
+            if (errorExpected)
+            {
+                commandResult.Should().Fail();
+            }
+            else
+            {
+                commandResult.Should().Pass();
+            }
+
+            commandResult
+                  .Should()
+                  .HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                  .And.HaveStdOutContaining("Processing post-creation actions...")
+                  .And.HaveStdOutContaining("Running 'dotnet restore' on")
+                  .And.NotHaveStdOutContaining("Restore succeeded.")
+                  .And.HaveStdErrContaining("Post action failed.")
+                  .And.HaveStdErrContaining("Manual instructions: Run 'dotnet restore'");
+
+            new DotnetCommand(_log, "build", "--no-restore")
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail();
+        }
+
+        [Theory]
         [InlineData("PostActions/AddProjectToSolution/Basic", "TestAssets.PostActions.AddProjectToSolution.Basic")]
         [InlineData("PostActions/AddProjectToSolution/BasicWithFiles", "TestAssets.PostActions.AddProjectToSolution.BasicWithFiles")]
         public void AddProjectToSolution_Basic(string templateLocation, string templateName)
@@ -340,6 +378,53 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining($"Description: Manual actions needed")
                 .And.HaveStdOutContaining($"Manual instructions: Run the following command:")
                 .And.HaveStdOutContaining($"Actual command: setup.cmd <your project name>");
+        }
+
+        [Theory]
+        [InlineData("PostActions/RestoreNuGet/Basic", "TestAssets.PostActions.RestoreNuGet.Basic")]
+        public void PostActions_DryRun(string templateLocation, string templateName, string targetSubfolder = "")
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, templateName, "-n", "MyProject", "--dry-run")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"File actions would have been taken:")
+                .And.HaveStdOutContaining(
+@"Processing post-creation actions...
+Action would have been taken automatically:
+   Restore NuGet packages required by this project.");
+
+            Assert.False(File.Exists(Path.Combine(workingDirectory, targetSubfolder, $"MyProject.csproj")));
+            Assert.False(File.Exists(Path.Combine(workingDirectory, targetSubfolder, $"Program.cs")));
+        }
+
+        [Fact]
+        public void CanProcessUnknownPostAction()
+        {
+            string templateLocation = "PostActions/UnknownPostAction";
+            string templateName = "TestAssets.PostActions.UnknownPostAction";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, templateName)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should().Fail()
+                .And.HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                .And.HaveStdErrContaining($"The post action 210d431b-a78b-4d2f-b762-4ed3e3ea9027 is not supported.")
+                .And.HaveStdErrContaining($"Description: This is not defined post action.")
+                .And.HaveStdErrContaining($"Manual instructions: Run setup.cmd script manually.");
         }
     }
 }
