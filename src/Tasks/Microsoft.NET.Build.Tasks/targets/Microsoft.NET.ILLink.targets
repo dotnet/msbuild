@@ -27,40 +27,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     </AssemblyAttribute>
   </ItemGroup>
 
-  <!-- We disable startup hooks for trimmed apps here so that the feature
-       switch can flow to the runtimeconfig.json. Startup hooks are disabled
-       by default since they may require assemblies, types or members that
-       could be removed by the linker, causing a trimmed app to crash. -->
-  <PropertyGroup Condition="'$(StartupHookSupport)' == '' And
-                            '$(PublishTrimmed)' == 'true' And
-                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <StartupHookSupport>false</StartupHookSupport>
-  </PropertyGroup>
 
-  <!-- We disable custom resource types for trimmed apps here so that the feature
-       switch can flow to the runtimeconfig.json. Custom resource types are disabled
-       by default since they may require assemblies, types or members that
-       could be removed by the linker, causing a trimmed app to crash. -->
-  <PropertyGroup Condition="'$(CustomResourceTypesSupport)' == '' And
-                            '$(PublishTrimmed)' == 'true' And
+  <!-- We disable features for trimmed apps here so that the feature
+      switches can flow to the runtimeconfig.json. Features are disabled
+      by default since they may require assemblies, types or members that
+      could be removed by the linker, causing a trimmed app to crash. -->
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' And
                             $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
+    <StartupHookSupport Condition="'$(StartupHookSupport)' == ''">false</StartupHookSupport>
+    <CustomResourceTypesSupport Condition="'$(CustomResourceTypesSupport)' == ''">false</CustomResourceTypesSupport>
+    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' == ''">false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
+    <BuiltInComInteropSupport Condition="'$(BuiltInComInteropSupport)' == ''">false</BuiltInComInteropSupport>
+    <EnableCppCLIHostActivation Condition="'$(EnableCppCLIHostActivation)' == ''">false</EnableCppCLIHostActivation>
+    <_EnableConsumingManagedCodeFromNativeHosting Condition="'$(_EnableConsumingManagedCodeFromNativeHosting)' == ''">false</_EnableConsumingManagedCodeFromNativeHosting>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' == '' And
-                            '$(PublishTrimmed)' == 'true' And
-                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
-  </PropertyGroup>
-
-  <!-- We disable in-built COM support for trimmed apps here so that the feature
-       switch can flow to the runtimeconfig.json. Built-in COM support is disabled
-       by default since they may require assemblies, types or members that
-       could be removed by the linker, causing a trimmed app to crash. -->
-  <PropertyGroup Condition="'$(BuiltInComSupport)' == '' And
-                            '$(PublishTrimmed)' == 'true' And
-                            $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <BuiltInComSupport>false</BuiltInComSupport>
-  </PropertyGroup>  
 
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And ('$(EnableTrimAnalyzer)' == 'true' Or '$(PublishTrimmed)' == 'true')">
     <!-- Trim analysis warnings are suppressed for .NET < 6. -->

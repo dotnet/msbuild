@@ -682,24 +682,32 @@ namespace Microsoft.NET.Publish.Tests
             {
                 JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
                 runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Runtime.InteropServices.Marshal.IsBuiltInComSupported"].Value<bool>()
-                    .Should().BeFalse();
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.StartupHookProvider.IsSupported"].Value<bool>()
+                    ["System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"].Value<bool>()
                     .Should().BeFalse();
                 runtimeConfig["runtimeOptions"]["configProperties"]
                     ["System.Resources.ResourceManager.AllowCustomResourceTypes"].Value<bool>()
                     .Should().BeFalse();
                 runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"].Value<bool>()
+                    ["System.Runtime.InteropServices.BuiltInComInterop.IsSupported"].Value<bool>()
+                    .Should().BeFalse();
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"].Value<bool>()
+                    .Should().BeFalse();
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.Runtime.InteropServices.EnableCppCLIHostActivation"].Value<bool>()
+                    .Should().BeFalse();
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.StartupHookProvider.IsSupported"].Value<bool>()
                     .Should().BeFalse();
             }
             else
             {
-                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.Marshal.IsBuiltInComSupported");
-                runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
-                runtimeConfigContents.Should().NotContain("System.Resources.ResourceManager.AllowCustomResourceTypes");
                 runtimeConfigContents.Should().NotContain("System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization");
+                runtimeConfigContents.Should().NotContain("System.Resources.ResourceManager.AllowCustomResourceTypes");
+                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.BuiltInComInterop.IsSupported");
+                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting");
+                runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableCppCLIHostActivation");
+                runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
             }
         }
 
