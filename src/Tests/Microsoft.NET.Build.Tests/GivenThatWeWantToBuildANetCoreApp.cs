@@ -860,8 +860,10 @@ class Program
                 .Pass();
         }
 
-        [Fact]
-        public void It_builds_the_project_successfully_with_only_reference_assembly_set()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_builds_the_project_successfully_with_only_reference_assembly_set(bool produceOnlyReferenceAssembly)
         {
             var testProject = new TestProject()
             {
@@ -869,12 +871,11 @@ class Program
                 TargetFrameworks = "net5.0",
                 IsSdkProject = true,
                 IsExe = true
-
             };
 
-            testProject.AdditionalProperties["ProduceOnlyReferenceAssembly"] = "true";
+            testProject.AdditionalProperties["ProduceOnlyReferenceAssembly"] = produceOnlyReferenceAssembly.ToString();
 
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
+            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: produceOnlyReferenceAssembly.ToString());
 
             var buildCommand = new BuildCommand(testProjectInstance);
             buildCommand
@@ -883,39 +884,20 @@ class Program
                 .Pass();
 
             var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
-            var refPath = Path.Combine(outputPath, "ref");
-            Directory.Exists(refPath)
-                .Should()
-                .BeFalse();
-        }
-
-        [Fact]
-        public void It_builds_the_project_successfully_with_only_reference_assembly_false()
-        {
-            var testProject = new TestProject()
+            if (produceOnlyReferenceAssembly == true)
             {
-                Name = "MainProject",
-                TargetFrameworks = "net5.0",
-                IsSdkProject = true,
-                IsExe = true
-
-            };
-
-            testProject.AdditionalProperties["ProduceOnlyReferenceAssembly"] = "false";
-
-            var testProjectInstance = _testAssetsManager.CreateTestProject(testProject);
-
-            var buildCommand = new BuildCommand(testProjectInstance);
-            buildCommand
-                .Execute()
-                .Should()
-                .Pass();
-
-            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
-            var refPath = Path.Combine(outputPath, "ref", "MainProject.dll");
-            File.Exists(refPath)
-                .Should()
-                .BeTrue();
+                var refPath = Path.Combine(outputPath, "ref");
+                Directory.Exists(refPath)
+                    .Should()
+                    .BeFalse();
+            }
+            else
+            {
+                var refPath = Path.Combine(outputPath, "ref", "MainProject.dll");
+                File.Exists(refPath)
+                    .Should()
+                    .BeTrue();
+            }
         }
     }
 }
