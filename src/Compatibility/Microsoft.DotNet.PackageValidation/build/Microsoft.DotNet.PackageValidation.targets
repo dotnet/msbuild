@@ -4,12 +4,13 @@
   <UsingTask TaskName="Microsoft.DotNet.PackageValidation.GetLastStablePackage" AssemblyFile="$(DotNetPackageValidationAssembly)" />
   
   <PropertyGroup>
-    <!-- Create the intermediate file which contains the PackageDownload item before static graph restore (out-of-proc) is invoked. -->
-    <AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets Condition="'$(RestoreUseStaticGraphEvaluation)' == 'true'">Restore</AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets>
+    <!-- On static graph build, the CollectPackageDownloads target is invoked per target and there is no other way to run logic only once for all tfms.
+         Hence the GetLastStablePackage feature should not be used when using static graph build as it results in a remote call per tfm. -->
+    <AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets Condition="'$(RestoreUseStaticGraphEvaluation)' == 'true'">CollectPackageDownloads</AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets>
     <!-- For a non static graph restore with a single tfm, hook onto CollectPackageDownloads which will then be invoked just once. -->
     <AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets Condition="'$(AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets)' == '' and '$(TargetFrameworks)' == '' and '$(TargetFramework)' != ''">CollectPackageDownloads</AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets>
     <!-- For a non static graph restore with multiple tfms, hook onto the target that fans out to the individual tfm restore graph walk operations. -->
-    <AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets Condition="'$(AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets)' == ''">_GetAllRestoreProjectPathItems</AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets>
+    <AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets Condition="'$(AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets)' == ''">_GenerateProjectRestoreGraphAllFrameworks</AddPackageValidationBaselinePackageAsPackageDownloadBeforeTargets>
   </PropertyGroup>
 
   <Target Name="RunPackageValidation"
@@ -72,9 +73,6 @@
     <_PackageValidationBaselineName>$(PackageValidationBaselineName)</_PackageValidationBaselineName>
     <_PackageValidationBaselineVersion>$(PackageValidationBaselineVersion)</_PackageValidationBaselineVersion>
   </PropertyGroup>
-  <ItemGroup Condition="'%24(EnablePackageBaselineValidation)' == 'true'">
-    <PackageDownload Include="$(PackageValidationBaselineName)" Version="[$(PackageValidationBaselineVersion)]" />
-  </ItemGroup>
 </Project>]]>
       </_PackageValidationIntermediateBaselineFileContent>
     </PropertyGroup>
@@ -83,11 +81,13 @@
          usually doesn't share evaluation (nodes) with restore.
          PackageDownload doesn't support GeneratePathProperty which is why the path needs
          to be written into a separate file than the NuGet generated props file:
-         https://github.com/NuGet/Home/issues/8476. -->
+         https://github.com/NuGet/Home/issues/8476.
+         On static graph restore, write the baseline file only once for all tfms (either in the cross targeting build or when only targeting a single tfm). -->
     <WriteLinesToFile File="$(_PackageValidationIntermediateBaselineFile)"
                       Lines="$(_PackageValidationIntermediateBaselineFileContent)"
                       Overwrite="true"
-                      Encoding="Unicode" />
+                      Encoding="Unicode"
+                      Condition="'$(RestoreUseStaticGraphEvaluation)' != 'true' or '$(IsCrossTargetingBuild)' == 'true' or '$(TargetFrameworks)' == ''" />
 
     <ItemGroup>
       <FileWrites Include="$(PackageValidationIntermediateBaselineFile)" />
