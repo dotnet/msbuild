@@ -24,7 +24,8 @@ namespace Microsoft.Build.UnGAC
                     "Microsoft.Build.Framework, Version=15.1.0.0",
                     "Microsoft.Build.Tasks.Core, Version=15.1.0.0",
                     "Microsoft.Build.Utilities.Core, Version=15.1.0.0",
-                    "Microsoft.Build.Conversion.Core, Version=15.1.0.0"
+                    "Microsoft.Build.Conversion.Core, Version=15.1.0.0",
+                    "System.Memory, Version=4.0.1.1"
                 };
 
                 uint hresult = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
