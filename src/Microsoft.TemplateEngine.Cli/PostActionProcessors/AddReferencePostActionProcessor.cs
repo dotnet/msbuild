@@ -1,9 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Utils;
@@ -11,22 +14,28 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    internal class AddReferencePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor, IPostActionProcessor2
+    internal class AddReferencePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor
     {
         internal static readonly Guid ActionProcessorId = new Guid("B17581D1-C5C9-4489-8F0A-004BE667B814");
 
         public Guid Id => ActionProcessorId;
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, ICreationResult templateCreationResult, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
-            IReadOnlyList<string> allTargets = null;
-            if (action.Args.TryGetValue("targetFiles", out string singleTarget) && singleTarget != null)
+            if (string.IsNullOrEmpty(outputBasePath))
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
+                return false;
+            }
+
+            IEnumerable<IReadOnlyList<string>>? allTargets = null;
+            if (action.Args.TryGetValue("targetFiles", out string? singleTarget) && singleTarget != null && creationEffects is ICreationEffects2 creationEffects2)
             {
                 JToken config = JToken.Parse(singleTarget);
 
                 if (config.Type == JTokenType.String)
                 {
-                    allTargets = singleTarget.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    allTargets = singleTarget.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(t => GetTargetForSource(creationEffects2, t));
                 }
                 else if (config is JArray arr)
                 {
@@ -44,25 +53,32 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                     if (parts.Count > 0)
                     {
-                        allTargets = parts;
+                        allTargets = parts.Select(t => GetTargetForSource(creationEffects2, t));
                     }
                 }
-            }
-            else
-            {
-                //If the author didn't opt in to the new behavior by using "targetFiles", do things the old way
-                return Process(environment, action, templateCreationResult, outputBasePath);
             }
 
             if (allTargets is null)
             {
-                return Process(environment, action, creationEffects.CreationResult, outputBasePath);
+                HashSet<string> extensionLimiters = new HashSet<string>(StringComparer.Ordinal);
+                if (action.Args.TryGetValue("projectFileExtensions", out string? projectFileExtensions))
+                {
+                    if (projectFileExtensions.Contains("/") || projectFileExtensions.Contains("\\") || projectFileExtensions.Contains("*"))
+                    {
+                        // these must be literals
+                        Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionMisconfigured);
+                        return false;
+                    }
+
+                    extensionLimiters.UnionWith(projectFileExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                }
+                 allTargets = new[] { FindProjFileAtOrAbovePath(environment.Host.FileSystem, outputBasePath, extensionLimiters) };
             }
 
             bool success = true;
-            foreach (string target in allTargets)
+            foreach (var target in allTargets)
             {
-                success &= AddReference(environment, action, GetTargetForSource(creationEffects, target));
+                success &= AddReference(environment, action, target);
 
                 if (!success)
                 {
@@ -71,30 +87,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
 
             return true;
-        }
-
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
-        {
-            if (string.IsNullOrEmpty(outputBasePath))
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
-            }
-
-            HashSet<string> extensionLimiters = new HashSet<string>(StringComparer.Ordinal);
-            if (actionConfig.Args.TryGetValue("projectFileExtensions", out string projectFileExtensions))
-            {
-                if (projectFileExtensions.Contains("/") || projectFileExtensions.Contains("\\") || projectFileExtensions.Contains("*"))
-                {
-                    // these must be literals
-                    Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionMisconfigured);
-                    return false;
-                }
-
-                extensionLimiters.UnionWith(projectFileExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
-            }
-
-            IReadOnlyList<string> nearestProjectFilesFound = FindProjFileAtOrAbovePath(environment.Host.FileSystem, outputBasePath, extensionLimiters);
-            return AddReference(environment, actionConfig, nearestProjectFilesFound);
         }
 
         internal IReadOnlyList<string> FindProjFileAtOrAbovePath(IPhysicalFileSystem fileSystem, string startPath, HashSet<string> extensionLimiters)
@@ -111,13 +103,13 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         private bool AddReference(IEngineEnvironmentSettings environment, IPostAction actionConfig, IReadOnlyList<string> nearestProjectFilesFound)
         {
-            if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string referenceToAdd))
+            if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string? referenceToAdd))
             {
                 Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionMisconfigured);
                 return false;
             }
 
-            if (!actionConfig.Args.TryGetValue("referenceType", out string referenceType))
+            if (!actionConfig.Args.TryGetValue("referenceType", out string? referenceType))
             {
                 Reporter.Error.WriteLine(LocalizableStrings.AddRefPostActionMisconfigured);
                 return false;
@@ -139,7 +131,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 }
                 else if (string.Equals(referenceType, "package", StringComparison.OrdinalIgnoreCase))
                 {
-                    actionConfig.Args.TryGetValue("version", out string version);
+                    actionConfig.Args.TryGetValue("version", out string? version);
 
                     Dotnet addReferenceCommand = Dotnet.AddPackageReference(projectFile, referenceToAdd, version);
                     addReferenceCommand.CaptureStdOut();

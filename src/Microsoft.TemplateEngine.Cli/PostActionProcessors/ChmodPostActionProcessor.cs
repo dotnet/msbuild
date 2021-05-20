@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public Guid Id => ActionProcessorId;
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
             bool allSucceeded = true;
             foreach (KeyValuePair<string, string> entry in actionConfig.Args)
@@ -38,22 +40,39 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 foreach (string file in values)
                 {
-                    Process commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
+                    try
                     {
-                        RedirectStandardError = false,
-                        RedirectStandardOutput = false,
-                        UseShellExecute = false,
-                        CreateNoWindow = false,
-                        WorkingDirectory = outputBasePath,
-                        FileName = "/bin/sh",
-                        Arguments = $"-c \"chmod {entry.Key} {file}\""
-                    });
+                        Process? commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
+                        {
+                            RedirectStandardError = false,
+                            RedirectStandardOutput = false,
+                            UseShellExecute = false,
+                            CreateNoWindow = false,
+                            WorkingDirectory = outputBasePath,
+                            FileName = "/bin/sh",
+                            Arguments = $"-c \"chmod {entry.Key} {file}\""
+                        });
 
-                    commandResult.WaitForExit();
+                        if (commandResult == null)
+                        {
+                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
+                            Reporter.Verbose.WriteLine("Unable to start sub-process.");
+                            allSucceeded = false;
+                            continue;
+                        }
 
-                    if (commandResult.ExitCode != 0)
+                        commandResult.WaitForExit();
+
+                        if (commandResult.ExitCode != 0)
+                        {
+                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
+                            allSucceeded = false;
+                        }
+                    }
+                    catch (Exception ex)
                     {
                         Reporter.Error.WriteLine(string.Format(LocalizableStrings.UnableToSetPermissions, entry.Key, file));
+                        Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, ex.ToString()));
                         allSucceeded = false;
                     }
                 }

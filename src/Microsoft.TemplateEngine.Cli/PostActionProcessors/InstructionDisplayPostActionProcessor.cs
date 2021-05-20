@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using Microsoft.TemplateEngine.Abstractions;
 
@@ -12,14 +14,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public Guid Id => ActionProcessorId;
 
-        public bool Process(IEngineEnvironmentSettings settings, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
-            Console.WriteLine(string.Format(LocalizableStrings.PostActionDescription, actionConfig.Description));
-            Console.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, actionConfig.ManualInstructions));
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionDescription, actionConfig.Description));
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionInstructions, actionConfig.ManualInstructions));
 
-            if (actionConfig.Args != null && actionConfig.Args.TryGetValue("executable", out string executable))
+            if (actionConfig.Args != null && actionConfig.Args.TryGetValue("executable", out string? executable))
             {
-                actionConfig.Args.TryGetValue("args", out string commandArgs);
+                actionConfig.Args.TryGetValue("args", out string? commandArgs);
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.PostActionCommand, $"{executable} {commandArgs}").Bold().Red());
             }
 
