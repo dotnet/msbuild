@@ -175,6 +175,46 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
+        [Fact]
+        public void BuildProjectAsTarget()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "classlib"), createFolder: true);
+                TransientTestFile classLibrary = testEnvironment.CreateFile(classLibFolder, "classlib.csproj",
+                    @"<Project>
+                  <Target Name=""ClassLibraryTarget"">
+                      <Message Text=""ClassLibraryBuilt""/>
+                  </Target>
+                  </Project>
+                    ");
+
+                TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "simpleProject"), createFolder: true);
+                TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectFolder, "simpleProject.csproj",
+                    @"<Project>
+                  <Target Name=""SimpleProjectTarget"">
+                      <Message Text=""SimpleProjectBuilt""/>
+                  </Target>
+                  </Project>
+                    ");
+
+                TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "testFolder.sln",
+                    @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.6.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""simpleProject"", ""simpleProject\simpleProject.csproj"", ""{AA52A05F-A9C0-4C89-9933-BF976A304C91}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""classlib"", ""classlib\classlib.csproj"", ""{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}""
+EndProject
+                ");
+                RunnerUtilities.ExecMSBuild(solutionFile.Path + " /t:classlib", out bool success);
+                success.ShouldBeTrue();
+            }
+        }
+
         /// <summary>
         /// Verify the AddNewErrorWarningMessageElement method
         /// </summary>
