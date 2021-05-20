@@ -1084,6 +1084,7 @@ namespace Microsoft.Build.Execution
                     if (_shuttingDown)
                     {
                         // We were already canceled!
+                        AddBuildRequestToSubmission(submission, resolvedConfiguration.ConfigurationId);
                         BuildResult result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
                         submission.CompleteResults(result);
                         submission.CompleteLogging(true);
