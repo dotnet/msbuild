@@ -102,7 +102,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                         headerSeparator: '-',
                         blankLineBetweenRows: false)
                     .DefineColumn(r => r.TemplateGroupInfo.Name, out object nameColumn, LocalizableStrings.ColumnNameTemplateName, showAlways: true, shrinkIfNeeded: true, minWidth: 15)
-                    .DefineColumn(r => r.TemplateGroupInfo.ShortName, LocalizableStrings.ColumnNameShortName, showAlways: true)
+                    .DefineColumn(r => r.TemplateGroupInfo.ShortNames, LocalizableStrings.ColumnNameShortName, showAlways: true)
                     .DefineColumn(r => r.TemplateGroupInfo.Author, LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: true, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(r => r.TemplateGroupInfo.Languages, LocalizableStrings.ColumnNameLanguage, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
                     .DefineColumn(r => r.TemplateGroupInfo.Type, LocalizableStrings.ColumnNameType, NewCommandInputCli.TypeColumnFilter, defaultColumn: false)

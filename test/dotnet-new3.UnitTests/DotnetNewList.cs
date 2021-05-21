@@ -73,7 +73,7 @@ namespace Dotnet_new3.IntegrationTests
 ASP.NET Core Empty                            web            [C#],F#     Web/Empty             
 ASP.NET Core gRPC Service                     grpc           [C#]        Web/gRPC              
 ASP.NET Core Web API                          webapi         [C#],F#     Web/WebAPI            
-ASP.NET Core Web App                          webapp         [C#]        Web/MVC/Razor Pages   
+ASP.NET Core Web App                          webapp,razor   [C#]        Web/MVC/Razor Pages   
 ASP.NET Core Web App (Model-View-Controller)  mvc            [C#],F#     Web/MVC               
 Blazor Server App                             blazorserver   [C#]        Web/Blazor            
 Blazor WebAssembly App                        blazorwasm     [C#]        Web/Blazor/WebAssembly
@@ -98,7 +98,53 @@ Worker Service                                worker         [C#],F#     Common/
                 .ExitWith(0)
                 .And.HaveStdOut(expectedOutput)
                 .And.NotHaveStdErr();
+        }
 
+		[Fact]
+        public void CanShowMultipleShortNames()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+                  .WithCustomHive(home)
+                  .WithWorkingDirectory(workingDirectory)
+                  .Execute()
+                  .Should()
+                  .ExitWith(0)
+                  .And
+                  .NotHaveStdErr()
+                  .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
+
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(home)
+                .WithoutBuiltInTemplates()
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
+
+            new DotnetNewCommand(_log, "webapp", "--list")
+                .WithCustomHive(home)
+                .WithoutBuiltInTemplates()
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
+
+            new DotnetNewCommand(_log, "razor", "--list")
+                .WithCustomHive(home)
+                .WithoutBuiltInTemplates()
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
         }
     }
 }

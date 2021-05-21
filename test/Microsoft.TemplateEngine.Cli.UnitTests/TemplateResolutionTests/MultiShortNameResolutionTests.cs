@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
     public class MultiShortNameResolutionTests
     {
-        private static IReadOnlyList<ITemplateInfo> _multiShortNameGroupTemplateInfo;
+        private static IReadOnlyList<ITemplateInfo>? _multiShortNameGroupTemplateInfo;
 
         private static IReadOnlyList<ITemplateInfo> MultiShortNameGroupTemplateInfo
         {
@@ -57,20 +59,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             }
         }
 
+        private static readonly IReadOnlyList<string> _shortNamesForGroup = new [] { "aaa", "bbb", "ccc", "ddd", "eee", "fff" };
+
         [Fact(DisplayName = nameof(AllTemplatesInGroupUseAllShortNamesForResolution))]
         public void AllTemplatesInGroupUseAllShortNamesForResolution()
         {
-            IReadOnlyList<string> shortNamesForGroup = new List<string>()
-            {
-                "aaa", "bbb", "ccc", "ddd", "eee", "fff"
-            };
             string defaultLanguage = "C#";
 
-            foreach (string testShortName in shortNamesForGroup)
+            foreach (string testShortName in _shortNamesForGroup)
             {
                 INewCommandInput userInputs = new MockNewCommandInput(testShortName);
 
-                TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, defaultLanguage);
+                TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(
+                    MultiShortNameGroupTemplateInfo,
+                    new MockHostSpecificDataLoader(),
+                    userInputs,
+                    defaultLanguage);
+
                 Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
                 Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Templates.Count);
                 Assert.True(matchResult.UnambiguousTemplateGroup.Templates.All(t => WellKnownSearchFilters.MatchesAllCriteria(t)));
@@ -78,7 +83,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 foreach (ITemplateMatchInfo templateMatchInfo in matchResult.UnambiguousTemplateGroup.Templates)
                 {
                     Assert.Equal("MultiName.Test", templateMatchInfo.Info.GroupIdentity);
-                    if (templateMatchInfo.Info.GetLanguage().Equals(defaultLanguage, StringComparison.OrdinalIgnoreCase))
+                    if (templateMatchInfo.Info.GetLanguage()?.Equals(defaultLanguage, StringComparison.OrdinalIgnoreCase) ?? false)
                     {
                         //default language match is part of MatchDisposition collection
                         Assert.Equal(2, templateMatchInfo.MatchDisposition.Count);
@@ -89,42 +94,34 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     }
                     Assert.True(templateMatchInfo.MatchDisposition[0].Name == MatchInfo.BuiltIn.ShortName && templateMatchInfo.MatchDisposition[0].Kind == MatchKind.Exact);
                 }
+                Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
             }
         }
 
         [Fact(DisplayName = nameof(HighestPrecedenceWinsWithMultipleShortNames))]
         public void HighestPrecedenceWinsWithMultipleShortNames()
         {
-            IReadOnlyList<string> shortNamesForGroup = new List<string>()
-            {
-                "aaa", "bbb", "ccc", "ddd", "eee", "fff"
-            };
-
-            foreach (string testShortName in shortNamesForGroup)
+            foreach (string testShortName in _shortNamesForGroup)
             {
                 INewCommandInput userInputs = new MockNewCommandInput(testShortName);
 
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
                 Assert.Equal("MultiName.Test.High.CSharp", matchResult.TemplateToInvoke.Info.Identity);
+                Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
             }
         }
 
         [Fact(DisplayName = nameof(ExplicitLanguageChoiceIsHonoredWithMultipleShortNames))]
         public void ExplicitLanguageChoiceIsHonoredWithMultipleShortNames()
         {
-            IReadOnlyList<string> shortNamesForGroup = new List<string>()
-            {
-                "aaa", "bbb", "ccc", "ddd", "eee", "fff"
-            };
-
-            foreach (string testShortName in shortNamesForGroup)
+            foreach (string testShortName in _shortNamesForGroup)
             {
                 INewCommandInput userInputs = new MockNewCommandInput(testShortName, "F#");
-
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
                 Assert.Equal("Multiname.Test.Only.FSharp", matchResult.TemplateToInvoke.Info.Identity);
+                Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
             }
         }
 
@@ -142,6 +139,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
             Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
             Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke.Info.Identity);
+            Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
         }
 
         [Theory(DisplayName = nameof(ParameterExistenceDisambiguatesMatchesWithMultipleShortNames))]
@@ -158,6 +156,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
             Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
             Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke.Info.Identity);
+            Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
         }
     }
 }

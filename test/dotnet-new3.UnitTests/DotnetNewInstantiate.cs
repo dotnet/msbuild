@@ -300,6 +300,32 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("The template \"Console Application\" was created successfully.");
 
             Assert.Equal(commandResult.StdOut, forceCommandResult.StdOut);
-        }    
+        }
+
+        [Fact]
+        public void CanInstantiateTemplateWithSecondShortName()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0", _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, "webapp", "-o", "webapp")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"ASP.NET Core Web App\" was created successfully.");
+
+            new DotnetNewCommand(_log, "razor", "-o", "razor")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"ASP.NET Core Web App\" was created successfully.");
+        }
     }
 }

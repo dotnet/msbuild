@@ -63,14 +63,17 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         {
             get
             {
-                if (HasSingleTemplate)
-                {
-                    return Templates.First().Info.ShortNameList;
-                }
-                HashSet<string> shortNames = new HashSet<string>();
+                HashSet<string> shortNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (ITemplateMatchInfo template in Templates)
                 {
-                    shortNames.UnionWith(template.Info.ShortNameList);
+                    if (template.Info is TemplateInfoWithGroupShortNames groupAwareTemplate)
+                    {
+                        shortNames.UnionWith(groupAwareTemplate.GroupShortNameList);
+                    }
+                    else
+                    {
+                        shortNames.UnionWith(template.Info.ShortNameList);
+                    }
                 }
                 return shortNames.ToList();
             }

@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 namespace Microsoft.TemplateEngine.Cli.TableOutput
 {
     /// <summary>
@@ -16,7 +18,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
 
         internal string Name { get; set; }
 
-        internal string ShortName { get; set; }
+        internal string ShortNames { get; set; }
 
         internal string Type { get; set; }
     }
