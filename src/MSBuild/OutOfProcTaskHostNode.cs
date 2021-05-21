@@ -29,11 +29,11 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        INodePacketFactory, INodePacketHandler, IBuildEngineInternal,
+        INodePacketFactory, INodePacketHandler,
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine9
+        IBuildEngine10
 #endif
     {
         /// <summary>
@@ -492,16 +492,22 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion
-#endif
 
-        #region IBuildEngineInternal Members
+        #region IBuildEngine10 Members
 
-        /// <summary>
-        /// No logging verbosity optimization in OOP nodes.
-        /// </summary>
-        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
+        private class BuildEngineInterfaceImpl : BuildEngineInterface
+        {
+            /// <summary>
+            /// No logging verbosity optimization in OOP nodes.
+            /// </summary>
+            public override MessageImportance MinimumRequiredMessageImportance => MessageImportance.Low;
+        }
+
+        public BuildEngineInterface EngineInterface { get; } = new BuildEngineInterfaceImpl();
 
         #endregion
+
+#endif
 
         #region INodePacketFactory Members
 

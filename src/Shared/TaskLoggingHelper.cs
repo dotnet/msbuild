@@ -246,7 +246,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>True if messages of the given importance should be logged, false if it's guaranteed that such messages would be ignored.</returns>
         public bool ShouldLogMessage(MessageImportance importance)
         {
-            return importance <= ((IBuildEngineInternal)BuildEngine).MinimumRequiredMessageImportance;
+            return importance <= ((IBuildEngine10)BuildEngine).EngineInterface.MinimumRequiredMessageImportance;
         }
 
         /// <summary>

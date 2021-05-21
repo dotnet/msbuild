@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine2, IBuildEngineInternal
+    internal sealed class MockEngine : IBuildEngine2
     {
         private string _upperLog;
 
@@ -106,8 +106,6 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             string[] toolsVersion,
             bool useResultsCache,
             bool unloadProjectsOnCompletion) => false;
-
-        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
 
         /// <summary>
         /// Assert that the log file contains the given string.

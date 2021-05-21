@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine7, IBuildEngineInternal
+    internal sealed class MockEngine : IBuildEngine7
     {
         private readonly object _lockObj = new object();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -488,7 +488,5 @@ namespace Microsoft.Build.UnitTests
             _objectCache.TryRemove(key, out object obj);
             return obj;
         }
-
-        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance => MessageImportance.Low;
     }
 }

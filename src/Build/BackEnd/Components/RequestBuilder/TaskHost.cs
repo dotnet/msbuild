@@ -34,8 +34,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngineInternal,
-        IBuildEngine9
+        IBuildEngine10
     {
         /// <summary>
         /// True if the "secret" environment variable MSBUILDNOINPROCNODE is set.
@@ -129,8 +128,9 @@ namespace Microsoft.Build.BackEnd
             _activeProxy = true;
             _callbackMonitor = new object();
             _disableInprocNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                ? s_disableInprocNodeByEnvironmentVariable || host.BuildParameters.DisableInProcNode
+                ?  || host.BuildParameters.DisableInProcNode
                 : s_disableInprocNodeByEnvironmentVariable;
+            EngineInterface = new BuildEngineInterfaceImpl(this);
         }
 
         /// <summary>
@@ -873,11 +873,25 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Returns the minimum message importance not guaranteed to be ignored by registered loggers.
-        /// </summary>
-        MessageImportance IBuildEngineInternal.MinimumRequiredMessageImportance =>
-            _taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
+        #endregion
+
+        #region IBuildEngine10 Members
+
+        private class BuildEngineInterfaceImpl : BuildEngineInterface
+        {
+            private TaskHost _taskHost;
+
+            internal BuildEngineInterfaceImpl(TaskHost taskHost)
+            {
+                _taskHost = taskHost;
+            }
+
+            /// <inheritdoc/>
+            public override MessageImportance MinimumRequiredMessageImportance =>
+                _taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
+        }
+
+        public BuildEngineInterface EngineInterface { get; }
 
         #endregion
 
