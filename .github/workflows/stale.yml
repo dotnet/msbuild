@@ -1,0 +1,22 @@
+name: 'Close stale issues'
+on:
+  schedule:
+    - cron: '00 19 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          stale-issue-message: |
+            This issue is marked as stale due to requiring feedback for 30 days. Please respond within 5 days or this issue will be closed due to inactivity.
+          close-issue-message: |
+            This issue was closed due to inactivity. If you can still reproduce this bug, please comment with the following information:
+            1. Full output of running `msbuild --version` and `dotnet --version` (if applicable) on a developer command prompt.
+            2. Steps to reproduce your scenario.
+            3. Any other notes that might help in the investigation.
+          days-before-stale: 30
+          days-before-close: 14
+          stale-issue-label: stale
+          any-of-labels: 'Needs: Author Feedback'
