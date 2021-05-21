@@ -8,7 +8,6 @@ Microsoft.TemplateEngine.Cli.HostSpecificDataLoader.ReadHostSpecificTemplateData
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.HiddenParameterNames.get -> System.Collections.Generic.HashSet<string!>!
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.IsHidden.get -> bool
-Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.IsHidden.set -> void
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.LongNameOverrides.get -> System.Collections.Generic.Dictionary<string!, string!>!
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.ParametersToAlwaysShow.get -> System.Collections.Generic.HashSet<string!>!
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.ShortNameOverrides.get -> System.Collections.Generic.Dictionary<string!, string!>!

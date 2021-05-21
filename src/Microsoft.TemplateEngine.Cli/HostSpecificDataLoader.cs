@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
@@ -17,6 +18,9 @@ namespace Microsoft.TemplateEngine.Cli
     {
         private readonly IEngineEnvironmentSettings _engineEnvironment;
 
+        private readonly ConcurrentDictionary<ITemplateInfo, HostSpecificTemplateData> _cache =
+            new ConcurrentDictionary<ITemplateInfo, HostSpecificTemplateData>();
+
         public HostSpecificDataLoader(IEngineEnvironmentSettings engineEnvironment)
         {
             _engineEnvironment = engineEnvironment;
@@ -24,11 +28,16 @@ namespace Microsoft.TemplateEngine.Cli
 
         public HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
         {
+            return _cache.GetOrAdd(templateInfo, ReadHostSpecificTemplateDataUncached);
+        }
+
+        private HostSpecificTemplateData ReadHostSpecificTemplateDataUncached(ITemplateInfo templateInfo)
+        {
             IMountPoint? mountPoint = null;
 
-            if (templateInfo is ITemplateInfoHostJsonCache withCache)
+            if (templateInfo is ITemplateInfoHostJsonCache { HostData: JObject hostData })
             {
-                return withCache.HostData?.ToObject<HostSpecificTemplateData>() ?? HostSpecificTemplateData.Default;
+                return new HostSpecificTemplateData(hostData);
             }
 
             try
@@ -46,7 +55,7 @@ namespace Microsoft.TemplateEngine.Cli
                             jsonData = JObject.Load(jsonReader);
                         }
 
-                        return jsonData.ToObject<HostSpecificTemplateData>();
+                        return new HostSpecificTemplateData(jsonData);
                     }
                 }
             }

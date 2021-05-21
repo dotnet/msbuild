@@ -5,7 +5,7 @@
 
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -16,26 +16,56 @@ namespace Microsoft.TemplateEngine.Cli
         private const string ShortNameKey = "shortName";
         private const string AlwaysShowKey = "alwaysShow";
 
-        private readonly Dictionary<string, IReadOnlyDictionary<string, string>> _symbolInfo;
-
-        internal HostSpecificTemplateData()
+        internal HostSpecificTemplateData(JObject? jObject)
         {
-            _symbolInfo = new Dictionary<string, IReadOnlyDictionary<string, string>>();
+            var symbolsInfo = new Dictionary<string, IReadOnlyDictionary<string, string>>();
+
+            if (jObject == null)
+            {
+                SymbolInfo = symbolsInfo;
+                return;
+            }
+
+            if (jObject.GetValue(nameof(UsageExamples), StringComparison.OrdinalIgnoreCase) is JArray usagesArray)
+            {
+                UsageExamples = new List<string>(usagesArray.Values<string>());
+            }
+
+            if (jObject.GetValue(nameof(SymbolInfo), StringComparison.OrdinalIgnoreCase) is JObject symbols)
+            {
+                foreach (var symbolInfo in symbols.Properties())
+                {
+                    if (!(symbolInfo.Value is JObject symbol))
+                    {
+                        continue;
+                    }
+
+                    var symbolProperties = new Dictionary<string, string>();
+
+                    foreach (var symbolProperty in symbol.Properties())
+                    {
+                        symbolProperties[symbolProperty.Name] = symbolProperty.Value.Value<string>();
+                    }
+
+                    symbolsInfo[symbolInfo.Name] = symbolProperties;
+                }
+            }
+            SymbolInfo = symbolsInfo;
+
+            IsHidden = jObject.Value<bool>(nameof(IsHidden));
+
         }
 
-        internal HostSpecificTemplateData(Dictionary<string, IReadOnlyDictionary<string, string>> symbolInfo)
+        internal HostSpecificTemplateData(IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> symbolInfo)
         {
-            _symbolInfo = symbolInfo;
+            SymbolInfo = symbolInfo;
         }
 
-        [JsonProperty]
         public List<string>? UsageExamples { get; set; }
 
-        [JsonProperty]
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> SymbolInfo => _symbolInfo;
+        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> SymbolInfo { get; }
 
-        [JsonProperty]
-        public bool IsHidden { get; set; }
+        public bool IsHidden { get; }
 
         public HashSet<string> HiddenParameterNames
         {
@@ -111,7 +141,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        internal static HostSpecificTemplateData Default { get; } = new HostSpecificTemplateData();
+        internal static HostSpecificTemplateData Default { get; } = new HostSpecificTemplateData((JObject?)null);
 
         internal string DisplayNameForParameter(string parameterName)
         {
