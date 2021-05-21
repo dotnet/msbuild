@@ -1593,47 +1593,33 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             var innerLogger = (logger is Evaluation.ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
-            MessageImportance minimumImportance;
-            if (innerLogger is Build.Logging.ConsoleLogger consoleLogger)
+            MessageImportance? minimumImportance = innerLogger switch
             {
-                minimumImportance = consoleLogger.GetMinimumMessageImportance();
-            }
-            else if (innerLogger is Build.Logging.ConfigurableForwardingLogger forwardingLogger)
-            {
-                minimumImportance = forwardingLogger.GetMinimumMessageImportance();
-            }
-            else if (innerLogger is CentralForwardingLogger)
-            {
+                Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
+                Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
+
                 // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
                 // where we must log everything. They can be ignored in inproc nodes.
-                if (_nodeId > 1)
+                CentralForwardingLogger => (_nodeId > 1 ? MessageImportance.Low : null),
+
+                // The null logger has no effect on minimum verbosity.
+                Execution.BuildManager.NullLogger => null,
+
+                // If the logger is not on our whitelist, there are no importance guarantees. Fall back to "any importance".
+                _ => MessageImportance.Low
+            };
+
+            if (minimumImportance != null)
+            {
+                if (_minimumRequiredMessageImportance == null)
                 {
-                    minimumImportance = MessageImportance.Low;
+                    _minimumRequiredMessageImportance = minimumImportance;
                 }
                 else
                 {
-                    return;
+                    int newMinImportance = Math.Max((int)_minimumRequiredMessageImportance, (int)minimumImportance);
+                    _minimumRequiredMessageImportance = (MessageImportance)newMinImportance;
                 }
-            }
-            else if (innerLogger is Execution.BuildManager.NullLogger)
-            {
-                // The null logger has no effect on minimum verbosity.
-                return;
-            }
-            else
-            {
-                // If the logger is not on our whitelist, there are no importance guarantees. Fall back to "any importance".
-                minimumImportance = MessageImportance.Low;
-            }
-
-            if (_minimumRequiredMessageImportance == null)
-            {
-                _minimumRequiredMessageImportance = minimumImportance;
-            }
-            else
-            {
-                int newMinImportance = Math.Max((int)_minimumRequiredMessageImportance, (int)minimumImportance);
-                _minimumRequiredMessageImportance = (MessageImportance)newMinImportance;
             }
         }
 
