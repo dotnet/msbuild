@@ -14,7 +14,6 @@ using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Linq;
-using Microsoft.DotNet.Workloads.Workload.Update;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
@@ -26,6 +25,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
         private readonly SdkFeatureBand _sdkFeatureBand;
 
+        public static readonly string MockUpdateDirectory = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath),
+            "DEV_mockworkloads", "update");
 
         public WorkloadListCommand(
             ParseResult result,
@@ -81,7 +82,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         {
             var updateList = new List<UpdateAvailableEntry>();
 
-            if (!File.Exists(Path.Combine(WorkloadUpdateCommand.MockUpdateDirectory,
+            if (!File.Exists(Path.Combine(MockUpdateDirectory,
                 "Microsoft.NET.Workload.Android.6.0.100.nupkg")))
             {
                 updateList.Add(new UpdateAvailableEntry("6.0.100",
@@ -89,7 +90,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                     "microsoft-android-sdk-full"));
             }
 
-            if (!File.Exists(Path.Combine(WorkloadUpdateCommand.MockUpdateDirectory,
+            if (!File.Exists(Path.Combine(MockUpdateDirectory,
                 "Microsoft.iOS.Bundle.6.0.100.nupkg")))
             {
                 updateList.Add(new UpdateAvailableEntry("6.0.100",
@@ -105,10 +106,10 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         internal record UpdateAvailableEntry(string ManifestVersion, string Description, string WorkloadId);
 
         private readonly string _mockIosDescription =
-            $"ios-workload-description: for testing you can delete the content of {WorkloadUpdateCommand.MockUpdateDirectory} to revert the mock update";
+            $"ios-workload-description: for testing you can delete the content of {MockUpdateDirectory} to revert the mock update";
 
         private readonly string _mockAndroidDescription =
-            $"android-workload-description: for testing you can delete the content of {WorkloadUpdateCommand.MockUpdateDirectory} to revert the mock update";
+            $"android-workload-description: for testing you can delete the content of {MockUpdateDirectory} to revert the mock update";
 
         private readonly string _sdkVersion;
     }

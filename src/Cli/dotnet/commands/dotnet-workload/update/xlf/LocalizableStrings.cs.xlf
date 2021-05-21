@@ -27,6 +27,16 @@
         <target state="new">Successfully updated workload(s): {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadCacheDownloadFailed">
+        <source>Failed to download workload update packages to cache: {0}</source>
+        <target state="new">Failed to download workload update packages to cache: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdateFailed">
+        <source>Workload update failed: {0}</source>
+        <target state="new">Workload update failed: {0}</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -314,6 +314,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
+        public IEnumerable<PackInfo> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        {
+            var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
+            return Directory.GetDirectories(installedPacksDir)
+                .Select(packIdPath => Path.GetFileName(packIdPath))
+                .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                .Where(pack => pack != null);
+        }
+
         private IEnumerable<string> GetExpectedPackInstallRecords(SdkFeatureBand sdkFeatureBand)
         {
             var installedWorkloads = _installationRecordRepository.GetInstalledWorkloads(sdkFeatureBand);
