@@ -34,7 +34,7 @@ stages:
 
   - job: Windows_NT
     pool:
-      name: VSEng-MicroBuildVS2019
+      name: VSEngSS-MicroBuild2019
       demands:
       - agent.os -equals Windows_NT
 
@@ -66,6 +66,14 @@ stages:
         restoreSolution: 'eng\common\internal\Tools.csproj'
         nugetConfigPath: 'NuGet.config'
         restoreDirectory: '$(Build.SourcesDirectory)\.packages'
+
+    - task: MicroBuildOptProfPlugin@6
+      inputs:
+        ProfilingInputsDropName: '$(VisualStudio.DropName)'
+        ShouldSkipOptimize: true
+        AccessToken: '$(System.AccessToken)'
+        feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+      displayName: 'Install OptProf Plugin'
 
     - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
       inputs:
@@ -111,7 +119,7 @@ stages:
         buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
         sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
         toLowerCase: false
-        usePat: false
+        usePat: true
       displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
       condition: succeeded()
 
@@ -162,11 +170,14 @@ stages:
 
     # Publishes setup VSIXes to a drop.
     # Note: The insertion tool looks for the display name of this task in the logs.
-    - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+    - task: MicroBuildUploadVstsDropFolder@2
       displayName: Upload VSTS Drop
       inputs:
         DropName: $(VisualStudio.DropName)
         DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        AccessToken: '$(System.AccessToken)'
+        DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+        VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
       condition: succeeded()
 
     # Publish an artifact that the RoslynInsertionTool is able to find by its name.
