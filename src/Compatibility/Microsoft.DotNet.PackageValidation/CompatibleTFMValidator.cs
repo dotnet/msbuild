@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.PackageValidation
                             compileTimeAsset.Path,
                             package.PackagePath,
                             runtimeAsset.Path,
-                            Path.GetFileName(package.PackagePath),
+                            package.PackageId,
                             Resources.CompatibleTfmValidatorHeader,
                             string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path));
                     }
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.PackageValidation
                                 compileTimeAsset.Path,
                                 package.PackagePath, 
                                 runtimeAsset.Path,
-                                Path.GetFileName(package.PackagePath),
+                                package.PackageId,
                                 Resources.CompatibleTfmValidatorHeader,
                                 string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path));
                         }
