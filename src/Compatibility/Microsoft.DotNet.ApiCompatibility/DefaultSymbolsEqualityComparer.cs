@@ -16,15 +16,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         public int GetHashCode(ISymbol obj) =>
             GetKey(obj).GetHashCode();
 
-        private static string GetKey(ISymbol symbol) =>
-            symbol switch
-            {
-                IMethodSymbol => symbol.ToComparisonDisplayString(),
-                IFieldSymbol => symbol.ToComparisonDisplayString(),
-                IPropertySymbol => symbol.ToComparisonDisplayString(),
-                IEventSymbol => symbol.ToComparisonDisplayString(),
-                ITypeSymbol => symbol.ToComparisonDisplayString(),
-                _ => symbol.Name,
-            };
+        private static string GetKey(ISymbol symbol) => symbol.ToComparisonDisplayString();
     }
 }
