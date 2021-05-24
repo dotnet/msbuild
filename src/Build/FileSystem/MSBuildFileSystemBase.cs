@@ -39,6 +39,8 @@ namespace Microsoft.Build.FileSystem
             _defaultFileSystem = defaultFileSystem;
         }
 
+        #region IFileSystem implementation
+
         /// <summary>
         /// Use this for var sr = new StreamReader(path)
         /// </summary>
@@ -100,45 +102,7 @@ namespace Microsoft.Build.FileSystem
         /// <summary>
         /// Use this for File.Exists(path) || Directory.Exists(path)
         /// </summary>
-        public virtual bool FileOrDirectoryExists(string path) => DefaultFileSystem.DirectoryEntryExists(path);
-
-        #region IFileSystem implementation
-
-        TextReader IFileSystem.ReadFile(string path) => this.ReadFile(path);
-
-        Stream IFileSystem.GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => this.GetFileStream(path, mode, access, share);
-
-        string IFileSystem.ReadFileAllText(string path) => this.ReadFileAllText(path);
-
-        byte[] IFileSystem.ReadFileAllBytes(string path) => this.ReadFileAllBytes(path);
-
-        IEnumerable<string> IFileSystem.EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
-        {
-            return this.EnumerateFiles(path, searchPattern, searchOption);
-        }
-
-        IEnumerable<string> IFileSystem.EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
-        {
-            return this.EnumerateDirectories(path, searchPattern, searchOption);
-        }
-
-        IEnumerable<string> IFileSystem.EnumerateFileSystemEntries(
-            string path,
-            string searchPattern,
-            SearchOption searchOption)
-        {
-            return this.EnumerateFileSystemEntries(path, searchPattern, searchOption);
-        }
-
-        FileAttributes IFileSystem.GetAttributes(string path) => this.GetAttributes(path);
-
-        DateTime IFileSystem.GetLastWriteTimeUtc(string path) => this.GetLastWriteTimeUtc(path);
-
-        bool IFileSystem.DirectoryExists(string path) => this.DirectoryExists(path);
-
-        bool IFileSystem.FileExists(string path) => this.FileExists(path);
-
-        bool IFileSystem.DirectoryEntryExists(string path) => this.FileOrDirectoryExists(path);
+        public virtual bool FileOrDirectoryExists(string path) => DefaultFileSystem.FileOrDirectoryExists(path);
 
         #endregion
     }

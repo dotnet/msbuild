@@ -2068,13 +2068,13 @@ namespace Microsoft.Build.UnitTests
                 return base.FileExists(path);
             }
 
-            private int _directoryEntryExistsCalls;
-            public int DirectoryEntryExistsCalls => _directoryEntryExistsCalls;
+            private int _fileOrDirectoryExistsCalls;
+            public int FileOrDirectoryExistsCalls => _fileOrDirectoryExistsCalls;
 
             public override bool FileOrDirectoryExists(string path)
             {
                 IncrementCalls(ref _fileSystemCalls);
-                IncrementCalls(ref _directoryEntryExistsCalls);
+                IncrementCalls(ref _fileOrDirectoryExistsCalls);
                 IncrementExistenceChecks(path);
 
                 return base.FileOrDirectoryExists(path);
