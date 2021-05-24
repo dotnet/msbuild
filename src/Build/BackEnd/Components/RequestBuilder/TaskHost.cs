@@ -877,7 +877,8 @@ namespace Microsoft.Build.BackEnd
 
         #region IBuildEngine10 Members
 
-        private class BuildEngineInterfaceImpl : BuildEngineInterface
+        [Serializable]
+        private sealed class BuildEngineInterfaceImpl : BuildEngineInterface
         {
             private TaskHost _taskHost;
 

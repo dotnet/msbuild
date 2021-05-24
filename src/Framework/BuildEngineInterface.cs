@@ -12,6 +12,7 @@ namespace Microsoft.Build.Framework
     /// Make all members virtual but not abstract, ensuring that implementations can override them and external implementations
     /// won't break when the class is extended with new members. This base implementation should be throwing <see cref="NotImplementedException"/>.
     /// </remarks>
+    [Serializable]
     public abstract class BuildEngineInterface
     {
         /// <summary>

@@ -495,7 +495,8 @@ namespace Microsoft.Build.CommandLine
 
         #region IBuildEngine10 Members
 
-        private class BuildEngineInterfaceImpl : BuildEngineInterface
+        [Serializable]
+        private sealed class BuildEngineInterfaceImpl : BuildEngineInterface
         {
             /// <summary>
             /// No logging verbosity optimization in OOP nodes.
