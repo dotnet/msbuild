@@ -472,7 +472,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [PlatformSpecificFact(TestPlatforms.Windows | TestPlatforms.Linux)]
+        [PlatformSpecificFact(TestPlatforms.Windows)]
         public void ItCreatesCoverageFileInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
@@ -523,7 +523,31 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify test results
             if (!TestContext.IsLocalized())
             {
-                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows, Ubuntu and Alpine.");
+                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows and Linux x64.");
+                result.StdOut.Should().Contain("Total:     1");
+                result.StdOut.Should().Contain("Passed:     1");
+                result.StdOut.Should().NotContain("Failed!");
+            }
+
+            result.ExitCode.Should().Be(0);
+        }
+
+        [PlatformSpecificFact(TestPlatforms.Linux)]
+        public void ItShouldShowWarningMessageOnCollectCodeCoverageThatProfilerWasNotInitialized()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
+
+            // Call test
+            CommandResult result = new DotnetTestCommand(Log)
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .Execute(
+                                            "--collect", "Code Coverage",
+                                            "--filter", "VSTestPassTest");
+
+            // Verify test results
+            if (!TestContext.IsLocalized())
+            {
+                result.StdOut.Should().Contain("No code coverage data available. Profiler was not initialized.");
                 result.StdOut.Should().Contain("Total:     1");
                 result.StdOut.Should().Contain("Passed:     1");
                 result.StdOut.Should().NotContain("Failed!");
