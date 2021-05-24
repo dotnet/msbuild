@@ -1248,7 +1248,7 @@ namespace Microsoft.Build.Tasks
 
 #if FEATURE_WIN32_REGISTRY
             MessageImportance messageImportance = MessageImportance.Low;
-            if (dependencyTable.Resolvers != null && Log.ShouldLogMessage(messageImportance))
+            if (dependencyTable.Resolvers != null && Log.LogsMessagesOfImportance(messageImportance))
             {
                 foreach (Resolver r in dependencyTable.Resolvers)
                 {
@@ -1347,7 +1347,7 @@ namespace Microsoft.Build.Tasks
         {
             // Set an importance level to be used for secondary messages.
             MessageImportance importance = ChooseReferenceLoggingImportance(reference);
-            if (!Log.ShouldLogMessage(importance))
+            if (!Log.LogsMessagesOfImportance(importance))
             {
                 return;
             }
@@ -1418,7 +1418,7 @@ namespace Microsoft.Build.Tasks
         private void LogInputs()
         {
             MessageImportance importance = MessageImportance.Low;
-            if (Traits.Instance.EscapeHatches.LogTaskInputs || Silent || !Log.ShouldLogMessage(importance))
+            if (Traits.Instance.EscapeHatches.LogTaskInputs || Silent || !Log.LogsMessagesOfImportance(importance))
             {
                 // the inputs will be logged automatically anyway, avoid duplication in the logs
                 return;

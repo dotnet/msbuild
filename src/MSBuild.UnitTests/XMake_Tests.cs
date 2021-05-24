@@ -2276,7 +2276,7 @@ EndGlobal
         }
 
         /// <summary>
-        /// Helper task used by <see cref="EndToEndMinimumMessageImportance"/> to verify <see cref="TaskLoggingHelper.ShouldLogMessage"/>.
+        /// Helper task used by <see cref="EndToEndMinimumMessageImportance"/> to verify <see cref="TaskLoggingHelper.LogsMessagesOfImportance"/>.
         /// </summary>
         public class MessageImportanceCheckingTask : Task
         {
@@ -2284,9 +2284,9 @@ EndGlobal
 
             public override bool Execute()
             {
-                bool shouldLogHigh = Log.ShouldLogMessage(MessageImportance.High);
-                bool shouldLogNormal = Log.ShouldLogMessage(MessageImportance.Normal);
-                bool shouldLogLow = Log.ShouldLogMessage(MessageImportance.Low);
+                bool shouldLogHigh = Log.LogsMessagesOfImportance(MessageImportance.High);
+                bool shouldLogNormal = Log.LogsMessagesOfImportance(MessageImportance.Normal);
+                bool shouldLogLow = Log.LogsMessagesOfImportance(MessageImportance.Low);
                 return (MessageImportance)ExpectedMinimumMessageImportance switch
                 {
                     MessageImportance.High - 1 => !shouldLogHigh && !shouldLogNormal && !shouldLogLow,

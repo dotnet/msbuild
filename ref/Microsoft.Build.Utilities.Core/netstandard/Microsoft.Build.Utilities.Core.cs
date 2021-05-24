@@ -265,6 +265,7 @@ namespace Microsoft.Build.Utilities
         public bool LogMessagesFromFile(string fileName) { throw null; }
         public bool LogMessagesFromFile(string fileName, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
         public bool LogMessagesFromStream(System.IO.TextReader stream, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
+        public bool LogsMessagesOfImportance(Microsoft.Build.Framework.MessageImportance importance) { throw null; }
         public void LogTelemetry(string eventName, System.Collections.Generic.IDictionary<string, string> properties) { }
         public void LogWarning(string message, params object[] messageArgs) { }
         public void LogWarning(string subcategory, string warningCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
@@ -275,7 +276,6 @@ namespace Microsoft.Build.Utilities
         public void LogWarningFromResources(string subcategoryResourceName, string warningCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string messageResourceName, params object[] messageArgs) { }
         public void LogWarningWithCodeFromResources(string messageResourceName, params object[] messageArgs) { }
         public void LogWarningWithCodeFromResources(string subcategoryResourceName, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string messageResourceName, params object[] messageArgs) { }
-        public bool ShouldLogMessage(Microsoft.Build.Framework.MessageImportance importance) { throw null; }
     }
     public static partial class ToolLocationHelper
     {

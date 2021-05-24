@@ -244,7 +244,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="importance">The importance to check.</param>
         /// <returns>True if messages of the given importance should be logged, false if it's guaranteed that such messages would be ignored.</returns>
-        public bool ShouldLogMessage(MessageImportance importance)
+        public bool LogsMessagesOfImportance(MessageImportance importance)
         {
             return BuildEngine is not IBuildEngine10 buildEngine10
                 || buildEngine10.EngineInterface.LogsMessagesOfImportance(importance);
@@ -290,7 +290,7 @@ namespace Microsoft.Build.Utilities
                 ResourceUtilities.FormatString(message, messageArgs);
             }
 #endif
-            if (!ShouldLogMessage(importance))
+            if (!LogsMessagesOfImportance(importance))
             {
                 return;
             }
@@ -358,7 +358,7 @@ namespace Microsoft.Build.Utilities
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
-            if (!ShouldLogMessage(importance))
+            if (!LogsMessagesOfImportance(importance))
             {
                 return;
             }
@@ -490,7 +490,7 @@ namespace Microsoft.Build.Utilities
             // global state.
             ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
-            if (!ShouldLogMessage(importance))
+            if (!LogsMessagesOfImportance(importance))
             {
                 return;
             }
@@ -577,7 +577,7 @@ namespace Microsoft.Build.Utilities
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
             ErrorUtilities.VerifyThrowArgumentNull(commandLine, nameof(commandLine));
 
-            if (!ShouldLogMessage(importance))
+            if (!LogsMessagesOfImportance(importance))
             {
                 return;
             }
