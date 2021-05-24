@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="BaselinePackageNotFound">
-        <source>No baseline package with id {0} found in feeds: {1}.</source>
-        <target state="new">No baseline package with id {0} found in feeds: {1}.</target>
+        <source>Baseline package with id {0} and version less than {2} not found in feeds: ({1}).</source>
+        <target state="new">Baseline package with id {0} and version less than {2} not found in feeds: ({1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="CompatibleFrameworkInPackageValidatorHeader">
