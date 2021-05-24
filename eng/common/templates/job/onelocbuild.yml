@@ -11,17 +11,15 @@ parameters:
 
   SourcesDirectory: $(Build.SourcesDirectory)
   CreatePr: true
-  AutoCompletePr: false
   UseCheckedInLocProjectJson: false
   LanguageSet: VS_Main_Languages
   LclSource: lclFilesInRepo
   LclPackageId: ''
   RepoType: gitHub
-  condition: ''
 
 jobs:
 - job: OneLocBuild
-  
+
   dependsOn: ${{ parameters.dependsOn }}
 
   displayName: OneLocBuild
@@ -37,7 +35,7 @@ jobs:
     - ${{ if eq(parameters.UseCheckedInLocProjectJson, 'true') }}:
       - name: _GenerateLocProjectArguments
         value: ${{ variables._GenerateLocProjectArguments }} -UseCheckedInLocProjectJson
-      
+
 
   steps:
     - task: Powershell@2
@@ -45,26 +43,20 @@ jobs:
         filePath: $(Build.SourcesDirectory)/eng/common/generate-locproject.ps1
         arguments: $(_GenerateLocProjectArguments)
       displayName: Generate LocProject.json
-      condition: ${{ parameters.condition }}
 
     - task: OneLocBuild@2
       displayName: OneLocBuild
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       inputs:
         locProj: Localize/LocProject.json
         outDir: $(Build.ArtifactStagingDirectory)
         lclSource: ${{ parameters.LclSource }}
         lclPackageId: ${{ parameters.LclPackageId }}
         isCreatePrSelected: ${{ parameters.CreatePr }}
-        ${{ if eq(parameters.CreatePr, true) }}:
-          isAutoCompletePrSelected: ${{ parameters.AutoCompletePr }}
+        repoType: ${{ parameters.RepoType }}
+        gitHubPatVariable: "${{ parameters.GithubPat }}"
         packageSourceAuth: patAuth
         patVariable: ${{ parameters.CeapexPat }}
-        ${{ if eq(parameters.RepoType, 'gitHub') }}:
-          repoType: ${{ parameters.RepoType }}
-          gitHubPatVariable: "${{ parameters.GithubPat }}"
-      condition: ${{ parameters.condition }}
+      condition: always()
 
     - task: PublishBuildArtifacts@1
       displayName: Publish Localization Files
@@ -72,7 +64,7 @@ jobs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)/loc'
         PublishLocation: Container
         ArtifactName: Loc
-      condition: ${{ parameters.condition }}
+      condition: always()
 
     - task: PublishBuildArtifacts@1
       displayName: Publish LocProject.json
@@ -80,4 +72,4 @@ jobs:
         PathtoPublish: '$(Build.SourcesDirectory)/Localize/'
         PublishLocation: Container
         ArtifactName: Loc
-      condition: ${{ parameters.condition }}
+      condition: always()
