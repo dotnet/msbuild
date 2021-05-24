@@ -34,7 +34,8 @@
                 "Xamarin.Android.BuildTools",
                 "Xamarin.Android.Framework",
                 "Xamarin.Android.Runtime",
-                "Mono.Android.Sdk"
+                "Mono.Android.Sdk",
+                "Mono.Android.Sdk.Extra"
             ]
         },
         // on CI machines, this will only be installed if
@@ -149,6 +150,13 @@
             "alias-to": {
                 "osx-x64": "Mono.Android.LLVM.Aot.armv7a.MacHost",
                 "win-x64": "Mono.Android.LLVM.Aot.armv7a.Win64Host"
+            }
+        },
+        "Mono.Android.Sdk.Extra": {
+            "version": "8.4.7",
+            "kind": "sdk",
+            "alias-to": {
+                "non-existent": "Mono.Android.Sdk.Extra.NonExistent"
             }
         },
         "Test.Pack.A": {

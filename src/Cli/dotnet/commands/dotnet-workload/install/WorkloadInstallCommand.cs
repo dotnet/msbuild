@@ -164,7 +164,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         workloadPackToInstall = workloadIds
                             .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                             .Distinct()
-                            .Select(packId => _workloadResolver.TryGetPackInfo(packId));
+                            .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                            .Where(pack => pack != null);
 
                         foreach (var packId in workloadPackToInstall)
                         {
@@ -227,6 +228,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                     .Distinct()
                     .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                    .Where(pack => pack != null)
                     .Select(pack => _nugetPackageDownloader.GetPackageUrl(new PackageId(pack.ResolvedPackageId), new NuGetVersion(pack.Version), includePreview: includePreview).Result);
                 packageUrls.AddRange(packUrls);
             }
@@ -247,7 +249,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var workloadPacks = workloadIds
                     .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                     .Distinct()
-                    .Select(packId => _workloadResolver.TryGetPackInfo(packId));
+                    .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                    .Where(pack => pack != null);
 
                 foreach (var pack in workloadPacks)
                 {
