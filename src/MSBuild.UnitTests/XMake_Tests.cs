@@ -2279,6 +2279,51 @@ $@"<Project>
             success.ShouldBeFalse();
         }
 
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
+        [Fact]
+        public void BuildSlnOutOfProc()
+        {
+            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+            {
+                string solutionFileContents =
+                    @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'TestProject', 'TestProject.proj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Mixed Platforms = Debug|Mixed Platforms
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.ActiveCfg = CSConfig1|Any CPU
+        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.Build.0 = CSConfig1|Any CPU
+    EndGlobalSection
+EndGlobal
+                    ".Replace("'", "\"");
+
+                var testSolution = testEnvironment.CreateFile("TestSolution.sln", ObjectModelHelpers.CleanupFileContents(solutionFileContents));
+
+                string testMessage = "Hello from TestProject!";
+                testEnvironment.CreateFile("TestProject.proj", @$"
+                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                  <Target Name=""Build"">
+                    <Message Text=""{testMessage}"" />
+                  </Target>
+                </Project>
+                ");
+
+                testEnvironment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+
+                string output = RunnerUtilities.ExecMSBuild($"\"{testSolution.Path}\" /p:Configuration=Debug", out var success, _output);
+
+                success.ShouldBeTrue(output);
+                output.ShouldContain(testMessage);
+            }
+        }
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>.
