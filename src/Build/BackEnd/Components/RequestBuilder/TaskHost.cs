@@ -888,8 +888,20 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <inheritdoc/>
-            public override bool LogsMessagesOfImportance(MessageImportance importance) =>
-                importance <= (_taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low);
+            public override bool LogsMessagesOfImportance(MessageImportance importance)
+            {
+#if FEATURE_APPDOMAIN
+                if (RemotingServices.IsTransparentProxy(_taskHost))
+                {
+                    // If the check would be a cross-domain call, chances are that it wouldn't be worth it.
+                    // Simply disable the optimization in such a case.
+                    return true;
+                }
+#endif
+                MessageImportance minimumImportance = _taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
+                return importance <= minimumImportance;
+
+            }
         }
 
         public BuildEngineInterface EngineInterface { get; }
