@@ -132,4 +132,10 @@
   <data name="RollingBackInstall" xml:space="preserve">
     <value>Workload installation failed, rolling back installed packs...</value>
   </data>
+  <data name="WorkloadCacheDownloadFailed" xml:space="preserve">
+    <value>Failed to download workload update packages to cache: {0}</value>
+  </data>
+  <data name="WorkloadUpdateFailed" xml:space="preserve">
+    <value>Workload update failed: {0}</value>
+  </data>
 </root>

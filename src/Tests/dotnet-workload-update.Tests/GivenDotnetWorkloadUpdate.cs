@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.IO;
@@ -20,6 +19,8 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Cli.Workload.Install.Tests;
 using Microsoft.DotNet.Workloads.Workload.Update;
+using Microsoft.DotNet.Cli.Utils;
+using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
 namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 {
@@ -132,8 +133,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
             (_, var command, var installer, var workloadResolver, _, _) = GetTestInstallers(_parseResult, installedWorkloads: mockWorkloadIds, failingWorkload: "xamarin-android-build");
 
-            var exceptionThrown = Assert.Throws<Exception>(() => command.Execute());
-            exceptionThrown.Message.Should().Be("Failing workload: xamarin-android-build");
+            var exceptionThrown = Assert.Throws<GracefulException>(() => command.Execute());
+            exceptionThrown.Message.Should().Contain("Failing workload: xamarin-android-build");
             var expectedPacks = mockWorkloadIds
                 .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                 .Distinct()
@@ -142,20 +143,80 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEmpty();
         }
 
+        [Fact]
+        public void GivenWorkloadUpdateItCanDownloadToOfflineCache()
+        {
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
+            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "cachePath").Path, "mockCachePath");
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--download-to-cache", cachePath });
+            (_, var command, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
+
+            command.Execute();
+
+            // Manifest packages should have been 'downloaded' and used for pack resolution
+            manifestUpdater.DownloadManifestPackagesCallCount.Should().Be(1);
+            manifestUpdater.ExtractManifestPackagesToTempDirCallCount.Should().Be(1);
+            // 6 android pack packages need to be updated
+            installer.CachedPacks.Count.Should().Be(6);
+            installer.CachedPacks.Select(pack => pack.Id).Should().NotContain("Xamarin.Android.Sdk"); // This pack is up to date, doesn't need to be cached
+            installer.CachePath.Should().Be(cachePath);
+        }
+
+        [Fact]
+        public void GivenWorkloadUpdateItCanInstallFromOfflineCache()
+        {
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
+            var cachePath = "mockCachePath";
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--from-cache", cachePath });
+            (_, var command, var installer, _, _, var nugetDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds);
+
+            command.Execute();
+
+            installer.GarbageCollectionCalled.Should().BeTrue();
+            installer.CachePath.Should().Contain(cachePath);
+            installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
+            installer.InstalledPacks.Count.Should().Be(8);
+            installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
+            nugetDownloader.DownloadCallParams.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public void GivenWorkloadUpdateItPrintsDownloadUrls()
+        {
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--print-download-link-only" });
+            (_, var command, _, _, _, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
+
+            command.Execute();
+
+            _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
+            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.templates", "New pack urls should be included in output");
+            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.framework", "Urls for packs with updated versions should be included in output");
+            string.Join(" ", _reporter.Lines).Should().NotContain("mock-url-xamarin.android.sdk", "Urls for packs with the same version should not be included in output");
+            string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
+        }
+
         private (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",
             string failingWorkload = null,
             IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestUpdates = null,
-            IList<WorkloadId> installedWorkloads = null)
+            IList<WorkloadId> installedWorkloads = null,
+            bool includeInstalledPacks = false)
         {
             _reporter.Clear();
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName).Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var installer = new MockPackWorkloadInstaller(failingWorkload, installedWorkloads: installedWorkloads);
+            var installedPacks = new PackInfo[] {
+                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk"),
+                new PackInfo("Xamarin.Android.Framework", "8.2.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.2.0"), "Xamarin.Android.Framework")
+            };
+            var installer = includeInstalledPacks ?
+                new MockPackWorkloadInstaller(failingWorkload, installedWorkloads: installedWorkloads, installedPacks: installedPacks) :
+                new MockPackWorkloadInstaller(failingWorkload, installedWorkloads: installedWorkloads);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates);
+            var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, _manifestPath);
             var installManager = new WorkloadUpdateCommand(
                 parseResult,
                 reporter: _reporter,

@@ -7,18 +7,19 @@ using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
+using Microsoft.DotNet.MSBuildSdkResolver;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
-using NuGet.Protocol;
-using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Product = Microsoft.DotNet.Cli.Utils.Product;
@@ -29,18 +30,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
     {
         private readonly bool _printDownloadLinkOnly;
         private readonly string _fromCacheOption;
+        private readonly string _downloadToCacheOption;
         private readonly IReporter _reporter;
         private readonly bool _includePreviews;
         private readonly VerbosityOptions _verbosity;
         private readonly IInstaller _workloadInstaller;
-        private readonly IWorkloadResolver _workloadResolver;
-        private readonly IWorkloadManifestProvider _workloadManifestProvider;
+        private IWorkloadResolver _workloadResolver;
+        private IWorkloadManifestProvider _workloadManifestProvider;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly ReleaseVersion _sdkVersion;
-
-        public static readonly string MockUpdateDirectory = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath),
-            "DEV_mockworkloads", "update");
+        private readonly string _userHome;
+        private readonly string _dotnetPath;
 
         public WorkloadUpdateCommand(
             ParseResult parseResult,
@@ -59,80 +60,70 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
             _reporter = reporter ?? Reporter.Output;
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
+            _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
             _sdkVersion = new ReleaseVersion(version ??
                 (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption)) ?
                 Product.Version : parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption)));
 
-            var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader, dotnetDir);
-            userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
-            var tempPackagesDir = new DirectoryPath(Path.Combine(userHome, ".dotnet", "sdk-advertising-temp"));
+            _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
+            var tempPackagesDir = new DirectoryPath(Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, userHome);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome);
         }
 
         public override int Execute()
         {
-            if (_printDownloadLinkOnly || !string.IsNullOrWhiteSpace(_fromCacheOption))
+            if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
             {
-                SourceRepository source =
-                    Repository.Factory.GetCoreV3("https://www.myget.org/F/mockworkloadfeed/api/v3/index.json");
-                ServiceIndexResourceV3 serviceIndexResource = source.GetResourceAsync<ServiceIndexResourceV3>().Result;
-                IReadOnlyList<Uri> packageBaseAddress =
-                    serviceIndexResource?.GetServiceEntryUris(ServiceTypes.PackageBaseAddress);
-                List<string> allPackageUrl = new List<string>();
-
-                if (_printDownloadLinkOnly)
+                try
                 {
-                    allPackageUrl.Add(nupkgUrl(packageBaseAddress.First().ToString(), "Microsoft.iOS.Bundle",
-                        NuGetVersion.Parse("6.0.100")));
-
-                    allPackageUrl.Add(nupkgUrl(packageBaseAddress.First().ToString(), "Microsoft.NET.Workload.Android",
-                        NuGetVersion.Parse("6.0.100")));
-
-                    Reporter.Output.WriteLine("==allPackageLinksJsonOutputStart==");
-                    Reporter.Output.WriteLine(JsonSerializer.Serialize(allPackageUrl));
-                    Reporter.Output.WriteLine("==allPackageLinksJsonOutputEnd==");
+                    DownloadToOfflineCacheAsync(new DirectoryPath(_downloadToCacheOption), _includePreviews).Wait();
                 }
-
-                if (!string.IsNullOrWhiteSpace(_fromCacheOption))
+                catch (Exception e)
                 {
-                    Directory.CreateDirectory(MockUpdateDirectory);
-
-                    File.Copy(Path.Combine(_fromCacheOption, "Microsoft.NET.Workload.Android.6.0.100.nupkg"),
-                        Path.Combine(MockUpdateDirectory, "Microsoft.NET.Workload.Android.6.0.100.nupkg"));
-
-                    File.Copy(Path.Combine(_fromCacheOption, "Microsoft.iOS.Bundle.6.0.100.nupkg"),
-                        Path.Combine(MockUpdateDirectory, "Microsoft.iOS.Bundle.6.0.100.nupkg"));
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e);
                 }
+            }
+            else if (_printDownloadLinkOnly)
+            {
+                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).Result;
+
+                _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
+                _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
+                _reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
             }
             else
             {
-                UpdateWorkloads(_includePreviews);
+                try
+                {
+                    UpdateWorkloads(_includePreviews, string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
+                }
+                catch (Exception e)
+                {
+                    // Don't show entire stack trace
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadUpdateFailed, e.Message), e);
+                }
             }
 
             return 0;
         }
 
-        public string nupkgUrl(string baseUri, string id, NuGetVersion version) =>
-            baseUri + id.ToLowerInvariant() + "/" + version.ToNormalizedString() + "/" + id.ToLowerInvariant() +
-            "." +
-            version.ToNormalizedString() + ".nupkg";
-
-        public void UpdateWorkloads(bool includePreviews = false)
+        public void UpdateWorkloads(bool includePreviews = false, DirectoryPath? offlineCache = null)
         {
             _reporter.WriteLine();
             var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
             var workloadIds = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
-            _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews).Wait();
+            _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
             var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
 
-            UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate);
+            UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -147,7 +138,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private void UpdateWorkloadsWithInstallRecord(
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
-            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate)
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate,
+            DirectoryPath? offlineCache = null)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -159,7 +151,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                     {
                         foreach (var manifest in manifestsToUpdate)
                         {
-                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand);
+                            _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.newVersion, sdkFeatureBand, offlineCache);
                         }
 
                         _workloadResolver.RefreshWorkloadManifests();
@@ -172,7 +164,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                         foreach (var packId in workloadPackToUpdate)
                         {
-                            installer.InstallWorkloadPack(packId, sdkFeatureBand);
+                            installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
                         }
 
                         foreach (var workloadId in workloadIds)
@@ -217,6 +209,119 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                     installer.InstallWorkload(workloadId);
                 }
             }
+        }
+
+        private async Task DownloadToOfflineCacheAsync(DirectoryPath offlineCache, bool includePreviews)
+        {
+            var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreviews, offlineCache);
+            var tempManifestDir = Path.Combine(offlineCache.Value, "temp-manifests");
+            try
+            {
+                await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
+                _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
+                _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+
+                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+                {
+                    var installer = _workloadInstaller.GetPackInstaller();
+                    var packsToUpdate = GetUpdatablePacks(installer);
+                    foreach (var pack in packsToUpdate)
+                    {
+                        installer.DownloadToOfflineCache(pack, new DirectoryPath(_downloadToCacheOption), _includePreviews);
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            finally
+            {
+                if (!string.IsNullOrWhiteSpace(tempManifestDir) && Directory.Exists(tempManifestDir))
+                {
+                   Directory.Delete(tempManifestDir, true);
+                }
+            }
+        }
+
+        private async Task<IEnumerable<string>> GetUpdatablePackageUrlsAsync(bool includePreview)
+        {
+            IEnumerable<string> packageUrls = new List<string>();
+            DirectoryPath? tempPath = null;
+
+            try
+            {
+                var manifestPackageUrls = _workloadManifestUpdater.GetManifestPackageUrls(includePreview);
+                packageUrls = packageUrls.Concat(manifestPackageUrls);
+
+                tempPath = new DirectoryPath(Path.Combine(_userHome, ".dotnet", "manifest-extraction"));
+                await UseTempManifestsToResolvePacksAsync(tempPath.Value, includePreview);
+
+                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+                {
+                    var installer = _workloadInstaller.GetPackInstaller();
+                    var packsToUpdate = GetUpdatablePacks(installer)
+                        .Select(packInfo => _nugetPackageDownloader.GetPackageUrl(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version)).Result);
+                    packageUrls = packageUrls.Concat(packsToUpdate);
+                    return packageUrls;
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            finally
+            {
+                if (tempPath != null && tempPath.HasValue && Directory.Exists(tempPath.Value.Value))
+                {
+                    Directory.Delete(tempPath.Value.Value, true);
+                }
+            }
+        }
+
+        private async Task UseTempManifestsToResolvePacksAsync(DirectoryPath tempPath, bool includePreview)
+        {
+            var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);
+            await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath);
+            _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
+            _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+        }
+
+        private IEnumerable<PackInfo> GetUpdatablePacks(IWorkloadPackInstaller installer)
+        {
+            var installedPacks = installer.GetInstalledPacks(new SdkFeatureBand(_sdkVersion));
+            if (installedPacks == null || !installedPacks.Any())
+            {
+                return new List<PackInfo>();
+            }
+            var updatedPacks = installer.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(new SdkFeatureBand(_sdkVersion))
+                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                .Distinct()
+                .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                .Where(pack => pack != null);
+
+            var packsToUpdate = new List<PackInfo>();
+            foreach (var updatedPack in updatedPacks)
+            {
+                var installedPackIds = installedPacks.Select(pack => pack.Id);
+                if (installedPackIds.Contains(updatedPack.Id))
+                {
+                    var installedPack = installedPacks.First(pack => pack.Id.Equals(updatedPack.Id));
+                    var installedVersion = new ReleaseVersion(installedPack.Version);
+                    var updatedVersion = new ReleaseVersion(updatedPack.Version);
+                    if (installedVersion != null && updatedVersion != null && installedVersion < updatedVersion)
+                    {
+                        packsToUpdate.Add(updatedPack);
+                    }
+                }
+                else
+                {
+                    // New pack required for this workload, include it
+                    packsToUpdate.Add(updatedPack);
+                }
+            }
+
+            return packsToUpdate;
         }
     }
 }

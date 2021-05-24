@@ -18,6 +18,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option IncludePreviewsOption = WorkloadInstallCommandParser.IncludePreviewOption;
 
+        public static readonly Option DownloadToCacheOption = WorkloadInstallCommandParser.DownloadToCacheOption;
+
         public static readonly Option PrintDownloadLinkOnlyOption =
             WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption;
 
@@ -42,6 +44,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FromCacheOption);
             command.AddOption(SdkVersionOption);
             command.AddOption(IncludePreviewsOption);
+            command.AddOption(DownloadToCacheOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.NoCacheOption);
