@@ -215,22 +215,32 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         {
             var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreviews, offlineCache);
             var tempManifestDir = Path.Combine(offlineCache.Value, "temp-manifests");
-            await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
-            _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
-            _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
-
-            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+            try
             {
-                var installer = _workloadInstaller.GetPackInstaller();
-                var packsToUpdate = GetUpdatablePacks(installer);
-                foreach (var pack in packsToUpdate)
+                await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
+                _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
+                _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+
+                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
                 {
-                    installer.DownloadToOfflineCache(pack, new DirectoryPath(_downloadToCacheOption), _includePreviews);
+                    var installer = _workloadInstaller.GetPackInstaller();
+                    var packsToUpdate = GetUpdatablePacks(installer);
+                    foreach (var pack in packsToUpdate)
+                    {
+                        installer.DownloadToOfflineCache(pack, new DirectoryPath(_downloadToCacheOption), _includePreviews);
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException();
                 }
             }
-            else
+            finally
             {
-                throw new NotImplementedException();
+                if (!string.IsNullOrWhiteSpace(tempManifestDir) && Directory.Exists(tempManifestDir))
+                {
+                   Directory.Delete(tempManifestDir, true);
+                }
             }
         }
 
@@ -297,9 +307,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 if (installedPackIds.Contains(updatedPack.Id))
                 {
                     var installedPack = installedPacks.First(pack => pack.Id.Equals(updatedPack.Id));
-                    if (Version.TryParse(installedPack.Version, out var installedVersion) &&
-                        Version.TryParse(updatedPack.Version, out var updatedVersion) &&
-                        installedVersion < updatedVersion)
+                    var installedVersion = new ReleaseVersion(installedPack.Version);
+                    var updatedVersion = new ReleaseVersion(updatedPack.Version);
+                    if (installedVersion != null && updatedVersion != null && installedVersion < updatedVersion)
                     {
                         packsToUpdate.Add(updatedPack);
                     }

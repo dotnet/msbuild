@@ -190,9 +190,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             command.Execute();
 
             _reporter.Lines.Should().Contain("==allPackageLinksJsonOutputStart==");
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.templates"); // New packs should be included
-            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.framework"); // Packs with updated versions should be included
-            string.Join(" ", _reporter.Lines).Should().NotContain("mock-url-xamarin.android.sdk"); // Packs that were the same version should not be included
+            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.templates", "New pack urls should be included in output");
+            string.Join(" ", _reporter.Lines).Should().Contain("mock-url-xamarin.android.framework", "Urls for packs with updated versions should be included in output");
+            string.Join(" ", _reporter.Lines).Should().NotContain("mock-url-xamarin.android.sdk", "Urls for packs with the same version should not be included in output");
             string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
         }
 
