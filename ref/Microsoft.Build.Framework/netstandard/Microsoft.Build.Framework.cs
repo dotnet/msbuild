@@ -6,7 +6,7 @@ namespace Microsoft.Build.Framework
     public abstract partial class BuildEngineInterface
     {
         protected BuildEngineInterface() { }
-        public virtual Microsoft.Build.Framework.MessageImportance MinimumRequiredMessageImportance { get { throw null; } }
+        public virtual bool LogsMessagesOfImportance(Microsoft.Build.Framework.MessageImportance importance) { throw null; }
     }
     [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct BuildEngineResult

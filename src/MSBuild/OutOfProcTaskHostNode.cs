@@ -501,7 +501,7 @@ namespace Microsoft.Build.CommandLine
             /// <summary>
             /// No logging verbosity optimization in OOP nodes.
             /// </summary>
-            public override MessageImportance MinimumRequiredMessageImportance => MessageImportance.Low;
+            public override bool LogsMessagesOfImportance(MessageImportance importance) => true;
         }
 
         public BuildEngineInterface EngineInterface { get; } = new BuildEngineInterfaceImpl();

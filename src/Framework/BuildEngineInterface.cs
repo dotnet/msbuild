@@ -16,12 +16,15 @@ namespace Microsoft.Build.Framework
     public abstract class BuildEngineInterface
     {
         /// <summary>
-        /// Returns the minimum message importance not guaranteed to be ignored by registered loggers.
+        /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
         /// </summary>
+        /// <param name="importance">The importance to check.</param>
+        /// <returns>True if messages of the given importance should be logged, false if it's guaranteed that such messages would be ignored.</returns>
         /// <remarks>
-        /// Example: If we know that no logger is interested in MessageImportance.Low, this property returns
-        /// MessageImportance.Normal. If loggers may consume any messages, this property returns MessageImportance.Low.
+        /// Example: If we know that no logger is interested in <see cref="MessageImportance.Low"/>, this method returns <see langword="true"/>
+        /// for <see cref="MessageImportance.Normal"/> and <see cref="MessageImportance.High"/>, and returns <see langword="false"/>
+        /// for <see cref="MessageImportance.Low"/>.
         /// </remarks>
-        public virtual MessageImportance MinimumRequiredMessageImportance => throw new NotImplementedException();
+        public virtual bool LogsMessagesOfImportance(MessageImportance importance) => throw new NotImplementedException();
     }
 }

@@ -888,8 +888,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <inheritdoc/>
-            public override MessageImportance MinimumRequiredMessageImportance =>
-                _taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low;
+            public override bool LogsMessagesOfImportance(MessageImportance importance) =>
+                importance <= (_taskHost._taskLoggingContext?.LoggingService.MinimumRequiredMessageImportance ?? MessageImportance.Low);
         }
 
         public BuildEngineInterface EngineInterface { get; }

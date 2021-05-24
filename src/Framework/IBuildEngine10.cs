@@ -10,7 +10,7 @@ namespace Microsoft.Build.Framework
     public interface IBuildEngine10 : IBuildEngine9
     {
         /// <summary>
-        /// 
+        /// Returns the new build engine interface.
         /// </summary>
         BuildEngineInterface EngineInterface { get; }
     }
