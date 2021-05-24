@@ -949,6 +949,11 @@ Examples:
         <target state="new">Success: {0} installed the following templates:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package">
+        <source>No templates were found in the package {0}.</source>
+        <target state="new">No templates were found in the package {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TemplateResolver_Warning_FailedToReparseTemplate">
         <source>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</source>
         <target state="new">[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</target>

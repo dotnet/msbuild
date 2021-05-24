@@ -721,4 +721,7 @@ Examples:
   <data name="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable" xml:space="preserve">
     <value>Failed to run the command: argument 'executable' is missing in post action configuration.</value>
   </data>
+  <data name="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package" xml:space="preserve">
+    <value>No templates were found in the package {0}.</value>
+  </data>
 </root>

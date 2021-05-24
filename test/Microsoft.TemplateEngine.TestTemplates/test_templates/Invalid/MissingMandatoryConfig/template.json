@@ -1,0 +1,8 @@
+{
+    "author": "Test Asset",
+    "classifications": [ "Test Asset" ],
+    "generatorVersions": "[1.0.0.0-*)",
+    "groupIdentity": "group",
+    "precedence": "100",
+    "sourceName": "Basic"
+}

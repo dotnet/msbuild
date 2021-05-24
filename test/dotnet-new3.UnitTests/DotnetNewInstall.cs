@@ -500,5 +500,24 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("TestAssets.TemplateWithTags")
                 .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
         }
+
+        [Fact]
+        public void CannotInstallTemplateWithoutMandatoryConfig()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            string invalidTemplatePath = TestUtils.GetTestTemplateLocation("Invalid/MissingMandatoryConfig");
+            new DotnetNewCommand(_log, "-i", invalidTemplatePath)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"Error: Failed to load template from {invalidTemplatePath}:")
+                .And.HaveStdOutContaining($"Error:     Missing 'identity' in '/template.json'")
+                .And.HaveStdOutContaining($"Error:     Missing 'name' in '/template.json'")
+                .And.HaveStdOutContaining($"Error:     Missing 'shortName' in '/template.json'")
+                .And.HaveStdOutContaining($"No templates were found in the package {invalidTemplatePath}.");
+        }
     }
 }

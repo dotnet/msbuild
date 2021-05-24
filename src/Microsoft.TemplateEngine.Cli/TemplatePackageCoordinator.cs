@@ -592,12 +592,21 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (result.Success)
             {
-                Reporter.Output.WriteLine(
-                    string.Format(
-                        LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
-                        result.TemplatePackage.DisplayName));
                 IEnumerable<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(result.TemplatePackage, cancellationToken).ConfigureAwait(false);
-                HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
+                if (templates.Any())
+                {
+                    Reporter.Output.WriteLine(
+                        string.Format(
+                            LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
+                            result.TemplatePackage.DisplayName));
+                    HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
+                }
+                else
+                {
+                    Reporter.Output.WriteLine(string.Format(
+                            LocalizableStrings.TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package,
+                            result.TemplatePackage.DisplayName));
+                }
             }
             else
             {

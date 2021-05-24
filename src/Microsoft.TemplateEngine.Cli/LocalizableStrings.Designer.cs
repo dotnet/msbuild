@@ -1562,6 +1562,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No templates were found in the package {0}..
+        /// </summary>
+        internal static string TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package {
+            get {
+                return ResourceManager.GetString("TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to uninstall {0}, reason: {1}..
         /// </summary>
         internal static string TemplatePackageCoordinator_Uninstall_Error_GenericError {
