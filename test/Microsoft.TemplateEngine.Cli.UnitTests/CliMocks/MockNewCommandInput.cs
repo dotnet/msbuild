@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Edge.Template;
 using Newtonsoft.Json;
 using Xunit.Abstractions;
 
@@ -139,6 +138,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public IList<string> ToUninstallList { get; }
 
         public string TypeFilter => _commandOptions.ContainsKey("--type") ? _commandOptions["--type"] : string.Empty;
+
+        public bool NoUpdateCheck => throw new NotImplementedException();
 
         public MockNewCommandInput WithTemplateOption(string optionName, string optionValue = null)
         {

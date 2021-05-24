@@ -164,6 +164,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string Language => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "language" });
 
+        public bool NoUpdateCheck => _parseResult.HasAppliedOption(new[] { _commandName, "no-update-check" });
+
         public string Name => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "name" });
 
         public string OutputPath => _parseResult.GetArgumentValueAtPath(new[] { _commandName, "output" });

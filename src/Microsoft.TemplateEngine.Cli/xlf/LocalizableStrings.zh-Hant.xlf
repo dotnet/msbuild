@@ -574,6 +574,11 @@ The supported columns are: language, tags, author, type.</target>
         <target state="new">Display all columns in --list and --search output.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OptionDescriptionNoUpdateCheck">
+        <source>Disables checking for the template package updates when instantiating a template.</source>
+        <target state="new">Disables checking for the template package updates when instantiating a template.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
         <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
         <target state="new">Filters the templates based on NuGet package ID. Applies to --search.</target>

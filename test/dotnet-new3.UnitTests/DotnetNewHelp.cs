@@ -38,7 +38,8 @@ Options:
   --columns <COLUMNS_LIST>       Comma separated list of columns to display in --list and --search output.
                                  The supported columns are: language, tags, author, type.
   --columns-all                  Display all columns in --list and --search output.
-  --tag <TAG>                    Filters the templates based on the tag. Applies to --search and --list.";
+  --tag <TAG>                    Filters the templates based on the tag. Applies to --search and --list.
+  --no-update-check              Disables checking for the template package updates when instantiating a template.";
 
         private const string ConsoleHelp =
 @"Console Application (C#)

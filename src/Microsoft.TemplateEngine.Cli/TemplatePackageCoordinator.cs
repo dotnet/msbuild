@@ -112,6 +112,12 @@ namespace Microsoft.TemplateEngine.Cli
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
             cancellationToken.ThrowIfCancellationRequested();
 
+            if (commandInput.NoUpdateCheck)
+            {
+                Reporter.Verbose.WriteLine("The check for update is skipped by user.");
+                return null;
+            }
+
             ITemplatePackage templatePackage;
             try
             {

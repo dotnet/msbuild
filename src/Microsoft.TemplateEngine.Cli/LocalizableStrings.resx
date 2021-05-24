@@ -712,6 +712,9 @@ Examples:
   <data name="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader" xml:space="preserve">
     <value>To update the package use:</value>
   </data>
+  <data name="OptionDescriptionNoUpdateCheck" xml:space="preserve">
+    <value>Disables checking for the template package updates when instantiating a template.</value>
+  </data>
   <data name="PostActionDispatcher_Error_NotSupported" xml:space="preserve">
     <value>The post action {0} is not supported.</value>
   </data>

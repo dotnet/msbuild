@@ -60,6 +60,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         string Name { get; }
 
+        /// <summary>
+        /// True when the user specified --no-update-check option.
+        /// </summary>
+        bool NoUpdateCheck { get; }
+
         string OutputPath { get; }
 
         string PackageFilter { get; }

@@ -1071,6 +1071,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disables checking for the template package updates when instantiating a template..
+        /// </summary>
+        internal static string OptionDescriptionNoUpdateCheck {
+            get {
+                return ResourceManager.GetString("OptionDescriptionNoUpdateCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Filters the templates based on NuGet package ID. Applies to --search..
         /// </summary>
         internal static string OptionDescriptionPackageFilter {

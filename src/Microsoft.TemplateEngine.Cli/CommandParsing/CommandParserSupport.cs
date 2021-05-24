@@ -60,6 +60,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--columns", LocalizableStrings.OptionDescriptionColumns, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionColumns, "COLUMNS_LIST")),
                     Create.Option("--columns-all", LocalizableStrings.OptionDescriptionColumnsAll, Accept.NoArguments()),
                     Create.Option("--tag", LocalizableStrings.OptionDescriptionTagFilter, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionTagFilter, "TAG")),
+                    Create.Option("--no-update-check", LocalizableStrings.OptionDescriptionNoUpdateCheck, Accept.NoArguments()),
                 };
             }
         }
