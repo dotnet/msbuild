@@ -8,7 +8,7 @@ parameters:
   inline: true
 
   # Only used if inline==false. When set to true will stall the current build until
-  # the Promotion Pipeline build finishes. Otherwise, the current build will continue
+  # the Promotion Pipeline build finishes. Otherwise, the current build will continue 
   # execution concurrently with the promotion build.
   waitPublishingFinish: true
 
@@ -36,11 +36,11 @@ parameters:
   # Which stages should finish execution before post-build stages start
   validateDependsOn:
   - build
-  publishDependsOn:
+  publishDependsOn: 
   - Validate
 
   # Channel ID's instantiated in this file.
-  # When adding a new channel implementation the call to `check-channel-consistency.ps1`
+  # When adding a new channel implementation the call to `check-channel-consistency.ps1` 
   # needs to be updated with the new channel ID
   NetEngLatestChannelId: 2
   NetEngValidationChannelId: 9
@@ -123,8 +123,8 @@ stages:
           displayName: Validate
           inputs:
             filePath: $(Build.SourcesDirectory)/eng/common/post-build/nuget-validation.ps1
-            arguments: -PackagesPath $(Build.ArtifactStagingDirectory)/PackageArtifacts/
-              -ToolDestinationPath $(Agent.BuildDirectory)/Extract/
+            arguments: -PackagesPath $(Build.ArtifactStagingDirectory)/PackageArtifacts/ 
+              -ToolDestinationPath $(Agent.BuildDirectory)/Extract/ 
 
     - job:
       displayName: Signing Validation
@@ -213,9 +213,9 @@ stages:
           displayName: Validate
           inputs:
             filePath: $(Build.SourcesDirectory)/eng/common/post-build/sourcelink-validation.ps1
-            arguments: -InputPath $(Build.ArtifactStagingDirectory)/BlobArtifacts/
-              -ExtractPath $(Agent.BuildDirectory)/Extract/
-              -GHRepoName $(Build.Repository.Name)
+            arguments: -InputPath $(Build.ArtifactStagingDirectory)/BlobArtifacts/ 
+              -ExtractPath $(Agent.BuildDirectory)/Extract/ 
+              -GHRepoName $(Build.Repository.Name) 
               -GHCommit $(Build.SourceVersion)
               -SourcelinkCliVersion $(SourceLinkCLIVersion)
           continueOnError: true
@@ -258,7 +258,7 @@ stages:
           displayName: Publish Using Darc
           inputs:
             filePath: $(Build.SourcesDirectory)/eng/common/post-build/publish-using-darc.ps1
-            arguments: -BuildId $(BARBuildId)
+            arguments: -BuildId $(BARBuildId) 
               -PublishingInfraVersion ${{ parameters.PublishingInfraVersion }}
               -AzdoToken '$(publishing-dnceng-devdiv-code-r-build-re)'
               -MaestroToken '$(MaestroApiAccessToken)'
@@ -271,7 +271,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -319,7 +319,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -335,7 +335,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -351,7 +351,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -366,7 +366,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -381,7 +381,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-internal-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -396,7 +396,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -411,7 +411,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -426,7 +426,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -441,7 +441,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -456,7 +456,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-internal-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -466,12 +466,12 @@ stages:
       channelId: ${{ parameters.NetCoreSDK314xxInternalChannelId }}
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-transport/nuget/v3/index.json'
       shippingFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal/nuget/v3/index.json'
-      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json'
+      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json' 
 
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -486,7 +486,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-internal-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -496,12 +496,12 @@ stages:
       channelId: ${{ parameters.NetCoreSDK313xxInternalChannelId }}
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-transport/nuget/v3/index.json'
       shippingFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal/nuget/v3/index.json'
-      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json'
+      symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3.1-internal-symbols/nuget/v3/index.json' 
 
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -516,7 +516,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -527,11 +527,11 @@ stages:
       transportFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools-transport/nuget/v3/index.json'
       shippingFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json'
       symbolsFeed: 'https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools-symbols/nuget/v3/index.json'
-
+      
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -546,7 +546,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -561,7 +561,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
@@ -576,7 +576,7 @@ stages:
   - template: \eng\common\templates\post-build\channels\generic-public-channel.yml
     parameters:
       BARBuildId: ${{ parameters.BARBuildId }}
-      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
+      PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}    
       artifactsPublishingAdditionalParameters: ${{ parameters.artifactsPublishingAdditionalParameters }}
       dependsOn: ${{ parameters.publishDependsOn }}
       publishInstallersAndChecksums: ${{ parameters.publishInstallersAndChecksums }}
