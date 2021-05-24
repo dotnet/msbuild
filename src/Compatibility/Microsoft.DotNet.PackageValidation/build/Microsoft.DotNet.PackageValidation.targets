@@ -20,7 +20,7 @@
                               '$(PackageValidationBaselinePath)' == ''">
       <PackageValidationBaselineName Condition="'$(PackageValidationBaselineName)' == ''">$(_PackageValidationBaselineName)</PackageValidationBaselineName>
       <PackageValidationBaselineVersion Condition="'$(PackageValidationBaselineVersion)' == ''">$(_PackageValidationBaselineVersion)</PackageValidationBaselineVersion>
-      <PackageValidationBaselinePath>$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName)', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
+      <PackageValidationBaselinePath>$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName.ToLower())', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName.ToLower()).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
     </PropertyGroup>
 
     <!-- PackageTargetPath isn't exposed by NuGet: https://github.com/NuGet/Home/issues/6671. -->
