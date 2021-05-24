@@ -233,6 +233,7 @@ stages:
       publishUsingPipelines: true
       dependsOn:
         - Windows_NT
+        - Source_Build_Managed
       pool:
         vmImage: vs2017-win2016
 
