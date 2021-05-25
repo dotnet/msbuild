@@ -22,16 +22,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly SdkFeatureBand _sdkFeatureBand;
         private readonly string _userHome;
+        private readonly string _tempDirPath;
 
         public WorkloadManifestUpdater(
             IReporter reporter,
             IWorkloadManifestProvider workloadManifestProvider,
             INuGetPackageDownloader nugetPackageDownloader,
-            string userHome)
+            string userHome,
+            string tempDirPath)
         {
             _reporter = reporter;
             _workloadManifestProvider = workloadManifestProvider;
             _userHome = userHome;
+            _tempDirPath = tempDirPath;
             _nugetPackageDownloader = nugetPackageDownloader;
             _sdkFeatureBand = new SdkFeatureBand(_workloadManifestProvider.GetSdkFeatureBand());
         }
@@ -162,7 +165,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
                 }
 
-                extractionPath = Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp", $"{manifestId}-extracted");
+                extractionPath = Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp", $"{manifestId}-extracted");
                 Directory.CreateDirectory(extractionPath);
                 var resultingFiles = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(extractionPath));
 

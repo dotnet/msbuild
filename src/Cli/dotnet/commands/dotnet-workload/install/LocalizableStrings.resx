@@ -189,6 +189,9 @@
   <data name="FromCacheOptionDescription" xml:space="preserve">
     <value>Complete the operation from cache (offline).</value>
   </data>
+  <data name="TempDirOptionDescription" xml:space="preserve">
+    <value>Configure the temporary directory used for this command (must be secure).</value>
+  </data>
   <data name="UnrecognizedPackError" xml:space="preserve">
     <value>Pack Id {0} unrecognized.</value>
   </data>

@@ -127,6 +127,11 @@
         <target state="new">Skip updating the workload manifests.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TempDirOptionDescription">
+        <source>Configure the temporary directory used for this command (must be secure).</source>
+        <target state="new">Configure the temporary directory used for this command (must be secure).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedPackError">
         <source>Pack Id {0} unrecognized.</source>
         <target state="new">Pack Id {0} unrecognized.</target>

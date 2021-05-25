@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .ToArray();
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
 
             manifestUpdater.UpdateAdvertisingManifestsAsync(true).Wait();
             var expectedDownloadedPackages = installedManifests.Select(id => ((PackageId, NuGetVersion, DirectoryPath?))(new PackageId($"{id}.manifest-{featureBand}"), null, null));
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .ToArray();
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
 
             var manifestUpdates = manifestUpdater.CalculateManifestUpdates();
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var workloadManifestProvider = new MockManifestProvider(new string[] { Path.Combine(installedManifestDir, manifestId, _manifestFileName) });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
             manifestUpdater.UpdateAdvertisingManifestsAsync(false, new DirectoryPath(offlineCache)).Wait();
 
             // We should have chosen the higher version manifest package to install/ extract
