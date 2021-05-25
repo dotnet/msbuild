@@ -994,11 +994,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (CanScheduleRequestToNode(request, InProcNodeId) && IsProxyBuildRequest(request.BuildRequest))
                     {
-                        {
-                            AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
-                            idleNodes.Remove(InProcNodeId);
-                            break;
-                        }
+                        AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
+                        idleNodes.Remove(InProcNodeId);
+                        break;
                     }
                 }
             }
