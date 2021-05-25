@@ -992,9 +992,8 @@ namespace Microsoft.Build.BackEnd
                 List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
                 foreach (SchedulableRequest request in unscheduledRequests)
                 {
-                    if (CanScheduleRequestToNode(request, InProcNodeId))
+                    if (CanScheduleRequestToNode(request, InProcNodeId) && IsProxyBuildRequest(request.BuildRequest))
                     {
-                        if (IsProxyBuildRequest(request.BuildRequest))
                         {
                             AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
                             idleNodes.Remove(InProcNodeId);
