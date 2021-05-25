@@ -3772,7 +3772,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Title="$(Satellite_Title)"
         ToolPath="$(AlToolPath)"
         ToolExe ="$(AlToolExe)"
-        SdkToolsPath="$(SdkToolsPathMaybeWithx64Architecture)"
+        SdkToolsPath="$(_ALExeToolPath)"
         Trademark="$(Satellite_Trademark)"
         Version="$(Satellite_Version)"
         Win32Icon="$(Satellite_Win32Icon)"
