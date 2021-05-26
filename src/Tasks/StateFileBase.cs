@@ -13,6 +13,7 @@ namespace Microsoft.Build.Tasks
     /// <remarks>
     /// Base class for task state files.
     /// </remarks>
+    [Serializable]
     internal abstract class StateFileBase
     {
         // Current version for serialization. This should be changed when breaking changes

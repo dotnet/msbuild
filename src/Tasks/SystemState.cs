@@ -20,6 +20,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Class is used to cache system state.
     /// </summary>
+    [Serializable]
     internal sealed class SystemState : StateFileBase, ITranslatable
     {
         /// <summary>
@@ -102,6 +103,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Class that holds the current file state.
         /// </summary>
+        [Serializable]
         internal sealed class FileState : ITranslatable
         {
             /// <summary>
