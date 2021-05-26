@@ -1390,7 +1390,7 @@ namespace Microsoft.Build.BackEnd
 
             void WarnWhenProxyBuildsGetScheduledOnOutOfProcNode()
             {
-                if (request.BuildRequest.ProxyTargets != null && nodeId != InProcNodeId)
+                if (IsProxyBuildRequest(request) && nodeId != InProcNodeId)
                 {
                     ErrorUtilities.VerifyThrow(
                         _componentHost.BuildParameters.DisableInProcNode || _forceAffinityOutOfProc,
