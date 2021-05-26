@@ -23,13 +23,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly SdkFeatureBand _sdkFeatureBand;
         private readonly string _userHome;
         private readonly string _tempDirPath;
+        private readonly PackageSourceLocation _packageSourceLocation;
 
         public WorkloadManifestUpdater(
             IReporter reporter,
             IWorkloadManifestProvider workloadManifestProvider,
             INuGetPackageDownloader nugetPackageDownloader,
             string userHome,
-            string tempDirPath)
+            string tempDirPath,
+            PackageSourceLocation packageSourceLocation = null)
         {
             _reporter = reporter;
             _workloadManifestProvider = workloadManifestProvider;
@@ -37,6 +39,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _tempDirPath = tempDirPath;
             _nugetPackageDownloader = nugetPackageDownloader;
             _sdkFeatureBand = new SdkFeatureBand(_workloadManifestProvider.GetSdkFeatureBand());
+            _packageSourceLocation = packageSourceLocation;
         }
 
         public async Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null)
@@ -77,7 +80,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
-                    var packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifest), includePreview: includePreviews, downloadFolder: downloadPath);
+                    var packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifest),
+                        packageSourceLocation: _packageSourceLocation, includePreview: includePreviews, downloadFolder: downloadPath);
                     packagePaths.Add(packagePath);
                 }
                 catch (Exception)
@@ -111,7 +115,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
-                    packageUrls.Add(_nugetPackageDownloader.GetPackageUrl(packageId, includePreview: includePreviews).Result);
+                    packageUrls.Add(_nugetPackageDownloader.GetPackageUrl(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews).Result);
                 }
                 catch
                 {
@@ -146,7 +150,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     try
                     {
-                        packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifestId), includePreview: includePreviews);
+                        packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifestId),
+                            packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
                     }
                     catch (NuGetPackageNotFoundException)
                     {

@@ -17,9 +17,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IWorkloadResolver workloadResolver, 
             VerbosityOptions verbosity,
             INuGetPackageDownloader nugetPackageDownloader = null,
-            string dotnetDir = null)
+            string dotnetDir = null, 
+            PackageSourceLocation packageSourceLocation = null)
         {
-            return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver, nugetPackageDownloader, verbosity: verbosity, dotnetDir: dotnetDir);
+            return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver, nugetPackageDownloader, verbosity: verbosity, dotnetDir: dotnetDir, packageSourceLocation: packageSourceLocation);
         }
     }
 }

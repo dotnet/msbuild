@@ -47,7 +47,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                   WorkloadInstallerFactory
                                       .GetWorkloadInstaller(_reporter, _sdkFeatureBand, workloadResolver, _verbosity)
                                       .GetWorkloadInstallationRecordRepository();
-            _sdkVersion = result.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption);
+            _sdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
         }
 
         public override int Execute()

@@ -13,11 +13,11 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("workload", LocalizableStrings.CommandDescription);
 
             command.AddCommand(WorkloadInstallCommandParser.GetCommand());
+            command.AddCommand(WorkloadUpdateCommandParser.GetCommand());
+            command.AddCommand(WorkloadListCommandParser.GetCommand());
             if (includeAllCommands)
             {
                 command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
-                command.AddCommand(WorkloadUpdateCommandParser.GetCommand());
-                command.AddCommand(WorkloadListCommandParser.GetCommand());
                 command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
             }
 
