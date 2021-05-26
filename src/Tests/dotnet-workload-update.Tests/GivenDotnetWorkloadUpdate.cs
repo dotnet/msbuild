@@ -197,11 +197,11 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
         }
 
-        private (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
+        internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",
             string failingWorkload = null,
-            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestUpdates = null,
+            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestUpdates = null,
             IList<WorkloadId> installedWorkloads = null,
             bool includeInstalledPacks = false)
         {

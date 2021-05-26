@@ -15,12 +15,6 @@ namespace Microsoft.DotNet.Cli
                 Arity = ArgumentArity.OneOrMore, Description = LocalizableStrings.WorkloadIdArgumentDescription
             };
 
-        public static readonly Option VersionOption =
-            new Option<string>("--sdk-version", LocalizableStrings.VersionOptionDescription)
-            {
-                ArgumentHelpName = LocalizableStrings.VersionOptionName
-            };
-
         public static readonly Option ConfigOption =
             new Option<string>("--configfile", LocalizableStrings.ConfigFileOptionDescription)
             {
@@ -37,6 +31,12 @@ namespace Microsoft.DotNet.Cli
             new Option<bool>("--print-download-link-only", LocalizableStrings.PrintDownloadLinkOnlyDescription)
             {
                 IsHidden = true
+            };
+
+        public static readonly Option VersionOption =
+            new Option<string>("--sdk-version", LocalizableStrings.VersionOptionDescription)
+            {
+                ArgumentHelpName = LocalizableStrings.VersionOptionName
             };
 
         public static readonly Option IncludePreviewOption =

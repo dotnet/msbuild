@@ -12,8 +12,6 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option AddSourceOption = WorkloadInstallCommandParser.AddSourceOption;
 
-        public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
-
         public static readonly Option VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
 
         public static readonly Option IncludePreviewsOption = WorkloadInstallCommandParser.IncludePreviewOption;
@@ -34,7 +32,7 @@ namespace Microsoft.DotNet.Cli
 
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
-            command.AddOption(VersionOption);
+            command.AddOption(WorkloadInstallCommandParser.VersionOption);
             command.AddOption(PrintDownloadLinkOnlyOption);
             command.AddOption(FromCacheOption);
             command.AddOption(IncludePreviewsOption);

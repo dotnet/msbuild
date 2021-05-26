@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -65,9 +66,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
-            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption)) ?
+            Option versionOption = new Option<string>("--sdk-version", Install.LocalizableStrings.VersionOptionDescription)
+            {
+                ArgumentHelpName = Install.LocalizableStrings.VersionOptionName
+            };
+            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(versionOption)) ?
                 new ReleaseVersion(version ?? Product.Version) :
-                new ReleaseVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption));
+                new ReleaseVersion(parseResult.ValueForOption<string>(versionOption));
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
@@ -129,11 +134,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         public void UpdateWorkloads(bool includePreviews = false, DirectoryPath? offlineCache = null)
         {
             _reporter.WriteLine();
-            var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
+            var featureBand =
+                new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
-            var workloadIds = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
+            var workloadIds = _workloadInstaller.GetWorkloadInstallationRecordRepository()
+                .GetInstalledWorkloads(featureBand);
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
-            var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
+            var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates()
+                .Select(m => (m.manifestId, m.existingVersion, m.newVersion));
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 
