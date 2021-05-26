@@ -42,6 +42,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private readonly ReleaseVersion _sdkVersion;
         private readonly string _userHome;
         private readonly string _dotnetPath;
+        private readonly string _tempDirPath;
 
         public WorkloadUpdateCommand(
             ParseResult parseResult,
@@ -52,6 +53,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             IWorkloadManifestUpdater workloadManifestUpdater = null,
             string dotnetDir = null,
             string userHome = null,
+            string tempDirPath = null,
             string version = null)
             : base(parseResult)
         {
@@ -65,6 +67,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _sdkVersion = new ReleaseVersion(version ??
                 (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption)) ?
                 Product.Version : parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.SdkVersionOption)));
+            _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
+                Path.GetTempPath() :
+                parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
 
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
@@ -72,9 +77,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader, dotnetDir);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
-            var tempPackagesDir = new DirectoryPath(Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp"));
+            var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath);
         }
 
         public override int Execute()
@@ -254,7 +259,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 var manifestPackageUrls = _workloadManifestUpdater.GetManifestPackageUrls(includePreview);
                 packageUrls = packageUrls.Concat(manifestPackageUrls);
 
-                tempPath = new DirectoryPath(Path.Combine(_userHome, ".dotnet", "manifest-extraction"));
+                tempPath = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-manifest-extraction"));
                 await UseTempManifestsToResolvePacksAsync(tempPath.Value, includePreview);
 
                 if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))

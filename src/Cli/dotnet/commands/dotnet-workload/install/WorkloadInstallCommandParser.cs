@@ -48,6 +48,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option SkipManifestUpdateOption = new Option<bool>("--skip-manifest-update", LocalizableStrings.SkipManifestUpdateOptionDescription);
 
+        public static readonly Option TempDirOption = new Option<string>("--temp-dir", LocalizableStrings.TempDirOptionDescription);
+
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
 
         public static Command GetCommand()
@@ -63,6 +65,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FromCacheOption);
             command.AddOption(DownloadToCacheOption);
             command.AddOption(IncludePreviewOption);
+            command.AddOption(TempDirOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(WorkloadCommandRestorePassThroughOptions.NoCacheOption);
