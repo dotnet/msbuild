@@ -7,8 +7,8 @@
     "symbols/someChoice/displayName": "sym1_displayName_tr-TR:çÇğĞıIİöÖşŞüÜ",
     "symbols/someChoice/choices/choice0/description": "sym1_choice0_tr-TR:çÇğĞıIİöÖşŞüÜ",
     "symbols/someChoice/choices/choice2/description": "sym1_choice2_tr-TR:çÇğĞıIİöÖşŞüÜ",
-    "postActions[0]/description": "pa0_desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
-    "postActions[0]/manualInstructions[0]/text": "pa0_manualInstructions_tr-TR:çÇğĞıIİöÖşŞüÜ",
-    "postActions[1]/description": "pa1_desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
-    "postActions[1]/manualInstructions[0]/text": "pa1_manualInstructions0_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "postActions/pa0/description": "pa0_desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "postActions/pa0/manualInstructions/first_instruction/text": "pa0_manualInstructions_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "postActions/pa1/description": "pa1_desc_tr-TR:çÇğĞıIİöÖşŞüÜ",
+    "postActions/pa1/manualInstructions/first_instruction/text": "pa1_manualInstructions0_tr-TR:çÇğĞıIİöÖşŞüÜ"
 }

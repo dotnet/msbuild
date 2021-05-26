@@ -6,8 +6,8 @@
     "symbols/someChoice/description": "sym1_desc_de-DE:äÄßöÖüÜ",
     "symbols/someChoice/choices/choice0/description": "sym1_choice0_de-DE:äÄßöÖüÜ",
     "symbols/someChoice/choices/choice1/description": "sym1_choice1_de-DE:äÄßöÖüÜ",
-    "postActions[0]/description": "pa0_desc_de-DE:äÄßöÖüÜ",
-    "postActions[0]/manualInstructions[0]/text": "pa0_manualInstructions_de-DE:äÄßöÖüÜ",
-    "postActions[1]/description": "pa1_desc_de-DE:äÄßöÖüÜ",
-    "postActions[1]/manualInstructions[1]/text": "pa1_manualInstructions1_de-DE:äÄßöÖüÜ"
+    "postActions/pa0/description": "pa0_desc_de-DE:äÄßöÖüÜ",
+    "postActions/pa0/manualInstructions/default/text": "pa0_manualInstructions_de-DE:äÄßöÖüÜ",
+    "postActions/pa1/description": "pa1_desc_de-DE:äÄßöÖüÜ",
+    "postActions/pa1/manualInstructions/third_instruction/text": "pa1_manualInstructions1_de-DE:äÄßöÖüÜ"
 }
