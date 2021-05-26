@@ -9,9 +9,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>dca1d060f38e1e02f6bfca41e25f081f19fd534b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.0-preview.6.21275.1">
+    <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.0-preview.6.21276.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>5525d0bbb57d5550d71a0a15158f992b0e694000</Sha>
+      <Sha>f584c7401a24781b4c8e8e2a8097b85462ee4941</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20574.26">
       <Uri>https://github.com/dotnet/roslyn</Uri>
