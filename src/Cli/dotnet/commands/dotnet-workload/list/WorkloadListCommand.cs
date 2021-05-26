@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             if (!File.Exists(Path.Combine(MockUpdateDirectory,
                 "Microsoft.NET.Workload.Android.6.0.100.nupkg")))
             {
-                updateList.Add(new UpdateAvailableEntry("6.0.100",
+                updateList.Add(new UpdateAvailableEntry("6.0.100", "6.0.101",
                     _mockAndroidDescription,
                     "microsoft-android-sdk-full"));
             }
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             if (!File.Exists(Path.Combine(MockUpdateDirectory,
                 "Microsoft.iOS.Bundle.6.0.100.nupkg")))
             {
-                updateList.Add(new UpdateAvailableEntry("6.0.100",
+                updateList.Add(new UpdateAvailableEntry("6.0.100", "6.0.101",
                     _mockIosDescription,
                     "microsoft-ios-sdk-full"));
             }
@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
         internal record ListOutput(string[] Installed, UpdateAvailableEntry[] UpdateAvailable);
 
-        internal record UpdateAvailableEntry(string ManifestVersion, string Description, string WorkloadId);
+        internal record UpdateAvailableEntry(string ExistingManifestVersion, string AvailableUpdateManifestVersion, string Description, string WorkloadId);
 
         private readonly string _mockIosDescription =
             $"ios-workload-description: for testing you can delete the content of {MockUpdateDirectory} to revert the mock update";
