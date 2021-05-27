@@ -17,7 +17,6 @@ namespace Microsoft.TemplateEngine.TestHelper
     public class EnvironmentSettingsHelper : IDisposable
     {
         private readonly List<string> _foldersToCleanup = new List<string>();
-        private readonly List<EngineEnvironmentSettings> _engineEnvironmentToDispose = new List<EngineEnvironmentSettings>();
 
         public IEngineEnvironmentSettings CreateEnvironment(
             string? locale = null,
