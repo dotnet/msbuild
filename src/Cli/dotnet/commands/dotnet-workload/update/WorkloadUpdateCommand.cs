@@ -59,11 +59,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             : base(parseResult)
         {
             _printDownloadLinkOnly =
-                parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
-            _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
+                parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintDownloadLinkOnlyOption);
+            _fromCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromCacheOption);
             _reporter = reporter ?? Reporter.Output;
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
-            _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.DownloadToCacheOption);
+            _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
             _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption)) ?
                 new ReleaseVersion(version ?? Product.Version) :
@@ -72,10 +72,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
 
-            var configOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.ConfigOption);
-            var addSourceOption = parseResult.ValueForOption<string[]>(WorkloadInstallCommandParser.AddSourceOption);
+            var configOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
+            var addSourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.AddSourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (addSourceOption == null || !addSourceOption.Any()) ? null :
-                string.IsNullOrEmpty(configOption) ? new PackageSourceLocation(sourceFeedOverrides: addSourceOption) : new PackageSourceLocation(new FilePath(configOption));
+                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  addSourceOption);
 
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());

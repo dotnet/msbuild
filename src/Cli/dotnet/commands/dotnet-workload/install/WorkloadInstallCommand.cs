@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var configOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.ConfigOption);
             var addSourceOption = parseResult.ValueForOption<string[]>(WorkloadInstallCommandParser.AddSourceOption);
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (addSourceOption == null || !addSourceOption.Any()) ? null :
-                string.IsNullOrEmpty(configOption) ? new PackageSourceLocation(sourceFeedOverrides: addSourceOption) : new PackageSourceLocation(new FilePath(configOption));
+                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: addSourceOption);
 
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
