@@ -23,6 +23,7 @@ namespace Microsoft.TemplateEngine.TestHelper
 {
     public class PackageManager : IDisposable
     {
+        private const string NuGetOrgFeed = "https://api.nuget.org/v3/index.json";
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         private readonly ILogger _nugetLogger = NullLogger.Instance;
 
@@ -42,7 +43,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             return PackNuGetPackage(projectToPack);
         }
 
-        public async Task<string> GetNuGetPackage(string templatePackName, ITestOutputHelper? log = null)
+        public async Task<string> GetNuGetPackage(string templatePackName, NuGetVersion? minimumVersion = null, ITestOutputHelper? log = null)
         {
             try
             {
@@ -56,7 +57,11 @@ namespace Microsoft.TemplateEngine.TestHelper
                 {
                     try
                     {
-                        string downloadedPackage = await DownloadPackageAsync(templatePackName, log: log).ConfigureAwait(false);
+                        string downloadedPackage = await DownloadPackageAsync(
+                            templatePackName,
+                            additionalSources: new [] { NuGetOrgFeed },
+                            minimumVersion: minimumVersion,
+                            log: log).ConfigureAwait(false);
                         _installedPackages[templatePackName] = downloadedPackage;
                         return downloadedPackage;
                     }
@@ -120,6 +125,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             string identifier,
             string? version = null,
             IEnumerable<string>? additionalSources = null,
+            NuGetVersion? minimumVersion = null,
             ITestOutputHelper? log = null,
             CancellationToken cancellationToken = default)
         {
@@ -137,6 +143,10 @@ namespace Microsoft.TemplateEngine.TestHelper
             if (string.IsNullOrWhiteSpace(version))
             {
                 (source, packageMetadata) = await GetLatestVersionInternalAsync(identifier, packagesSources, log, cancellationToken).ConfigureAwait(false);
+                if (minimumVersion is not null && packageMetadata.Identity.Version < minimumVersion)
+                {
+                    throw new Exception($"Failed to find the package with version {minimumVersion} or later");
+                }
             }
             else
             {
