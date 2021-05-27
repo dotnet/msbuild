@@ -62,9 +62,6 @@ namespace Microsoft.NET.Build.Tasks
         public void LogWarning(string format, params string[] args)
             => Log(CreateMessage(MessageLevel.Warning, format, args));
 
-        public void LogNonSdkWarning(string code, string format, params string[] args)
-            => Log(new Message(MessageLevel.Warning, string.Format(format, args), code));
-
         public void LogError(string format, params string[] args)
             => Log(CreateMessage(MessageLevel.Error, format, args));
 
