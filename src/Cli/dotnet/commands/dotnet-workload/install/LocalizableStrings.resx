@@ -258,4 +258,7 @@
   <data name="FailedToGetPackageManifestUrl" xml:space="preserve">
     <value>Failed to resolve manifest package url {0}.</value>
   </data>
+  <data name="DeletingWorkloadPack" xml:space="preserve">
+    <value>Uninstalling workload pack {0} version {1}.</value>
+  </data>
 </root>

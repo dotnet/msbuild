@@ -17,6 +17,11 @@
         <target state="new">Package {0} version {1} does not exist in offline cache {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DeletingWorkloadPack">
+        <source>Uninstalling workload pack {0} version {1}.</source>
+        <target state="new">Uninstalling workload pack {0} version {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DownloadToCacheOptionDescription">
         <source>Download packages needed to install a workload to a folder which can be used for offline installation.</source>
         <target state="new">Download packages needed to install a workload to a folder which can be used for offline installation.</target>

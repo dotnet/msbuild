@@ -17,23 +17,23 @@
         <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
+      <trans-unit id="RemovingWorkloadInstallationRecord">
+        <source>Removing workload installation record for {0}...</source>
+        <target state="new">Removing workload installation record for {0}...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload Package Id to uninstall.</source>
         <target state="translated">Spécifiez un ID de package d'outils à désinstaller.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallLocalWorkloadSucceeded">
-        <source>Workload '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
-        <target state="translated">L'outil '{0}' a été désinstallé et supprimé correctement du fichier manifeste {1}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UninstallSucceeded">
-        <source>Workload '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="translated">L'outil '{0}' (version '{1}') a été désinstallé.</target>
+        <source>Successfully uninstalled workload(s): {0}</source>
+        <target state="new">Successfully uninstalled workload(s): {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>A workload with the package Id '{0}' could not be found.</source>
+        <source>Could not find workloads with id(s): {0}</source>
         <target state="needs-review-translation">L'outil ayant l'ID de package '{0}' est introuvable. 
 
 Les outils sont désinstallés via leur ID de package, lequel peut être différent 
@@ -42,24 +42,9 @@ et les ID de package correspondants aux outils installés, utilisez la commande
 'dotnet workload list'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToUninstallWorkload">
-        <source>Failed to uninstall workload '{0}': {1}</source>
-        <target state="translated">Échec de désinstallation de l'outil '{0}' : {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidWorkloadPathOption">
-        <source>Workload path '{0}' does not exist.</source>
-        <target state="translated">Le chemin d'outil '{0}' n'existe pas.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="translated">PATH</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionDescription">
-        <source>The directory containing the workload to uninstall.</source>
-        <target state="translated">Répertoire contenant l'outil à désinstaller.</target>
+      <trans-unit id="WorkloadUninstallFailed">
+        <source>Workload uninstallation failed: {0}</source>
+        <target state="new">Workload uninstallation failed: {0}</target>
         <note />
       </trans-unit>
     </body>
