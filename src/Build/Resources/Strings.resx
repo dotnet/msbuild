@@ -1894,4 +1894,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="KillingProcessWithPid" xml:space="preserve">
     <value>Killing process with pid = {0}.</value>
   </data>
+  <data name="ProxyRequestNotScheduledOnInprocNode" xml:space="preserve">
+    <value>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</value>
+  </data>
 </root>
