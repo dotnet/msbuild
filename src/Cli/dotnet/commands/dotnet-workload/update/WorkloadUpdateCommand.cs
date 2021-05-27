@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _reporter.WriteLine();
             var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
-            var workloadIds = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
+            var workloadIds = GetUpdatableWorkloads();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
             var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
 
@@ -161,11 +161,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                         _workloadResolver.RefreshWorkloadManifests();
 
-                        workloadPackToUpdate = workloadIds
-                            .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
-                            .Distinct()
-                            .Select(packId => _workloadResolver.TryGetPackInfo(packId))
-                            .Where(pack => pack != null);
+                        workloadPackToUpdate = GetUpdatablePacks(installer);
 
                         foreach (var packId in workloadPackToUpdate)
                         {
@@ -292,14 +288,45 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
         }
 
+        private IEnumerable<WorkloadId> GetUpdatableWorkloads()
+        {
+            var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
+            var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
+            if (workloads == null || !workloads.Any())
+            {
+                var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
+                    .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
+                if (priorFeatureBands.Any())
+                {
+                    var maxPriorFeatureBand = priorFeatureBands.Max();
+                    return _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(maxPriorFeatureBand);
+                }
+                return new List<WorkloadId>();
+            }
+
+            return workloads;
+        }
+
         private IEnumerable<PackInfo> GetUpdatablePacks(IWorkloadPackInstaller installer)
         {
-            var installedPacks = installer.GetInstalledPacks(new SdkFeatureBand(_sdkVersion));
+            var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
+            var installedPacks = installer.GetInstalledPacks(currentFeatureBand);
             if (installedPacks == null || !installedPacks.Any())
             {
+                var priorFeatureBands = installer.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
+                    .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
+                if (priorFeatureBands.Any())
+                {
+                    var maxPriorFeatureBand = priorFeatureBands.Max();
+                    return installer.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(maxPriorFeatureBand)
+                        .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                        .Distinct()
+                        .Select(packId => _workloadResolver.TryGetPackInfo(packId))
+                        .Where(pack => pack != null);
+                }
                 return new List<PackInfo>();
             }
-            var updatedPacks = installer.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(new SdkFeatureBand(_sdkVersion))
+            var updatedPacks = installer.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand)
                 .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                 .Distinct()
                 .Select(packId => _workloadResolver.TryGetPackInfo(packId))

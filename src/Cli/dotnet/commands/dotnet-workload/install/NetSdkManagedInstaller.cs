@@ -314,13 +314,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public IEnumerable<PackInfo> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        public IEnumerable<(string, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
             return Directory.GetDirectories(installedPacksDir)
-                .Select(packIdPath => Path.GetFileName(packIdPath))
-                .Select(packId => _workloadResolver.TryGetPackInfo(packId))
-                .Where(pack => pack != null);
+                .Where(packIdDir => HasFeatureBandMarkerFile(packIdDir, sdkFeatureBand))
+                .SelectMany(packIdPath => Directory.GetDirectories(packIdPath))
+                .Select(packVersionPath => (Path.GetFileName(Path.GetDirectoryName(packVersionPath)), Path.GetFileName(packVersionPath)));
+        }
+
+        private bool HasFeatureBandMarkerFile(string packIdDir, SdkFeatureBand featureBand)
+        {
+            return Directory.GetDirectories(packIdDir)
+                .SelectMany(packVersionDir => Directory.GetFiles(packVersionDir))
+                .Select(featureBandPath => Path.GetFileName(featureBandPath))
+                .Any(featureBandFileName => featureBand.ToString().Equals(featureBandFileName));
         }
 
         private IEnumerable<string> GetExpectedPackInstallRecords(SdkFeatureBand sdkFeatureBand)
