@@ -59,7 +59,24 @@ namespace Microsoft.Build.Internal
         Administrator = 32
     }
 
-    internal readonly struct Handshake
+    internal interface IHandshake
+    {
+        int[] RetrieveHandshakeComponents();
+
+        /// <summary>
+        /// Get string key representing all handshake values. It does not need to be human readable.
+        /// </summary>
+        string GetKey();
+
+        /// <summary>
+        /// Some handshakes uses very 1st byte to encode version of handshake in it,
+        /// so if it does not match it can reject it early based on very first byte.
+        /// Null means that no such encoding is used
+        /// </summary>
+        byte? ExpectedVersionInFirstByte { get; }
+    }
+
+    internal readonly struct Handshake : IHandshake
     {
         readonly int options;
         readonly int salt;
@@ -87,13 +104,7 @@ namespace Microsoft.Build.Internal
             sessionId = Process.GetCurrentProcess().SessionId;
         }
 
-        // This is used as a key, so it does not need to be human readable.
-        public override string ToString()
-        {
-            return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
-        }
-
-        internal int[] RetrieveHandshakeComponents()
+        public int[] RetrieveHandshakeComponents()
         {
             return new int[]
             {
@@ -106,6 +117,10 @@ namespace Microsoft.Build.Internal
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
             };
         }
+
+        public string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
+
+        public byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
     }
 
     /// <summary>
@@ -629,6 +644,86 @@ namespace Microsoft.Build.Internal
         internal static int AvoidEndOfHandshakeSignal(int x)
         {
             return x == EndOfHandshakeSignal ? ~x : x;
+        }
+
+        internal static IServerMutex OpenOrCreateMutex(string name, out bool createdNew)
+        {
+            // TODO: verify it is not needed anymore
+            //if (PlatformInformation.IsRunningOnMono)
+            //{
+            //    return new ServerFileMutexPair(name, initiallyOwned: true, out createdNew);
+            //}
+            //else
+
+            return new ServerNamedMutex(name, out createdNew);
+        }
+
+        internal interface IServerMutex : IDisposable
+        {
+            bool TryLock(int timeoutMs);
+            bool IsDisposed { get; }
+        }
+
+        internal sealed class ServerNamedMutex : IServerMutex
+        {
+            public readonly Mutex ServerMutex;
+
+            public bool IsDisposed { get; private set; }
+            public bool IsLocked { get; private set; }
+
+            public ServerNamedMutex(string mutexName, out bool createdNew)
+            {
+                ServerMutex = new Mutex(
+                    initiallyOwned: true,
+                    name: mutexName,
+                    createdNew: out createdNew
+                );
+                if (createdNew)
+                    IsLocked = true;
+            }
+
+            public static bool WasOpen(string mutexName)
+            {
+                try
+                {
+                    // we can't use TryOpenExisting as it is not supported in net3.5
+                    using var m = Mutex.OpenExisting(mutexName);
+                    return true;
+                }
+                catch
+                {
+                    // In the case an exception occurred trying to open the Mutex then 
+                    // the assumption is that it's not open.
+                    return false;
+                }
+            }
+
+            public bool TryLock(int timeoutMs)
+            {
+                if (IsDisposed)
+                    throw new ObjectDisposedException("Mutex");
+                if (IsLocked)
+                    throw new InvalidOperationException("Lock already held");
+                return IsLocked = ServerMutex.WaitOne(timeoutMs);
+            }
+
+            public void Dispose()
+            {
+                if (IsDisposed)
+                    return;
+                IsDisposed = true;
+
+                try
+                {
+                    if (IsLocked)
+                        ServerMutex.ReleaseMutex();
+                }
+                finally
+                {
+                    (ServerMutex as IDisposable).Dispose();
+                    IsLocked = false;
+                }
+            }
         }
     }
 }

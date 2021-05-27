@@ -9,7 +9,6 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 #if FEATURE_PIPE_SECURITY
@@ -180,7 +179,7 @@ namespace Microsoft.Build.BackEnd
         /// Finds or creates a child process which can act as a node.
         /// </summary>
         /// <returns>The pipe stream representing the node.</returns>
-        protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, Handshake hostHandshake, NodeContextTerminateDelegate terminateNode)
+        protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, IHandshake hostHandshake, NodeContextTerminateDelegate terminateNode)
         {
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
@@ -324,9 +323,9 @@ namespace Microsoft.Build.BackEnd
         /// Generate a string from task host context and the remote process to be used as key to lookup processes we have already
         /// attempted to connect to or are already connected to
         /// </summary>
-        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
+        private string GetProcessesToIgnoreKey(IHandshake hostHandshake, int nodeProcessId)
         {
-            return hostHandshake.ToString() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
+            return hostHandshake.GetKey() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -353,7 +352,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
+        private Stream TryConnectToProcess(int nodeProcessId, int timeout, IHandshake handshake)
         {
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPipeNameOrPath("MSBuild" + nodeProcessId);

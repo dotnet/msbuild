@@ -251,7 +251,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected abstract Handshake GetHandshake();
+        protected abstract IHandshake GetHandshake();
 
         /// <summary>
         /// Updates the current link status if it has changed and notifies any registered delegates.
@@ -379,13 +379,13 @@ namespace Microsoft.Build.BackEnd
                     // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
                     // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                     // Once the handshake is complete, both sides can be assured the other is ready to accept data.
-                    Handshake handshake = GetHandshake();
+                    IHandshake handshake = GetHandshake();
                     try
                     {
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
-                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? handshake.ExpectedVersionInFirstByte : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1 || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
