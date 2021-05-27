@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 #if FEATURE_PIPE_SECURITY
