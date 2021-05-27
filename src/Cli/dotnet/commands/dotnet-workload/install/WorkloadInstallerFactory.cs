@@ -22,10 +22,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string dotnetDir = null, 
             PackageSourceLocation packageSourceLocation = null)
         {
-            var installType = GetWorkloadInstallType(sdkFeatureBand);
+            var installType = GetWorkloadInstallType(sdkFeatureBand, string.IsNullOrWhiteSpace(dotnetDir) ?  Environment.ProcessPath : dotnetDir);
 
-            if (installType == InstallType.Msi && OperatingSystem.IsWindows())
+            if (installType == InstallType.Msi)
             {
+                if (!OperatingSystem.IsWindows())
+                {
+                    throw new InvalidOperationException(LocalizableStrings.OSDoesNotSupportMsi);
+                }
+
                 return new NetSdkMsiInstaller();
             }
 
@@ -37,9 +42,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// </summary>
         /// <param name="sdkFeatureBand">The SDK version to check.</param>
         /// <returns>The <see cref="InstallType"/> associated with the SDK.</returns>
-        public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand)
+        public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
         {
-            string installerTypePath = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "metadata",
+            string installerTypePath = Path.Combine(dotnetDir, "metadata",
                 "workloads", $"{sdkFeatureBand}", "installertype");
 
             if (File.Exists(Path.Combine(installerTypePath, "msi")))

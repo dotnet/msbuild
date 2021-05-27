@@ -258,4 +258,7 @@
   <data name="FailedToGetPackageManifestUrl" xml:space="preserve">
     <value>Failed to resolve manifest package url {0}.</value>
   </data>
+  <data name="OSDoesNotSupportMsi" xml:space="preserve">
+    <value>MSI installations are only supported on Windows.</value>
+  </data>
 </root>

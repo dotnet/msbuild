@@ -102,6 +102,11 @@
         <target state="new">No manifest with id {0} exists.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OSDoesNotSupportMsi">
+        <source>MSI installations are only supported on Windows.</source>
+        <target state="new">MSI installations are only supported on Windows.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
         <source>Resolving package urls for workload(s) {0}...</source>
         <target state="new">Resolving package urls for workload(s) {0}...</target>
