@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Resources.resx">
+    <body>
+      <trans-unit id="AssemblySearchDirectoryDoesNotExist">
+        <source>Provided assembly search directory '{0}' does not exist.</source>
+        <target state="new">Provided assembly search directory '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotResolveReference">
+        <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
+        <target state="new">Could not resolve reference '{0}' in any of the provided search directories.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ElementShouldNotBeNullAtIndex">
+        <source>Element should not be null. Found null at index: {0}.</source>
+        <target state="new">Element should not be null. Found null at index: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileDoesNotExist">
+        <source>File '{0}' does not exist.</source>
+        <target state="new">File '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IndexShouldBeWithinSetSizeRange">
+        <source>The index should be within the right set size range.</source>
+        <target state="new">The index should be within the right set size range.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MatchingAssemblyNotFound">
+        <source>Could not find matching assembly: '{0}' in any of the search directories.</source>
+        <target state="new">Could not find matching assembly: '{0}' in any of the search directories.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MemberExistsOnLeft">
+        <source>Member '{0}' exists on the left but not on the right</source>
+        <target state="new">Member '{0}' exists on the left but not on the right</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
+        <source>Could not find the provided path '{0}' to load binaries from.</source>
+        <target state="new">Could not find the provided path '{0}' to load binaries from.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
+        <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
+        <target state="new">Provided stream for assembly '{0}' doesn't have any metadata to read. from.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShouldBeGreaterThanZero">
+        <source>Value should be greater than 0.</source>
+        <target state="new">Value should be greater than 0.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShouldNotBeNullAndContainAtLeastOneElement">
+        <source>Should not be null and contain at least one element.</source>
+        <target state="new">Should not be null and contain at least one element.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShouldProvideValidAssemblyName">
+        <source>Should provide a valid assembly name.</source>
+        <target state="new">Should provide a valid assembly name.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StreamPositionGreaterThanLength">
+        <source>Stream position is greater than it's length, so there are no contents available to read.</source>
+        <target state="new">Stream position is greater than it's length, so there are no contents available to read.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeExistsOnLeft">
+        <source>Type '{0}' exists on the left but not on the right</source>
+        <target state="new">Type '{0}' exists on the left but not on the right</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeExistsOnRight">
+        <source>Type '{0}' exists on the right but not on the left</source>
+        <target state="new">Type '{0}' exists on the right but not on the left</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
+        <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
+        <target state="new">The provided right count when creating the visitor should match the right set size specified for the mappers.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

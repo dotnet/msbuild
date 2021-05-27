@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.PackageValidation
                         baselineCompileTimeAsset.Path,
                         package.PackagePath,
                         latestCompileTimeAsset.Path,
-                        Path.GetFileName(package.PackagePath),
+                        package.PackageId,
                         Resources.BaselineVersionValidatorHeader,
                         string.Format(Resources.ApiCompatibilityBaselineHeader, baselineCompileTimeAsset.Path, latestCompileTimeAsset.Path, _baselinePackage.Version, package.Version));
                 }
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.PackageValidation
                             baselineRuntimeAsset.Path,
                             package.PackagePath, 
                             latestRuntimeAsset.Path,
-                            Path.GetFileName(package.PackagePath),
+                            package.PackageId,
                             Resources.BaselineVersionValidatorHeader,
                             string.Format(Resources.ApiCompatibilityBaselineHeader, baselineRuntimeAsset.Path, latestRuntimeAsset.Path, _baselinePackage.Version, package.Version));
                     }
@@ -108,7 +108,7 @@ namespace Microsoft.DotNet.PackageValidation
                             baselineRuntimeSpecificAsset.Path,
                             package.PackagePath, 
                             latestRuntimeSpecificAsset.Path,
-                            Path.GetFileName(package.PackagePath),
+                            package.PackageId,
                             Resources.BaselineVersionValidatorHeader,
                             string.Format(Resources.BaselineVersionValidatorHeader, baselineRuntimeSpecificAsset.Path, latestRuntimeSpecificAsset.Path, _baselinePackage.Version, package.Version));
                     }

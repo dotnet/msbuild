@@ -45,14 +45,74 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Second' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Second"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyRecord' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyRecord"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyStruct' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyStruct"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyDelegate' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyDelegate"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.MyEnum' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.MyEnum"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Second"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.MyRecord"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.MyStruct"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.MyDelegate"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.MyEnum"),
             };
 
-            Assert.Equal(expected, differences);
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+        }
+
+        [Fact]
+        public void TypeInDifferentNamespaces()
+        {
+
+            string leftSyntax = @"
+namespace A.B
+{
+  public class C { }
+}
+";
+            string rightSyntax = @"
+namespace B.B
+{
+  public class C { }
+}
+";
+            ApiComparer differ = new();
+            bool enableNullable = false;
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable);
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left , right);
+
+            CompatDifference[] expected = new[]
+            {
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:A.B.C"),
+            };
+
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+        }
+
+        [Fact]
+        public void NestedTypeVsNamespaces()
+        {
+
+            string leftSyntax = @"
+namespace A
+{
+  public class B { }
+}
+";
+            string rightSyntax = @"
+public class A
+{
+  public class B { }
+}
+";
+            ApiComparer differ = new();
+            bool enableNullable = false;
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, enableNullable);
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+
+            CompatDifference[] expected = new[]
+            {
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:A.B"),
+            };
+
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
 
         [Fact]
@@ -81,14 +141,14 @@ namespace CompatTests
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntaxWithReferences(leftSyntax, new[] { forwardedTypeSyntax }, includeDefaultReferences: true);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new();
-            IEnumerable<CompatDifference> differences = differ.GetDifferences(new[] { left }, new[] { right });
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.ForwardedTestType' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.ForwardedTestType")
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.ForwardedTestType")
             };
 
-            Assert.Equal(expected, differences);
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
 
         [Fact]
@@ -177,11 +237,11 @@ namespace CompatTests
 
             CompatDifference[] expected = new[]
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Third' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Third"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Fourth' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Fourth")
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Third"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Fourth")
             };
 
-            Assert.Equal(expected, differences);
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
 
         [Theory]
@@ -219,10 +279,10 @@ namespace CompatTests
             {
                 CompatDifference[] expected = new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.InternalType' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.InternalType")
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.InternalType")
                 };
 
-                Assert.Equal(expected, differences);
+                Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
             }
         }
 
@@ -267,17 +327,17 @@ namespace CompatTests
 
             List<CompatDifference> expected = new()
             {
-                new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
             };
 
             if (includeInternalSymbols)
             {
                 expected.Add(
-                  new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.InternalNested.DoubleNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.InternalNested.DoubleNested")
+                  new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.InternalNested.DoubleNested")
                 );
             }
 
-            Assert.Equal(expected, differences);
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
 
         [Fact]
@@ -322,20 +382,20 @@ namespace CompatTests
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
-            List<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> expected = new()
+            CompatDifference[][] expected =
             {
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-0"), Array.Empty<CompatDifference>()),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-1"), new CompatDifference[]
+                Array.Empty<CompatDifference>(),
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First"),
-                }),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-2"), new CompatDifference[]
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First"),
+                },
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.Second' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.Second"),
-                }),
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.Second"),
+                },
             };
 
-            Assert.Equal(expected, differences);
+            AssertExtensions.MultiRightResult(left.MetadataInformation, expected, differences);
         }
 
         [Fact]
@@ -409,27 +469,26 @@ namespace CompatTests
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
-            List<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> expected = new()
+            CompatDifference[][] expected =
             {
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-0"), new CompatDifference[]
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested.SecondNested.ThirdNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested.ThirdNested"),
-                }),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-1"), new CompatDifference[]
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested.ThirdNested"),
+                },
+                new[] {
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested")
+                },
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested"),
-                }),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-2"), new CompatDifference[]
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested"),
+                },
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First.FirstNested.SecondNested' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First.FirstNested.SecondNested"),
-                }),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-3"), new CompatDifference[]
-                {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.First' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.First"),
-                }),
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.First"),
+                },
             };
 
-            Assert.Equal(expected, differences);
+            AssertExtensions.MultiRightResult(left.MetadataInformation, expected, differences);
         }
 
         [Fact]
@@ -465,16 +524,7 @@ namespace CompatTests
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
-            int i = 0;
-            foreach ((MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences) diff in differences)
-            {
-                Assert.Equal(left.MetadataInformation, diff.left);
-                MetadataInformation expectedRightMetadata = new(string.Empty, string.Empty, $"runtime-{i++}");
-                Assert.Equal(expectedRightMetadata, diff.right);
-                Assert.Empty(diff.differences);
-            }
-
-            Assert.Equal(4, i);
+            AssertExtensions.MultiRightEmptyDifferences(left.MetadataInformation, rightSyntaxes.Length, differences);
         }
 
         [Fact]
@@ -499,16 +549,7 @@ namespace CompatTests
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
-            int i = 0;
-            foreach ((MetadataInformation left, MetadataInformation right, IEnumerable<CompatDifference> differences) diff in differences)
-            {
-                Assert.Equal(left.MetadataInformation, diff.left);
-                MetadataInformation expectedRightMetadata = new(string.Empty, string.Empty, $"runtime-{i++}");
-                Assert.Equal(expectedRightMetadata, diff.right);
-                Assert.Empty(diff.differences);
-            }
-
-            Assert.Equal(5, i);
+            AssertExtensions.MultiRightEmptyDifferences(left.MetadataInformation, rightSyntaxes.Length, differences);
         }
 
         [Fact]
@@ -533,17 +574,17 @@ namespace CompatTests
             IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                 differ.GetDifferences(left, right);
 
-            List<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> expected = new()
+            CompatDifference[][] expected =
             {
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-0"), Array.Empty<CompatDifference>()),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-1"), new CompatDifference[]
+                Array.Empty<CompatDifference>(),
+                new[]
                 {
-                    new CompatDifference(DiagnosticIds.TypeMustExist, $"Type 'CompatTests.ForwardedTestType' exists on the left but not on the right", DifferenceType.Removed, "T:CompatTests.ForwardedTestType"),
-                }),
-                (left.MetadataInformation, new MetadataInformation(string.Empty, string.Empty, "runtime-2"), Array.Empty<CompatDifference>()),
+                    new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Removed, "T:CompatTests.ForwardedTestType"),
+                },
+                Array.Empty<CompatDifference>(),
             };
 
-            Assert.Equal(expected, differences);
+            AssertExtensions.MultiRightResult(left.MetadataInformation, expected, differences);
         }
     }
 }

@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.ApiCompatibility
 
             if (stream.Position >= stream.Length)
             {
-                throw new ArgumentException("Stream position is greater than it's length, so there are no contents available to read", nameof(stream));
+                throw new ArgumentException(Resources.StreamPositionGreaterThanLength, nameof(stream));
             }
 
             if (!_loadedAssemblies.TryGetValue(name, out MetadataReference metadataReference))
@@ -177,12 +177,12 @@ namespace Microsoft.DotNet.ApiCompatibility
         {
             if (filePaths == null || filePaths.Count() == 0)
             {
-                throw new ArgumentNullException(nameof(filePaths), $"Should not be null and contain at least one element");
+                throw new ArgumentNullException(nameof(filePaths), Resources.ShouldNotBeNullAndContainAtLeastOneElement);
             }
 
             if (string.IsNullOrEmpty(assemblyName))
             {
-                throw new ArgumentNullException(nameof(assemblyName), $"Should provide a valid assembly name");
+                throw new ArgumentNullException(nameof(assemblyName), Resources.ShouldProvideValidAssemblyName);
             }
 
             _cSharpCompilation = _cSharpCompilation.WithAssemblyName(assemblyName);
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             {
                 if (!File.Exists(filePath))
                 {
-                    throw new FileNotFoundException($"File '{filePath}' does not exist.");
+                    throw new FileNotFoundException(string.Format(Resources.FileDoesNotExist, filePath));
                 }
 
                 syntaxTrees.Add(CSharpSyntaxTree.ParseText(File.ReadAllText(filePath)));
@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 {
                     if (!Directory.Exists(directory))
                     {
-                        throw new FileNotFoundException($"Matching assembly search directory '{directory}' does not exist", nameof(searchPaths));
+                        throw new FileNotFoundException(string.Format(Resources.ShouldProvideValidAssemblyName, directory), nameof(searchPaths));
                     }
 
                     string possiblePath = Path.Combine(directory, name);
@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 if (warnOnMissingAssemblies && !found)
                 {
                     string assemblyInfo = validateMatchingIdentity ? assembly.Identity.GetDisplayName() : assembly.Name;
-                    _warnings.Add($"Could not find matching assembly: '{assemblyInfo}' in any of the search directories.");
+                    _warnings.Add(string.Format(Resources.MatchingAssemblyNotFound, assemblyInfo));
                 }
             }
 
@@ -286,7 +286,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 }
                 else
                 {
-                    _warnings.Add($"Could not find the provided path '{resolvedPath}' to load binaries from.");
+                    throw new FileNotFoundException(string.Format(Resources.ProvidedPathToLoadBinariesFromNotFound, resolvedPath));
                 }
 
                 if (_resolveReferences && !string.IsNullOrEmpty(directory))
@@ -326,7 +326,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             
             if (!reader.HasMetadata)
             {
-                throw new ArgumentException($"Provided stream for assembly {name} doesn't have any metadata to read from");
+                throw new ArgumentException(string.Format(Resources.ProvidedStreamDoesNotHaveMetadata, name));
             }
 
             PEMemoryBlock image = reader.GetEntireImage();
@@ -369,7 +369,7 @@ namespace Microsoft.DotNet.ApiCompatibility
 
                 if (!found)
                 {
-                    _warnings.Add($"Could not resolve reference '{name}' in any of the provided search directories.");
+                    _warnings.Add(string.Format(Resources.CouldNotResolveReference, name));
                 }
             }
         }

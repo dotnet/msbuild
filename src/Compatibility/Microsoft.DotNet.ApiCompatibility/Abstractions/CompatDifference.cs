@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     /// <summary>
     /// Class representing a difference of compatibility, containing detailed information about it.
     /// </summary>
-    public class CompatDifference : IDiagnostic, IEquatable<CompatDifference>
+    public class CompatDifference : IDiagnostic
     {
         /// <summary>
         /// The Diagnostic ID for this difference.
@@ -59,25 +59,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             Type = type;
             ReferenceId = memberId ?? throw new ArgumentNullException(nameof(memberId));
         }
-
-        /// <summary>
-        /// Evaluates whether the current object is equal to another <see cref="CompatDifference"/>.
-        /// </summary>
-        /// <param name="other"><see cref="CompatDifference"/> to compare against.</param>
-        /// <returns>True if equals, False if different.</returns>
-        public bool Equals(CompatDifference other) =>
-            other != null &&
-            Type == other.Type &&
-            DiagnosticId.Equals(other.DiagnosticId, StringComparison.OrdinalIgnoreCase) &&
-            ReferenceId.Equals(other.ReferenceId, StringComparison.OrdinalIgnoreCase) &&
-            Message.Equals(other.Message, StringComparison.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Gets the hashcode that reperesents this instance.
-        /// </summary>
-        /// <returns>Unique <see cref="int"/> based on the properties' values of the instance.</returns>
-        public override int GetHashCode() =>
-            HashCode.Combine(ReferenceId, DiagnosticId, Message, Type);
 
         /// <summary>
         /// Gets a <see cref="string"/> representation of the difference.

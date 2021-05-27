@@ -12,11 +12,6 @@
         <target state="new">API Compatibility errors between {0} (left) and {1} (right):</target>
         <note />
       </trans-unit>
-      <trans-unit id="BaselinePackageNotFound">
-        <source>No baseline package with id {0} found in feeds: {1}.</source>
-        <target state="new">No baseline package with id {0} found in feeds: {1}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CompatibleFrameworkInPackageValidatorHeader">
         <source>{0} assembly api surface area should be compatible with {1} assembly surface area so we can compile against {0} and run on {1} .framework.</source>
         <target state="new">{0} assembly api surface area should be compatible with {1} assembly surface area so we can compile against {0} and run on {1} .framework.</target>
