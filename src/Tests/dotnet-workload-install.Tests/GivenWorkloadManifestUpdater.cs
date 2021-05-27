@@ -55,7 +55,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
 
             manifestUpdater.UpdateAdvertisingManifestsAsync(true).Wait();
-            var expectedDownloadedPackages = installedManifests.Select(id => ((PackageId, NuGetVersion, DirectoryPath?))(new PackageId($"{id}.manifest-{featureBand}"), null, null));
+            var expectedDownloadedPackages = installedManifests
+                .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-{featureBand}"), null, null, null));
             nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
         }
 
