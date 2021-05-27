@@ -1495,9 +1495,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
 }
 namespace Microsoft.Build.FileSystem
 {
-    public partial class MSBuildFileSystemBase
+    public abstract partial class MSBuildFileSystemBase
     {
-        public MSBuildFileSystemBase() { }
+        protected MSBuildFileSystemBase() { }
         public virtual bool DirectoryExists(string path) { throw null; }
         public virtual System.Collections.Generic.IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly) { throw null; }
         public virtual System.Collections.Generic.IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", System.IO.SearchOption searchOption = System.IO.SearchOption.TopDirectoryOnly) { throw null; }

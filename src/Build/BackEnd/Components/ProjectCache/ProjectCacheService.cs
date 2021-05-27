@@ -13,7 +13,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
@@ -24,6 +23,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private readonly ProjectCacheDescriptor _projectCacheDescriptor;
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
+
+        /// <summary>
+        /// An instanatiable version of MSBuildFileSystemBase not overriding any methods,
+        /// i.e. falling back to FileSystem.Default.
+        /// </summary>
+        private sealed class DefaultMSBuildFileSystem : MSBuildFileSystemBase
+        { }
 
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
@@ -59,7 +65,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 await plugin.BeginBuildAsync(
                     new CacheContext(
                         pluginDescriptor.PluginSettings,
-                        new MSBuildFileSystemBase(FileSystems.Default),
+                        new DefaultMSBuildFileSystem(),
                         pluginDescriptor.ProjectGraph,
                         pluginDescriptor.EntryPoints),
                     // TODO: Detect verbosity from logging service.
