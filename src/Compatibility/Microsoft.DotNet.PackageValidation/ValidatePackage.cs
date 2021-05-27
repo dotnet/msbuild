@@ -18,8 +18,6 @@ namespace Microsoft.DotNet.PackageValidation
 
         public bool RunApiCompat { get; set; }
 
-        public bool BaselineValidation { get; set; }
-
         public string BaselinePackageTargetPath { get; set; }
 
         protected override void ExecuteCore()
@@ -35,7 +33,7 @@ namespace Microsoft.DotNet.PackageValidation
 
             new CompatibleTfmValidator(NoWarn, null, RunApiCompat, logger).Validate(package);
             new CompatibleFrameworkInPackageValidator(NoWarn, null, logger).Validate(package);
-            if (BaselineValidation)
+            if (!string.IsNullOrEmpty(BaselinePackageTargetPath))
             {
                 Package baselinePackage = NupkgParser.CreatePackage(BaselinePackageTargetPath, runtimeGraph);
                 new BaselinePackageValidator(baselinePackage, NoWarn, null, RunApiCompat, logger).Validate(package);

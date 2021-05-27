@@ -15,6 +15,5 @@ namespace Microsoft.DotNet.PackageValidation
         public const string CompatibleRuntimeRidSpecificAsset = "PKV005";
         public const string TargetFrameworkDropped = "PKV006";
         public const string TargetFrameworkAndRidPairDropped = "PKV007";
-        public const string NoBaselinePackageFound = "PKV008";
     }
 }
