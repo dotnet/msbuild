@@ -13,6 +13,7 @@ namespace Microsoft.Build.Tasks
     /// <remarks>
     /// Base class for task state files.
     /// </remarks>
+    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
     [Serializable]
     internal abstract class StateFileBase
     {

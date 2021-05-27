@@ -13,6 +13,7 @@ namespace Microsoft.Build.Tasks
     /// Represents a single input to a compilation-style task.
     /// Keeps track of timestamp for later comparison.
     /// </remarks>
+    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
     [Serializable]
     internal class DependencyFile
     {
