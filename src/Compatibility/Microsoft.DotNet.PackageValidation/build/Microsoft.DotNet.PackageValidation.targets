@@ -18,7 +18,7 @@
       <PackageValidationBaselinePath Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName.ToLower())', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName.ToLower()).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
     </PropertyGroup>
 
-    <Error Condition="!Exists('$(PackageValidationBaselinePath)')" Text="$(PackageValidationBaselinePath) does not exist. Please check the PackageValidationBaselinePath or PackageValidationBaselineVersion." />
+    <Error Condition="'$(PackageValidationBaselinePath)' != '' and !Exists('$(PackageValidationBaselinePath)')" Text="$(PackageValidationBaselinePath) does not exist. Please check the PackageValidationBaselinePath or PackageValidationBaselineVersion." />
 
     <!-- PackageTargetPath isn't exposed by NuGet: https://github.com/NuGet/Home/issues/6671. -->
     <Microsoft.DotNet.PackageValidation.ValidatePackage
