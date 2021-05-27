@@ -284,7 +284,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.IsNullOrEmpty(stateFile) && FileSystems.Default.FileExists(stateFile))
                 {
-                    using FileStream s = new FileStream(stateFile, FileMode.Open);
+                    using FileStream s = File.OpenRead(stateFile);
                     var translator = BinaryTranslator.GetReadTranslator(s, buffer:null); // TODO: shared buffering?
 
                     // verify file signature

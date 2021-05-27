@@ -1,5 +1,21 @@
 # MSBuild Changelog
 
+## MSBuild 16.11.0
+
+This version of MSBuild will ship with Visual Studio 2019 version 16.11.0 and .NET SDK 5.0.400.
+
+### Detailed release notes
+
+#### Fixed
+
+* Fixed memory leak in `ProjectRootElement.Reload` (#6457).
+* Added locking to avoid race conditions in `BuildManager` (#6412).
+* Allow `ResolveAssemblyReferences` precomputed cache files to be in read-only locations (#6393).
+
+#### Infrastructure
+
+* Use a packaged C# compiler to avoid changes in reference assembly generation caused by compiler changes (#6431).
+
 ## MSBuild 16.10.1
 
 This version of MSBuild will ship with Visual Studio 2019 version 16.10.1 and .NET SDK 5.0.301.
@@ -11,6 +27,7 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.10.1 and .N
 ## MSBuild 16.10.0
 
 This version of MSBuild shipped with Visual Studio 2019 version 16.10.0 and .NET SDK 5.0.300.
+
 ### What's new
 
 * MSBuild now targets .NET 5.0 and .NET Framework 4.7.2.
