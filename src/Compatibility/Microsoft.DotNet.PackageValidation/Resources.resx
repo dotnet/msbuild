@@ -150,9 +150,6 @@
   <data name="ApiCompatibilityBaselineHeader" xml:space="preserve">
     <value>API compatibility errors in between {0} (left) and {1} (right) for versions {2} and {3} respectively:</value>
   </data>
-  <data name="BaselinePackageNotFound" xml:space="preserve">
-    <value>Baseline package with id {0} and version less than {2} not found in feeds: ({1}).</value>
-  </data>
   <data name="EmptyPackagePath" xml:space="preserve">
     <value>{0} is empty or null.  Please provide a valid package path.</value>
   </data>

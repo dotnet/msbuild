@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly bool _skipManifestUpdate;
         private readonly string _fromCacheOption;
         private readonly string _downloadToCacheOption;
+        private readonly PackageSourceLocation _packageSourceLocation;
         private readonly bool _printDownloadLinkOnly;
         private readonly bool _includePreviews;
         private readonly VerbosityOptions _verbosity;
@@ -65,21 +66,28 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.DownloadToCacheOption);
             _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
-            _sdkVersion = new ReleaseVersion(version ?? Product.Version);
+            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.VersionOption)) ?
+                new ReleaseVersion(version ?? Product.Version) :
+                new ReleaseVersion(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.VersionOption));
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
+
+            var configOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.ConfigOption);
+            var addSourceOption = parseResult.ValueForOption<string[]>(WorkloadInstallCommandParser.AddSourceOption);
+            _packageSourceLocation = string.IsNullOrEmpty(configOption) && (addSourceOption == null || !addSourceOption.Any()) ? null :
+                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: addSourceOption);
 
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? 
-                WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader, _dotnetPath);
+                WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader, _dotnetPath, _packageSourceLocation);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
         }
 
         public override int Execute()
@@ -255,7 +263,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         .Distinct()
                         .Select(packId => _workloadResolver.TryGetPackInfo(packId))
                         .Where(pack => pack != null)
-                        .Select(pack => _nugetPackageDownloader.GetPackageUrl(new PackageId(pack.ResolvedPackageId), new NuGetVersion(pack.Version), includePreview: includePreview).Result);
+                        .Select(pack => _nugetPackageDownloader.GetPackageUrl(new PackageId(pack.ResolvedPackageId), new NuGetVersion(pack.Version),
+                            packageSourceLocation: _packageSourceLocation, includePreview: includePreview).Result);
                     packageUrls.AddRange(packUrls);
                 }
                 else

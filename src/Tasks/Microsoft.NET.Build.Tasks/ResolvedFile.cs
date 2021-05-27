@@ -13,7 +13,8 @@ namespace Microsoft.NET.Build.Tasks
         None,
         Runtime,
         Native,
-        Resources
+        Resources,
+        PgoData
     }
 
     internal class ResolvedFile

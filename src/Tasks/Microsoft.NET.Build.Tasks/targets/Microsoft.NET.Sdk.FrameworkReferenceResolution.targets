@@ -398,7 +398,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <ReferenceCopyLocalPaths Include="@(RuntimePackAsset)"
-                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true' and ('$(SelfContained)' == 'true' or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true')" />
+                               Condition="'$(CopyLocalLockFileAssemblies)' == 'true' and ('$(SelfContained)' == 'true' or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
     </ItemGroup>
 
 
