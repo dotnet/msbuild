@@ -37,7 +37,7 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public string PackTestTemplatesNuGetPackage()
         {
-            string dir = Path.GetDirectoryName(typeof(PackageManager).GetTypeInfo().Assembly.Location);
+            string dir = Path.GetDirectoryName(typeof(PackageManager).GetTypeInfo().Assembly.Location) ?? string.Empty;
             string projectToPack = Path.Combine(dir, "..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "Microsoft.TemplateEngine.TestTemplates.csproj");
             return PackNuGetPackage(projectToPack);
         }
@@ -47,7 +47,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             try
             {
                 await semaphore.WaitAsync().ConfigureAwait(false);
-                if (_installedPackages.TryGetValue(templatePackName, out string packagePath))
+                if (_installedPackages.TryGetValue(templatePackName, out string? packagePath))
                 {
                     return packagePath;
                 }
@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             }
             lock (string.Intern(absolutePath.ToLowerInvariant()))
             {
-                if (_installedPackages.TryGetValue(absolutePath, out string packagePath))
+                if (_installedPackages.TryGetValue(absolutePath, out string? packagePath))
                 {
                     return packagePath;
                 }
@@ -100,7 +100,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                     RedirectStandardError = true,
                     RedirectStandardOutput = true
                 };
-                Process p = Process.Start(info);
+                Process p = Process.Start(info) ?? throw new Exception("Failed to start dotnet process.");
                 p.WaitForExit();
                 if (p.ExitCode != 0)
                 {
@@ -207,7 +207,8 @@ namespace Microsoft.TemplateEngine.TestHelper
             }
 
             var accumulativeSearchResults = foundPackagesBySource
-                .SelectMany(result => result.FoundPackages.Select(package => (result.Source, package)));
+                .Where(r => r.FoundPackages != null)
+                .SelectMany(result => result.FoundPackages!.Select(package => (result.Source, package)));
 
             if (!accumulativeSearchResults.Any())
             {
@@ -255,7 +256,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                     continue;
                 }
                 atLeastOneSourceValid = true;
-                IPackageSearchMetadata matchedVersion = result.FoundPackages.FirstOrDefault(package => package.Identity.Version == packageVersion);
+                IPackageSearchMetadata? matchedVersion = result.FoundPackages!.FirstOrDefault(package => package.Identity.Version == packageVersion);
                 if (matchedVersion != null)
                 {
                     linkedCts.Cancel();
