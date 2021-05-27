@@ -992,7 +992,7 @@ namespace Microsoft.Build.BackEnd
                 List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
                 foreach (SchedulableRequest request in unscheduledRequests)
                 {
-                    if (CanScheduleRequestToNode(request, InProcNodeId) && IsProxyBuildRequest(request.BuildRequest))
+                    if (CanScheduleRequestToNode(request, InProcNodeId) && request.IsProxyBuildRequest())
                     {
                         AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
                         idleNodes.Remove(InProcNodeId);
@@ -1008,11 +1008,6 @@ namespace Microsoft.Build.BackEnd
         private bool IsTraversalRequest(BuildRequest request)
         {
             return _configCache[request.ConfigurationId].IsTraversal;
-        }
-
-        private bool IsProxyBuildRequest(BuildRequest request)
-        {
-            return request.ProxyTargets != null;
         }
 
         /// <summary>
@@ -1390,7 +1385,7 @@ namespace Microsoft.Build.BackEnd
 
             void WarnWhenProxyBuildsGetScheduledOnOutOfProcNode()
             {
-                if (IsProxyBuildRequest(request) && nodeId != InProcNodeId)
+                if (request.IsProxyBuildRequest() && nodeId != InProcNodeId)
                 {
                     ErrorUtilities.VerifyThrow(
                         _componentHost.BuildParameters.DisableInProcNode || _forceAffinityOutOfProc,
@@ -2112,7 +2107,7 @@ namespace Microsoft.Build.BackEnd
                 return NodeAffinity.InProc;
             }
 
-            if (IsProxyBuildRequest(request))
+            if (request.IsProxyBuildRequest())
             {
                 return NodeAffinity.InProc;
             }

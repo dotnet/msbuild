@@ -419,5 +419,10 @@ namespace Microsoft.Build.BackEnd
         }
 
         #endregion
+
+        public bool IsProxyBuildRequest()
+        {
+            return ProxyTargets != null;
+        }
     }
 }
