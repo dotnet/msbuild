@@ -160,11 +160,15 @@ namespace Microsoft.Build.UnitTests
                 projectFile: "C:\\project.proj",
                 taskFile: "C:\\common.targets",
                 taskName: "Csc");
+            args.LineNumber = 42;
+            args.ColumnNumber = 999;
 
             Roundtrip(args,
                 e => e.ProjectFile,
                 e => e.TaskFile,
-                e => e.TaskName);
+                e => e.TaskName,
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString());
         }
 
         [Fact]
