@@ -75,7 +75,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeForwardingTable()
         {
-            _forwardingTable = new Dictionary<string, int>(15, StringComparer.OrdinalIgnoreCase);
+            _forwardingTable = new Dictionary<string, int>(17, StringComparer.OrdinalIgnoreCase);
             _forwardingTable[BuildStartedEventDescription] = 0;
             _forwardingTable[BuildFinishedEventDescription] = 0;
             _forwardingTable[ProjectStartedEventDescription] = 0;
