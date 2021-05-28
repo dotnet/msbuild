@@ -302,7 +302,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Importance of the message
         /// </summary>
-        public MessageImportance Importance => importance;
+        public MessageImportance Importance
+        {
+            get => importance;
+            internal set => importance = value;
+        }
 
         /// <summary>
         /// The custom sub-type of the event.

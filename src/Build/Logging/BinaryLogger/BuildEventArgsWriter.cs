@@ -445,6 +445,8 @@ Build
 
         private void Write(TargetSkippedEventArgs e)
         {
+            ErrorUtilities.VerifyThrow(e.SkipReason != TargetSkipReason.None, "TargetSkippedEventArgs.SkipReason needs to be set");
+
             Write(BinaryLogRecordKind.TargetSkipped);
             WriteMessageFields(e, writeMessage: false);
             WriteDeduplicatedString(e.TargetFile);
@@ -454,6 +456,8 @@ Build
             WriteDeduplicatedString(e.EvaluatedCondition);
             Write(e.OriginallySucceeded);
             Write((int)e.BuildReason);
+            Write((int)e.SkipReason);
+            binaryWriter.WriteOptionalBuildEventContext(e.OriginalBuildEventContext);
         }
 
         private void Write(CriticalBuildMessageEventArgs e)
