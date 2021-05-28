@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.100-preview.6.21277.7">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.100-preview.6.21277.8">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>12f1f9e24eb0b253b50166abc8fe5f2a2278cefb</Sha>
+      <Sha>cbc3cd8073a844a5439909a0efe58cf28a399773</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.100-preview.6.21277.7">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.100-preview.6.21277.8">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>12f1f9e24eb0b253b50166abc8fe5f2a2278cefb</Sha>
+      <Sha>cbc3cd8073a844a5439909a0efe58cf28a399773</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.100-preview.6.21277.7">
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.100-preview.6.21277.8">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>12f1f9e24eb0b253b50166abc8fe5f2a2278cefb</Sha>
+      <Sha>cbc3cd8073a844a5439909a0efe58cf28a399773</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.100-preview.6.21277.7">
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.100-preview.6.21277.8">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>12f1f9e24eb0b253b50166abc8fe5f2a2278cefb</Sha>
+      <Sha>cbc3cd8073a844a5439909a0efe58cf28a399773</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.100-preview.6.21277.7">
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.100-preview.6.21277.8">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>12f1f9e24eb0b253b50166abc8fe5f2a2278cefb</Sha>
+      <Sha>cbc3cd8073a844a5439909a0efe58cf28a399773</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.100-preview.6.21277.7">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.100-preview.6.21277.8">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>12f1f9e24eb0b253b50166abc8fe5f2a2278cefb</Sha>
+      <Sha>cbc3cd8073a844a5439909a0efe58cf28a399773</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="6.0.0-preview.6.21276.13">
       <Uri>https://github.com/dotnet/runtime</Uri>
