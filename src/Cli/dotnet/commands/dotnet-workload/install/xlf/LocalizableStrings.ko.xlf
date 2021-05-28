@@ -208,8 +208,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="new">PACKAGE_ID</target>
+        <source>WORKLOAD_ID</source>
+        <target state="new">WORKLOAD_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadInstallationFailed">

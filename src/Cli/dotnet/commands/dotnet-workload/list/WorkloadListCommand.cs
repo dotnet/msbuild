@@ -38,16 +38,17 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _machineReadableOption = result.ValueForOption<bool>(WorkloadListCommandParser.MachineReadableOption);
             _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadListCommandParser.VerbosityOption);
 
-            var sdkVersion = new ReleaseVersion(version ?? Product.Version);
+            _sdkVersion = string.IsNullOrEmpty(result.ValueForOption<string>(WorkloadListCommandParser.VersionOption)) ?
+                new ReleaseVersion(version ?? Product.Version) :
+                new ReleaseVersion(result.ValueForOption<string>(WorkloadListCommandParser.VersionOption));
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion.ToString());
-            var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion.ToString());
-            _sdkFeatureBand = new SdkFeatureBand(sdkVersion);
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
+            var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadRecordRepo = workloadRecordRepo ??
                                   WorkloadInstallerFactory
                                       .GetWorkloadInstaller(_reporter, _sdkFeatureBand, workloadResolver, _verbosity)
                                       .GetWorkloadInstallationRecordRepository();
-            _sdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
         }
 
         public override int Execute()
@@ -111,6 +112,6 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly string _mockAndroidDescription =
             $"android-workload-description: for testing you can delete the content of {MockUpdateDirectory} to revert the mock update";
 
-        private readonly string _sdkVersion;
+        private readonly ReleaseVersion _sdkVersion;
     }
 }
