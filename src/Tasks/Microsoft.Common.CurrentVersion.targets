@@ -1603,6 +1603,47 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
+    <!--
+    ====================================================================================
+                                        _GetProjectReferenceTargetFrameworkProperties
+
+    Builds the GetPlatforms target of all existing & opted-in project references to get a list
+    of all possible platforms of the referenced projects. Calls the
+    GetNearestPlatform task to determine the most compatible platform for each project.
+    This prevents overbuilding a project when 'AnyCPU' is available, for example.
+
+    ======================================================================================
+  -->
+
+  <Target Name="_GetProjectReferencePlatformProperties"
+          BeforeTargets="_GetProjectReferenceTargetFrameworkProperties"
+          Condition="'$(EnableDynamicPlatformResolution)' != 'true' and '$(BuildingInsideVisualStudio)' != 'true'">
+  
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Extension)' == '.vcxproj' or '%(_MSBuildProjectReferenceExistent.Extension)' == '.nativeproj'">
+        <UsePlatformPropertyAsDefinitivePlatform>true</UsePlatformPropertyAsDefinitivePlatform>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+
+    <!-- Allow preset SetPlatform to override this operation -->
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetPlatform)' != ''">
+        <SkipGetPlatformProperties>true</SkipGetPlatformProperties>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+
+    <MSBuild Projects="@(_MSBuildProjectReferenceExistent)"
+        Targets="GetPlatforms"
+        BuildInParallel="$(BuildInParallel)"
+        ContinueOnError="!$(BuildingProject)"
+        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(_GlobalPropertiesToRemoveFromProjectReferences)"
+        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"
+        SkipNonexistentTargets="true">
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferencePlatformPossibilities" />
+    </MSBuild>
+
+  </Target>
+
   <!--
     ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
