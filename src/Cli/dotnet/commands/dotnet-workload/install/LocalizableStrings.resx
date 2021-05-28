@@ -261,4 +261,7 @@
   <data name="OSDoesNotSupportMsi" xml:space="preserve">
     <value>MSI installations are only supported on Windows.</value>
   </data>
+  <data name="DeletingWorkloadPack" xml:space="preserve">
+    <value>Uninstalling workload pack {0} version {1}.</value>
+  </data>
 </root>

@@ -366,6 +366,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             if (PackIsInstalled(packInfo))
             {
+                _reporter.WriteLine(string.Format(LocalizableStrings.DeletingWorkloadPack, packInfo.Id, packInfo.Version));
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 if (IsSingleFilePack(packInfo))

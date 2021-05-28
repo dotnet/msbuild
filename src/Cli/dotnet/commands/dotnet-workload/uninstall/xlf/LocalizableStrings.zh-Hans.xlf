@@ -17,23 +17,23 @@
         <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
+      <trans-unit id="RemovingWorkloadInstallationRecord">
+        <source>Removing workload installation record for {0}...</source>
+        <target state="new">Removing workload installation record for {0}...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload Package Id to uninstall.</source>
         <target state="translated">请指定一个要卸载的工具包 ID。</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallLocalWorkloadSucceeded">
-        <source>Workload '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
-        <target state="translated">工具“{0}”已成功卸载并从清单文件 {1} 中移除。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UninstallSucceeded">
-        <source>Workload '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="translated">已成功卸载工具“{0}”（版本“{1}”）。</target>
+        <source>Successfully uninstalled workload(s): {0}</source>
+        <target state="new">Successfully uninstalled workload(s): {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>A workload with the package Id '{0}' could not be found.</source>
+        <source>Could not find workloads with id(s): {0}</source>
         <target state="needs-review-translation">找不到具有包 ID“{0}”的工具。
 
 工具是使用其包 ID 卸载的，该 ID 可能
@@ -42,24 +42,9 @@
 对应的包 ID。</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToUninstallWorkload">
-        <source>Failed to uninstall workload '{0}': {1}</source>
-        <target state="translated">无法卸载工具“{0}”: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidWorkloadPathOption">
-        <source>Workload path '{0}' does not exist.</source>
-        <target state="translated">工具路径“{0}”不存在。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="translated">PATH</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionDescription">
-        <source>The directory containing the workload to uninstall.</source>
-        <target state="translated">包含要卸载的工具的目录。</target>
+      <trans-unit id="WorkloadUninstallFailed">
+        <source>Workload uninstallation failed: {0}</source>
+        <target state="new">Workload uninstallation failed: {0}</target>
         <note />
       </trans-unit>
     </body>

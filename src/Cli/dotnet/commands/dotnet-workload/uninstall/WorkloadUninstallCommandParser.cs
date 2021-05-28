@@ -8,12 +8,16 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadUninstallCommandParser
     {
-        public static readonly Argument PackageIdArgument = WorkloadInstallCommandParser.WorkloadIdArgument;
+        public static readonly Argument WorkloadIdArgument = WorkloadInstallCommandParser.WorkloadIdArgument;
+
+        public static readonly Option VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
+        
+        public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
 
         public static Command GetCommand()
         {
             Command command = new Command("uninstall", LocalizableStrings.CommandDescription);
-            command.AddArgument(PackageIdArgument);
+            command.AddArgument(WorkloadIdArgument);
 
             return command;
         }
