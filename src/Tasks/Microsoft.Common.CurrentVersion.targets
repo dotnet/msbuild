@@ -1615,7 +1615,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Code Type="Fragment" Language="cs">
       <![CDATA[
 
-            Dictionary<string, string> translationTable = new Dictionary<string, string>();
+            Dictionary<string, string> translationTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (PlatformLookupTable != null)
             {
               foreach (string s in PlatformLookupTable.Split(';'))
@@ -1677,6 +1677,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Task>
   </UsingTask>
 
+  <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
+  <PropertyGroup>
+    <DefaultToVcxPlatformMapping>AnyCPU=Win32;x86=Win32;x64=x64</DefaultToVcxPlatformMapping>
+  </PropertyGroup>
+
     <!--
     ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
@@ -1691,13 +1696,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_GetProjectReferencePlatformProperties"
           BeforeTargets="_GetProjectReferenceTargetFrameworkProperties"
-          Condition="'$(EnableDynamicPlatformResolution)' != 'true' and '$(BuildingInsideVisualStudio)' != 'true'">
-  
-    <ItemGroup>
-      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.Extension)' == '.vcxproj' or '%(_MSBuildProjectReferenceExistent.Extension)' == '.nativeproj'">
-        <UsePlatformPropertyAsDefinitivePlatform>true</UsePlatformPropertyAsDefinitivePlatform>
-      </_MSBuildProjectReferenceExistent>
-    </ItemGroup>
+          Condition="'$(EnableDynamicPlatformResolution)' == 'true' and '$(BuildingInsideVisualStudio)' != 'true'">
 
     <!-- Allow preset SetPlatform to override this operation -->
     <ItemGroup>
@@ -1716,12 +1715,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferencePlatformPossibilities" />
     </MSBuild>
 
+    <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
+    <ItemGroup>
+      <!-- TODO: Add check for "if outer build is managed" -->
+      <_ProjectReferencePlatformPossibilities Condition="'%(_ProjectReferencePlatformPossibilities.Extension)' == '.vcxproj' or '%(_ProjectReferencePlatformPossibilities.Extension)' == '.nativeproj'">
+        <PlatformLookupTable>$(DefaultToVcxPlatformMapping)</PlatformLookupTable>
+      </_ProjectReferencePlatformPossibilities>
+    </ItemGroup>
+
     <GetNearestPlatformTask AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
-                            ParentProjectPlatform="$(PlatformTarget)"
-                            PlatformLookupTable="$(PlatformLookupTable)"
+                            ParentProjectPlatform="$(Platform)"
+                            PlatformLookupTable="%(_ProjectReferencePlatformPossibilities.PlatformLookupTable)"
                             Condition="'@(_ProjectReferencePlatformPossibilities->Count())' != '0'">
       <Output ItemName="ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
     </GetNearestPlatformTask>
+
+    <ItemGroup>
+      <ProjectsWithNearestPlatform Include="@(ProjectsWithPlatformAssignment)"/>
+      <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
+      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != '' and '%(ProjectsWithNearestPlatform.CanMultiPlatform)' != 'true'">
+        <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+        <SetPlatform Condition="'%(ProjectsWithNearestPlatform.Extension)' == '.vcxproj' or '%(ProjectsWithNearestPlatform.Extension)' == '.nativeproj'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+      </ProjectsWithNearestPlatform>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
+      <_MSBuildProjectReferenceExistent Include="@(ProjectsWithNearestPlatform)"/>
+    </ItemGroup>
 
   </Target>
 
