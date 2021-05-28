@@ -48,7 +48,7 @@ Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
-    $targetFramework = "net5.0"
+    $targetFramework = "net6.0"
 }
 
 $bootstrapBinDirectory = "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework"
