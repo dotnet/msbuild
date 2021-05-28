@@ -1603,6 +1603,80 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
+  <UsingTask TaskName="GetNearestPlatformTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <AnnotatedProjects ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <ParentProjectPlatform ParameterType="System.String" Required="true" />
+      <PlatformLookupTable ParameterType="System.String" Required="false" />
+      <AssignedProjectsWithPlatform ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.Collections.Generic"/>
+      <Code Type="Fragment" Language="cs">
+      <![CDATA[
+
+            Dictionary<string, string> translationTable = new Dictionary<string, string>();
+            if (PlatformLookupTable != null)
+            {
+              foreach (string s in PlatformLookupTable.Split(';'))
+              {
+                // Minimum translation: a,b
+                if (s.Length < 3) 
+                {
+                  break;
+                }
+                string key = s.Split('=')[0];
+                string val = s.Split('=')[1]; 
+                translationTable[key]=val;
+              }
+            }
+
+            AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
+            for (int i = 0; i < AnnotatedProjects.Length; i++)
+            {
+              AssignedProjectsWithPlatform[i] = new TaskItem(AnnotatedProjects[i]);
+
+              HashSet <string> childPlatforms = new HashSet<string>();
+              foreach (string s in AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions").Split(','))
+              {
+                if (!string.IsNullOrEmpty(s))
+                {
+                  childPlatforms.Add(s);
+                }
+              }
+
+              // Default to anycpu, the "best case".
+              string buildChildProjectAs = "AnyCPU";
+
+              // If the child can't build as AnyCPU, look for alternatives.
+              if (!childPlatforms.Contains("AnyCPU"))
+              {
+                // If there is a translation from a parent's platform to something
+                // the child SHOULD build as, use that.
+                if (translationTable.ContainsKey(ParentProjectPlatform) &&
+                    childPlatforms.Contains(translationTable[ParentProjectPlatform]))
+                {
+                  buildChildProjectAs = translationTable[ParentProjectPlatform];
+                }
+                else if (childPlatforms.Contains(ParentProjectPlatform))
+                {
+                  buildChildProjectAs = ParentProjectPlatform;
+                }
+                else
+                {
+                  buildChildProjectAs = AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions").Split(',')[0];
+                }
+              }
+
+              AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildChildProjectAs);
+              Log.LogMessage($"Project {AssignedProjectsWithPlatform[i].GetMetadata("Identity")} would be built as: {buildChildProjectAs}");
+            }
+
+      ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
     <!--
     ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
@@ -1641,6 +1715,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SkipNonexistentTargets="true">
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferencePlatformPossibilities" />
     </MSBuild>
+
+    <GetNearestPlatformTask AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
+                            ParentProjectPlatform="$(PlatformTarget)"
+                            PlatformLookupTable="$(PlatformLookupTable)"
+                            Condition="'@(_ProjectReferencePlatformPossibilities->Count())' != '0'">
+      <Output ItemName="ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
+    </GetNearestPlatformTask>
 
   </Target>
 
