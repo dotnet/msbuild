@@ -16,6 +16,17 @@ namespace Microsoft.Build.Framework
     public abstract class BuildEngineInterface
     {
         /// <summary>
+        /// Initial version with LogsMessagesOfImportance() as the only exposed member.
+        /// </summary>
+        public const int Version1 = 1;
+
+        /// <summary>
+        /// An explicit version of this class. Must be incremented whenever new members are added. Derived classes should override
+        /// the property to return the version actually being implemented.
+        /// </summary>
+        public virtual int Version => Version1;
+
+        /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
         /// </summary>
         /// <param name="importance">The importance to check.</param>
