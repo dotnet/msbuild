@@ -387,11 +387,7 @@ namespace Microsoft.NET.Publish.Tests
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}")
                 .Should().Pass()
                 // trim analysis warnings are disabled
-                .And.NotHaveStdOutContaining("warning IL2075")
-                .And.NotHaveStdOutContaining("warning IL2026")
-                .And.NotHaveStdOutContaining("warning IL2043")
-                .And.NotHaveStdOutContaining("warning IL2046")
-                .And.NotHaveStdOutContaining("warning IL2093");
+                .And.NotHaveStdOutMatching(@"warning IL\d\d\d\d");
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
@@ -592,7 +588,9 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             // Please keep list below sorted and de-duplicated
-            var expectedOutput = new[] {
+            var expectedOutput = new string[] {
+                "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.ComponentActivator.GetFunctionPointer(IntPtr,IntPtr,IntPtr,IntPtr,IntPtr,IntPtr",
+                "ILLink : Trim analysis warning IL2026: Internal.Runtime.InteropServices.InMemoryAssemblyLoader.LoadInMemoryAssembly(IntPtr,IntPtr",
                 "ILLink : Trim analysis warning IL2026: System.ComponentModel.Design.DesigntimeLicenseContextSerializer.DeserializeUsingBinaryFormatter(DesigntimeLicenseContextSerializer.StreamWrapper,String,RuntimeLicenseContext",
                 "ILLink : Trim analysis warning IL2072: System.Diagnostics.Tracing.EventSource.EnsureDescriptorsInitialized(",
                 "ILLink : Trim analysis warning IL2026: System.Resources.ManifestBasedResourceGroveler.CreateResourceSet(Stream,Assembly",
@@ -603,7 +601,7 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimMode=copyused");
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimMode=copyused", "/p:TrimmerSingleWarn=false");
             result.Should().Pass();
             ValidateWarningsOnHelloWorldApp(publishCommand, result, expectedOutput, targetFramework, rid);
         }
@@ -619,7 +617,7 @@ namespace Microsoft.NET.Publish.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
-            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true");
+            var result = publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:TrimmerSingleWarn=false");
             result.Should().Pass();
             ValidateWarningsOnHelloWorldApp(publishCommand, result, Array.Empty<string>(), targetFramework, rid);
         }
@@ -627,8 +625,8 @@ namespace Microsoft.NET.Publish.Tests
         private void ValidateWarningsOnHelloWorldApp (PublishCommand publishCommand, CommandResult result, string[] expectedOutput, string targetFramework, string rid)
         {
             // This checks that there are no unexpected warnings, but does not cause failures for missing expected warnings.
-            var warnings = result.StdOut.Split('\n', '\r', ')').Where(line => line.StartsWith("ILLink :"));
-            var extraWarnings = warnings.Except(expectedOutput);
+            var warnings = result.StdOut.Split('\n', '\r').Where(line => line.Contains("warning IL"));
+            var extraWarnings = warnings.Where(warning => !expectedOutput.Any(expected => warning.Contains(expected)));
 
             StringBuilder errorMessage = new StringBuilder();
 
