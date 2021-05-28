@@ -22,6 +22,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(CustomBeforeMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonCrossTargetingTargets)')"/>
 
+  <Target Name="GetPlatforms"
+          Returns="@(_ThisProjectPlatformMetadata)">
+    <ItemGroup>
+      <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
+        <PlatformOptions>$(Platform),$(Platforms),$(PlatformTarget)</PlatformOptions>
+        <CanMultiPlatform>false</CanMultiPlatform>
+        <CanMultiPlatform Condition="'$(Platforms)' != ''">true</CanMultiPlatform>
+      </_ThisProjectPlatformMetadata>
+    </ItemGroup>
+  </Target>
+  
   <Target Name="GetTargetFrameworks"
           DependsOnTargets="GetTargetFrameworksWithPlatformFromInnerBuilds"
           Returns="@(_ThisProjectBuildMetadata)">
