@@ -22,7 +22,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string dotnetDir = null, 
             PackageSourceLocation packageSourceLocation = null)
         {
-            var installType = GetWorkloadInstallType(sdkFeatureBand, string.IsNullOrWhiteSpace(dotnetDir) ?  Environment.ProcessPath : dotnetDir);
+            var installType = GetWorkloadInstallType(sdkFeatureBand, string.IsNullOrWhiteSpace(dotnetDir) 
+                ? Path.GetDirectoryName(Environment.ProcessPath)
+                : dotnetDir);
 
             if (installType == InstallType.Msi)
             {
