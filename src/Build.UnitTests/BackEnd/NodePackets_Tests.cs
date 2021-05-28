@@ -158,6 +158,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 items,
                 logItemMetadata: true,
                 DateTime.MinValue);
+            result.LineNumber = 30000;
+            result.ColumnNumber = 50;
 
             // normalize line endings as we can't rely on the line endings of NodePackets_Tests.cs
             Assert.Equal(@"Task Parameter:
@@ -433,6 +435,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Assert.Equal(leftTaskParameter.Message, rightTaskParameter.Message);
                     Assert.Equal(leftTaskParameter.BuildEventContext, rightTaskParameter.BuildEventContext);
                     Assert.Equal(leftTaskParameter.Timestamp, rightTaskParameter.Timestamp);
+                    Assert.Equal(leftTaskParameter.LineNumber, rightTaskParameter.LineNumber);
+                    Assert.Equal(leftTaskParameter.ColumnNumber, rightTaskParameter.ColumnNumber);
                     break;
 
                 case LoggingEventType.TaskFinishedEvent:

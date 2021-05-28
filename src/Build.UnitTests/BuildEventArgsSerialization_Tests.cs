@@ -327,11 +327,15 @@ namespace Microsoft.Build.UnitTests
                 new TaskItemData("ItemSpec2", Enumerable.Range(1,3).ToDictionary(i => i.ToString(), i => i.ToString() + "value"))
             };
             var args = new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, "ItemName", items, true, DateTime.MinValue);
+            args.LineNumber = 265;
+            args.ColumnNumber = 6;
 
             Roundtrip(args,
                 e => e.Kind.ToString(),
                 e => e.ItemType,
                 e => e.LogItemMetadata.ToString(),
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
                 e => TranslationHelpers.GetItemsString(e.Items));
         }
 

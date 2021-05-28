@@ -322,12 +322,20 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Line number of interest in associated file. 
         /// </summary>
-        public int LineNumber => lineNumber;
+        public int LineNumber
+        {
+            get => lineNumber;
+            internal set => lineNumber = value;
+        }
 
         /// <summary>
         /// Column number of interest in associated file. 
         /// </summary>
-        public int ColumnNumber => columnNumber;
+        public int ColumnNumber
+        {
+            get => columnNumber;
+            internal set => columnNumber = value;
+        }
 
         /// <summary>
         /// Ending line number of interest in associated file. 
