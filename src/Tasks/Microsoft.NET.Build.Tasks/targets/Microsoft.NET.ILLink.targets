@@ -221,7 +221,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <!-- DynamicallyAccessedMembersAttribute mismatch on virtual override -->
       <NoWarn>$(NoWarn);IL2092;IL2093;IL2094;IL2095</NoWarn>
       <!-- DynamicallyAccessedMembersAttribute used on unsupported member -->
-      <NoWarn>$(NoWarn);IL2097;IL2098;IL2099</NoWarn>
+      <NoWarn>$(NoWarn);IL2097;IL2098;IL2099;IL2106</NoWarn>
+      <!-- Unknown value passed to Expression.Property -->
+      <NoWarn>$(NoWarn);IL2103</NoWarn>
     </PropertyGroup>
 
     <!-- Suppressions to work around issues in previous versions of the framework. See https://github.com/dotnet/runtime/issues/40336 -->
