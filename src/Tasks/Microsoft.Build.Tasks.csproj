@@ -551,7 +551,6 @@
     <Compile Include="CodeTaskFactory.cs" />
     <Compile Include="XamlTaskFactory\XamlTaskFactory.cs" />
     <Compile Include="StateFileBase.cs" />
-    <Compile Include="Dependencies.cs" />
     <Compile Include="SystemState.cs" />
     <Compile Include="DependencyFile.cs" />
     <Compile Include="ZipDirectory.cs" />
