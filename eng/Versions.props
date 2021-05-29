@@ -31,7 +31,7 @@
     <DotNetCliVersion>6.0.100-preview.2.21155.3</DotNetCliVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftNetCompilersToolsetVersion>3.9.0-2.20574.26</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>5.10.0-rc.7240</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>6.0.0-preview.1.66</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
