@@ -4,12 +4,20 @@
     <TaskTargetFramework>$(SdkTargetFramework)</TaskTargetFramework>
     <TaskTargetFramework Condition="'$(MSBuildRuntimeType)' != 'Core'">net472</TaskTargetFramework>
 
-    <ToolsetTaskDll>$(ArtifactsDir)tasks\bin\toolset-tasks\$(Configuration)\$(TaskTargetFramework)\toolset-tasks.dll</ToolsetTaskDll>
+    <!--<ToolsetTaskDll>$(ArtifactsDir)tasks\bin\toolset-tasks\$(Configuration)\$(TaskTargetFramework)\toolset-tasks.dll</ToolsetTaskDll>-->
+    <ToolsetTaskDll>$(ArtifactsDir)bin\toolset-tasks\$(Configuration)\$(TaskTargetFramework)\toolset-tasks.dll</ToolsetTaskDll>
     <ToolsetTaskProject>$(RepoRoot)src\Layout\toolset-tasks\toolset-tasks.csproj</ToolsetTaskProject>
   </PropertyGroup>
-  <Target Name="BuildCoreSdkTasks" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
-    <!-- Use a different ArtifactsDir for this invocation so that the tasks project can be part of the solution
-         (for easy editing), but we don't hit problems with the tasks DLL being locked when we try to build the solution. -->
+
+  <!-- Right now we're using these tasks in all projects, so we build with a ProjectReference.  Once https://github.com/dotnet/sdk/pull/17982
+       is merged and flows through to stage 0, we can delete the PatchRuntimeConfig target and go back to the way it was. -->
+  <ItemGroup>
+    <ProjectReference Include="$(ToolsetTaskProject)" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" SetTargetFramework="TargetFramework=$(TaskTargetFramework)" />
+  </ItemGroup>
+  
+  <!--<Target Name="BuildCoreSdkTasks" BeforeTargets="_CheckForInvalidConfigurationAndPlatform">
+    --><!-- Use a different ArtifactsDir for this invocation so that the tasks project can be part of the solution
+         (for easy editing), but we don't hit problems with the tasks DLL being locked when we try to build the solution. --><!--
 
     <MSBuild Projects="$(ToolsetTaskProject)"
              Properties="ArtifactsDir=$(ArtifactsDir)tasks\;Phase=Restore"
@@ -17,7 +25,7 @@
 
     <MSBuild Projects="$(ToolsetTaskProject)"
              Properties="ArtifactsDir=$(ArtifactsDir)tasks\"/>
-  </Target>
+  </Target>-->
 
   <UsingTask TaskName="ReplaceFileContents" AssemblyFile="$(ToolsetTaskDll)" />
   <UsingTask TaskName="Chmod" AssemblyFile="$(ToolsetTaskDll)" />
@@ -26,5 +34,20 @@
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(ToolsetTaskDll)"/>
   <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(ToolsetTaskDll)"/>
   <UsingTask TaskName="OverrideAndCreateBundledNETCoreAppPackageVersion" AssemblyFile="$(ToolsetTaskDll)"/>
+  <UsingTask TaskName="AddBaseFrameworkToRuntimeConfig" AssemblyFile="$(ToolsetTaskDll)"/>
+
+  <Target Name="PatchRuntimeConfig" AfterTargets="GenerateBuildRuntimeConfigurationFiles"
+          Condition="'$(MSBuildProjectName)' != 'toolset-tasks'  And '$(MSBuildProjectName)' != 'HelixTasks' And Exists($(ProjectRuntimeConfigFilePath))">
+
+    <!-- Currently, GenerateRuntimeConfigurationFiles omits the reference to Microsoft.NETCore.App from the runtimeconfig file when there is a different
+         shared framework.  In this repo, this can cause the tests or tools such as dotnet-watch to use  the stage 0 version of Microsoft.NETCore.App
+         instead of the version specified in Versions.props.  This can cause failures when there are changes to the base framework, as we compile against
+         the one specified in Versions.props, but the project runs against an earlier version.
+         
+         This task works around this by adding Microsoft.NETCore.App back to the list of runtimes in the runtimeconfig file if it's not there already. -->
+
+    <AddBaseFrameworkToRuntimeConfig RuntimeConfigPath="$(ProjectRuntimeConfigFilePath)" MicrosoftNetCoreAppVersion="$(VSRedistCommonNetCoreSharedFrameworkx6460PackageVersion)" />
+
+  </Target>
 
 </Project>
