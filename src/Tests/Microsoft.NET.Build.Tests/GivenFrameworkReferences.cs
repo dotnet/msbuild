@@ -40,7 +40,7 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject()
             {
                 Name = "MultipleFrameworkReferenceTest",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
@@ -63,9 +63,7 @@ namespace FrameworkReferenceTest
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
 
-            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
-            //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App");
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.WindowsDesktop.App", "Microsoft.NETCore.App");
         }
 
         [Theory]
@@ -148,7 +146,7 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject()
             {
                 Name = "MultipleProfileFrameworkReferenceTest",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
@@ -171,9 +169,7 @@ namespace FrameworkReferenceTest
             string runtimeConfigFile = Path.Combine(outputDirectory.FullName, testProject.Name + ".runtimeconfig.json");
             var runtimeFrameworkNames = GetRuntimeFrameworks(runtimeConfigFile);
 
-            //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
-            //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App");
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.WindowsDesktop.App", "Microsoft.NETCore.App");
         }
 
         [Fact]
@@ -677,14 +673,14 @@ namespace FrameworkReferenceTest
             var testProject = new TestProject()
             {
                 Name = "TransitiveFrameworkReference",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
                 IsExe = true
             };
 
             var referencedProject = new TestProject()
             {
                 Name = "ReferencedProject",
-                TargetFrameworks = "netcoreapp3.0",
+                TargetFrameworks = "net6.0",
             };
 
             referencedProject.FrameworkReferences.Add("Microsoft.ASPNETCORE.App");
@@ -707,7 +703,7 @@ namespace FrameworkReferenceTest
 
             //  When we remove the workaround for https://github.com/dotnet/core-setup/issues/4947 in GenerateRuntimeConfigurationFiles,
             //  Microsoft.NETCore.App will need to be added to this list
-            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App");
+            runtimeFrameworkNames.Should().BeEquivalentTo("Microsoft.AspNetCore.App", "Microsoft.NETCore.App");
         }
 
         [Fact]
