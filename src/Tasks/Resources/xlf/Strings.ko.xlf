@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -2557,27 +2557,27 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotConvertToInferredType">
         <source>Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</source>
-        <target state="new">Could not convert the value for parameter "{0}" to the inferred type "{1}". The value will be treated as a string. {2}</target>
+        <target state="translated">매개 변수 "{0}"의 값을 유추된 유형 "{1}"(으)로 변환할 수 없습니다. 값이 문자열로 처리됩니다. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotConvertValue">
         <source>MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</source>
-        <target state="new">MSB3716: The parameter value "{0}" could not be converted to "{1}". {2}</target>
+        <target state="translated">MSB3716: 매개 변수 값 "{0}"(을)를 "{1}"(으)로 변환할 수 없습니다. {2}</target>
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
         <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="new">Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</target>
+        <target state="translated">특성 유형을 알 수 없기 때문에 매개 변수 "{0}" 유형을 유추할 수 없습니다. 값이 문자열로 처리됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
         <source>Multiple attribute constructors were found for type inferencing.</source>
-        <target state="new">Multiple attribute constructors were found for type inferencing.</target>
+        <target state="translated">유형 유추를 위해 여러 특성 생성자가 발견됨</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.ParameterTypeNotFound">
         <source>MSB3715: The type "{0}" was not found.</source>
-        <target state="new">MSB3715: The type "{0}" was not found.</target>
+        <target state="translated">MSB3715: "{0}" 형식을 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">

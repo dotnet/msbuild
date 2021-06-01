@@ -1785,8 +1785,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (!sdkResult.Success)
                 {
-                    // Ignore the missing import if IgnoreMissingImports is set unless FailOnUnresolvedSdk is also set
-                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))
+                    if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10) || !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk)))
                     {
                         ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
                             importElement.Location.Line,

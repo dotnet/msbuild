@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="en" target-language="zh-HANT" original="../Strings.resx">
+  <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
       <trans-unit id="AmbiguousProjectError">
         <source>MSBUILD : error MSB1011: Specify which project or solution file to use because this folder contains more than one project or solution file.</source>
@@ -937,7 +937,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedsummary
+        <target state="translated">  -detailedSummary[:True|False]
                      在建置結束時顯示詳細資訊，
                      內容為建置的組態，
                      以及將組態排程到節點的方式。
@@ -959,7 +959,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: 詳細摘要值無效。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1557,10 +1557,10 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                     將所有建置事件序列化成壓縮的二進位檔案。
-                     根據預設，此檔案存放在目前的目錄下，
-                     並會命名為 "msbuild.binlog"。此二進位記錄檔是
+                     根據預設，此檔案存放在目前的目錄下，並會命名為
+                     「msbuild.binlog」。此二進位記錄檔是
                      建置程序的詳細描述，之後可用於重建文字記錄，
                      以及供其他分析工具使用。二進位記錄檔
                      的大小通常會比大部分的詳細文字
@@ -1569,7 +1569,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
 
                      根據預設，二進位記錄器會收集專案檔的
                      原始程式文字，包括在建置期間遇到的
-                     匯入專案及目標檔案。選擇性的 ProjectImports 參數
+                     所有匯入專案及目標檔案。選擇性的 ProjectImports 參數
                      會控制此行為:
 
                       ProjectImports=None     - 不收集專案
@@ -1590,7 +1590,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      其他記錄器會收到記錄檔中包含的資訊，
                      就如同原始組建發生時的情況。
                      若要深入閱讀二進位記錄檔及其使用方式，請前往:
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     https://aka.ms/msbuild/binlog
 
                      範例:
                        -bl

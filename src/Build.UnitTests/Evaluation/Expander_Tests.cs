@@ -2010,13 +2010,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void PropertyFunctionNullReturn()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Convert]::ChangeType(,$(SomeStuff.GetType())))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-
+            // The null-returning function is the only thing in the expression.
+            string result = expander.ExpandIntoStringLeaveEscaped("$([System.Environment]::GetEnvironmentVariable(`_NonExistentVar`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("", result);
+
+            // The result of the null-returning function is concatenated with a non-empty string.
+            result = expander.ExpandIntoStringLeaveEscaped("prefix_$([System.Environment]::GetEnvironmentVariable(`_NonExistentVar`))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("prefix_", result);
         }
 
         /// <summary>

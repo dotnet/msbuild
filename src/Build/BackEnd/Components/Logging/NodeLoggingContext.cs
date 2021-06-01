@@ -69,7 +69,13 @@ namespace Microsoft.Build.BackEnd.Logging
         internal ProjectLoggingContext LogProjectStarted(BuildRequest request, BuildRequestConfiguration configuration)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return new ProjectLoggingContext(this, request, configuration.ProjectFullPath, configuration.ToolsVersion, request.ParentBuildEventContext, configuration.Project?.EvaluationId ?? BuildEventContext.InvalidEvaluationId);
+
+            // If we can retrieve the evaluationId from the project, do so. Don't if it's not available or
+            // if we'd have to retrieve it from the cache in order to access it.
+            // Order is important here because the Project getter will throw if IsCached.
+            int evaluationId = (configuration != null && !configuration.IsCached && configuration.Project != null) ? configuration.Project.EvaluationId : BuildEventContext.InvalidEvaluationId;
+
+            return new ProjectLoggingContext(this, request, configuration.ProjectFullPath, configuration.ToolsVersion, request.ParentBuildEventContext, evaluationId);
         }
 
         /// <summary>
@@ -80,18 +86,26 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ProjectLoggingContext projectLoggingContext = LogProjectStarted(request, configuration);
 
-            // When pulling a request from the cache, we want to make sure we log a task skipped message for any targets which 
-            // were used to build the request including default and inital targets.
+            // When pulling a request from the cache, we want to make sure we log a target skipped event for any targets which
+            // were used to build the request including default and initial targets.
             foreach (string target in configuration.GetTargetsUsedToBuildRequest(request))
             {
-                projectLoggingContext.LogComment
-                    (
-                        MessageImportance.Low,
-                        result[target].ResultCode == TargetResultCode.Failure ? "TargetAlreadyCompleteFailure" : "TargetAlreadyCompleteSuccess",
-                        target
-                    );
+                var targetResult = result[target];
+                bool isFailure = targetResult.ResultCode == TargetResultCode.Failure;
 
-                if (result[target].ResultCode == TargetResultCode.Failure)
+                var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
+                {
+                    BuildEventContext = projectLoggingContext.BuildEventContext,
+                    TargetName = target,
+                    BuildReason = TargetBuiltReason.None,
+                    SkipReason = isFailure ? TargetSkipReason.PreviouslyBuiltUnsuccessfully : TargetSkipReason.PreviouslyBuiltSuccessfully,
+                    OriginallySucceeded = !isFailure,
+                    OriginalBuildEventContext = (targetResult as TargetResult)?.OriginalBuildEventContext
+                };
+
+                projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
+
+                if (targetResult.ResultCode == TargetResultCode.Failure)
                 {
                     break;
                 }

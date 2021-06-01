@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
     <body>
@@ -937,8 +937,8 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      scheduled to nodes.
                      (Short form: -ds)
     </source>
-        <target state="needs-review-translation">  -detailedSummary
-                    ビルドの最後に、ビルド構成と、ノードに対して
+        <target state="translated">  -detailedSummary[:True|False]
+                     ビルドの最後に、ビルドした構成と、ノードに対して
                     どのようにスケジュールされたかについて、
                     詳細情報が表示されます。
                     (短い形式: -ds)
@@ -959,7 +959,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       </trans-unit>
       <trans-unit id="InvalidDetailedSummaryValue">
         <source>MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1061: Detailed summary value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1061: 詳細な概要値が無効です。 {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1061: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1557,7 +1557,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      すべてのビルド イベントを圧縮バイナリ ファイルにシリアル化します。
                      既定では、このファイルは "msbuild.binlog" という名前で
                      現在のディレクトリに置かれます。バイナリ ログはビルド プロセスの
@@ -1590,7 +1590,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      他のロガーは、オリジナルのビルドが行われたときのように、
                      ログ ファイルに含まれる情報を受け取ることができます。
                      バイナリ ログとその使用法の詳細については、以下をお読みください。
-                     https://github.com/Microsoft/msbuild/wiki/Binary-Log
+                     https://aka.ms/msbuild/binlog
 
                      例:
                        -bl

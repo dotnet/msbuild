@@ -66,7 +66,11 @@ namespace Microsoft.Build.Construction
             "Build",
             "Clean",
             "Rebuild",
-            "Publish"
+            "Publish",
+            "ValidateSolutionConfiguration",
+            "ValidateToolsVersions",
+            "ValidateProjects",
+            "GetSolutionConfigurationContents"
             );
 
 #if FEATURE_ASPNET_COMPILER
@@ -781,8 +785,9 @@ namespace Microsoft.Build.Construction
                 AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, "Rebuild", "BuildOutput", canBuildDirectly);
                 AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, "Publish", null, canBuildDirectly);
 
-                // Add any other targets specified by the user that were not already added
-                foreach (string targetName in _targetNames.Except(traversalInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
+                // Add any other targets specified by the user that were not already added. A target's presence or absence must be determined at the last
+                // minute because whether traversalInstance.Targets.ContainsKey(i) is true or not can change during the enumeration.
+                foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
                 {
                     AddTraversalTargetForProject(traversalInstance, project, projectConfiguration, targetName, null, canBuildDirectly);
                 }
@@ -796,7 +801,7 @@ namespace Microsoft.Build.Construction
             }
 
             // Add any other targets specified by the user that were not already added
-            foreach (string targetName in _targetNames.Except(traversalInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
+            foreach (string targetName in _targetNames.Where(i => !traversalInstance.Targets.ContainsKey(i)))
             {
                 AddTraversalReferencesTarget(traversalInstance, targetName, null);
             }
@@ -973,6 +978,10 @@ namespace Microsoft.Build.Construction
                 _sdkResolverService,
                 _submissionId
                 );
+
+            // Traversal meta project entire state has to be serialized as it was generated and hence
+            // does not have disk representation to load project from.
+            traversalInstance.TranslateEntireState = true;
 
             // Make way for the real ones
             foreach (string targetName in dummyTargetsForEvaluationTime)
@@ -1181,6 +1190,10 @@ namespace Microsoft.Build.Construction
             // Create a new project instance with global properties and tools version from the existing project
             ProjectInstance metaprojectInstance = new ProjectInstance(EscapingUtilities.UnescapeAll(GetMetaprojectName(project)), traversalProject, GetMetaprojectGlobalProperties(traversalProject));
 
+            // Traversal meta project entire state has to be serialized as it was generated and hence
+            // does not have disk representation to load project from.
+            metaprojectInstance.TranslateEntireState = true;
+
             // Add the project references which must build before this one.
             AddMetaprojectReferenceItems(traversalProject, metaprojectInstance, project);
 
@@ -1201,7 +1214,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Publish");
 
-                foreach (string targetName in _targetNames.Except(metaprojectInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
                 {
                     AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, targetName);
                 }
@@ -1221,7 +1234,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Rebuild", targetOutputItemName);
                 AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, "Publish", null);
 
-                foreach (string targetName in _targetNames.Except(metaprojectInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
                 {
                     AddMetaprojectTargetForManagedProject(traversalProject, metaprojectInstance, project, projectConfiguration, targetName, null);
                 }
@@ -1233,7 +1246,7 @@ namespace Microsoft.Build.Construction
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Rebuild", unknownProjectTypeErrorMessage);
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Publish", unknownProjectTypeErrorMessage);
 
-                foreach (string targetName in _targetNames.Except(metaprojectInstance.Targets.Keys, StringComparer.OrdinalIgnoreCase))
+                foreach (string targetName in _targetNames.Where(i => !metaprojectInstance.Targets.ContainsKey(i)))
                 {
                     AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, targetName, unknownProjectTypeErrorMessage);
                 }
