@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords()
         {
-            return Array.Empty<SdkFeatureBand>();
+            return Enumerable.Empty<SdkFeatureBand>();
         }
     }
 }

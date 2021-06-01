@@ -261,6 +261,40 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
         }
 
+        [Fact]
+        public void GivenWorkloadUpdateAcrossFeatureBandsItErrorsWhenManifestsDoNotExist()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--sdk-version", "7.0.100" });
+            
+            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot));
+            exceptionThrown.Message.Should().Contain("No manifests exist");
+        }
+
+        [Fact]
+        public void GivenWorkloadUpdateAcrossFeatureBandsItErrorsWhenUnableToReadManifest()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--sdk-version", "7.0.100" });
+
+            // Write manifest of "new" format that we don't recognize
+            Directory.CreateDirectory(Path.Combine(dotnetRoot, "sdk-manifests", "7.0.100", "mock.workload"));
+            File.WriteAllText(Path.Combine(dotnetRoot, "sdk-manifests", "7.0.100", "mock.workload", "WorkloadManifest.json"), @"{
+  ""version"": 1,
+  ""workloads"": {
+    ""mock.workload"": {
+      ""new.item"": ""fake""
+    }
+  }
+}
+");
+
+            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot));
+            exceptionThrown.Message.Should().Contain("not compatible with workload manifests");
+        }
+
         private (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",

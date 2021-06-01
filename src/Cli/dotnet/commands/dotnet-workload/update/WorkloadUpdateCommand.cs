@@ -13,7 +13,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.MSBuildSdkResolver;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
@@ -22,7 +21,6 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.Update
 {
@@ -65,9 +63,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
-            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption)) ?
-                new ReleaseVersion(version ?? Product.Version) :
-                new ReleaseVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption));
+            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            _sdkVersion = WorkloadInstallCommand.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath);
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
@@ -77,7 +74,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (addSourceOption == null || !addSourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  addSourceOption);
 
-            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
@@ -116,7 +112,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 {
                     UpdateWorkloads(_includePreviews, string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
                 }
-                catch (Exception e)
+                    catch (Exception e)
                 {
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadUpdateFailed, e.Message), e);

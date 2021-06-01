@@ -66,9 +66,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.DownloadToCacheOption);
             _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
-            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.VersionOption)) ?
-                new ReleaseVersion(version ?? Product.Version) :
-                new ReleaseVersion(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.VersionOption));
+            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            _sdkVersion = GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.VersionOption), version, _dotnetPath);
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
@@ -78,7 +77,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (addSourceOption == null || !addSourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: addSourceOption);
 
-            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
@@ -332,6 +330,39 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             if (!string.IsNullOrWhiteSpace(tempManifestDir) && Directory.Exists(tempManifestDir))
             {
                 Directory.Delete(tempManifestDir, true);
+            }
+        }
+
+        internal static ReleaseVersion GetValidatedSdkVersion(string versionOption, string providedVersion, string dotnetPath)
+        {
+
+            if (string.IsNullOrEmpty(versionOption))
+            {
+                return new ReleaseVersion(providedVersion ?? Product.Version);
+            }
+            else
+            {
+                var manifests = new SdkDirectoryWorkloadManifestProvider(dotnetPath, versionOption).GetManifests();
+                if (!manifests.Any())
+                {
+                    throw new GracefulException(string.Format(LocalizableStrings.NoManifestsExistForFeatureBand, versionOption));
+                }
+                try
+                {
+                    foreach ((string manifestId, Stream manifestStream) in manifests)
+                    {
+                        using (manifestStream)
+                        {
+                            var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
+                        }
+                    }
+                }
+                catch
+                {
+                    throw new GracefulException(string.Format(LocalizableStrings.IncompatibleManifests, versionOption));
+                }
+
+                return new ReleaseVersion(versionOption);
             }
         }
     }

@@ -271,6 +271,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectingSdkFeatureBandsMessage, string.Join(" ", installedSdkFeatureBands)));
             var currentBandInstallRecords = GetExpectedPackInstallRecords(_sdkFeatureBand);
 
+            if (!Directory.Exists(installedPacksDir))
+            {
+                return;
+            }
+
             foreach (var packIdDir in Directory.GetDirectories(installedPacksDir))
             {
                 foreach (var packVersionDir in Directory.GetDirectories(packIdDir))
@@ -321,6 +326,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public IEnumerable<(string, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
+            if (!Directory.Exists(installedPacksDir))
+            {
+                return Enumerable.Empty<(string, string)>();
+            }
             return Directory.GetDirectories(installedPacksDir)
                 .Where(packIdDir => HasFeatureBandMarkerFile(packIdDir, sdkFeatureBand))
                 .SelectMany(packIdPath => Directory.GetDirectories(packIdPath))

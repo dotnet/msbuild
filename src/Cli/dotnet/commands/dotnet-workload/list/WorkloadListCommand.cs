@@ -9,7 +9,6 @@ using System.Text.Json;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
@@ -38,10 +37,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _machineReadableOption = result.ValueForOption<bool>(WorkloadListCommandParser.MachineReadableOption);
             _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadListCommandParser.VerbosityOption);
 
-            _sdkVersion = string.IsNullOrEmpty(result.ValueForOption<string>(WorkloadListCommandParser.VersionOption)) ?
-                new ReleaseVersion(version ?? Product.Version) :
-                new ReleaseVersion(result.ValueForOption<string>(WorkloadListCommandParser.VersionOption));
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
+            _sdkVersion = WorkloadInstallCommand.GetValidatedSdkVersion(result.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, dotnetPath);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
             _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
