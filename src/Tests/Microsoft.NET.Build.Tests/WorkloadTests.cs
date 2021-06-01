@@ -64,27 +64,84 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Fact]
-        public void It_should_fail_without_workload_when_multitargeted()
+        public void It_should_create_suggested_workload_items()
         {
             var testProject = new TestProject()
             {
                 Name = "WorkloadTest",
-                TargetFrameworks = "net5.0;net5.0-missingworkloadtestplatform"
+                TargetFrameworks = "net5.0-missingworkloadtestplatform"
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject);
+
+            var getValuesCommand = new GetValuesCommand(testAsset, "SuggestedWorkload", GetValuesCommand.ValueType.Item);
+            getValuesCommand.DependsOnTargets = "GetSuggestedWorkloads";
+            getValuesCommand.MetadataNames.Add("VisualStudioComponentId");
+            getValuesCommand.ShouldRestore = false;
+
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+
+            getValuesCommand.GetValuesWithMetadata().Select(valueAndMetadata => (valueAndMetadata.value, valueAndMetadata.metadata["VisualStudioComponentId"]))
+                .Should()
+                .BeEquivalentTo(("microsoft-net-sdk-missingtestworkload", "microsoft.net.sdk.missingtestworkload"));
+        }
+
+        [Fact]
+        public void It_should_fail_to_restore_without_workload_when_multitargeted()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "WorkloadTest",
+                TargetFrameworks = "net5.0-android;net5.0-ios"
+            };
+
+            var testAsset = _testAssetsManager
+                .CreateTestProject(testProject);
+
+            new RestoreCommand(testAsset)
+                .Execute()
+                .Should()
+                .Fail()
+                .And
+                .HaveStdOutContaining("NETSDK1147");
+
+            //  Until https://github.com/NuGet/Home/issues/10872 is fixed, only one of the errors will be reported when restoring
+            //  Once that is fixed we should add the following checks:
+            //  .And
+            //  .HaveStdOutContaining("ios")
+            //  .And
+            //  .HaveStdOutContaining("android");
+        }
+
+        [Fact]
+        public void It_should_fail_to_build_without_workload_when_multitargeted()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "WorkloadTest",
+                TargetFrameworks = "net5.0-android;net5.0-ios"
             };
 
             var testAsset = _testAssetsManager
                 .CreateTestProject(testProject);
 
             new BuildCommand(testAsset)
-                .Execute()
+                .ExecuteWithoutRestore()
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("NETSDK1147");
+                .HaveStdOutContaining("NETSDK1147")
+                .And
+                .HaveStdOutContaining("ios")
+                .And
+                .HaveStdOutContaining("android");
         }
 
         [Fact]
-        public void It_should_fail_when_multitargeted_to_unknown_platforms()
+        public void It_should_fail_to_build_when_multitargeted_to_unknown_platforms()
         {
             var testProject = new TestProject()
             {
