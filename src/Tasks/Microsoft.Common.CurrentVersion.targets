@@ -1664,7 +1664,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                 }
                 else
                 {
-                  buildChildProjectAs = AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions").Split(',')[0];
+                  // Unable to determine what the child project should be built as.
+                  // Don't set NearestPlatform so we can undefine Platform/PlatformTarget when it's empty.
+                  buildChildProjectAs = "";
+                  Log.LogWarning("Could not determine what the child project should be built as.\nChild project will be built normally.");
                 }
               }
 
@@ -1739,6 +1742,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
         <SetPlatform Condition="'%(ProjectsWithNearestPlatform.Extension)' == '.vcxproj' or '%(ProjectsWithNearestPlatform.Extension)' == '.nativeproj'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+      </ProjectsWithNearestPlatform>
+
+      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
+        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.Extension)' != '.vcxproj' and '%(ProjectsWithNearestPlatform.Extension)' != '.nativeproj'">%(ProjectsWithNearestPlatform.UndefineProperties);PlatformTarget</UndefineProperties>
+        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.Extension)' == '.vcxproj' or '%(ProjectsWithNearestPlatform.Extension)' == '.nativeproj'">%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
