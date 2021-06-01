@@ -1,7 +1,7 @@
 Param(
-    [Parameter(Mandatory = $true)][string] $SourcesDirectory, # Directory where source files live; if using a Localize directory it should live in here
-    [string] $LanguageSet = 'VS_Main_Languages', # Language set to be used in the LocProject.json
-    [switch] $UseCheckedInLocProjectJson, # When set, generates a LocProject.json and compares it to one that already exists in the repo; otherwise just generates one
+    [Parameter(Mandatory=$true)][string] $SourcesDirectory,     # Directory where source files live; if using a Localize directory it should live in here
+    [string] $LanguageSet = 'VS_Main_Languages',                # Language set to be used in the LocProject.json
+    [switch] $UseCheckedInLocProjectJson,                       # When set, generates a LocProject.json and compares it to one that already exists in the repo; otherwise just generates one
     [switch] $CreateNeutralXlfs                                 # Creates neutral xlf files. Only set to false when running locally
 )
 
@@ -14,9 +14,10 @@ $ErrorActionPreference = "Stop"
 
 Import-Module -Name (Join-Path $PSScriptRoot 'native\CommonLibrary.psm1')
 
-$exclusionsFilePath = "$SourcesDirectory\Localize\LocExclusions.json"
+$exclusionsFilePath = "$SourcesDirectory\eng\Localize\LocExclusions.json"
 $exclusions = @{ Exclusions = @() }
-if (Test-Path -Path $exclusionsFilePath) {
+if (Test-Path -Path $exclusionsFilePath)
+{
     $exclusions = Get-Content "$exclusionsFilePath" | ConvertFrom-Json
 }
 
@@ -37,8 +38,8 @@ if ($allXlfFiles) {
     $langXlfFiles = Get-ChildItem -Recurse -Path "$SourcesDirectory\*\*.$firstLangCode.xlf"
 }
 $langXlfFiles | ForEach-Object {
-    $null = $_.Name -Match "([^.]+)\.[\w-]+\.xlf" # matches '[filename].[langcode].xlf'
-
+    $null = $_.Name -Match "(.+)\.[\w-]+\.xlf" # matches '[filename].[langcode].xlf
+    
     $destinationFile = "$($_.Directory.FullName)\$($Matches.1).xlf"
     $xlfFiles += Copy-Item "$($_.FullName)" -Destination $destinationFile -PassThru
 }
@@ -49,12 +50,13 @@ $locJson = @{
     Projects = @(
         @{
             LanguageSet = $LanguageSet
-            LocItems    = @(
+            LocItems = @(
                 $locFiles | ForEach-Object {
-                    $outputPath = "Localize\$(($_.DirectoryName | Resolve-Path -Relative) + "\")"
+                    $outputPath = "$(($_.DirectoryName | Resolve-Path -Relative) + "\")" 
                     $continue = $true
                     foreach ($exclusion in $exclusions.Exclusions) {
-                        if ($outputPath.Contains($exclusion)) {
+                        if ($outputPath.Contains($exclusion))
+                        {
                             $continue = $false
                         }
                     }
@@ -62,11 +64,21 @@ $locJson = @{
                     if (!$CreateNeutralXlfs -and $_.Extension -eq '.xlf') {
                         Remove-Item -Path $sourceFile
                     }
-                    if ($continue) {
-                        return @{
-                            SourceFile = $sourceFile
-                            CopyOption = "LangIDOnName"
-                            OutputPath = $outputPath
+                    if ($continue)
+                    {
+                        if ($_.Directory.Name -eq 'en' -and $_.Extension -eq '.json') {
+                            return @{
+                                SourceFile = $sourceFile
+                                CopyOption = "LangIDOnPath"
+                                OutputPath = "$($_.Directory.Parent.FullName | Resolve-Path -Relative)\"
+                            }
+                        }
+                        else {
+                            return @{
+                                SourceFile = $sourceFile
+                                CopyOption = "LangIDOnName"
+                                OutputPath = $outputPath
+                            }
                         }
                     }
                 }
@@ -76,20 +88,20 @@ $locJson = @{
 }
 
 $json = ConvertTo-Json $locJson -Depth 5
-Write-Host "(NETCORE_ENGINEERING_TELEMETRY=Build) LocProject.json generated:`n`n$json`n`n"
+Write-Host "LocProject.json generated:`n`n$json`n`n"
 Pop-Location
 
 if (!$UseCheckedInLocProjectJson) {
-    New-Item "$SourcesDirectory\Localize\LocProject.json" -Force # Need this to make sure the Localize directory is created
-    Set-Content "$SourcesDirectory\Localize\LocProject.json" $json
+    New-Item "$SourcesDirectory\eng\Localize\LocProject.json" -Force # Need this to make sure the Localize directory is created
+    Set-Content "$SourcesDirectory\eng\Localize\LocProject.json" $json
 }
 else {
-    New-Item "$SourcesDirectory\Localize\LocProject-generated.json" -Force # Need this to make sure the Localize directory is created
-    Set-Content "$SourcesDirectory\Localize\LocProject-generated.json" $json
+    New-Item "$SourcesDirectory\eng\Localize\LocProject-generated.json" -Force # Need this to make sure the Localize directory is created
+    Set-Content "$SourcesDirectory\eng\Localize\LocProject-generated.json" $json
 
-    if ((Get-FileHash "$SourcesDirectory\Localize\LocProject-generated.json").Hash -ne (Get-FileHash "$SourcesDirectory\Localize\LocProject.json").Hash) {
-        Write-PipelineTaskError -Type "warning" -Message "Existing LocProject.json differs from generated LocProject.json. Download LocProject-generated.json and compare them."
-
+    if ((Get-FileHash "$SourcesDirectory\eng\Localize\LocProject-generated.json").Hash -ne (Get-FileHash "$SourcesDirectory\eng\Localize\LocProject.json").Hash) {
+        Write-PipelineTelemetryError -Category "OneLocBuild" -Message "Existing LocProject.json differs from generated LocProject.json. Download LocProject-generated.json and compare them."
+        
         exit 1
     }
     else {
