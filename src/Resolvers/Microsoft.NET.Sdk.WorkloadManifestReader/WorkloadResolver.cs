@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.MSBuildSdkResolver;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
@@ -362,6 +360,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             (
                 finder.GetBestSuggestion().Workloads.Select(s => new WorkloadInfo(s.ToString(), _workloads[s].Description))
             );
+        }
+
+        /// <summary>
+        /// Returns the list of workloads defined by the manifests on disk
+        /// </summary>
+        public IEnumerable<WorkloadDefinition> GetAvaliableWorkloads()
+        {
+            return _workloads.Values;
         }
 
         public class PackInfo
