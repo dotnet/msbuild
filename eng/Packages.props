@@ -25,7 +25,7 @@
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageReference Update="System.Memory" Version="4.5.4" />
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
-    <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
+    <PackageReference Update="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
     <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="5.0.0"/>
     <PackageReference Update="System.Security.Cryptography.Pkcs" Version="4.7.0" />
     <PackageReference Update="System.Security.Cryptography.Xml" Version="4.7.0" />
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true' or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))">
-    <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="5.0.0"/>
+    <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">

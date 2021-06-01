@@ -2633,9 +2633,9 @@ namespace Microsoft.Build.UnitTests
                 return FileSystems.Default.FileExists(path);
             }
 
-            public bool DirectoryEntryExists(string path)
+            public bool FileOrDirectoryExists(string path)
             {
-                return FileSystems.Default.DirectoryEntryExists(path);
+                return FileSystems.Default.FileOrDirectoryExists(path);
             }
         }
     }

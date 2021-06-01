@@ -16,7 +16,6 @@ using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
@@ -35,6 +34,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
         private readonly CancellationToken _cancellationToken;
         private readonly ProjectCachePluginBase _projectCachePlugin;
 
+        /// <summary>
+        /// An instanatiable version of MSBuildFileSystemBase not overriding any methods,
+        /// i.e. falling back to FileSystem.Default.
+        /// </summary>
+        private sealed class DefaultMSBuildFileSystem : MSBuildFileSystemBase { }
+      
         // Use NullableBool to make it work with Interlock.CompareExchange (doesn't accept bool?).
         // Assume that if one request is a design time build, all of them are.
         // Volatile because it is read by the BuildManager thread and written by one project cache service thread pool thread.
@@ -96,7 +101,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 await plugin.BeginBuildAsync(
                     new CacheContext(
                         pluginDescriptor.PluginSettings,
-                        new IFileSystemAdapter(FileSystems.Default),
+                        new DefaultMSBuildFileSystem(),
                         pluginDescriptor.ProjectGraph,
                         pluginDescriptor.EntryPoints),
                     // TODO: Detect verbosity from logging service.

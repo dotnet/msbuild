@@ -153,7 +153,7 @@ jobs:
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-latest'
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
@@ -258,3 +258,9 @@ jobs:
       ArtifactName: 'MonoOnMac test logs'
     continueOnError: true
     condition: always()
+
+- template: /eng/common/templates/job/source-build.yml
+  parameters:
+    platform:
+      name: 'Managed'
+      container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
