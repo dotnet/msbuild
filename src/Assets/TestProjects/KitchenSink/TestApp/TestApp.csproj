@@ -18,6 +18,7 @@
     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
     <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
     <StartupHookSupport>false</StartupHookSupport>
+    <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
     <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
     <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
     <EventSourceSupport>false</EventSourceSupport>
