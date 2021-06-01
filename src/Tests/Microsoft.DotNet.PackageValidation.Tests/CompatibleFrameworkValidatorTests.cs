@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
             new CompatibleTfmValidator(string.Empty, null, false, _log).Validate(package);
             Assert.Single(_log.errors);
-            Assert.Equal("PKV004 There is no compatible runtime asset for target framework .NETCoreApp,Version=v3.1 in the package.", _log.errors[0]);
+            Assert.Equal(DiagnosticIds.CompatibleRuntimeRidLessAsset + " " + string.Format(Resources.NoCompatibleRuntimeAsset, ".NETCoreApp,Version=v3.1"), _log.errors[0]);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
             new CompatibleTfmValidator(string.Empty, null, false, _log).Validate(package); ;
             Assert.NotEmpty(_log.errors);
-            Assert.Contains("PKV004 There is no compatible runtime asset for target framework .NETStandard,Version=v2.0 in the package.", _log.errors);
+            Assert.Contains(DiagnosticIds.CompatibleRuntimeRidLessAsset + " " + string.Format(Resources.NoCompatibleRuntimeAsset, ".NETStandard,Version=v2.0"), _log.errors);
         }
 
         [Fact]
@@ -60,8 +60,8 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
             new CompatibleTfmValidator(string.Empty, null, false, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
-            Assert.Contains("PKV004 There is no compatible runtime asset for target framework .NETCoreApp,Version=v2.0 in the package.", _log.errors);
-            Assert.Contains("PKV005 There is no compatible runtime asset for target framework .NETCoreApp,Version=v2.0-win in the package.", _log.errors);
+            Assert.Contains(DiagnosticIds.CompatibleRuntimeRidLessAsset + " " + string.Format(Resources.NoCompatibleRuntimeAsset, ".NETCoreApp,Version=v2.0"), _log.errors);
+            Assert.Contains(DiagnosticIds.CompatibleRuntimeRidSpecificAsset + " " + string.Format(Resources.NoCompatibleRidSpecificRuntimeAsset, ".NETCoreApp,Version=v2.0", "win"), _log.errors);
         }
 
         [Fact]
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             new CompatibleTfmValidator(string.Empty, null, false, _log).Validate(package);
 
             Assert.NotEmpty(_log.errors);
-            Assert.Contains("PKV0001 There is no compatible compile time asset for target framework .NETStandard,Version=v2.0 in the package.", _log.errors);
+            Assert.Contains(DiagnosticIds.ApplicableCompileTimeAsset + " " + string.Format(Resources.NoCompatibleCompileTimeAsset, ".NETStandard,Version=v2.0"), _log.errors);
         }
 
         [Fact]
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
             new CompatibleTfmValidator(string.Empty, null, false, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
-            Assert.Contains("PKV0001 There is no compatible compile time asset for target framework .NETStandard,Version=v2.0 in the package.", _log.errors);
+            Assert.Contains(DiagnosticIds.ApplicableCompileTimeAsset + " " +string.Format(Resources.NoCompatibleCompileTimeAsset, ".NETStandard,Version=v2.0"), _log.errors);
         }
 
         [Fact]
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
             new CompatibleTfmValidator(string.Empty, null, false, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
-            Assert.Contains("PKV004 There is no compatible runtime asset for target framework .NETCoreApp,Version=v3.0 in the package.", _log.errors);
+            Assert.Contains(DiagnosticIds.CompatibleRuntimeRidLessAsset +  " " + string.Format(Resources.NoCompatibleRuntimeAsset, ".NETCoreApp,Version=v3.0"), _log.errors);
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Package package = new("TestPackage", "1.0.0", filePaths, null, null);
             new CompatibleTfmValidator(string.Empty, null, false, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
-            Assert.Contains("PKV0001 There is no compatible compile time asset for target framework .NETStandard,Version=v2.0 in the package.", _log.errors);
+            Assert.Contains(DiagnosticIds.ApplicableCompileTimeAsset + " " + string.Format(Resources.NoCompatibleCompileTimeAsset, ".NETStandard,Version=v2.0"), _log.errors);
         }
 
         [Fact]

@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.PackageValidation
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    throw new ArgumentException(string.Format(Resources.EmptyPackagePath, value));
+                    throw new ArgumentException(Resources.EmptyPackagePath);
                 }
 
                 if (!File.Exists(Path.GetFullPath(value)))

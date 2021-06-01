@@ -3,68 +3,68 @@
   <file datatype="xml" source-language="en" target-language="fr" original="../Resources.resx">
     <body>
       <trans-unit id="ApiCompatibilityBaselineHeader">
-        <source>API compatibility errors in between {0} (left) and {1} (right) for versions {2} and {3} respectively:</source>
-        <target state="new">API compatibility errors in between {0} (left) and {1} (right) for versions {2} and {3} respectively:</target>
+        <source>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</source>
+        <target state="new">Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</target>
         <note />
       </trans-unit>
       <trans-unit id="ApiCompatibilityHeader">
-        <source>API Compatibility errors between {0} (left) and {1} (right):</source>
-        <target state="new">API Compatibility errors between {0} (left) and {1} (right):</target>
+        <source>API compatibility errors between '{0}' (left) and '{1}' (right):</source>
+        <target state="new">API compatibility errors between '{0}' (left) and '{1}' (right):</target>
         <note />
       </trans-unit>
       <trans-unit id="CompatibleFrameworkInPackageValidatorHeader">
-        <source>{0} assembly api surface area should be compatible with {1} assembly surface area so we can compile against {0} and run on {1} .framework.</source>
-        <target state="new">{0} assembly api surface area should be compatible with {1} assembly surface area so we can compile against {0} and run on {1} .framework.</target>
+        <source>Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</source>
+        <target state="new">Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="CompatibleTfmValidatorHeader">
-        <source>The compile time assemblies public api surface area should be compatible with the runtime assemblies for all target frameworks and RIDs. Please add the following apis to the runtime assemblies.</source>
-        <target state="new">The compile time assemblies public api surface area should be compatible with the runtime assemblies for all target frameworks and RIDs. Please add the following apis to the runtime assemblies.</target>
+        <source>Public API surface area of compile time assemblies and runtime assemblies are not the same for all target frameworks and runtime identifiers. The following API are missing from some runtime assemblies:</source>
+        <target state="new">Public API surface area of compile time assemblies and runtime assemblies are not the same for all target frameworks and runtime identifiers. The following API are missing from some runtime assemblies:</target>
         <note />
       </trans-unit>
       <trans-unit id="EmptyPackagePath">
-        <source>{0} is empty or null.  Please provide a valid package path.</source>
-        <target state="new">{0} is empty or null.  Please provide a valid package path.</target>
+        <source>Package path is empty. Please provide a valid package path.</source>
+        <target state="new">Package path is empty. Please provide a valid package path.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackagePath">
-        <source>Package Path {0} is invalid. Please Check the path .</source>
-        <target state="new">Package Path {0} is invalid. Please Check the path .</target>
+        <source>Package path '{0}' is invalid.</source>
+        <target state="new">Package path '{0}' is invalid.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTargetFramework">
-        <source>TargetFramework {0} is no longer supported in the latest version.</source>
-        <target state="new">TargetFramework {0} is no longer supported in the latest version.</target>
+        <source>Target framework {0} is no longer supported in the latest version.</source>
+        <target state="new">Target framework {0} is no longer supported in the latest version.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTargetFrameworkAndRid">
-        <source>TargetFramework {0} and Rid {1} is no longer supported in the latest version.</source>
-        <target state="new">TargetFramework {0} and Rid {1} is no longer supported in the latest version.</target>
+        <source>Target framework {0} and runtime identifier (RID) {1} is no longer supported in the latest version.</source>
+        <target state="new">Target framework {0} and runtime identifier (RID) {1} is no longer supported in the latest version.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoCompatibleCompileTimeAsset">
-        <source>There is no compatible compile time asset for target framework {0} in the package.</source>
-        <target state="new">There is no compatible compile time asset for target framework {0} in the package.</target>
+        <source>Target framework {0} does not have a compatible compile time asset in the package.</source>
+        <target state="new">Target framework {0} does not have a compatible compile time asset in the package.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoCompatibleRidSpecificRuntimeAsset">
-        <source>There is no compatible runtime asset for target framework {0}-{1} in the package.</source>
-        <target state="new">There is no compatible runtime asset for target framework {0}-{1} in the package.</target>
+        <source>Target framework {0}-{1} does not have a compatible runtime asset in the package.</source>
+        <target state="new">Target framework {0}-{1} does not have a compatible runtime asset in the package.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoCompatibleRuntimeAsset">
-        <source>There is no compatible runtime asset for target framework {0} in the package.</source>
-        <target state="new">There is no compatible runtime asset for target framework {0} in the package.</target>
+        <source>Target framework {0} does not have a compatible runtime asset in the package.</source>
+        <target state="new">Target framework {0} does not have a compatible runtime asset in the package.</target>
         <note />
       </trans-unit>
       <trans-unit id="BaselineVersionValidatorHeader">
-        <source>There are breaking changes between the versions. Please add or modify the apis in the recent version or suppress the intentional breaking changes.</source>
-        <target state="new">There are breaking changes between the versions. Please add or modify the apis in the recent version or suppress the intentional breaking changes.</target>
+        <source>Found breaking API changes between package versions. If these breaking changes are unintentional, revert them in the newer package version. Otherwise suppress this error.</source>
+        <target state="new">Found breaking API changes between package versions. If these breaking changes are unintentional, revert them in the newer package version. Otherwise suppress this error.</target>
         <note />
       </trans-unit>
       <trans-unit id="NonExistentPackagePath">
-        <source>{0} does not exist. Please provide a valid package path.</source>
-        <target state="new">{0} does not exist. Please provide a valid package path.</target>
+        <source>Package '{0}' not found. Please provide a valid package path.</source>
+        <target state="new">Package '{0}' not found. Please provide a valid package path.</target>
         <note />
       </trans-unit>
     </body>
