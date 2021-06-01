@@ -62,6 +62,20 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Obtain the number of documents contained in the cache.
+        /// </summary>
+        internal int DocumentCount
+        {
+            get
+            {
+                lock (_locker)
+                {
+                    return _documents.Count;
+                }
+            }
+        }
+
+        /// <summary>
         /// Add the given string to the cache or return the existing string if it is already
         /// in the cache.
         /// Constant time operation.

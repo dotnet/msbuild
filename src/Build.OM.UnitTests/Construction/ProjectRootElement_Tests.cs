@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 #endif
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -18,6 +19,7 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Construction
@@ -1854,6 +1856,31 @@ true, true, true)]
             AssertReload(SimpleProject, ComplexProject, true, true, true, act);
         }
 
+        [Fact]
+        public void ReloadDoesNotLeakCachedXmlDocuments()
+        {
+            using var env = TestEnvironment.Create();
+            var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
+            var projectFile = testFiles.CreatedFiles.First();
+
+            var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(SimpleProject);
+            projectElement.Save(projectFile);
+
+            int originalDocumentCount = GetNumberOfDocumentsInProjectStringCache(projectElement);
+
+            // Test successful reload.
+            projectElement.Reload(false);
+            GetNumberOfDocumentsInProjectStringCache(projectElement).ShouldBe(originalDocumentCount);
+
+            // Test failed reload.
+            using (StreamWriter sw = new StreamWriter(projectFile))
+            {
+                sw.WriteLine("<XXX />"); // Invalid root element
+            }
+            Should.Throw<InvalidProjectFileException>(() => projectElement.Reload(false));
+            GetNumberOfDocumentsInProjectStringCache(projectElement).ShouldBe(originalDocumentCount);
+        }
+
         private void AssertReload(
             string initialContents,
             string changedContents,
@@ -1985,6 +2012,18 @@ true, true, true)]
         private void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false);
+        }
+
+        /// <summary>
+        /// Returns the number of documents retained by the project string cache.
+        /// Peeks at it via reflection since internals are not visible to these tests.
+        /// </summary>
+        private int GetNumberOfDocumentsInProjectStringCache(ProjectRootElement project)
+        {
+            var bindingFlags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty;
+            object document = typeof(ProjectRootElement).InvokeMember("XmlDocument", bindingFlags, null, project, Array.Empty<object>());
+            object cache = document.GetType().InvokeMember("StringCache", bindingFlags, null, document, Array.Empty<object>());
+            return (int)cache.GetType().InvokeMember("DocumentCount", bindingFlags, null, cache, Array.Empty<object>());
         }
     }
 }
