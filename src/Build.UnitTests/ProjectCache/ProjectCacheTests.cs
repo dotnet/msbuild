@@ -193,6 +193,31 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
+        public class DelegatingMockCache : ProjectCachePluginBase
+        {
+            private readonly Func<BuildRequestData, PluginLoggerBase, CancellationToken, Task<CacheResult>> _getCacheResultDelegate;
+
+            public DelegatingMockCache(Func<BuildRequestData, PluginLoggerBase, CancellationToken, Task<CacheResult>> getCacheResultDelegate)
+            {
+                _getCacheResultDelegate = getCacheResultDelegate;
+            }
+
+            public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
+
+            public override async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, PluginLoggerBase logger, CancellationToken cancellationToken)
+            {
+                return await _getCacheResultDelegate(buildRequest, logger, cancellationToken);
+            }
+
+            public override Task EndBuildAsync(PluginLoggerBase logger, CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
         [Flags]
         public enum ErrorLocations
         {
@@ -1249,6 +1274,92 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 return;
             }
 
+            var referenceNumbers = new []{2, 3, 4};
+
+            var testData = new GraphCacheResponse(
+                new Dictionary<int, int[]>
+                {
+                    {1, referenceNumbers}
+                },
+                referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult())
+            );
+
+            var graph = testData.CreateGraph(_env);
+
+            var completedCacheRequests = new ConcurrentBag<int>();
+            var task2Completion = new TaskCompletionSource<bool>();
+            task2Completion.Task.IsCompleted.ShouldBeFalse();
+
+            var cache = new DelegatingMockCache(
+                async (buildRequest, _, _) =>
+                {
+                    var projectNumber = GetProjectNumber(buildRequest.ProjectFullPath);
+
+                    try
+                    {
+                        if (projectNumber == 2)
+                        {
+                            await task2Completion.Task;
+                        }
+
+                        return testData.GetExpectedCacheResultForProjectNumber(projectNumber);
+                    }
+                    finally
+                    {
+                        completedCacheRequests.Add(projectNumber);
+                    }
+                });
+
+            using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters()
+            {
+                MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+                    cache,
+                    entryPoints: null,
+                    graph),
+                UseSynchronousLogging = useSynchronousLogging,
+                DisableInProcNode = disableInprocNode
+            });
+
+            var task2 = BuildProjectFileAsync(2);
+            var task3 = BuildProjectFileAsync(3);
+            var task4 = BuildProjectFileAsync(4);
+
+            task3.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            completedCacheRequests.ShouldContain(3);
+            task4.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            completedCacheRequests.ShouldContain(4);
+
+            // task 2 hasn't been instructed to finish yet
+            task2.IsCompleted.ShouldBeFalse();
+            completedCacheRequests.ShouldNotContain(2);
+
+            task2Completion.SetResult(true);
+
+            task2.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            completedCacheRequests.ShouldContain(2);
+
+            var task1 = BuildProjectFileAsync(1);
+            task1.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            completedCacheRequests.ShouldContain(1);
+
+            Task<BuildResult> BuildProjectFileAsync(int projectNumber)
+            {
+                return buildSession.BuildProjectFileAsync(graph.ProjectNodes.First(n => GetProjectNumber(n) == projectNumber).ProjectInstance.FullPath);
+            }
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, true)]
+        public void ParallelStressTest(bool useSynchronousLogging, bool disableInprocNode)
+        {
+            if (disableInprocNode)
+            {
+                // TODO: remove this branch when the DisableInProcNode failure is fixed by https://github.com/dotnet/msbuild/pull/6400
+                return;
+            }
+
             var referenceNumbers = Enumerable.Range(2, NativeMethodsShared.GetLogicalCoreCount() * 2).ToArray();
 
             var testData = new GraphCacheResponse(
@@ -1277,19 +1388,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
             cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
-
-            // Iterate through the ordered list of cache query starts and stops and verify they are out of order.
-            // Out of order means the cache was called in parallel. In order means it was called sequentially.
-            var cacheCallsAreSerialized = true;
-            foreach (var i in Enumerable.Range(0, cache.QueryStartStops.Count).Where(i => i % 2 == 0))
-            {
-                if (cache.QueryStartStops.ElementAt(i) != cache.QueryStartStops.ElementAt(i + 1))
-                {
-                    cacheCallsAreSerialized = false;
-                }
-            }
-
-            cacheCallsAreSerialized.ShouldBeFalse(string.Join(" ", cache.QueryStartStops));
         }
 
         private static void StringShouldContainSubstring(string aString, string substring, int expectedOccurrences)
