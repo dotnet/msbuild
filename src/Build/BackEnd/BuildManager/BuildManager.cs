@@ -1144,6 +1144,9 @@ namespace Microsoft.Build.Execution
             return BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Count > 0;
         }
 
+        // Cache requests on configuration N do not block future build submissions depending on configuration N.
+        // It is assumed that the higher level build orchestrator (static graph scheduler, VS, quickbuild) submits a
+        // project build request only when its references have finished building.
         private void IssueCacheRequestForBuildSubmission(CacheRequest cacheRequest)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
