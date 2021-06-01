@@ -1736,7 +1736,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup Condition="'@(ProjectsWithPlatformAssignment->Count())' != '0'">
       <ProjectsWithNearestPlatform Include="@(ProjectsWithPlatformAssignment)"/>
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
-      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != '' and '%(ProjectsWithNearestPlatform.CanMultiPlatform)' == 'true'">
+      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
         <SetPlatform Condition="'%(ProjectsWithNearestPlatform.Extension)' == '.vcxproj' or '%(ProjectsWithNearestPlatform.Extension)' == '.nativeproj'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
