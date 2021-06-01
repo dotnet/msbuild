@@ -1740,11 +1740,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
         <SetPlatform Condition="'%(ProjectsWithNearestPlatform.Extension)' == '.vcxproj' or '%(ProjectsWithNearestPlatform.Extension)' == '.nativeproj'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
-    </ItemGroup>
 
-    <!-- If GetNearestPlatformTask didn't run, @(ProjectsWithPlatformAssignment) will be empty.
-         Don't modify @(_MSBuildProjectReferenceExistent) in this case. -->
-    <ItemGroup Condition="'@(ProjectsWithPlatformAssignment->Count())' != '0'">
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
       <_MSBuildProjectReferenceExistent Include="@(ProjectsWithNearestPlatform)"/>
     </ItemGroup>
