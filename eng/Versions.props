@@ -23,6 +23,7 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
+    <SystemResourcesExtensionsPackageVersion>4.6.0</SystemResourcesExtensionsPackageVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>

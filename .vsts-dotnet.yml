@@ -237,12 +237,19 @@ stages:
       displayName: Execute cleanup tasks
       condition: succeededOrFailed()
 
+  - template: /eng/common/templates/job/source-build.yml
+    parameters:
+      platform:
+        name: 'Managed'
+        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
+
   - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:
       enablePublishBuildArtifacts: true
       publishUsingPipelines: true
       dependsOn:
         - Windows_NT
+        - Source_Build_Managed
       pool:
         vmImage: vs2017-win2016
 

@@ -4,6 +4,7 @@
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21281.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>c7d6bd607715f334cda90e01967bb0c02dee09be</Sha>
+      <SourceBuild RepoName="arcade" ManagedOnly="true"/>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="6.0.0-preview.1.66">
       <Uri>https://github.com/nuget/nuget.client</Uri>
