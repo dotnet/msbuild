@@ -26,9 +26,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Returns="@(_ThisProjectPlatformMetadata)">
     <ItemGroup>
       <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
-        <PlatformOptions>$(Platform),$(Platforms),$(PlatformTarget)</PlatformOptions>
+        <PlatformOptions>$(Platforms)</PlatformOptions>
         <CanMultiPlatform>false</CanMultiPlatform>
-        <CanMultiPlatform Condition="'$(Platforms)' != ''">true</CanMultiPlatform>
+        <CanMultiPlatform Condition="$(Platforms.Contains(',')) == 'true'">true</CanMultiPlatform>
       </_ThisProjectPlatformMetadata>
     </ItemGroup>
   </Target>
