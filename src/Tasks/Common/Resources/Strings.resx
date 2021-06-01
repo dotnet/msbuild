@@ -783,7 +783,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1167: "}</comment>
   </data>
   <data name="TrimmingWpfIsNotSupported" xml:space="preserve">
-    <value>NETSDK1168: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
+    <value>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
     <comment>{StrBegin="NETSDK1168: "}</comment>
   </data>
   <data name="DuplicateTypeLibraryIds" xml:space="preserve">
