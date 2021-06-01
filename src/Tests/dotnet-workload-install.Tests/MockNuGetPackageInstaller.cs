@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly string _downloadPath;
         private readonly bool _manifestDownload;
 
-        public List<(PackageId, NuGetVersion, DirectoryPath?)> DownloadCallParams = new List<(PackageId, NuGetVersion, DirectoryPath?)>();
+        public List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)> DownloadCallParams = new List<(PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation)>();
 
         public List<string> DownloadCallResult = new List<string>();
 
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             bool includePreview = false,
 			DirectoryPath? downloadFolder = null)
         {
-            DownloadCallParams.Add((packageId, packageVersion, downloadFolder));
+            DownloadCallParams.Add((packageId, packageVersion, downloadFolder, packageSourceLocation));
             var path = Path.Combine(_downloadPath, "mock.nupkg");
             DownloadCallResult.Add(path);
             File.WriteAllText(path, string.Empty);

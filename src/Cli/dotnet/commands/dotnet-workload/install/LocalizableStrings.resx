@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="WorkloadIdArgumentName" xml:space="preserve">
-    <value>PACKAGE_ID</value>
+    <value>WORKLOAD_ID</value>
   </data>
   <data name="WorkloadIdArgumentDescription" xml:space="preserve">
     <value>The NuGet Package Id of the workload to install.</value>
@@ -257,5 +257,11 @@
   </data>
   <data name="FailedToGetPackageManifestUrl" xml:space="preserve">
     <value>Failed to resolve manifest package url {0}.</value>
+  </data>
+  <data name="OSDoesNotSupportMsi" xml:space="preserve">
+    <value>MSI installations are only supported on Windows.</value>
+  </data>
+  <data name="DeletingWorkloadPack" xml:space="preserve">
+    <value>Uninstalling workload pack {0} version {1}.</value>
   </data>
 </root>

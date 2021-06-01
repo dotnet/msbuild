@@ -66,11 +66,11 @@ namespace Microsoft.DotNet.PackageValidation
         /// <param name="rightPackagePath">Path to package containing right assembly.</param>
         /// <param name="rightRelativePath">Relative right assembly path in package.</param>
         /// <param name="assemblyName">The name of the assembly.</param>
-        /// <param name="compatibiltyReason">The reason for assembly compatibilty.</param>
+        /// <param name="compatibilityReason">The reason for assembly compatibilty.</param>
         /// <param name="header">The header for the api compat diagnostics.</param>
-        public void QueueApiCompat(string leftPackagePath, string leftRelativePath, string rightPackagePath, string rightRelativePath, string assemblyName, string compatibiltyReason, string header)
+        public void QueueApiCompat(string leftPackagePath, string leftRelativePath, string rightPackagePath, string rightRelativePath, string assemblyName, string compatibilityReason, string header)
         {
-            _queue.Add((leftPackagePath, leftRelativePath, rightPackagePath, rightRelativePath, assemblyName, compatibiltyReason, header));
+            _queue.Add((leftPackagePath, leftRelativePath, rightPackagePath, rightRelativePath, assemblyName, compatibilityReason, header));
         }
 
         private static Stream GetFileStreamFromPackage(string packagePath, string entry)

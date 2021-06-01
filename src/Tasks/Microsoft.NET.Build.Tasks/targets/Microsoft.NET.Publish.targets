@@ -499,7 +499,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <ItemGroup>
         <_ResolvedCopyLocalPublishAssets Include="@(RuntimePackAsset)"
-                                         Condition="'$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true'" />
+                                         Condition="('$(SelfContained)' == 'true' Or '%(RuntimePackAsset.RuntimePackAlwaysCopyLocal)' == 'true') and '%(RuntimePackAsset.AssetType)' != 'pgodata'" />
       </ItemGroup>
 
       <ItemGroup Condition="'$(_UseBuildDependencyFile)' != 'true'">

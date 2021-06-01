@@ -118,6 +118,10 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     assetType = "native";
                 }
+                else if (typeAttributeValue.Equals("PgoData", StringComparison.OrdinalIgnoreCase))
+                {
+                    assetType = "pgodata";
+                }
                 else if (typeAttributeValue.Equals("Resources", StringComparison.OrdinalIgnoreCase))
                 {
                     assetType = "resources";
@@ -166,7 +170,9 @@ namespace Microsoft.NET.Build.Tasks
 
             var assetItem = new TaskItem(assetPath);
 
-            assetItem.SetMetadata(MetadataKeys.CopyLocal, "true");
+            if (assetType != "pgodata")
+                assetItem.SetMetadata(MetadataKeys.CopyLocal, "true");
+
             if (string.IsNullOrEmpty(culture))
             {
                 assetItem.SetMetadata(MetadataKeys.DestinationSubPath, Path.GetFileName(assetPath));

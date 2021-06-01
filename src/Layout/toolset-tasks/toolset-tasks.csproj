@@ -3,6 +3,7 @@
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
     <TargetFrameworks Condition=" '$([MSBuild]::IsOSPlatform(`Windows`))' == 'false' ">$(SdkTargetFramework)</TargetFrameworks>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RootNamespace>Microsoft.DotNet.Build.Tasks</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +12,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Tasks\Microsoft.NET.Build.Tasks\RuntimeConfig.cs" LinkBase="RuntimeConfig"/>
+    <Compile Include="..\..\Tasks\Microsoft.NET.Build.Tasks\RuntimeOptions.cs" LinkBase="RuntimeConfig"/>
+    <Compile Include="..\..\Tasks\Microsoft.NET.Build.Tasks\RuntimeConfigFramework.cs" LinkBase="RuntimeConfig"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

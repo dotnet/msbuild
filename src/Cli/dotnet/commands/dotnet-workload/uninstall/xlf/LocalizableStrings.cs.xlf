@@ -17,23 +17,23 @@
         <target state="translated">PACKAGE_ID</target>
         <note />
       </trans-unit>
+      <trans-unit id="RemovingWorkloadInstallationRecord">
+        <source>Removing workload installation record for {0}...</source>
+        <target state="new">Removing workload installation record for {0}...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
         <source>Specify one workload Package Id to uninstall.</source>
         <target state="translated">Zadejte jedno ID balíčku nástroje, který se má odinstalovat.</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallLocalWorkloadSucceeded">
-        <source>Workload '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
-        <target state="translated">Nástroj {0} se úspěšně odinstaloval a odebral ze souboru manifestu {1}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UninstallSucceeded">
-        <source>Workload '{0}' (version '{1}') was successfully uninstalled.</source>
-        <target state="translated">Nástroj {0} (verze {1}) byl úspěšně odinstalován.</target>
+        <source>Successfully uninstalled workload(s): {0}</source>
+        <target state="new">Successfully uninstalled workload(s): {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>A workload with the package Id '{0}' could not be found.</source>
+        <source>Could not find workloads with id(s): {0}</source>
         <target state="needs-review-translation">Nástroj s ID balíčku {0} se nenašel. 
 
 Nástroje se odinstalují pomocí svého ID balíčku, které se může lišit 
@@ -42,24 +42,9 @@ a odpovídající ID balíčků nainstalovaných nástrojů najdete pomocí
 příkazu 'dotnet workload list'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToUninstallWorkload">
-        <source>Failed to uninstall workload '{0}': {1}</source>
-        <target state="translated">Nepodařilo se odinstalovat nástroj {0}: {1}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidWorkloadPathOption">
-        <source>Workload path '{0}' does not exist.</source>
-        <target state="translated">Cesta k nástroji {0} neexistuje.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionName">
-        <source>PATH</source>
-        <target state="translated">PATH</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="WorkloadPathOptionDescription">
-        <source>The directory containing the workload to uninstall.</source>
-        <target state="translated">Adresář obsahující nástroj, který se má odinstalovat</target>
+      <trans-unit id="WorkloadUninstallFailed">
+        <source>Workload uninstallation failed: {0}</source>
+        <target state="new">Workload uninstallation failed: {0}</target>
         <note />
       </trans-unit>
     </body>

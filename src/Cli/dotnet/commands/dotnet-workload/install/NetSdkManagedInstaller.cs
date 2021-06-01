@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly IWorkloadResolver _workloadResolver;
         private readonly SdkFeatureBand _sdkFeatureBand;
         private readonly NetSdkManagedInstallationRecordRepository _installationRecordRepository;
+        private readonly PackageSourceLocation _packageSourceLocation;
 
         public NetSdkManagedInstaller(
             IReporter reporter,
@@ -37,7 +38,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir =  null,
-            VerbosityOptions verbosity = VerbosityOptions.normal)
+            VerbosityOptions verbosity = VerbosityOptions.normal, 
+            PackageSourceLocation packageSourceLocation = null)
         {
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
@@ -48,6 +50,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _sdkFeatureBand = sdkFeatureBand;
             _workloadResolver = workloadResolver;
             _installationRecordRepository = new NetSdkManagedInstallationRecordRepository(_dotnetDir);
+            _packageSourceLocation = packageSourceLocation;
         }
 
         public InstallationUnit GetInstallationUnit()
@@ -85,7 +88,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             string packagePath;
                             if (offlineCache == null || !offlineCache.HasValue)
                             {
-                                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version)).Result;
+                                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).Result;
                                 tempFilesToDelete.Add(packagePath);
                             }
                             else
@@ -182,7 +185,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                    {
                        if (offlineCache == null || !offlineCache.HasValue)
                        {
-                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), new NuGetVersion(manifestVersion.ToString())).Result;
+                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).Result;
                        }
                        else
                        {
@@ -257,7 +260,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 Directory.CreateDirectory(cachePath.Value);
             }
-            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), downloadFolder: cachePath, includePreview: includePreviews).Wait();
+            _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), downloadFolder: cachePath,
+                packageSourceLocation: _packageSourceLocation, includePreview: includePreviews).Wait();
         }
 
         public void GarbageCollectInstalledWorkloadPacks()
@@ -370,6 +374,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             if (PackIsInstalled(packInfo))
             {
+                _reporter.WriteLine(string.Format(LocalizableStrings.DeletingWorkloadPack, packInfo.Id, packInfo.Version));
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 if (IsSingleFilePack(packInfo))

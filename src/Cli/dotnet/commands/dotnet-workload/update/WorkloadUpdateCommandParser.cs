@@ -28,13 +28,6 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option FromCacheOption =
             WorkloadInstallCommandParser.FromCacheOption;
 
-        /// <summary>
-        /// VSMac updater could update SDK across feature band. This option is only for VSMac updater
-        /// scenario. If there are breaking change between manifests, we would fail to load the new available update
-        /// we will do best effort in that case.
-        /// </summary>
-        public static readonly Option SdkVersionOption = new Option<string>("--target-sdk-version") {IsHidden = true};
-
         public static Command GetCommand()
         {
             Command command = new("update", LocalizableStrings.CommandDescription);
@@ -44,7 +37,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VersionOption);
             command.AddOption(PrintDownloadLinkOnlyOption);
             command.AddOption(FromCacheOption);
-            command.AddOption(SdkVersionOption);
             command.AddOption(IncludePreviewsOption);
             command.AddOption(DownloadToCacheOption);
             command.AddOption(TempDirOption);

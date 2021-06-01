@@ -118,42 +118,42 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CompatibleFrameworkInPackageValidatorHeader" xml:space="preserve">
-    <value>{0} assembly api surface area should be compatible with {1} assembly surface area so we can compile against {0} and run on {1} .framework.</value>
+    <value>Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</value>
   </data>
   <data name="CompatibleTfmValidatorHeader" xml:space="preserve">
-    <value>The compile time assemblies public api surface area should be compatible with the runtime assemblies for all target frameworks and RIDs. Please add the following apis to the runtime assemblies.</value>
-  </data>
-  <data name="InvalidPackagePath" xml:space="preserve">
-    <value>Package Path {0} is invalid. Please Check the path .</value>
+    <value>Public API surface area of compile time assemblies and runtime assemblies are not the same for all target frameworks and runtime identifiers. The following API are missing from some runtime assemblies:</value>
   </data>
   <data name="ApiCompatibilityHeader" xml:space="preserve">
-    <value>API Compatibility errors between {0} (left) and {1} (right):</value>
+    <value>API compatibility errors between '{0}' (left) and '{1}' (right):</value>
   </data>
   <data name="MissingTargetFramework" xml:space="preserve">
-    <value>TargetFramework {0} is no longer supported in the latest version.</value>
+    <value>Target framework {0} is no longer supported in the latest version.</value>
   </data>
   <data name="MissingTargetFrameworkAndRid" xml:space="preserve">
-    <value>TargetFramework {0} and Rid {1} is no longer supported in the latest version.</value>
+    <value>Target framework {0} and runtime identifier (RID) {1} is no longer supported in the latest version.</value>
   </data>
   <data name="NoCompatibleCompileTimeAsset" xml:space="preserve">
-    <value>There is no compatible compile time asset for target framework {0} in the package.</value>
+    <value>Target framework {0} does not have a compatible compile time asset in the package.</value>
   </data>
   <data name="NoCompatibleRidSpecificRuntimeAsset" xml:space="preserve">
-    <value>There is no compatible runtime asset for target framework {0}-{1} in the package.</value>
+    <value>Target framework {0}-{1} does not have a compatible runtime asset in the package.</value>
   </data>
   <data name="NoCompatibleRuntimeAsset" xml:space="preserve">
-    <value>There is no compatible runtime asset for target framework {0} in the package.</value>
+    <value>Target framework {0} does not have a compatible runtime asset in the package.</value>
   </data>
   <data name="BaselineVersionValidatorHeader" xml:space="preserve">
-    <value>There are breaking changes between the versions. Please add or modify the apis in the recent version or suppress the intentional breaking changes.</value>
+    <value>Found breaking API changes between package versions. If these breaking changes are unintentional, revert them in the newer package version. Otherwise suppress this error.</value>
   </data>
   <data name="ApiCompatibilityBaselineHeader" xml:space="preserve">
-    <value>API compatibility errors in between {0} (left) and {1} (right) for versions {2} and {3} respectively:</value>
+    <value>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</value>
   </data>
   <data name="EmptyPackagePath" xml:space="preserve">
-    <value>{0} is empty or null.  Please provide a valid package path.</value>
+    <value>Package path is empty. Please provide a valid package path.</value>
+  </data>
+  <data name="InvalidPackagePath" xml:space="preserve">
+    <value>Package path '{0}' is invalid.</value>
   </data>
   <data name="NonExistentPackagePath" xml:space="preserve">
-    <value>{0} does not exist. Please provide a valid package path.</value>
+    <value>Package '{0}' not found. Please provide a valid package path.</value>
   </data>
 </root>

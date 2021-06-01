@@ -10,14 +10,17 @@ namespace Microsoft.DotNet.Cli
     {
         // arguments are a list of workload to be detected
         public static readonly Option MachineReadableOption = new Option<bool>("--machine-readable") {IsHidden = true};
+
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
+
+        public static readonly Option VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
         public static Command GetCommand()
         {
             var command = new Command("list", LocalizableStrings.CommandDescription);
             command.AddOption(MachineReadableOption);
             command.AddOption(VerbosityOption);
-            command.AddOption(WorkloadUpdateCommandParser.SdkVersionOption);
+            command.AddOption(VersionOption);
             return command;
         }
     }
