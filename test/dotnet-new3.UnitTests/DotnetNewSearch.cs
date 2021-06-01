@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.NET.TestFramework.Assertions;
 using Xunit;
@@ -376,6 +377,39 @@ Examples:
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
 
+        [Fact]
+        public void CanSortByName()
+        {
+            var commandResult = new DotnetNewCommand(_log, "console", "--search")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US")
+                .Execute();
+
+            commandResult.Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("Searching for the templates...")
+                .And.HaveStdOutContaining("Matches from template source: NuGet.org")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Author\\s+Language\\s+Package\\s+Downloads")
+                .And.HaveStdOutContaining("To use the template, run the following command to install the package: dotnet new3 -i <package>");
+
+            var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
+
+            Assert.True(tableOutput.Count > 2, "At least 2 search hits are expected");
+
+            // rows can be shrunk: ML.NET Console App for Training and ML.NET Console App for Train...
+            // in this case ML.NET Console App for Training < ML.NET Console App for Train...
+            // therefore use custom comparer 
+            var comparer = new ShrinkAwareOrdinalStringComparer();
+            //first row is the header
+            for (int i = 2; i < tableOutput.Count; i++)
+            {
+                Assert.True(
+                    comparer.Compare(tableOutput[i - 1][0], tableOutput[i][0]) <= 0,
+                    $"the following entries of the table are not sorted alphabetically by first column: {tableOutput[i - 1][0]} and {tableOutput[i][0]}.");
+            }
+        }
+
         private static bool AllRowsContain(List<List<string>> tableOutput, string[] columnsNames, string value)
         {
             var columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));
@@ -462,6 +496,44 @@ Examples:
                 parsedTable.Add(parsedRow);
             }
             return parsedTable;
+        }
+
+        private class ShrinkAwareOrdinalStringComparer : IComparer<string>
+        {
+            public int Compare(string? left, string? right)
+            {
+                if (string.IsNullOrEmpty(left) && string.IsNullOrEmpty(right))
+                {
+                    return 0;
+                }
+
+                if (string.IsNullOrEmpty(left))
+                {
+                    return -1;
+                }
+
+                if (string.IsNullOrEmpty(right))
+                {
+                    return 1;
+                }
+
+                bool leftIsShrunk = left.EndsWith("...");
+                bool rightIsShrunk = right.EndsWith("...");
+                if (!(leftIsShrunk ^ rightIsShrunk))
+                {
+                    return string.Compare(left, right, StringComparison.Ordinal);
+                }
+                
+                if (rightIsShrunk && left.StartsWith(right.Substring(0, right.Length - 3), StringComparison.Ordinal))
+                {
+                    return -1;
+                }
+                if (leftIsShrunk && right.StartsWith(left.Substring(0, left.Length - 3), StringComparison.Ordinal))
+                {
+                    return 1;
+                }
+                return string.Compare(left, right, StringComparison.Ordinal);
+            }
         }
     }
 }

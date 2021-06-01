@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         /// <c>New3CommandStatus.Cancelled</c> when the command validation fails;
         /// <c>New3CommandStatus.NotFound</c> when no templates found based on the filter criteria.
         /// </returns>
-        internal static async Task<New3CommandStatus> SearchForTemplateMatchesAsync(IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, INewCommandInput commandInput, string defaultLanguage)
+        internal static async Task<New3CommandStatus> SearchForTemplateMatchesAsync(IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, INewCommandInput commandInput, string? defaultLanguage)
         {
             if (!ValidateCommandInput(commandInput))
             {
@@ -45,7 +47,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
             if (searchResults.MatchesBySource.Count > 0)
             {
-                string packageIdToShow = null;
+                string? packageIdToShow = null;
                 foreach (TemplateSourceSearchResult sourceResult in searchResults.MatchesBySource)
                 {
                     DisplayResultsForPack(sourceResult, environmentSettings, commandInput, defaultLanguage);
@@ -79,7 +81,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
         }
 
-        private static void DisplayResultsForPack(TemplateSourceSearchResult sourceResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage)
+        private static void DisplayResultsForPack(TemplateSourceSearchResult sourceResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage)
         {
             string sourceHeader = string.Format(LocalizableStrings.SearchResultSourceIndicator, sourceResult.SourceDisplayName);
 
@@ -97,7 +99,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                         columnPadding: 2,
                         headerSeparator: '-',
                         blankLineBetweenRows: false)
-                    .DefineColumn(r => r.TemplateGroupInfo.Name, LocalizableStrings.ColumnNameTemplateName, showAlways: true, shrinkIfNeeded: true, minWidth: 15)
+                    .DefineColumn(r => r.TemplateGroupInfo.Name, out object nameColumn, LocalizableStrings.ColumnNameTemplateName, showAlways: true, shrinkIfNeeded: true, minWidth: 15)
                     .DefineColumn(r => r.TemplateGroupInfo.ShortName, LocalizableStrings.ColumnNameShortName, showAlways: true)
                     .DefineColumn(r => r.TemplateGroupInfo.Author, LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: true, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(r => r.TemplateGroupInfo.Languages, LocalizableStrings.ColumnNameLanguage, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
@@ -105,12 +107,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     .DefineColumn(r => r.TemplateGroupInfo.Classifications, LocalizableStrings.ColumnNameTags, NewCommandInputCli.TagsColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(r => r.PackageName, out object packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
                     .DefineColumn(r => r.PrintableTotalDownloads, LocalizableStrings.ColumnNameTotalDownloads, showAlways: true, rightAlign: true)
-                    .OrderBy(packageColumn);
+                    .OrderBy(nameColumn);
 
             Reporter.Output.WriteLine(formatter.Layout());
         }
 
-        private static IReadOnlyCollection<SearchResultTableRow> GetSearchResultsForDisplay(TemplateSourceSearchResult sourceResult, string language, string defaultLanguage)
+        private static IReadOnlyCollection<SearchResultTableRow> GetSearchResultsForDisplay(TemplateSourceSearchResult sourceResult, string language, string? defaultLanguage)
         {
             List<SearchResultTableRow> templateGroupsForDisplay = new List<SearchResultTableRow>();
 
