@@ -697,6 +697,9 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfig["runtimeOptions"]["configProperties"]
                     ["System.StartupHookProvider.IsSupported"].Value<bool>()
                     .Should().BeFalse();
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.Threading.Thread.EnableAutoreleasePool"].Value<bool>()
+                    .Should().BeFalse();
             }
             else
             {
@@ -706,6 +709,7 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting");
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableCppCLIHostActivation");
                 runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
+                runtimeConfigContents.Should().NotContain("System.Threading.Thread.EnableAutoreleasePool");
             }
         }
 
