@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests
 
                 /* Directory + File */
                 Assert.Equal(@"def", FileUtilities.MakeRelative(@"/abc/", @"/abc/def"));
-                Assert.Equal(@"../../ghi", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/def"));
+                Assert.Equal(@"../../ghi", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/ghi"));
                 Assert.Equal(@"../ghi", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/def/ghi"));
                 Assert.Equal(@"../ghi", FileUtilities.MakeRelative(@"/abc/def/", @"/abc/ghi"));
 
