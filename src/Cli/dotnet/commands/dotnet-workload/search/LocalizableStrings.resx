@@ -132,10 +132,7 @@
   <data name="DescriptionColumnName" xml:space="preserve">
     <value>Description</value>
   </data>
-  <data name="KindColumnName" xml:space="preserve">
-    <value>Kind</value>
-  </data>
-  <data name="IsAbstractColumnName" xml:space="preserve">
-    <value>Is Abstract</value>
+  <data name="PlatformColumnName" xml:space="preserve">
+    <value>Platforms</value>
   </data>
 </root>
