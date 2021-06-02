@@ -22,7 +22,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateResourceMSBuildArchitecture Condition=" '$(GenerateResourceMSBuildArchitecture)' == '' ">CurrentArchitecture</GenerateResourceMSBuildArchitecture>
     <GenerateResourceMSBuildRuntime Condition=" '$(GenerateResourceMSBuildRuntime)' == '' ">CurrentRuntime</GenerateResourceMSBuildRuntime>
   </PropertyGroup>
-
+  
   <PropertyGroup>
     <_NativeLibraryPrefix Condition="'$(_NativeLibraryPrefix)' == '' and !$(RuntimeIdentifier.StartsWith('win'))">lib</_NativeLibraryPrefix>
 
