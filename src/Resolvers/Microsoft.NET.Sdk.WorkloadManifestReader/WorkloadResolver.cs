@@ -55,6 +55,22 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return new WorkloadResolver(manifestProvider, dotNetRootPaths, currentRuntimeIdentifiers);
         }
 
+        public WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion)
+        {
+            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_PACK_ROOTS");
+            string[] dotnetRootPaths;
+            if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
+            {
+                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.DirectorySeparatorChar).Append(dotnetRootPath).ToArray();
+            }
+            else
+            {
+                dotnetRootPaths = new[] { dotnetRootPath };
+            }
+
+            return new WorkloadResolver(manifestProvider, dotnetRootPaths, _currentRuntimeIdentifiers);
+        }
+
         private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string [] dotnetRootPaths, string [] currentRuntimeIdentifiers)
         {
             _dotnetRootPaths = dotnetRootPaths;
@@ -267,7 +283,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             if (!_workloads.TryGetValue(id, out var workload))
             {
-                throw new Exception("Workload not found");
+                throw new Exception($"Workload not found: {id}. Known workloads: {string.Join(" ", _workloads.Select(workload => workload.Key.ToString()))}");
             }
 
             if (workload.Extends?.Count > 0)

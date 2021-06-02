@@ -11,6 +11,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         IEnumerable<string> GetPacksInWorkload(string workloadId);
         ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId);
         IEnumerable<WorkloadDefinition> GetAvaliableWorkloads();
+        WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion);
 
         /// <summary>
         /// Resolve the pack for this resolver's SDK band.
