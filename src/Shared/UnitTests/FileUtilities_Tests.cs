@@ -97,6 +97,24 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"\\host\path\file", FileUtilities.MakeRelative(@"c:\abc\def", @"\\host\path\file"));
                 Assert.Equal(@"\\host\d$\file", FileUtilities.MakeRelative(@"c:\abc\def", @"\\host\d$\file"));
                 Assert.Equal(@"..\fff\ggg.hh", FileUtilities.MakeRelative(@"c:\foo\bar\..\abc\cde", @"c:\foo\bar\..\abc\fff\ggg.hh"));
+
+                /* Directories */
+                Assert.Equal(@"def\", FileUtilities.MakeRelative(@"c:\abc\", @"c:\abc\def\"));
+                Assert.Equal(@"..\", FileUtilities.MakeRelative(@"c:\abc\def\xyz\", @"c:\abc\def\"));
+                Assert.Equal(@"..\ttt\", FileUtilities.MakeRelative(@"c:\abc\def\xyz\", @"c:\abc\def\ttt\"));
+                Assert.Equal(@".", FileUtilities.MakeRelative(@"c:\abc\def\", @"c:\abc\def\"));
+
+                /* Directory + File */
+                Assert.Equal(@"def", FileUtilities.MakeRelative(@"c:\abc\", @"c:\abc\def"));
+                Assert.Equal(@"..\..\ghi", FileUtilities.MakeRelative(@"c:\abc\def\xyz\", @"c:\abc\ghi"));
+                Assert.Equal(@"..\ghi", FileUtilities.MakeRelative(@"c:\abc\def\xyz\", @"c:\abc\def\ghi"));
+                Assert.Equal(@"..\ghi", FileUtilities.MakeRelative(@"c:\abc\def\", @"c:\abc\ghi"));
+
+                /* File + Directory */
+                Assert.Equal(@"def\", FileUtilities.MakeRelative(@"c:\abc", @"c:\abc\def\"));
+                Assert.Equal(@"..\", FileUtilities.MakeRelative(@"c:\abc\def\xyz", @"c:\abc\def\"));
+                Assert.Equal(@"..\ghi\", FileUtilities.MakeRelative(@"c:\abc\def\xyz", @"c:\abc\def\ghi\"));
+                Assert.Equal(@".", FileUtilities.MakeRelative(@"c:\abc\def", @"c:\abc\def\"));
             }
             else
             {
@@ -106,6 +124,25 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"../ttt/foo.cpp", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/def/ttt/foo.cpp"));
                 Assert.Equal(@"foo.cpp", FileUtilities.MakeRelative(@"/abc/def", @"foo.cpp"));
                 Assert.Equal(@"../fff/ggg.hh", FileUtilities.MakeRelative(@"/foo/bar/../abc/cde", @"/foo/bar/../abc/fff/ggg.hh"));
+
+                /* Directories */
+                Assert.Equal(@"def/", FileUtilities.MakeRelative(@"/abc/", @"/abc/def/"));
+                Assert.Equal(@"../", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/def/"));
+                Assert.Equal(@"../ttt/", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/def/ttt/"));
+                Assert.Equal(@".", FileUtilities.MakeRelative(@"/abc/def/", @"/abc/def/"));
+
+                /* Directory + File */
+                Assert.Equal(@"def", FileUtilities.MakeRelative(@"/abc/", @"/abc/def"));
+                Assert.Equal(@"../../ghi", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/ghi"));
+                Assert.Equal(@"../ghi", FileUtilities.MakeRelative(@"/abc/def/xyz/", @"/abc/def/ghi"));
+                Assert.Equal(@"../ghi", FileUtilities.MakeRelative(@"/abc/def/", @"/abc/ghi"));
+
+                /* File + Directory */
+                Assert.Equal(@"def/", FileUtilities.MakeRelative(@"/abc", @"/abc/def/"));
+                Assert.Equal(@"../", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/"));
+                Assert.Equal(@"../ghi/", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/ghi/"));
+                Assert.Equal(@".", FileUtilities.MakeRelative(@"/abc/def", @"/abc/def/"));
+
             }
         }
 
