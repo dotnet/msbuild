@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <GitHubRepositoryName>msbuild</GitHubRepositoryName>
+    <SourceBuildManagedOnly>true</SourceBuildManagedOnly>
   </PropertyGroup>
 
   <Target Name="ConfigureInnerBuildArgs" BeforeTargets="GetSourceBuildCommandConfiguration">
