@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Graph;
@@ -25,9 +24,6 @@ namespace Microsoft.DotNet.Watcher
         private readonly DotNetWatchOptions _dotNetWatchOptions;
         private readonly IWatchFilter[] _filters;
         private readonly RudeEditDialog _rudeEditDialog;
-
-        public bool SuppressHotRestart { get; init; }
-        public ProjectGraph ProjectGraph { get; init; }
 
         public HotReloadDotNetWatcher(IReporter reporter, IFileSetFactory fileSetFactory, DotNetWatchOptions dotNetWatchOptions, IConsole console)
         {
@@ -228,41 +224,13 @@ namespace Microsoft.DotNet.Watcher
                 filePath.EndsWith(".cshtml", StringComparison.Ordinal));
         }
 
-        private void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
+        private static void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
         {
             var project = context.FileSet.Project;
-
-            // For webapps, we can support changes to Program.Main and Startup by restarting the host (aka hot restart).
-            // First determine if we can perform hot restarts.
-            if (!SuppressHotRestart &&
-                ProjectGraph.EntryPointNodes?.FirstOrDefault()?.ProjectInstance is { } projectInstance &&
-                !string.IsNullOrEmpty(projectInstance.GetPropertyValue("UsingMicrosoftNETSdkWeb")))
-            {
-                // When performing a hot restart, we have to use Microsoft.Extensions.HotRestart assembly as the app's entry assembly. This
-                // is similar to how the inside dll works in tools such as dotnet-ef. Infer metadata from the project required to run the
-                // alternate entry point.
-                var projectDll = projectInstance.GetPropertyValue("TargetPath");
-                var runtimeConfigPath = projectInstance.GetPropertyValue("ProjectRuntimeConfigFilePath");
-                var depsFilePath = projectInstance.GetPropertyValue("ProjectDepsFilePath");
-
-                var hotRestartAssembly = Path.Combine(AppContext.BaseDirectory, "hotreload", "Microsoft.Extensions.HotRestart.dll");
-                processSpec.Executable = DotnetMuxer.MuxerPath;
-                processSpec.EscapedArguments = $"exec --runtimeconfig \"{runtimeConfigPath}\" --depsfile \"{depsFilePath}\" \"{hotRestartAssembly}\"";
-                if (!string.IsNullOrEmpty(project.RunArguments))
-                {
-                    processSpec.EscapedArguments += " -- " + project.RunArguments;
-                }
-
-                processSpec.EnvironmentVariables["_DOTNET_WATCH_APP_ASSEMBLY_PATH"] = projectDll;
-                processSpec.EnvironmentVariables["_DOTNET_WATCH_HOT_RESTART"] = "1";
-            }
-            else
-            {
             processSpec.Executable = project.RunCommand;
             if (!string.IsNullOrEmpty(project.RunArguments))
             {
                 processSpec.EscapedArguments = project.RunArguments;
-            }
             }
 
             if (!string.IsNullOrEmpty(project.RunWorkingDirectory))

@@ -2,9 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics;
 using System.IO.Pipes;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.HotReload;
@@ -12,7 +10,6 @@ using Microsoft.Extensions.HotReload;
 internal sealed class StartupHook
 {
     private static readonly bool LogDeltaClientMessages = Environment.GetEnvironmentVariable("HOTRELOAD_DELTA_CLIENT_LOG_MESSAGES") == "1";
-    private static readonly DiagnosticListener _listener = new("_DOTNET_WATCH_EMULATED_CONTROL_C");
 
     public static void Initialize()
     {
@@ -56,22 +53,6 @@ internal sealed class StartupHook
             Log("Attempting to apply deltas.");
 
             hotReloadAgent.ApplyDeltas(update.Deltas);
-            if (Environment.GetEnvironmentVariable("_DOTNET_WATCH_HOT_RESTART") == "1" &&
-                update.ChangedFile is string changedFile &&
-                (changedFile.EndsWith("Startup.cs", StringComparison.Ordinal) ||
-                changedFile.EndsWith("Program.cs", StringComparison.Ordinal)))
-            {
-                // When hot restarting, HotRestart's Program.Main listens for indications that a Ctrl-C was emulated to keep looping.
-                // This write signals that state.
-                _listener.Write("signal", "1");
-
-                // When hot-restarting is enabled, kill the current host by simulating a Ctrl-C event.
-                // Since there isn't a programmatic way to doing this, use reflection to trigger the Console.CancelKeyPress event
-                // https://github.com/dotnet/runtime/blob/49eef91d24e282d2548827a601a9caa65882e499/src/libraries/System.Console/src/System/Console.cs#L936
-                var handleBreak = typeof(Console).GetMethod("HandleBreakEvent", BindingFlags.Static | BindingFlags.NonPublic, new[] { typeof(ConsoleSpecialKey) });
-                handleBreak?.Invoke(obj: null, parameters: new object[] { ConsoleSpecialKey.ControlC });
-            }
-
             pipeClient.WriteByte((byte)ApplyResult.Success);
 
         }

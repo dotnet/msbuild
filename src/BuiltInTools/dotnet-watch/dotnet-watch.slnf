@@ -1,0 +1,15 @@
+{
+  "solution": {
+    "path": "..\\..\\..\\sdk.sln",
+    "projects": [
+      "src\\BuiltInTools\\BrowserRefresh\\Microsoft.AspNetCore.Watch.BrowserRefresh.csproj",
+      "src\\BuiltInTools\\DotNetDeltaApplier\\Microsoft.Extensions.DotNetDeltaApplier.csproj",
+      "src\\BuiltInTools\\DotNetWatchTasks\\DotNetWatchTasks.csproj",
+      "src\\BuiltInTools\\dotnet-watch\\dotnet-watch.csproj",
+      "src\\Tests\\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests\\Microsoft.AspNetCore.Watch.BrowserRefresh.Tests.csproj",
+      "src\\Tests\\Microsoft.Extensions.DotNetDeltaApplier.Tests\\Microsoft.Extensions.DotNetDeltaApplier.Tests.csproj",
+      "src\\Tests\\Microsoft.NET.TestFramework\\Microsoft.NET.TestFramework.csproj",
+      "src\\Tests\\dotnet-watch.Tests\\dotnet-watch.Tests.csproj"
+    ]
+  }
+}

@@ -136,9 +136,6 @@ Examples:
                  new Option<bool>(
                     new[] { "--no-hot-reload" },
                     "Suppress hot reload for supported apps."),
-                 new Option<bool>(
-                    new[] { "--no-hot-restart" },
-                    "Suppress hot restart for supported apps."),
                  new Option<string>(
                     new[] { "--project", "-p" },
                     "The project to watch"),
@@ -286,11 +283,7 @@ Examples:
                 // a) watch was invoked with no args or with exactly one arg - the run command e.g. `dotnet watch` or `dotnet watch run`
                 // b) The launch profile supports hot-reload based watching.
                 // The watcher will complain if users configure this for runtimes that would not support it.
-                await using var watcher = new HotReloadDotNetWatcher(reporter, fileSetFactory, watchOptions, _console)
-                {
-                    SuppressHotRestart = options.NoHotRestart,
-                    ProjectGraph = projectGraph,
-                };
+                await using var watcher = new HotReloadDotNetWatcher(reporter, fileSetFactory, watchOptions, _console);
                 await watcher.WatchAsync(context, cancellationToken);
             }
             else
