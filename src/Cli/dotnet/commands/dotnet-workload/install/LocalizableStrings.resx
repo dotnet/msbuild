@@ -264,4 +264,7 @@
   <data name="DeletingWorkloadPack" xml:space="preserve">
     <value>Uninstalling workload pack {0} version {1}.</value>
   </data>
+  <data name="SkippingManifestUpdate" xml:space="preserve">
+    <value>Manifest packages were not found, skipping manifest update...</value>
+  </data>
 </root>

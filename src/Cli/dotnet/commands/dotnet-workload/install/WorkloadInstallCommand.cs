@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         _includePreviews, 
                         string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
                 }
-                catch (Exception e)
+                    catch (Exception e)
                 {
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
@@ -287,9 +287,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private async Task UseTempManifestsToResolvePacksAsync(DirectoryPath tempPath, bool includePreview)
         {
             var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);
+            if (manifestPackagePaths == null || !manifestPackagePaths.Any())
+            {
+                _reporter.WriteLine(LocalizableStrings.SkippingManifestUpdate);
+                return;
+            }
             await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath);
             _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
-            _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = _workloadResolver.CreateTempDirResolver(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
         }
 
         private async Task DownloadToOfflineCacheAsync(IEnumerable<WorkloadId> workloadIds, DirectoryPath offlineCache, bool skipManifestUpdate, bool includePreviews)
@@ -298,10 +303,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             if (!skipManifestUpdate)
             {
                 var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreviews, offlineCache);
-                tempManifestDir = Path.Combine(offlineCache.Value, "temp-manifests");
-                await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
-                _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
-                _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+                if (manifestPackagePaths != null && manifestPackagePaths.Any())
+                {
+                    tempManifestDir = Path.Combine(offlineCache.Value, "temp-manifests");
+                    await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
+                    _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
+                    _workloadResolver = _workloadResolver.CreateTempDirResolver(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+                }
+                else
+                {
+                    _reporter.WriteLine(LocalizableStrings.SkippingManifestUpdate);
+                }
 
                 var installedWorkloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(new SdkFeatureBand(_sdkVersion));
                 workloadIds = workloadIds.Concat(installedWorkloads).Distinct();

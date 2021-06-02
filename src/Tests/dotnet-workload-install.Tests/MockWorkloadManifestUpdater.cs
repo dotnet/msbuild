@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath)
         {
             DownloadManifestPackagesCallCount++;
-            return Task.FromResult(new List<string>() as IEnumerable<string>);
+            return Task.FromResult(new List<string>() { "fake pack path" } as IEnumerable<string>);
         }
 
         public Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir)
