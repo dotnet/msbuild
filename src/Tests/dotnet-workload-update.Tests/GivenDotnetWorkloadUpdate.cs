@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             File.Create(Path.Combine(dotnetRoot, "metadata", "workloads", oldFeatureBand, "InstalledWorkloads", installingWorkload));
 
             // Update workload (without installing any workloads to this feature band)
-            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update" });
+            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--from-previous-sdk" });
             var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
             workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot);
             updateCommand.Execute();
