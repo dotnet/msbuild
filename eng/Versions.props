@@ -124,15 +124,15 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreAnalyzersPackageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreAnalyzersPackageVersion>
-    <MicrosoftAspNetCoreTestHostPackageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreTestHostPackageVersion>
-    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
-    <MicrosoftAspNetCoreRazorLanguageVersion>6.0.0-preview.6.21301.18</MicrosoftAspNetCoreRazorLanguageVersion>
-    <MicrosoftCodeAnalysisRazorVersion>6.0.0-preview.6.21301.18</MicrosoftCodeAnalysisRazorVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreComponentsAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcAnalyzersPackageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreMvcAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreMvcApiAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreAnalyzersPackageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreAnalyzersPackageVersion>
+    <MicrosoftAspNetCoreTestHostPackageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreTestHostPackageVersion>
+    <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
+    <MicrosoftAspNetCoreRazorLanguageVersion>6.0.0-preview.6.21301.22</MicrosoftAspNetCoreRazorLanguageVersion>
+    <MicrosoftCodeAnalysisRazorVersion>6.0.0-preview.6.21301.22</MicrosoftCodeAnalysisRazorVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->
