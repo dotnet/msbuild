@@ -1741,12 +1741,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
-        <SetPlatform Condition="'%(ProjectsWithNearestPlatform.Extension)' == '.vcxproj' or '%(ProjectsWithNearestPlatform.Extension)' == '.nativeproj'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+        <SetPlatform Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
-        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.Extension)' != '.vcxproj' and '%(ProjectsWithNearestPlatform.Extension)' != '.nativeproj'">%(ProjectsWithNearestPlatform.UndefineProperties);PlatformTarget</UndefineProperties>
-        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.Extension)' == '.vcxproj' or '%(ProjectsWithNearestPlatform.Extension)' == '.nativeproj'">%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
+        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
+        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' != 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);PlatformTarget</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
@@ -1925,6 +1925,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Returns="@(_ThisProjectPlatformMetadata)">
     <ItemGroup>
       <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
+        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
         <PlatformOptions>$(Platforms)</PlatformOptions>
         <CanMultiPlatform>false</CanMultiPlatform>
         <CanMultiPlatform Condition="$(Platforms.Contains(',')) == 'true'">true</CanMultiPlatform>
