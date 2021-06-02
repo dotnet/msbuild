@@ -756,8 +756,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWpfIsNotSupported">
-        <source>NETSDK1168: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
-        <target state="new">NETSDK1168: Wpf is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
+        <source>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</source>
+        <target state="new">NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</target>
         <note>{StrBegin="NETSDK1168: "}</note>
       </trans-unit>
       <trans-unit id="TypeLibraryDoesNotExist">
@@ -876,8 +876,10 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1148: "}</note>
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>NETSDK1147: The following workload packs were not installed: {0}</source>
-        <target state="translated">NETSDK1147: i pacchetti del carico di lavoro seguenti non sono stati installati: {0}</target>
+        <source>NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: {1}</source>
+        <target state="new">NETSDK1147: To build this project, the following workloads must be installed: {0}
+To install these workloads, run the following command: {1}</target>
         <note>{StrBegin="NETSDK1147: "}</note>
       </trans-unit>
     </body>

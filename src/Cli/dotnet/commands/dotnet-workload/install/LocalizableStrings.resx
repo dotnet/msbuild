@@ -264,6 +264,9 @@
   <data name="DeletingWorkloadPack" xml:space="preserve">
     <value>Uninstalling workload pack {0} version {1}.</value>
   </data>
+    <data name="SkippingManifestUpdate" xml:space="preserve">
+    <value>Manifest packages were not found, skipping manifest update...</value>
+  </data>
   <data name="NoManifestsExistForFeatureBand" xml:space="preserve">
     <value>No manifests exist for SDK version {0}.</value>
   </data>

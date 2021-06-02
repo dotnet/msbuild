@@ -192,7 +192,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var expectedPacks = mockWorkloadIds
                 .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                 .Distinct()
-                .Select(packId => workloadResolver.TryGetPackInfo(packId));
+                .Select(packId => workloadResolver.TryGetPackInfo(packId))
+                .Where(pack => pack != null);
             installer.RolledBackPacks.ShouldBeEquivalentTo(expectedPacks);
             installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEmpty();
         }

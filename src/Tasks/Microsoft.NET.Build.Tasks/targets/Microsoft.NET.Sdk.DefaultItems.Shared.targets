@@ -70,7 +70,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Condition="'$(DisableImplicitFrameworkReferences)' == 'true'"
                       AllowExplicitVersion="true"/>
   </ItemGroup>
-
+  
   <UsingTask TaskName="ApplyImplicitVersions" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="CheckIfPackageReferenceShouldBeFrameworkReference" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
@@ -140,7 +140,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </PackageReference>
     </ItemGroup>
   </Target>
-
+  
   <UsingTask TaskName="CheckForImplicitPackageReferenceOverrides" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!-- Remove package references with metadata IsImplicitlyDefined = true, if there are other PackageReference items with the same identity -->

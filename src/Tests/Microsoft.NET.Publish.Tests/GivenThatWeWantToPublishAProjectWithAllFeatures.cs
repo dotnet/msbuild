@@ -78,6 +78,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Runtime.TieredCompilation.QuickJit"": true,
             ""System.Runtime.TieredCompilation.QuickJitForLoops"": true,
             ""System.StartupHookProvider.IsSupported"": false,
+            ""System.Threading.Thread.EnableAutoreleasePool"": false,
             ""System.Resources.ResourceManager.AllowCustomResourceTypes"": false,
             ""System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"": false,
             ""System.Text.Encoding.EnableUnsafeUTF7Encoding"": false,

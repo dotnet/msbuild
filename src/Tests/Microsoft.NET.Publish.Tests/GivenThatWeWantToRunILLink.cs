@@ -706,6 +706,7 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting");
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableCppCLIHostActivation");
                 runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
+                runtimeConfigContents.Should().NotContain("System.Threading.Thread.EnableAutoreleasePool");
             }
         }
 

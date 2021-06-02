@@ -147,6 +147,11 @@
         <target state="new">Skip updating the workload manifests.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SkippingManifestUpdate">
+        <source>Manifest packages were not found, skipping manifest update...</source>
+        <target state="new">Manifest packages were not found, skipping manifest update...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TempDirOptionDescription">
         <source>Configure the temporary directory used for this command (must be secure).</source>
         <target state="new">Configure the temporary directory used for this command (must be secure).</target>
