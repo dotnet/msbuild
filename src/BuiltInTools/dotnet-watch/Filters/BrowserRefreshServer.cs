@@ -38,18 +38,25 @@ namespace Microsoft.DotNet.Watcher.Tools
             _taskCompletionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         }
 
-        public async ValueTask<string> StartAsync(CancellationToken cancellationToken)
+        public async ValueTask<IEnumerable<string>> StartAsync(CancellationToken cancellationToken)
         {
             var envHostName = Environment.GetEnvironmentVariable("DOTNET_WATCH_AUTO_RELOAD_WS_HOSTNAME");
             var hostName = envHostName ?? "127.0.0.1";
 
-            var useTls = await ShouldUseHttps();
+            var supportsTLS = await SupportsTLS();
 
             _refreshServer = new HostBuilder()
                 .ConfigureWebHost(builder =>
                 {
                     builder.UseKestrel();
-                    builder.UseUrls(useTls ? $"https://{hostName}:0" : $"http://{hostName}:0");
+                    if (supportsTLS)
+                    {
+                        builder.UseUrls($"https://{hostName}:0", $"http://{hostName}:0");
+                    }
+                    else
+                    {
+                        builder.UseUrls($"http://{hostName}:0");
+                    }
 
                     builder.Configure(app =>
                     {
@@ -61,23 +68,26 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await _refreshServer.StartAsync(cancellationToken);
 
-            var serverUrl = _refreshServer.Services
+            var serverUrls = _refreshServer.Services
                 .GetRequiredService<IServer>()
                 .Features
                 .Get<IServerAddressesFeature>()
-                .Addresses
-                .First();
+                .Addresses;
 
             if (envHostName is null)
             {
-                return useTls ?
-                    serverUrl.Replace("https://127.0.0.1", "wss://localhost", StringComparison.Ordinal) :
-                    serverUrl.Replace("http://127.0.0.1", "ws://localhost", StringComparison.Ordinal);
+                return serverUrls.Select(s =>
+                    s.Replace("http://127.0.0.1", "ws://localhost", StringComparison.Ordinal)
+                    .Replace("https://127.0.0.1", "wss://localhost", StringComparison.Ordinal));
             }
 
-            return serverUrl
-                .Replace("https://", "wss://", StringComparison.Ordinal)
-                .Replace("http://", "ws://", StringComparison.Ordinal);
+            return new[]
+            {
+                serverUrls
+                    .First()
+                    .Replace("https://", "wss://", StringComparison.Ordinal)
+                    .Replace("http://", "ws://", StringComparison.Ordinal)
+             };
         }
 
         private async Task WebSocketRequest(HttpContext context)
@@ -167,7 +177,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
         public ValueTask SendWaitMessageAsync(CancellationToken cancellationToken) => SendMessage(WaitMessage, cancellationToken);
 
-        private static async Task<bool> ShouldUseHttps()
+        private static async Task<bool> SupportsTLS()
         {
             try
             {

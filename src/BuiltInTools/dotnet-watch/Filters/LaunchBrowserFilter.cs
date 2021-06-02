@@ -61,10 +61,9 @@ namespace Microsoft.DotNet.Watcher.Tools
                     {
                         _refreshServer = new BrowserRefreshServer(context.Reporter);
                         context.BrowserRefreshServer = _refreshServer;
-                        var serverUrl = await _refreshServer.StartAsync(cancellationToken);
-
-                        context.Reporter.Verbose($"Refresh server running at {serverUrl}.");
-                        context.ProcessSpec.EnvironmentVariables["ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT"] = serverUrl;
+                        var serverUrls = string.Join(',', await _refreshServer.StartAsync(cancellationToken));
+                        context.Reporter.Verbose($"Refresh server running at {serverUrls}.");
+                        context.ProcessSpec.EnvironmentVariables["ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT"] = serverUrls;
 
                         var pathToMiddleware = Path.Combine(AppContext.BaseDirectory, "middleware", "Microsoft.AspNetCore.Watch.BrowserRefresh.dll");
                         context.ProcessSpec.EnvironmentVariables.DotNetStartupHooks.Add(pathToMiddleware);
