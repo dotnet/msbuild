@@ -1358,12 +1358,6 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
             ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
 
-            // Currently we cannot move certain kinds of traversals (notably solution metaprojects) to other nodes because 
-            // they only have a ProjectInstance representation, and besides these kinds of projects build very quickly 
-            // and produce more references (more work to do.)  This just verifies we do not attempt to send a traversal to
-            // an out-of-proc node because doing so is inefficient and presently will cause the engine to fail on the remote
-            // node because these projects cannot be found.
-            ErrorUtilities.VerifyThrow(nodeId == InProcNodeId || ForceAffinityOutOfProc || !IsTraversalRequest(request.BuildRequest), "Can't assign traversal request to out-of-proc node!");
             request.VerifyState(SchedulableRequestState.Unscheduled);
 
             // Determine if this node has seen our configuration before.  If not, we must send it along with this request.
