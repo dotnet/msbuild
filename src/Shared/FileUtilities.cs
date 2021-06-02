@@ -1078,7 +1078,13 @@ namespace Microsoft.Build.Shared
             {
                 sb.Append(splitPath[i]).Append(Path.DirectorySeparatorChar);
             }
-            sb.Length--;
+
+            int length = fullPath.Length;
+            if (length < 1 || fullPath[length - 1] != Path.DirectorySeparatorChar)
+            {
+                sb.Length--;
+            }
+
             return StringBuilderCache.GetStringAndRelease(sb);
         }
 
