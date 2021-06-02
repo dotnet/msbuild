@@ -1391,7 +1391,7 @@ namespace Microsoft.Build.BackEnd
                 if (request.IsProxyBuildRequest() && nodeId != InProcNodeId)
                 {
                     ErrorUtilities.VerifyThrow(
-                        _componentHost.BuildParameters.DisableInProcNode || _forceAffinityOutOfProc,
+                        _componentHost.BuildParameters.DisableInProcNode || ForceAffinityOutOfProc,
                         "Proxy requests should only get scheduled to out of proc nodes when the inproc node is disabled");
 
                     var loggedWarnings = Interlocked.CompareExchange(ref _loggedWarningsForProxyBuildsOnOutOfProcNodes, 1, 0);
