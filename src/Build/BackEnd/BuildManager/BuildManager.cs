@@ -244,7 +244,6 @@ namespace Microsoft.Build.Execution
 
         private IEnumerable<DeferredBuildMessage> _deferredBuildMessages;
         private Task<ProjectCacheService> _projectCacheService;
-        private bool _projectCacheServiceInstantiatedByVSWorkaround;
 
 #if DEBUG
         /// <summary>
@@ -1055,326 +1054,208 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(submission, nameof(submission));
             ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
 
-            bool thisMethodIsAsync = false;
-
-            if (ProjectCacheIsPresent())
+            lock (_syncLock)
             {
-                thisMethodIsAsync = true;
-
-                // Potential long running operations:
-                //  - submission may need evaluation
-                //  - project cache may need initializing
-                //  - project cache will be queried
-                // Use separate thread to unblock calling thread.
-                Task.Factory.StartNew(
-                    ExecuteSubmissionImpl,
-                    CancellationToken.None,
-                    TaskCreationOptions.LongRunning,
-                    TaskScheduler.Default
-                );
-            }
-            else
-            {
-                ExecuteSubmissionImpl();
-            }
-
-            void ExecuteSubmissionImpl()
-            {
-                lock (_syncLock)
+                ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
+                if (projectInstance != null)
                 {
-                    ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
-                    if (projectInstance != null)
+                    if (_acquiredProjectRootElementCacheFromProjectInstance)
                     {
-                        if (_acquiredProjectRootElementCacheFromProjectInstance)
-                        {
-                            ErrorUtilities.VerifyThrowArgument(
-                                _buildParameters.ProjectRootElementCache == projectInstance.ProjectRootElementCache,
-                                "OM_BuildSubmissionsMultipleProjectCollections");
-                        }
-                        else
-                        {
-                            _buildParameters.ProjectRootElementCache = projectInstance.ProjectRootElementCache;
-                            _acquiredProjectRootElementCacheFromProjectInstance = true;
-                        }
+                        ErrorUtilities.VerifyThrowArgument(
+                            _buildParameters.ProjectRootElementCache == projectInstance.ProjectRootElementCache,
+                            "OM_BuildSubmissionsMultipleProjectCollections");
                     }
-                    else if (_buildParameters.ProjectRootElementCache == null)
+                    else
                     {
-                        // Create our own cache; if we subsequently get a build submission with a project instance attached,
-                        // we'll dump our cache and use that one.
-                        _buildParameters.ProjectRootElementCache =
-                            new ProjectRootElementCache(false /* do not automatically reload from disk */);
-                    }
-
-                    VerifyStateInternal(BuildManagerState.Building);
-
-                    try
-                    {
-                        // If we have an unnamed project, assign it a temporary name.
-                        if (string.IsNullOrEmpty(submission.BuildRequestData.ProjectFullPath))
-                        {
-                            ErrorUtilities.VerifyThrow(
-                                submission.BuildRequestData.ProjectInstance != null,
-                                "Unexpected null path for a submission with no ProjectInstance.");
-
-                            // If we have already named this instance when it was submitted previously during this build, use the same
-                            // name so that we get the same configuration (and thus don't cause it to rebuild.)
-                            if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance, out var tempName))
-                            {
-                                tempName = "Unnamed_" + _nextUnnamedProjectId++;
-                                _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance] = tempName;
-                            }
-
-                            submission.BuildRequestData.ProjectFullPath = Path.Combine(
-                                submission.BuildRequestData.ProjectInstance.GetProperty(ReservedPropertyNames.projectDirectory).EvaluatedValue,
-                                tempName);
-                        }
-
-                        // Create/Retrieve a configuration for each request
-                        var buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
-                        var matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
-                        var newConfiguration = ResolveConfiguration(
-                            buildRequestConfiguration,
-                            matchingConfiguration,
-                            submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
-
-                        newConfiguration.ExplicitlyLoaded = true;
-
-                        submission.BuildRequest = CreateRealBuildRequest(submission, newConfiguration.ConfigurationId);
-
-                        // TODO: Remove this when VS gets updated to setup project cache plugins.
-                        AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio(submission, newConfiguration);
-
-                        CacheResult cacheResult = null;
-                        if (_projectCacheService != null)
-                        {
-                            cacheResult = QueryCache(submission, newConfiguration);
-                        }
-
-                        if (cacheResult == null || cacheResult.ResultType != CacheResultType.CacheHit)
-                        {
-                            // Issue the real build request.
-                            SubmitBuildRequest();
-                        }
-                        else if (cacheResult?.ResultType == CacheResultType.CacheHit && cacheResult.ProxyTargets != null)
-                        {
-                            // Setup submission.BuildRequest with proxy targets. The proxy request is built on the inproc node (to avoid ProjectInstance serialization).
-                            // The proxy target results are used as results for the real targets.
-
-                            submission.BuildRequest = CreateProxyBuildRequest(
-                                submission,
-                                newConfiguration.ConfigurationId,
-                                cacheResult.ProxyTargets);
-
-                            SubmitBuildRequest();
-                        }
-                        else if (cacheResult?.ResultType == CacheResultType.CacheHit && cacheResult.BuildResult != null)
-                        {
-                            // Mark the build submission as complete with the provided results and return.
-                            var result = new BuildResult(submission.BuildRequest);
-
-                            foreach (var targetResult in cacheResult.BuildResult.ResultsByTarget)
-                            {
-                                result.AddResultsForTarget(targetResult.Key, targetResult.Value);
-                            }
-
-                            _resultsCache.AddResult(result);
-                            submission.CompleteLogging(false);
-                            ReportResultsToSubmission(result);
-                        }
-                    }
-                    // This catch should always be the first one because when this method runs in a separate thread
-                    // and throws an exception there is nobody there to observe the exception.
-                    catch (Exception ex) when (thisMethodIsAsync)
-                    {
-                        HandleExecuteSubmissionException(submission, ex);
-                    }
-                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                    {
-                        HandleExecuteSubmissionException(submission, ex);
-                        throw;
-                    }
-                    void SubmitBuildRequest()
-                    {
-                        if (CheckForShutdown())
-                        {
-                            return;
-                        }
-
-                        _workQueue.Post(
-                            () =>
-                            {
-                                try
-                                {
-                                    IssueBuildSubmissionToScheduler(submission, allowMainThreadBuild);
-                                }
-                                catch (BuildAbortedException bae)
-                                {
-                                    // We were canceled before we got issued by the work queue.
-                                    var result = new BuildResult(submission.BuildRequest, bae);
-                                    submission.CompleteResults(result);
-                                    submission.CompleteLogging(true);
-                                    CheckSubmissionCompletenessAndRemove(submission);
-                                }
-                                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                                {
-                                    HandleExecuteSubmissionException(submission, ex);
-                                }
-                            });
+                        _buildParameters.ProjectRootElementCache = projectInstance.ProjectRootElementCache;
+                        _acquiredProjectRootElementCacheFromProjectInstance = true;
                     }
                 }
-            }
-
-            bool ProjectCacheIsPresent()
-            {
-                return _projectCacheService != null ||
-                       _buildParameters.ProjectCacheDescriptor != null ||
-                       (BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Count > 0);
-            }
-
-            bool CheckForShutdown()
-            {
-                if (!_shuttingDown)
+                else if (_buildParameters.ProjectRootElementCache == null)
                 {
-                    return false;
+                    // Create our own cache; if we subsequently get a build submission with a project instance attached,
+                    // we'll dump our cache and use that one.
+                    _buildParameters.ProjectRootElementCache =
+                        new ProjectRootElementCache(false /* do not automatically reload from disk */);
                 }
 
-                // We were already canceled!
-                var result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
-                submission.CompleteResults(result);
-                submission.CompleteLogging(true);
-                CheckSubmissionCompletenessAndRemove(submission);
+                VerifyStateInternal(BuildManagerState.Building);
 
-                return true;
-            }
-
-            CacheResult QueryCache(BuildSubmission buildSubmission, BuildRequestConfiguration newConfiguration)
-            {
-                ProjectCacheService cacheService = null;
-
+                BuildRequestConfiguration resolvedConfiguration = null;
                 try
                 {
-                    cacheService = _projectCacheService.Result;
+                    // If we have an unnamed project, assign it a temporary name.
+                    if (string.IsNullOrEmpty(submission.BuildRequestData.ProjectFullPath))
+                    {
+                        ErrorUtilities.VerifyThrow(
+                            submission.BuildRequestData.ProjectInstance != null,
+                            "Unexpected null path for a submission with no ProjectInstance.");
+
+                        // If we have already named this instance when it was submitted previously during this build, use the same
+                        // name so that we get the same configuration (and thus don't cause it to rebuild.)
+                        if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance, out var tempName))
+                        {
+                            tempName = "Unnamed_" + _nextUnnamedProjectId++;
+                            _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance] = tempName;
+                        }
+
+                        submission.BuildRequestData.ProjectFullPath = Path.Combine(
+                            submission.BuildRequestData.ProjectInstance.GetProperty(ReservedPropertyNames.projectDirectory).EvaluatedValue,
+                            tempName);
+                    }
+
+                    // Create/Retrieve a configuration for each request
+                    var buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
+                    var matchingConfiguration = _configCache.GetMatchingConfiguration(buildRequestConfiguration);
+                    resolvedConfiguration = ResolveConfiguration(
+                        buildRequestConfiguration,
+                        matchingConfiguration,
+                        submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.ReplaceExistingProjectInstance));
+
+                    resolvedConfiguration.ExplicitlyLoaded = true;
+
+                    if (_shuttingDown)
+                    {
+                        // We were already canceled!
+                        AddBuildRequestToSubmission(submission, resolvedConfiguration.ConfigurationId);
+                        BuildResult result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
+                        submission.CompleteResults(result);
+                        submission.CompleteLogging(true);
+                        CheckSubmissionCompletenessAndRemove(submission);
+                        return;
+                    }
+
+                    if (ProjectCacheIsPresent())
+                    {
+                        IssueCacheRequestForBuildSubmission(new CacheRequest(submission, resolvedConfiguration));
+                    }
+                    else
+                    {
+                        AddBuildRequestToSubmission(submission, resolvedConfiguration.ConfigurationId);
+                        IssueBuildRequestForBuildSubmission(submission, allowMainThreadBuild);
+                    }
                 }
-                catch
+                catch (ProjectCacheException ex)
                 {
-                    // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
-                    Debug.Assert(Monitor.IsEntered(_syncLock));
-                    _projectCacheService = null;
-                    throw;
+                    ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having ");
+                    CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
                 }
-
-                // Project cache plugins require an evaluated project. Evaluate the submission if it's by path.
-                LoadSubmissionProjectIntoConfiguration(buildSubmission, newConfiguration);
-
-                var cacheResult = cacheService.GetCacheResultAsync(
-                        new BuildRequestData(
-                            newConfiguration.Project,
-                            buildSubmission.BuildRequestData.TargetNames.ToArray()))
-                    .GetAwaiter()
-                    .GetResult();
-
-                return cacheResult;
-            }
-
-            static BuildRequest CreateRealBuildRequest(BuildSubmission submission, int configurationId)
-            {
-                return new BuildRequest(
-                    submission.SubmissionId,
-                    BackEnd.BuildRequest.InvalidNodeRequestId,
-                    configurationId,
-                    submission.BuildRequestData.TargetNames,
-                    submission.BuildRequestData.HostServices,
-                    BuildEventContext.Invalid,
-                    null,
-                    submission.BuildRequestData.Flags,
-                    submission.BuildRequestData.RequestedProjectState);
-            }
-
-            static BuildRequest CreateProxyBuildRequest(
-                BuildSubmission submission,
-                int configurationId,
-                ProxyTargets proxyTargets)
-            {
-                return new BuildRequest(
-                    submission.SubmissionId,
-                    BackEnd.BuildRequest.InvalidNodeRequestId,
-                    configurationId,
-                    proxyTargets,
-                    submission.BuildRequestData.HostServices,
-                    submission.BuildRequestData.Flags,
-                    submission.BuildRequestData.RequestedProjectState);
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    if (resolvedConfiguration is not null)
+                    {
+                        CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
+                    }
+                    else
+                    {
+                        HandleSubmissionException(submission, ex);
+                        throw;
+                    }
+                }
             }
         }
 
-        private void AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio(
-            BuildSubmission submission,
-            BuildRequestConfiguration config)
+        bool ProjectCacheIsPresent()
+        {
+            // TODO: remove after we change VS to set the cache descriptor via build parameters.
+            // TODO: no need to access the service when there's no design time builds.
+            var projectCacheService = GetProjectCacheService();
+
+            if (projectCacheService != null && projectCacheService.DesignTimeBuildsDetected)
+            {
+                return false;
+            }
+
+            return
+                projectCacheService != null ||
+                _buildParameters.ProjectCacheDescriptor != null ||
+                ProjectCachePresentViaVisualStudioWorkaround();
+        }
+
+        private static bool ProjectCachePresentViaVisualStudioWorkaround()
+        {
+            return BuildEnvironmentHelper.Instance.RunningInVisualStudio && ProjectCacheItems.Count > 0;
+        }
+
+        // Cache requests on configuration N do not block future build submissions depending on configuration N.
+        // It is assumed that the higher level build orchestrator (static graph scheduler, VS, quickbuild) submits a
+        // project build request only when its references have finished building.
+        private void IssueCacheRequestForBuildSubmission(CacheRequest cacheRequest)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
+            _workQueue.Post(() =>
+            {
+                try
+                {
+                    var projectCacheService = GetProjectCacheService();
+
+                    ErrorUtilities.VerifyThrow(
+                        projectCacheService != null,
+                        "This method should not get called if there's no project cache.");
+
+                    ErrorUtilities.VerifyThrow(
+                        !projectCacheService.DesignTimeBuildsDetected,
+                        "This method should not get called if design time builds are detected.");
+
+                    projectCacheService.PostCacheRequest(cacheRequest);
+                }
+                catch (Exception e)
+                {
+                    CompleteSubmissionWithException(cacheRequest.Submission, cacheRequest.Configuration, e);
+                }
+            });
+        }
+
+        private ProjectCacheService GetProjectCacheService()
+        {
+            // TODO: remove after we change VS to set the cache descriptor via build parameters.
+            AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio();
+
+            try
+            {
+                return _projectCacheService?.Result;
+            }
+            catch(Exception ex)
+            {
+                if (ex is AggregateException ae && ae.InnerExceptions.Count == 1)
+                {
+                    ex = ae.InnerExceptions.First();
+                }
+
+                // These are exceptions thrown during project cache startup (assembly load issues or cache BeginBuild exceptions).
+                // Set to null so that EndBuild does not try to shut it down and thus rethrow the exception.
+                Interlocked.Exchange(ref _projectCacheService, null);
+                throw ex;
+            }
+        }
+
+        private void AutomaticallyDetectAndInstantiateProjectCacheServiceForVisualStudio()
+        {
             if (BuildEnvironmentHelper.Instance.RunningInVisualStudio &&
                 ProjectCacheItems.Count > 0 &&
-                !_projectCacheServiceInstantiatedByVSWorkaround &&
                 _projectCacheService == null &&
                 _buildParameters.ProjectCacheDescriptor == null)
             {
-                _projectCacheServiceInstantiatedByVSWorkaround = true;
-
-                if (ProjectCacheItems.Count != 1)
+                lock (_syncLock)
                 {
-                    ProjectCacheException.ThrowForMSBuildIssueWithTheProjectCache(
-                        "OnlyOneCachePluginMustBeSpecified",
-                        string.Join("; ", ProjectCacheItems.Values.Select(c => c.PluginPath)));
+                    if (_projectCacheService != null)
+                    {
+                        return;
+                    }
+
+                    if (ProjectCacheItems.Count != 1)
+                    {
+                        ProjectCacheException.ThrowForMSBuildIssueWithTheProjectCache(
+                            "OnlyOneCachePluginMustBeSpecified",
+                            string.Join("; ", ProjectCacheItems.Values.Select(c => c.PluginPath)));
+                    }
+
+                    var projectCacheItem = ProjectCacheItems.First().Value;
+
+                    InitializeProjectCacheService(ProjectCacheDescriptor.FromVisualStudioWorkaround(projectCacheItem), CancellationToken.None);
                 }
-                
-                // Plugin needs the graph root (aka top BuildSubmission path, aka the solution path when in VS) which, under VS, is accessible
-                // only by evaluating the submission and retrieving the 'SolutionPath' property set by VS. This is also the reason why
-                // this method cannot be called from BeginBuild, because no build submissions are available there to extract the solution path from.
-                LoadSubmissionProjectIntoConfiguration(submission, config);
-
-                if (IsDesignTimeBuild(config.Project))
-                {
-                    // Design time builds do not use the project cache.
-                    return;
-                }
-
-                var solutionPath = config.Project.GetPropertyValue(SolutionProjectGenerator.SolutionPathPropertyName);
-
-                ErrorUtilities.VerifyThrow(
-                    solutionPath != null && !string.IsNullOrWhiteSpace(solutionPath) && solutionPath != "*Undefined*",
-                    $"Expected VS to set a valid SolutionPath property but got: {solutionPath}");
-
-                ErrorUtilities.VerifyThrow(
-                    FileSystems.Default.FileExists(solutionPath),
-                    $"Solution file does not exist: {solutionPath}");
-
-                var projectCacheItem = ProjectCacheItems.First().Value;
-
-                InitializeProjectCacheService(
-                    ProjectCacheDescriptor.FromAssemblyPath(
-                        projectCacheItem.PluginPath,
-                        new[]
-                        {
-                            new ProjectGraphEntryPoint(
-                                solutionPath,
-                                config.Project.GlobalProperties)
-                        },
-                        null,
-                        projectCacheItem.PluginSettings),
-                    CancellationToken.None);
             }
-
-            static bool IsDesignTimeBuild(ProjectInstance project)
-            {
-                var designTimeBuild = project.GetPropertyValue(DesignTimeProperties.DesignTimeBuild);
-                var buildingProject = project.GlobalPropertiesDictionary[DesignTimeProperties.BuildingProject]?.EvaluatedValue;
-
-                return MSBuildStringIsTrue(designTimeBuild) ||
-                       buildingProject != null && !MSBuildStringIsTrue(buildingProject);
-            }
-
-            static bool MSBuildStringIsTrue(string msbuildString) =>
-                ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
         }
 
         /// <summary>
@@ -1415,7 +1296,7 @@ namespace Microsoft.Build.Execution
                             }
                             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                             {
-                                HandleExecuteSubmissionException(submission, ex);
+                                HandleSubmissionException(submission, ex);
                             }
                         },
                         _graphSchedulingCancellationSource.Token,
@@ -1424,7 +1305,7 @@ namespace Microsoft.Build.Execution
                 }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    HandleExecuteSubmissionException(submission, ex);
+                    HandleSubmissionException(submission, ex);
                     throw;
                 }
             }
@@ -1620,10 +1501,23 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private void CompleteSubmissionWithException(BuildSubmission submission, BuildRequestConfiguration configuration, Exception exception)
+        {
+            lock (_syncLock)
+            {
+                if (submission.BuildRequest is null)
+                {
+                    AddBuildRequestToSubmission(submission, configuration.ConfigurationId);
+                }
+
+                HandleSubmissionException(submission, exception);
+            }
+        }
+
         /// <summary>
-        /// Deals with exceptions that may be thrown as a result of ExecuteSubmission.
+        /// Deals with exceptions that may be thrown when handling a submission.
         /// </summary>
-        private void HandleExecuteSubmissionException(BuildSubmission submission, Exception ex)
+        private void HandleSubmissionException(BuildSubmission submission, Exception ex)
         {
             if (ex is AggregateException ae && ae.InnerExceptions.Count == 1)
             {
@@ -1657,7 +1551,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Deals with exceptions that may be thrown as a result of ExecuteSubmission.
         /// </summary>
-        private void HandleExecuteSubmissionException(GraphBuildSubmission submission, Exception ex)
+        private void HandleSubmissionException(GraphBuildSubmission submission, Exception ex)
         {
             if (ex is InvalidProjectFileException projectException)
             {
@@ -1685,70 +1579,120 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private static void AddBuildRequestToSubmission(BuildSubmission submission, int configurationId)
+        {
+            submission.BuildRequest = new BuildRequest(
+                submission.SubmissionId,
+                BackEnd.BuildRequest.InvalidNodeRequestId,
+                configurationId,
+                submission.BuildRequestData.TargetNames,
+                submission.BuildRequestData.HostServices,
+                BuildEventContext.Invalid,
+                null,
+                submission.BuildRequestData.Flags,
+                submission.BuildRequestData.RequestedProjectState);
+        }
+
+        private static void AddProxyBuildRequestToSubmission(BuildSubmission submission, int configurationId, ProxyTargets proxyTargets)
+        {
+            submission.BuildRequest = new BuildRequest(
+                submission.SubmissionId,
+                BackEnd.BuildRequest.InvalidNodeRequestId,
+                configurationId,
+                proxyTargets,
+                submission.BuildRequestData.HostServices,
+                submission.BuildRequestData.Flags,
+                submission.BuildRequestData.RequestedProjectState);
+        }
+
         /// <summary>
         /// The submission is a top level build request entering the BuildManager.
         /// Sends the request to the scheduler with optional legacy threading semantics behavior.
         /// </summary>
-        private void IssueBuildSubmissionToScheduler(BuildSubmission submission, bool allowMainThreadBuild)
+        private void IssueBuildRequestForBuildSubmission(BuildSubmission submission, bool allowMainThreadBuild = false)
         {
-            bool resetMainThreadOnFailure = false;
-            try
-            {
-                lock (_syncLock)
+            _workQueue.Post(
+                () =>
                 {
-                    if (_shuttingDown)
+                    try
                     {
-                        throw new BuildAbortedException();
+                        IssueBuildSubmissionToSchedulerImpl(submission, allowMainThreadBuild);
                     }
-
-                    if (allowMainThreadBuild && _buildParameters.LegacyThreadingSemantics)
+                    catch (BuildAbortedException bae)
                     {
-                        if (_legacyThreadingData.MainThreadSubmissionId == -1)
+                        // We were canceled before we got issued by the work queue.
+                        var result = new BuildResult(submission.BuildRequest, bae);
+                        submission.CompleteResults(result);
+                        submission.CompleteLogging(true);
+                        CheckSubmissionCompletenessAndRemove(submission);
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        HandleSubmissionException(submission, ex);
+                    }
+                });
+
+            void IssueBuildSubmissionToSchedulerImpl(BuildSubmission submission, bool allowMainThreadBuild)
+            {
+                var resetMainThreadOnFailure = false;
+                try
+                {
+                    lock (_syncLock)
+                    {
+                        if (_shuttingDown)
                         {
-                            resetMainThreadOnFailure = true;
-                            _legacyThreadingData.MainThreadSubmissionId = submission.SubmissionId;
+                            throw new BuildAbortedException();
+                        }
+
+                        if (allowMainThreadBuild && _buildParameters.LegacyThreadingSemantics)
+                        {
+                            if (_legacyThreadingData.MainThreadSubmissionId == -1)
+                            {
+                                resetMainThreadOnFailure = true;
+                                _legacyThreadingData.MainThreadSubmissionId = submission.SubmissionId;
+                            }
+                        }
+
+                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] {submission.BuildRequest});
+
+                        HandleNewRequest(Scheduler.VirtualNode, blocker);
+                    }
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    var projectException = ex as InvalidProjectFileException;
+                    if (projectException != null)
+                    {
+                        if (!projectException.HasBeenLogged)
+                        {
+                            BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
+                            projectException.HasBeenLogged = true;
                         }
                     }
-
-                    BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] {submission.BuildRequest});
-
-                    HandleNewRequest(Scheduler.VirtualNode, blocker);
-                }
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                InvalidProjectFileException projectException = ex as InvalidProjectFileException;
-                if (projectException != null)
-                {
-                    if (!projectException.HasBeenLogged)
+                    else if ((ex is BuildAbortedException) || ExceptionHandling.NotExpectedException(ex))
                     {
-                        BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                        ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
-                        projectException.HasBeenLogged = true;
-                    }
-                }
-                else if ((ex is BuildAbortedException) || ExceptionHandling.NotExpectedException(ex))
-                {
-                    throw;
-                }
-
-                lock (_syncLock)
-                {
-
-                    if (resetMainThreadOnFailure)
-                    {
-                        _legacyThreadingData.MainThreadSubmissionId = -1;
+                        throw;
                     }
 
-                    if (projectException == null)
+                    lock (_syncLock)
                     {
-                        BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                        ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
-                    }
 
-                    submission.CompleteLogging(true);
-                    ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
-                    _overallBuildSuccess = false;
+                        if (resetMainThreadOnFailure)
+                        {
+                            _legacyThreadingData.MainThreadSubmissionId = -1;
+                        }
+
+                        if (projectException == null)
+                        {
+                            var buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
+                        }
+
+                        submission.CompleteLogging(true);
+                        ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
+                        _overallBuildSuccess = false;
+                    }
                 }
             }
         }
@@ -2150,7 +2094,6 @@ namespace Microsoft.Build.Execution
             _workQueue = null;
             _graphSchedulingCancellationSource = null;
             _projectCacheService = null;
-            _projectCacheServiceInstantiatedByVSWorkaround = false;
             _acquiredProjectRootElementCacheFromProjectInstance = false;
 
             _unnamedProjectInstanceToNames.Clear();
@@ -2255,6 +2198,67 @@ namespace Microsoft.Build.Execution
             _configCache.AddConfiguration(newConfiguration);
 
             return newConfiguration;
+        }
+
+        internal void PostCacheResult(CacheRequest cacheRequest, CacheResult cacheResult)
+        {
+            _workQueue.Post(() =>
+            {
+                if (cacheResult.Exception is not null)
+                {
+                    CompleteSubmissionWithException(cacheRequest.Submission, cacheRequest.Configuration, cacheResult.Exception);
+                    return;
+                }
+
+                HandleCacheResult();
+            });
+
+            void HandleCacheResult()
+            {
+                lock (_syncLock)
+                {
+                    try
+                    {
+                        var submission = cacheRequest.Submission;
+                        var configuration = cacheRequest.Configuration;
+
+                        if (cacheResult.ResultType != CacheResultType.CacheHit)
+                        {
+                            // Issue the real build request.
+                            AddBuildRequestToSubmission(submission, configuration.ConfigurationId);
+                            IssueBuildRequestForBuildSubmission(submission, allowMainThreadBuild: false);
+                        }
+                        else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.ProxyTargets != null)
+                        {
+                            // Setup submission.BuildRequest with proxy targets. The proxy request is built on the inproc node (to avoid
+                            // ProjectInstance serialization). The proxy target results are used as results for the real targets.
+                            AddProxyBuildRequestToSubmission(submission, configuration.ConfigurationId, cacheResult.ProxyTargets);
+                            IssueBuildRequestForBuildSubmission(submission, allowMainThreadBuild: false);
+                        }
+                        else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.BuildResult != null)
+                        {
+                            // Mark the build submission as complete with the provided results and return.
+
+                            // There must be a build request for the results, so fake one.
+                            AddBuildRequestToSubmission(submission, configuration.ConfigurationId);
+                            var result = new BuildResult(submission.BuildRequest);
+
+                            foreach (var cacheResult in cacheResult.BuildResult.ResultsByTarget)
+                            {
+                                result.AddResultsForTarget(cacheResult.Key, cacheResult.Value);
+                            }
+
+                            _resultsCache.AddResult(result);
+                            submission.CompleteLogging(false);
+                            ReportResultsToSubmission(result);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        CompleteSubmissionWithException(cacheRequest.Submission, cacheRequest.Configuration, e);
+                    }
+                }
+            }
         }
 
         /// <summary>
