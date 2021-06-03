@@ -67,7 +67,10 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
                 {
                     output.Contains(workload.Description).Should().BeTrue();
                 }
-                output.Contains(workload.Kind.ToString()).Should().BeFalse();
+                if (workload.Platforms != null && workload.Platforms.Any())
+                {
+                    output.Contains(workload.Platforms.First().ToString()).Should().BeFalse();
+                }
             }
         }
 
@@ -88,8 +91,10 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
                 {
                     output.Contains(workload.Description).Should().BeTrue();
                 }
-                output.Contains(workload.Kind.ToString()).Should().BeTrue();
-                output.Contains(workload.IsAbstract.ToString()).Should().BeTrue();
+                if (workload.Platforms != null && workload.Platforms.Any())
+                {
+                    output.Contains(workload.Platforms.First().ToString()).Should().BeTrue();
+                }
             }
         }
 

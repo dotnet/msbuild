@@ -12,14 +12,9 @@
         <target state="new">Description</target>
         <note />
       </trans-unit>
-      <trans-unit id="IsAbstractColumnName">
-        <source>Is Abstract</source>
-        <target state="new">Is Abstract</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="KindColumnName">
-        <source>Kind</source>
-        <target state="new">Kind</target>
+      <trans-unit id="PlatformColumnName">
+        <source>Platforms</source>
+        <target state="new">Platforms</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumnName">
