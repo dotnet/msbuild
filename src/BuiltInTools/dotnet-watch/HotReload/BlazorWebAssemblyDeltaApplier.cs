@@ -89,9 +89,10 @@ namespace Microsoft.DotNet.Watcher.Tools
                         return false;
                     }
 
-                    if (IsDeltaApplied(result.Value))
+                    if (IsDeltaReceivedMessage(result.Value))
                     {
-                        return true;
+                        // 1 indicates success.
+                        return _receiveBuffer[0] == 1;
                     }
                 }
             }
@@ -102,13 +103,12 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             return false;
 
-            bool IsDeltaApplied(ValueWebSocketReceiveResult result)
+            bool IsDeltaReceivedMessage(ValueWebSocketReceiveResult result)
             {
                 _reporter.Verbose($"Received {_receiveBuffer[0]} from browser in [Count: {result.Count}, MessageType: {result.MessageType}, EndOfMessage: {result.EndOfMessage}].");
                 return result.Count == 1 // Should have received 1 byte on the socket for the acknowledgement
                     && result.MessageType is WebSocketMessageType.Binary
-                    && result.EndOfMessage
-                    && _receiveBuffer[0] == 1;
+                    && result.EndOfMessage;
             }
         }
 
