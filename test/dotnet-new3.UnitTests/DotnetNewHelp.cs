@@ -96,7 +96,11 @@ Options:
 
   --no-restore    If specified, skips the automatic restore of the project on create.
                   bool - Optional                                                    
-                  Default: false                                                     ";
+                  Default: false                                                     
+
+  --nullable      Whether to enable nullable reference types for this project.       
+                  bool - Optional                                                    
+                  Default: true                                                      ";
 
         #endregion
         private readonly ITestOutputHelper _log;
