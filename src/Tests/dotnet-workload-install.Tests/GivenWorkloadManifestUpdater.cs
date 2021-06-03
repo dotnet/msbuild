@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
 
-            var manifestUpdates = manifestUpdater.CalculateManifestUpdates();
+            var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select( m => (m.manifestId, m.existingVersion,m .newVersion));
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
         }
 
