@@ -48,18 +48,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetRuntime>Managed</TargetRuntime>
   </PropertyGroup>
 
+    <!-- Store values of certain intrinsic functions that won't change throughout the build. -->
+  <PropertyGroup Condition="'$(TargetFramework)' != ''">
+    <TargetFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</TargetFrameworkIdentifier>
+  </PropertyGroup>
+
   <!-- Because .NET 2.0 apps did not set TargetFrameworkIdentifier, we need to set it for them here by default.  If
        the runtime is set to Managed, we also need to set these.  Otherwise they should be blank (for instance Javascript or
        Native apps) because they do not target a .NET Framework. -->
   <PropertyGroup Condition="'$(TargetRuntime)' == 'Managed'">
     <TargetFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == ''">.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion Condition=" '$(TargetFrameworkVersion)' == '' ">v4.0</TargetFrameworkVersion>
-  </PropertyGroup>
-
-  <!-- Store values of certain intrinsic functions that won't change throughout the build. -->
-  <PropertyGroup Condition="'$(TargetFramework)' != ''">
-    <_TargetFrameworkIdentifier Condition="'$(_TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))</_TargetFrameworkIdentifier>
-    <_TargetFrameworkVersion Condition="'$(_TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_TargetFrameworkVersion>
   </PropertyGroup>
 
   <!-- AvailablePlatforms is the list of platform targets available. -->

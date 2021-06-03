@@ -78,9 +78,9 @@
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
-    <GenAPIShortFrameworkIdentifier Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">net</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0'))">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">net</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
 
