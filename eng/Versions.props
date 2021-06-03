@@ -14,7 +14,8 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup Condition="'$(MonoBuild)' != 'true'">
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
-    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers><!-- Force a specific compiler version because record changes cause genapi output to flip-flop -->
+    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
+    <!-- Force a specific compiler version because record changes cause genapi output to flip-flop -->
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
@@ -32,7 +33,7 @@
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>6.0.100-preview.3.21202.5</DotNetCliVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.0.0-1.21277.15</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.0.0-1.21302.11</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.0.0-preview.1.66</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
