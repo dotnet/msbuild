@@ -514,7 +514,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationPropertiesAndItems
         {
-            get => _includeEvaluationPropertiesAndItems ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+            get => _includeEvaluationPropertiesAndItems ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().All(sink => sink.IncludeEvaluationPropertiesAndItems);
             set => _includeEvaluationPropertiesAndItems = value;
         }
 
