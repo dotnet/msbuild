@@ -8,4 +8,8 @@
     <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.Cli.TestHelper\Microsoft.TemplateEngine.Cli.TestHelper.csproj" />
     <ProjectReference Include="$(TestDir)Microsoft.TemplateEngine.TestHelper\Microsoft.TemplateEngine.TestHelper.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
