@@ -344,7 +344,7 @@ namespace Microsoft.NET.Build.Tests
                 return command;
             }
         }
-        
+
         [Fact]
         public void It_includes_internals_visible_to()
         {
@@ -370,6 +370,89 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        public void It_includes_requires_preview_features(bool addPreviewFeatureProperty, bool enablePreviewFeatures)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework("net6.0")
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    if (addPreviewFeatureProperty)
+                    {
+                        project.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "EnablePreviewFeatures", $"{enablePreviewFeatures}")));
+                    }
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("net6.0").FullName, "HelloWorld.dll");
+
+            var parameterlessAttributes = AssemblyInfo.GetParameterlessAttributes(assemblyPath);
+            bool contains = false;
+            foreach (var attribute in parameterlessAttributes)
+            {
+                if (attribute.Equals("RequiresPreviewFeaturesAttribute", System.StringComparison.Ordinal))
+                {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (!addPreviewFeatureProperty || !enablePreviewFeatures)
+            {
+                Assert.False(contains);
+            }
+            else
+            {
+                Assert.True(contains);
+            }
+        }
+
+        [Fact]
+        public void It_doesnt_includes_requires_preview_features()
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFramework("net6.0")
+                .WithProjectChanges((path, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement(ns + "EnablePreviewFeatures", "false")));
+                });
+
+            var buildCommand = new BuildCommand(testAsset);
+            buildCommand.Execute().Should().Pass();
+
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("net6.0").FullName, "HelloWorld.dll");
+
+            var parameterlessAttributes = AssemblyInfo.GetParameterlessAttributes(assemblyPath);
+            bool contains = false;
+            foreach (var attribute in parameterlessAttributes)
+            {
+                if (attribute.Equals("RequiresPreviewFeaturesAttribute", System.StringComparison.Ordinal))
+                {
+                    contains = true;
+                    break;
+                }
+            }
+
+            Assert.False(contains);
+        }
+
         [Fact]
         public void It_respects_out_out_of_internals_visible_to()
         {
@@ -382,7 +465,7 @@ namespace Microsoft.NET.Build.Tests
                     var ns = project.Root.Name.Namespace;
 
                     project.Root.Add(
-                        new XElement(ns + "PropertyGroup", 
+                        new XElement(ns + "PropertyGroup",
                             new XElement(ns + "GenerateInternalsVisibleToAttributes", "false")),
                         new XElement(ns + "ItemGroup",
                             new XElement(ns + "InternalsVisibleTo",
@@ -651,7 +734,7 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 AssemblyInfo.Get(assemblyPath).ContainsKey("AssemblyMetadataAttribute").Should().Be(false);
-            } 
+            }
         }
     }
 }
