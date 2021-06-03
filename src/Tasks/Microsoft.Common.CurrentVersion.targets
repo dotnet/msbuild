@@ -56,6 +56,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetFrameworkVersion Condition=" '$(TargetFrameworkVersion)' == '' ">v4.0</TargetFrameworkVersion>
   </PropertyGroup>
 
+  <!-- Store values of certain intrinsic functions that won't change throughout the build. -->
+  <PropertyGroup Condition="'$(TargetFramework)' != ''">
+    <_TargetFrameworkIdentifier Condition="'$(_TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))</_TargetFrameworkIdentifier>
+    <_TargetFrameworkVersion Condition="'$(_TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_TargetFrameworkVersion>
+  </PropertyGroup>
+
   <!-- AvailablePlatforms is the list of platform targets available. -->
   <PropertyGroup>
     <AvailablePlatforms Condition="'$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == ''">Any CPU,x86,x64,Itanium</AvailablePlatforms>
