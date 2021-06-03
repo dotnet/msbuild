@@ -66,13 +66,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
-            Option versionOption = new Option<string>("--sdk-version", Install.LocalizableStrings.VersionOptionDescription)
-            {
-                ArgumentHelpName = Install.LocalizableStrings.VersionOptionName
-            };
-            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(versionOption)) ?
+            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption)) ?
                 new ReleaseVersion(version ?? Product.Version) :
-                new ReleaseVersion(parseResult.ValueForOption<string>(versionOption));
+                new ReleaseVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption));
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));

@@ -13,11 +13,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
 
-        public static readonly Option TargetSdkVersionOption = new Option<string>("--target-sdk-version", Workloads.Workload.Install.LocalizableStrings.VersionOptionDescription)
-        {
-            ArgumentHelpName = Workloads.Workload.Install.LocalizableStrings.VersionOptionName
-        };
-        
+        public static readonly Option VersionOption = WorkloadUpdateCommandParser.VersionOption;
+
         public static readonly Option TempDirOption = WorkloadUpdateCommandParser.TempDirOption;
         
         public static readonly Option IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption;
@@ -27,7 +24,7 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("list", LocalizableStrings.CommandDescription);
             command.AddOption(MachineReadableOption);
             command.AddOption(VerbosityOption);
-            command.AddOption(TargetSdkVersionOption);
+            command.AddOption(VersionOption);
             command.AddOption(TempDirOption);
             command.AddOption(IncludePreviewsOption);
             return command;

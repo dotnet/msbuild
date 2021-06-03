@@ -12,10 +12,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
         
-        public static readonly Option VersionOption = new Option<string>("--sdk-version", Workloads.Workload.Install.LocalizableStrings.VersionOptionDescription)
-        {
-            ArgumentHelpName = Workloads.Workload.Install.LocalizableStrings.VersionOptionName
-        };
+        public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
 
         public static Command GetCommand()
         {

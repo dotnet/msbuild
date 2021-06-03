@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption))
                                ? Path.GetTempPath()
                                : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
-            _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.TargetSdkVersionOption);
+            _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
             _workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(_dotnetPath,
                     string.IsNullOrWhiteSpace(_targetSdkVersion)
@@ -85,6 +85,15 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             IEnumerable<WorkloadId> installedList = _workloadRecordRepo.GetInstalledWorkloads(_currentSdkFeatureBand);
             if (_machineReadableOption)
             {
+                if (!string.IsNullOrWhiteSpace(_targetSdkVersion))
+                {
+                    if (new SdkFeatureBand(_targetSdkVersion).CompareTo(_currentSdkFeatureBand) < 0)
+                    {
+                        throw new ArgumentException(
+                            $"Version band of {_targetSdkVersion} --- {new SdkFeatureBand(_targetSdkVersion)} should not be smaller than current version band {_currentSdkFeatureBand}");
+                    }
+                }
+
                 UpdateAvailableEntry[] updateAvailable = GetUpdateAvailable(installedList);
                 ListOutput listOutput = new(installedList.Select(id => id.ToString()).ToArray(),
                     updateAvailable);

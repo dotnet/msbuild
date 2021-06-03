@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
@@ -27,65 +28,84 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         private const string UpdateAvailableVersion = "7.0.100";
         private const string XamarinAndroidDescription = "xamarin-android description";
         private readonly BufferedReporter _reporter = new();
-        private readonly WorkloadListCommand _workloadListCommand;
+        private WorkloadListCommand _workloadListCommand;
+        private string _testDirectory;
+
+        private List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+            Workloads)> _mockManifestUpdates;
+
+        private MockNuGetPackageDownloader _nugetDownloader;
+        private string _dotnetRoot;
 
         public GivenInstalledWorkloadAndManifestUpdater(ITestOutputHelper log) : base(log)
         {
-            string testDirectory = _testAssetsManager.CreateTestDirectory().Path;
-            string dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            MockNuGetPackageDownloader nugetDownloader = new(dotnetRoot);
+        }
 
-            List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition>
-                Workloads)> mockManifestUpdates =
-                new List<(ManifestId, ManifestVersion, ManifestVersion,
-                    Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)>
-                {
-                    (
-                        new ManifestId("manifest1"),
-                        new ManifestVersion(CurrentSdkVersion),
-                        new ManifestVersion(UpdateAvailableVersion),
-                        new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
-                        {
-                            [new WorkloadDefinitionId(InstallingWorkload)] = new(
-                                new WorkloadDefinitionId(InstallingWorkload), false, XamarinAndroidDescription,
-                                WorkloadDefinitionKind.Dev, null, null, null),
-                            [new WorkloadDefinitionId("other")] = new(
-                                new WorkloadDefinitionId("other"), false, "other description",
-                                WorkloadDefinitionKind.Dev, null, null, null)
-                        }),
-                    (
-                        new ManifestId("manifest-other"),
-                        new ManifestVersion(CurrentSdkVersion),
-                        new ManifestVersion("7.0.101"),
-                        new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
-                        {
-                            [new WorkloadDefinitionId("other-manifest-workload")] = new(
-                                new WorkloadDefinitionId("other-manifest-workload"), false,
-                                "other-manifest-workload description",
-                                WorkloadDefinitionKind.Dev, null, null, null)
-                        })
-                };
+        private void Setup(string identifier)
+        {
+            _testDirectory = _testAssetsManager.CreateTestDirectory(identifier: identifier).Path;
+            _dotnetRoot = Path.Combine(_testDirectory, "dotnet");
+            _nugetDownloader = new(_dotnetRoot);
 
-            // Update workload
+            _mockManifestUpdates = new()
+            {
+                (
+                    new ManifestId("manifest1"),
+                    new ManifestVersion(CurrentSdkVersion),
+                    new ManifestVersion(UpdateAvailableVersion),
+                    new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                    {
+                        [new WorkloadDefinitionId(InstallingWorkload)] = new(
+                            new WorkloadDefinitionId(InstallingWorkload), false, XamarinAndroidDescription,
+                            WorkloadDefinitionKind.Dev, null, null, null),
+                        [new WorkloadDefinitionId("other")] = new(
+                            new WorkloadDefinitionId("other"), false, "other description",
+                            WorkloadDefinitionKind.Dev, null, null, null)
+                    }),
+                (
+                    new ManifestId("manifest-other"),
+                    new ManifestVersion(CurrentSdkVersion),
+                    new ManifestVersion("7.0.101"),
+                    new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                    {
+                        [new WorkloadDefinitionId("other-manifest-workload")] = new(
+                            new WorkloadDefinitionId("other-manifest-workload"), false,
+                            "other-manifest-workload description",
+                            WorkloadDefinitionKind.Dev, null, null, null)
+                    }),
+                (
+                    new ManifestId("manifest-older-version"),
+                    new ManifestVersion(CurrentSdkVersion),
+                    new ManifestVersion("6.0.100"),
+                    new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                    {
+                        [new WorkloadDefinitionId("other-manifest-workload")] = new(
+                            new WorkloadDefinitionId("other-manifest-workload"), false,
+                            "other-manifest-workload description",
+                            WorkloadDefinitionKind.Dev, null, null, null)
+                    })
+            };
+
             ParseResult listParseResult = Parser.GetWorkloadsInstance.Parse(new[]
             {
-                "dotnet", "workload", "list", "--machine-readable", "--target-sdk-version", "7.0.100"
+                "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "7.0.100"
             });
 
             _workloadListCommand = new WorkloadListCommand(
                 listParseResult,
                 _reporter,
-                nugetPackageDownloader: nugetDownloader,
-                workloadManifestUpdater: new MockWorkloadManifestUpdater(mockManifestUpdates),
-                userHome: testDirectory,
+                nugetPackageDownloader: _nugetDownloader,
+                workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
+                userHome: _testDirectory,
                 currentSdkVersion: CurrentSdkVersion,
-                dotnetDir: dotnetRoot,
+                dotnetDir: _dotnetRoot,
                 workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
         }
 
         [Fact]
         public void ItShouldGetAvailableUpdate()
         {
+            Setup(nameof(ItShouldGetAvailableUpdate));
             WorkloadListCommand.UpdateAvailableEntry[] result =
                 _workloadListCommand.GetUpdateAvailable(new List<WorkloadId> {new("xamarin-android")});
 
@@ -99,8 +119,49 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         [Fact]
         public void ItShouldGetListOfWorkloadWithCurrentSdkVersionBand()
         {
+            Setup(nameof(ItShouldGetListOfWorkloadWithCurrentSdkVersionBand));
             _workloadListCommand.Execute();
             _reporter.Lines.Should().Contain(c => c.Contains("\"installed\":[\"xamarin-android\"]"));
+        }
+
+        [Fact]
+        public void GivenLowerTargetVersionItShouldThrow()
+        {
+            _workloadListCommand = new WorkloadListCommand(
+                Parser.GetWorkloadsInstance.Parse(new[]
+                {
+                    "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "5.0.306"
+                }),
+                _reporter,
+                nugetPackageDownloader: _nugetDownloader,
+                workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
+                userHome: _testDirectory,
+                currentSdkVersion: CurrentSdkVersion,
+                dotnetDir: _dotnetRoot,
+                workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
+
+            Action a = () => _workloadListCommand.Execute();
+            a.ShouldThrow<ArgumentException>();
+        }
+
+        [Fact]
+        public void GivenSameLowerTargetVersionBandItShouldNotThrow()
+        {
+            _workloadListCommand = new WorkloadListCommand(
+                Parser.GetWorkloadsInstance.Parse(new[]
+                {
+                    "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "6.0.100"
+                }),
+                _reporter,
+                nugetPackageDownloader: _nugetDownloader,
+                workloadManifestUpdater: new MockWorkloadManifestUpdater(_mockManifestUpdates),
+                userHome: _testDirectory,
+                currentSdkVersion: "6.0.101",
+                dotnetDir: _dotnetRoot,
+                workloadRecordRepo: new MockMatchingFeatureBandInstallationRecordRepository());
+
+            Action a = () => _workloadListCommand.Execute();
+            a.ShouldNotThrow();
         }
 
         internal class MockMatchingFeatureBandInstallationRecordRepository : IWorkloadInstallationRecordRepository
