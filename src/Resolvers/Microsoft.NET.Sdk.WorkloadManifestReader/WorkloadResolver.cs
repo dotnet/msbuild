@@ -140,18 +140,20 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </remarks>
         public IEnumerable<PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind)
         {
-            foreach (var pack in _packs)
+            foreach (var pack in _packs.Values)
             {
-                if (pack.Value.Kind != kind)
+                if (pack.Kind != kind)
                 {
                     continue;
                 }
 
-                var aliasedPath = ResolvePackPath(pack.Value);
-                var resolvedPackageId = pack.Value.IsAlias ? pack.Value.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers)?.ToString() : pack.Value.Id.ToString();
-                if (aliasedPath != null && resolvedPackageId != null && PackExists(aliasedPath, pack.Value.Kind))
+                if (ResolveId(pack) is WorkloadPackId resolvedPackageId)
                 {
-                    yield return CreatePackInfo(pack.Value, aliasedPath, resolvedPackageId);
+                    var aliasedPath = GetPackPath(_dotnetRootPaths, resolvedPackageId, pack.Version, pack.Kind, out bool isInstalled);
+                    if (isInstalled)
+                    {
+                        yield return CreatePackInfo(pack, aliasedPath, resolvedPackageId);
+                    }
                 }
             }
         }
@@ -162,58 +164,54 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _directoryExistOverride = directoryExists;
         }
 
-        private PackInfo CreatePackInfo(WorkloadPack pack, string aliasedPath, string resolvedPackageId) => new PackInfo(
+        private PackInfo CreatePackInfo(WorkloadPack pack, string aliasedPath, WorkloadPackId resolvedPackageId) => new PackInfo(
                 pack.Id.ToString(),
                 pack.Version,
                 pack.Kind,
                 aliasedPath,
-                resolvedPackageId
+                resolvedPackageId.ToString()
             );
 
-        private bool PackExists (string packPath, WorkloadPackKind packKind)
+        /// <summary>
+        /// Resolve the package ID for the host platform.
+        /// </summary>
+        /// <param name="pack">The workload pack</param>
+        /// <returns>The path to the pack, or null if the pack is not available on the host platform.</returns>
+        private WorkloadPackId? ResolveId(WorkloadPack pack)
         {
-            switch (packKind)
+            if (!pack.IsAlias)
             {
-                case WorkloadPackKind.Framework:
-                case WorkloadPackKind.Sdk:
-                case WorkloadPackKind.Tool:
-                    //can we do a more robust check than directory.exists?
-                    return _directoryExistOverride?.Invoke(packPath) ?? Directory.Exists(packPath);
-                case WorkloadPackKind.Library:
-                case WorkloadPackKind.Template:
-                    return _fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath);
-                default:
-                    throw new ArgumentException($"The package kind '{packKind}' is not known", nameof(packKind));
+                return pack.Id;
             }
-        }
 
+            if (pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers) is WorkloadPackId aliasedId)
+            {
+                return aliasedId;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Resolve the pack path for the host platform.
         /// </summary>
         /// <param name="pack">The workload pack</param>
+        /// <param name="isInstalled">Whether the pack is installed</param>
         /// <returns>The path to the pack, or null if the pack is not available on the host platform.</returns>
-        private string? ResolvePackPath(WorkloadPack pack)
+        private string? ResolvePackPath(WorkloadPack pack, out bool isInstalled)
         {
-            var resolvedId = pack.Id;
-
-            if (pack.IsAlias)
+            if (ResolveId(pack) is WorkloadPackId resolvedId)
             {
-                if (pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers) is WorkloadPackId aliasedId)
-                {
-                    resolvedId = aliasedId;
-                }
-                else
-                {
-                    return null;
-                }
+                return GetPackPath(_dotnetRootPaths, resolvedId, pack.Version, pack.Kind, out isInstalled);
             }
 
-            return GetPackPath(_dotnetRootPaths, resolvedId, pack.Version, pack.Kind);
+            isInstalled = false;
+            return null;
         }
 
-        private string GetPackPath(string [] dotnetRootPaths, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind)
+        private string GetPackPath(string [] dotnetRootPaths, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind, out bool isInstalled)
         {
+            isInstalled = false;
             string packPath = "";
             bool isFile;
             foreach (var rootPath in dotnetRootPaths)
@@ -241,15 +239,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
                 }
 
-                bool packFound = isFile ?
+                //can we do a more robust check than directory.exists?
+                isInstalled = isFile ?
                     _fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath) :
                     _directoryExistOverride?.Invoke(packPath) ?? Directory.Exists(packPath); ;
 
-                if (packFound)
+                if (isInstalled)
                 {
                     break;
                 }
-                
             }
             return packPath;
         }
@@ -262,9 +260,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             var installedPacks = new HashSet<WorkloadPackId>();
             foreach (var pack in _packs)
             {
-                var packPath = ResolvePackPath(pack.Value);
-
-                if (packPath != null && PackExists(packPath, pack.Value.Kind))
+                ResolvePackPath(pack.Value, out bool isInstalled);
+                if (isInstalled)
                 {
                     installedPacks.Add(pack.Key);
                 }
@@ -349,11 +346,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             if (_packs.TryGetValue(new WorkloadPackId (packId), out var pack))
             {
-                var packPath = ResolvePackPath(pack);
-                var resolvedPackageId = pack.IsAlias ? pack.TryGetAliasForRuntimeIdentifiers(_currentRuntimeIdentifiers)?.ToString() : pack.Id.ToString();
-                if (packPath != null && resolvedPackageId != null)
+                if (ResolveId(pack) is WorkloadPackId resolvedPackageId)
                 {
-                    return CreatePackInfo(pack, packPath, resolvedPackageId);
+                    var aliasedPath = GetPackPath(_dotnetRootPaths, resolvedPackageId, pack.Version, pack.Kind, out bool exists);
+                    return CreatePackInfo(pack, aliasedPath, resolvedPackageId);
                 }
             }
 
@@ -397,6 +393,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 ResolvedPackageId = resolvedPackageId;
             }
 
+            /// <summary>
+            /// The workload pack ID. The NuGet package ID <see cref="ResolvedPackageId"/> may differ from this.
+            /// </summary>
             public string Id { get; }
 
             public string Version { get; }
