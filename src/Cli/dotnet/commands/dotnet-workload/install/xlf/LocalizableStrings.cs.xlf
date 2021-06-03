@@ -62,6 +62,11 @@
         <target state="new">Garbage collecting for SDK feature bands {0}...</target>
         <note />
       </trans-unit>
+      <trans-unit id="InadequatePermissions">
+        <source>Inadequate permissions to access, please elevate to run this command.</source>
+        <target state="new">Inadequate permissions to access, please elevate to run this command.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IncludePreviewOptionDescription">
         <source>Allow prerelease workload manifests.</source>
         <target state="new">Allow prerelease workload manifests.</target>

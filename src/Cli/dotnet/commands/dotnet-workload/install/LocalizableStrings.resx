@@ -267,4 +267,7 @@
   <data name="SkippingManifestUpdate" xml:space="preserve">
     <value>Manifest packages were not found, skipping manifest update...</value>
   </data>
+  <data name="InadequatePermissions" xml:space="preserve">
+    <value>Inadequate permissions to access, please elevate to run this command.</value>
+  </data>
 </root>
