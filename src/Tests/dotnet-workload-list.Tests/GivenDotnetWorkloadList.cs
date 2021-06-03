@@ -9,8 +9,8 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.DotNet.Workloads.Workload.List;
 using System.CommandLine.Parsing;
 using Microsoft.NET.TestFramework.Utilities;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using System.Collections.Generic;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {

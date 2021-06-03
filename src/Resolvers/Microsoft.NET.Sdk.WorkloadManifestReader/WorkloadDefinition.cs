@@ -8,7 +8,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     public class WorkloadDefinition
     {
         public WorkloadDefinition(
-            WorkloadDefinitionId id, bool isAbstract, string? description, WorkloadDefinitionKind kind, List<WorkloadDefinitionId>? extends,
+            WorkloadId id, bool isAbstract, string? description, WorkloadDefinitionKind kind, List<WorkloadId>? extends,
             List<WorkloadPackId>? packs, List<string>? platforms)
         {
             Id = id;
@@ -20,11 +20,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             Platforms = platforms;
         }
 
-        public WorkloadDefinitionId Id { get; }
+        public WorkloadId Id { get; }
         public bool IsAbstract { get; }
         public string? Description { get; }
         public WorkloadDefinitionKind Kind { get; }
-        public List<WorkloadDefinitionId>? Extends { get; }
+        public List<WorkloadId>? Extends { get; }
         public List<WorkloadPackId>? Packs { get; }
         public List<string>? Platforms { get; }
     }

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {
