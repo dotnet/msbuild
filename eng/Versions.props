@@ -14,7 +14,8 @@
   <!-- Repo Toolset Features -->
   <PropertyGroup Condition="'$(MonoBuild)' != 'true'">
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
-    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers><!-- Force a specific compiler version because record changes cause genapi output to flip-flop -->
+    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
+    <!-- Force a specific compiler version because record changes cause genapi output to flip-flop -->
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
