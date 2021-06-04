@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         private WorkloadListCommand _workloadListCommand;
         private string _testDirectory;
 
-        private List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+        private List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
             Workloads)> _mockManifestUpdates;
 
         private MockNuGetPackageDownloader _nugetDownloader;
@@ -53,23 +53,23 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                     new ManifestId("manifest1"),
                     new ManifestVersion(CurrentSdkVersion),
                     new ManifestVersion(UpdateAvailableVersion),
-                    new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                    new Dictionary<WorkloadId, WorkloadDefinition>
                     {
-                        [new WorkloadDefinitionId(InstallingWorkload)] = new(
-                            new WorkloadDefinitionId(InstallingWorkload), false, XamarinAndroidDescription,
+                        [new WorkloadId(InstallingWorkload)] = new(
+                            new WorkloadId(InstallingWorkload), false, XamarinAndroidDescription,
                             WorkloadDefinitionKind.Dev, null, null, null),
-                        [new WorkloadDefinitionId("other")] = new(
-                            new WorkloadDefinitionId("other"), false, "other description",
+                        [new WorkloadId("other")] = new(
+                            new WorkloadId("other"), false, "other description",
                             WorkloadDefinitionKind.Dev, null, null, null)
                     }),
                 (
                     new ManifestId("manifest-other"),
                     new ManifestVersion(CurrentSdkVersion),
                     new ManifestVersion("7.0.101"),
-                    new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                    new Dictionary<WorkloadId, WorkloadDefinition>
                     {
-                        [new WorkloadDefinitionId("other-manifest-workload")] = new(
-                            new WorkloadDefinitionId("other-manifest-workload"), false,
+                        [new WorkloadId("other-manifest-workload")] = new(
+                            new WorkloadId("other-manifest-workload"), false,
                             "other-manifest-workload description",
                             WorkloadDefinitionKind.Dev, null, null, null)
                     }),
@@ -77,10 +77,10 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                     new ManifestId("manifest-older-version"),
                     new ManifestVersion(CurrentSdkVersion),
                     new ManifestVersion("6.0.100"),
-                    new Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                    new Dictionary<WorkloadId, WorkloadDefinition>
                     {
-                        [new WorkloadDefinitionId("other-manifest-workload")] = new(
-                            new WorkloadDefinitionId("other-manifest-workload"), false,
+                        [new WorkloadId("other-manifest-workload")] = new(
+                            new WorkloadId("other-manifest-workload"), false,
                             "other-manifest-workload description",
                             WorkloadDefinitionKind.Dev, null, null, null)
                     })

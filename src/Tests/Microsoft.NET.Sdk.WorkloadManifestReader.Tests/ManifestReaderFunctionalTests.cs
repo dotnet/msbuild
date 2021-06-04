@@ -52,7 +52,7 @@ namespace ManifestReaderTests
         public void ItShouldGetWorkloadDescription()
         {
             WorkloadResolver workloadResolver = SetUp();
-            var result = workloadResolver.GetWorkloadInfo(new WorkloadDefinitionId("xamarin-android"));
+            var result = workloadResolver.GetWorkloadInfo(new WorkloadId("xamarin-android"));
             result.Description.Should().Be("Create, build and run Android apps");
         }
 
