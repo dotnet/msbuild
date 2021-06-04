@@ -44,6 +44,113 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void HashTaskIgnoreOrderTest()
+        {
+            var variant1 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("item1"),
+                        new TaskItem("item2"),
+                        new TaskItem("item3")
+                    },
+                    ignoreOrder: true);
+            var variant2 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("item2"),
+                        new TaskItem("item1"),
+                        new TaskItem("item3")
+                    },
+                    ignoreOrder: true);
+            var variant3 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("item1"),
+                        new TaskItem("item3"),
+                        new TaskItem("item2")
+                    },
+                    ignoreOrder: true);
+            Assert.Equal(variant1, variant3);
+            Assert.Equal(variant1, variant2);
+            Assert.Equal(variant2, variant3);
+        }
+
+        [Fact]
+        public void HashTaskIgnoreOrderNegativeTest()
+        {
+            var variant1 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("item1"),
+                        new TaskItem("item2"),
+                        new TaskItem("item3")
+                    });
+            var variant2 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("item2"),
+                        new TaskItem("item1"),
+                        new TaskItem("item3")
+                    });
+            Assert.NotEqual(variant1, variant2);
+        }
+
+        [Fact]
+        public void HashTaskIgnoreCaseNegativeTest()
+        {
+            var uppercaseHash =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("ITEM1"),
+                        new TaskItem("ITEM2"),
+                        new TaskItem("ITEM3")
+                    });
+            var mixedcaseHash =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("Item1"),
+                        new TaskItem("iTEm2"),
+                        new TaskItem("iteM3")
+                    });
+            Assert.NotEqual(uppercaseHash, mixedcaseHash);
+        }
+
+        [Fact]
+        public void HashTaskIgnoreOrderIgnoreCaseTest()
+        {
+            var variant1 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("ITEM1"),
+                        new TaskItem("ITEM2"),
+                        new TaskItem("ITEM3")
+                    },
+                    ignoreCase: true,
+                    ignoreOrder: true);
+            var variant2 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("iTEm2"),
+                        new TaskItem("Item1"),
+                        new TaskItem("iteM3")
+                    },
+                    ignoreCase: true,
+                    ignoreOrder: true);
+            var variant3 =
+                ExecuteHashTask(new ITaskItem[]
+                    {
+                        new TaskItem("item1"),
+                        new TaskItem("item3"),
+                        new TaskItem("item2")
+                    },
+                    ignoreCase: true,
+                    ignoreOrder: true);
+            Assert.Equal(variant1, variant3);
+            Assert.Equal(variant1, variant2);
+            Assert.Equal(variant2, variant3);
+        }
+
+        [Fact]
         public void HashTaskIgnoreCaseTest()
         {
             var uppercaseHash =
@@ -53,7 +160,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                         new TaskItem("ITEM2"),
                         new TaskItem("ITEM3")
                     },
-                    true);
+                    ignoreCase: true);
             var mixedcaseHash =
                 ExecuteHashTask(new ITaskItem[]
                     {
@@ -61,7 +168,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                         new TaskItem("iTEm2"),
                         new TaskItem("iteM3")
                     },
-                    true);
+                    ignoreCase: true);
             var lowercaseHash =
                 ExecuteHashTask(new ITaskItem[]
                     {
@@ -69,19 +176,20 @@ namespace Microsoft.Build.Tasks.UnitTests
                         new TaskItem("item2"),
                         new TaskItem("item3")
                     },
-                    true);
+                    ignoreCase: true);
             Assert.Equal(uppercaseHash, lowercaseHash);
             Assert.Equal(uppercaseHash, mixedcaseHash);
             Assert.Equal(mixedcaseHash, lowercaseHash);
         }
 
-        private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false)
+        private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false, bool ignoreOrder = false)
         {
             var hashTask = new Hash
             {
                 BuildEngine = new MockEngine(),
                 ItemsToHash = items,
-                IgnoreCase = ignoreCase
+                IgnoreCase = ignoreCase,
+                IgnoreOrder = ignoreOrder
             };
 
             Assert.True(hashTask.Execute());

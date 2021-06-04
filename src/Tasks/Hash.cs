@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -32,6 +34,14 @@ namespace Microsoft.Build.Tasks
         public bool IgnoreCase { get; set; }
 
         /// <summary>
+        /// When true, will generate a hash that does not depend on the order of the items.
+        /// </summary>
+        /// <remarks>
+        /// When true, the items are sorted first using their Identity
+        /// </remarks>
+        public bool IgnoreOrder { get; set; }
+
+        /// <summary>
         /// Hash of the ItemsToHash ItemSpec.
         /// </summary>
         [Output]
@@ -52,7 +62,12 @@ namespace Microsoft.Build.Tasks
 
                     using (var stringBuilder = new ReuseableStringBuilder(Math.Max(concatenatedItemStringSize, hashStringSize)))
                     {
-                        foreach (var item in ItemsToHash)
+                        IEnumerable<ITaskItem> items = ItemsToHash;
+                        if (IgnoreOrder)
+                        {
+                            items = items.OrderBy(o => o.ItemSpec, IgnoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+                        }
+                        foreach (var item in items)
                         {
                             string itemSpec = item.ItemSpec;
                             stringBuilder.Append(IgnoreCase ? itemSpec.ToUpperInvariant() : itemSpec);

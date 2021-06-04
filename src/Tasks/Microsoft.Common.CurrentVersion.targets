@@ -3537,6 +3537,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <Hash
       ItemsToHash="@(CoreCompileCache)"
+      IgnoreOrder="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreOrder)`, `false`))"
       IgnoreCase="$([MSBuild]::ValueOrDefault(`$(CoreCompileCacheIgnoreCase)`, `true`))">
       <Output TaskParameter="HashResult" PropertyName="CoreCompileDependencyHash" />
     </Hash>
