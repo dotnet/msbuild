@@ -5,70 +5,108 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
+using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
-using System.Linq;
+using NuGet.Common;
+using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.List
 {
     internal class WorkloadListCommand : CommandBase
     {
-        private readonly IReporter _reporter;
-        private readonly VerbosityOptions _verbosity;
+        private readonly SdkFeatureBand _currentSdkFeatureBand;
+        private readonly string _dotnetPath;
+        private readonly bool _includePreviews;
         private readonly bool _machineReadableOption;
+        private readonly INuGetPackageDownloader _nugetPackageDownloader;
+        private readonly IReporter _reporter;
+        private readonly string _targetSdkVersion;
+        private readonly string _tempDirPath;
+        private readonly string _userHome;
+        private readonly VerbosityOptions _verbosity;
+        private readonly SdkDirectoryWorkloadManifestProvider _workloadManifestProvider;
+        private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
-        private readonly SdkFeatureBand _sdkFeatureBand;
-
-        public static readonly string MockUpdateDirectory = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath),
-            "DEV_mockworkloads", "update");
 
         public WorkloadListCommand(
             ParseResult result,
             IReporter reporter = null,
             IWorkloadInstallationRecordRepository workloadRecordRepo = null,
-            string version = null) : base(result)
+            string currentSdkVersion = null,
+            string dotnetDir = null,
+            string userHome = null,
+            string tempDirPath = null,
+            INuGetPackageDownloader nugetPackageDownloader = null,
+            IWorkloadManifestUpdater workloadManifestUpdater = null
+        ) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
             _machineReadableOption = result.ValueForOption<bool>(WorkloadListCommandParser.MachineReadableOption);
             _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadListCommandParser.VerbosityOption);
 
-            _sdkVersion = string.IsNullOrEmpty(result.ValueForOption<string>(WorkloadListCommandParser.VersionOption)) ?
-                new ReleaseVersion(version ?? Product.Version) :
-                new ReleaseVersion(result.ValueForOption<string>(WorkloadListCommandParser.VersionOption));
-            var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
-            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
-            var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
-            _sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
+            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            ReleaseVersion currentSdkReleaseVersion = new(currentSdkVersion ?? Product.Version);
+            _currentSdkFeatureBand = new SdkFeatureBand(currentSdkReleaseVersion);
             _workloadRecordRepo = workloadRecordRepo ??
-                                  WorkloadInstallerFactory
-                                      .GetWorkloadInstaller(_reporter, _sdkFeatureBand, workloadResolver, _verbosity)
-                                      .GetWorkloadInstallationRecordRepository();
+                                  new NetSdkManagedInstallationRecordRepository(_dotnetPath);
+            _includePreviews = result.ValueForOption<bool>(WorkloadListCommandParser.IncludePreviewsOption);
+            _tempDirPath = tempDirPath ??
+                           (string.IsNullOrWhiteSpace(
+                               result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption))
+                               ? Path.GetTempPath()
+                               : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
+            _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
+            _workloadManifestProvider =
+                new SdkDirectoryWorkloadManifestProvider(_dotnetPath,
+                    string.IsNullOrWhiteSpace(_targetSdkVersion)
+                        ? currentSdkReleaseVersion.ToString()
+                        : _targetSdkVersion);
+            _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
+            DirectoryPath tempPackagesDir =
+                new(Path.Combine(_userHome, ".dotnet", "sdk-advertising-temp"));
+            _nugetPackageDownloader = nugetPackageDownloader ??
+                                      new NuGetPackageDownloader(tempPackagesDir, null,
+                                          new NullLogger());
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
+                _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath);
         }
 
         public override int Execute()
         {
-            var installedList = _workloadRecordRepo.GetInstalledWorkloads(_sdkFeatureBand);
+            IEnumerable<WorkloadId> installedList = _workloadRecordRepo.GetInstalledWorkloads(_currentSdkFeatureBand);
             if (_machineReadableOption)
             {
-                var updateAvailable = MockUpdateAvailable();
-                var listOutput = new ListOutput(Installed: installedList.Select(id => id.ToString()).ToArray(),
-                    UpdateAvailable: updateAvailable);
+                if (!string.IsNullOrWhiteSpace(_targetSdkVersion))
+                {
+                    if (new SdkFeatureBand(_targetSdkVersion).CompareTo(_currentSdkFeatureBand) < 0)
+                    {
+                        throw new ArgumentException(
+                            $"Version band of {_targetSdkVersion} --- {new SdkFeatureBand(_targetSdkVersion)} should not be smaller than current version band {_currentSdkFeatureBand}");
+                    }
+                }
+
+                UpdateAvailableEntry[] updateAvailable = GetUpdateAvailable(installedList);
+                ListOutput listOutput = new(installedList.Select(id => id.ToString()).ToArray(),
+                    updateAvailable);
 
                 _reporter.WriteLine("==workloadListJsonOutputStart==");
                 _reporter.WriteLine(
                     JsonSerializer.Serialize(listOutput,
-                        options: new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase}));
+                        new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase}));
                 _reporter.WriteLine("==workloadListJsonOutputEnd==");
             }
             else
             {
-                var table = new PrintableTable<WorkloadId>();
+                PrintableTable<WorkloadId> table = new();
                 table.AddColumn(LocalizableStrings.WorkloadIdColumn, workloadId => workloadId.ToString());
 
                 table.PrintRows(installedList, l => _reporter.WriteLine(l));
@@ -79,24 +117,28 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             return 0;
         }
 
-        private UpdateAvailableEntry[] MockUpdateAvailable()
+        internal UpdateAvailableEntry[] GetUpdateAvailable(IEnumerable<WorkloadId> installedList)
         {
-            var updateList = new List<UpdateAvailableEntry>();
+            HashSet<WorkloadId> installedWorkloads = installedList.ToHashSet();
+            _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(_includePreviews).Wait();
+            IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion,
+                Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestsToUpdate =
+                _workloadManifestUpdater.CalculateManifestUpdates();
 
-            if (!File.Exists(Path.Combine(MockUpdateDirectory,
-                "Microsoft.NET.Workload.Android.6.0.100.nupkg")))
+            List<UpdateAvailableEntry> updateList = new();
+            foreach ((ManifestId _, ManifestVersion existingVersion, ManifestVersion newVersion,
+                Dictionary<WorkloadDefinitionId, WorkloadDefinition> workloads) in manifestsToUpdate)
             {
-                updateList.Add(new UpdateAvailableEntry("6.0.100", "6.0.101",
-                    _mockAndroidDescription,
-                    "microsoft-android-sdk-full"));
-            }
-
-            if (!File.Exists(Path.Combine(MockUpdateDirectory,
-                "Microsoft.iOS.Bundle.6.0.100.nupkg")))
-            {
-                updateList.Add(new UpdateAvailableEntry("6.0.100", "6.0.101",
-                    _mockIosDescription,
-                    "microsoft-ios-sdk-full"));
+                foreach ((WorkloadDefinitionId workloadDefinitionId, WorkloadDefinition workloadDefinition) in
+                    workloads)
+                {
+                    if (installedWorkloads.Contains(new WorkloadId(workloadDefinitionId.ToString())))
+                    {
+                        updateList.Add(new UpdateAvailableEntry(existingVersion.ToString(),
+                            newVersion.ToString(),
+                            workloadDefinition.Description, workloadDefinitionId.ToString()));
+                    }
+                }
             }
 
             return updateList.ToArray();
@@ -104,14 +146,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
 
         internal record ListOutput(string[] Installed, UpdateAvailableEntry[] UpdateAvailable);
 
-        internal record UpdateAvailableEntry(string ExistingManifestVersion, string AvailableUpdateManifestVersion, string Description, string WorkloadId);
-
-        private readonly string _mockIosDescription =
-            $"ios-workload-description: for testing you can delete the content of {MockUpdateDirectory} to revert the mock update";
-
-        private readonly string _mockAndroidDescription =
-            $"android-workload-description: for testing you can delete the content of {MockUpdateDirectory} to revert the mock update";
-
-        private readonly ReleaseVersion _sdkVersion;
+        internal record UpdateAvailableEntry(string ExistingManifestVersion, string AvailableUpdateManifestVersion,
+            string Description, string WorkloadId);
     }
 }

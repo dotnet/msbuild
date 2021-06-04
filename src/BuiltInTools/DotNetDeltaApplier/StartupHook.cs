@@ -4,7 +4,6 @@
 using System;
 using System.IO.Pipes;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.HotReload;
 
 internal sealed class StartupHook

@@ -53,13 +53,14 @@ namespace Microsoft.DotNet.Watcher
             }
 
             _reporter.Output("Hot reload enabled. For a list of supported edits, see https://aka.ms/dotnet/hot-reload. " +
-                "Press \"Ctrl + R\" to restart.");
+                "Press \"Ctrl + Shift + R\" to restart.");
 
             var forceReload = new CancellationTokenSource();
 
             _console.KeyPressed += (key) =>
             {
-                if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.R)
+                var controlShift = ConsoleModifiers.Control | ConsoleModifiers.Shift;
+                if ((key.Modifiers & controlShift) == controlShift && key.Key == ConsoleKey.R)
                 {
                     var cancellationTokenSource = Interlocked.Exchange(ref forceReload, new CancellationTokenSource());
                     cancellationTokenSource.Cancel();

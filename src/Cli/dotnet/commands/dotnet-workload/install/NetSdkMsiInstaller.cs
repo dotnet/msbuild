@@ -21,5 +21,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null) => throw new NotImplementedException();
         public void InstallWorkloadPack(WorkloadResolver.PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null) => throw new NotImplementedException();
         public void RollBackWorkloadPackInstall(WorkloadResolver.PackInfo packInfo, SdkFeatureBand sdkFeatureBand) => throw new NotImplementedException();
+        IEnumerable<(string Id, string Version)> IWorkloadPackInstaller.GetInstalledPacks(SdkFeatureBand sdkFeatureBand) => throw new NotImplementedException();
     }
 }

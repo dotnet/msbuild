@@ -697,6 +697,9 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfig["runtimeOptions"]["configProperties"]
                     ["System.StartupHookProvider.IsSupported"].Value<bool>()
                     .Should().BeFalse();
+                runtimeConfig["runtimeOptions"]["configProperties"]
+                    ["System.Threading.Thread.EnableAutoreleasePool"].Value<bool>()
+                    .Should().BeFalse();
             }
             else
             {

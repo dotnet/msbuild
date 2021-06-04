@@ -51,24 +51,34 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestUpdates()
+        public IEnumerable<(
+            ManifestId manifestId, 
+            ManifestVersion existingVersion, 
+            ManifestVersion newVersion,
+            Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
         {
-            var manifestUpdates = new List<(ManifestId, ManifestVersion, ManifestVersion)>();
+            var manifestUpdates =
+                new List<(ManifestId, ManifestVersion, ManifestVersion,
+                    Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)>();
             var currentManifestIds = GetInstalledManifestIds();
             foreach (var manifestId in currentManifestIds)
             {
                 var currentManifestVersion = GetInstalledManifestVersion(manifestId);
-                var adManifestVersion = GetAdvertisingManifestVersion(manifestId);
-                if (adManifestVersion == null)
+                var advertisingManifestVersionAndWorkloads = GetAdvertisingManifestVersionAndWorkloads(manifestId);
+                if (advertisingManifestVersionAndWorkloads == null)
                 {
                     continue;
                 }
 
-                if (adManifestVersion != null && adManifestVersion.CompareTo(currentManifestVersion) > 0)
+                if (advertisingManifestVersionAndWorkloads != null &&
+                    advertisingManifestVersionAndWorkloads.Value.ManifestVersion.CompareTo(currentManifestVersion) > 0)
                 {
-                    manifestUpdates.Add((manifestId, currentManifestVersion, adManifestVersion));
+                    manifestUpdates.Add((manifestId, currentManifestVersion,
+                        advertisingManifestVersionAndWorkloads.Value.ManifestVersion,
+                        advertisingManifestVersionAndWorkloads.Value.Workloads));
                 }
             }
+
             return manifestUpdates;
         }
 
@@ -213,9 +223,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private ManifestVersion GetAdvertisingManifestVersion(ManifestId manifestId)
+        private (ManifestVersion ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)?
+            GetAdvertisingManifestVersionAndWorkloads(ManifestId manifestId)
         {
-            var manifestPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId), "WorkloadManifest.json");
+            var manifestPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId),
+                "WorkloadManifest.json");
             if (!File.Exists(manifestPath))
             {
                 return null;
@@ -224,7 +236,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
             {
                 var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource);
-                return new ManifestVersion(manifest.Version);
+                return (new ManifestVersion(manifest.Version), manifest.Workloads);
             }
         }
 

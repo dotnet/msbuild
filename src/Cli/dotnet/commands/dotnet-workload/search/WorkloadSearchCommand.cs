@@ -7,9 +7,9 @@ using System.IO;
 using Microsoft.Deployment.DotNet.Releases;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Linq;
+using Microsoft.DotNet.Workloads.Workload.Install;
 
 namespace Microsoft.DotNet.Workloads.Workload.Search
 {
@@ -30,8 +30,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             _reporter = reporter ?? Reporter.Output;
             _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadSearchCommandParser.VerbosityOption);
             _workloadIdStub = result.ValueForArgument<string>(WorkloadSearchCommandParser.WorkloadIdStubArgument);
-            _sdkVersion = new ReleaseVersion(version ?? Product.Version) ?? new ReleaseVersion(result.ValueForOption<string>(WorkloadSearchCommandParser.VersionOption));
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.ValueForOption<string>(WorkloadSearchCommandParser.VersionOption), version, dotnetPath);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
         }

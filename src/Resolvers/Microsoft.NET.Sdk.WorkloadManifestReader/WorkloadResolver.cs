@@ -433,5 +433,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             public string Id { get; }
             public string? Description { get; }
         }
+
+        public WorkloadInfo GetWorkloadInfo(WorkloadDefinitionId workloadDefinitionId)
+        {
+            if (!_workloads.TryGetValue(workloadDefinitionId, out var workload))
+            {
+                throw new Exception("Workload not found");
+            }
+
+            return new WorkloadInfo(workload.Id.ToString(), workload.Description);
+        }
     }
 }

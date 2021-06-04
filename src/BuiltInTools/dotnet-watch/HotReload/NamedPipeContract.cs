@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.DotNet.Watcher.Tools
+namespace Microsoft.Extensions.HotReload
 {
     internal readonly struct UpdatePayload
     {

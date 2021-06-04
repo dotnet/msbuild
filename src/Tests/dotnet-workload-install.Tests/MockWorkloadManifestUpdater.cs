@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -15,12 +16,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public int CalculateManifestUpdatesCallCount = 0;
         public int DownloadManifestPackagesCallCount = 0;
         public int ExtractManifestPackagesToTempDirCallCount = 0;
-        private IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> _manifestUpdates;
+        private IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> _manifestUpdates;
         private string _tempDirManifestPath;
 
-        public MockWorkloadManifestUpdater(IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestUpdates = null, string tempDirManifestPath = null)
+        public MockWorkloadManifestUpdater(IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestUpdates = null, string tempDirManifestPath = null)
         {
-            _manifestUpdates = manifestUpdates ?? new List<(ManifestId, ManifestVersion, ManifestVersion)>();
+            _manifestUpdates = manifestUpdates ?? new List<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)>();
             _tempDirManifestPath = tempDirManifestPath;
         }
 
@@ -30,7 +31,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return Task.CompletedTask;
         }
 
-        public IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> CalculateManifestUpdates()
+        public IEnumerable<(
+            ManifestId manifestId, 
+            ManifestVersion existingVersion, 
+            ManifestVersion newVersion,
+            Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
         {
             CalculateManifestUpdatesCallCount++;
             return _manifestUpdates;
