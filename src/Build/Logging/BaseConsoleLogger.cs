@@ -2,19 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text;
+
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Collections;
-using System.Globalization;
-using System.IO;
 
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
-using Microsoft.Build.Exceptions;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -642,39 +644,38 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual void OutputItems(string itemType, ArrayList itemTypeList)
         {
-            // Write each item, one per line
-            bool haveWrittenItemType = false;
+            setColor(ConsoleColor.Gray);
+            WriteLinePretty(itemType);
             setColor(ConsoleColor.DarkGray);
-            foreach (ITaskItem item in itemTypeList)
+
+            Internal.Utilities.EnumerateItems(itemTypeList, entry =>
             {
-                if (!haveWrittenItemType)
+                string itemSpec = entry.Value switch
                 {
-                    setColor(ConsoleColor.Gray);
-                    WriteLinePretty(itemType);
-                    haveWrittenItemType = true;
-                    setColor(ConsoleColor.DarkGray);
-                }
-                WriteLinePretty("    "  /* indent slightly*/ + item.ItemSpec);
+                    ITaskItem taskItem => taskItem.ItemSpec,
+                    IItem iitem => iitem.EvaluatedInclude,
+                    { } misc => throw new InvalidOperationException($"Unsupported item {entry.Value} of type {entry.Value.GetType()}"),
+                    null => "null"
+                };
 
-                IDictionary metadata = item.CloneCustomMetadata();
-
-                foreach (DictionaryEntry metadatum in metadata)
+                var metadata = entry.Value switch
                 {
-                    string valueOrError;
-                    try
-                    {
-                        valueOrError = item.GetMetadata(metadatum.Key as string);
-                    }
-                    catch (InvalidProjectFileException e)
-                    {
-                        valueOrError = e.Message;
-                    }
+                    IMetadataContainer metadataContainer => metadataContainer.EnumerateMetadata(),
+                    IItem<ProjectMetadata> iitem => iitem.Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue)),
+                    _ => throw new InvalidOperationException("Unsupported item with metadata")
+                };
 
-                    // A metadatum's "value" is its escaped value, since that's how we represent them internally.
-                    // So unescape before returning to the world at large.
-                    WriteLinePretty("        " + metadatum.Key + " = " + valueOrError);
+                WriteLinePretty("    "  /* indent slightly*/ + itemSpec);
+
+                if (metadata != null)
+                {
+                    foreach (var metadatum in metadata)
+                    {
+                        WriteLinePretty("        " + metadatum.Key + " = " + metadatum.Value);
+                    }
                 }
-            }
+            });
+
             resetColor();
         }
 
