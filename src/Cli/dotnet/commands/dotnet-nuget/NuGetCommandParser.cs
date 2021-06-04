@@ -96,8 +96,8 @@ namespace Microsoft.DotNet.Cli
         {
             var trustCommand = new Command("trust");
 
-            trustCommand.AddArgument(new Argument<string>()
-                .FromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
+            trustCommand.AddArgument(new Argument<string>() { Arity = ArgumentArity.ZeroOrOne }
+                         .FromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
 
             trustCommand.AddOption(new Option<string>("--algorithm"));
             trustCommand.AddOption(new Option<bool>("--allow-untrusted-root"));
