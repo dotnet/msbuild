@@ -499,7 +499,7 @@ namespace Microsoft.TemplateEngine.Cli
                        .DefineColumn(r => r.Identifier, out object packageColumn, LocalizableStrings.ColumnNamePackage, showAlways: true)
                        .DefineColumn(r => r.CurrentVersion, LocalizableStrings.ColumnNameCurrentVersion, showAlways: true)
                        .DefineColumn(r => r.LatestVersion, LocalizableStrings.ColumnNameLatestVersion, showAlways: true)
-                       .OrderBy(packageColumn);
+                       .OrderBy(packageColumn, StringComparer.OrdinalIgnoreCase);
                 Reporter.Output.WriteLine(formatter.Layout());
                 Reporter.Output.WriteLine();
 

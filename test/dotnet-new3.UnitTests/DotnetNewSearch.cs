@@ -521,18 +521,18 @@ Examples:
                 bool rightIsShrunk = right.EndsWith("...");
                 if (!(leftIsShrunk ^ rightIsShrunk))
                 {
-                    return string.Compare(left, right, StringComparison.Ordinal);
+                    return string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
                 }
                 
-                if (rightIsShrunk && left.StartsWith(right.Substring(0, right.Length - 3), StringComparison.Ordinal))
+                if (rightIsShrunk && left.StartsWith(right.Substring(0, right.Length - 3), StringComparison.OrdinalIgnoreCase))
                 {
                     return -1;
                 }
-                if (leftIsShrunk && right.StartsWith(left.Substring(0, left.Length - 3), StringComparison.Ordinal))
+                if (leftIsShrunk && right.StartsWith(left.Substring(0, left.Length - 3), StringComparison.OrdinalIgnoreCase))
                 {
                     return 1;
                 }
-                return string.Compare(left, right, StringComparison.Ordinal);
+                return string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
             }
         }
     }

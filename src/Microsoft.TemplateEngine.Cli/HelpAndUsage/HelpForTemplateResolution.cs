@@ -476,7 +476,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, NewCommandInputCli.TypeColumnFilter, defaultColumn: false)
                     .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
                     .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, NewCommandInputCli.TagsColumnFilter, defaultColumn: true)
-                    .OrderBy(nameColumn);
+                    .OrderBy(nameColumn, StringComparer.OrdinalIgnoreCase);
 
             Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
             reporter.WriteLine(formatter.Layout());

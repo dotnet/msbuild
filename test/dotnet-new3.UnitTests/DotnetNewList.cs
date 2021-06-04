@@ -71,22 +71,22 @@ namespace Dotnet_new3.IntegrationTests
 @"Template Name                                 Short Name     Language    Tags                  
 --------------------------------------------  -------------  ----------  ----------------------
 ASP.NET Core Empty                            web            [C#],F#     Web/Empty             
+ASP.NET Core gRPC Service                     grpc           [C#]        Web/gRPC              
 ASP.NET Core Web API                          webapi         [C#],F#     Web/WebAPI            
 ASP.NET Core Web App                          webapp         [C#]        Web/MVC/Razor Pages   
 ASP.NET Core Web App (Model-View-Controller)  mvc            [C#],F#     Web/MVC               
-ASP.NET Core gRPC Service                     grpc           [C#]        Web/gRPC              
 Blazor Server App                             blazorserver   [C#]        Web/Blazor            
 Blazor WebAssembly App                        blazorwasm     [C#]        Web/Blazor/WebAssembly
 Class Library                                 classlib       [C#],F#,VB  Common/Library        
 Console Application                           console        [C#],F#,VB  Common/Console        
+dotnet gitignore file                         gitignore                  Config                
 Dotnet local tool manifest file               tool-manifest              Config                
+global.json file                              globaljson                 Config                
 NuGet Config                                  nugetconfig                Config                
 Razor Class Library                           razorclasslib  [C#]        Web/Razor/Library     
 Solution File                                 sln                        Solution              
 Web Config                                    webconfig                  Config                
-Worker Service                                worker         [C#],F#     Common/Worker/Web     
-dotnet gitignore file                         gitignore                  Config                
-global.json file                              globaljson                 Config                ";
+Worker Service                                worker         [C#],F#     Common/Worker/Web     ";
 
             string home = TestUtils.CreateTemporaryFolder();
             Helpers.InstallNuGetTemplate("Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", _log, null, home);
