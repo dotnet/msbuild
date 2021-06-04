@@ -63,7 +63,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         AND '$(ResolvedRazorCompileToolset)'=='RazorSdk'
         AND ('$(RazorCompileOnBuild)' == 'true'
         OR '$(RazorCompileOnPublish)' == 'true')
-        AND '$(_UseRazorSourceGenerator)' != 'true'">
+        AND '$(UseRazorSourceGenerator)' != 'true'">
       <_RazorAssemblyAttribute Include="Microsoft.AspNetCore.Mvc.ApplicationParts.RelatedAssemblyAttribute">
         <_Parameter1>$(RazorTargetName)</_Parameter1>
       </_RazorAssemblyAttribute>

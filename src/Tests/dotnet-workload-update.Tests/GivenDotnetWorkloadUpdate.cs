@@ -296,11 +296,11 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             exceptionThrown.Message.Should().Contain("not compatible with workload manifests");
         }
 
-        private (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
+        internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",
             string failingWorkload = null,
-            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestUpdates = null,
+            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestUpdates = null,
             IList<WorkloadId> installedWorkloads = null,
             IList<PackInfo> installedPacks = null)
         {

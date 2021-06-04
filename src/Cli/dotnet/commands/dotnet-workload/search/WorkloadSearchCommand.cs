@@ -50,8 +50,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             table.AddColumn(LocalizableStrings.DescriptionColumnName, workload => workload.Description);
             if (_verbosity.VerbosityIsDetailedOrDiagnostic())
             {
-                table.AddColumn(LocalizableStrings.IsAbstractColumnName, workload => workload.IsAbstract.ToString());
-                table.AddColumn(LocalizableStrings.KindColumnName, workload => workload.Kind.ToString());
+                table.AddColumn(LocalizableStrings.PlatformColumnName, workload => workload.Platforms == null ? string.Empty : string.Join(" ", workload.Platforms));
             }
 
             _reporter.WriteLine();

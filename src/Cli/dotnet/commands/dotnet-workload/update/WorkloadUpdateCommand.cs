@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -127,11 +128,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         public void UpdateWorkloads(bool includePreviews = false, DirectoryPath? offlineCache = null)
         {
             _reporter.WriteLine();
-            var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
+            var featureBand =
+                new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
             var workloadIds = GetUpdatableWorkloads();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
-            var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
+            var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates()
+                .Select(m => (m.manifestId, m.existingVersion, m.newVersion));
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 

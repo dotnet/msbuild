@@ -6,11 +6,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.DotNet.Watcher.Tools;
 
 namespace Microsoft.Extensions.HotReload
 {
-    internal class HotReloadAgent : IDisposable
+    internal sealed class HotReloadAgent : IDisposable
     {
         private readonly Action<string> _log;
         private readonly AssemblyLoadEventHandler _assemblyLoad;
@@ -29,7 +28,7 @@ namespace Microsoft.Extensions.HotReload
         {
             _handlerActions = null;
             var loadedAssembly = eventArgs.LoadedAssembly;
-            var moduleId = loadedAssembly.Modules.FirstOrDefault()?.ModuleVersionId;
+            var moduleId = TryGetModuleId(loadedAssembly);
             if (moduleId is null)
             {
                 return;
@@ -193,7 +192,7 @@ namespace Microsoft.Extensions.HotReload
                     var item = deltas[i];
                     foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                     {
-                        if (assembly.GetModules().Any(m => m.ModuleVersionId == item.ModuleId))
+                        if (TryGetModuleId(assembly) is Guid moduleId && moduleId == item.ModuleId)
                         {
                             System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
                         }
@@ -240,6 +239,20 @@ namespace Microsoft.Extensions.HotReload
         public void Dispose()
         {
             AppDomain.CurrentDomain.AssemblyLoad -= _assemblyLoad;
+        }
+
+        private static Guid? TryGetModuleId(Assembly loadedAssembly)
+        {
+            try
+            {
+                return loadedAssembly.Modules.FirstOrDefault()?.ModuleVersionId;
+            }
+            catch
+            {
+                // Assembly.Modules might throw. See https://github.com/dotnet/aspnetcore/issues/33152
+            }
+
+            return default;
         }
     }
 }

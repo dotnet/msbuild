@@ -1,10 +1,17 @@
-setTimeout(function () {
+setTimeout(async function () {
   // dotnet-watch browser reload script
+  const webSocketUrls = '{{hostString}}'.split(',');
   let connection;
-  try {
-    connection = new WebSocket('{{hostString}}');
-  } catch (ex) {
-    console.debug(ex);
+  for (const url of webSocketUrls) {
+    try {
+      connection = await getWebSocket(url);
+      break;
+    } catch (ex) {
+      console.debug(ex);
+    }
+  }
+  if (!connection) {
+    console.debug('Unable to establish a conection to the browser refresh server.');
     return;
   }
 
@@ -105,9 +112,9 @@ setTimeout(function () {
       } catch (error) {
         console.warn(error);
         applyFailed = true;
-      } 
+      }
     });
-    
+
     fetch('_framework/blazor-hotreload', { method: 'post', headers: { 'content-type': 'application/json' }, body: JSON.stringify(deltas) })
       .then(response => {
         if (response.status == 200) {
@@ -115,7 +122,7 @@ setTimeout(function () {
           window.sessionStorage.setItem('blazor-webasssembly-cache', { etag, deltas });
         }
       });
-    
+
     if (applyFailed) {
       sendDeltaNotApplied();
     } else {
@@ -158,5 +165,43 @@ setTimeout(function () {
 
   function sendDeltaNotApplied() {
     connection.send(new Uint8Array([0]).buffer);
+  }
+
+  function getWebSocket(url) {
+    return new Promise((resolve, reject) => {
+      const webSocket = new WebSocket(url);
+      let opened = false;
+
+      function onOpen() {
+        opened = true;
+        clearEventListeners();
+        resolve(webSocket);
+      }
+
+      function onClose(event) {
+        if (opened) {
+          // Open completed successfully. Nothing to do here.
+          return;
+        }
+
+        let error = 'WebSocket failed to connect.';
+        if (event instanceof ErrorEvent) {
+          error = event.error;
+        }
+
+        clearEventListeners();
+        reject(error);
+      }
+
+      function clearEventListeners() {
+        webSocket.removeEventListener('open', onOpen);
+        // The error event isn't as reliable, but close is always called even during failures.
+        // If close is called without a corresponding open, we can reject the promise.
+        webSocket.removeEventListener('close', onClose);
+      }
+
+      webSocket.addEventListener('open', onOpen);
+      webSocket.addEventListener('close', onClose);
+    });
   }
 }, 500);

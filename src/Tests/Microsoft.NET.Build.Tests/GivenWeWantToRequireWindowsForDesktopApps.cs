@@ -295,6 +295,56 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
         }
 
+        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
+        public void Given_duplicated_ResolvedFileToPublish_It_Can_Publish()
+        {
+            const string ProjectName = "WindowsDesktopSdkTest_without_ProjectSdk_set";
+
+            const string tfm = "net5.0";
+
+            var testProject = new TestProject()
+            {
+                Name = ProjectName,
+                TargetFrameworks = tfm,
+                IsWinExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject).WithProjectChanges((project) =>
+            {
+                var ns = project.Root.Name.Namespace;
+                var duplicatedResolvedFileToPublish = XElement.Parse(@"
+<ItemGroup>
+    <ResolvedFileToPublish Include=""obj\Debug\net5.0\WindowsDesktopSdkTest_without_ProjectSdk_set.dll"">
+      <RelativePath>WindowsDesktopSdkTest_without_ProjectSdk_set.dll</RelativePath>
+    </ResolvedFileToPublish>
+    <ResolvedFileToPublish Include=""obj\Debug\net5.0\WindowsDesktopSdkTest_without_ProjectSdk_set.dll"">
+      <RelativePath>WindowsDesktopSdkTest_without_ProjectSdk_set.dll</RelativePath>
+    </ResolvedFileToPublish>
+  </ItemGroup>
+");
+                project.Root.Add(duplicatedResolvedFileToPublish);
+            });
+
+            var publishItemsOutputGroupOutputsCommand = new GetValuesCommand(
+                Log,
+                Path.Combine(testAsset.Path, testProject.Name),
+                testProject.TargetFrameworks,
+                "PublishItemsOutputGroupOutputs",
+                GetValuesCommand.ValueType.Item)
+            {
+                DependsOnTargets = "Publish",
+                MetadataNames = { "OutputPath" },
+            };
+
+            publishItemsOutputGroupOutputsCommand.Execute().Should().Pass();
+            var publishItemsOutputGroupOutputsItems =
+                from item in publishItemsOutputGroupOutputsCommand.GetValuesWithMetadata()
+                select new
+                {
+                    OutputPath = item.metadata["OutputPath"]
+                };
+        }
+
         private TestAsset CreateWindowsDesktopSdkTestAsset(string projectName, string uiFrameworkProperty, string identifier, [CallerMemberName] string callingMethod = "")
         {
             const string tfm = "netcoreapp3.0";

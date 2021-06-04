@@ -49,7 +49,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
         <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
         <_TargetingNET60OrLater>true</_TargetingNET60OrLater>
-        <_UseRazorSourceGenerator Condition="'$(_UseRazorSourceGenerator)' == '' ">true</_UseRazorSourceGenerator>
+        <UseRazorSourceGenerator Condition="'$(UseRazorSourceGenerator)' == '' ">true</UseRazorSourceGenerator>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">5.0</RazorLangVersion>
       </PropertyGroup>
     </When>
@@ -57,14 +57,14 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PropertyGroup>
         <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
         <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
-        <_UseRazorSourceGenerator>false</_UseRazorSourceGenerator>
+        <UseRazorSourceGenerator>false</UseRazorSourceGenerator>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">5.0</RazorLangVersion>
       </PropertyGroup>
     </When>
     <When Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '3.0')) ">
       <PropertyGroup>
         <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
-        <_UseRazorSourceGenerator>false</_UseRazorSourceGenerator>
+        <UseRazorSourceGenerator>false</UseRazorSourceGenerator>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">3.0</RazorLangVersion>
       </PropertyGroup>
     </When>
@@ -106,7 +106,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     RazorCoreCompile and any other targets that are needed for two-step compilation should be defined there.
   -->
-  <Import Project="Microsoft.NET.Sdk.Razor.Compilation.targets" Condition="'$(_UseRazorSourceGenerator)' != 'true'"/>
+  <Import Project="Microsoft.NET.Sdk.Razor.Compilation.targets" Condition="'$(UseRazorSourceGenerator)' != 'true'"/>
 
   <!--
     Razor defines two primary targets:
@@ -124,7 +124,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       _CheckForIncorrectMvcConfiguration;
     </PrepareForRazorGenerateDependsOn>
 
-    <PrepareForRazorGenerateDependsOn Condition="'$(_UseRazorSourceGenerator)' != 'true'">
+    <PrepareForRazorGenerateDependsOn Condition="'$(UseRazorSourceGenerator)' != 'true'">
       $(PrepareForRazorGenerateDependsOn);
       ResolveAssemblyReferenceRazorGenerateInputs;
       _CheckForMissingRazorCompiler;
@@ -142,7 +142,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       PrepareForRazorGenerate;
     </RazorGenerateDependsOn>
 
-    <RazorGenerateDependsOn Condition="'$(_UseRazorSourceGenerator)' != 'true'">
+    <RazorGenerateDependsOn Condition="'$(UseRazorSourceGenerator)' != 'true'">
       $(RazorGenerateDependsOn);
       _CheckForMissingRazorCompiler;
       RazorCoreGenerate
@@ -336,10 +336,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UpToDateCheckInput Include="@(Content->WithMetadataValue('Extension', '.razor'))" />
   </ItemGroup>
 
-  <!-- For .NET 5 and below, a separate Views assembly is produced out of the source
+  <!-- For apps building with the source generator, a separate Views assembly is produced out of the source
   CSHTML files. In that scenario, the source CSHTML files and the output assembly
   are treated in a separate set. -->
-  <ItemGroup Condition="'$(_UseRazorSourceGenerator)' != 'true'">
+  <ItemGroup Condition="'$(UseRazorSourceGenerator)' != 'true'">
     <!--
       Add all cshtml files to UpToDateCheckInput - a collection of files used by FastUpToDateCheck to determine
       if any of the the project inputs have changed.
@@ -353,9 +353,8 @@ Copyright (c) .NET Foundation. All rights reserved.
       Condition="'$(RazorCompileOnBuild)'=='true' AND '@(Content->WithMetadataValue('Extension', '.cshtml'))' != ''" Set="RazorViews" />
   </ItemGroup>
 
-  <!-- For .NET 6 and above, we add CSHTML files to the default set since they
-  are compiled into the app binary. -->
-  <ItemGroup Condition="'$(_UseRazorSourceGenerator)' == 'true'">
+  <!-- For apps building with the source generator, add .cshtml files to the default set since they are compiled into the app binary. -->
+  <ItemGroup Condition="'$(UseRazorSourceGenerator)' == 'true'">
     <UpToDateCheckInput Include="@(Content->WithMetadataValue('Extension', '.cshtml'))" />
   </ItemGroup>
 
@@ -374,11 +373,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="Microsoft.NET.Sdk.Razor.Configuration.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'" />
 
   <!-- For projects targeting 3.x and later, use the compiler that ships in the SDK -->
-  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(_UseRazorSourceGenerator)' != 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(UseRazorSourceGenerator)' != 'true'" />
 
-  <Import Project="Microsoft.NET.Sdk.Razor.Component.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(_UseRazorSourceGenerator)' != 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.Component.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(UseRazorSourceGenerator)' != 'true'" />
 
-  <Import Project="Microsoft.NET.Sdk.Razor.SourceGenerators.targets" Condition="'$(_UseRazorSourceGenerator)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.SourceGenerators.targets" Condition="'$(UseRazorSourceGenerator)' == 'true'" />
 
   <Import Project="Microsoft.NET.Sdk.Razor.ScopedCss.targets" Condition="'$(ScopedCssEnabled)' == 'true'" />
 
