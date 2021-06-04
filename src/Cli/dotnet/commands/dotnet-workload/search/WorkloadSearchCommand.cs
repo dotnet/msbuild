@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             _verbosity = result.ValueForOption<VerbosityOptions>(WorkloadSearchCommandParser.VerbosityOption);
             _workloadIdStub = result.ValueForArgument<string>(WorkloadSearchCommandParser.WorkloadIdStubArgument);
             var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
-            _sdkVersion = WorkloadInstallCommand.GetValidatedSdkVersion(result.ValueForOption<string>(WorkloadSearchCommandParser.VersionOption), version, dotnetPath);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(result.ValueForOption<string>(WorkloadSearchCommandParser.VersionOption), version, dotnetPath);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
         }

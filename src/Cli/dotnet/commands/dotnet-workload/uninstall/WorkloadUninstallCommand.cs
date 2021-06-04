@@ -39,7 +39,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadUninstallCommandParser.WorkloadIdArgument)
                 .Select(workloadId => new WorkloadId(workloadId)).ToList().AsReadOnly();
             var dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _sdkVersion = WorkloadInstallCommand.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath);
             var verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUninstallCommandParser.VerbosityOption);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
             workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
