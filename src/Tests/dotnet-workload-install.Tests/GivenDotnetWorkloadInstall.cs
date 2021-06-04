@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var parseResult =
                 Parser.GetWorkloadsInstance.Parse(new string[] {"dotnet", "workload", "install", "xamarin-android"});
             var manifestsToUpdate =
-                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
                     Workloads)[]
                     {
                         (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public void GivenWorkloadInstallFromCacheItInstallsCachedManifest()
         {
             var manifestsToUpdate =
-                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition>
+                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
                     Workloads)[]
                     {
                         (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
                 ParseResult parseResult, [CallerMemberName] string testName = "", string failingWorkload = null,
                 IEnumerable<(ManifestId, ManifestVersion, ManifestVersion,
-                    Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestUpdates = null,
+                    Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
                 string tempDirManifestPath = null)
         {
             _reporter.Clear();

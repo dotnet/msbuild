@@ -300,7 +300,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             ParseResult parseResult,
             [CallerMemberName] string testName = "",
             string failingWorkload = null,
-            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestUpdates = null,
+            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
             IList<WorkloadId> installedWorkloads = null,
             IList<PackInfo> installedPacks = null)
         {

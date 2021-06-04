@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             ManifestId manifestId, 
             ManifestVersion existingVersion, 
             ManifestVersion newVersion,
-            Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> CalculateManifestUpdates();
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates();
 
         Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath);
 

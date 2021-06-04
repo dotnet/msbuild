@@ -55,11 +55,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             ManifestId manifestId, 
             ManifestVersion existingVersion, 
             ManifestVersion newVersion,
-            Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
         {
             var manifestUpdates =
                 new List<(ManifestId, ManifestVersion, ManifestVersion,
-                    Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)>();
+                    Dictionary<WorkloadId, WorkloadDefinition> Workloads)>();
             var currentManifestIds = GetInstalledManifestIds();
             foreach (var manifestId in currentManifestIds)
             {
@@ -223,7 +223,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private (ManifestVersion ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)?
+        private (ManifestVersion ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)?
             GetAdvertisingManifestVersionAndWorkloads(ManifestId manifestId)
         {
             var manifestPath = Path.Combine(GetAdvertisingManifestPath(_sdkFeatureBand, manifestId),
