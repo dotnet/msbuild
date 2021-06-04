@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Cli.Utils
     internal class MSBuildForwardingAppWithoutLogging
     {
         private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_RUN_MSBUILD_OUTOFPROC");
-        private static readonly bool DoNotUseMSBUILDNOINPROCNODE = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_DO_NOT_USE_MSBUILDNOINPROCNODE");
 
         private const string MSBuildExeName = "MSBuild.dll";
 
@@ -53,13 +52,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
             _argsToForward = argsToForward;
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
-
-            if (!DoNotUseMSBUILDNOINPROCNODE)
-            {
-                // Force MSBuild to use external working node long living process for building projects
-                // We also refers to this as MSBuild Server V1 as entry process forwards most of the work to it.
-                EnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-            }
 
             // If DOTNET_CLI_RUN_MSBUILD_OUTOFPROC is set or we're asked to execute a non-default binary, call MSBuild out-of-proc.
             if (AlwaysExecuteMSBuildOutOfProc || !string.Equals(MSBuildPath, defaultMSBuildPath, StringComparison.OrdinalIgnoreCase))
@@ -100,8 +92,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
             if (value == string.Empty || value == "\0")
             {
-                // Do not allow MSBuild NOIPROCNODE as null env vars are not properly transferred to build nodes
-                _msbuildRequiredEnvironmentVariables["MSBUILDNOINPROCNODE"] = "0";
                 // Unlike ProcessStartInfo.EnvironmentVariables, Environment.SetEnvironmentVariable can't set a variable
                 // to an empty value, so we just fall back to calling MSBuild out-of-proc if we encounter this case.
                 // https://github.com/dotnet/runtime/issues/50554
