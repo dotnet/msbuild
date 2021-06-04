@@ -644,39 +644,54 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual void OutputItems(string itemType, ArrayList itemTypeList)
         {
-            setColor(ConsoleColor.Gray);
-            WriteLinePretty(itemType);
-            setColor(ConsoleColor.DarkGray);
+            WriteItemType(itemType);
 
-            Internal.Utilities.EnumerateItems(itemTypeList, entry =>
+            foreach (var item in itemTypeList)
             {
-                string itemSpec = entry.Value switch
+                string itemSpec = item switch
                 {
                     ITaskItem taskItem => taskItem.ItemSpec,
                     IItem iitem => iitem.EvaluatedInclude,
-                    { } misc => throw new InvalidOperationException($"Unsupported item {entry.Value} of type {entry.Value.GetType()}"),
+                    { } misc => throw new InvalidOperationException($"Unsupported item {item} of type {item.GetType()}"),
                     null => "null"
                 };
 
-                var metadata = entry.Value switch
+                var metadata = item switch
                 {
                     IMetadataContainer metadataContainer => metadataContainer.EnumerateMetadata(),
                     IItem<ProjectMetadata> iitem => iitem.Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue)),
                     _ => throw new InvalidOperationException("Unsupported item with metadata")
                 };
 
-                WriteLinePretty("    "  /* indent slightly*/ + itemSpec);
+                WriteItemSpec(itemSpec);
 
                 if (metadata != null)
                 {
                     foreach (var metadatum in metadata)
                     {
-                        WriteLinePretty("        " + metadatum.Key + " = " + metadatum.Value);
+                        WriteMetadata(metadatum.Key, metadatum.Value);
                     }
                 }
-            });
+            }
 
             resetColor();
+        }
+
+        protected virtual void WriteItemType(string itemType)
+        {
+            setColor(ConsoleColor.Gray);
+            WriteLinePretty(itemType);
+            setColor(ConsoleColor.DarkGray);
+        }
+
+        protected virtual void WriteItemSpec(string itemSpec)
+        {
+            WriteLinePretty("    " + itemSpec);
+        }
+
+        protected virtual void WriteMetadata(string name, string value)
+        {
+            WriteLinePretty("        " + name + " = " + value);
         }
 
         /// <summary>

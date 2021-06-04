@@ -782,44 +782,23 @@ namespace Microsoft.Build.BackEnd.Logging
             ShownBuildEventContext(e.BuildEventContext);
         }
 
-        internal override void OutputItems(string itemType, ArrayList itemTypeList)
+        protected override void WriteItemType(string itemType)
         {
-            // Write each item, one per line
-            bool haveWrittenItemType = false;
-            foreach (ITaskItem item in itemTypeList)
-            {
-                if (!haveWrittenItemType)
-                {
-                    setColor(ConsoleColor.DarkGray);
-                    WriteMessageAligned(itemType, false);
-                    haveWrittenItemType = true;
-                }
-                setColor(ConsoleColor.Gray);
-
-                // Indent the text by two tab lengths
-                StringBuilder result = new StringBuilder((2 * tabWidth) + item.ItemSpec.Length);
-                result.Append(' ', 2 * tabWidth).Append(item.ItemSpec);
-                WriteMessageAligned(result.ToString(), false);
-
-                IDictionary metadata = item.CloneCustomMetadata();
-
-                foreach (DictionaryEntry metadatum in metadata)
-                {
-                    string valueOrError;
-                    try
-                    {
-                        valueOrError = item.GetMetadata(metadatum.Key as string);
-                    }
-                    catch (InvalidProjectFileException e)
-                    {
-                        valueOrError = e.Message;
-                    }
-
-                    WriteMessageAligned($"{new string(' ', 4 * tabWidth)}{metadatum.Key} = {valueOrError}", false);
-                }
-            }
-            resetColor();
+            setColor(ConsoleColor.DarkGray);
+            WriteMessageAligned(itemType, prefixAlreadyWritten: false);
+            setColor(ConsoleColor.Gray);
         }
+
+        protected override void WriteItemSpec(string itemSpec)
+        {
+            WriteMessageAligned(new string(' ', 2 * tabWidth) + itemSpec, prefixAlreadyWritten: false);
+        }
+
+        protected override void WriteMetadata(string name, string value)
+        {
+            WriteMessageAligned($"{new string(' ', 4 * tabWidth)}{name} = {value}", prefixAlreadyWritten: false);
+        }
+
         /// <summary>
         /// Handler for target started events
         /// </summary>
