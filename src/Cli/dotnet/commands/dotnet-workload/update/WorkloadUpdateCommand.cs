@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.MSBuildSdkResolver;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
@@ -182,12 +180,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                         {
                             installer.InstallWorkloadPack(packId, sdkFeatureBand, offlineCache);
                         }
-
-                        foreach (var workloadId in workloadIds)
-                        {
-                            _workloadInstaller.GetWorkloadInstallationRecordRepository()
-                                .WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
-                        }
                     },
                     rollback: () => {
                         try
@@ -202,12 +194,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                             foreach (var packId in workloadPackToUpdate)
                             {
                                 installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
-                            }
-
-                            foreach (var workloadId in workloadIds)
-                            {
-                                _workloadInstaller.GetWorkloadInstallationRecordRepository()
-                                    .DeleteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                             }
                         }
                         catch (Exception e)

@@ -122,7 +122,6 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             installer.GarbageCollectionCalled.Should().BeTrue();
             installer.CachePath.Should().BeNull();
-            installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
             installer.InstalledPacks.Count.Should().Be(8);
             installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
         }
@@ -131,10 +130,10 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenWorkloadUpdateItRollsBackOnFailedUpdate()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
-            (_, var command, var installer, var workloadResolver, _, _) = GetTestInstallers(_parseResult, installedWorkloads: mockWorkloadIds, failingWorkload: "xamarin-android-build");
+            (_, var command, var installer, var workloadResolver, _, _) = GetTestInstallers(_parseResult, installedWorkloads: mockWorkloadIds, failingPack: "Xamarin.Android.Framework");
 
             var exceptionThrown = Assert.Throws<GracefulException>(() => command.Execute());
-            exceptionThrown.Message.Should().Contain("Failing workload: xamarin-android-build");
+            exceptionThrown.Message.Should().Contain("Failing pack: Xamarin.Android.Framework");
             var expectedPacks = mockWorkloadIds
                 .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                 .Distinct()
@@ -175,7 +174,6 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             installer.GarbageCollectionCalled.Should().BeTrue();
             installer.CachePath.Should().Contain(cachePath);
-            installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
             installer.InstalledPacks.Count.Should().Be(8);
             installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
             nugetDownloader.DownloadCallParams.Count().Should().Be(0);
@@ -201,6 +199,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             ParseResult parseResult,
             [CallerMemberName] string testName = "",
             string failingWorkload = null,
+            string failingPack = null,
             IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestUpdates = null,
             IList<WorkloadId> installedWorkloads = null,
             bool includeInstalledPacks = false)
@@ -213,8 +212,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 new PackInfo("Xamarin.Android.Framework", "8.2.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.2.0"), "Xamarin.Android.Framework")
             };
             var installer = includeInstalledPacks ?
-                new MockPackWorkloadInstaller(failingWorkload, installedWorkloads: installedWorkloads, installedPacks: installedPacks) :
-                new MockPackWorkloadInstaller(failingWorkload, installedWorkloads: installedWorkloads);
+                new MockPackWorkloadInstaller(failingWorkload, failingPack, installedWorkloads: installedWorkloads, installedPacks: installedPacks) :
+                new MockPackWorkloadInstaller(failingWorkload, failingPack, installedWorkloads: installedWorkloads);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var manifestUpdater = new MockWorkloadManifestUpdater(manifestUpdates, _manifestPath);
