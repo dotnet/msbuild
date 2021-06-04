@@ -656,6 +656,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Creates a project in memory, passing a set of loggers to the evaluation.
+        /// </summary>
+        internal static Project CreateInMemoryProjectWithLoggers(string xml, params ILogger[] loggers)
+        {
+            return CreateInMemoryProjectWithLoggers(new ProjectCollection(), xml, toolsVersion: null, loggers);
+        }
+
+        /// <summary>
         /// Create an in-memory project and attach it to the passed-in engine.
         /// </summary>
         /// <param name="engine"></param>
@@ -679,13 +687,31 @@ namespace Microsoft.Build.UnitTests
             ILogger logger /* May be null */,
             string toolsVersion /* may be null */
             )
+            => CreateInMemoryProjectWithLoggers(projectCollection, xml, toolsVersion, logger);
+
+        /// <summary>
+        /// Create an in-memory project and attach it to the passed-in engine.
+        /// </summary>
+        /// <param name="toolsVersion">May be null</param>
+        internal static Project CreateInMemoryProjectWithLoggers
+            (
+            ProjectCollection projectCollection,
+            string xml,
+            string toolsVersion,
+            params ILogger[] loggers
+            )
         {
             XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
+
+            if (loggers != null && loggers.Length > 0)
+            {
+                projectCollection.RegisterLoggers(loggers);
+            }
 
             Project project = new Project
                 (
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
-                null,
+                globalProperties: null,
                 toolsVersion,
                 projectCollection
                 );
@@ -693,11 +719,6 @@ namespace Microsoft.Build.UnitTests
             Guid guid = Guid.NewGuid();
             project.FullPath = Path.Combine(TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
             project.ReevaluateIfNecessary();
-
-            if (logger != null)
-            {
-                project.ProjectCollection.RegisterLogger(logger);
-            }
 
             return project;
         }
@@ -725,7 +746,7 @@ namespace Microsoft.Build.UnitTests
             params ILogger[] loggers
             )
         {
-            Project project = CreateInMemoryProject(projectContents, logger: null); // logger is null so we take care of loggers ourselves
+            Project project = CreateInMemoryProjectWithLoggers(projectContents, loggers);
             project.Build(loggers).ShouldBeTrue();
         }
 
