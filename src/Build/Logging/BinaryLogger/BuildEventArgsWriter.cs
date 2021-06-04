@@ -777,6 +777,12 @@ Build
                 {
                     Write(taskItem, writeMetadata);
                 }
+                else if (item is IItem<ProjectMetadata> iitem)
+                {
+                    Write(new TaskItemData(
+                        iitem.EvaluatedInclude,
+                        iitem.Metadata.ToDictionary(m => m.Name, m => m.EvaluatedValue)), writeMetadata);
+                }
                 else
                 {
                     WriteDeduplicatedString(item?.ToString() ?? ""); // itemspec
