@@ -687,7 +687,10 @@ namespace Microsoft.Build.UnitTests
             ILogger logger /* May be null */,
             string toolsVersion /* may be null */
             )
-            => CreateInMemoryProjectWithLoggers(projectCollection, xml, toolsVersion, logger);
+        {
+            var loggers = logger == null ? null : new[] { logger };
+            return CreateInMemoryProjectWithLoggers(projectCollection, xml, toolsVersion, loggers);
+        }
 
         /// <summary>
         /// Create an in-memory project and attach it to the passed-in engine.
@@ -747,7 +750,8 @@ namespace Microsoft.Build.UnitTests
             )
         {
             Project project = CreateInMemoryProjectWithLoggers(projectContents, loggers);
-            project.Build(loggers).ShouldBeTrue();
+            project.Build().ShouldBeTrue();
+            project.ProjectCollection.Dispose();
         }
 
         /// <summary>
