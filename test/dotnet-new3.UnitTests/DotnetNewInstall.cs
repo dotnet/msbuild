@@ -11,16 +11,19 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Dotnet_new3.IntegrationTests
 {
-    public class DotnetNewInstallTests
+    public class DotnetNewInstallTests : IClassFixture<DiagnosticFixture>
     {
         private readonly ITestOutputHelper _log;
+        private readonly IMessageSink _messageSink;
 
-        public DotnetNewInstallTests(ITestOutputHelper log)
+        public DotnetNewInstallTests(DiagnosticFixture diagnosisFixture, ITestOutputHelper log)
         {
             _log = log;
+            _messageSink = diagnosisFixture.DiagnosticSink;
         }
 
         [Fact]
@@ -380,13 +383,16 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public async Task InstallingSamePackageFromRemoteUpdatesLocal()
         {
+            _messageSink.OnMessage(new DiagnosticMessage($"{nameof(InstallingSamePackageFromRemoteUpdatesLocal)} started."));
             var home = TestUtils.CreateTemporaryFolder("Home");
 
             using var packageManager = new PackageManager();
             string packageLocation = await packageManager.GetNuGetPackage(
                 "Microsoft.DotNet.Common.ProjectTemplates.5.0",
                 minimumVersion: new NuGet.Versioning.NuGetVersion(6, 0, 0),
-                log: _log).ConfigureAwait(false);
+                logger: new XunitNuGetLogger(_messageSink)).ConfigureAwait(false);
+
+            _messageSink.OnMessage(new DiagnosticMessage($"{nameof(InstallingSamePackageFromRemoteUpdatesLocal)}: Microsoft.DotNet.Common.ProjectTemplates.5.0 is downloaded to {packageLocation}.)"));
 
             new DotnetNewCommand(_log, "-i", packageLocation)
                 .WithCustomHive(home)
@@ -432,6 +438,8 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .And.HaveStdOutContaining("Author: Microsoft")
                 .And.HaveStdOutContaining("Version: 5.0.0");
+
+            _messageSink.OnMessage(new DiagnosticMessage($"{nameof(InstallingSamePackageFromRemoteUpdatesLocal)} finished."));
         }
 
         [Fact]
