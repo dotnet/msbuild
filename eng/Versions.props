@@ -10,6 +10,7 @@
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.0.672</MicroBuildPluginsSwixBuildVersion>
     <MonoBuild Condition="'$(Configuration)' == 'Debug-MONO' or '$(Configuration)' == 'Release-MONO'">true</MonoBuild>
+    <MicrosoftDotNetMSBuildSdkResolverVersion>5.0.300-servicing.21267.11</MicrosoftDotNetMSBuildSdkResolverVersion>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
   <PropertyGroup Condition="'$(MonoBuild)' != 'true'">

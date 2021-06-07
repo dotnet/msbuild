@@ -18,5 +18,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>b6a9f8c39f7a71b02b9a8b929f002777e4efd6f1</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.DotNet.MSBuildSdkResolver" Version="5.0.300-servicing.21267.11">
+      <Uri>https://github.com/dotnet/sdk</Uri>
+      <Sha />
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
