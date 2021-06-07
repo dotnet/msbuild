@@ -78,7 +78,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 return true;
             }
-            catch
+            catch (UnauthorizedAccessException)
             {
                 return false;
             }
