@@ -1,25 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="ActionWouldHaveBeenTakenAutomatically">
         <source>Action would have been taken automatically:</source>
-        <target state="new">Action would have been taken automatically:</target>
+        <target state="translated">La acción se habría realizado automáticamente:</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionFailed">
         <source>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</source>
-        <target state="new">Failed to add project(s) {0} to solution file {1}, solution folder {2}.</target>
+        <target state="translated">No se pudo agregar el proyecto o los proyectos {0} al archivo de solución {1}, carpeta de soluciones {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionNoProjFiles">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">La acción de agregar una referencia de proyecto a la solución no está configurada correctamente en la plantilla. No se pueden determinar los archivos de proyecto que se van a agregar.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionRunning">
         <source>Adding project reference(s) to solution file. Running {0}</source>
-        <target state="new">Adding project reference(s) to solution file. Running {0}</target>
+        <target state="translated">Agregando referencia(s) del proyecto al archivo de solución. Ejecutando {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionSucceeded">
@@ -27,243 +27,243 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Successfully added
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">Se agregaron correctamente 
+    el proyecto o los proyectos: {0}
+    al archivo de solución: {1}
+    carpeta de soluciones: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionUnresolvedSlnFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">No se puede determinar a qué archivo de solución debe agregarse la referencia.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRef">
         <source>Adding a package reference. Running dotnet add {0} package {1}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1}</target>
+        <target state="translated">Agregando una referencia de paquete. Ejecutando dotnet add {0} package {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRefWithVersion">
         <source>Adding a package reference. Running dotnet add {0} package {1} --version {2}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1} --version {2}</target>
+        <target state="translated">Agregando una referencia de paquete. Ejecutando dotnet add {0} package {1} --version {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddProjectRef">
         <source>Adding a project reference. Running dotnet add {0} reference {1}</source>
-        <target state="new">Adding a project reference. Running dotnet add {0} reference {1}</target>
+        <target state="translated">Agregando una referencia de proyecto. Ejecutando dotnet add {0} reference {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFailed">
         <source>Failed to add reference {0} to project file {1}</source>
-        <target state="new">Failed to add reference {0} to project file {1}</target>
+        <target state="translated">No se pudo agregar la referencia {0} al archivo del proyecto {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">No se puede agregar automáticamente la referencia de marco {0} al proyecto. Edite manualmente el archivo del proyecto para agregarla.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">La acción Agregar referencia no está bien configurada en la plantilla.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">Archivos de proyecto encontrados:</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionSucceeded">
         <source>Successfully added
     reference: {0}
     to project file: {1}</source>
-        <target state="new">Successfully added
-    reference: {0}
-    to project file: {1}</target>
+        <target state="translated">Se agregó correctamente
+    la referencia: {0}
+    al archivo del proyecto: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">No se puede determinar a qué archivo de proyecto debe agregarse la referencia.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">No se puede agregar el tipo de referencia {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
         <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
-        <target state="new">Alias '{0}' is a template short name, and therefore cannot be aliased.</target>
+        <target state="translated">El alias "{0}" es un nombre corto de plantilla y, por lo tanto, no puede tener alias.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCommandAfterExpansion">
         <source>After expanding aliases, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding aliases, the command is:
-    dotnet {0}</target>
+        <target state="translated">Después de expandir los alias, el comando es:
+    {0} dotnet</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCreated">
         <source>Successfully created alias named '{0}' with value '{1}'</source>
-        <target state="new">Successfully created alias named '{0}' with value '{1}'</target>
+        <target state="translated">Se creó correctamente el alias denominado "{0}" con el valor "{1}"</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCycleError">
         <source>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</source>
-        <target state="new">Alias not created. It would have created an alias cycle, resulting in infinite expansion.</target>
+        <target state="translated">No se creó ningún alias. Habría creado un ciclo de alias, lo que habría dado lugar a una expansión infinita.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpandedCommandParseError">
         <source>Command is invalid after expanding aliases.</source>
-        <target state="new">Command is invalid after expanding aliases.</target>
+        <target state="translated">El comando no es válido después de expandir los alias.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpansionError">
         <source>Error expanding aliases on input params.</source>
-        <target state="new">Error expanding aliases on input params.</target>
+        <target state="translated">Error al expandir los alias en los parámetros de entrada.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasName">
         <source>Alias Name</source>
-        <target state="new">Alias Name</target>
+        <target state="translated">Nombre de alias</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNameContainsInvalidCharacters">
         <source>Alias names can only contain letters, numbers, underscores, and periods.</source>
-        <target state="new">Alias names can only contain letters, numbers, underscores, and periods.</target>
+        <target state="translated">Los nombres de alias solo pueden contener letras, números, guiones bajos y puntos.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNotCreatedInvalidInput">
         <source>Alias not created. The input was invalid.</source>
-        <target state="new">Alias not created. The input was invalid.</target>
+        <target state="translated">No se creó el alias. La entrada no era válida.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoveNonExistentFailed">
         <source>Unable to remove alias '{0}'. It did not exist.</source>
-        <target state="new">Unable to remove alias '{0}'. It did not exist.</target>
+        <target state="translated">No se puede quitar el alias "{0}". No existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoved">
         <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
-        <target state="new">Successfully removed alias named '{0}' whose value was '{1}'.</target>
+        <target state="translated">Se quitó correctamente el alias denominado "{0}" cuyo valor era "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowAllAliasesHeader">
         <source>All Aliases:</source>
-        <target state="new">All Aliases:</target>
+        <target state="translated">Todos los alias:</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowErrorUnknownAlias">
         <source>Unknown alias name '{0}'.
 Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
-        <target state="new">Unknown alias name '{0}'.
-Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
+        <target state="translated">Nombre de alias desconocido "{0}".
+Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasUpdated">
         <source>Successfully updated alias named '{0}' to value '{1}'.</source>
-        <target state="new">Successfully updated alias named '{0}' to value '{1}'.</target>
+        <target state="translated">El alias denominado "{0}" se actualizó correctamente al valor "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValue">
         <source>Alias Value</source>
-        <target state="new">Alias Value</target>
+        <target state="translated">Valor de alias</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValueFirstArgError">
         <source>First argument of an alias value must begin with a letter or digit.</source>
-        <target state="new">First argument of an alias value must begin with a letter or digit.</target>
+        <target state="translated">El primer argumento de un valor de alias debe comenzar con una letra o un dígito.</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsNoChoice">
         <source>Do not allow scripts to run</source>
-        <target state="new">Do not allow scripts to run</target>
+        <target state="translated">No permitir la ejecución de scripts</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsPromptChoice">
         <source>Ask before running each script</source>
-        <target state="new">Ask before running each script</target>
+        <target state="translated">Preguntar antes de ejecutar cada script</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsYesChoice">
         <source>Allow scripts to run</source>
-        <target state="new">Allow scripts to run</target>
+        <target state="translated">Permitir la ejecución de scripts</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousLanguageHint">
         <source>Re-run the command specifying the language to use with --language option.</source>
-        <target state="new">Re-run the command specifying the language to use with --language option.</target>
+        <target state="translated">Vuelva a ejecutar el comando especificando el idioma que se va a usar con la opción --idioma.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
-        <target state="new">The value '{1}' is ambiguous for option {0}.</target>
+        <target state="translated">El valor "{1}" es ambiguo para la opción {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
         <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="new">Unable to resolve the template to instantiate, these templates matched your input:</target>
+        <target state="translated">No se puede resolver la plantilla para crear una instancia, estas plantillas coinciden con la entrada:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
         <source>Re-run the command using the template's exact short name.</source>
-        <target state="new">Re-run the command using the template's exact short name.</target>
+        <target state="translated">Vuelva a ejecutar el comando usando el nombre corto exacto de la plantilla.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
         <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="new">Unable to resolve the template to instantiate, the following installed templates are conflicting:</target>
+        <target state="translated">No se puede resolver la plantilla para crear una instancia, las siguientes plantillas instaladas están en conflicto:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the templates or the packages to keep only one template from the list.</source>
-        <target state="new">Uninstall the templates or the packages to keep only one template from the list.</target>
+        <target state="translated">Desinstale las plantillas o los paquetes para conservar solo una plantilla de la lista.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
         <source>The package {0} is not correct, uninstall it and report the issue to the package author.</source>
-        <target state="new">The package {0} is not correct, uninstall it and report the issue to the package author.</target>
+        <target state="translated">El paquete {0} no es correcto, desinstálelo e informe del problema al autor del paquete.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileNotFound">
         <source>The specified extra args file does not exist: {0}.</source>
-        <target state="new">The specified extra args file does not exist: {0}.</target>
+        <target state="translated">El archivo de argumentos adicional especificado no existe: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileWrongFormat">
         <source>Extra args file {0} is not formatted properly.</source>
-        <target state="new">Extra args file {0} is not formatted properly.</target>
+        <target state="translated">El archivo de argumentos adicional {0} no tiene el formato correcto.</target>
         <note />
       </trans-unit>
       <trans-unit id="Assembly">
         <source>Assembly</source>
-        <target state="new">Assembly</target>
+        <target state="translated">ensamblado</target>
         <note />
       </trans-unit>
       <trans-unit id="Author">
         <source>Author: {0}</source>
-        <target state="new">Author: {0}</target>
+        <target state="translated">Autor: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousBestPrecedence">
         <source>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">La coincidencia de los valores de mayor prioridad entre las mejores coincidencias de plantilla impidió elegir sin ambigüedad una plantilla para invocarla.</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousChoiceParameterValue">
         <source>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">Un valor de parámetro de opción ambiguo impidió la elección sin ambigüedad de una plantilla para invocarla.</target>
         <note />
       </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
-        <target state="new">Change</target>
+        <target state="translated">Cambiar</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
         <source>Author</source>
-        <target state="new">Author</target>
+        <target state="translated">Autor</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameCurrentVersion">
@@ -273,12 +273,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNameIdentity">
         <source>Identity</source>
-        <target state="new">Identity</target>
+        <target state="translated">Identidad</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLanguage">
         <source>Language</source>
-        <target state="new">Language</target>
+        <target state="translated">Idioma</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLatestVersion">
@@ -288,163 +288,168 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNamePackage">
         <source>Package</source>
-        <target state="new">Package</target>
+        <target state="translated">Paquete</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
         <source>Precedence</source>
-        <target state="new">Precedence</target>
+        <target state="translated">Precedencia</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameShortName">
         <source>Short Name</source>
-        <target state="new">Short Name</target>
+        <target state="translated">Nombre corto</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Etiquetas</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTemplateName">
         <source>Template Name</source>
-        <target state="new">Template Name</target>
+        <target state="translated">Nombre de la plantilla</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTotalDownloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">Descargas</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameType">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">Tipo</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamesAreNotSupported">
         <source>The column {0} is/are not supported, the supported columns are: {1}.</source>
-        <target state="new">The column {0} is/are not supported, the supported columns are: {1}.</target>
+        <target state="translated">La columna o las columnas {0} no se admiten, las columnas admitidas son: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="new">Template Instantiation Commands for .NET Core CLI</target>
+        <target state="translated">Comandos de creación de instancias de plantilla para CLI de .NET Core</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
-        <target state="new">Command failed.</target>
+        <target state="translated">Error de comando.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOutput">
         <source>Output from command:
 {0}</source>
-        <target state="new">Output from command:
+        <target state="translated">Salida del comando:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
         <source>Command succeeded.</source>
-        <target state="new">Command succeeded.</target>
+        <target state="translated">El comando se ejecutó correctamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommitHash">
         <source>Commit Hash:</source>
-        <target state="new">Commit Hash:</target>
+        <target state="translated">Hash de commit:</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
-        <target state="new">Configured Value: {0}</target>
+        <target state="translated">Valor configurado: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldntDetermineFilesToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">No se pudieron determinar los archivos que se van a restaurar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Create">
+        <source>Create</source>
+        <target state="new">Create</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateFailed">
         <source>Template "{0}" could not be created.
 {1}</source>
-        <target state="new">Template "{0}" could not be created.
+        <target state="translated">No se pudo crear la plantilla "{0}".
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateSuccessful">
         <source>The template "{0}" was created successfully.</source>
-        <target state="new">The template "{0}" was created successfully.</target>
+        <target state="translated">La plantilla "{0}" se creó correctamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="CurrentConfiguration">
         <source>Current configuration:</source>
-        <target state="new">Current configuration:</target>
+        <target state="translated">Configuración actual:</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
-        <target state="new">Default if option is provided without a value: {0}</target>
+        <target state="translated">Valor predeterminado si se proporciona la opción sin un valor: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultValue">
         <source>Default: {0}</source>
-        <target state="new">Default: {0}</target>
+        <target state="translated">Predeterminado: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="new">Delete</target>
+        <target state="translated">Eliminar</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">Descripción: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DestructiveChangesNotification">
         <source>Creating this template will make changes to existing files:</source>
-        <target state="new">Creating this template will make changes to existing files:</target>
+        <target state="translated">Al crear esta plantilla, se realizarán cambios en los archivos existentes:</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
         <source>Displays help for this command.</source>
-        <target state="new">Displays help for this command.</target>
+        <target state="translated">Muestra ayuda para este comando.</target>
         <note />
       </trans-unit>
       <trans-unit id="DryRunDescription">
         <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <target state="translated">Muestra un resumen de lo que sucede si se ejecuta la línea de comandos dada si se crea una plantilla.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding the extra args files, the command is:
+        <target state="translated">Después de expandir los archivos de argumentos adicionales, el comando es:
     dotnet {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
-        <target state="new">File actions would have been taken:</target>
+        <target state="translated">Se habrían tomado acciones de archivo:</target>
         <note />
       </trans-unit>
       <trans-unit id="ForcesTemplateCreation">
         <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <target state="translated">Fuerza la generación de contenido aunque cambie a los archivos existentes.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
         <source>Generators</source>
-        <target state="new">Generators</target>
+        <target state="translated">Generadores</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericError">
         <source>Error: {0}</source>
-        <target state="new">Error: {0}</target>
+        <target state="translated">Error: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericWarning">
         <source>Warning: {0}</source>
-        <target state="new">Warning: {0}</target>
+        <target state="translated">Advertencia: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Details">
@@ -454,124 +459,124 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="InstallHelp">
         <source>Installs a source or a template package.</source>
-        <target state="new">Installs a source or a template package.</target>
+        <target state="needs-review-translation">Instala un paquete de origen o de plantilla.</target>
         <note />
       </trans-unit>
       <trans-unit id="InteractiveHelp">
         <source>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">Permite que el comando interno dotnet restore se detenga y espere la entrada o acción del usuario (por ejemplo, para completar la autenticación).</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidInputSwitch">
         <source>Invalid input switch:</source>
-        <target state="new">Invalid input switch:</target>
+        <target state="translated">Modificador de entrada no válido:</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
         <source>Name cannot contain any of the following characters {0} or character codes {1}</source>
-        <target state="new">Name cannot contain any of the following characters {0} or character codes {1}</target>
+        <target state="translated">El nombre no puede contener ninguno de los siguientes caracteres {0} o códigos de carácter {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDefault">
         <source>The default value '{1}' is not a valid value for {0}.</source>
-        <target state="new">The default value '{1}' is not a valid value for {0}.</target>
+        <target state="translated">El valor predeterminado "{1}" no es un valor válido para {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDetail">
         <source>'{1}' is not a valid value for {0}.</source>
-        <target state="new">'{1}' is not a valid value for {0}.</target>
+        <target state="translated">"{1}" no es un valor válido para "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterNameDetail">
         <source>'{0}' is not a valid option</source>
-        <target state="new">'{0}' is not a valid option</target>
+        <target state="translated">"{0}" no es una opción válida</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
         <source>For more information, run '{0}'.</source>
-        <target state="new">For more information, run '{0}'.</target>
+        <target state="translated">Para obtener más información, ejecute "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidTemplateParameterValues">
         <source>Error: Invalid option(s):</source>
-        <target state="new">Error: Invalid option(s):</target>
+        <target state="translated">Error: Opción u opciones no válidas:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
         <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
+        <target state="translated">Filtra plantillas en función del idioma y especifica el idioma de la plantilla que se va a crear.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="new">To list installed templates, run 'dotnet {0} --list'.</target>
+        <target state="translated">Para mostrar las plantillas instaladas, ejecute "dotnet {0} --list".</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
         <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="new">Lists templates containing the specified template name. If no name is specified, lists all templates.</target>
+        <target state="translated">Muestra las plantillas que contienen el nombre de plantilla especificado. Si no se especifica ningún nombre, muestra todas las plantillas.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="new">Mandatory option {0} missing for template {1}.</target>
+        <target state="translated">Falta la opción obligatoria {0} para la plantilla {1}. </target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">
         <source>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</source>
-        <target state="new">Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</target>
+        <target state="translated">No se puede encontrar el contenido especificado de la plantilla, es posible que la caché de plantillas esté dañada. Pruebe a ejecutar "dotnet {0} --debug:reinit" para corregir el problema.</target>
         <note />
       </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
-        <target state="new">Mount Point Factories</target>
+        <target state="translated">Generadores de puntos de montaje</target>
         <note />
       </trans-unit>
       <trans-unit id="NameOfOutput">
         <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <target state="translated">Nombre de la salida que se va a crear. Si no se especifica ningún nombre, se usa el nombre del directorio de salida.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
-        <target state="new">(No Items)</target>
+        <target state="translated">(Sin elementos)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoParameters">
         <source>    (No Parameters)</source>
-        <target state="new">    (No Parameters)</target>
+        <target state="translated">    (No hay parámetros)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoPrimaryOutputsToRestore">
         <source>No Primary Outputs to restore.</source>
-        <target state="new">No Primary Outputs to restore.</target>
+        <target state="translated">No hay ningún resultado principal para restaurar.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
-        <target state="new">No templates found matching: {0}.</target>
+        <target state="translated">No se encontró ninguna plantilla que coincida con: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetSourceHelp">
         <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
+        <target state="translated">Especifica un origen de NuGet para usarlo durante la instalación.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="new">Filters the templates based on the template author. Applicable only with --search or --list | -l option.</target>
+        <target state="needs-review-translation">Filtra las plantillas en función del autor. Se aplica a --search y --list.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
         <source>Comma separated list of columns to display in --list and --search output. 
 The supported columns are: language, tags, author, type.</source>
-        <target state="new">Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</target>
+        <target state="translated">Lista de columnas separadas por comas para mostrar los resultados de --list y --search. 
+Las columnas admitidas son: idioma, etiquetas, autor y tipo.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumnsAll">
         <source>Display all columns in --list and --search output.</source>
-        <target state="new">Display all columns in --list and --search output.</target>
+        <target state="translated">Muestra todas las columnas en los resultados de --list y --search.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
@@ -581,57 +586,57 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
         <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
-        <target state="new">Filters the templates based on NuGet package ID. Applies to --search.</target>
+        <target state="translated">Filtra las plantillas en función del id. de paquete de NuGet. Se aplica a --search.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionSearch">
         <source>Searches for the templates on NuGet.org.</source>
-        <target state="new">Searches for the templates on NuGet.org.</target>
+        <target state="translated">Busca las plantillas en NuGet.org.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionTagFilter">
         <source>Filters the templates based on the tag. Applies to --search and --list.</source>
-        <target state="new">Filters the templates based on the tag. Applies to --search and --list.</target>
+        <target state="translated">Filtra las plantillas en función de la etiqueta. Se aplica a --search y --list.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
         <source>Error during synchronization with the Optional SDK Workloads.</source>
-        <target state="new">Error during synchronization with the Optional SDK Workloads.</target>
+        <target state="translated">Error durante la sincronización con las cargas de trabajo opcionales del SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options:</source>
-        <target state="new">Options:</target>
+        <target state="translated">Opciones:</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPath">
         <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
+        <target state="translated">Ubicación en la que se colocará el resultado generado.</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
         <source>Overwrite</source>
-        <target state="new">Overwrite</target>
+        <target state="translated">Sobrescribir</target>
         <note />
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
         <source>Some partially matched templates may not support these input switches:</source>
-        <target state="new">Some partially matched templates may not support these input switches:</target>
+        <target state="translated">Es posible que algunas plantillas parcialmente coincidentes no admitan estos modificadores de entrada:</target>
         <note />
       </trans-unit>
       <trans-unit id="PossibleValuesHeader">
         <source>The possible values are:</source>
-        <target state="new">The possible values are:</target>
+        <target state="translated">Los valores posibles son los siguientes:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionCommand">
         <source>Actual command: {0}</source>
-        <target state="new">Actual command: {0}</target>
+        <target state="translated">Comando real: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDescription">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">Descripción: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_NotSupported">
@@ -646,27 +651,27 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
         <source>Post action failed.</source>
-        <target state="new">Post action failed.</target>
+        <target state="translated">No se pudo realizar la acción posterior.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInstructions">
         <source>Manual instructions: {0}</source>
-        <target state="new">Manual instructions: {0}</target>
+        <target state="translated">Instrucciones manuales: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInvalidInputRePrompt">
         <source>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</source>
-        <target state="new">Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</target>
+        <target state="translated">Entrada no válida "{0}". Escriba uno de [{1}(yes)|{2}(no)].</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptHeader">
         <source>Template is configured to run the following action:</source>
-        <target state="new">Template is configured to run the following action:</target>
+        <target state="translated">La plantilla está configurada para ejecutar la acción siguiente:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptRequest">
         <source>Do you want to run this action [{0}(yes)|{1}(no)]?</source>
-        <target state="new">Do you want to run this action [{0}(yes)|{1}(no)]?</target>
+        <target state="translated">¿Quiere ejecutar esta acción [{0}(yes)|{1}(no)]?</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -676,37 +681,37 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
         <source>Processing post-creation actions...</source>
-        <target state="new">Processing post-creation actions...</target>
+        <target state="translated">Procesando acciones posteriores a la creación...</target>
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
         <source>Rerun the command and pass --force to accept and create.</source>
-        <target state="new">Rerun the command and pass --force to accept and create.</target>
+        <target state="translated">Vuelva a ejecutar el comando y pase --force para aceptar y crear.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">Error en la restauración.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreSucceeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">Restauración realizada correctamente.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>Run dotnet {0} --help for usage information.</source>
-        <target state="new">Run dotnet {0} --help for usage information.</target>
+        <target state="translated">Ejecute dotnet {0} --help para obtener la información de uso.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
-        <target state="new">Running command '{0}'...</target>
+        <target state="translated">Ejecutando comando "{0}"...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
-        <target state="new">Running 'dotnet restore' on {0}...</target>
+        <target state="translated">Ejecutando "dotnet restore" en {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorNoTemplateNameOrFilter">
@@ -716,9 +721,9 @@ Examples:
         dotnet {1} &lt;template name&gt; --search
         dotnet {1} --search --author Microsoft
         dotnet {1} &lt;template name&gt; --search --author Microsoft</source>
-        <target state="new">Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}.
-Examples:
+        <target state="translated">No se pudo realizar la búsqueda: no se especificó ningún nombre de plantilla.
+Para buscar la plantilla, especifique el nombre de la plantilla o use uno de los filtros admitidos. {0}.
+Ejemplos:
         dotnet {1} &lt;template name&gt; --search
         dotnet {1} --search --author Microsoft
         dotnet {1} &lt;template name&gt; --search --author Microsoft</target>
@@ -726,62 +731,62 @@ Examples:
       </trans-unit>
       <trans-unit id="SearchOnlineErrorTemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <target state="translated">No se pudo realizar la búsqueda: el nombre de la plantilla es demasiado corto, se requieren 2 caracteres como mínimo.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNoSources">
         <source>No remoted sources defined to search for the templates.</source>
-        <target state="new">No remoted sources defined to search for the templates.</target>
+        <target state="translated">No hay ningún origen remoto definido para buscar las plantillas.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNotification">
         <source>Searching for the templates...</source>
-        <target state="new">Searching for the templates...</target>
+        <target state="translated">Buscando las plantillas...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineTemplateNotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="new">Template '{0}' was not found.</target>
+        <target state="translated">No se encontró la plantilla "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallCommand">
         <source>        dotnet {0} -i {1}</source>
-        <target state="new">        dotnet {0} -i {1}</target>
+        <target state="translated">        dotnet {0} -i {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallHeader">
         <source>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</source>
-        <target state="new">To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</target>
+        <target state="translated">Para usar la plantilla, ejecute el siguiente comando para instalar el paquete: dotnet {0} -i &lt;package&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultSourceIndicator">
         <source>Matches from template source: {0}</source>
-        <target state="new">Matches from template source: {0}</target>
+        <target state="translated">Coincidencias de origen de plantilla: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="new">To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</target>
+        <target state="translated">Para buscar las plantillas en NuGet.org, ejecute "dotnet {0} {1} --search".</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
         <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
-        <target state="new">Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</target>
+        <target state="translated">Error al leer la configuración instalada, es posible que el archivo esté dañado. Si el problema persiste, pruebe a restablecer con la marca "--debug:reinit"</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsAllTemplates">
         <source>Shows all templates.</source>
-        <target state="new">Shows all templates.</target>
+        <target state="translated">Muestra todas las plantillas.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsFilteredTemplates">
         <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
+        <target state="translated">Filtra las plantillas en función de los tipos disponibles. Los valores predefinidos son "proyecto" y "elemento".</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">
         <source>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</source>
-        <target state="new">The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</target>
+        <target state="translated">Las opciones siguientes o sus valores no son válidos junto con otras opciones proporcionadas o sus valores:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
@@ -966,62 +971,62 @@ Examples:
       </trans-unit>
       <trans-unit id="Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Plantillas</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
         <source>These templates matched your input: {0}.</source>
-        <target state="new">These templates matched your input: {0}.</target>
+        <target state="translated">Estas plantillas coinciden con su entrada: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
         <source>{0} template(s) partially matched, but failed on {1}.</source>
-        <target state="new">{0} template(s) partially matched, but failed on {1}.</target>
+        <target state="translated">{0} plantilla(s) coinciden parcialmente, pero con error en {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">Esta plantilla contiene tecnologías de terceros ajenos a Microsoft, consulte {0} para obtener más información.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">Tipo</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToSetPermissions">
         <source>Unable to apply permissions {0} to "{1}".</source>
-        <target state="new">Unable to apply permissions {0} to "{1}".</target>
+        <target state="translated">No se pueden aplicar los permisos {0} a "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallHelp">
         <source>Uninstalls a source or a template package.</source>
-        <target state="new">Uninstalls a source or a template package.</target>
+        <target state="needs-review-translation">Desinstala un paquete de origen o de plantilla.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
         <source>Unknown Change</source>
-        <target state="new">Unknown Change</target>
+        <target state="translated">Cambio desconocido</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateApplyCommandHelp">
         <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="new">Check the currently installed template packages for update, and install the updates.</target>
+        <target state="needs-review-translation">Compruebe si hay actualizaciones para los paquetes de plantillas instalados actualmente e instale las actualizaciones.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateCheckCommandHelp">
         <source>Check the currently installed template packages for updates.</source>
-        <target state="new">Check the currently installed template packages for updates.</target>
+        <target state="needs-review-translation">Compruebe si hay actualizaciones para los paquetes de plantillas instalados actualmente.</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">
         <source>Version:</source>
-        <target state="new">Version:</target>
+        <target state="translated">Versión:</target>
         <note />
       </trans-unit>
       <trans-unit id="WhetherToAllowScriptsToRun">
         <source>Specify if post action scripts should run.</source>
-        <target state="new">Specify if post action scripts should run.</target>
+        <target state="translated">Especifique si deben ejecutarse los scripts de acción posterior.</target>
         <note />
       </trans-unit>
     </body>

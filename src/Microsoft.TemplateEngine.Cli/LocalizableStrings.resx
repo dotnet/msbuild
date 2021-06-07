@@ -727,4 +727,7 @@ Examples:
   <data name="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package" xml:space="preserve">
     <value>No templates were found in the package {0}.</value>
   </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
 </root>

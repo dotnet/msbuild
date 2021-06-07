@@ -142,6 +142,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             return kind switch
             {
+                ChangeKind.Create => LocalizableStrings.Create,
                 ChangeKind.Change => LocalizableStrings.Change,
                 ChangeKind.Delete => LocalizableStrings.Delete,
                 ChangeKind.Overwrite => LocalizableStrings.Overwrite,
@@ -236,7 +237,7 @@ namespace Microsoft.TemplateEngine.Cli
                         {
                             foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
                             {
-                                Reporter.Output.WriteLine($"  {change.ChangeKind}: {change.TargetRelativePath}");
+                                Reporter.Output.WriteLine($"  {GetChangeString(change.ChangeKind)}: {change.TargetRelativePath}");
                             }
                         }
                     }

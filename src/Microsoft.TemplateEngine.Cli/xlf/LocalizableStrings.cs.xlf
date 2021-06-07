@@ -1,25 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="ActionWouldHaveBeenTakenAutomatically">
         <source>Action would have been taken automatically:</source>
-        <target state="new">Action would have been taken automatically:</target>
+        <target state="translated">Akce by se provedla automaticky:</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionFailed">
         <source>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</source>
-        <target state="new">Failed to add project(s) {0} to solution file {1}, solution folder {2}.</target>
+        <target state="translated">Nepovedlo se přidat projekty {0} do souboru řešení {1} a složky řešení {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionNoProjFiles">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">Akce Přidat odkaz na projekt do řešení není v šabloně správně nakonfigurovaná. Nedají se určit soubory projektu, které se mají přidat.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionRunning">
         <source>Adding project reference(s) to solution file. Running {0}</source>
-        <target state="new">Adding project reference(s) to solution file. Running {0}</target>
+        <target state="translated">Do souboru řešení se přidávají odkazy na projekt. Spouští se {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionSucceeded">
@@ -27,243 +27,243 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Successfully added
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">Úspěšně se přidaly
+    projekty: {0}
+    do souboru řešení: {1}
+    a složky řešení: {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionUnresolvedSlnFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">Nedá se určit, do kterého souboru řešení se má odkaz přidat.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRef">
         <source>Adding a package reference. Running dotnet add {0} package {1}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1}</target>
+        <target state="translated">Přidává se odkaz na balíček. Spouští se příkaz dotnet add {0} package {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRefWithVersion">
         <source>Adding a package reference. Running dotnet add {0} package {1} --version {2}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1} --version {2}</target>
+        <target state="translated">Přidává se odkaz na balíček. Spouští se příkaz dotnet add {0} package {1} --version {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddProjectRef">
         <source>Adding a project reference. Running dotnet add {0} reference {1}</source>
-        <target state="new">Adding a project reference. Running dotnet add {0} reference {1}</target>
+        <target state="translated">Přidává se odkaz na projekt. Spouští se příkaz dotnet add {0} reference {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFailed">
         <source>Failed to add reference {0} to project file {1}</source>
-        <target state="new">Failed to add reference {0} to project file {1}</target>
+        <target state="translated">Nepovedlo se přidat odkaz {0} na soubor projektu {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">Do projektu se nedá automaticky přidat odkaz na rozhraní {0}. Pokud ho chcete přidat, upravte soubor projektu ručně.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">V šabloně není správně nakonfigurovaná akce pro přidání odkazu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">Nalezené soubory projektu:</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionSucceeded">
         <source>Successfully added
     reference: {0}
     to project file: {1}</source>
-        <target state="new">Successfully added
-    reference: {0}
-    to project file: {1}</target>
+        <target state="translated">Úspěšně se přidal
+    odkaz: {0}
+    do souboru projektu: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">Nepovedlo se určit, do kterého souboru projektu se má odkaz přidat.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">Přidávání typu odkazu {0} se nepodporuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
         <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
-        <target state="new">Alias '{0}' is a template short name, and therefore cannot be aliased.</target>
+        <target state="translated">Alias {0} je krátký název šablony, proto se pro něj nedá alias vytvořit.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCommandAfterExpansion">
         <source>After expanding aliases, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding aliases, the command is:
-    dotnet {0}</target>
+        <target state="translated">Po rozbalení aliasů je příkaz 
+    dotnet {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCreated">
         <source>Successfully created alias named '{0}' with value '{1}'</source>
-        <target state="new">Successfully created alias named '{0}' with value '{1}'</target>
+        <target state="translated">Úspěšně se vytvořil alias s názvem {0} a hodnotou {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCycleError">
         <source>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</source>
-        <target state="new">Alias not created. It would have created an alias cycle, resulting in infinite expansion.</target>
+        <target state="translated">Alias se nevytvořil. Vytvořil by se cyklus aliasu, což by vedlo k nekonečnému rozšiřování.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpandedCommandParseError">
         <source>Command is invalid after expanding aliases.</source>
-        <target state="new">Command is invalid after expanding aliases.</target>
+        <target state="translated">Po rozšíření aliasů není příkaz platný.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpansionError">
         <source>Error expanding aliases on input params.</source>
-        <target state="new">Error expanding aliases on input params.</target>
+        <target state="translated">Při rozšiřování aliasů u vstupních parametrů došlo k chybě.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasName">
         <source>Alias Name</source>
-        <target state="new">Alias Name</target>
+        <target state="translated">Název aliasu</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNameContainsInvalidCharacters">
         <source>Alias names can only contain letters, numbers, underscores, and periods.</source>
-        <target state="new">Alias names can only contain letters, numbers, underscores, and periods.</target>
+        <target state="translated">Názvy aliasů můžou obsahovat pouze písmena, číslice, podtržítka a tečky.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNotCreatedInvalidInput">
         <source>Alias not created. The input was invalid.</source>
-        <target state="new">Alias not created. The input was invalid.</target>
+        <target state="translated">Alias se nevytvořil. Vstup nebyl platný.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoveNonExistentFailed">
         <source>Unable to remove alias '{0}'. It did not exist.</source>
-        <target state="new">Unable to remove alias '{0}'. It did not exist.</target>
+        <target state="translated">Nepovedlo se odebrat alias {0}, protože neexistoval.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoved">
         <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
-        <target state="new">Successfully removed alias named '{0}' whose value was '{1}'.</target>
+        <target state="translated">Úspěšně se odebral alias s názvem {0}, jehož hodnota byla {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowAllAliasesHeader">
         <source>All Aliases:</source>
-        <target state="new">All Aliases:</target>
+        <target state="translated">Všechny aliasy:</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowErrorUnknownAlias">
         <source>Unknown alias name '{0}'.
 Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
-        <target state="new">Unknown alias name '{0}'.
-Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
+        <target state="translated">Neznámý název aliasu {0}.
+Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotnet {1} --show-aliases.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasUpdated">
         <source>Successfully updated alias named '{0}' to value '{1}'.</source>
-        <target state="new">Successfully updated alias named '{0}' to value '{1}'.</target>
+        <target state="translated">Alias s názvem {0} se úspěšně aktualizoval na hodnotu {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValue">
         <source>Alias Value</source>
-        <target state="new">Alias Value</target>
+        <target state="translated">Hodnota aliasu</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValueFirstArgError">
         <source>First argument of an alias value must begin with a letter or digit.</source>
-        <target state="new">First argument of an alias value must begin with a letter or digit.</target>
+        <target state="translated">První argument hodnoty aliasu musí začínat písmenem nebo číslicí.</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsNoChoice">
         <source>Do not allow scripts to run</source>
-        <target state="new">Do not allow scripts to run</target>
+        <target state="translated">Nepovolit spouštění skriptů</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsPromptChoice">
         <source>Ask before running each script</source>
-        <target state="new">Ask before running each script</target>
+        <target state="translated">Před spuštěním každého skriptu se zeptat</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsYesChoice">
         <source>Allow scripts to run</source>
-        <target state="new">Allow scripts to run</target>
+        <target state="translated">Povolit spouštění skriptů</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousLanguageHint">
         <source>Re-run the command specifying the language to use with --language option.</source>
-        <target state="new">Re-run the command specifying the language to use with --language option.</target>
+        <target state="translated">Spusťte příkaz znovu s tím, že pomocí možnosti --language zadáte jazyk, který se má použít.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
-        <target state="new">The value '{1}' is ambiguous for option {0}.</target>
+        <target state="translated">Hodnota {1} je pro možnost {0} nejednoznačná.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
         <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="new">Unable to resolve the template to instantiate, these templates matched your input:</target>
+        <target state="translated">Nedá se přeložit šablona, ze které se má vytvořit instance. Tyto šablony odpovídají vašemu vstupu:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
         <source>Re-run the command using the template's exact short name.</source>
-        <target state="new">Re-run the command using the template's exact short name.</target>
+        <target state="translated">Pomocí přesného krátkého názvu šablony spusťte příkaz znovu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
         <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="new">Unable to resolve the template to instantiate, the following installed templates are conflicting:</target>
+        <target state="translated">Nedá se přeložit šablona, ze které se má vytvořit instance. Následující nainstalované šablony jsou v konfliktu:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the templates or the packages to keep only one template from the list.</source>
-        <target state="new">Uninstall the templates or the packages to keep only one template from the list.</target>
+        <target state="translated">Odinstalujte šablony nebo balíčky, aby z daného seznamu zůstala pouze jedna šablona.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
         <source>The package {0} is not correct, uninstall it and report the issue to the package author.</source>
-        <target state="new">The package {0} is not correct, uninstall it and report the issue to the package author.</target>
+        <target state="translated">Balíček {0} není správný, odinstalujte ho a nahlaste tento problém autorovi balíčku.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileNotFound">
         <source>The specified extra args file does not exist: {0}.</source>
-        <target state="new">The specified extra args file does not exist: {0}.</target>
+        <target state="translated">Zadaný dodatečný soubor argumentů neexistují: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileWrongFormat">
         <source>Extra args file {0} is not formatted properly.</source>
-        <target state="new">Extra args file {0} is not formatted properly.</target>
+        <target state="translated">Dodatečný soubor argumentů {0} nemá správný formát.</target>
         <note />
       </trans-unit>
       <trans-unit id="Assembly">
         <source>Assembly</source>
-        <target state="new">Assembly</target>
+        <target state="translated">sestavení</target>
         <note />
       </trans-unit>
       <trans-unit id="Author">
         <source>Author: {0}</source>
-        <target state="new">Author: {0}</target>
+        <target state="translated">Autor: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousBestPrecedence">
         <source>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">Stejné hodnoty nejvyšší priority mezi nejlepšími shodami šablon znemožnily jednoznačně zvolit šablonu, která se má vyvolat.</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousChoiceParameterValue">
         <source>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">Nejednoznačná hodnota parametru volby znemožňuje jednoznačně zvolit šablonu, která se má vyvolat.</target>
         <note />
       </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
-        <target state="new">Change</target>
+        <target state="translated">Změnit</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
         <source>Author</source>
-        <target state="new">Author</target>
+        <target state="translated">Autor</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameCurrentVersion">
@@ -273,12 +273,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNameIdentity">
         <source>Identity</source>
-        <target state="new">Identity</target>
+        <target state="translated">Identita</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLanguage">
         <source>Language</source>
-        <target state="new">Language</target>
+        <target state="translated">Jazyk</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLatestVersion">
@@ -288,163 +288,168 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNamePackage">
         <source>Package</source>
-        <target state="new">Package</target>
+        <target state="translated">Balíček</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
         <source>Precedence</source>
-        <target state="new">Precedence</target>
+        <target state="translated">Priorita</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameShortName">
         <source>Short Name</source>
-        <target state="new">Short Name</target>
+        <target state="translated">Krátký název</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Značky</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTemplateName">
         <source>Template Name</source>
-        <target state="new">Template Name</target>
+        <target state="translated">Název šablony</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTotalDownloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">Soubory ke stažení</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameType">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">Typ</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamesAreNotSupported">
         <source>The column {0} is/are not supported, the supported columns are: {1}.</source>
-        <target state="new">The column {0} is/are not supported, the supported columns are: {1}.</target>
+        <target state="translated">Sloupce {0} se nepodporují, podporované sloupce: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="new">Template Instantiation Commands for .NET Core CLI</target>
+        <target state="translated">Příkazy pro vytvoření instancí šablon pro .NET Core CLI.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
-        <target state="new">Command failed.</target>
+        <target state="translated">Chyba příkazu</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOutput">
         <source>Output from command:
 {0}</source>
-        <target state="new">Output from command:
+        <target state="translated">Výstup příkazu:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
         <source>Command succeeded.</source>
-        <target state="new">Command succeeded.</target>
+        <target state="translated">Příkaz proběhl úspěšně.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommitHash">
         <source>Commit Hash:</source>
-        <target state="new">Commit Hash:</target>
+        <target state="translated">Hodnota hash potvrzení:</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
-        <target state="new">Configured Value: {0}</target>
+        <target state="translated">Nakonfigurovaná hodnota: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldntDetermineFilesToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">Soubory k obnovení se nepodařilo určit.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Create">
+        <source>Create</source>
+        <target state="new">Create</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateFailed">
         <source>Template "{0}" could not be created.
 {1}</source>
-        <target state="new">Template "{0}" could not be created.
+        <target state="translated">Šablonu {0} se nepovedlo vytvořit.
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateSuccessful">
         <source>The template "{0}" was created successfully.</source>
-        <target state="new">The template "{0}" was created successfully.</target>
+        <target state="translated">Šablona {0} se úspěšně vytvořila.</target>
         <note />
       </trans-unit>
       <trans-unit id="CurrentConfiguration">
         <source>Current configuration:</source>
-        <target state="new">Current configuration:</target>
+        <target state="translated">Aktuální konfigurace:</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
-        <target state="new">Default if option is provided without a value: {0}</target>
+        <target state="translated">Výchozí možnost, pokud se zadala možnost bez hodnoty: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultValue">
         <source>Default: {0}</source>
-        <target state="new">Default: {0}</target>
+        <target state="translated">Výchozí: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="new">Delete</target>
+        <target state="translated">Odstranit</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">Popis: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DestructiveChangesNotification">
         <source>Creating this template will make changes to existing files:</source>
-        <target state="new">Creating this template will make changes to existing files:</target>
+        <target state="translated">Pokud vytvoříte tuto šablonu, provedou se změny v existujících souborech:</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
         <source>Displays help for this command.</source>
-        <target state="new">Displays help for this command.</target>
+        <target state="translated">Zobrazí nápovědu k tomuto příkazu.</target>
         <note />
       </trans-unit>
       <trans-unit id="DryRunDescription">
         <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <target state="translated">Zobrazí souhrn toho, co by se mohlo stát, kdyby se daný příkazový řádek spustil, pokud by to vedlo k vytvoření šablony.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding the extra args files, the command is:
-    dotnet {0}</target>
+        <target state="translated">Po rozšíření dodatečných souborů argumentů je příkaz
+    dotnet {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
-        <target state="new">File actions would have been taken:</target>
+        <target state="translated">Akce souborů by se provedly:</target>
         <note />
       </trans-unit>
       <trans-unit id="ForcesTemplateCreation">
         <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <target state="translated">Vynutí vygenerování obsahu i v případě, že by došlo ke změně existujících souborů.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
         <source>Generators</source>
-        <target state="new">Generators</target>
+        <target state="translated">Generátory</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericError">
         <source>Error: {0}</source>
-        <target state="new">Error: {0}</target>
+        <target state="translated">Chyba: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericWarning">
         <source>Warning: {0}</source>
-        <target state="new">Warning: {0}</target>
+        <target state="translated">Upozornění: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Details">
@@ -454,124 +459,124 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="InstallHelp">
         <source>Installs a source or a template package.</source>
-        <target state="new">Installs a source or a template package.</target>
+        <target state="needs-review-translation">Nainstaluje zdroj nebo balíček šablon.</target>
         <note />
       </trans-unit>
       <trans-unit id="InteractiveHelp">
         <source>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">Umožňuje, aby se interní příkaz dotnet restore zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidInputSwitch">
         <source>Invalid input switch:</source>
-        <target state="new">Invalid input switch:</target>
+        <target state="translated">Neplatný vstupní přepínač:</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
         <source>Name cannot contain any of the following characters {0} or character codes {1}</source>
-        <target state="new">Name cannot contain any of the following characters {0} or character codes {1}</target>
+        <target state="translated">Název nemůže obsahovat žádné z následujících znaků {0} nebo kódů znaků {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDefault">
         <source>The default value '{1}' is not a valid value for {0}.</source>
-        <target state="new">The default value '{1}' is not a valid value for {0}.</target>
+        <target state="translated">Výchozí hodnota {1} není platnou hodnotou pro {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDetail">
         <source>'{1}' is not a valid value for {0}.</source>
-        <target state="new">'{1}' is not a valid value for {0}.</target>
+        <target state="translated">{1} není platnou hodnotou pro {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterNameDetail">
         <source>'{0}' is not a valid option</source>
-        <target state="new">'{0}' is not a valid option</target>
+        <target state="translated">{0} není platná možnost.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
         <source>For more information, run '{0}'.</source>
-        <target state="new">For more information, run '{0}'.</target>
+        <target state="translated">Pokud chcete získat další informace, spusťte {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidTemplateParameterValues">
         <source>Error: Invalid option(s):</source>
-        <target state="new">Error: Invalid option(s):</target>
+        <target state="translated">Chyba: Neplatné možnosti:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
         <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
+        <target state="translated">Filtruje šablony podle jazyka a určuje jazyk šablony, která se má vytvořit.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="new">To list installed templates, run 'dotnet {0} --list'.</target>
+        <target state="translated">Pokud chcete vypsat nainstalované šablony, spusťte příkaz dotnet {0} --list.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
         <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="new">Lists templates containing the specified template name. If no name is specified, lists all templates.</target>
+        <target state="translated">Vypíše šablony, které obsahují zadaný název šablony. Pokud se nezadá žádný název, vypíše seznam všech šablon.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="new">Mandatory option {0} missing for template {1}.</target>
+        <target state="translated">Pro šablonu {1} chybí povinná možnost {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">
         <source>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</source>
-        <target state="new">Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</target>
+        <target state="translated">Nedá se najít zadaný obsah šablony, mezipaměť šablony může být poškozená. Zkuste problém vyřešit spuštěním příkazu dotnet {0} --debug:reinit.</target>
         <note />
       </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
-        <target state="new">Mount Point Factories</target>
+        <target state="translated">Továrny bodů připojení</target>
         <note />
       </trans-unit>
       <trans-unit id="NameOfOutput">
         <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <target state="translated">Název vytvářeného výstupu. Pokud se žádný název nezadá, použije se název výstupního adresáře.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
-        <target state="new">(No Items)</target>
+        <target state="translated">(Žádné položky)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoParameters">
         <source>    (No Parameters)</source>
-        <target state="new">    (No Parameters)</target>
+        <target state="translated">    (Žádné parametry)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoPrimaryOutputsToRestore">
         <source>No Primary Outputs to restore.</source>
-        <target state="new">No Primary Outputs to restore.</target>
+        <target state="translated">Nejsou k dispozici žádné primární výstupy, které by se měly obnovit.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
-        <target state="new">No templates found matching: {0}.</target>
+        <target state="translated">Nenašly se žádné šablony, které by odpovídaly tomuto hledání: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetSourceHelp">
         <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
+        <target state="translated">Určuje zdroj NuGet, který se má použít během instalace.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="new">Filters the templates based on the template author. Applicable only with --search or --list | -l option.</target>
+        <target state="needs-review-translation">Filtruje šablony podle autora. Vztahuje se na možnosti --search a --list.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
         <source>Comma separated list of columns to display in --list and --search output. 
 The supported columns are: language, tags, author, type.</source>
-        <target state="new">Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</target>
+        <target state="translated">Seznam čárkami oddělených sloupců, které se zobrazí ve výstupu --list a --search. 
+Podporované sloupce: language, tags, author, type</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumnsAll">
         <source>Display all columns in --list and --search output.</source>
-        <target state="new">Display all columns in --list and --search output.</target>
+        <target state="translated">Zobrazí všechny sloupce ve výstupu --list a --search.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
@@ -581,57 +586,57 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
         <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
-        <target state="new">Filters the templates based on NuGet package ID. Applies to --search.</target>
+        <target state="translated">Filtruje šablony podle ID balíčku NuGet. Vztahuje se na možnost --search.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionSearch">
         <source>Searches for the templates on NuGet.org.</source>
-        <target state="new">Searches for the templates on NuGet.org.</target>
+        <target state="translated">Vyhledá šablony na NuGet.org.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionTagFilter">
         <source>Filters the templates based on the tag. Applies to --search and --list.</source>
-        <target state="new">Filters the templates based on the tag. Applies to --search and --list.</target>
+        <target state="translated">Filtruje šablony podle značky. Vztahuje se na možnosti --search a --list.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
         <source>Error during synchronization with the Optional SDK Workloads.</source>
-        <target state="new">Error during synchronization with the Optional SDK Workloads.</target>
+        <target state="translated">Během synchronizace s volitelnými úlohami sady SDK došlo k chybě.</target>
         <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options:</source>
-        <target state="new">Options:</target>
+        <target state="translated">Možnosti:</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPath">
         <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
+        <target state="translated">Umístění, do kterého se uloží vygenerovaný výstup</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
         <source>Overwrite</source>
-        <target state="new">Overwrite</target>
+        <target state="translated">Přepsat</target>
         <note />
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
         <source>Some partially matched templates may not support these input switches:</source>
-        <target state="new">Some partially matched templates may not support these input switches:</target>
+        <target state="translated">Některé částečně vyhovující šablony nemusí podporovat tyto vstupní přepínače:</target>
         <note />
       </trans-unit>
       <trans-unit id="PossibleValuesHeader">
         <source>The possible values are:</source>
-        <target state="new">The possible values are:</target>
+        <target state="translated">Možné hodnoty:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionCommand">
         <source>Actual command: {0}</source>
-        <target state="new">Actual command: {0}</target>
+        <target state="translated">Skutečný příkaz: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDescription">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">Popis: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_NotSupported">
@@ -646,27 +651,27 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
         <source>Post action failed.</source>
-        <target state="new">Post action failed.</target>
+        <target state="translated">Akce publikování selhala.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInstructions">
         <source>Manual instructions: {0}</source>
-        <target state="new">Manual instructions: {0}</target>
+        <target state="translated">Ruční pokyny: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInvalidInputRePrompt">
         <source>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</source>
-        <target state="new">Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</target>
+        <target state="translated">Neplatný vstup {0}. Zadejte prosím jednu z možností: [{1}(ano)|{2}(ne)]</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptHeader">
         <source>Template is configured to run the following action:</source>
-        <target state="new">Template is configured to run the following action:</target>
+        <target state="translated">Šablona je nakonfigurovaná tak, aby spouštěla následující akci:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptRequest">
         <source>Do you want to run this action [{0}(yes)|{1}(no)]?</source>
-        <target state="new">Do you want to run this action [{0}(yes)|{1}(no)]?</target>
+        <target state="translated">Chcete tuto akci spustit? [{0}(ano)|{1}(ne)]</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -676,37 +681,37 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
         <source>Processing post-creation actions...</source>
-        <target state="new">Processing post-creation actions...</target>
+        <target state="translated">Zpracovávají se akce po vytvoření...</target>
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
         <source>Rerun the command and pass --force to accept and create.</source>
-        <target state="new">Rerun the command and pass --force to accept and create.</target>
+        <target state="translated">Spusťte příkaz znovu a pro přijetí a vytvoření předejte možnost --force.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">Obnovení neproběhlo úspěšně.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreSucceeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">Obnovení proběhlo úspěšně.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>Run dotnet {0} --help for usage information.</source>
-        <target state="new">Run dotnet {0} --help for usage information.</target>
+        <target state="translated">Pro informace o využití spusťte dotnet {0} --help.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
-        <target state="new">Running command '{0}'...</target>
+        <target state="translated">Spouští se příkaz {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
-        <target state="new">Running 'dotnet restore' on {0}...</target>
+        <target state="translated">Spouští se dotnet restore v {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorNoTemplateNameOrFilter">
@@ -716,72 +721,72 @@ Examples:
         dotnet {1} &lt;template name&gt; --search
         dotnet {1} --search --author Microsoft
         dotnet {1} &lt;template name&gt; --search --author Microsoft</source>
-        <target state="new">Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}.
-Examples:
-        dotnet {1} &lt;template name&gt; --search
+        <target state="translated">Vyhledávání selhalo: nezadal se žádný název šablony.
+Pokud chcete šablonu vyhledat, zadejte název šablony nebo použijte jeden z podporovaných filtrů: {0}.
+Příklady:
+        dotnet {1} &lt;název šablony&gt; --search
         dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;template name&gt; --search --author Microsoft</target>
+        dotnet {1} &lt;název šablony&gt; --search --author Microsoft</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorTemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <target state="translated">Hledání se nepovedlo: název šablony je příliš krátký, vyžadují se minimálně 2 znaky.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNoSources">
         <source>No remoted sources defined to search for the templates.</source>
-        <target state="new">No remoted sources defined to search for the templates.</target>
+        <target state="translated">Nedefinovaly se žádné vzdálené zdroje, ve kterých by se daly hledat šablony.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNotification">
         <source>Searching for the templates...</source>
-        <target state="new">Searching for the templates...</target>
+        <target state="translated">Vyhledávají se šablony...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineTemplateNotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="new">Template '{0}' was not found.</target>
+        <target state="translated">Šablona {0} se nenašla.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallCommand">
         <source>        dotnet {0} -i {1}</source>
-        <target state="new">        dotnet {0} -i {1}</target>
+        <target state="translated">        dotnet {0} -i {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallHeader">
         <source>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</source>
-        <target state="new">To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</target>
+        <target state="translated">Pokud chcete použít šablonu, spusťte následující příkaz a nainstalujte balíček: dotnet {0}-i &lt;package&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultSourceIndicator">
         <source>Matches from template source: {0}</source>
-        <target state="new">Matches from template source: {0}</target>
+        <target state="translated">Shody ze zdroje šablony: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="new">To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</target>
+        <target state="translated">Pokud chcete hledat šablony na NuGet.org, spusťte příkaz dotnet {0} {1} --search.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
         <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
-        <target state="new">Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</target>
+        <target state="translated">Při čtení nainstalované konfigurace došlo k chybě, soubor může být poškozený. Pokud se problém bude opakovat, zkuste provést reset pomocí příznaku --debug:reinit.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsAllTemplates">
         <source>Shows all templates.</source>
-        <target state="new">Shows all templates.</target>
+        <target state="translated">Zobrazí všechny šablony.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsFilteredTemplates">
         <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
+        <target state="translated">Filtruje šablony na základě dostupných typů. Předem definované hodnoty jsou project a item.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">
         <source>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</source>
-        <target state="new">The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</target>
+        <target state="translated">Následující možnosti nebo jejich hodnoty nejsou platné v kombinaci s jinými poskytnutými možnostmi nebo jejich hodnotami:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
@@ -966,62 +971,62 @@ Examples:
       </trans-unit>
       <trans-unit id="Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Šablony</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
         <source>These templates matched your input: {0}.</source>
-        <target state="new">These templates matched your input: {0}.</target>
+        <target state="translated">Tyto šablony odpovídají vstupu: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
         <source>{0} template(s) partially matched, but failed on {1}.</source>
-        <target state="new">{0} template(s) partially matched, but failed on {1}.</target>
+        <target state="translated">Našla se částečná shoda {0} šablon, ale při {1} došlo k selhání.</target>
         <note />
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">Tato šablona obsahuje technologie jiných dodavatelů než Microsoftu, podrobnosti najdete tady: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">Typ</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToSetPermissions">
         <source>Unable to apply permissions {0} to "{1}".</source>
-        <target state="new">Unable to apply permissions {0} to "{1}".</target>
+        <target state="translated">Nedá se zavést oprávnění {0} do {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallHelp">
         <source>Uninstalls a source or a template package.</source>
-        <target state="new">Uninstalls a source or a template package.</target>
+        <target state="needs-review-translation">Odinstaluje zdroj nebo balíček šablon.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
         <source>Unknown Change</source>
-        <target state="new">Unknown Change</target>
+        <target state="translated">Neznámá změna</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateApplyCommandHelp">
         <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="new">Check the currently installed template packages for update, and install the updates.</target>
+        <target state="needs-review-translation">Vyhledejte aktualizace pro aktuálně nainstalované balíčky šablon a nainstalujte je.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateCheckCommandHelp">
         <source>Check the currently installed template packages for updates.</source>
-        <target state="new">Check the currently installed template packages for updates.</target>
+        <target state="needs-review-translation">Vyhledejte aktualizace pro aktuálně nainstalované balíčky šablon.</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">
         <source>Version:</source>
-        <target state="new">Version:</target>
+        <target state="translated">Verze:</target>
         <note />
       </trans-unit>
       <trans-unit id="WhetherToAllowScriptsToRun">
         <source>Specify if post action scripts should run.</source>
-        <target state="new">Specify if post action scripts should run.</target>
+        <target state="translated">Zadejte, jestli se mají spouštět skripty akcí publikování.</target>
         <note />
       </trans-unit>
     </body>

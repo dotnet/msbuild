@@ -1,25 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="ActionWouldHaveBeenTakenAutomatically">
         <source>Action would have been taken automatically:</source>
-        <target state="new">Action would have been taken automatically:</target>
+        <target state="translated">Şu eylem otomatik olarak gerçekleştirilirdi:</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionFailed">
         <source>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</source>
-        <target state="new">Failed to add project(s) {0} to solution file {1}, solution folder {2}.</target>
+        <target state="translated">{0} projeleri {1} çözüm dosyasına, {2} çözüm klasörüne eklenemedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionNoProjFiles">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">Çözüme proje başvurusu ekleme eylemi şablonda doğru şekilde yapılandırılmadı. Eklenecek proje dosyaları belirlenemiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionRunning">
         <source>Adding project reference(s) to solution file. Running {0}</source>
-        <target state="new">Adding project reference(s) to solution file. Running {0}</target>
+        <target state="translated">Proje başvuruları çözüm dosyasına ekleniyor. {0} çalıştırılıyor</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionSucceeded">
@@ -27,243 +27,243 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Successfully added
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">
+    projeleri: {0}
+    çözüm dosyası: {1}
+    çözüm klasörü: {2} konumuna başarıyla eklendi</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionUnresolvedSlnFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">Başvurunun hangi çözüm dosyasına ekleneceği belirlenemiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRef">
         <source>Adding a package reference. Running dotnet add {0} package {1}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1}</target>
+        <target state="translated">Bir paket başvurusu ekleniyor. “dotnet add {0} package {1}” komutu çalıştırılıyor</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRefWithVersion">
         <source>Adding a package reference. Running dotnet add {0} package {1} --version {2}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1} --version {2}</target>
+        <target state="translated">Bir paket başvurusu ekleniyor. “dotnet add {0} package {1} --version {2}” komutu çalıştırılıyor</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddProjectRef">
         <source>Adding a project reference. Running dotnet add {0} reference {1}</source>
-        <target state="new">Adding a project reference. Running dotnet add {0} reference {1}</target>
+        <target state="translated">Bir proje başvurusu ekleniyor. “dotnet add {0} reference {1}“ komutu çalıştırılıyor</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFailed">
         <source>Failed to add reference {0} to project file {1}</source>
-        <target state="new">Failed to add reference {0} to project file {1}</target>
+        <target state="translated">{0} başvurusu {1} proje dosyasına eklenemedi</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">{0} çerçeve başvurusu projeye otomatik olarak eklenemiyor. Proje dosyasını el ile düzenleyerek ekleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">Add reference eylemi şablonda doğru yapılandırılmamış.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">Bulunan proje dosyaları:</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionSucceeded">
         <source>Successfully added
     reference: {0}
     to project file: {1}</source>
-        <target state="new">Successfully added
-    reference: {0}
-    to project file: {1}</target>
+        <target state="translated">
+    başvurusu: {0}
+    proje dosyası: {1} konumuna başarıyla eklendi</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">Başvurunun hangi proje dosyasına ekleneceği belirlenemiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">{0} başvuru türünün eklenmesi desteklenmiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
         <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
-        <target state="new">Alias '{0}' is a template short name, and therefore cannot be aliased.</target>
+        <target state="translated">'{0}' diğer adı bir şablon kısa adıdır ve bu nedenle diğer ad alamaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCommandAfterExpansion">
         <source>After expanding aliases, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding aliases, the command is:
+        <target state="translated">Diğer adlar genişletildikten sonra şu komut kullanılır:
     dotnet {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCreated">
         <source>Successfully created alias named '{0}' with value '{1}'</source>
-        <target state="new">Successfully created alias named '{0}' with value '{1}'</target>
+        <target state="translated">'{1}' değerine sahip '{0}' diğer adı başarıyla oluşturuldu</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCycleError">
         <source>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</source>
-        <target state="new">Alias not created. It would have created an alias cycle, resulting in infinite expansion.</target>
+        <target state="translated">Diğer ad oluşturulmadı. Bu, bir diğer ad döngüsü oluşturarak sonsuz genişletmeye neden olurdu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpandedCommandParseError">
         <source>Command is invalid after expanding aliases.</source>
-        <target state="new">Command is invalid after expanding aliases.</target>
+        <target state="translated">Diğer adlar genişletildikten sonra komut geçersiz oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpansionError">
         <source>Error expanding aliases on input params.</source>
-        <target state="new">Error expanding aliases on input params.</target>
+        <target state="translated">Giriş parametrelerindeki diğer adlar genişletilirken hata oluştu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasName">
         <source>Alias Name</source>
-        <target state="new">Alias Name</target>
+        <target state="translated">Diğer Ad</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNameContainsInvalidCharacters">
         <source>Alias names can only contain letters, numbers, underscores, and periods.</source>
-        <target state="new">Alias names can only contain letters, numbers, underscores, and periods.</target>
+        <target state="translated">Diğer ad yalnızca harf, rakam, alt çizgi ve nokta içerebilir.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNotCreatedInvalidInput">
         <source>Alias not created. The input was invalid.</source>
-        <target state="new">Alias not created. The input was invalid.</target>
+        <target state="translated">Diğer ad oluşturulmadı. Giriş geçersizdi.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoveNonExistentFailed">
         <source>Unable to remove alias '{0}'. It did not exist.</source>
-        <target state="new">Unable to remove alias '{0}'. It did not exist.</target>
+        <target state="translated">'{0}' diğer adı kaldırılamıyor. Bu ad zaten yoktu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoved">
         <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
-        <target state="new">Successfully removed alias named '{0}' whose value was '{1}'.</target>
+        <target state="translated">Değeri '{1}' olan '{0}' diğer adı başarıyla kaldırıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowAllAliasesHeader">
         <source>All Aliases:</source>
-        <target state="new">All Aliases:</target>
+        <target state="translated">Tüm Diğer Adlar:</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowErrorUnknownAlias">
         <source>Unknown alias name '{0}'.
 Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
-        <target state="new">Unknown alias name '{0}'.
-Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
+        <target state="translated">Bilinmeyen diğer ad '{0}'.
+Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağımsız değişken olmadan çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasUpdated">
         <source>Successfully updated alias named '{0}' to value '{1}'.</source>
-        <target state="new">Successfully updated alias named '{0}' to value '{1}'.</target>
+        <target state="translated">'{0}' diğer adı başarıyla '{1}' değerine güncelleştirildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValue">
         <source>Alias Value</source>
-        <target state="new">Alias Value</target>
+        <target state="translated">Diğer Ad Değeri</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValueFirstArgError">
         <source>First argument of an alias value must begin with a letter or digit.</source>
-        <target state="new">First argument of an alias value must begin with a letter or digit.</target>
+        <target state="translated">Bir diğer ad değerinin ilk bağımsız değişkeni bir harf veya rakam ile başlamalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsNoChoice">
         <source>Do not allow scripts to run</source>
-        <target state="new">Do not allow scripts to run</target>
+        <target state="translated">Betikleri çalıştırmaya izin verme</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsPromptChoice">
         <source>Ask before running each script</source>
-        <target state="new">Ask before running each script</target>
+        <target state="translated">Her betiği çalıştırmadan önce sor</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsYesChoice">
         <source>Allow scripts to run</source>
-        <target state="new">Allow scripts to run</target>
+        <target state="translated">Betikleri çalıştırmaya izin ver</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousLanguageHint">
         <source>Re-run the command specifying the language to use with --language option.</source>
-        <target state="new">Re-run the command specifying the language to use with --language option.</target>
+        <target state="translated">--language seçeneğiyle kullanılacak dili belirterek komutu yeniden çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
-        <target state="new">The value '{1}' is ambiguous for option {0}.</target>
+        <target state="translated">'{1}' değeri {0} seçeneği için belirsiz.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
         <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="new">Unable to resolve the template to instantiate, these templates matched your input:</target>
+        <target state="translated">Örneği oluşturulacak şablon çözümlenemiyor. Bu şablonlar girişinizle eşleşiyor:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
         <source>Re-run the command using the template's exact short name.</source>
-        <target state="new">Re-run the command using the template's exact short name.</target>
+        <target state="translated">Şablonun tam kısa adını kullanarak komutu yeniden çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
         <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="new">Unable to resolve the template to instantiate, the following installed templates are conflicting:</target>
+        <target state="translated">Örneği oluşturulacak şablon çözümlenemiyor. Şu yüklü şablonlar çakışıyor:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the templates or the packages to keep only one template from the list.</source>
-        <target state="new">Uninstall the templates or the packages to keep only one template from the list.</target>
+        <target state="translated">Şablonları veya paketleri kaldırarak listede yalnızca bir şablon tutun.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
         <source>The package {0} is not correct, uninstall it and report the issue to the package author.</source>
-        <target state="new">The package {0} is not correct, uninstall it and report the issue to the package author.</target>
+        <target state="translated">{0} paketi doğru değil. Paketi kaldırın ve sorunu paket yazarına bildirin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileNotFound">
         <source>The specified extra args file does not exist: {0}.</source>
-        <target state="new">The specified extra args file does not exist: {0}.</target>
+        <target state="translated">Belirtilen ek bağımsız değişkenler dosyası yok: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileWrongFormat">
         <source>Extra args file {0} is not formatted properly.</source>
-        <target state="new">Extra args file {0} is not formatted properly.</target>
+        <target state="translated">{0} ek bağımsız değişkenler dosyası düzgün biçimlendirilmemiş.</target>
         <note />
       </trans-unit>
       <trans-unit id="Assembly">
         <source>Assembly</source>
-        <target state="new">Assembly</target>
+        <target state="translated">derleme</target>
         <note />
       </trans-unit>
       <trans-unit id="Author">
         <source>Author: {0}</source>
-        <target state="new">Author: {0}</target>
+        <target state="translated">Yazar: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousBestPrecedence">
         <source>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">En iyi şablon eşleşmeleri arasında eşit en yüksek öncelik değerleri çağrılacak bir şablon seçilmesini açık bir şekilde engelledi.</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousChoiceParameterValue">
         <source>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">Belirsiz bir seçim parametresi değeri, çağrılacak bir şablon seçilmesini açık bir şekilde engelledi.</target>
         <note />
       </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
-        <target state="new">Change</target>
+        <target state="translated">Değişiklik</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
         <source>Author</source>
-        <target state="new">Author</target>
+        <target state="translated">Yazar</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameCurrentVersion">
@@ -273,12 +273,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNameIdentity">
         <source>Identity</source>
-        <target state="new">Identity</target>
+        <target state="translated">Kimlik</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLanguage">
         <source>Language</source>
-        <target state="new">Language</target>
+        <target state="translated">Dil</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLatestVersion">
@@ -288,163 +288,168 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNamePackage">
         <source>Package</source>
-        <target state="new">Package</target>
+        <target state="translated">Paket</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
         <source>Precedence</source>
-        <target state="new">Precedence</target>
+        <target state="translated">Öncellik</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameShortName">
         <source>Short Name</source>
-        <target state="new">Short Name</target>
+        <target state="translated">Kısa Ad</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">Etiketler</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTemplateName">
         <source>Template Name</source>
-        <target state="new">Template Name</target>
+        <target state="translated">Şablon Adı</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTotalDownloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">İndirilenler</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameType">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">Tür</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamesAreNotSupported">
         <source>The column {0} is/are not supported, the supported columns are: {1}.</source>
-        <target state="new">The column {0} is/are not supported, the supported columns are: {1}.</target>
+        <target state="translated">{0} sütunları desteklenmiyor. Desteklenen sütunlar şunlardır: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="new">Template Instantiation Commands for .NET Core CLI</target>
+        <target state="translated">.NET Core CLI için Şablon Örneği Oluşturma Komutları</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
-        <target state="new">Command failed.</target>
+        <target state="translated">Komut başarısız oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOutput">
         <source>Output from command:
 {0}</source>
-        <target state="new">Output from command:
+        <target state="translated">Komuttan çıkış:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
         <source>Command succeeded.</source>
-        <target state="new">Command succeeded.</target>
+        <target state="translated">Komut başarılı oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommitHash">
         <source>Commit Hash:</source>
-        <target state="new">Commit Hash:</target>
+        <target state="translated">Commit Karması:</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
-        <target state="new">Configured Value: {0}</target>
+        <target state="translated">Yapılandırılan Değer: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldntDetermineFilesToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">Geri yüklenecek dosyalar belirlenemedi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Create">
+        <source>Create</source>
+        <target state="new">Create</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateFailed">
         <source>Template "{0}" could not be created.
 {1}</source>
-        <target state="new">Template "{0}" could not be created.
+        <target state="translated">"{0}" şablonu oluşturulamadı.
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateSuccessful">
         <source>The template "{0}" was created successfully.</source>
-        <target state="new">The template "{0}" was created successfully.</target>
+        <target state="translated">"{0}" şablonu başarıyla oluşturuldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CurrentConfiguration">
         <source>Current configuration:</source>
-        <target state="new">Current configuration:</target>
+        <target state="translated">Geçerli yapılandırma:</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
-        <target state="new">Default if option is provided without a value: {0}</target>
+        <target state="translated">Seçenek bir değer olmadan sağlanırsa varsayılan: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultValue">
         <source>Default: {0}</source>
-        <target state="new">Default: {0}</target>
+        <target state="translated">Varsayılan: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="new">Delete</target>
+        <target state="translated">Sil</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">Açıklama: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DestructiveChangesNotification">
         <source>Creating this template will make changes to existing files:</source>
-        <target state="new">Creating this template will make changes to existing files:</target>
+        <target state="translated">Bu şablonun oluşturulması mevcut dosyalarda değişiklikler yapar:</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
         <source>Displays help for this command.</source>
-        <target state="new">Displays help for this command.</target>
+        <target state="translated">Bu komutla ilgili yardımı görüntüler.</target>
         <note />
       </trans-unit>
       <trans-unit id="DryRunDescription">
         <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <target state="translated">Verilen komut satırı bir şablon oluşturma eylemiyle sonuçlanacak durumdayken çalıştırılsaydı olacak şeylerin özetini görüntüler.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding the extra args files, the command is:
+        <target state="translated">Ek bağımsız değişkenler dosyası genişletildikten sonra şu komut kullanılır:
     dotnet {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
-        <target state="new">File actions would have been taken:</target>
+        <target state="translated">Şu dosya eylemleri gerçekleştirilirdi:</target>
         <note />
       </trans-unit>
       <trans-unit id="ForcesTemplateCreation">
         <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <target state="translated">Mevcut dosyalar değiştirilecek olsaydı bile içerik oluşturmaya zorlar.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
         <source>Generators</source>
-        <target state="new">Generators</target>
+        <target state="translated">Oluşturucular</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericError">
         <source>Error: {0}</source>
-        <target state="new">Error: {0}</target>
+        <target state="translated">Hata: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericWarning">
         <source>Warning: {0}</source>
-        <target state="new">Warning: {0}</target>
+        <target state="translated">Uyarı: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Details">
@@ -454,124 +459,124 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="InstallHelp">
         <source>Installs a source or a template package.</source>
-        <target state="new">Installs a source or a template package.</target>
+        <target state="needs-review-translation">Bir kaynak veya şablon paketi yükler.</target>
         <note />
       </trans-unit>
       <trans-unit id="InteractiveHelp">
         <source>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">İç dotnet restore komutunun kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasını tamamlamak için) durdurmasına ve beklemesine olanak sağlar.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidInputSwitch">
         <source>Invalid input switch:</source>
-        <target state="new">Invalid input switch:</target>
+        <target state="translated">Geçersiz giriş anahtarı:</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
         <source>Name cannot contain any of the following characters {0} or character codes {1}</source>
-        <target state="new">Name cannot contain any of the following characters {0} or character codes {1}</target>
+        <target state="translated">Ad, {0} karakterlerinden veya {1} karakter kodlarından herhangi birini içeremez</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDefault">
         <source>The default value '{1}' is not a valid value for {0}.</source>
-        <target state="new">The default value '{1}' is not a valid value for {0}.</target>
+        <target state="translated">'{1}' varsayılan değeri, {0} için geçerli bir değer değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDetail">
         <source>'{1}' is not a valid value for {0}.</source>
-        <target state="new">'{1}' is not a valid value for {0}.</target>
+        <target state="translated">'{1}', {0} için geçerli bir değer değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterNameDetail">
         <source>'{0}' is not a valid option</source>
-        <target state="new">'{0}' is not a valid option</target>
+        <target state="translated">'{0}', geçerli bir seçenek değil</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
         <source>For more information, run '{0}'.</source>
-        <target state="new">For more information, run '{0}'.</target>
+        <target state="translated">Daha fazla bilgi için '{0}' komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidTemplateParameterValues">
         <source>Error: Invalid option(s):</source>
-        <target state="new">Error: Invalid option(s):</target>
+        <target state="translated">Hata: Geçersiz seçenek(ler):</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
         <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
+        <target state="translated">Şablonları dile göre filtreler ve oluşturulacak şablonun dilini belirtir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="new">To list installed templates, run 'dotnet {0} --list'.</target>
+        <target state="translated">Yüklü şablonları listelemek için 'dotnet {0} --list' komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
         <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="new">Lists templates containing the specified template name. If no name is specified, lists all templates.</target>
+        <target state="translated">Belirtilen şablon adını içeren şablonları listeler. Ad belirtilmezse, tüm şablonları listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="new">Mandatory option {0} missing for template {1}.</target>
+        <target state="translated">{1} şablonunda zorunlu {0} seçeneği eksik.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">
         <source>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</source>
-        <target state="new">Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</target>
+        <target state="translated">Belirtilen şablon içeriği bulunamıyor, şablon önbelleği bozulmuş olabilir. Sorunu düzeltmek için “dotnet {0} --debug:reinit” komutunu çalıştırmayı deneyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
-        <target state="new">Mount Point Factories</target>
+        <target state="translated">Bağlama Noktası Fabrikaları</target>
         <note />
       </trans-unit>
       <trans-unit id="NameOfOutput">
         <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <target state="translated">Oluşturulan çıkışın adı. Ad belirtilmezse, çıkış dizininin adı kullanılır.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
-        <target state="new">(No Items)</target>
+        <target state="translated">(Öğe Yok)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoParameters">
         <source>    (No Parameters)</source>
-        <target state="new">    (No Parameters)</target>
+        <target state="translated">    (Parametre Yok)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoPrimaryOutputsToRestore">
         <source>No Primary Outputs to restore.</source>
-        <target state="new">No Primary Outputs to restore.</target>
+        <target state="translated">Geri yüklenecek Birincil Çıkış yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
-        <target state="new">No templates found matching: {0}.</target>
+        <target state="translated">Eşleşen şablon bulunamadı: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetSourceHelp">
         <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
+        <target state="translated">Yükleme sırasında kullanılacak NuGet kaynağını belirtir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="new">Filters the templates based on the template author. Applicable only with --search or --list | -l option.</target>
+        <target state="needs-review-translation">Şablonları yazara göre filtreler. “--search” ve “--list” için geçerlidir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
         <source>Comma separated list of columns to display in --list and --search output. 
 The supported columns are: language, tags, author, type.</source>
-        <target state="new">Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</target>
+        <target state="translated">“--list” ve “--search” çıkışında görüntülenecek virgülle ayrılmış sütun listesi. 
+Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumnsAll">
         <source>Display all columns in --list and --search output.</source>
-        <target state="new">Display all columns in --list and --search output.</target>
+        <target state="translated">Tüm sütunları “--list” ve “--search” çıkışında görüntüleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
@@ -581,57 +586,57 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
         <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
-        <target state="new">Filters the templates based on NuGet package ID. Applies to --search.</target>
+        <target state="translated">Şablonları NuGet paketi kimliğine göre filtreler. “--search” için geçerlidir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionSearch">
         <source>Searches for the templates on NuGet.org.</source>
-        <target state="new">Searches for the templates on NuGet.org.</target>
+        <target state="translated">NuGet.org sitesinde şablon arar.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionTagFilter">
         <source>Filters the templates based on the tag. Applies to --search and --list.</source>
-        <target state="new">Filters the templates based on the tag. Applies to --search and --list.</target>
+        <target state="translated">Şablonları etiketlere göre filtreler. “--search” ve “--list” için geçerlidir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
         <source>Error during synchronization with the Optional SDK Workloads.</source>
-        <target state="new">Error during synchronization with the Optional SDK Workloads.</target>
+        <target state="translated">İsteğe Bağlı SDK İş Yükleri ile eşitleme sırasında hata oluştu.</target>
         <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options:</source>
-        <target state="new">Options:</target>
+        <target state="translated">Seçenekler:</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPath">
         <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
+        <target state="translated">Oluşturulan çıkışın yerleştirileceği konum.</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
         <source>Overwrite</source>
-        <target state="new">Overwrite</target>
+        <target state="translated">Üzerine Yaz</target>
         <note />
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
         <source>Some partially matched templates may not support these input switches:</source>
-        <target state="new">Some partially matched templates may not support these input switches:</target>
+        <target state="translated">Kısmen eşleşen bazı şablonlar bu giriş anahtarlarını desteklemiyor olabilir:</target>
         <note />
       </trans-unit>
       <trans-unit id="PossibleValuesHeader">
         <source>The possible values are:</source>
-        <target state="new">The possible values are:</target>
+        <target state="translated">Olası değerler:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionCommand">
         <source>Actual command: {0}</source>
-        <target state="new">Actual command: {0}</target>
+        <target state="translated">Güncel komut: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDescription">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">Açıklama: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_NotSupported">
@@ -646,27 +651,27 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
         <source>Post action failed.</source>
-        <target state="new">Post action failed.</target>
+        <target state="translated">Eylem sonrası başarısız.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInstructions">
         <source>Manual instructions: {0}</source>
-        <target state="new">Manual instructions: {0}</target>
+        <target state="translated">El ile yönergeler: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInvalidInputRePrompt">
         <source>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</source>
-        <target state="new">Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</target>
+        <target state="translated">Geçersiz giriş "{0}". Lütfen [{1}(evet)|{2}(hayır)] değerlerinden birini girin.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptHeader">
         <source>Template is configured to run the following action:</source>
-        <target state="new">Template is configured to run the following action:</target>
+        <target state="translated">Şablon şu eylemi çalıştıracak şekilde yapılandırıldı:</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptRequest">
         <source>Do you want to run this action [{0}(yes)|{1}(no)]?</source>
-        <target state="new">Do you want to run this action [{0}(yes)|{1}(no)]?</target>
+        <target state="translated">Bu eylemi çalıştırmak istiyor musunuz [{0}(evet)|{1}(hayır)]?</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -676,37 +681,37 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
         <source>Processing post-creation actions...</source>
-        <target state="new">Processing post-creation actions...</target>
+        <target state="translated">Oluşturma sonrası eylemleri işleniyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
         <source>Rerun the command and pass --force to accept and create.</source>
-        <target state="new">Rerun the command and pass --force to accept and create.</target>
+        <target state="translated">Komutu yeniden çalıştırın ve “--force to accept and create” uyarısını geçin.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">Geri yükleme başarısız oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreSucceeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">Geri yükleme başarılı oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>Run dotnet {0} --help for usage information.</source>
-        <target state="new">Run dotnet {0} --help for usage information.</target>
+        <target state="translated">Kullanım bilgileri için “dotnet {0} --help” komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
-        <target state="new">Running command '{0}'...</target>
+        <target state="translated">'{0}' komutu çalıştırılıyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
-        <target state="new">Running 'dotnet restore' on {0}...</target>
+        <target state="translated">'dotnet restore' {0} üzerinde çalıştırılıyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorNoTemplateNameOrFilter">
@@ -716,72 +721,72 @@ Examples:
         dotnet {1} &lt;template name&gt; --search
         dotnet {1} --search --author Microsoft
         dotnet {1} &lt;template name&gt; --search --author Microsoft</source>
-        <target state="new">Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}.
-Examples:
-        dotnet {1} &lt;template name&gt; --search
+        <target state="translated">Arama başarısız oldu: şablon adı belirtilemedi.
+Şablonu aramak için şablon adını belirtin veya desteklenen filtrelerden birini kullanın: {0}.
+Örnekler:
+        dotnet {1} &lt;şablon adı&gt; --search
         dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;template name&gt; --search --author Microsoft</target>
+        dotnet {1} &lt;şablon adı&gt; --search --author Microsoft</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorTemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <target state="translated">Arama başarısız: şablon adı çok kısa, en az 2 karakter gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNoSources">
         <source>No remoted sources defined to search for the templates.</source>
-        <target state="new">No remoted sources defined to search for the templates.</target>
+        <target state="translated">Şablonları aramak için tanımlanmış uzak kaynak yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNotification">
         <source>Searching for the templates...</source>
-        <target state="new">Searching for the templates...</target>
+        <target state="translated">Şablonlar aranıyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineTemplateNotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="new">Template '{0}' was not found.</target>
+        <target state="translated">'{0}' şablonu bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallCommand">
         <source>        dotnet {0} -i {1}</source>
-        <target state="new">        dotnet {0} -i {1}</target>
+        <target state="translated">        dotnet {0} -i {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallHeader">
         <source>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</source>
-        <target state="new">To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</target>
+        <target state="translated">Şablonu kullanmak için şu komutu çalıştırarak paketi yükleyin: dotnet {0} -i &lt;package&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultSourceIndicator">
         <source>Matches from template source: {0}</source>
-        <target state="new">Matches from template source: {0}</target>
+        <target state="translated">Şablon kaynağındaki eşleşmeler: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="new">To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</target>
+        <target state="translated">NuGet.org sitesinde şablon aramak için “dotnet {0} {1} --search” komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
         <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
-        <target state="new">Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</target>
+        <target state="translated">Yüklü yapılandırma okunurken hata oluştu, dosya bozulmuş olabilir. Bu sorun devam ederse, “--debug:reinit” bayrağı ile sıfırlamayı deneyin</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsAllTemplates">
         <source>Shows all templates.</source>
-        <target state="new">Shows all templates.</target>
+        <target state="translated">Tüm şablonları gösterir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsFilteredTemplates">
         <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
+        <target state="translated">Şablonları kullanılabilir türlere göre filtreler. Önceden tanımlı değerler şunlardır: “project” ve “item”.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">
         <source>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</source>
-        <target state="new">The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</target>
+        <target state="translated">Aşağıdaki seçenekler veya sahip oldukları değerler, sağlanan diğer seçenekler veya bunların değerleri ile kombinasyon halinde geçerli değil:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
@@ -966,62 +971,62 @@ Examples:
       </trans-unit>
       <trans-unit id="Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">Şablonlar</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
         <source>These templates matched your input: {0}.</source>
-        <target state="new">These templates matched your input: {0}.</target>
+        <target state="translated">Bu şablonlar girişinizle eşleşti: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
         <source>{0} template(s) partially matched, but failed on {1}.</source>
-        <target state="new">{0} template(s) partially matched, but failed on {1}.</target>
+        <target state="translated">{0} şablonları kısmen eşleşiyor ancak {1} filtresinde başarısız oldu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">Bu şablon Microsoft dışındaki tarafların teknolojilerini içeriyor. Ayrıntılar için {0} sayfasına bakın.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">Tür</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToSetPermissions">
         <source>Unable to apply permissions {0} to "{1}".</source>
-        <target state="new">Unable to apply permissions {0} to "{1}".</target>
+        <target state="translated">{0} izinleri "{1}" öğesine uygulanamıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallHelp">
         <source>Uninstalls a source or a template package.</source>
-        <target state="new">Uninstalls a source or a template package.</target>
+        <target state="needs-review-translation">Bir kaynak veya şablon paketi yükler.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
         <source>Unknown Change</source>
-        <target state="new">Unknown Change</target>
+        <target state="translated">Bilinmeyen Değişiklik</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateApplyCommandHelp">
         <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="new">Check the currently installed template packages for update, and install the updates.</target>
+        <target state="needs-review-translation">Şu anda yüklü şablon paketleri için güncelleştirme olup olmadığını denetleyin ve güncelleştirmeleri yükleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateCheckCommandHelp">
         <source>Check the currently installed template packages for updates.</source>
-        <target state="new">Check the currently installed template packages for updates.</target>
+        <target state="needs-review-translation">Şu anda yüklü şablon paketleri için güncelleştirmeler olup olmadığını denetleyin..</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">
         <source>Version:</source>
-        <target state="new">Version:</target>
+        <target state="translated">Sürüm:</target>
         <note />
       </trans-unit>
       <trans-unit id="WhetherToAllowScriptsToRun">
         <source>Specify if post action scripts should run.</source>
-        <target state="new">Specify if post action scripts should run.</target>
+        <target state="translated">Eylem sonrası betiklerinin çalıştırılıp çalıştırılmayacağını belirtin.</target>
         <note />
       </trans-unit>
     </body>

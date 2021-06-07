@@ -1,25 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="ActionWouldHaveBeenTakenAutomatically">
         <source>Action would have been taken automatically:</source>
-        <target state="new">Action would have been taken automatically:</target>
+        <target state="translated">조치가 자동으로 수행되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionFailed">
         <source>Failed to add project(s) {0} to solution file {1}, solution folder {2}.</source>
-        <target state="new">Failed to add project(s) {0} to solution file {1}, solution folder {2}.</target>
+        <target state="translated">솔루션 파일 {1}, 솔루션 폴더 {2}에{0} 프로젝트를 추가하는 데 실패했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionNoProjFiles">
         <source>Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</source>
-        <target state="new">Add project reference to solution action is not configured correctly in the template. Unable to determine the project files to add.</target>
+        <target state="translated">솔루션 작업에 프로젝트 참조 추가가 템플릿에서 올바르게 구성되지 않았습니다. 추가할 프로젝트 파일을 확인할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionRunning">
         <source>Adding project reference(s) to solution file. Running {0}</source>
-        <target state="new">Adding project reference(s) to solution file. Running {0}</target>
+        <target state="translated">솔루션 파일에 프로젝트 참조를 추가합니다. {0} 실행</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionSucceeded">
@@ -27,243 +27,243 @@
     project(s): {0}
     to solution file: {1}
     solution folder: {2}</source>
-        <target state="new">Successfully added
-    project(s): {0}
-    to solution file: {1}
-    solution folder: {2}</target>
+        <target state="translated">
+ 프로젝트를 성공적으로 추가 :{0}
+ 솔루션 파일 :{1}
+ 솔루션 폴더 :{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjToSlnPostActionUnresolvedSlnFile">
         <source>Unable to determine which solution file to add the reference to.</source>
-        <target state="new">Unable to determine which solution file to add the reference to.</target>
+        <target state="translated">참조를 추가할 솔루션 파일을 확인할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRef">
         <source>Adding a package reference. Running dotnet add {0} package {1}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1}</target>
+        <target state="translated">패키지 참조 추가. dotnet 추가 {0} 패키지{1} 실행</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddPackageRefWithVersion">
         <source>Adding a package reference. Running dotnet add {0} package {1} --version {2}</source>
-        <target state="new">Adding a package reference. Running dotnet add {0} package {1} --version {2}</target>
+        <target state="translated">패키지 참조 추가. dotnet 추가 {0} 패키지 {1} --version{2} 실행</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionAddProjectRef">
         <source>Adding a project reference. Running dotnet add {0} reference {1}</source>
-        <target state="new">Adding a project reference. Running dotnet add {0} reference {1}</target>
+        <target state="translated">프로젝트 참조를 추가합니다. 도트넷 추가 {0} 참조 {1} 실행</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFailed">
         <source>Failed to add reference {0} to project file {1}</source>
-        <target state="new">Failed to add reference {0} to project file {1}</target>
+        <target state="translated">{1} 프로젝트 파일에{0} 참조를 추가하지 못했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionFrameworkNotSupported">
         <source>Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</source>
-        <target state="new">Unable to automatically add the framework reference {0} to the project. Manually edit the project file to add it.</target>
+        <target state="translated">프레임워크 참조 {0}을(를) 프로젝트에 자동으로 추가할 수 없습니다. 프로젝트 파일을 수동으로 편집하여 추가하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionMisconfigured">
         <source>Add reference action is not configured correctly in the template.</source>
-        <target state="new">Add reference action is not configured correctly in the template.</target>
+        <target state="translated">템플릿에서 참조 추가 작업이 올바르게 구성되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionProjFileListHeader">
         <source>Project files found:</source>
-        <target state="new">Project files found:</target>
+        <target state="translated">찾은 프로젝트 파일 :</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionSucceeded">
         <source>Successfully added
     reference: {0}
     to project file: {1}</source>
-        <target state="new">Successfully added
-    reference: {0}
-    to project file: {1}</target>
+        <target state="translated">프로젝트 파일에 
+ 참조:{0}
+ 추가 완료:{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnresolvedProjFile">
         <source>Unable to determine which project file to add the reference to.</source>
-        <target state="new">Unable to determine which project file to add the reference to.</target>
+        <target state="translated">참조를 추가할 프로젝트 파일을 확인할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddRefPostActionUnsupportedRefType">
         <source>Adding reference type {0} is not supported.</source>
-        <target state="new">Adding reference type {0} is not supported.</target>
+        <target state="translated">참조 형식 {0} 추가는 지원되지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCannotBeShortName">
         <source>Alias '{0}' is a template short name, and therefore cannot be aliased.</source>
-        <target state="new">Alias '{0}' is a template short name, and therefore cannot be aliased.</target>
+        <target state="translated">별칭 '{0}'은(는) 템플릿 축약 이름이므로 별칭을 지정할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCommandAfterExpansion">
         <source>After expanding aliases, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding aliases, the command is:
-    dotnet {0}</target>
+        <target state="translated">별칭을 확장한 후 명령은 다음과 같습니다.
+ dotnet{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCreated">
         <source>Successfully created alias named '{0}' with value '{1}'</source>
-        <target state="new">Successfully created alias named '{0}' with value '{1}'</target>
+        <target state="translated">값이 '{1}'인 '{0}'(이)라는 별칭을 만들었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasCycleError">
         <source>Alias not created. It would have created an alias cycle, resulting in infinite expansion.</source>
-        <target state="new">Alias not created. It would have created an alias cycle, resulting in infinite expansion.</target>
+        <target state="translated">별칭이 생성되지 않았습니다. 별칭 순환이 생성되어 무한 확장이 발생했을 것입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpandedCommandParseError">
         <source>Command is invalid after expanding aliases.</source>
-        <target state="new">Command is invalid after expanding aliases.</target>
+        <target state="translated">별칭을 확장한 후 명령이 유효하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasExpansionError">
         <source>Error expanding aliases on input params.</source>
-        <target state="new">Error expanding aliases on input params.</target>
+        <target state="translated">입력 매개 변수에서 별칭을 확장하는 중에 오류가 발생했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasName">
         <source>Alias Name</source>
-        <target state="new">Alias Name</target>
+        <target state="translated">별칭 이름</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNameContainsInvalidCharacters">
         <source>Alias names can only contain letters, numbers, underscores, and periods.</source>
-        <target state="new">Alias names can only contain letters, numbers, underscores, and periods.</target>
+        <target state="translated">별칭 이름은 문자, 숫자, 밑줄 및 마침표만 포함할 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasNotCreatedInvalidInput">
         <source>Alias not created. The input was invalid.</source>
-        <target state="new">Alias not created. The input was invalid.</target>
+        <target state="translated">별칭이 생성되지 않았습니다. 입력이 잘못되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoveNonExistentFailed">
         <source>Unable to remove alias '{0}'. It did not exist.</source>
-        <target state="new">Unable to remove alias '{0}'. It did not exist.</target>
+        <target state="translated">별칭 '{0}'을(를) 제거할 수 없습니다. 해당 별칭은 존재하지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasRemoved">
         <source>Successfully removed alias named '{0}' whose value was '{1}'.</source>
-        <target state="new">Successfully removed alias named '{0}' whose value was '{1}'.</target>
+        <target state="translated">값이 '{1}'인 '{0}' 별칭을 성공적으로 제거했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowAllAliasesHeader">
         <source>All Aliases:</source>
-        <target state="new">All Aliases:</target>
+        <target state="translated">모든 별칭:</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasShowErrorUnknownAlias">
         <source>Unknown alias name '{0}'.
 Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
-        <target state="new">Unknown alias name '{0}'.
-Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
+        <target state="translated">알 수 없는 별칭 이름 '{0}'.
+ 모든 별칭을 표시하려면 인수 없이 'dotnet{1} --show-aliases'를 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasUpdated">
         <source>Successfully updated alias named '{0}' to value '{1}'.</source>
-        <target state="new">Successfully updated alias named '{0}' to value '{1}'.</target>
+        <target state="translated">이름이 '{0}'인 별칭을 '{1}' 값으로 업데이트했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValue">
         <source>Alias Value</source>
-        <target state="new">Alias Value</target>
+        <target state="translated">별칭 값</target>
         <note />
       </trans-unit>
       <trans-unit id="AliasValueFirstArgError">
         <source>First argument of an alias value must begin with a letter or digit.</source>
-        <target state="new">First argument of an alias value must begin with a letter or digit.</target>
+        <target state="translated">별칭 값의 첫 번째 인수는 문자 또는 숫자로 시작해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsNoChoice">
         <source>Do not allow scripts to run</source>
-        <target state="new">Do not allow scripts to run</target>
+        <target state="translated">스크립트 실행 허용 안함</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsPromptChoice">
         <source>Ask before running each script</source>
-        <target state="new">Ask before running each script</target>
+        <target state="translated">각 스크립트를 실행하기 전에 확인</target>
         <note />
       </trans-unit>
       <trans-unit id="AllowScriptsYesChoice">
         <source>Allow scripts to run</source>
-        <target state="new">Allow scripts to run</target>
+        <target state="translated">스크립트 실행 허용</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousLanguageHint">
         <source>Re-run the command specifying the language to use with --language option.</source>
-        <target state="new">Re-run the command specifying the language to use with --language option.</target>
+        <target state="translated">--language 옵션과 함께 사용할 언어를 지정하는 명령을 다시 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousParameterDetail">
         <source>The value '{1}' is ambiguous for option {0}.</source>
-        <target state="new">The value '{1}' is ambiguous for option {0}.</target>
+        <target state="translated">{0} 옵션에 대한 '{1}' 값이 모호합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
         <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="new">Unable to resolve the template to instantiate, these templates matched your input:</target>
+        <target state="translated">인스턴스화할 템플릿을 확인할 수 없습니다. 다음 템플릿은 입력한 내용과 일치합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
         <source>Re-run the command using the template's exact short name.</source>
-        <target state="new">Re-run the command using the template's exact short name.</target>
+        <target state="translated">템플릿의 정확한 짧은 이름을 사용하여 명령을 다시 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
         <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="new">Unable to resolve the template to instantiate, the following installed templates are conflicting:</target>
+        <target state="translated">인스턴스화할 템플릿을 확인할 수 없습니다. 설치된 다음 템플릿이 충돌합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
         <source>Uninstall the templates or the packages to keep only one template from the list.</source>
-        <target state="new">Uninstall the templates or the packages to keep only one template from the list.</target>
+        <target state="translated">목록에서 하나의 템플릿만 유지하려면 템플릿 또는 패키지를 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesSamePackageHint">
         <source>The package {0} is not correct, uninstall it and report the issue to the package author.</source>
-        <target state="new">The package {0} is not correct, uninstall it and report the issue to the package author.</target>
+        <target state="translated">{0} 패키지가 올바르지 않습니다. 패키지를 제거하고 패키지 작성자에게 문제를 보고하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileNotFound">
         <source>The specified extra args file does not exist: {0}.</source>
-        <target state="new">The specified extra args file does not exist: {0}.</target>
+        <target state="translated">지정된 추가 인수 파일이 없습니다:{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgsFileWrongFormat">
         <source>Extra args file {0} is not formatted properly.</source>
-        <target state="new">Extra args file {0} is not formatted properly.</target>
+        <target state="translated">추가 인수 파일{0}이(가) 제대로 형식화되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Assembly">
         <source>Assembly</source>
-        <target state="new">Assembly</target>
+        <target state="translated">어셈블리</target>
         <note />
       </trans-unit>
       <trans-unit id="Author">
         <source>Author: {0}</source>
-        <target state="new">Author: {0}</target>
+        <target state="translated">작성자 :{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousBestPrecedence">
         <source>Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">Equal highest precedence values among the best template matches prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">최상의 템플릿 일치 중에서 가장 높은 우선 순위 값이 동일하므로 호출할 템플릿을 명확하게 선택할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Authoring_AmbiguousChoiceParameterValue">
         <source>An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</source>
-        <target state="new">An ambiguous choice parameter value prevented unambiguously choosing a template to invoke.</target>
+        <target state="translated">애매한 선택 매개 변수 값으로 인해 호출할 템플릿을 명확하게 선택할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Change">
         <source>Change</source>
-        <target state="new">Change</target>
+        <target state="translated">변경</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
         <source>Author</source>
-        <target state="new">Author</target>
+        <target state="translated">만든 사람</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameCurrentVersion">
@@ -273,12 +273,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNameIdentity">
         <source>Identity</source>
-        <target state="new">Identity</target>
+        <target state="translated">ID</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLanguage">
         <source>Language</source>
-        <target state="new">Language</target>
+        <target state="translated">언어</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameLatestVersion">
@@ -288,163 +288,168 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="ColumnNamePackage">
         <source>Package</source>
-        <target state="new">Package</target>
+        <target state="translated">패키지</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamePrecedence">
         <source>Precedence</source>
-        <target state="new">Precedence</target>
+        <target state="translated">우선 순위</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameShortName">
         <source>Short Name</source>
-        <target state="new">Short Name</target>
+        <target state="translated">약식 이름</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTags">
         <source>Tags</source>
-        <target state="new">Tags</target>
+        <target state="translated">태그</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTemplateName">
         <source>Template Name</source>
-        <target state="new">Template Name</target>
+        <target state="translated">템플릿 이름</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameTotalDownloads">
         <source>Downloads</source>
-        <target state="new">Downloads</target>
+        <target state="translated">다운로드</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameType">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">유형</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamesAreNotSupported">
         <source>The column {0} is/are not supported, the supported columns are: {1}.</source>
-        <target state="new">The column {0} is/are not supported, the supported columns are: {1}.</target>
+        <target state="translated">{0} 열은 지원되지 않습니다. 지원되는 열은 {1}입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Template Instantiation Commands for .NET Core CLI</source>
-        <target state="new">Template Instantiation Commands for .NET Core CLI</target>
+        <target state="translated">.NET Core CLI용 템플릿 인스턴스화 명령</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandFailed">
         <source>Command failed.</source>
-        <target state="new">Command failed.</target>
+        <target state="translated">명령이 실패했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandOutput">
         <source>Output from command:
 {0}</source>
-        <target state="new">Output from command:
+        <target state="translated">명령의 출력:
 {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
         <source>Command succeeded.</source>
-        <target state="new">Command succeeded.</target>
+        <target state="translated">명령이 성공했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommitHash">
         <source>Commit Hash:</source>
-        <target state="new">Commit Hash:</target>
+        <target state="translated">해시 커밋:</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
-        <target state="new">Configured Value: {0}</target>
+        <target state="translated">구성된 값:{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldntDetermineFilesToRestore">
         <source>Couldn't determine files to restore.</source>
-        <target state="new">Couldn't determine files to restore.</target>
+        <target state="translated">복원할 파일을 확인할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Create">
+        <source>Create</source>
+        <target state="new">Create</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateFailed">
         <source>Template "{0}" could not be created.
 {1}</source>
-        <target state="new">Template "{0}" could not be created.
+        <target state="translated">"{0}" 템플릿을 만들 수 없습니다.
 {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateSuccessful">
         <source>The template "{0}" was created successfully.</source>
-        <target state="new">The template "{0}" was created successfully.</target>
+        <target state="translated">"{0}" 템플릿이 성공적으로 생성되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CurrentConfiguration">
         <source>Current configuration:</source>
-        <target state="new">Current configuration:</target>
+        <target state="translated">현재 구성:</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultIfOptionWithoutValue">
         <source>Default if option is provided without a value: {0}</source>
-        <target state="new">Default if option is provided without a value: {0}</target>
+        <target state="translated">옵션이 값 없이 제공되는 경우 기본값 :{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultValue">
         <source>Default: {0}</source>
-        <target state="new">Default: {0}</target>
+        <target state="translated">기본값: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="new">Delete</target>
+        <target state="translated">삭제</target>
         <note />
       </trans-unit>
       <trans-unit id="Description">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">설명: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="DestructiveChangesNotification">
         <source>Creating this template will make changes to existing files:</source>
-        <target state="new">Creating this template will make changes to existing files:</target>
+        <target state="translated">이 템플릿을 만들면 기존 파일이 변경됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DisplaysHelp">
         <source>Displays help for this command.</source>
-        <target state="new">Displays help for this command.</target>
+        <target state="translated">이 명령에 대한 도움말을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DryRunDescription">
         <source>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</source>
-        <target state="new">Displays a summary of what would happen if the given command line were run if it would result in a template creation.</target>
+        <target state="translated">템플릿이 생성될 경우 주어진 명령 줄이 실행되면 어떤 일이 발생하는지에 대한 요약을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExtraArgsCommandAfterExpansion">
         <source>After expanding the extra args files, the command is:
     dotnet {0}</source>
-        <target state="new">After expanding the extra args files, the command is:
-    dotnet {0}</target>
+        <target state="translated">추가 인수 파일을 확장하면 명령은 다음과 같습니다.
+ dotnet{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
-        <target state="new">File actions would have been taken:</target>
+        <target state="translated">파일 조치가 취해졌습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ForcesTemplateCreation">
         <source>Forces content to be generated even if it would change existing files.</source>
-        <target state="new">Forces content to be generated even if it would change existing files.</target>
+        <target state="translated">기존 파일을 변경하더라도 콘텐츠를 강제로 생성합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Generators">
         <source>Generators</source>
-        <target state="new">Generators</target>
+        <target state="translated">발전기</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericError">
         <source>Error: {0}</source>
-        <target state="new">Error: {0}</target>
+        <target state="translated">오류 :{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="GenericWarning">
         <source>Warning: {0}</source>
-        <target state="new">Warning: {0}</target>
+        <target state="translated">경고 :{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_Details">
@@ -454,124 +459,124 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</target>
       </trans-unit>
       <trans-unit id="InstallHelp">
         <source>Installs a source or a template package.</source>
-        <target state="new">Installs a source or a template package.</target>
+        <target state="needs-review-translation">소스 또는 템플릿 팩을 설치합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InteractiveHelp">
         <source>Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the internal dotnet restore command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">내부 dotnet restore 명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidInputSwitch">
         <source>Invalid input switch:</source>
-        <target state="new">Invalid input switch:</target>
+        <target state="translated">잘못된 입력 스위치 :</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
         <source>Name cannot contain any of the following characters {0} or character codes {1}</source>
-        <target state="new">Name cannot contain any of the following characters {0} or character codes {1}</target>
+        <target state="translated">이름은 다음 문자 {0} 또는 문자 코드{1}를 포함할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDefault">
         <source>The default value '{1}' is not a valid value for {0}.</source>
-        <target state="new">The default value '{1}' is not a valid value for {0}.</target>
+        <target state="translated">기본값 '{1}'은(는){0}에 유효한 값이 아닙니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterDetail">
         <source>'{1}' is not a valid value for {0}.</source>
-        <target state="new">'{1}' is not a valid value for {0}.</target>
+        <target state="translated">'{1}'은(는) {0}에 유효한 값이 아닙니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterNameDetail">
         <source>'{0}' is not a valid option</source>
-        <target state="new">'{0}' is not a valid option</target>
+        <target state="translated">'{0}'은(는) 유효한 옵션이 아닙니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
         <source>For more information, run '{0}'.</source>
-        <target state="new">For more information, run '{0}'.</target>
+        <target state="translated">자세한 정보를 보려면 '{0}'(을)를 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidTemplateParameterValues">
         <source>Error: Invalid option(s):</source>
-        <target state="new">Error: Invalid option(s):</target>
+        <target state="translated">오류: 잘못된 옵션 :</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
         <source>Filters templates based on language and specifies the language of the template to create.</source>
-        <target state="new">Filters templates based on language and specifies the language of the template to create.</target>
+        <target state="translated">언어에 따라 템플릿을 필터링하고 만들 템플릿의 언어를 지정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="new">To list installed templates, run 'dotnet {0} --list'.</target>
+        <target state="translated">설치된 템플릿을 나열하려면 'dotnet{0} --목록'을 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
         <source>Lists templates containing the specified template name. If no name is specified, lists all templates.</source>
-        <target state="new">Lists templates containing the specified template name. If no name is specified, lists all templates.</target>
+        <target state="translated">지정된 템플릿 이름이 포함된 템플릿을 나열합니다. 이름을 지정하지 않으면 모든 템플릿을 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingRequiredParameter">
         <source>Mandatory option {0} missing for template {1}.</source>
-        <target state="new">Mandatory option {0} missing for template {1}.</target>
+        <target state="translated">{1} 템플릿에 대한 필수 옵션{0}이(가) 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingTemplateContentDetected">
         <source>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</source>
-        <target state="new">Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</target>
+        <target state="translated">지정된 템플릿 콘텐츠를 찾을 수 없습니다. 템플릿 캐시가 손상되었을 수 있습니다. 문제를 해결하려면 'dotnet {0} --debug : reinit'를 실행 해보세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="MountPointFactories">
         <source>Mount Point Factories</source>
-        <target state="new">Mount Point Factories</target>
+        <target state="translated">마운트 포인트 팩토리</target>
         <note />
       </trans-unit>
       <trans-unit id="NameOfOutput">
         <source>The name for the output being created. If no name is specified, the name of the output directory is used.</source>
-        <target state="new">The name for the output being created. If no name is specified, the name of the output directory is used.</target>
+        <target state="translated">생성 중인 출력의 이름입니다. 이름을 지정하지 않으면 출력 디렉터리의 이름이 사용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoItems">
         <source>(No Items)</source>
-        <target state="new">(No Items)</target>
+        <target state="translated">(항목 없음)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoParameters">
         <source>    (No Parameters)</source>
-        <target state="new">    (No Parameters)</target>
+        <target state="translated">    (매개 변수 없음)</target>
         <note />
       </trans-unit>
       <trans-unit id="NoPrimaryOutputsToRestore">
         <source>No Primary Outputs to restore.</source>
-        <target state="new">No Primary Outputs to restore.</target>
+        <target state="translated">복원할 기본 출력이 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoTemplatesMatchingInputParameters">
         <source>No templates found matching: {0}.</source>
-        <target state="new">No templates found matching: {0}.</target>
+        <target state="translated">일치하는 템플릿이 없음:{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetSourceHelp">
         <source>Specifies a NuGet source to use during install.</source>
-        <target state="new">Specifies a NuGet source to use during install.</target>
+        <target state="translated">설치 중에 사용할 NuGet 소스를 지정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="new">Filters the templates based on the template author. Applicable only with --search or --list | -l option.</target>
+        <target state="needs-review-translation">작성자를 기반으로 템플릿을 필터링합니다. --search 및 --list에 적용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
         <source>Comma separated list of columns to display in --list and --search output. 
 The supported columns are: language, tags, author, type.</source>
-        <target state="new">Comma separated list of columns to display in --list and --search output. 
-The supported columns are: language, tags, author, type.</target>
+        <target state="translated">--list 및 --search 출력에 표시 할 쉼표로 구분 된 열 목록입니다.
+ 지원되는 열은 언어, 태그, 작성자, 유형입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumnsAll">
         <source>Display all columns in --list and --search output.</source>
-        <target state="new">Display all columns in --list and --search output.</target>
+        <target state="translated">--list 및 --search 출력의 모든 열을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
@@ -581,57 +586,57 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
         <source>Filters the templates based on NuGet package ID. Applies to --search.</source>
-        <target state="new">Filters the templates based on NuGet package ID. Applies to --search.</target>
+        <target state="translated">NuGet 패키지 ID를 기반으로 템플릿을 필터링합니다. --search에 적용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionSearch">
         <source>Searches for the templates on NuGet.org.</source>
-        <target state="new">Searches for the templates on NuGet.org.</target>
+        <target state="translated">NuGet.org에서 템플릿을 검색합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionTagFilter">
         <source>Filters the templates based on the tag. Applies to --search and --list.</source>
-        <target state="new">Filters the templates based on the tag. Applies to --search and --list.</target>
+        <target state="translated">태그를 기반으로 템플릿을 필터링합니다. --search 및 --list에 적용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionalWorkloadsSyncFailed">
         <source>Error during synchronization with the Optional SDK Workloads.</source>
-        <target state="new">Error during synchronization with the Optional SDK Workloads.</target>
+        <target state="translated">선택적 SDK 워크로드와 동기화하는 동안 오류가 발생했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Options">
         <source>Options:</source>
-        <target state="new">Options:</target>
+        <target state="translated">옵션:</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPath">
         <source>Location to place the generated output.</source>
-        <target state="new">Location to place the generated output.</target>
+        <target state="translated">생성된 출력을 배치할 위치입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Overwrite">
         <source>Overwrite</source>
-        <target state="new">Overwrite</target>
+        <target state="translated">덮어쓰기</target>
         <note />
       </trans-unit>
       <trans-unit id="PartialTemplateMatchSwitchesNotValidForAllMatches">
         <source>Some partially matched templates may not support these input switches:</source>
-        <target state="new">Some partially matched templates may not support these input switches:</target>
+        <target state="translated">부분적으로 일치하는 일부 템플릿은 다음 입력 스위치를 지원하지 않을 수 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PossibleValuesHeader">
         <source>The possible values are:</source>
-        <target state="new">The possible values are:</target>
+        <target state="translated">가능한 값은 다음과 같습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionCommand">
         <source>Actual command: {0}</source>
-        <target state="new">Actual command: {0}</target>
+        <target state="translated">실제 명령:{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDescription">
         <source>Description: {0}</source>
-        <target state="new">Description: {0}</target>
+        <target state="translated">설명: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_NotSupported">
@@ -646,27 +651,27 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
         <source>Post action failed.</source>
-        <target state="new">Post action failed.</target>
+        <target state="translated">게시 작업이 실패했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInstructions">
         <source>Manual instructions: {0}</source>
-        <target state="new">Manual instructions: {0}</target>
+        <target state="translated">수동 지침 :{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionInvalidInputRePrompt">
         <source>Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</source>
-        <target state="new">Invalid input "{0}". Please enter one of [{1}(yes)|{2}(no)].</target>
+        <target state="translated">잘못된 입력 "{0}". [{1} (예) |{2} (아니오)] 중 하나를 입력하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptHeader">
         <source>Template is configured to run the following action:</source>
-        <target state="new">Template is configured to run the following action:</target>
+        <target state="translated">템플릿은 다음 작업을 실행하도록 구성됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionPromptRequest">
         <source>Do you want to run this action [{0}(yes)|{1}(no)]?</source>
-        <target state="new">Do you want to run this action [{0}(yes)|{1}(no)]?</target>
+        <target state="translated">이 작업을 실행하시겠어요 [{0} (예) |{1} (아니요)]?</target>
         <note />
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
@@ -676,37 +681,37 @@ The supported columns are: language, tags, author, type.</target>
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
         <source>Processing post-creation actions...</source>
-        <target state="new">Processing post-creation actions...</target>
+        <target state="translated">생성 후 작업 처리 중...</target>
         <note />
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
         <source>Rerun the command and pass --force to accept and create.</source>
-        <target state="new">Rerun the command and pass --force to accept and create.</target>
+        <target state="translated">명령을 다시 실행하고 --force를 전달하여 수락하고 만듭니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
         <source>Restore failed.</source>
-        <target state="new">Restore failed.</target>
+        <target state="translated">복원하지 못했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreSucceeded">
         <source>Restore succeeded.</source>
-        <target state="new">Restore succeeded.</target>
+        <target state="translated">복원에 성공했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>Run dotnet {0} --help for usage information.</source>
-        <target state="new">Run dotnet {0} --help for usage information.</target>
+        <target state="translated">사용법 정보를 보려면 dotnet{0} --help를 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
         <source>Running command '{0}'...</source>
-        <target state="new">Running command '{0}'...</target>
+        <target state="translated">'{0}' 명령 실행 중 ...</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
-        <target state="new">Running 'dotnet restore' on {0}...</target>
+        <target state="translated">{0}에서 'dotnet restore' 실행 중 ...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorNoTemplateNameOrFilter">
@@ -716,72 +721,72 @@ Examples:
         dotnet {1} &lt;template name&gt; --search
         dotnet {1} --search --author Microsoft
         dotnet {1} &lt;template name&gt; --search --author Microsoft</source>
-        <target state="new">Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}.
-Examples:
-        dotnet {1} &lt;template name&gt; --search
-        dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;template name&gt; --search --author Microsoft</target>
+        <target state="translated">검색 실패 : 템플릿 이름이 지정되지 않았습니다.
+ 템플릿을 검색하려면 템플릿 이름을 지정하거나 지원되는 필터 중 하나를 사용하세요.{0}.
+ 예:
+ dotnet{1} &lt;Template name&gt; --search
+ dotnet{1} --search --author Microsoft
+ dotnet{1} &lt;Template name&gt; --search --author Microsoft</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorTemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <target state="translated">검색 실패: 템플릿 이름이 너무 짧습니다. 최소 2 자 이상이 필요합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNoSources">
         <source>No remoted sources defined to search for the templates.</source>
-        <target state="new">No remoted sources defined to search for the templates.</target>
+        <target state="translated">템플릿을 검색하도록 정의된 원격 소스가 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineNotification">
         <source>Searching for the templates...</source>
-        <target state="new">Searching for the templates...</target>
+        <target state="translated">템플릿 검색 중...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineTemplateNotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="new">Template '{0}' was not found.</target>
+        <target state="translated">'{0}' 템플릿을 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallCommand">
         <source>        dotnet {0} -i {1}</source>
-        <target state="new">        dotnet {0} -i {1}</target>
+        <target state="translated">        dotnet{0} -i{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultInstallHeader">
         <source>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</source>
-        <target state="new">To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</target>
+        <target state="translated">템플릿을 사용하려면 다음 명령을 실행하여 패키지를 설치하세요. dotnet{0} -i &lt;package&gt;</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchResultSourceIndicator">
         <source>Matches from template source: {0}</source>
-        <target state="new">Matches from template source: {0}</target>
+        <target state="translated">템플릿 소스에서 일치:{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="new">To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</target>
+        <target state="translated">NuGet.org에서 템플릿을 검색하려면 'dotnet{0}{1} --search'를 실행합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
         <source>Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</source>
-        <target state="new">Error reading the installed configuration, file may be corrupted. If this problem persists, try resetting with the `--debug:reinit' flag</target>
+        <target state="translated">설치된 구성을 읽는 동안 오류가 발생했습니다. 파일이 손상되었을 수 있습니다. 이 문제가 지속되면`--debug : reinit '플래그로 재설정해 보세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsAllTemplates">
         <source>Shows all templates.</source>
-        <target state="new">Shows all templates.</target>
+        <target state="translated">모든 템플릿을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowsFilteredTemplates">
         <source>Filters templates based on available types. Predefined values are "project" and "item".</source>
-        <target state="new">Filters templates based on available types. Predefined values are "project" and "item".</target>
+        <target state="translated">사용 가능한 유형에 따라 템플릿을 필터링합니다. 미리 정의된 값은 "프로젝트"및 "항목"입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches">
         <source>The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</source>
-        <target state="new">The following option(s) or their value(s) are not valid in combination with other supplied options or their values:</target>
+        <target state="translated">다음 옵션 또는 해당 값은 제공된 다른 옵션 또는 해당 값과 함께 사용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
@@ -966,62 +971,62 @@ Examples:
       </trans-unit>
       <trans-unit id="Templates">
         <source>Templates</source>
-        <target state="new">Templates</target>
+        <target state="translated">템플릿</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
         <source>These templates matched your input: {0}.</source>
-        <target state="new">These templates matched your input: {0}.</target>
+        <target state="translated">이 템플릿은 입력한 내용과 일치합니다:{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
         <source>{0} template(s) partially matched, but failed on {1}.</source>
-        <target state="new">{0} template(s) partially matched, but failed on {1}.</target>
+        <target state="translated">{0} 템플릿이 부분적으로 일치했지만{1}에서 실패했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ThirdPartyNotices">
         <source>This template contains technologies from parties other than Microsoft, see {0} for details.</source>
-        <target state="new">This template contains technologies from parties other than Microsoft, see {0} for details.</target>
+        <target state="translated">이 템플릿에는 Microsoft 이외의 타사 기술이 포함되어 있습니다. 자세한 내용은{0}를 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Type">
         <source>Type</source>
-        <target state="new">Type</target>
+        <target state="translated">형식</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToSetPermissions">
         <source>Unable to apply permissions {0} to "{1}".</source>
-        <target state="new">Unable to apply permissions {0} to "{1}".</target>
+        <target state="translated">{0} 권한을 "{1}"에 적용할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallHelp">
         <source>Uninstalls a source or a template package.</source>
-        <target state="new">Uninstalls a source or a template package.</target>
+        <target state="needs-review-translation">소스 또는 템플릿 팩을 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
         <source>Unknown Change</source>
-        <target state="new">Unknown Change</target>
+        <target state="translated">알 수 없는 변경</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateApplyCommandHelp">
         <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="new">Check the currently installed template packages for update, and install the updates.</target>
+        <target state="needs-review-translation">업데이트를 위해 현재 설치된 템플릿 팩을 확인하고 업데이트를 설치하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateCheckCommandHelp">
         <source>Check the currently installed template packages for updates.</source>
-        <target state="new">Check the currently installed template packages for updates.</target>
+        <target state="needs-review-translation">현재 설치된 템플릿 팩에서 업데이트를 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">
         <source>Version:</source>
-        <target state="new">Version:</target>
+        <target state="translated">버전:</target>
         <note />
       </trans-unit>
       <trans-unit id="WhetherToAllowScriptsToRun">
         <source>Specify if post action scripts should run.</source>
-        <target state="new">Specify if post action scripts should run.</target>
+        <target state="translated">사후 조치 스크립트를 실행해야 하는지 여부를 지정하세요.</target>
         <note />
       </trans-unit>
     </body>
