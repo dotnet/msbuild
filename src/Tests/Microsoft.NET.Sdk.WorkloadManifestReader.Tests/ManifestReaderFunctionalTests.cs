@@ -48,6 +48,14 @@ namespace ManifestReaderTests
             androidWorkloads.Path.Should().Be(Path.Combine("fakepath", "packs", "Xamarin.Android.Sdk", "8.4.7"));
         }
 
+        [Fact]
+        public void ItShouldGetWorkloadDescription()
+        {
+            WorkloadResolver workloadResolver = SetUp();
+            var result = workloadResolver.GetWorkloadInfo(new WorkloadId("xamarin-android"));
+            result.Description.Should().Be("Create, build and run Android apps");
+        }
+
         private WorkloadResolver SetUp()
         {
             var workloadResolver =

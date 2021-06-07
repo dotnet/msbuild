@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
@@ -13,7 +14,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.MSBuildSdkResolver;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
@@ -22,7 +22,6 @@ using Microsoft.NET.Sdk.WorkloadManifestReader;
 using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
-using Product = Microsoft.DotNet.Cli.Utils.Product;
 
 namespace Microsoft.DotNet.Workloads.Workload.Update
 {
@@ -34,6 +33,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private readonly PackageSourceLocation _packageSourceLocation;
         private readonly IReporter _reporter;
         private readonly bool _includePreviews;
+        private readonly bool _fromPreviousSdk;
         private readonly VerbosityOptions _verbosity;
         private readonly IInstaller _workloadInstaller;
         private IWorkloadResolver _workloadResolver;
@@ -63,11 +63,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromCacheOption);
             _reporter = reporter ?? Reporter.Output;
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
+            _fromPreviousSdk = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.FromPreviousSdkOption);
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
-            _sdkVersion = string.IsNullOrEmpty(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption)) ?
-                new ReleaseVersion(version ?? Product.Version) :
-                new ReleaseVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption));
+            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.VersionOption), version, _dotnetPath);
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
@@ -77,7 +77,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (addSourceOption == null || !addSourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  addSourceOption);
 
-            _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
@@ -116,7 +115,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 {
                     UpdateWorkloads(_includePreviews, string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
                 }
-                catch (Exception e)
+                    catch (Exception e)
                 {
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadUpdateFailed, e.Message), e);
@@ -129,11 +128,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         public void UpdateWorkloads(bool includePreviews = false, DirectoryPath? offlineCache = null)
         {
             _reporter.WriteLine();
-            var featureBand = new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
+            var featureBand =
+                new SdkFeatureBand(string.Join('.', _sdkVersion.Major, _sdkVersion.Minor, _sdkVersion.SdkFeatureBand));
 
-            var workloadIds = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(featureBand);
+            var workloadIds = GetUpdatableWorkloads();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
-            var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates();
+            var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates()
+                .Select(m => (m.manifestId, m.existingVersion, m.newVersion));
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 
@@ -168,11 +169,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
                         _workloadResolver.RefreshWorkloadManifests();
 
-                        workloadPackToUpdate = workloadIds
-                            .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
-                            .Distinct()
-                            .Select(packId => _workloadResolver.TryGetPackInfo(packId))
-                            .Where(pack => pack != null);
+                        workloadPackToUpdate = GetUpdatablePacks(installer);
 
                         foreach (var packId in workloadPackToUpdate)
                         {
@@ -299,18 +296,41 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
         }
 
+        private IEnumerable<WorkloadId> GetUpdatableWorkloads()
+        {
+            var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
+            if (_fromPreviousSdk)
+            {
+                var priorFeatureBands = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetFeatureBandsWithInstallationRecords()
+                    .Where(featureBand => featureBand.CompareTo(currentFeatureBand) < 0);
+                if (priorFeatureBands.Any())
+                {
+                    var maxPriorFeatureBand = priorFeatureBands.Max();
+                    return _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(maxPriorFeatureBand);
+                }
+                return new List<WorkloadId>();
+            }
+            else
+            {
+                var workloads = _workloadInstaller.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(currentFeatureBand);
+                if (workloads == null || !workloads.Any())
+                {
+                    _reporter.WriteLine(LocalizableStrings.NoWorkloadsToUpdate);
+                }
+
+                return workloads;
+            }
+        }
+
         private IEnumerable<PackInfo> GetUpdatablePacks(IWorkloadPackInstaller installer)
         {
-            var installedPacks = installer.GetInstalledPacks(new SdkFeatureBand(_sdkVersion));
-            if (installedPacks == null || !installedPacks.Any())
-            {
-                return new List<PackInfo>();
-            }
-            var updatedPacks = installer.GetWorkloadInstallationRecordRepository().GetInstalledWorkloads(new SdkFeatureBand(_sdkVersion))
-                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+            var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
+            var workloads = GetUpdatableWorkloads();
+            var updatedPacks = workloads.SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
                 .Distinct()
                 .Select(packId => _workloadResolver.TryGetPackInfo(packId))
                 .Where(pack => pack != null);
+            var installedPacks = installer.GetInstalledPacks(currentFeatureBand);
 
             var packsToUpdate = new List<PackInfo>();
             foreach (var updatedPack in updatedPacks)

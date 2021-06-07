@@ -134,7 +134,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 "delete",
                 "locals",
                 "push",
-                "verify"
+                "verify",
+                "trust"
             };
 
             var reporter = new BufferedReporter();
@@ -243,6 +244,35 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget verify " }, reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenNuGetTrustCommandItDisplaysCompletions()
+        {
+            var expected = new[] {
+                "--algorithm",
+                "--allow-untrusted-root",
+                "--configfile",
+                "--owners",
+                "--verbosity",
+                "--help",
+                "-v",
+                "-?",
+                "-h",
+                "/?",
+                "/h",
+                "author",
+                "certificate",
+                "list",
+                "remove",
+                "repository",
+                "source",
+                "sync"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(new[] { "dotnet nuget trust " }, reporter).Should().Be(0);
             reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
     }

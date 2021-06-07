@@ -115,9 +115,17 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenWorkloadInstallItCanUpdateInstalledManifests()
         {
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android" });
-            var manifestsToUpdate = new (ManifestId, ManifestVersion, ManifestVersion)[] { (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0")) };
-            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate);
+            var parseResult =
+                Parser.GetWorkloadsInstance.Parse(new string[] {"dotnet", "workload", "install", "xamarin-android"});
+            var manifestsToUpdate =
+                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
+                    Workloads)[]
+                    {
+                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
+                            null),
+                    };
+            (_, var installManager, var installer, _, _, _) =
+                GetTestInstallers(parseResult, manifestUpdates: manifestsToUpdate);
 
             installManager.InstallWorkloads(new List<WorkloadId>(), false); // Don't actually do any installs, just update manifests
 
@@ -130,10 +138,21 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenWorkloadInstallFromCacheItInstallsCachedManifest()
         {
-            var manifestsToUpdate = new (ManifestId, ManifestVersion, ManifestVersion)[] { (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0")) };
-            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "mockCache").Path, "mockCachePath");
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "--from-cache", cachePath });
-            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult, tempDirManifestPath: _manifestPath, manifestUpdates: manifestsToUpdate);
+            var manifestsToUpdate =
+                new (ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition>
+                    Workloads)[]
+                    {
+                        (new ManifestId("mock-manifest"), new ManifestVersion("1.0.0"), new ManifestVersion("2.0.0"),
+                            null)
+                    };
+            var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "mockCache").Path,
+                "mockCachePath");
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[]
+            {
+                "dotnet", "workload", "install", "xamarin-android", "--from-cache", cachePath
+            });
+            (_, var installManager, var installer, _, _, _) = GetTestInstallers(parseResult,
+                tempDirManifestPath: _manifestPath, manifestUpdates: manifestsToUpdate);
 
             installManager.Execute();
 
@@ -191,9 +210,12 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
         }
 
-        private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
-            ParseResult parseResult, [CallerMemberName] string testName = "", string failingWorkload = null, IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestUpdates =  null, 
-            string tempDirManifestPath = null)
+        private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver,
+            MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
+                ParseResult parseResult, [CallerMemberName] string testName = "", string failingWorkload = null,
+                IEnumerable<(ManifestId, ManifestVersion, ManifestVersion,
+                    Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
+                string tempDirManifestPath = null)
         {
             _reporter.Clear();
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName).Path;

@@ -68,7 +68,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             FXVersion? version = null;
             string? description = null;
-            Dictionary<WorkloadDefinitionId, WorkloadDefinition>? workloads = null;
+            Dictionary<WorkloadId, WorkloadDefinition>? workloads = null;
             Dictionary<WorkloadPackId, WorkloadPack>? packs = null;
             Dictionary<string, FXVersion>? dependsOn = null;
 
@@ -156,7 +156,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             id,
                             version,
                             description,
-                            workloads ?? new Dictionary<WorkloadDefinitionId, WorkloadDefinition> (),
+                            workloads ?? new Dictionary<WorkloadId, WorkloadDefinition> (),
                             packs ?? new Dictionary<WorkloadPackId, WorkloadPack> (),
                             dependsOn
                         );
@@ -228,18 +228,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        private static Dictionary<WorkloadDefinitionId, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)
+        private static Dictionary<WorkloadId, WorkloadDefinition> ReadWorkloadDefinitions(ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
-            var workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
+            var workloads = new Dictionary<WorkloadId, WorkloadDefinition>();
 
             while (reader.Read())
             {
                 switch (reader.TokenType)
                 {
                     case JsonTokenType.PropertyName:
-                        var workloadId = new WorkloadDefinitionId(reader.GetString());
+                        var workloadId = new WorkloadId(reader.GetString());
                         var workload = ReadWorkloadDefinition(workloadId, ref reader);
                         if (workloads.ContainsKey(workloadId)) ThrowDuplicateKeyException(ref reader, workloadId);
                         workloads.Add(workloadId, workload);
@@ -378,7 +378,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             throw new WorkloadManifestFormatException(Strings.IncompleteDocument);
         }
 
-        private static WorkloadDefinition ReadWorkloadDefinition(WorkloadDefinitionId id, ref Utf8JsonStreamReader reader)
+        private static WorkloadDefinition ReadWorkloadDefinition(WorkloadId id, ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -386,7 +386,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             bool? isAbstractOrNull = null;
             WorkloadDefinitionKind? kind = null;
             List<WorkloadPackId>? packs = null;
-            List<WorkloadDefinitionId>? extends = null;
+            List<WorkloadId>? extends = null;
             List<string>? platforms = null;
 
             while (reader.Read())
@@ -436,7 +436,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         if (string.Equals("extends", propName, StringComparison.OrdinalIgnoreCase))
                         {
                             if (extends != null) ThrowDuplicateKeyException(ref reader, propName);
-                            extends = ReadStringArray<WorkloadDefinitionId>(ref reader, s => new WorkloadDefinitionId(s));
+                            extends = ReadStringArray<WorkloadId>(ref reader, s => new WorkloadId(s));
                             continue;
                         }
 

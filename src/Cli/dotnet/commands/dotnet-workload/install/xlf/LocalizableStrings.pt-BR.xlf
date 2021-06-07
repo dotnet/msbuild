@@ -72,6 +72,11 @@
         <target state="new">Allow prerelease workload manifests.</target>
         <note />
       </trans-unit>
+      <trans-unit id="IncompatibleManifests">
+        <source>The current SDK is not compatible with workload manifests of SDK version {0}.</source>
+        <target state="new">The current SDK is not compatible with workload manifests of SDK version {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>Successfully installed workload(s) {0}.</source>
         <target state="new">Successfully installed workload(s) {0}.</target>
@@ -110,6 +115,11 @@
       <trans-unit id="ManifestDoesNotExist">
         <source>No manifest with id {0} exists.</source>
         <target state="new">No manifest with id {0} exists.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoManifestsExistForFeatureBand">
+        <source>No manifests exist for SDK version {0}.</source>
+        <target state="new">No manifests exist for SDK version {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OSDoesNotSupportMsi">

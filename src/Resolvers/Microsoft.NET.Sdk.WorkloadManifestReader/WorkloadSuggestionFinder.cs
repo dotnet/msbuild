@@ -10,7 +10,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     internal class WorkloadSuggestionFinder
     {
-        public WorkloadSuggestionFinder(HashSet<WorkloadPackId> installedPacks, HashSet<WorkloadPackId> requestedPacks, IEnumerable<(WorkloadDefinitionId id, HashSet<WorkloadPackId> expandedPacks)> expandedWorkloads)
+        public WorkloadSuggestionFinder(HashSet<WorkloadPackId> installedPacks, HashSet<WorkloadPackId> requestedPacks, IEnumerable<(WorkloadId id, HashSet<WorkloadPackId> expandedPacks)> expandedWorkloads)
         {
             FindPartialSuggestionsAndSimpleCompleteSuggestions(
                 requestedPacks, expandedWorkloads,
@@ -41,7 +41,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <param name="completeSuggestions">Workloads that contain all the requested packs and therefore are inherently complete suggestions</param>
         internal static void FindPartialSuggestionsAndSimpleCompleteSuggestions(
             HashSet<WorkloadPackId> requestedPacks,
-            IEnumerable<(WorkloadDefinitionId id, HashSet<WorkloadPackId> expandedPacks)> expandedWorkloads,
+            IEnumerable<(WorkloadId id, HashSet<WorkloadPackId> expandedPacks)> expandedWorkloads,
             out List<WorkloadSuggestionCandidate> partialSuggestions,
             out HashSet<WorkloadSuggestionCandidate> completeSuggestions)
         {
@@ -52,7 +52,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 if (workload.expandedPacks.Any(e => requestedPacks.Contains(e)))
                 {
                     var unsatisfied = new HashSet<WorkloadPackId>(requestedPacks.Where(p => !workload.expandedPacks.Contains(p)));
-                    var suggestion = new WorkloadSuggestionCandidate(new HashSet<WorkloadDefinitionId>() { workload.id }, workload.expandedPacks, unsatisfied);
+                    var suggestion = new WorkloadSuggestionCandidate(new HashSet<WorkloadId>() { workload.id }, workload.expandedPacks, unsatisfied);
                     if (suggestion.IsComplete)
                     {
                         completeSuggestions.Add(suggestion);
@@ -111,7 +111,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 }
 
                 //construct the new condidate by combining the root and the branch
-                var combinedIds = new HashSet<WorkloadDefinitionId>(root.Workloads);
+                var combinedIds = new HashSet<WorkloadId>(root.Workloads);
                 combinedIds.UnionWith(branch.Workloads);
                 var combinedPacks = new HashSet<WorkloadPackId>(root.Packs);
                 combinedPacks.UnionWith(branch.Packs);
@@ -200,14 +200,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </summary>
         internal class WorkloadSuggestionCandidate : IEquatable<WorkloadSuggestionCandidate>
         {
-            public WorkloadSuggestionCandidate(HashSet<WorkloadDefinitionId> id, HashSet<WorkloadPackId> packs, HashSet<WorkloadPackId> unsatisfiedPacks)
+            public WorkloadSuggestionCandidate(HashSet<WorkloadId> id, HashSet<WorkloadPackId> packs, HashSet<WorkloadPackId> unsatisfiedPacks)
             {
                 Packs = packs;
                 UnsatisfiedPacks = unsatisfiedPacks;
                 Workloads = id;
             }
 
-            public HashSet<WorkloadDefinitionId> Workloads { get; }
+            public HashSet<WorkloadId> Workloads { get; }
             public HashSet<WorkloadPackId> Packs { get; }
             public HashSet<WorkloadPackId> UnsatisfiedPacks { get; }
             public bool IsComplete => UnsatisfiedPacks.Count == 0;
@@ -230,7 +230,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </summary>
         public class WorkloadSuggestion
         {
-            public WorkloadSuggestion(HashSet<WorkloadDefinitionId> workloads, int extraPacks)
+            public WorkloadSuggestion(HashSet<WorkloadId> workloads, int extraPacks)
             {
                 Workloads = workloads;
                 ExtraPacks = extraPacks;
@@ -239,7 +239,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             /// <summary>
             /// The workload IDs that comprise this suggestion
             /// </summary>
-            public HashSet<WorkloadDefinitionId> Workloads { get; internal set; }
+            public HashSet<WorkloadId> Workloads { get; internal set; }
 
             /// <summary>
             /// How many additional (and potentionally unnecessary) packs this suggestion will result in installing

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Microsoft.DotNet.Watcher.Tools
+namespace Microsoft.Extensions.HotReload
 {
     public class UpdatePayloadtest
     {

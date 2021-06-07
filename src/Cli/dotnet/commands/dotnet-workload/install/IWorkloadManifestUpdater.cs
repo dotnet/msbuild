@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -11,7 +12,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null);
 
-        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestUpdates();
+        public IEnumerable<(
+            ManifestId manifestId, 
+            ManifestVersion existingVersion, 
+            ManifestVersion newVersion,
+            Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates();
 
         Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath);
 

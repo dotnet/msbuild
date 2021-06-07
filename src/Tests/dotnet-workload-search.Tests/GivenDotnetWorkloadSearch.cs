@@ -21,15 +21,15 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         private readonly IEnumerable<WorkloadDefinition> _avaliableWorkloads =
             new List<WorkloadDefinition>()
             {
-                new WorkloadDefinition(new WorkloadDefinitionId("mock-workload-1"), false, null, WorkloadDefinitionKind.Dev, new List<WorkloadDefinitionId>(), 
+                new WorkloadDefinition(new WorkloadId("mock-workload-1"), false, null, WorkloadDefinitionKind.Dev, new List<WorkloadId>(), 
                     new List<WorkloadPackId>(), new List<string>()),
-                new WorkloadDefinition(new WorkloadDefinitionId("mock-workload-2"), false, string.Empty, WorkloadDefinitionKind.Build, null, 
+                new WorkloadDefinition(new WorkloadId("mock-workload-2"), false, string.Empty, WorkloadDefinitionKind.Build, null, 
                     new List<WorkloadPackId>(), new List<string>() { "platform1", "platform2" }),
-                new WorkloadDefinition(new WorkloadDefinitionId("mock-workload-3"), true, "Fake description 1", WorkloadDefinitionKind.Dev, 
-                    new List<WorkloadDefinitionId>() { new WorkloadDefinitionId("mock-workload-2") }, new List<WorkloadPackId>(), new List<string>()),
-                new WorkloadDefinition(new WorkloadDefinitionId("fake-workload-1"), true, null, WorkloadDefinitionKind.Build, 
-                    new List<WorkloadDefinitionId>(), new List<WorkloadPackId>(), null),
-                new WorkloadDefinition(new WorkloadDefinitionId("fake-workload-2"), false, "Fake description 2", WorkloadDefinitionKind.Dev, null, 
+                new WorkloadDefinition(new WorkloadId("mock-workload-3"), true, "Fake description 1", WorkloadDefinitionKind.Dev, 
+                    new List<WorkloadId>() { new WorkloadId("mock-workload-2") }, new List<WorkloadPackId>(), new List<string>()),
+                new WorkloadDefinition(new WorkloadId("fake-workload-1"), true, null, WorkloadDefinitionKind.Build, 
+                    new List<WorkloadId>(), new List<WorkloadPackId>(), null),
+                new WorkloadDefinition(new WorkloadId("fake-workload-2"), false, "Fake description 2", WorkloadDefinitionKind.Dev, null, 
                     new List<WorkloadPackId>(), new List<string>())
             };
 

@@ -26,6 +26,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             if (_restartImmediatelySessionPreference.HasValue)
             {
                 await GetRudeEditResult(_restartImmediatelySessionPreference.Value, cancellationToken);
+                return;
             }
 
             while (true)

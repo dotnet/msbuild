@@ -7,6 +7,8 @@ using Microsoft.DotNet.Workloads.Workload.Install;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using System.Linq;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -31,7 +33,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
-            InstalledPacks.Add(packInfo);
+            InstalledPacks = InstalledPacks.Append(packInfo).ToList();
             CachePath = offlineCache?.Value;
         }
 
@@ -75,9 +77,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             CachePath = cachePath.Value;
         }
 
-        public IEnumerable<PackInfo> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        public IEnumerable<(string, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
-            return InstalledPacks;
+            return InstalledPacks.Select(pack => (pack.Id, pack.Version));
         }
 
         public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();
@@ -113,6 +115,9 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             return InstalledWorkloads;
         }
 
-        public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords() => throw new NotImplementedException();
+        public IEnumerable<SdkFeatureBand> GetFeatureBandsWithInstallationRecords()
+        {
+            return Enumerable.Empty<SdkFeatureBand>();
+        }
     }
 }

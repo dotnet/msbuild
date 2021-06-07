@@ -267,6 +267,12 @@
   <data name="SkippingManifestUpdate" xml:space="preserve">
     <value>Manifest packages were not found, skipping manifest update...</value>
   </data>
+  <data name="NoManifestsExistForFeatureBand" xml:space="preserve">
+    <value>No manifests exist for SDK version {0}.</value>
+  </data>
+  <data name="IncompatibleManifests" xml:space="preserve">
+    <value>The current SDK is not compatible with workload manifests of SDK version {0}.</value>
+  </data>
   <data name="InadequatePermissions" xml:space="preserve">
     <value>Inadequate permissions to access, please elevate to run this command.</value>
   </data>
