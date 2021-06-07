@@ -131,7 +131,7 @@ namespace Microsoft.Build.Shared
                                     "*",
                                     directory,
                                     false));
-                        IEnumerable<string> filteredEntriesForPath = (pattern != null && pattern != "*" && pattern != "*.*")
+                        IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
                             ? allEntriesForPath.Where(o => IsMatch(Path.GetFileName(o), pattern))
                             : allEntriesForPath;
                         return stripProjectDirectory
@@ -886,7 +886,7 @@ namespace Microsoft.Build.Shared
                         //  The wildcard path portion of the excluded search matches the include search
                         searchToExclude.RemainingWildcardDirectory == recursionState.RemainingWildcardDirectory &&
                         //  The exclude search will match ALL filenames OR
-                        (searchToExclude.SearchData.Filespec == "*" || searchToExclude.SearchData.Filespec == "*.*" ||
+                        (IsAllFilesWildcard(searchToExclude.SearchData.Filespec) ||
                             //  The exclude search filename pattern matches the include search's pattern
                             searchToExclude.SearchData.Filespec == recursionState.SearchData.Filespec))
                     {
@@ -1091,7 +1091,11 @@ namespace Microsoft.Build.Shared
 
         private static bool MatchFileRecursionStep(RecursionState recursionState, string file)
         {
-            if (recursionState.SearchData.Filespec != null)
+            if (IsAllFilesWildcard(recursionState.SearchData.Filespec))
+            {
+                return true;
+            }
+            else if (recursionState.SearchData.Filespec != null)
             {
                 return IsMatch(Path.GetFileName(file), recursionState.SearchData.Filespec);
             }
@@ -2563,6 +2567,17 @@ namespace Microsoft.Build.Shared
             int index = directoryPath.LastIndexOfAny(FileUtilities.Slashes);
             return (index != -1 && IsMatch(directoryPath.Substring(index + 1), pattern));
         }
+
+        /// <summary>
+        /// Returns true if <paramref name="pattern"/> is <code>*</code> or <code>*.*</code>.
+        /// </summary>
+        /// <param name="pattern">The filename pattern to check.</param>
+        private static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
+        {
+            1 => pattern[0] == '*',
+            3 => pattern[0] == '*' && pattern[1] == '.' && pattern[2] == '*',
+            _ => false
+        };
 
         internal static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
     }
