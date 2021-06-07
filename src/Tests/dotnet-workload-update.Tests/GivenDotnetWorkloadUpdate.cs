@@ -137,7 +137,9 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 File.Create(Path.Combine(packRecordDir, pack.Id, pack.Version, oldFeatureBand));
             }
             Directory.CreateDirectory(Path.Combine(dotnetRoot, "metadata", "workloads", oldFeatureBand, "InstalledWorkloads"));
+            Directory.CreateDirectory(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads"));
             File.Create(Path.Combine(dotnetRoot, "metadata", "workloads", oldFeatureBand, "InstalledWorkloads", installingWorkload));
+            File.Create(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload));
 
             // Update workload (without installing any workloads to this feature band)
             var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--from-previous-sdk" });
@@ -150,8 +152,6 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 Directory.Exists(pack.Path).Should().BeTrue(because: "Pack should be installed");
                 File.Exists(Path.Combine(packRecordDir, pack.Id, pack.Version, oldFeatureBand))
                     .Should().BeTrue(because: "Pack install record should still be present for old feature band");
-                File.Exists(Path.Combine(packRecordDir, pack.Id, pack.Version, sdkFeatureVersion))
-                    .Should().BeTrue(because: "Pack install record should be present for current feature band");
             }
             File.Exists(Path.Combine(dotnetRoot, "metadata", "workloads", oldFeatureBand, "InstalledWorkloads", installingWorkload))
                 .Should().BeTrue(because: "Workload install record should still be present for old feature band");
