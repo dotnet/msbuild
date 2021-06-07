@@ -87,6 +87,27 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
+
+            ValidateWorkloadIdsInput();
+        }
+
+        private void ValidateWorkloadIdsInput()
+        {
+            var avaliableWorkloads = _workloadResolver.GetAvaliableWorkloads();
+            foreach (var workloadId in _workloadIds)
+            {
+                if (avaliableWorkloads.Select(workload => workload.Id.ToString()).Contains(workloadId))
+                {
+                    if (!_workloadResolver.IsWorkloadPlatformCompatible(new WorkloadId(workloadId)))
+                    {
+                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotSupportedOnPlatform, workloadId));
+                    }
+                }
+                else
+                {
+                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadNotRecognized, workloadId));
+                }
+            }
         }
 
         public override int Execute()

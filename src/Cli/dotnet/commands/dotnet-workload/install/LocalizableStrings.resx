@@ -276,4 +276,10 @@
   <data name="InadequatePermissions" xml:space="preserve">
     <value>Inadequate permissions to access, please elevate to run this command.</value>
   </data>
+  <data name="WorkloadNotSupportedOnPlatform" xml:space="preserve">
+    <value>Workload with id {0} is not supported on this platform.</value>
+  </data>
+  <data name="WorkloadNotRecognized" xml:space="preserve">
+    <value>Workload with id {0} is not recognized.</value>
+  </data>
 </root>

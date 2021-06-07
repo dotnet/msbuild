@@ -242,6 +242,16 @@
         <target state="new">Workload installation failed: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadNotRecognized">
+        <source>Workload with id {0} is not recognized.</source>
+        <target state="new">Workload with id {0} is not recognized.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadNotSupportedOnPlatform">
+        <source>Workload with id {0} is not supported on this platform.</source>
+        <target state="new">Workload with id {0} is not supported on this platform.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadPackAlreadyInstalledMessage">
         <source>Pack {0} version {1} is already installed.</source>
         <target state="new">Pack {0} version {1} is already installed.</target>
