@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(GetLocalsCommand());
             command.AddCommand(GetPushCommand());
             command.AddCommand(GetVerifyCommand());
+            command.AddCommand(GetTrustCommand());
 
             return command;
         }
@@ -90,5 +91,21 @@ namespace Microsoft.DotNet.Cli
 
             return verifyCommand;
         }
+
+        private static Command GetTrustCommand()
+        {
+            var trustCommand = new Command("trust");
+
+            trustCommand.AddArgument(new Argument<string>() { Arity = ArgumentArity.ZeroOrOne }
+                         .FromAmong(new string[] { "list", "author", "repository", "source", "certificate", "remove", "sync" }));
+
+            trustCommand.AddOption(new Option<string>("--algorithm"));
+            trustCommand.AddOption(new Option<bool>("--allow-untrusted-root"));
+            trustCommand.AddOption(new Option<string>("--owners"));
+            trustCommand.AddOption(new Option<string>("--configfile"));
+            trustCommand.AddOption(CommonOptions.VerbosityOption());
+
+            return trustCommand;
+        }        
     }
 }
