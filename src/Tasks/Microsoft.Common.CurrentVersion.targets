@@ -51,7 +51,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Store values of certain intrinsic functions that won't change throughout the build. -->
   <PropertyGroup Condition="'$(TargetFramework)' != ''">
     <TargetFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion Condition="'$(TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</TargetFrameworkVersion>
   </PropertyGroup>
 
   <!-- Because .NET 2.0 apps did not set TargetFrameworkIdentifier, we need to set it for them here by default.  If
