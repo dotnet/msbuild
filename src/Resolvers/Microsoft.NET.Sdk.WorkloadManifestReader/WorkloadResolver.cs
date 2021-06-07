@@ -15,7 +15,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </remarks>
     public class WorkloadResolver : IWorkloadResolver
     {
-        private readonly Dictionary<WorkloadDefinitionId, WorkloadDefinition> _workloads = new Dictionary<WorkloadDefinitionId, WorkloadDefinition>();
+        private readonly Dictionary<WorkloadId, WorkloadDefinition> _workloads = new Dictionary<WorkloadId, WorkloadDefinition>();
         private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
         private readonly IWorkloadManifestProvider _manifestProvider;
         private string[] _currentRuntimeIdentifiers;
@@ -279,7 +279,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 throw new ArgumentException($"'{nameof(workloadId)}' cannot be null or empty", nameof(workloadId));
             }
 
-            var id = new WorkloadDefinitionId(workloadId);
+            var id = new WorkloadId(workloadId);
 
             if (!_workloads.TryGetValue(id, out var workload))
             {
@@ -298,9 +298,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         internal IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadDefinition workload)
         {
-            var dedup = new HashSet<WorkloadDefinitionId>();
+            var dedup = new HashSet<WorkloadId>();
 
-            IEnumerable<WorkloadPackId> ExpandPacks (WorkloadDefinitionId workloadId)
+            IEnumerable<WorkloadPackId> ExpandPacks (WorkloadId workloadId)
             {
                 if (!_workloads.TryGetValue (workloadId, out var workloadInfo))
                 {
@@ -434,9 +434,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             public string? Description { get; }
         }
 
-        public WorkloadInfo GetWorkloadInfo(WorkloadDefinitionId workloadDefinitionId)
+        public WorkloadInfo GetWorkloadInfo(WorkloadId WorkloadId)
         {
-            if (!_workloads.TryGetValue(workloadDefinitionId, out var workload))
+            if (!_workloads.TryGetValue(WorkloadId, out var workload))
             {
                 throw new Exception("Workload not found");
             }

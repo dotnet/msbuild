@@ -122,21 +122,21 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             HashSet<WorkloadId> installedWorkloads = installedList.ToHashSet();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(_includePreviews).Wait();
             IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion,
-                Dictionary<WorkloadDefinitionId, WorkloadDefinition> Workloads)> manifestsToUpdate =
+                Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestsToUpdate =
                 _workloadManifestUpdater.CalculateManifestUpdates();
 
             List<UpdateAvailableEntry> updateList = new();
             foreach ((ManifestId _, ManifestVersion existingVersion, ManifestVersion newVersion,
-                Dictionary<WorkloadDefinitionId, WorkloadDefinition> workloads) in manifestsToUpdate)
+                Dictionary<WorkloadId, WorkloadDefinition> workloads) in manifestsToUpdate)
             {
-                foreach ((WorkloadDefinitionId workloadDefinitionId, WorkloadDefinition workloadDefinition) in
+                foreach ((WorkloadId WorkloadId, WorkloadDefinition workloadDefinition) in
                     workloads)
                 {
-                    if (installedWorkloads.Contains(new WorkloadId(workloadDefinitionId.ToString())))
+                    if (installedWorkloads.Contains(new WorkloadId(WorkloadId.ToString())))
                     {
                         updateList.Add(new UpdateAvailableEntry(existingVersion.ToString(),
                             newVersion.ToString(),
-                            workloadDefinition.Description, workloadDefinitionId.ToString()));
+                            workloadDefinition.Description, WorkloadId.ToString()));
                     }
                 }
             }

@@ -138,4 +138,10 @@
   <data name="WorkloadUpdateFailed" xml:space="preserve">
     <value>Workload update failed: {0}</value>
   </data>
+  <data name="FromPreviousSdkOptionDescription" xml:space="preserve">
+    <value>Include workloads installed with previous SDK versions in update.</value>
+  </data>
+  <data name="NoWorkloadsToUpdate" xml:space="preserve">
+    <value>No workloads installed for this feature band. To update from the previous SDK, include the --from-previous-sdk option.</value>
+  </data>
 </root>

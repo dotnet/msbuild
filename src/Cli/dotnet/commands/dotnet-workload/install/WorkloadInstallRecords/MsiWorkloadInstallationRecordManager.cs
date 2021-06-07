@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord

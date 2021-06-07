@@ -9,11 +9,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// Wraps a workload definition id string to help ensure consistency of behaviour/semantics.
     /// Comparisons are case insensitive but ToString() will return the original string for display purposes.
     /// </summary>
-    public readonly struct WorkloadDefinitionId : IComparable<WorkloadDefinitionId>, IEquatable<WorkloadDefinitionId>
+    public readonly struct WorkloadId : IComparable<WorkloadId>, IEquatable<WorkloadId>
     {
         private readonly string _id;
 
-        public WorkloadDefinitionId(string id)
+        public WorkloadId(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -23,13 +23,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _id = id;
         }
 
-        public int CompareTo(WorkloadDefinitionId other) => string.Compare(_id, other._id, StringComparison.OrdinalIgnoreCase);
+        public int CompareTo(WorkloadId other) => string.Compare(_id, other._id, StringComparison.OrdinalIgnoreCase);
 
-        public bool Equals(WorkloadDefinitionId other) => string.Equals(_id, other._id, StringComparison.OrdinalIgnoreCase);
+        public bool Equals(WorkloadId other) => string.Equals(_id, other._id, StringComparison.OrdinalIgnoreCase);
 
         public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(_id);
 
-        public override bool Equals(object? obj) => obj is WorkloadDefinitionId id && Equals(id);
+        public override bool Equals(object? obj) => obj is WorkloadId id && Equals(id);
 
         public override string ToString() => _id;
     }

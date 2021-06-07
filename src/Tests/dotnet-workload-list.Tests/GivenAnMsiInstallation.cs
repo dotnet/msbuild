@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
 using Microsoft.Win32;
 using Xunit;

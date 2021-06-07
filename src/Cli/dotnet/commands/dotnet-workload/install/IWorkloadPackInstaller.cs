@@ -18,6 +18,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void GarbageCollectInstalledWorkloadPacks();
 
-        IEnumerable<PackInfo> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
+        IEnumerable<(string Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
     }
 }
