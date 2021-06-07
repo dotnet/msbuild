@@ -36,6 +36,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 return new NetSdkMsiInstaller();
             }
 
+            if (!CanWriteToDotnetRoot(dotnetDir))
+            {
+                throw new GracefulException(LocalizableStrings.InadequatePermissions);
+            }
+
             return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver, nugetPackageDownloader, verbosity: verbosity, dotnetDir: dotnetDir, packageSourceLocation: packageSourceLocation);
         }
 
@@ -55,6 +60,28 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
 
             return InstallType.FileBased;
+        }
+
+        private static bool CanWriteToDotnetRoot(string dotnetDir = null)
+        {
+            dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
+            try
+            {
+                var testPath = Path.Combine(dotnetDir, "metadata", Path.GetRandomFileName());
+                if (Directory.Exists(Path.GetDirectoryName(testPath)))
+                {
+                    using (FileStream fs = File.Create(testPath, 1, FileOptions.DeleteOnClose)) { }
+                }
+                else
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(testPath));
+                }
+                return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
         }
     }
 }
