@@ -1169,13 +1169,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PublishItemsOutputGroupDependsOn>
   </PropertyGroup>
 
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GetPublishItemsOutputGroupOutputs"
+          AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
   <Target Name="PublishItemsOutputGroup" DependsOnTargets="$(PublishItemsOutputGroupDependsOn)" Returns="@(PublishItemsOutputGroupOutputs)">
+    <GetPublishItemsOutputGroupOutputs
+      ResolvedFileToPublish="@(ResolvedFileToPublish)"
+      PublishDir="$(PublishDir)"
+        >
+
+      <Output TaskParameter="PublishItemsOutputGroupOutputs" ItemName="PublishItemsOutputGroupOutputs" />
+    </GetPublishItemsOutputGroupOutputs>
+
     <ItemGroup>
-      <PublishItemsOutputGroupOutputs Include="@(ResolvedFileToPublish->'%(FullPath)')"
-                                      TargetPath="%(ResolvedFileToPublish.RelativePath)"
-                                      IsKeyOutput="%(ResolvedFileToPublish.IsKeyOutput)"
-                                      OutputPath="@(ResolvedFileToPublish->'$(PublishDir)%(relativePath)')"
-                                      OutputGroup="PublishItemsOutputGroup" />
       <PublishItemsOutputGroupOutputs Include="$(PublishedSingleFilePath)"
                                       TargetPath="$(PublishedSingleFileName)"
                                       IsKeyOutput="true"

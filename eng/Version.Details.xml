@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.300-preview.21260.2">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="5.0.301-servicing.21277.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>592742371da1df5b459c4bbf68e05968b5eb750d</Sha>
+      <Sha>671312f7f9f0d06558479d412961f5fe6d1d1f4d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="5.0.300-preview.21260.2">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="5.0.301-servicing.21277.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>592742371da1df5b459c4bbf68e05968b5eb750d</Sha>
+      <Sha>671312f7f9f0d06558479d412961f5fe6d1d1f4d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.TemplateEngine.Cli.Localization" Version="5.0.300-preview.21159.1">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>c83d98dbae2262798e804236fb3edabe517d50f5</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.300-preview.21260.2">
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="5.0.301-servicing.21277.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>592742371da1df5b459c4bbf68e05968b5eb750d</Sha>
+      <Sha>671312f7f9f0d06558479d412961f5fe6d1d1f4d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="5.0.300-preview.21260.2">
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="5.0.301-servicing.21277.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>592742371da1df5b459c4bbf68e05968b5eb750d</Sha>
+      <Sha>671312f7f9f0d06558479d412961f5fe6d1d1f4d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateSearch.Common" Version="5.0.300-preview.21260.2">
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="5.0.301-servicing.21277.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>592742371da1df5b459c4bbf68e05968b5eb750d</Sha>
+      <Sha>671312f7f9f0d06558479d412961f5fe6d1d1f4d</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.300-preview.21260.2">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="5.0.301-servicing.21277.3">
       <Uri>https://github.com/dotnet/templating</Uri>
-      <Sha>592742371da1df5b459c4bbf68e05968b5eb750d</Sha>
+      <Sha>671312f7f9f0d06558479d412961f5fe6d1d1f4d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App.Ref" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -81,9 +81,9 @@
       <Uri>https://github.com/dotnet/fsharp</Uri>
       <Sha>1b23bbeda88ea3cb9be9af777f4c99fa8663df81</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.10.0-4.21269.26">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="3.10.0-4.21273.6">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>029847714208ebe49668667c60ea5b0a294e0fcb</Sha>
+      <Sha>a408003c46b125f0c5fdc47472e5f0f5750f1e5d</Sha>
     </Dependency>
     <Dependency Name="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="5.0.7-servicing.21263.9">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-aspnetcore</Uri>
@@ -105,7 +105,7 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>dca1d060f38e1e02f6bfca41e25f081f19fd534b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210520-03">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="16.10.0">
       <Uri>https://github.com/microsoft/vstest</Uri>
       <Sha>5c9abb2ae1b0318dc52729a3639e72089c79fb3c</Sha>
     </Dependency>
