@@ -652,6 +652,37 @@ namespace Microsoft.Build.Internal
             return x == EndOfHandshakeSignal ? ~x : x;
         }
 
+        internal static bool WasServerMutexOpen(string mutexName)
+        {
+            try
+            {
+                if (PlatformInformation.IsRunningOnMono)
+                {
+                    IServerMutex? mutex = null;
+                    bool createdNew = false;
+                    try
+                    {
+                        mutex = new ServerFileMutexPair(mutexName, false, out createdNew);
+                        return !createdNew;
+                    }
+                    finally
+                    {
+                        mutex?.Dispose();
+                    }
+                }
+                else
+                {
+                    return ServerNamedMutex.WasOpen(mutexName);
+                }
+            }
+            catch
+            {
+                // In the case an exception occurred trying to open the Mutex then 
+                // the assumption is that it's not open. 
+                return false;
+            }
+        }
+
         internal static IServerMutex OpenOrCreateMutex(string name, out bool createdNew)
         {
             if (PlatformInformation.IsRunningOnMono)
