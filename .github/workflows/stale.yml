@@ -10,12 +10,15 @@ jobs:
       - uses: actions/stale@v3
         with:
           stale-issue-message: |
-            This issue is marked as stale because author feedback has been requested for 30 days with no response. Please respond within 14 days or this issue will be closed due to inactivity.
+            This issue is marked as stale because feedback has been requested for 30 days with no response. Please respond within 14 days or this issue will be closed due to inactivity.
           close-issue-message: |
             This issue was closed due to inactivity. If you can still reproduce this bug, please comment with the requested information, detailed steps to reproduce the problem, or any other notes that might help in the investigation.
           start-date: '2021-01-06T00:00:00Z'
           days-before-stale: 30
           days-before-close: 14
           stale-issue-label: stale
-          any-of-labels: 'Needs: Author Feedback'
-          exempt-milestones: 'Backlog'
+          any-of-labels: 'needs-more-info'
+          exempt-milestones: 'Backlog,Discussion'
+          exempt-issue-labels: 'bot-exclude,needs-triage'
+          labels-to-remove-when-unstale: 'needs-more-info'
+          labels-to-add-when-unstale: 'needs-attention'
