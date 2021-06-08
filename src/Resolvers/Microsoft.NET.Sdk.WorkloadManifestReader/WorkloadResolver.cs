@@ -443,5 +443,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             return new WorkloadInfo(workload.Id.ToString(), workload.Description);
         }
+
+        public bool IsWorkloadPlatformCompatible(WorkloadId workloadId)
+        {
+            var workloadDef = GetAvaliableWorkloads().FirstOrDefault(workload => workload.Id.ToString().Equals(workloadId.ToString()));
+            if (workloadDef == null)
+            {
+                throw new Exception("Workload not found");
+            }
+            if (workloadDef.Platforms == null)
+            {
+                return true;
+            }
+            return workloadDef.Platforms.Any(supportedPlatform => _currentRuntimeIdentifiers.Contains(supportedPlatform));
+        }
     }
 }

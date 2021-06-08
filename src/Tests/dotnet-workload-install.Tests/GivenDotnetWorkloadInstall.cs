@@ -20,6 +20,7 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -45,7 +46,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .Should()
                 .Fail()
                 .And
-                .HaveStdOutContaining("Workload not found");
+                .HaveStdErrContaining(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotRecognized, "fake"));
         }
 
         [Fact]
@@ -210,11 +211,29 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             string.Join(" ", _reporter.Lines).Should().Contain("mock-manifest-url");
         }
 
-        private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver,
-            MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
-                ParseResult parseResult, [CallerMemberName] string testName = "", string failingWorkload = null,
-                IEnumerable<(ManifestId, ManifestVersion, ManifestVersion,
-                    Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
+        [Fact]
+        public void GivenWorkloadInstallItErrorsOnUnsupportedPlatform()
+        {
+            var mockWorkloadId = "unsupported";
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "UnsupportedPlatform.json");
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var installer = new MockPackWorkloadInstaller();
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), new string[] { dotnetRoot });
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var manifestUpdater = new MockWorkloadManifestUpdater();
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", mockWorkloadId });
+
+            var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer,
+                nugetPackageDownloader: nugetDownloader, workloadManifestUpdater: manifestUpdater, userHome: testDirectory, dotnetDir: dotnetRoot, version: "6.0.100"));
+            exceptionThrown.Message.Should().Be(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotSupportedOnPlatform, mockWorkloadId));
+        }
+
+        private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
+                ParseResult parseResult,
+                [CallerMemberName] string testName = "",
+                string failingWorkload = null,
+                IEnumerable<(ManifestId, ManifestVersion, ManifestVersion, Dictionary<WorkloadId, WorkloadDefinition> Workloads)> manifestUpdates = null,
                 string tempDirManifestPath = null)
         {
             _reporter.Clear();
