@@ -14,11 +14,11 @@ jobs:
           close-issue-message: |
             This issue was closed due to inactivity. If you can still reproduce this bug, please comment with the requested information, detailed steps to reproduce the problem, or any other notes that might help in the investigation.
           start-date: '2021-01-06T00:00:00Z'
-          days-before-stale: 30
-          days-before-close: 14
+          days-before-stale: 1
+          days-before-close: 1
           stale-issue-label: stale
-          any-of-labels: 'needs-more-info'
+          any-of-labels: 'bot-test'
           exempt-milestones: 'Backlog,Discussion'
           exempt-issue-labels: 'bot-exclude,needs-triage'
-          labels-to-remove-when-unstale: 'needs-more-info'
+          labels-to-remove-when-unstale: 'bot-test'
           labels-to-add-when-unstale: 'needs-attention'
