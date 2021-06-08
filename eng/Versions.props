@@ -32,7 +32,7 @@
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>6.0.100-preview.3.21202.5</DotNetCliVersion>
-    <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.6.21307.1</MicrosoftExtensionsDependencyModelVersion>
+    <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.6.21308.1</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftNetCompilersToolsetVersion>4.0.0-1.21303.3</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.0.0-preview.1.66</NuGetBuildTasksVersion>
   </PropertyGroup>
