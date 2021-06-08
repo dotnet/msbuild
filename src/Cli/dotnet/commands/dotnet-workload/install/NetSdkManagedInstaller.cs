@@ -38,11 +38,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir =  null,
+            string tempDirPath =  null,
             VerbosityOptions verbosity = VerbosityOptions.normal, 
             PackageSourceLocation packageSourceLocation = null)
         {
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _tempPackagesDir = new DirectoryPath(Path.GetTempPath());
+            _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
             _nugetPackageDownloader = nugetPackageDownloader ?? 
                 new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null, verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger());
             _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
