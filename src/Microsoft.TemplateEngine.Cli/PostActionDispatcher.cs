@@ -18,10 +18,10 @@ namespace Microsoft.TemplateEngine.Cli
         Prompt
     }
 
-    [Flags]
     /// <summary>
     /// Indicates post action execution status.
     /// </summary>
+    [Flags]
     internal enum PostActionExecutionStatus
     {
         /// <summary>

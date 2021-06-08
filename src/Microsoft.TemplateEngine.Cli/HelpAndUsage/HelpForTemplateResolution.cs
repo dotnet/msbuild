@@ -66,8 +66,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// </summary>
         /// <param name="resolutionResult">template resolution result.</param>
         /// <param name="environmentSettings"></param>
+        /// <param name="templatePackageManager"></param>
         /// <param name="commandInput">command input used in CLI.</param>
         /// <param name="defaultLanguage">default language for the host.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         internal static Task<New3CommandStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
             TemplateResolutionResult resolutionResult,
@@ -363,8 +365,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="unambiguousTemplateGroup">the unambigious template group to use based on the command input.</param>
         /// <param name="commandInput">the command input.</param>
         /// <returns><see cref="New3CommandStatus.InvalidParamValues"/>.</returns>
-        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/>.</exception>
-        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see langword="null" />.</exception>
         private static New3CommandStatus DisplayInvalidParameterError(TemplateGroup unambiguousTemplateGroup, INewCommandInput commandInput)
         {
             _ = unambiguousTemplateGroup ?? throw new ArgumentNullException(paramName: nameof(unambiguousTemplateGroup));
@@ -391,10 +393,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// </summary>
         /// <param name="unambiguousTemplateGroup">resolved unambiguous template group to use based on the command input.</param>
         /// <param name="environmentSettings"></param>
+        /// <param name="templatePackageManager"></param>
         /// <param name="commandInput">the command input.</param>
+        /// <param name="cancellationToken">a cancellation token.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see cref="null"/>.</exception>
-        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/>is <see cref="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/> is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/> is <see langword="null" />.</exception>
         private static async Task<New3CommandStatus> DisplayAmbiguousPrecedenceErrorAsync(
             TemplateGroup unambiguousTemplateGroup,
             IEngineEnvironmentSettings environmentSettings,

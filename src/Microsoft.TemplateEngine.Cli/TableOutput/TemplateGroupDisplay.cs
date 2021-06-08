@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
         /// - Author
         /// - Type.
         /// </summary>
-        /// <param name="templateList">list of template groups to be displayed.</param>
+        /// <param name="templateGroupList">list of template groups to be displayed.</param>
         /// <param name="language">language from the command input.</param>
         /// <param name="defaultLanguage">default language.</param>
         /// <returns></returns>

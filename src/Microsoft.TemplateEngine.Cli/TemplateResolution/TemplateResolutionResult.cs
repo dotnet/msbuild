@@ -138,7 +138,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Returns the template to invoke or <see cref="null"/> if the template to invoke cannot be determined.
+        /// Returns the template to invoke or <c>null</c> if the template to invoke cannot be determined.
         /// Has value only when <see cref="Status" /> is <see cref="Status.SingleMatch"/>.
         /// </summary>
         internal ITemplateMatchInfo TemplateToInvoke
@@ -187,7 +187,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Returns unambiguous template group resolved; <see cref="null"/> if group cannot be resolved based on command input
+        /// Returns unambiguous template group resolved; <c>null</c> if group cannot be resolved based on command input
         /// Has value only when <see cref="GroupResolutionStatus" /> is <see cref="UnambiguousTemplateGroupStatus.SingleMatch"/>.
         /// </summary>
         internal TemplateGroup UnambiguousTemplateGroup

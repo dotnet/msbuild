@@ -75,6 +75,7 @@ namespace Microsoft.TemplateEngine.Cli
         /// Processes template packages according to <paramref name="commandInput"/>.
         /// </summary>
         /// <param name="commandInput">the command input with instructions to process.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         internal Task<New3CommandStatus> ProcessAsync(INewCommandInput commandInput, CancellationToken cancellationToken = default)
         {

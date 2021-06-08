@@ -13,7 +13,9 @@ namespace Microsoft.TemplateEngine.Cli
         /// Writes string formatted as command example. For now, just indentation is applied.
         /// The extension forces the same format for all command examples.
         /// </summary>
+        /// <param name="reporter"></param>
         /// <param name="command"></param>
+        /// <param name="indentLevel"></param>
         internal static void WriteCommand(this Reporter reporter, string command, int indentLevel = 0)
         {
             reporter.WriteLine(command.Indent(indentLevel + 1));

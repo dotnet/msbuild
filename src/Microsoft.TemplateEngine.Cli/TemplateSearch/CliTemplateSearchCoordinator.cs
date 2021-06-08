@@ -22,6 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         /// Performs validation for the commands, search for the templates in configured remote source, displays the results in table format.
         /// </summary>
         /// <param name="environmentSettings">environment settings.</param>
+        /// <param name="templatePackageManager"></param>
         /// <param name="commandInput">new command data.</param>
         /// <param name="defaultLanguage">default language for the host.</param>
         /// <returns><c>New3CommandStatus.Success</c> when the templates were found and displayed;

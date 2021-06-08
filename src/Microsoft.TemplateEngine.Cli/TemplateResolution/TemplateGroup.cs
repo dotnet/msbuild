@@ -26,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     internal sealed class TemplateGroup
     {
         /// <param name="templates">the templates of the template group.</param>
-        /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <see cref="null"/>.</exception>
+        /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined.</exception>
         internal TemplateGroup(IEnumerable<ITemplateMatchInfo> templates)
         {
@@ -77,7 +77,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Returns true when <see cref="GroupIdentity"/> is not <see cref="null"/> or empty.
+        /// Returns true when <see cref="GroupIdentity"/> is not <c>null</c> or empty.
         /// </summary>
         internal bool HasGroupIdentity => !string.IsNullOrWhiteSpace(GroupIdentity);
 
@@ -223,8 +223,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <param name="highestPrecedenceTemplate">Contains the invokable template with highest precedence.</param>
         /// <param name="useDefaultLanguage">Defines if default language template should be preferred in case of ambiguity.</param>
         /// <returns>
-        /// <see cref="true"/> when single invokable template with highest precedence can be defined.
-        /// <see cref="false"/> otherwise.
+        /// <c>true</c> when single invokable template with highest precedence can be defined.
+        /// <c>false</c> otherwise.
         /// </returns>
         internal bool TryGetHighestPrecedenceInvokableTemplate(out ITemplateMatchInfo? highestPrecedenceTemplate, bool useDefaultLanguage = false)
         {
