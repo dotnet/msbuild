@@ -394,7 +394,7 @@ namespace Microsoft.Build.BackEnd
 
                 CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
-#if NETCOREAPP2_1 || MONO
+#if NETCOREAPP2_1_OR_GREATER || MONO
                 nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
                 nodeStream.ReadEndOfHandshakeSignal(true);
