@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.List;
+using Microsoft.DotNet.Workloads.Workload.Repair;
 using Microsoft.DotNet.Workloads.Workload.Restore;
 using Microsoft.DotNet.Workloads.Workload.Search;
 using Microsoft.DotNet.Workloads.Workload.Uninstall;
@@ -43,6 +44,9 @@ namespace Microsoft.DotNet.Workloads.Workload
                     ParseResult),
                 ["search"] =
                 appliedOption => new WorkloadSearchCommand(
+                    ParseResult),
+                ["repair"] =
+                appliedOption => new WorkloadRepairCommand(
                     ParseResult)
             };
 

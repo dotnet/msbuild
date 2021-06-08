@@ -16,9 +16,10 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(WorkloadUpdateCommandParser.GetCommand());
             command.AddCommand(WorkloadListCommandParser.GetCommand());
             command.AddCommand(WorkloadSearchCommandParser.GetCommand());
+            command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
+            command.AddCommand(WorkloadRepairCommandParser.GetCommand());
             if (includeAllCommands)
             {
-                command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
                 command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
             }
 
