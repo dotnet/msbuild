@@ -236,7 +236,8 @@ namespace Microsoft.TemplateEngine.TestHelper
 
                 (PackageSource Source, IEnumerable<IPackageSearchMetadata>? FoundPackages)[] foundPackagesBySource =
                     await Task.WhenAll(
-                        packageSources.Select(source => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, cancellationToken)))
+                        packageSources.Select(source =>
+                            Task.Run(() => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, cancellationToken))))
                               .ConfigureAwait(false);
 
                 if (!foundPackagesBySource.Where(result => result.FoundPackages != null).Any())
@@ -288,7 +289,8 @@ namespace Microsoft.TemplateEngine.TestHelper
                 _nugetLogger.LogDebug($"[NuGet Package Manager] Loading package {packageIdentifier} metadata from all sources.");
                 using CancellationTokenSource linkedCts =
                           CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                var tasks = sources.Select(source => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, linkedCts.Token)).ToList();
+                var tasks = sources.Select(source =>
+                    Task.Run(() => GetPackageMetadataAsync(source, packageIdentifier, includePrerelease: true, linkedCts.Token))).ToList();
                 while (tasks.Any())
                 {
                     var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
