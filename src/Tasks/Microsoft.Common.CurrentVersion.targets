@@ -1926,11 +1926,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
         <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <!-- Use $(Platforms) and either $(Platform) (cpp) or $(PlatformTarget) (managed) as
-             platform possibilities. -->
-        <PlatformOptions Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">$(Platforms);$(Platform)</PlatformOptions>
-        <PlatformOptions Condition="'%(Extension)' != '.vcxproj' and '%(Extension)' != '.nativeproj'">$(Platforms);$(PlatformTarget)</PlatformOptions>
-        <!-- Platforms is the canonical list of possibilities -->
+        <PlatformOptions>$(Platforms)</PlatformOptions>
         <CanMultiPlatform>false</CanMultiPlatform>
         <CanMultiPlatform Condition="$(Platforms.Contains(';')) == 'true'">true</CanMultiPlatform>
       </_ThisProjectPlatformMetadata>
