@@ -9,6 +9,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.Versioning;
+#endif
 
 #nullable disable
 
@@ -38,6 +41,9 @@ namespace Microsoft.Build.Tasks
 
         public string TimestampUrl { get; set; }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public override bool Execute()
         {
             try
