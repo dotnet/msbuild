@@ -1568,8 +1568,8 @@ namespace Microsoft.Build.Graph
         public virtual bool Equals(Microsoft.Build.Graph.GraphBuildOptions other) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
-        public static bool operator ==(Microsoft.Build.Graph.GraphBuildOptions r1, Microsoft.Build.Graph.GraphBuildOptions r2) { throw null; }
-        public static bool operator !=(Microsoft.Build.Graph.GraphBuildOptions r1, Microsoft.Build.Graph.GraphBuildOptions r2) { throw null; }
+        public static bool operator ==(Microsoft.Build.Graph.GraphBuildOptions left, Microsoft.Build.Graph.GraphBuildOptions right) { throw null; }
+        public static bool operator !=(Microsoft.Build.Graph.GraphBuildOptions left, Microsoft.Build.Graph.GraphBuildOptions right) { throw null; }
         protected virtual bool PrintMembers(System.Text.StringBuilder builder) { throw null; }
         public override string ToString() { throw null; }
         public virtual Microsoft.Build.Graph.GraphBuildOptions <Clone>$() { throw null; }
