@@ -514,7 +514,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool IncludeEvaluationPropertiesAndItems
         {
-            get => _includeEvaluationPropertiesAndItems ??= _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+            get
+            {
+                if (_includeEvaluationPropertiesAndItems == null)
+                {
+                    var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
+                    // .All() on an empty list defaults to true, we want to default to false
+                    _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+                }
+
+                return _includeEvaluationPropertiesAndItems ?? false;
+            }
+
             set => _includeEvaluationPropertiesAndItems = value;
         }
 
