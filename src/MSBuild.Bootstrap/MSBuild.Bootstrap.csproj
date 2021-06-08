@@ -25,6 +25,7 @@
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
+
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' == 'true'">
@@ -42,6 +43,9 @@
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">
     <!-- Include DependencyModel libraries. -->
     <PackageReference Include="Microsoft.Extensions.DependencyModel" />
+
+    <!-- Workaround for https://github.com/dotnet/sdk/issues/18148; use recent System.Text.Json that _does_ have the sourcegenerator -->
+    <PackageReference Include="System.Text.Json" VersionOverride="$(MicrosoftExtensionsDependencyModelVersion)" />
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
