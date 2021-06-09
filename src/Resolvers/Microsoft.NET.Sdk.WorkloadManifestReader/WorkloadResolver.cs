@@ -410,7 +410,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// Returns the list of workloads defined by the manifests on disk
         /// </summary>
-        public IEnumerable<WorkloadDefinition> GetAvaliableWorkloads()
+        public IEnumerable<WorkloadDefinition> GetAvailableWorkloads()
         {
             return _workloads.Values;
         }
@@ -478,7 +478,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId)
         {
-            var workloadDef = GetAvaliableWorkloads().FirstOrDefault(workload => workload.Id.ToString().Equals(workloadId.ToString()));
+            var workloadDef = GetAvailableWorkloads().FirstOrDefault(workload => workload.Id.ToString().Equals(workloadId.ToString()));
             if (workloadDef == null)
             {
                 throw new Exception("Workload not found");

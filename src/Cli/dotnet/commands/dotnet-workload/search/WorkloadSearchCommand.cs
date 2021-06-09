@@ -39,12 +39,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
 
         public override int Execute()
         {
-            IEnumerable<WorkloadDefinition> avaliableWorkloads = _workloadResolver.GetAvaliableWorkloads()
+            IEnumerable<WorkloadDefinition> availableWorkloads = _workloadResolver.GetAvailableWorkloads()
                 .OrderBy(workload => workload.Id);
 
             if (!string.IsNullOrEmpty(_workloadIdStub))
             {
-                avaliableWorkloads = avaliableWorkloads.Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase));
+                availableWorkloads = availableWorkloads.Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase));
             }
 
             var table = new PrintableTable<WorkloadDefinition>();
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
             }
 
             _reporter.WriteLine();
-            table.PrintRows(avaliableWorkloads, l => _reporter.WriteLine(l));
+            table.PrintRows(availableWorkloads, l => _reporter.WriteLine(l));
             _reporter.WriteLine();
 
             return 0;

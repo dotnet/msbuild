@@ -102,10 +102,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private void ValidateWorkloadIdsInput()
         {
-            var avaliableWorkloads = _workloadResolver.GetAvaliableWorkloads();
+            var availableWorkloads = _workloadResolver.GetAvailableWorkloads();
             foreach (var workloadId in _workloadIds)
             {
-                if (avaliableWorkloads.Select(workload => workload.Id.ToString()).Contains(workloadId))
+                if (availableWorkloads.Select(workload => workload.Id.ToString()).Contains(workloadId))
                 {
                     if (!_workloadResolver.IsWorkloadPlatformCompatible(new WorkloadId(workloadId)))
                     {

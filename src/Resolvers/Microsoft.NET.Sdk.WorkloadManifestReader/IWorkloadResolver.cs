@@ -10,7 +10,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         IEnumerable<WorkloadResolver.PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind);
         IEnumerable<string> GetPacksInWorkload(string workloadId);
         ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId);
-        IEnumerable<WorkloadDefinition> GetAvaliableWorkloads();
+        IEnumerable<WorkloadDefinition> GetAvailableWorkloads();
         WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion);
         bool IsWorkloadPlatformCompatible(WorkloadId workloadId);
         string GetManifestVersion(string manifestId);

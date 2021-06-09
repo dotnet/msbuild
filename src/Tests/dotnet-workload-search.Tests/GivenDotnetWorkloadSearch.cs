@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
     public class GivenDotnetWorkloadSearch : SdkTest
     {
         private readonly BufferedReporter _reporter;
-        private readonly IEnumerable<WorkloadDefinition> _avaliableWorkloads =
+        private readonly IEnumerable<WorkloadDefinition> _availableWorkloads =
             new List<WorkloadDefinition>()
             {
                 new WorkloadDefinition(new WorkloadId("mock-workload-1"), false, null, WorkloadDefinitionKind.Dev, new List<WorkloadId>(), 
@@ -55,12 +55,12 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         {
             _reporter.Clear();
             var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search");
-            var workloadResolver = new MockWorkloadResolver(_avaliableWorkloads);
+            var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
 
             var output = string.Join(" ", _reporter.Lines);
-            foreach (var workload in _avaliableWorkloads)
+            foreach (var workload in _availableWorkloads)
             {
                 output.Contains(workload.Id.ToString()).Should().BeTrue();
                 if (workload.Description != null)
@@ -79,12 +79,12 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         {
             _reporter.Clear();
             var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search -v d");
-            var workloadResolver = new MockWorkloadResolver(_avaliableWorkloads);
+            var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
 
             var output = string.Join(" ", _reporter.Lines);
-            foreach (var workload in _avaliableWorkloads)
+            foreach (var workload in _availableWorkloads)
             {
                 output.Contains(workload.Id.ToString()).Should().BeTrue();
                 if (workload.Description != null)
@@ -103,12 +103,12 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         {
             _reporter.Clear();
             var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search mock");
-            var workloadResolver = new MockWorkloadResolver(_avaliableWorkloads);
+            var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
 
             var output = string.Join(" ", _reporter.Lines);
-            var expectedWorkloads = _avaliableWorkloads.Take(3);
+            var expectedWorkloads = _availableWorkloads.Take(3);
             foreach (var workload in expectedWorkloads)
             {
                 output.Contains(workload.Id.ToString()).Should().BeTrue();
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         {
             _reporter.Clear();
             var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search");
-            var workloadResolver = new MockWorkloadResolver(_avaliableWorkloads);
+            var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
 
