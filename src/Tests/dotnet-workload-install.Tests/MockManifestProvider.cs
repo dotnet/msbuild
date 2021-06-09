@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.NET.Sdk.WorkloadManifestReader;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -24,11 +26,11 @@ namespace ManifestReaderTests
             }
         }
 
-        public IEnumerable<(string manifestId, Stream manifestStream)> GetManifests()
+        public IEnumerable<(string manifestId, Func<Stream> openManifestStream)> GetManifests()
             {
                 foreach (var filePath in _filePaths)
                 {
-                    yield return (filePath, new FileStream(filePath, FileMode.Open, FileAccess.Read));
+                    yield return (filePath, () => new FileStream(filePath, FileMode.Open, FileAccess.Read));
                 }
             }
 

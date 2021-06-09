@@ -89,10 +89,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var manifests = new Dictionary<string,WorkloadManifest>(StringComparer.OrdinalIgnoreCase);
 
-            foreach ((string manifestId, Stream manifestStream) in _manifestProvider.GetManifests())
+            foreach ((string manifestId, Func<Stream> openManifestStream) in _manifestProvider.GetManifests())
 
             {
-                using (manifestStream)
+                using (var manifestStream = openManifestStream())
                 {
                     var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
                     if (manifests.ContainsKey(manifestId))

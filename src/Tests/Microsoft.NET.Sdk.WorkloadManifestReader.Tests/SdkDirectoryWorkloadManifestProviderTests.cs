@@ -90,7 +90,11 @@ namespace ManifestReaderTests
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.105");
 
-            Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().ToList();
+            Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().Select(m => {
+                using (m.openManifestStream()) { }
+                return true;
+            }).ToList();
+
             a.ShouldThrow<FileNotFoundException>();
         }
 
@@ -240,7 +244,7 @@ namespace ManifestReaderTests
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
-            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.manifestStream).ReadToEnd());
+            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.openManifestStream()).ReadToEnd());
         }
 
         private class EnvironmentMock
