@@ -789,6 +789,36 @@ Exemples :
         <target state="translated">Les options suivantes ou leur(s) valeur(s) ne sont pas valables en combinaison avec d’autres options fournies ou leurs valeurs :</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
+        <source>The '{0}' command creates a .NET project based on a template.</source>
+        <target state="new">The '{0}' command creates a .NET project based on a template.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint">
+        <source>Display template options with:</source>
+        <target state="new">Display template options with:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_ExampleHeader">
+        <source>An example would be:</source>
+        <target state="new">An example would be:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
+        <source>Display installed templates with:</source>
+        <target state="new">Display installed templates with:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
+        <source>Display templates available on NuGet.org with:</source>
+        <target state="new">Display templates available on NuGet.org with:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_DotnetNew_TemplatesHeader">
+        <source>Common templates are:</source>
+        <target state="new">Common templates are:</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="new">Could not find the template package containing template '{0}'</target>

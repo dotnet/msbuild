@@ -127,30 +127,6 @@ Options:
         }
 
         [Fact]
-        public void CanShowBasicInfo()
-        {
-            string home = TestUtils.CreateTemporaryFolder("Home");
-            string workingDirectory = TestUtils.CreateTemporaryFolder();
-
-            new DotnetNewCommand(_log, "--quiet")
-                .WithCustomHive(home)
-                .WithWorkingDirectory(workingDirectory)
-                .Execute()
-                .Should()
-                .ExitWith(0)
-                .And.NotHaveStdErr()
-                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
-                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
-                .And.HaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
-                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
-                .And.HaveStdOutContaining("Examples:")
-                .And.HaveStdOutMatching("dotnet new3 [A-Za-z\\-]+")
-                .And.HaveStdOutContaining("dotnet new3 --help")
-                .And.HaveStdOutMatching("dotnet new3 [A-Za-z\\-]+ --help")
-                .And.NotHaveStdOutContaining(HelpOutput);
-        }
-
-        [Fact]
         public void CanShowHelp()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");

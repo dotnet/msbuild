@@ -730,4 +730,22 @@ Examples:
   <data name="Create" xml:space="preserve">
     <value>Create</value>
   </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_Description" xml:space="preserve">
+    <value>The '{0}' command creates a .NET project based on a template.</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_ExampleHeader" xml:space="preserve">
+    <value>An example would be:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint" xml:space="preserve">
+    <value>Display template options with:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint" xml:space="preserve">
+    <value>Display installed templates with:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint" xml:space="preserve">
+    <value>Display templates available on NuGet.org with:</value>
+  </data>
+  <data name="TemplateInformationCoordinator_DotnetNew_TemplatesHeader" xml:space="preserve">
+    <value>Common templates are:</value>
+  </data>
 </root>

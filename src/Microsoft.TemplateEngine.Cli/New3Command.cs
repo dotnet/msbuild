@@ -266,8 +266,15 @@ namespace Microsoft.TemplateEngine.Cli
                 return New3CommandStatus.Success;
             }
 
-            // No other cases specified, we've fallen through to "Optional usage help + List"
-            return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
+            // dotnet new --list case
+            if (_commandInput.IsListFlagSpecified)
+            {
+                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
+            }
+
+            // No options specified - should information about dotnet new
+            return await _templateInformationCoordinator.DisplayCommandDescriptionAsync(_commandInput, default)
+                .ConfigureAwait(false);
         }
 
         private async Task<New3CommandStatus> EnterTemplateManipulationFlowAsync()

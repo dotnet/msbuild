@@ -334,9 +334,47 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         /// <summary>
+        /// Handles display for dotnet new command without parameters.
+        /// </summary>
+        /// <param name="commandInput">user command input.</param>
+        /// <param name="cancellationToken">cancellation token.</param>
+        /// <returns></returns>
+        internal async Task<New3CommandStatus> DisplayCommandDescriptionAsync(
+            INewCommandInput commandInput,
+            CancellationToken cancellationToken)
+        {
+            Reporter.Output.WriteLine(string.Format(
+                LocalizableStrings.TemplateInformationCoordinator_DotnetNew_Description,
+                commandInput.New3CommandExample()));
+            Reporter.Output.WriteLine();
+
+            Reporter.Output.WriteLine(string.Format(
+              LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
+              commandInput.New3CommandExample()));
+            await ShowCuratedListAsync(commandInput, cancellationToken).ConfigureAwait(false);
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
+            Reporter.Output.WriteCommand(commandInput.InstantiateTemplateExample("app"));
+            Reporter.Output.WriteLine();
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint);
+            Reporter.Output.WriteCommand(commandInput.HelpCommandExample("app"));
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ListTemplatesHint);
+            Reporter.Output.WriteCommand(commandInput.ListCommandExample());
+
+            Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint);
+            Reporter.Output.WriteCommand(commandInput.SearchCommandExample("ap"));
+
+            Reporter.Output.WriteLine();
+
+            return New3CommandStatus.Success;
+        }
+
+        /// <summary>
         /// Displays the help in case <paramref name="commandInput"/> contains invalid parameters for resolved <paramref name="unambiguousTemplateGroup"/>.
         /// </summary>
-        /// <param name="unambiguousTemplateGroup">the unambigious template group to use based on the command input.</param>
+        /// <param name="unambiguousTemplateGroup">the unambiguous template group to use based on the command input.</param>
         /// <param name="commandInput">the command input.</param>
         /// <returns><see cref="New3CommandStatus.InvalidParamValues"/>.</returns>
         /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/>is <see langword="null" />.</exception>
@@ -360,6 +398,27 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                             GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.ShortNames[0])).Bold().Red());
             }
             return New3CommandStatus.InvalidParamValues;
+        }
+
+        /// <summary>
+        /// Displays curated list of templates for dotnet new command.
+        /// </summary>
+        private async Task ShowCuratedListAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+        {
+            string[] curatedGroupIdentityList = new[]
+            {
+                "Microsoft.Common.Library", //classlib
+                "Microsoft.Common.Console", //console
+                "Microsoft.Common.App", //app
+                "Microsoft.Common.WPF", //wpf
+                "Microsoft.Common.WinForms", //winforms
+                "Microsoft.Web.Blazor.Wasm", //blazorwasm
+                "Microsoft.Web.RazorPages" //webapp
+            };
+
+            IReadOnlyList<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
+            IEnumerable<ITemplateInfo> filteredTemplates = templates.Where(t => curatedGroupIdentityList.Contains(t.GroupIdentity, StringComparer.OrdinalIgnoreCase));
+            DisplayTemplateList(filteredTemplates, commandInput);
         }
 
         /// <summary>

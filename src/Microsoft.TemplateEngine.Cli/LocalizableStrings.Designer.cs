@@ -1436,6 +1436,60 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; command creates a .NET project based on a template..
+        /// </summary>
+        internal static string TemplateInformationCoordinator_DotnetNew_Description {
+            get {
+                return ResourceManager.GetString("TemplateInformationCoordinator_DotnetNew_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display template options with:.
+        /// </summary>
+        internal static string TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint {
+            get {
+                return ResourceManager.GetString("TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An example would be:.
+        /// </summary>
+        internal static string TemplateInformationCoordinator_DotnetNew_ExampleHeader {
+            get {
+                return ResourceManager.GetString("TemplateInformationCoordinator_DotnetNew_ExampleHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display installed templates with:.
+        /// </summary>
+        internal static string TemplateInformationCoordinator_DotnetNew_ListTemplatesHint {
+            get {
+                return ResourceManager.GetString("TemplateInformationCoordinator_DotnetNew_ListTemplatesHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display templates available on NuGet.org with:.
+        /// </summary>
+        internal static string TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint {
+            get {
+                return ResourceManager.GetString("TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Common templates are:.
+        /// </summary>
+        internal static string TemplateInformationCoordinator_DotnetNew_TemplatesHeader {
+            get {
+                return ResourceManager.GetString("TemplateInformationCoordinator_DotnetNew_TemplatesHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
         /// </summary>
         internal static string TemplatePackageCoordinator_Error_PackageForTemplateNotFound {

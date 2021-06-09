@@ -64,5 +64,32 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
             return $"dotnet {command.CommandName} --uninstall {packageId}";
         }
+
+        internal static string InstantiateTemplateExample (this INewCommandInput command, string templateName)
+        {
+            if (templateName.Any(char.IsWhiteSpace))
+            {
+                templateName = $"'{templateName}'";
+            }
+            return $"dotnet {command.CommandName} {templateName}";
+        }
+
+        internal static string HelpCommandExample(this INewCommandInput command, string? templateName = null)
+        {
+            if (string.IsNullOrWhiteSpace(templateName))
+            {
+                return $"dotnet {command.CommandName} -h";
+            }
+            if (templateName.Any(char.IsWhiteSpace))
+            {
+                templateName = $"'{templateName}'";
+            }
+            return $"dotnet {command.CommandName} {templateName} -h";
+        }
+
+        internal static string New3CommandExample(this INewCommandInput command)
+        {
+            return $"dotnet {command.CommandName}";
+        }
     }
 }
