@@ -415,6 +415,47 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return _workloads.Values;
         }
 
+        /// <summary>
+        /// Determines which of the installed workloads has updates available in the advertising manifests.
+        /// </summary>
+        /// <param name="advertisingManifestResolver">A resolver that composes the advertising manifests with the installed manifests that do not have corresponding advertising manifests</param>
+        /// <param name="existingWorkloads">The IDs of all of the installed workloads</param>
+        /// <returns></returns>
+        public IEnumerable<WorkloadId> GetUpdatedWorkloads(WorkloadResolver advertisingManifestResolver, IEnumerable<WorkloadId> installedWorkloads)
+        {
+            foreach(var workloadId in installedWorkloads)
+            {
+                var existingWorkload = _workloads[workloadId];
+                var existingPacks = GetPacksInWorkload(existingWorkload).ToHashSet();
+                var updatedWorkload = advertisingManifestResolver._workloads[workloadId];
+                var updatedPacks = advertisingManifestResolver.GetPacksInWorkload(updatedWorkload);
+
+                if (!existingPacks.SetEquals(updatedPacks) || existingPacks.Any(p=> PackHasChanged(_packs[p], advertisingManifestResolver._packs[p])))
+                {
+                    yield return workloadId;
+                }
+            }
+        }
+
+        private bool PackHasChanged(WorkloadPack oldPack, WorkloadPack newPack)
+        {
+            var existingPackResolvedId = ResolveId(oldPack);
+            var newPackResolvedId = ResolveId(newPack);
+            if (existingPackResolvedId is null && newPackResolvedId is null)
+            {
+                return false; // pack still aliases to nothing
+            }
+            else if (existingPackResolvedId is null || newPackResolvedId is null || !existingPackResolvedId.Value.Equals(newPackResolvedId.Value))
+            {
+                return true; // alias has changed
+            }
+            if (!string.Equals(oldPack.Version, newPack.Version, StringComparison.OrdinalIgnoreCase))
+            {
+                return true; // version has changed
+            }
+            return false;
+        }
+
         public class PackInfo
         {
             public PackInfo(string id, string version, WorkloadPackKind kind, string path, string resolvedPackageId)
