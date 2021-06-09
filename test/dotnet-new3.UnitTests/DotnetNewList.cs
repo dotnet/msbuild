@@ -84,6 +84,7 @@ Dotnet local tool manifest file               tool-manifest              Config
 global.json file                              globaljson                 Config                
 NuGet Config                                  nugetconfig                Config                
 Razor Class Library                           razorclasslib  [C#]        Web/Razor/Library     
+Simple Console Application                    app            [C#]        Common/Console        
 Solution File                                 sln                        Solution              
 Web Config                                    webconfig                  Config                
 Worker Service                                worker         [C#],F#     Common/Worker/Web     ";

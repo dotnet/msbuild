@@ -102,6 +102,22 @@ Options:
                   bool - Optional                                                    
                   Default: true                                                      ";
 
+        private const string ConsoleAppHelp =
+@"Simple Console Application (C#)
+Author: Microsoft
+Description: A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.
+Options:                                                                            
+  --langVersion  Sets the LangVersion property in the created project file          
+                 text - Optional                                                    
+
+  --no-restore   If specified, skips the automatic restore of the project on create.
+                 bool - Optional                                                    
+                 Default: false                                                     
+
+  --nullable     Whether to enable nullable reference types for this project.       
+                 bool - Optional                                                    
+                 Default: true                                                      ";
+
         #endregion
         private readonly ITestOutputHelper _log;
 
@@ -165,7 +181,7 @@ Options:
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "console", "--help", "--quiet")
+            new DotnetNewCommand(_log, "console", "--help")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
@@ -184,6 +200,16 @@ Options:
                 .And.NotHaveStdErr()
                 .And.HaveStdOut(ClassLibHelp)
                 .And.NotHaveStdOutContaining(HelpOutput);
+
+            new DotnetNewCommand(_log, "app", "-h")
+                 .WithCustomHive(home)
+                 .WithWorkingDirectory(workingDirectory)
+                 .Execute()
+                 .Should()
+                 .ExitWith(0)
+                 .And.NotHaveStdErr()
+                 .And.HaveStdOut(ConsoleAppHelp)
+                 .And.NotHaveStdOutContaining(HelpOutput);
         }
 
         [Fact]

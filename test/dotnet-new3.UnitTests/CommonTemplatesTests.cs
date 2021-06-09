@@ -6,8 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.TemplateEngine.TestHelper;
@@ -61,6 +63,10 @@ namespace Dotnet_new3.IntegrationTests
         [InlineData("Class Library", "classlib", "C#", "netcoreapp2.1")]
         [InlineData("Class Library", "classlib", "F#", "netcoreapp2.1")]
         [InlineData("Class Library", "classlib", "VB", "netcoreapp2.1")]
+
+        [InlineData("Simple Console Application", "app")]
+        [InlineData("Simple Console Application", "app", "C#")]
+        [InlineData("Simple Console Application", "app", "C#", "net6.0")]
         public void AllCommonProjectsCreateRestoreAndBuild(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();
@@ -161,6 +167,10 @@ Restore succeeded\.");
         [InlineData("Class Library", "classlib", "C#", "netcoreapp2.1")]
         [InlineData("Class Library", "classlib", "F#", "netcoreapp2.1")]
         [InlineData("Class Library", "classlib", "VB", "netcoreapp2.1")]
+
+        [InlineData("Simple Console Application", "app")]
+        [InlineData("Simple Console Application", "app", "C#")]
+        [InlineData("Simple Console Application", "app", "C#", "net6.0")]
         public void AllCommonProjectsCreate_NoRestore(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();
@@ -209,6 +219,165 @@ Restore succeeded\.");
                 .And.NotHaveStdErr()
                 .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
 
+            Directory.Delete(workingDir, true);
+        }
+
+        [Theory]
+        [InlineData("Nullable", "enable", "Simple Console Application", "app", null, null)]
+        [InlineData("CheckForOverflowUnderflow", "true", "Simple Console Application", "app", null, null)]
+        [InlineData("LangVersion", null, "Simple Console Application", "app", null, null)]
+        [InlineData("TargetFramework", "net6.0", "Simple Console Application", "app", null, null)]
+
+        [InlineData("Nullable", null, "Console Application", "console", null, null)]
+        [InlineData("CheckForOverflowUnderflow", null, "Console Application", "console", null, null)]
+        [InlineData("LangVersion", null, "Console Application", "console", null, null)]
+        [InlineData("TargetFramework", "net6.0", "Console Application", "console", null, null)]
+
+        [InlineData("Nullable", null, "Console Application", "console", "F#", null)]
+        [InlineData("CheckForOverflowUnderflow", null, "Console Application", "console", "F#", null)]
+        [InlineData("LangVersion", null, "Console Application", "console", "F#", null)]
+        [InlineData("TargetFramework", "net6.0", "Console Application", "console", "F#", null)]
+        [InlineData("GenerateDocumentationFile", null, "Console Application", "console", "F#", null)]
+
+        [InlineData("Nullable", null, "Console Application", "console", "VB", null)]
+        [InlineData("CheckForOverflowUnderflow", null, "Console Application", "console", "VB", null)]
+        [InlineData("LangVersion", null, "Console Application", "console", "VB", null)]
+        [InlineData("TargetFramework", "net6.0", "Console Application", "console", "VB", null)]
+
+        [InlineData("Nullable", "enable", "Class Library", "classlib", null, null)]
+        [InlineData("CheckForOverflowUnderflow", "true", "Class Library", "classlib", null, null)]
+        [InlineData("LangVersion", null, "Class Library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net6.0", "Class Library", "classlib", null, null)]
+
+        [InlineData("Nullable", null, "Class Library", "classlib", "F#", null)]
+        [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", "F#", null)]
+        [InlineData("LangVersion", null, "Class Library", "classlib", "F#", null)]
+        [InlineData("TargetFramework", "net6.0", "Class Library", "classlib", "F#", null)]
+        [InlineData("GenerateDocumentationFile", "true", "Class Library", "classlib", "F#", null)]
+
+        [InlineData("Nullable", null, "Class Library", "classlib", "VB", null)]
+        [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", "VB", null)]
+        [InlineData("LangVersion", null, "Class Library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net6.0", "Class Library", "classlib", "VB", null)]
+
+        public void SetPropertiesByDefault(string propertyName, string? propertyValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
+        {
+            string workingDir = TestUtils.CreateTemporaryFolder();
+            List<string> args = new List<string>() { templateShortName, "--no-restore" };
+            if (!string.IsNullOrWhiteSpace(language))
+            {
+                args.Add("--language");
+                args.Add(language);
+            }
+            if (!string.IsNullOrWhiteSpace(framework))
+            {
+                args.Add("--framework");
+                args.Add(framework);
+            }
+
+            new DotnetNewCommand(_log, args.ToArray())
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
+
+            string expectedExtension = language switch
+            {
+                "C#" => "*.csproj",
+                "F#" => "*.fsproj",
+                "VB" => "*.vbproj",
+                _ => "*.csproj"
+            };
+            string projectFile = Directory.GetFiles(workingDir, expectedExtension).Single();
+            XDocument projectXml = XDocument.Load(projectFile);
+            XNamespace ns = projectXml.Root?.Name.Namespace ?? throw new Exception("Unexpected project file format");
+            if (propertyValue != null)
+            {
+                Assert.Equal(propertyValue, projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName)?.Value);
+            }
+            else
+            {
+                Assert.Null(projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName));
+            }
+            Directory.Delete(workingDir, true);
+        }
+
+        [Theory]
+        //unset nullable 
+        [InlineData("Nullable", null, "--nullable", "false", "Simple Console Application", "app", null, null)]
+        [InlineData("Nullable", null, "--nullable", "false", "Class Library", "classlib", null, null)]
+
+        //language version
+        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Simple Console Application", "app", null, null)]
+        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Console Application", "console", null, null)]
+        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Console Application", "console", "VB", null)]
+        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Class Library", "classlib", null, null)]
+        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Class Library", "classlib", "VB", null)]
+
+        //framework
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", null, null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Console Application", "console", "F#", null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class Library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class Library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "--framework", "net5.0", "Class Library", "classlib", "F#", null)]
+
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", null, null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Console Application", "console", "F#", null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class Library", "classlib", null, null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class Library", "classlib", "VB", null)]
+        [InlineData("TargetFramework", "net5.0", "-f", "net5.0", "Class Library", "classlib", "F#", null)]
+        public void CanSetProperty(string propertyName, string? propertyValue, string argName, string argValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
+        {
+            string workingDir = TestUtils.CreateTemporaryFolder();
+            List<string> args = new List<string>() { templateShortName, "--no-restore" };
+            if (!string.IsNullOrWhiteSpace(language))
+            {
+                args.Add("--language");
+                args.Add(language);
+            }
+            if (!string.IsNullOrWhiteSpace(framework))
+            {
+                args.Add("--framework");
+                args.Add(framework);
+            }
+            if (!string.IsNullOrWhiteSpace(argName))
+            {
+                args.Add(argName);
+                args.Add(argValue);
+            }
+
+            new DotnetNewCommand(_log, args.ToArray())
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
+
+            string expectedExtension = language switch
+            {
+                "C#" => "*.csproj",
+                "F#" => "*.fsproj",
+                "VB" => "*.vbproj",
+                _ => "*.csproj"
+            };
+            string projectFile = Directory.GetFiles(workingDir, expectedExtension).Single();
+            XDocument projectXml = XDocument.Load(projectFile);
+            XNamespace ns = projectXml.Root?.Name.Namespace ?? throw new Exception("Unexpected project file format");
+            if (propertyValue != null)
+            {
+                Assert.Equal(propertyValue, projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName)?.Value);
+            }
+            else
+            {
+                Assert.Null(projectXml.Root?.Element(ns + "PropertyGroup")?.Element(ns + propertyName));
+            }
             Directory.Delete(workingDir, true);
         }
     }
