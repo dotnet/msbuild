@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="DownloadVersionFailed">
+        <source>Downloading {0} version {1} failed.</source>
+        <target state="new">Downloading {0} version {1} failed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedToLoadNuGetSource">
         <source>Failed to load NuGet source {0}</source>
         <target state="new">Failed to load NuGet source {0}</target>
@@ -12,9 +17,24 @@
         <target state="new">Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToValidatePackageSigning">
+        <source>Failed to validate package signing.</source>
+        <target state="new">Failed to validate package signing.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IsNotFoundInNuGetFeeds">
-        <source>{0} is not found in NuGet feeds {1}",</source>
-        <target state="new">{0} is not found in NuGet feeds {1}",</target>
+        <source>{0} is not found in NuGet feeds {1}".</source>
+        <target state="new">{0} is not found in NuGet feeds {1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipNuGetpackageSigningValidationSDKNotFirstParty">
+        <source>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</source>
+        <target state="new">Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SkipNuGetpackageSigningValidationmacOSLinux">
+        <source>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</source>
+        <target state="new">Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</target>
         <note />
       </trans-unit>
     </body>

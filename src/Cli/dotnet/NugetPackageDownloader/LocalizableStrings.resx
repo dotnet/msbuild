@@ -124,6 +124,18 @@
     <value>Failed to load NuGet source {0}: the source is not valid. It will be skipped in further processing.</value>
   </data>
   <data name="IsNotFoundInNuGetFeeds" xml:space="preserve">
-    <value>{0} is not found in NuGet feeds {1}",</value>
+    <value>{0} is not found in NuGet feeds {1}".</value>
+  </data>
+  <data name="DownloadVersionFailed" xml:space="preserve">
+    <value>Downloading {0} version {1} failed.</value>
+  </data>
+  <data name="SkipNuGetpackageSigningValidationSDKNotFirstParty" xml:space="preserve">
+    <value>Skip NuGet package signing validation. The current .NET SDK is not signed by first party.</value>
+  </data>
+  <data name="SkipNuGetpackageSigningValidationmacOSLinux" xml:space="preserve">
+    <value>Skip NuGet package signing validation. NuGet signing validation is not available on Linux or macOS https://aka.ms/workloadskippackagevalidation .</value>
+  </data>
+  <data name="FailedToValidatePackageSigning" xml:space="preserve">
+    <value>Failed to validate package signing.</value>
   </data>
 </root>
