@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.DotNet.MSBuildSdkResolver;
+
+using Microsoft.NET.Sdk.Localization;
+using FXVersion = Microsoft.DotNet.MSBuildSdkResolver.FXVersion;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -120,10 +122,41 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         }
                     }
                 }
+
+                HashSet<WorkloadRedirect>? redirects = null;
                 foreach (var workload in manifest.Workloads)
                 {
-                    _workloads.Add(workload.Key, workload.Value);
+                    if (workload.Value is WorkloadRedirect redirect)
+                    {
+                        (redirects ?? (redirects = new HashSet<WorkloadRedirect>())).Add(redirect);
+                    }
+                    else
+                    {
+                        _workloads.Add(workload.Key, (WorkloadDefinition)workload.Value);
+                    }
                 }
+
+                // resolve redirects upfront so they are transparent to the rest of the code
+                // the _workloads dictionary maps redirected ids directly to the replacement
+                if (redirects != null)
+                {
+                    // handle multi-levels redirects via multiple resolve passes, bottom-up
+                    while (redirects.RemoveWhere(redirect =>
+                    {
+                        if (_workloads.TryGetValue(redirect.ReplaceWith, out var replacement))
+                        {
+                            _workloads.Add(redirect.Id, replacement);
+                            return true;
+                        }
+                        return false;
+                    }) > 0) { };
+
+                    if (redirects.Count > 0)
+                    {
+                        throw new WorkloadManifestCompositionException(Strings.UnresolvedWorkloadRedirects, string.Join("\", \"", redirects.Select(r => r.Id.ToString())));
+                    }
+                }
+
                 foreach (var pack in manifest.Packs)
                 {
                     _packs.Add(pack.Key, pack.Value);

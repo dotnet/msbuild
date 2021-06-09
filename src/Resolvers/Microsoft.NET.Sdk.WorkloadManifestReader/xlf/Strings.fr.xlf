@@ -52,6 +52,11 @@
         <target state="translated">Version manquante pour le pack de charges de travail '{0}'</target>
         <note />
       </trans-unit>
+      <trans-unit id="RedirectWorkloadHasOtherKeys">
+        <source>Redirect workload '{0}' has keys other than 'redirect-to'</source>
+        <target state="new">Redirect workload '{0}' has keys other than 'redirect-to'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnexpectedTokenAtOffset">
         <source>Unexpected token '{0}' at offset {1}</source>
         <target state="translated">Jeton '{0}' inattendu à l'offset {1}</target>
@@ -70,6 +75,11 @@
       <trans-unit id="UnknownWorkloadPackKind">
         <source>Unknown workload pack kind '{0}' at offset {1}</source>
         <target state="translated">Genre de pack de charge de travail inconnu '{0}' à l'offset {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnresolvedWorkloadRedirects">
+        <source>One or more workload redirects failed to resolve: {0}</source>
+        <target state="new">One or more workload redirects failed to resolve: {0}</target>
         <note />
       </trans-unit>
     </body>

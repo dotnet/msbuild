@@ -159,4 +159,10 @@
   <data name="UnknownWorkloadPackKind" xml:space="preserve">
     <value>Unknown workload pack kind '{0}' at offset {1}</value>
   </data>
+  <data name="RedirectWorkloadHasOtherKeys" xml:space="preserve">
+    <value>Redirect workload '{0}' has keys other than 'redirect-to'</value>
+  </data>
+  <data name="UnresolvedWorkloadRedirects" xml:space="preserve">
+    <value>One or more workload redirects failed to resolve: {0}</value>
+  </data>
 </root>
