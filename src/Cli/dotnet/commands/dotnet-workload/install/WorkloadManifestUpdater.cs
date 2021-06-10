@@ -125,7 +125,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
-                    packageUrls.Add(_nugetPackageDownloader.GetPackageUrl(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews).Result);
+                    packageUrls.Add(_nugetPackageDownloader.GetPackageUrl(packageId, packageSourceLocation: _packageSourceLocation, includePreview: includePreviews).GetAwaiter().GetResult());
                 }
                 catch
                 {

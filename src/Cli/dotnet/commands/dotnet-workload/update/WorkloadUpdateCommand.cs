@@ -103,7 +103,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printDownloadLinkOnly)
             {
-                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).Result;
+                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();
 
                 _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
@@ -270,7 +270,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 {
                     var installer = _workloadInstaller.GetPackInstaller();
                     var packsToUpdate = GetUpdatablePacks(installer)
-                        .Select(packInfo => _nugetPackageDownloader.GetPackageUrl(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).Result);
+                        .Select(packInfo => _nugetPackageDownloader.GetPackageUrl(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).GetAwaiter().GetResult());
                     packageUrls = packageUrls.Concat(packsToUpdate);
                     return packageUrls;
                 }

@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             if (_printDownloadLinkOnly)
             {
                 _reporter.WriteLine(string.Format(LocalizableStrings.ResolvingPackageUrls, string.Join(", ", _workloadIds)));
-                var packageUrls = GetPackageDownloadUrlsAsync(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews).Result;
+                var packageUrls = GetPackageDownloadUrlsAsync(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews).GetAwaiter().GetResult();
 
                 _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
@@ -264,7 +264,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         .Select(packId => _workloadResolver.TryGetPackInfo(packId))
                         .Where(pack => pack != null)
                         .Select(pack => _nugetPackageDownloader.GetPackageUrl(new PackageId(pack.ResolvedPackageId), new NuGetVersion(pack.Version),
-                            packageSourceLocation: _packageSourceLocation, includePreview: includePreview).Result);
+                            packageSourceLocation: _packageSourceLocation, includePreview: includePreview).GetAwaiter().GetResult());
                     packageUrls.AddRange(packUrls);
                 }
                 else

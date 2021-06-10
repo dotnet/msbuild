@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             string packagePath;
                             if (offlineCache == null || !offlineCache.HasValue)
                             {
-                                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).Result;
+                                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).GetAwaiter().GetResult();
                                 tempFilesToDelete.Add(packagePath);
                             }
                             else
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 var tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{packInfo.Id}-{packInfo.Version}-extracted");
                                 tempDirsToDelete.Add(tempExtractionDir);
                                 Directory.CreateDirectory(tempExtractionDir);
-                                var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).Result;
+                                var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
                                 FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, packInfo.Path));
                             }
@@ -186,7 +186,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                    {
                        if (offlineCache == null || !offlineCache.HasValue)
                        {
-                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).Result;
+                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId),
+                               new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).GetAwaiter().GetResult();
                        }
                        else
                        {
@@ -198,7 +199,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                        }
                        tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-extracted");
                        Directory.CreateDirectory(tempExtractionDir);
-                       var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).Result;
+                       var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
                        if (Directory.Exists(manifestPath) && Directory.GetFileSystemEntries(manifestPath).Any())
                        {
