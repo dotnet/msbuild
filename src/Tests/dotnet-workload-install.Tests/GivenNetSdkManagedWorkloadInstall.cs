@@ -121,7 +121,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             mockNugetInstaller.DownloadCallParams.Count.Should().Be(1);
             mockNugetInstaller.DownloadCallParams[0].ShouldBeEquivalentTo((new PackageId(packInfo.Id), new NuGetVersion(packInfo.Version), null as DirectoryPath?, null as PackageSourceLocation));
             mockNugetInstaller.ExtractCallParams.Count.Should().Be(1);
-            mockNugetInstaller.ExtractCallParams[0].ShouldBeEquivalentTo((mockNugetInstaller.DownloadCallResult[0], new DirectoryPath(Path.Combine(dotnetRoot, "metadata", "temp", $"{packInfo.Id}-{packInfo.Version}-extracted"))));
+            mockNugetInstaller.ExtractCallParams[0].Item1.Should().Be(mockNugetInstaller.DownloadCallResult[0]);
+            mockNugetInstaller.ExtractCallParams[0].Item2.ToString().Should().Contain($"{packInfo.Id}-{packInfo.Version}-extracted");
 
             var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
             File.Exists(installationRecordPath).Should().BeTrue();
@@ -400,7 +401,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             // Otherwise install should be normal
             mockNugetInstaller.ExtractCallParams.Count.Should().Be(1);
-            mockNugetInstaller.ExtractCallParams[0].ShouldBeEquivalentTo((nupkgPath, new DirectoryPath(Path.Combine(dotnetRoot, "metadata", "temp", $"{packInfo.Id}-{packInfo.Version}-extracted"))));
+            mockNugetInstaller.ExtractCallParams[0].Item1.Should().Be(nupkgPath);
+            mockNugetInstaller.ExtractCallParams[0].Item2.ToString().Should().Contain($"{packInfo.Id}-{packInfo.Version}-extracted");
             var installationRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1", packInfo.Id, packInfo.Version, version);
             File.Exists(installationRecordPath).Should().BeTrue();
             Directory.Exists(packInfo.Path).Should().BeTrue();
@@ -428,7 +430,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             INuGetPackageDownloader nugetInstaller = failingInstaller ? new FailingNuGetPackageDownloader(testDirectory) :  new MockNuGetPackageDownloader(dotnetRoot, manifestDownload);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
             var sdkFeatureBand = new SdkFeatureBand("6.0.100");
-            return (dotnetRoot, new NetSdkManagedInstaller(_reporter, sdkFeatureBand, workloadResolver, nugetInstaller, dotnetRoot, packageSourceLocation: packageSourceLocation), nugetInstaller);
+            return (dotnetRoot, new NetSdkManagedInstaller(_reporter, sdkFeatureBand, workloadResolver, nugetInstaller, dotnetRoot, packageSourceLocation: packageSourceLocation, tempDirPath: testDirectory), nugetInstaller);
         }
     }
 }

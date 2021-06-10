@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader,
-                dotnetDir, packageSourceLocation: _packageSourceLocation);
+                dotnetDir, _tempDirPath, packageSourceLocation: _packageSourceLocation);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printDownloadLinkOnly)
             {
-                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).Result;
+                var packageUrls = GetUpdatablePackageUrlsAsync(_includePreviews).GetAwaiter().GetResult();
 
                 _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
@@ -257,7 +257,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 {
                     var installer = _workloadInstaller.GetPackInstaller();
                     var packsToUpdate = GetUpdatablePacks(installer)
-                        .Select(packInfo => _nugetPackageDownloader.GetPackageUrl(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).Result);
+                        .Select(packInfo => _nugetPackageDownloader.GetPackageUrl(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).GetAwaiter().GetResult());
                     packageUrls = packageUrls.Concat(packsToUpdate);
                     return packageUrls;
                 }

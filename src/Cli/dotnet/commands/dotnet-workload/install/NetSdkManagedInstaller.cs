@@ -38,11 +38,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir =  null,
+            string tempDirPath =  null,
             VerbosityOptions verbosity = VerbosityOptions.normal, 
             PackageSourceLocation packageSourceLocation = null)
         {
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
-            _tempPackagesDir = new DirectoryPath(Path.Combine(_dotnetDir, "metadata", "temp"));
+            _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
             _nugetPackageDownloader = nugetPackageDownloader ?? 
                 new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null, verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger());
             _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
@@ -88,7 +89,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             string packagePath;
                             if (offlineCache == null || !offlineCache.HasValue)
                             {
-                                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).Result;
+                                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packInfo.ResolvedPackageId), new NuGetVersion(packInfo.Version), _packageSourceLocation).GetAwaiter().GetResult();
                                 tempFilesToDelete.Add(packagePath);
                             }
                             else
@@ -115,7 +116,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 var tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{packInfo.Id}-{packInfo.Version}-extracted");
                                 tempDirsToDelete.Add(tempExtractionDir);
                                 Directory.CreateDirectory(tempExtractionDir);
-                                var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).Result;
+                                var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
                                 FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, packInfo.Path));
                             }
@@ -185,7 +186,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                    {
                        if (offlineCache == null || !offlineCache.HasValue)
                        {
-                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId), new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).Result;
+                           packagePath = _nugetPackageDownloader.DownloadPackageAsync(WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId),
+                               new NuGetVersion(manifestVersion.ToString()), _packageSourceLocation).GetAwaiter().GetResult();
                        }
                        else
                        {
@@ -197,7 +199,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                        }
                        tempExtractionDir = Path.Combine(_tempPackagesDir.Value, $"{manifestId}-{manifestVersion}-extracted");
                        Directory.CreateDirectory(tempExtractionDir);
-                       var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).Result;
+                       var manifestFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
                        if (Directory.Exists(manifestPath) && Directory.GetFileSystemEntries(manifestPath).Any())
                        {

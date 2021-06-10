@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
             var manifestUpdater = new MockWorkloadManifestUpdater();
             var installParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
-                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot);
+                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             installCommand.Execute();
         }
 
@@ -160,7 +160,8 @@ namespace Microsoft.DotNet.Cli.Workload.Uninstall.Tests
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var uninstallParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "uninstall", uninstallingWorkload });
-            var uninstallCommand = new WorkloadUninstallCommand(uninstallParseResult, reporter: _reporter, workloadResolver, nugetDownloader, dotnetDir: dotnetRoot, version: sdkFeatureVersion);
+            var uninstallCommand = new WorkloadUninstallCommand(uninstallParseResult, reporter: _reporter, workloadResolver, nugetDownloader,
+                dotnetDir: dotnetRoot, version: sdkFeatureVersion);
             uninstallCommand.Execute();
         }
     }

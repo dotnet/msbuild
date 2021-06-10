@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             VerbosityOptions verbosity,
             INuGetPackageDownloader nugetPackageDownloader = null,
             string dotnetDir = null, 
+            string tempDirPath = null,
             PackageSourceLocation packageSourceLocation = null)
         {
             var installType = GetWorkloadInstallType(sdkFeatureBand, string.IsNullOrWhiteSpace(dotnetDir) 
@@ -41,7 +42,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 throw new GracefulException(LocalizableStrings.InadequatePermissions);
             }
 
-            return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver, nugetPackageDownloader, verbosity: verbosity, dotnetDir: dotnetDir, packageSourceLocation: packageSourceLocation);
+            return new NetSdkManagedInstaller(reporter, sdkFeatureBand, workloadResolver, nugetPackageDownloader, verbosity: verbosity, dotnetDir: dotnetDir,
+                packageSourceLocation: packageSourceLocation, tempDirPath: tempDirPath);
         }
 
         /// <summary>
