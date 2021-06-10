@@ -18,11 +18,11 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.11.0 and .N
 
 ## MSBuild 16.10.1
 
-This version of MSBuild will ship with Visual Studio 2019 version 16.10.1 and .NET SDK 5.0.301.
+This version of MSBuild shipped with Visual Studio 2019 version 16.10.1 and .NET SDK 5.0.301.
 
 #### Fixed
 
-* Specifying a project within a solution as a target is now possible again (#6465).
+* Restore support for building individual project(s) within solutions by specifying `-t:Project` (#6465).
 
 ## MSBuild 16.10.0
 
