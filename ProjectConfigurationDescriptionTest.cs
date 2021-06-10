@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Microsoft.NET.Build.Tests
 {
-    public class ProjecyConfigurationDescription : SdkTest
+    public class ProjectConfigurationDescription : SdkTest
     {
         public void ProjectConfigurationDescription_DefaultTest()
         {
@@ -39,7 +39,7 @@ namespace Microsoft.NET.Build.Tests
             var stdOut = runCommand.Execute().StdOut.Split(Environment.NewLine.ToCharArray()).Where(line => !string.IsNullOrWhiteSpace(line));
             stdOut.Should().BeEquivalentTo(expectedOutput);
 
-            //line 745 can be used to do the should fail expected output thing
+            //line 745 can be used to do the should fail expected output
         }
     }
 }
