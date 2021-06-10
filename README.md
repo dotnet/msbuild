@@ -4,6 +4,8 @@ The Microsoft Build Engine is a platform for building applications. This engine,
 
 For more information on MSBuild, see the [MSBuild documentation](https://docs.microsoft.com/visualstudio/msbuild/msbuild) on docs.microsoft.com.
 
+The [changelog](documentation/Changelog.md) has detailed information about changes made in different releases.
+
 ### Build Status
 
 The current development branch is `main`. Changes in `main` will go into a future update of MSBuild, which will release with Visual Studio 17.0 and a corresponding version of the .NET Core SDK.
