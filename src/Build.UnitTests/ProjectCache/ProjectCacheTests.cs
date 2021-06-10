@@ -1351,6 +1351,86 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         [Theory]
         [InlineData(false, false)]
+        // TODO: Reenable when this gets into the main branch.
+        //[InlineData(true, true)]
+        public void ParallelStressTestForVsWorkaround(bool useSynchronousLogging, bool disableInprocNode)
+        {
+            var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
+
+            try
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(
+                    new BuildEnvironment(
+                        currentBuildEnvironment.Mode,
+                        currentBuildEnvironment.CurrentMSBuildExePath,
+                        currentBuildEnvironment.RunningTests,
+                        runningInVisualStudio: true,
+                        visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
+
+                BuildManager.ProjectCacheItems.ShouldBeEmpty();
+
+                var referenceNumbers = Enumerable.Range(2, NativeMethodsShared.GetLogicalCoreCount() * 2).ToArray();
+
+                var testData = new GraphCacheResponse(
+                    new Dictionary<int, int[]>
+                    {
+                        {1, referenceNumbers}
+                    },
+                    referenceNumbers.ToDictionary(k => k, k => GraphCacheResponse.SuccessfulProxyTargetResult())
+                );
+
+                var graph = testData.CreateGraph(_env);
+
+                // Even though the assembly cache is discovered, we'll be overriding it with a descriptor based cache.
+                BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
+
+                var cache = new InstanceMockCache(testData, TimeSpan.FromMilliseconds(50));
+
+                using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters
+                {
+                    MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
+                    ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+                        cache,
+                        entryPoints: null,
+                        graph),
+                    UseSynchronousLogging = useSynchronousLogging,
+                    DisableInProcNode = disableInprocNode
+                });
+
+                var buildResultTasks = new List<Task<BuildResult>>();
+
+                foreach (var node in graph.ProjectNodes.Where(n => referenceNumbers.Contains(GetProjectNumber(n))))
+                {
+                    var buildResultTask = buildSession.BuildProjectFileAsync(
+                        node.ProjectInstance.FullPath,
+                        globalProperties:
+                        new Dictionary<string, string> { { "SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath } });
+
+                    buildResultTasks.Add(buildResultTask);
+                }
+
+                foreach (var buildResultTask in buildResultTasks)
+                {
+                    buildResultTask.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+                }
+
+                buildSession.BuildProjectFile(
+                        graph.GraphRoots.First().ProjectInstance.FullPath,
+                        globalProperties:
+                        new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}})
+                    .OverallResult.ShouldBe(BuildResultCode.Success);
+
+                cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
+            }
+            finally
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
+                BuildManager.ProjectCacheItems.Clear();
+            }
+        }
+
+        [Theory]
+        [InlineData(false, false)]
         [InlineData(true, true)]
         public void ParallelStressTest(bool useSynchronousLogging, bool disableInprocNode)
         {
