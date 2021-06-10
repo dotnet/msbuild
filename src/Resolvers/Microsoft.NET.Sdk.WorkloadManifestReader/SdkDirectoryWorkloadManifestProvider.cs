@@ -13,6 +13,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string _sdkRootPath;
         private readonly string _sdkVersionBand;
         private readonly string [] _manifestDirectories;
+        private static string[] _preview4ManifestIds = new string[] { "Microsoft.NET.Workload.Android", "Microsoft.NET.Workload.BlazorWebAssembly", "Microsoft.NET.Workload.iOS",
+            "Microsoft.NET.Workload.MacCatalyst", "Microsoft.NET.Workload.macOS", "Microsoft.NET.Workload.tvOS" };
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
             : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
@@ -81,7 +83,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectories[0]))
                     {
-                        yield return workloadManifestDirectory;
+                        if (!_preview4ManifestIds.Any(prev4Manifest => workloadManifestDirectory.ToLowerInvariant().Contains(prev4Manifest.ToLowerInvariant())))
+                        {
+                            yield return workloadManifestDirectory;
+                        }
                     }
                 }
             }
@@ -102,7 +107,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 foreach (var workloadManifestDirectory in directoriesWithManifests.Values)
                 {
-                    yield return workloadManifestDirectory;
+                    if (!_preview4ManifestIds.Any(prev4Manifest => workloadManifestDirectory.ToLowerInvariant().Contains(prev4Manifest.ToLowerInvariant())))
+                    {
+                        yield return workloadManifestDirectory;
+                    }
                 }
             }
         }
