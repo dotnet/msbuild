@@ -11,7 +11,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         IEnumerable<string> GetPacksInWorkload(string workloadId);
         ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId);
         IEnumerable<WorkloadDefinition> GetAvailableWorkloads();
-        WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion);
         bool IsWorkloadPlatformCompatible(WorkloadId workloadId);
         string GetManifestVersion(string manifestId);
         IDictionary<string, string> GetInstalledManifests();
@@ -30,6 +29,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// Refresh workload and pack information based on the current installed workload manifest files
         /// </summary>
+        /// <remarks>This is not valid for overlay resolvers</remarks>
         void RefreshWorkloadManifests();
+
+        /// <summary>
+        /// Derives a resolver from this resolver by overlaying a set of updated manifests and recomposing.
+        /// </summary>
+        IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider);
     }
 }

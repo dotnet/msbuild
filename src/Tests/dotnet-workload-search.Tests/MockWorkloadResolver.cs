@@ -26,9 +26,9 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId) => throw new NotImplementedException();
         public void RefreshWorkloadManifests() => throw new NotImplementedException();
         public WorkloadResolver.PackInfo TryGetPackInfo(string packId) => throw new NotImplementedException();
-        public WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion) => throw new NotImplementedException();
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId) => throw new NotImplementedException();
         public string GetManifestVersion(string manifestId) => throw new NotImplementedException();
         public IDictionary<string, string> GetInstalledManifests() => throw new NotImplementedException();
+        public IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider) => throw new NotImplementedException();
     }
 }

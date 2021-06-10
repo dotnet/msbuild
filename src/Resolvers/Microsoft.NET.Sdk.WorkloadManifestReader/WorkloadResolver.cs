@@ -17,9 +17,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </remarks>
     public class WorkloadResolver : IWorkloadResolver
     {
+        private readonly Dictionary<string, WorkloadManifest> _manifests = new Dictionary<string, WorkloadManifest>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<WorkloadId, WorkloadDefinition> _workloads = new Dictionary<WorkloadId, WorkloadDefinition>();
         private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
-        private readonly IWorkloadManifestProvider _manifestProvider;
+        private IWorkloadManifestProvider? _manifestProvider;
         private string[] _currentRuntimeIdentifiers;
         private readonly string [] _dotnetRootPaths;
 
@@ -57,59 +58,70 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return new WorkloadResolver(manifestProvider, dotNetRootPaths, currentRuntimeIdentifiers);
         }
 
-        public WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion)
+        /// <summary>
+        /// Creates a resolver by composing all the manifests from the provider.
+        /// </summary>
+        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string [] dotnetRootPaths, string [] currentRuntimeIdentifiers)
+            : this (dotnetRootPaths, currentRuntimeIdentifiers)
         {
-            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_PACK_ROOTS");
-            string[] dotnetRootPaths;
-            if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
-            {
-                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.PathSeparator).Append(dotnetRootPath).ToArray();
-            }
-            else
-            {
-                dotnetRootPaths = new[] { dotnetRootPath };
-            }
+            _manifestProvider = manifestProvider;
 
-            return new WorkloadResolver(manifestProvider, dotnetRootPaths, _currentRuntimeIdentifiers);
+            LoadManifestsFromProvider(manifestProvider);
+            ComposeWorkloadManifests();
         }
 
-        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string [] dotnetRootPaths, string [] currentRuntimeIdentifiers)
+        /// <summary>
+        /// Creates a resolver with no manifests.
+        /// </summary>A
+        private WorkloadResolver(string[] dotnetRootPaths, string[] currentRuntimeIdentifiers)
         {
             _dotnetRootPaths = dotnetRootPaths;
             _currentRuntimeIdentifiers = currentRuntimeIdentifiers;
-            _manifestProvider = manifestProvider;
-
-            RefreshWorkloadManifests();
         }
 
         public void RefreshWorkloadManifests()
         {
-            _workloads.Clear();
-            _packs.Clear();
+            if (_manifestProvider == null)
+            {
+                throw new InvalidOperationException("Resolver was created without provider and cannot be refreshed");
+            }
+            _manifests.Clear();
+            LoadManifestsFromProvider(_manifestProvider);
+            ComposeWorkloadManifests();
+        }
 
-            var manifests = new Dictionary<string,WorkloadManifest>(StringComparer.OrdinalIgnoreCase);
-
-            foreach ((string manifestId, Func<Stream> openManifestStream) in _manifestProvider.GetManifests())
-
+        private void LoadManifestsFromProvider(IWorkloadManifestProvider manifestProvider)
+        {
+            foreach ((string manifestId, Func<Stream> openManifestStream) in manifestProvider.GetManifests())
             {
                 using (var manifestStream = openManifestStream())
                 {
                     var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
-                    if (manifests.ContainsKey(manifestId))
+                    if (_manifests.ContainsKey(manifestId))
                     {
                         throw new Exception($"Duplicate workload manifest {manifestId}");
                     }
-                    manifests.Add(manifestId, manifest);
+                    if(!string.Equals (manifestId, manifest.Id, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new Exception($"Manifest provider {manifestProvider} supplied manifest '{manifestId}' does not match payload id '{manifest.Id}'");
+                    }
+                    _manifests.Add(manifestId, manifest);
                 }
             }
+        }
 
-            foreach (var manifest in manifests.Values)
+        private void ComposeWorkloadManifests()
+        {
+            _workloads.Clear();
+            _packs.Clear();
+
+            foreach (var manifest in _manifests.Values)
             {
                 if (manifest.DependsOnManifests != null)
                 {
                     foreach (var dependency in manifest.DependsOnManifests)
                     {
-                        if (manifests.TryGetValue(dependency.Key, out var resolvedDependency))
+                        if (_manifests.TryGetValue(dependency.Key, out var resolvedDependency))
                         {
                             if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
                             {
@@ -456,6 +468,25 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return false;
         }
 
+        public IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider)
+        {
+            // we specifically don't assign the overlayManifestProvider to the new resolver
+            // because it's not possible to refresh an overlay resolver
+            var overlayResolver = new WorkloadResolver(_dotnetRootPaths, _currentRuntimeIdentifiers);
+            overlayResolver.LoadManifestsFromProvider(overlayManifestProvider);
+
+            // after loading the overlay manifests into the new resolver
+            // we add all the manifests from this resolver that are not overlayed
+            foreach (var manifest in _manifests)
+            {
+                overlayResolver._manifests.TryAdd(manifest.Key, manifest.Value);
+            }
+
+            overlayResolver.ComposeWorkloadManifests();
+
+            return overlayResolver;
+        }
+
         public class PackInfo
         {
             public PackInfo(string id, string version, WorkloadPackKind kind, string path, string resolvedPackageId)
@@ -561,4 +592,20 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return manifests;
         }
     }
+
+#if !NETCOREAPP
+
+    static class DictionaryExtensions
+    {
+        public static bool TryAdd<TKey,TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue value) where TKey : notnull
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                return false;
+            }
+            dictionary.Add(key, value);
+            return true;
+        }
+    }
+#endif
 }
