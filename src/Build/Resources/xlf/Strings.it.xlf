@@ -257,6 +257,11 @@
         <target state="translated">Valore iniziale della proprietà: $({0})="{1}". Origine: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
+        <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
+        <target state="new">MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: il progetto "{0}" ha ignorato i vincoli di isolamento del grafico nel progetto di riferimento "{1}"</target>

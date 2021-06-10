@@ -30,6 +30,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public ProjectCachePluginBase? PluginInstance { get; }
 
+        internal bool VsWorkaround { get; }
+
         private ProjectCacheDescriptor(
             IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
             ProjectGraph? projectGraph,
@@ -62,6 +64,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
             PluginInstance = pluginInstance;
         }
 
+        private ProjectCacheDescriptor(ProjectCacheItem projectCacheItem)
+        {
+            VsWorkaround = true;
+            PluginAssemblyPath = projectCacheItem.PluginPath;
+            PluginSettings = projectCacheItem.PluginSettings;
+        }
+
+        // TODO: remove after we change VS to set the cache descriptor via build parameters.
+        internal static ProjectCacheDescriptor FromVisualStudioWorkaround(ProjectCacheItem projectCacheItem)
+        {
+            return new ProjectCacheDescriptor(projectCacheItem);
+        }
+
         public static ProjectCacheDescriptor FromAssemblyPath(
             string pluginAssemblyPath,
             IReadOnlyCollection<ProjectGraphEntryPoint>? entryPoints,
@@ -87,18 +102,22 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 : $"Assembly path based: {PluginAssemblyPath}";
 
             var entryPointStyle = EntryPoints != null
-                ? "Graph entrypoint based"
-                : "Static graph based";
+                ? "Explicit entry-point based"
+                : ProjectGraph != null
+                    ? "Static graph based"
+                    : "Visual Studio Workaround based";
 
             var entryPoints = EntryPoints != null
                 ? string.Join(
                     "\n",
                     EntryPoints.Select(e => $"{e.ProjectFile} {{{FormatGlobalProperties(e.GlobalProperties)}}}"))
-                : string.Join(
-                    "\n",
-                    ProjectGraph!.EntryPointNodes.Select(
-                        n =>
-                            $"{n.ProjectInstance.FullPath} {{{FormatGlobalProperties(n.ProjectInstance.GlobalProperties)}}}"));
+                : ProjectGraph != null
+                    ? string.Join(
+                        "\n",
+                        ProjectGraph!.EntryPointNodes.Select(
+                            n =>
+                                $"{n.ProjectInstance.FullPath} {{{FormatGlobalProperties(n.ProjectInstance.GlobalProperties)}}}"))
+                    : "Solution file";
 
             return $"{loadStyle}\nEntry-point style: {entryPointStyle}\nEntry-points:\n{entryPoints}";
 

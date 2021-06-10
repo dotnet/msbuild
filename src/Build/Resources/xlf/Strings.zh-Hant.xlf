@@ -257,6 +257,11 @@
         <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
+        <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
+        <target state="new">MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 專案 "{0}" 已跳過參考專案 "{1}" 上的圖形隔離條件約束</target>

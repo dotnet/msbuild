@@ -34,7 +34,7 @@ stages:
 
   - job: Windows_NT
     pool:
-      name: VSEng-MicroBuildVS2019
+      name: VSEngSS-MicroBuild2019
       demands:
       - agent.os -equals Windows_NT
 
@@ -72,11 +72,14 @@ stages:
         signType: $(SignType)
         zipSources: false
       condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
-
-    - task: ms-vseng.MicroBuildTasks.965C8DC6-1483-45C9-B384-5AC75DA1F1A4.MicroBuildOptProfPlugin@1
+      
+    - task: MicroBuildOptProfPlugin@6
       inputs:
-        skipRunOptimize: true
-      displayName: 'Install OptProf Plugin'
+        ProfilingInputsDropName: '$(VisualStudio.DropName)'
+        ShouldSkipOptimize: true
+        AccessToken: '$(System.AccessToken)'
+        feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+      displayName: 'Install OptProf Plugin'      
 
     # Required by MicroBuildBuildVSBootstrapper
     - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
@@ -111,7 +114,7 @@ stages:
         buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
         sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
         toLowerCase: false
-        usePat: false
+        usePat: true
       displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
       condition: succeeded()
 
@@ -162,11 +165,14 @@ stages:
 
     # Publishes setup VSIXes to a drop.
     # Note: The insertion tool looks for the display name of this task in the logs.
-    - task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+    - task: MicroBuildUploadVstsDropFolder@2
       displayName: Upload VSTS Drop
       inputs:
         DropName: $(VisualStudio.DropName)
         DropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+        AccessToken: '$(System.AccessToken)'
+        DropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+        VSDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
       condition: succeeded()
 
     # Publish an artifact that the RoslynInsertionTool is able to find by its name.

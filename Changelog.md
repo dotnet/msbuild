@@ -4,17 +4,34 @@
 
 This version of MSBuild will ship with Visual Studio 2019 version 16.11.0 and .NET SDK 5.0.400.
 
+### What's new
+
 ### Detailed release notes
+
+#### Added
+
+* Additional properties documented and available for completion in Visual Studio (#6500).
+* The `SignFile` task is now available in MSBuild on .NET 5.0 (#6509). Thanks, @Zastai!
+#### Changed
+
+* When using the experimental cache API, schedule proxy builds to the in-proc node for performance (#6386).
+* Experimental cache queries are now executed in parallel (#6468).
+* The ETW events generated in `ResolveAssemblyReference` now include an approximation of the "size" of the RAR request (#6410).
 
 #### Fixed
 
 * Fixed memory leak in `ProjectRootElement.Reload` (#6457).
 * Added locking to avoid race conditions in `BuildManager` (#6412).
 * Allow `ResolveAssemblyReferences` precomputed cache files to be in read-only locations (#6393).
+* 64-bit `al.exe` is used when targeting 64-bit architectures (for real this time) (#6484).
 
 #### Infrastructure
 
 * Use a packaged C# compiler to avoid changes in reference assembly generation caused by compiler changes (#6431).
+* Use more resilient test-result upload patterns (#6489).
+* Conditional compilation for .NET Core within our repo now includes new .NET 5.0+ runtimes (#6538).
+
+#### Documentation
 
 ## MSBuild 16.10.1
 

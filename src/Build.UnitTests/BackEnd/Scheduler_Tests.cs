@@ -10,6 +10,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.ProjectCache;
+using Shouldly;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Xunit;
 
@@ -521,6 +523,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Make sure that traversal projects are marked with an affinity of "InProc", which means that
+        /// even if multiple are available, we should still only have the single inproc node.
+        /// </summary>
+        [Fact]
+        public void TestProxyAffinityIsInProc()
+        {
+            _host.BuildParameters.MaxNodeCount = 4;
+            ReportDefaultParentRequestIsFinished();
+
+            CreateConfiguration(1, "foo.csproj");
+
+            BuildRequest request1 = CreateProxyBuildRequest(1, 1, new ProxyTargets(new Dictionary<string, string> {{"foo", "bar"}}), null);
+
+            BuildRequestBlocker blocker = new BuildRequestBlocker(-1, new string[] { }, new[] { request1 });
+            List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
+
+            // There will be no request to create a new node, because both of the above requests are proxy build requests,
+            // which have an affinity of "inproc", and the inproc node already exists.
+            Assert.Single(response);
+            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
+            Assert.Equal(request1, response[0].BuildRequest);
+            Assert.Equal(Scheduler.InProcNodeId, response[0].NodeId);
+        }
+
+        /// <summary>
         /// With something approximating the BuildManager's build loop, make sure that we don't end up
         /// trying to create more nodes than we can actually support.
         /// </summary>
@@ -729,8 +756,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Creates a build request.
         /// </summary>
-        private BuildRequest CreateBuildRequest(int nodeRequestId, int configId, string[] targets, NodeAffinity nodeAffinity, BuildRequest parentRequest)
+        private BuildRequest CreateBuildRequest(int nodeRequestId, int configId, string[] targets, NodeAffinity nodeAffinity, BuildRequest parentRequest, ProxyTargets proxyTargets = null)
         {
+            (targets == null ^ proxyTargets == null).ShouldBeTrue();
+
             HostServices hostServices = null;
 
             if (nodeAffinity != NodeAffinity.Any)
@@ -739,8 +768,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 hostServices.SetNodeAffinity(String.Empty, nodeAffinity);
             }
 
-            BuildRequest request = new BuildRequest(1 /* submissionId */, nodeRequestId, configId, targets, hostServices, BuildEventContext.Invalid, parentRequest);
-            return request;
+            if (targets != null)
+            {
+                return new BuildRequest(
+                    submissionId: 1,
+                    nodeRequestId,
+                    configId,
+                    targets,
+                    hostServices,
+                    BuildEventContext.Invalid,
+                    parentRequest);
+            }
+
+            parentRequest.ShouldBeNull();
+            return new BuildRequest(
+                submissionId: 1,
+                nodeRequestId,
+                configId,
+                proxyTargets,
+                hostServices);
+        }
+
+        private BuildRequest CreateProxyBuildRequest(int nodeRequestId, int configId, ProxyTargets proxyTargets, BuildRequest parentRequest)
+        {
+            return CreateBuildRequest(
+                nodeRequestId,
+                configId,
+                null,
+                NodeAffinity.Any,
+                parentRequest,
+                proxyTargets);
         }
 
         /// <summary>
@@ -777,6 +834,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 List<ScheduleResponse> moreResponses = new List<ScheduleResponse>(_scheduler.ReportNodesCreated(nodeInfos));
                 MockPerformSchedulingActions(moreResponses, ref nodeId, ref inProcNodeExists);
             }
+        }
+
+        private void ReportDefaultParentRequestIsFinished()
+        {
+            var buildResult = new BuildResult(_defaultParentRequest);
+            _scheduler.ReportResult(_defaultParentRequest.NodeRequestId, buildResult);
         }
     }
 }
