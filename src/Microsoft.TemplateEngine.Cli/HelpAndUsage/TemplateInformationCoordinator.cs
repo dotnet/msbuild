@@ -76,7 +76,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 case TemplateResolutionResult.Status.AmbiguousTemplateGroupChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
                     DisplayTemplateList(resolutionResult.TemplateGroups, commandInput, useErrorOutput: true);
-                    Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
+                    //TODO: https://github.com/dotnet/templating/issues/3275
+                    //revise error handling: this message is not the best CTA
+                    //Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
                     return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousParameterValueChoice:
                     if (resolutionResult.UnambiguousTemplateGroup == null)
