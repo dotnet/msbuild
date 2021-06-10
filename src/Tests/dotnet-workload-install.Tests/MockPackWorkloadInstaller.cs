@@ -23,18 +23,24 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public bool GarbageCollectionCalled = false;
         public MockInstallationRecordRepository InstallationRecordRepository;
         public bool FailingRollback;
+        private readonly string FailingPack;
 
-        public MockPackWorkloadInstaller(string failingWorkload = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, IList<PackInfo> installedPacks = null)
+        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, IList<PackInfo> installedPacks = null)
         {
             InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload, installedWorkloads);
             FailingRollback = failingRollback;
             InstalledPacks = installedPacks ?? new List<PackInfo>();
+            FailingPack = failingPack;
         }
 
         public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
         {
             InstalledPacks = InstalledPacks.Append(packInfo).ToList();
             CachePath = offlineCache?.Value;
+            if (packInfo.Id.ToString().Equals(FailingPack))
+            {
+                throw new Exception($"Failing pack: {packInfo.Id}");
+            }
         }
 
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
