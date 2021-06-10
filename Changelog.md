@@ -24,6 +24,14 @@ This version of MSBuild shipped with Visual Studio 2019 version 16.10.1 and .NET
 
 * Restore support for building individual project(s) within solutions by specifying `-t:Project` (#6465).
 
+## MSBuild 16.9.2
+
+This version of MSBuild shipped with Visual Studio 2019 version 16.9.7.
+
+#### Fixed
+
+* Fixed MSB0001 error when building large solutions (#6437).
+
 ## MSBuild 16.10.0
 
 This version of MSBuild shipped with Visual Studio 2019 version 16.10.0 and .NET SDK 5.0.300.
