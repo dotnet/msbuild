@@ -3151,7 +3151,7 @@ namespace Microsoft.Build.Tasks
                 // We can't easily filter those.  We can simply skip them.
                 return;
             }
-            catch (ArgumentException)
+            catch (ArgumentException e) when (e.InnerException is BadImageFormatException)
             {
                 // BadImageFormatExceptions can be wrapped in ArgumentExceptions, so catch those, too.
                 return;
