@@ -28,17 +28,20 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
         private readonly TemplatePackageManager _templatePackageManager;
+        private readonly TemplateInformationCoordinator _templateInformationCoordinator;
         private string _defaultLanguage;
 
         internal TemplatePackageCoordinator(
             ITelemetryLogger telemetryLogger,
             IEngineEnvironmentSettings environmentSettings,
             TemplatePackageManager templatePackageManager,
+            TemplateInformationCoordinator templateInformationCoordinator,
             string? defaultLanguage = null)
         {
             _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
             _engineEnvironmentSettings = environmentSettings ?? throw new ArgumentNullException(nameof(environmentSettings));
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
+            _templateInformationCoordinator = templateInformationCoordinator ?? throw new ArgumentNullException(nameof(templateInformationCoordinator));
             if (string.IsNullOrWhiteSpace(defaultLanguage))
             {
                 defaultLanguage = string.Empty;
@@ -606,7 +609,7 @@ namespace Microsoft.TemplateEngine.Cli
                         string.Format(
                             LocalizableStrings.TemplatePackageCoordinator_lnstall_Info_Success,
                             result.TemplatePackage.DisplayName));
-                    HelpForTemplateResolution.DisplayTemplateList(templates, _engineEnvironmentSettings, commandInput, _defaultLanguage);
+                    _templateInformationCoordinator.DisplayTemplateList(templates, commandInput);
                 }
                 else
                 {

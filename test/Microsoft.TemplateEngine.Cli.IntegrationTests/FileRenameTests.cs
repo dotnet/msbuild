@@ -13,7 +13,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         [InlineData("TestAssets.TemplateWithUnspecifiedSourceName --name baz", "NegativeFileRenamesTest.json")]
         [InlineData("TestAssets.TemplateWithSourceNameAndCustomSourcePath --name bar", "CustomSourcePathRenameTest.json")]
         [InlineData("TestAssets.TemplateWithSourceNameAndCustomTargetPath --name bar", "CustomTargetPathRenameTest.json")]
-        [InlineData("TestAssets.TemplateWithSourceNameAndCustomSourceAndTargetPath --name bar", "CustomSourceAndTargetPathRenameTest.json")]
+        [InlineData("TestAssets.TemplateWithSourceNameAndCustomSourceAndTargetPaths --name bar", "CustomSourceAndTargetPathRenameTest.json")]
         [InlineData("TestAssets.TemplateWithSourcePathOutsideConfigRoot --name baz", "TemplateWithSourcePathOutsideConfigRootTest.json")]
         [InlineData("TestAssets.TemplateWithSourceNameInTargetPathGetsRenamed --name baz", "TemplateWithSourceNameInTargetPathGetsRenamedTest.json")]
         [InlineData("TestAssets.TemplateWithPlaceholderFiles", "TemplateWithPlaceholderFilesTest.json")]

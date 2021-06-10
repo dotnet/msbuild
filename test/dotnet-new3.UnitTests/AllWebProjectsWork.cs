@@ -25,11 +25,11 @@ namespace Dotnet_new3.IntegrationTests
         [InlineData("emptyweb_cs-50", "web")]
         [InlineData("mvc_cs-50", "mvc")]
         [InlineData("mvc_fs-50", "mvc", "-lang", "F#")]
-        [InlineData("api_cs-50", "api")]
+        [InlineData("api_cs-50", "webapi")]
         [InlineData("emptyweb_cs-31", "web", "-f", "netcoreapp3.1")]
         [InlineData("mvc_cs-31", "mvc", "-f", "netcoreapp3.1")]
         [InlineData("mvc_fs-31", "mvc", "-lang", "F#", "-f", "netcoreapp3.1")]
-        [InlineData("api_cs-31", "api", "-f", "netcoreapp3.1")]
+        [InlineData("api_cs-31", "webapi", "-f", "netcoreapp3.1")]
         public void AllWebProjectsRestoreAndBuild(string testName, params string[] args)
         {
             string workingDir = Path.Combine(_fixture.BaseWorkingDirectory, testName);

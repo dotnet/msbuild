@@ -24,9 +24,7 @@ namespace Microsoft.TemplateEngine.Cli
     internal class TemplateInvoker
     {
         private readonly IEngineEnvironmentSettings _environment;
-        private readonly INewCommandInput _commandInput;
         private readonly ITelemetryLogger _telemetryLogger;
-        private readonly string _commandName;
         private readonly Func<string> _inputGetter;
         private readonly New3Callbacks _callbacks;
 
@@ -34,12 +32,10 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IHostSpecificDataLoader _hostDataLoader;
         private readonly PostActionDispatcher _postActionDispatcher;
 
-        internal TemplateInvoker(IEngineEnvironmentSettings environment, INewCommandInput commandInput, ITelemetryLogger telemetryLogger, string commandName, Func<string> inputGetter, New3Callbacks callbacks)
+        internal TemplateInvoker(IEngineEnvironmentSettings environment, ITelemetryLogger telemetryLogger, Func<string> inputGetter, New3Callbacks callbacks)
         {
             _environment = environment;
-            _commandInput = commandInput;
             _telemetryLogger = telemetryLogger;
-            _commandName = commandName;
             _inputGetter = inputGetter;
             _callbacks = callbacks;
 
@@ -54,7 +50,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (invalidParams.Any())
             {
-                HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
+                TemplateInformationCoordinator.DisplayInvalidParameters(invalidParams);
                 return true;
             }
             else
@@ -63,7 +59,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        internal async Task<New3CommandStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke)
+        internal async Task<New3CommandStatus> InvokeTemplate(ITemplateMatchInfo templateToInvoke, INewCommandInput commandInput)
         {
             string? templateLanguage = templateToInvoke.Info.GetLanguage();
             bool isMicrosoftAuthored = string.Equals(templateToInvoke.Info.Author, "Microsoft", StringComparison.OrdinalIgnoreCase);
@@ -73,17 +69,17 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (isMicrosoftAuthored)
             {
-                _commandInput.InputTemplateParams.TryGetValue("Framework", out string? inputFrameworkValue);
+                commandInput.InputTemplateParams.TryGetValue("Framework", out string? inputFrameworkValue);
                 framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "Framework", inputFrameworkValue));
 
-                _commandInput.InputTemplateParams.TryGetValue("auth", out string? inputAuthValue);
+                commandInput.InputTemplateParams.TryGetValue("auth", out string? inputAuthValue);
                 auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke.Info, "auth", inputAuthValue));
             }
 
             bool argsError = CheckForArgsError(templateToInvoke);
             if (argsError)
             {
-                _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
+                _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                 {
                     { TelemetryConstants.Language, templateLanguage },
                     { TelemetryConstants.ArgError, "True" },
@@ -93,7 +89,7 @@ namespace Microsoft.TemplateEngine.Cli
                     { TelemetryConstants.Auth, auth }
                 });
 
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{_commandName} {_commandInput.TemplateName}").Bold().Red());
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{commandInput.CommandName} {commandInput.TemplateName}").Bold().Red());
                 return New3CommandStatus.InvalidParamValues;
             }
             else
@@ -102,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 try
                 {
-                    return await CreateTemplateAsync(templateToInvoke).ConfigureAwait(false);
+                    return await CreateTemplateAsync(templateToInvoke, commandInput).ConfigureAwait(false);
                 }
                 catch (ContentGenerationException cx)
                 {
@@ -122,7 +118,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 finally
                 {
-                    _telemetryLogger.TrackEvent(_commandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
+                    _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.CreateEventSuffix, new Dictionary<string, string?>
                     {
                         { TelemetryConstants.Language, templateLanguage },
                         { TelemetryConstants.ArgError, "False" },
@@ -154,13 +150,13 @@ namespace Microsoft.TemplateEngine.Cli
         // Warning: The _commandInput cannot be assumed to be in a state that is parsed for the template being invoked.
         //      So be sure to only get template-agnostic information from it. Anything specific to the template must be gotten from the ITemplateMatchInfo
         //      Or do a reparse if necessary (currently occurs in one error case).
-        private async Task<New3CommandStatus> CreateTemplateAsync(ITemplateMatchInfo templateMatchDetails)
+        private async Task<New3CommandStatus> CreateTemplateAsync(ITemplateMatchInfo templateMatchDetails, INewCommandInput commandInput)
         {
             ITemplateInfo template = templateMatchDetails.Info;
 
             char[] invalidChars = Path.GetInvalidFileNameChars();
 
-            if (_commandInput.Name != null && _commandInput.Name.IndexOfAny(invalidChars) > -1)
+            if (commandInput.Name != null && commandInput.Name.IndexOfAny(invalidChars) > -1)
             {
                 string printableChars = string.Join(", ", invalidChars.Where(x => !char.IsControl(x)).Select(x => $"'{x}'"));
                 string nonPrintableChars = string.Join(", ", invalidChars.Where(char.IsControl).Select(x => $"char({(int)x})"));
@@ -169,8 +165,8 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             string? fallbackName = new DirectoryInfo(
-                !string.IsNullOrWhiteSpace(_commandInput.OutputPath)
-                    ? _commandInput.OutputPath
+                !string.IsNullOrWhiteSpace(commandInput.OutputPath)
+                    ? commandInput.OutputPath
                     : Directory.GetCurrentDirectory())
                 .Name;
 
@@ -196,13 +192,13 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 instantiateResult = await _templateCreator.InstantiateAsync(
                     template,
-                    _commandInput.Name,
+                    commandInput.Name,
                     fallbackName,
-                    _commandInput.OutputPath,
+                    commandInput.OutputPath,
                     templateMatchDetails.GetValidTemplateParameters(),
-                    _commandInput.IsForceFlagSpecified,
-                    _commandInput.BaselineName,
-                    _commandInput.IsDryRun)
+                    commandInput.IsForceFlagSpecified,
+                    commandInput.BaselineName,
+                    commandInput.IsDryRun)
                     .ConfigureAwait(false);
             }
             catch (ContentGenerationException cx)
@@ -221,12 +217,12 @@ namespace Microsoft.TemplateEngine.Cli
                 return New3CommandStatus.CreateFailed;
             }
 
-            string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? _commandInput.TemplateName : instantiateResult.TemplateFullName;
+            string resultTemplateName = string.IsNullOrEmpty(instantiateResult.TemplateFullName) ? commandInput.TemplateName : instantiateResult.TemplateFullName;
 
             switch (instantiateResult.Status)
             {
                 case CreationResultStatus.Success:
-                    if (!_commandInput.IsDryRun)
+                    if (!commandInput.IsDryRun)
                     {
                         Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
                     }
@@ -247,7 +243,7 @@ namespace Microsoft.TemplateEngine.Cli
                         Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, template.ThirdPartyNotices));
                     }
 
-                    return HandlePostActions(instantiateResult);
+                    return HandlePostActions(instantiateResult, commandInput);
                 case CreationResultStatus.CreateFailed:
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.CreateFailed, resultTemplateName, instantiateResult.ErrorMessage).Bold().Red());
                     return New3CommandStatus.CreateFailed;
@@ -260,10 +256,10 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         // TODO: rework to avoid having to reparse.
                         // The canonical info could be in the ITemplateMatchInfo, but currently isn't.
-                        TemplateResolver.ParseTemplateArgs(template, _hostDataLoader, _commandInput);
+                        TemplateResolver.ParseTemplateArgs(template, _hostDataLoader, commandInput);
 
                         IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' })
-                            .Select(x => _commandInput.VariantsForCanonical(x.Trim())
+                            .Select(x => commandInput.VariantsForCanonical(x.Trim())
                                                         .DefaultIfEmpty(x.Trim()).First())
                             .ToList();
                         string fixedMessage = string.Join(", ", missingParamNamesCanonical);
@@ -271,20 +267,20 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                     return New3CommandStatus.MissingMandatoryParam;
                 case CreationResultStatus.NotFound:
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, _commandName).Bold().Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput).Bold().Red());
                     return New3CommandStatus.NotFound;
                 case CreationResultStatus.InvalidParamValues:
-                    TemplateUsageInformation? usageInformation = await TemplateUsageHelp.GetTemplateUsageInformationAsync(template, _environment, _commandInput, _hostDataLoader, _templateCreator, default).ConfigureAwait(false);
+                    TemplateUsageInformation? usageInformation = await TemplateUsageHelp.GetTemplateUsageInformationAsync(template, _environment, commandInput, _hostDataLoader, _templateCreator, default).ConfigureAwait(false);
 
                     if (usageInformation != null)
                     {
                         string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.Value.InvalidParameters);
                         Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{_commandName} {_commandInput.TemplateName}").Bold().Red());
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{commandInput.CommandName} {commandInput.TemplateName}").Bold().Red());
                     }
                     else
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, _commandName).Bold().Red());
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput.CommandName).Bold().Red());
                         return New3CommandStatus.NotFound;
                     }
                     return New3CommandStatus.InvalidParamValues;
@@ -310,19 +306,19 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private New3CommandStatus HandlePostActions(ITemplateCreationResult creationResult)
+        private New3CommandStatus HandlePostActions(ITemplateCreationResult creationResult, INewCommandInput commandInput)
         {
             AllowRunScripts scriptRunSettings;
 
-            if (string.IsNullOrEmpty(_commandInput.AllowScriptsToRun) || string.Equals(_commandInput.AllowScriptsToRun, "prompt", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(commandInput.AllowScriptsToRun) || string.Equals(commandInput.AllowScriptsToRun, "prompt", StringComparison.OrdinalIgnoreCase))
             {
                 scriptRunSettings = AllowRunScripts.Prompt;
             }
-            else if (string.Equals(_commandInput.AllowScriptsToRun, "yes", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(commandInput.AllowScriptsToRun, "yes", StringComparison.OrdinalIgnoreCase))
             {
                 scriptRunSettings = AllowRunScripts.Yes;
             }
-            else if (string.Equals(_commandInput.AllowScriptsToRun, "no", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(commandInput.AllowScriptsToRun, "no", StringComparison.OrdinalIgnoreCase))
             {
                 scriptRunSettings = AllowRunScripts.No;
             }
@@ -331,7 +327,7 @@ namespace Microsoft.TemplateEngine.Cli
                 scriptRunSettings = AllowRunScripts.Prompt;
             }
 
-            PostActionExecutionStatus result = _postActionDispatcher.Process(creationResult, _commandInput.IsDryRun, scriptRunSettings);
+            PostActionExecutionStatus result = _postActionDispatcher.Process(creationResult, commandInput.IsDryRun, scriptRunSettings);
 
             return result switch
             {

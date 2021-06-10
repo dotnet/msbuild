@@ -202,8 +202,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="translated">インスタンス化するテンプレートを解決できませんでした。次のテンプレートが入力と一致しました:</target>
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="needs-review-translation">インスタンス化するテンプレートを解決できませんでした。次のテンプレートが入力と一致しました:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -212,8 +212,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
-        <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="translated">インスタンスを作成するためのテンプレートを解決できません。次のインストールされたテンプレートが競合しています:</target>
+        <source>Unable to resolve the template, the following installed templates are conflicting:</source>
+        <target state="needs-review-translation">インスタンスを作成するためのテンプレートを解決できません。次のインストールされたテンプレートが競合しています:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
@@ -508,8 +508,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="translated">インストールされているテンプレートを一覧表示するには、' dotnet {0}--list ' を実行してください。</target>
+        <source>To list installed templates, run '{0}'.</source>
+        <target state="needs-review-translation">インストールされているテンプレートを一覧表示するには、' dotnet {0}--list ' を実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -765,8 +765,8 @@ Examples:
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="translated">NuGet.org のテンプレートを検索するには、'dotnet {0} {1} --search ' を実行してください。</target>
+        <source>To search for the templates on NuGet.org, run '{0}'.</source>
+        <target state="new">To search for the templates on NuGet.org, run '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

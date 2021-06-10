@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
@@ -24,12 +26,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console2").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal("console2", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
-            Assert.Equal("Console.App2", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+
+            Assert.Equal("console2", matchResult.TemplatesForDetailedHelp.Single().Info.ShortNameList.Single());
+            Assert.Equal("Console.App2", matchResult.TemplatesForDetailedHelp.Single().Info.Identity);
+            Assert.Equal(1, matchResult.TemplatesForDetailedHelp.Count());
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_ExactMatchOnShortNameMatchesCorrectly))]
@@ -41,12 +44,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
-            Assert.Equal("Console.App", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal("console", matchResult.TemplatesForDetailedHelp.Single().Info.ShortNameList.Single());
+            Assert.Equal("Console.App", matchResult.TemplatesForDetailedHelp.Single().Info.Identity);
+            Assert.Equal(1, matchResult.TemplatesForDetailedHelp.Count());
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_UnambiguousGroupIsFound))]
@@ -59,12 +62,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+
+            Assert.Equal(TemplateResolutionResult.Status.AmbiguousLanguageChoice, matchResult.ResolutionStatus);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp); //ambiguous language
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MultipleGroupsAreFound))]
@@ -79,11 +81,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(2, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(5, matchResult.ExactMatchedTemplates.Count);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.Status.NoMatch, matchResult.ResolutionStatus);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp); //no partial matches allowed
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_DefaultLanguageDisambiguates))]
@@ -95,15 +96,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "L1");
-            Assert.True(matchResult.HasExactMatches);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.True(matchResult.HasUnambiguousTemplateGroupForDefaultLanguage);
-            Assert.Equal("console", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.ShortNameList.Single());
-            Assert.Equal("Console.App.L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.Identity);
-            Assert.Equal("L1", matchResult.UnambiguousTemplatesForDefaultLanguage.Single().Info.TagsCollection["language"]);
-            Assert.Equal(2, matchResult.UnambiguousTemplateGroup.Count);
-            Assert.Equal(1, matchResult.UnambiguousTemplatesForDefaultLanguage.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "L1");
+
+            Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal("console", matchResult.TemplatesForDetailedHelp.Single().Info.ShortNameList.Single());
+            Assert.Equal("Console.App.L1", matchResult.TemplatesForDetailedHelp.Single().Info.Identity);
+            Assert.Equal(1, matchResult.TemplatesForDetailedHelp.Count());
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_InputLanguageIsPreferredOverDefault))]
@@ -115,13 +114,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "L1");
-            Assert.True(matchResult.HasExactMatches);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal("console", matchResult.UnambiguousTemplateGroup.Single().Info.ShortNameList.Single());
-            Assert.Equal("Console.App.L2", matchResult.UnambiguousTemplateGroup.Single().Info.Identity);
-            Assert.Equal("L2", matchResult.UnambiguousTemplateGroup.Single().Info.TagsCollection["language"]);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, "L1");
+
+            Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal("console", matchResult.TemplatesForDetailedHelp.Single().Info.ShortNameList.Single());
+            Assert.Equal("Console.App.L2", matchResult.TemplatesForDetailedHelp.Single().Info.Identity);
+            Assert.Equal("L2", matchResult.TemplatesForDetailedHelp.Single().Info.TagsCollection["language"]);
+            Assert.Equal(1, matchResult.TemplatesForDetailedHelp.Count());
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_UnambiguousGroup_TemplatesAreNotSameLanguage))]
@@ -134,13 +134,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Count);
-            Assert.False(matchResult.AllTemplatesInUnambiguousTemplateGroupAreSameLanguage);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.Status.AmbiguousLanguageChoice, matchResult.ResolutionStatus);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal(0, matchResult.TemplatesForDetailedHelp.Count());
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_UnambiguousGroup_TemplatesAreSameLanguage))]
@@ -153,13 +150,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Count);
-            Assert.True(matchResult.AllTemplatesInUnambiguousTemplateGroupAreSameLanguage);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal(3, matchResult.TemplatesForDetailedHelp.Count());
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasLanguageMismatch))]
@@ -174,17 +167,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
-            Assert.True(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasContextMismatch))]
@@ -200,17 +185,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console", type: "item").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.True(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasBaselineMismatch))]
@@ -225,17 +202,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption().WithCommandOption("--baseline", "core");
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasTypeMismatch);
-            Assert.True(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatch_HasMultipleMismatches))]
@@ -251,17 +220,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2", "item").WithHelpOption().WithCommandOption("--baseline", "core");
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
-            Assert.True(matchResult.HasLanguageMismatch);
-            Assert.True(matchResult.HasTypeMismatch);
-            Assert.True(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_PartialMatchGroup_HasTypeMismatch_HasGroupLanguageMatch))]
@@ -283,17 +244,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("console", "L2", "item").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.False(matchResult.HasExactMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
-            Assert.Equal(2, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(1, matchResult.PartiallyMatchedTemplateGroups.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.True(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_NoMatch))]
@@ -309,18 +262,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("zzzzz", "L1", "item").WithHelpOption().WithCommandOption("--baseline", "app");
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.False(matchResult.HasExactMatches);
-            Assert.False(matchResult.HasPartialMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
-            Assert.Equal(0, matchResult.PartiallyMatchedTemplates.Count);
-            Assert.Equal(0, matchResult.PartiallyMatchedTemplateGroups.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(0, matchResult.UnambiguousTemplateGroup.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Empty(matchResult.TemplatesForDetailedHelp);
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_OtherParameterMatch_Text))]
@@ -329,37 +273,31 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                     .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithParameters("langVersion")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
-                    .WithTag("language", "L2")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithParameters("test")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test3")
-                    .WithTag("language", "L3")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("langVersion");
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption().WithTemplateOption("langVersion");
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(1, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(1, matchResult.ExactMatchedTemplates.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
-            Assert.True(matchResult.HasUnambiguousTemplateGroup);
-            Assert.Equal(1, matchResult.UnambiguousTemplateGroup.Count);
-            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchResult.ExactMatchedTemplates, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal(1, matchResult.TemplatesForDetailedHelp.Count());
+            TemplateInformationCoordinator.GetParametersInvalidForTemplatesInList(matchResult.TemplatesForDetailedHelp.ToList(), out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
             Assert.Equal(0, invalidForSomeTemplates.Count);
             Assert.Equal(0, invalidForAllTemplates.Count);
         }
@@ -370,38 +308,37 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                     .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithChoiceParameter("framework", "netcoreapp1.0", "netcoreapp1.1")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
-                    .WithTag("language", "L2")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithParameters("test")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test3")
-                    .WithTag("language", "L3")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("framework");
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption().WithTemplateOption("framework", "netcoreapp1.0");
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(3, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchResult.ExactMatchedTemplates, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
-            Assert.Equal(1, invalidForSomeTemplates.Count);
-            Assert.Equal(0, invalidForAllTemplates.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal(1, matchResult.TemplatesForDetailedHelp.Count());
+
+            //specifying choice value without choice is not allowed
+            userInputs = new MockNewCommandInput("console").WithHelpOption().WithTemplateOption("framework");
+            matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal(0, matchResult.TemplatesForDetailedHelp.Count());
+
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_OtherParameterDoesNotExist))]
@@ -410,38 +347,30 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             List<ITemplateInfo> templatesToSearch = new List<ITemplateInfo>();
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test1")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T1", groupIdentity: "Console.App.Test")
                     .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithChoiceParameter("framework", "netcoreapp1.0", "netcoreapp1.1")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test2")
-                    .WithTag("language", "L2")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T2", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithParameters("test")
                     .WithBaselineInfo("app", "standard"));
 
             templatesToSearch.Add(
-                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test3")
-                    .WithTag("language", "L3")
+                new MockTemplateInfo("console", name: "Long name for Console App", identity: "Console.App.T3", groupIdentity: "Console.App.Test")
+                    .WithTag("language", "L1")
                     .WithTag("type", "project")
                     .WithBaselineInfo("app", "standard"));
 
-            INewCommandInput userInputs = new MockNewCommandInput("c").WithHelpOption().WithTemplateOption("do-not-exist");
+            INewCommandInput userInputs = new MockNewCommandInput("console").WithHelpOption().WithTemplateOption("do-not-exist");
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.True(matchResult.HasExactMatches);
-            Assert.Equal(3, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(3, matchResult.ExactMatchedTemplates.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
-            Assert.False(matchResult.HasUnambiguousTemplateGroup);
-            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchResult.ExactMatchedTemplates, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
-            Assert.Equal(0, invalidForSomeTemplates.Count);
-            Assert.Equal(1, invalidForAllTemplates.Count);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal(0, matchResult.TemplatesForDetailedHelp.Count());
         }
 
         [Fact(DisplayName = nameof(TestGetTemplateResolutionResult_MatchByTagsIgnoredForHelp))]
@@ -457,14 +386,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             INewCommandInput userInputs = new MockNewCommandInput("Common").WithHelpOption();
 
-            TemplateListResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
-            Assert.False(matchResult.HasExactMatches);
-            Assert.False(matchResult.HasPartialMatches);
-            Assert.Equal(0, matchResult.ExactMatchedTemplateGroups.Count);
-            Assert.Equal(0, matchResult.ExactMatchedTemplates.Count);
-            Assert.False(matchResult.HasLanguageMismatch);
-            Assert.False(matchResult.HasTypeMismatch);
-            Assert.False(matchResult.HasBaselineMismatch);
+            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResultForHelp(templatesToSearch, new MockHostSpecificDataLoader(), userInputs, null);
+            Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, matchResult.GroupResolutionStatus);
+            Assert.Equal(0, matchResult.TemplatesForDetailedHelp.Count());
         }
     }
 }

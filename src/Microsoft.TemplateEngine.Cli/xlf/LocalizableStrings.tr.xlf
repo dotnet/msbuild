@@ -202,8 +202,8 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="translated">Örneği oluşturulacak şablon çözümlenemiyor. Bu şablonlar girişinizle eşleşiyor:</target>
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="needs-review-translation">Örneği oluşturulacak şablon çözümlenemiyor. Bu şablonlar girişinizle eşleşiyor:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -212,8 +212,8 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
-        <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="translated">Örneği oluşturulacak şablon çözümlenemiyor. Şu yüklü şablonlar çakışıyor:</target>
+        <source>Unable to resolve the template, the following installed templates are conflicting:</source>
+        <target state="needs-review-translation">Örneği oluşturulacak şablon çözümlenemiyor. Şu yüklü şablonlar çakışıyor:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
@@ -508,8 +508,8 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="translated">Yüklü şablonları listelemek için 'dotnet {0} --list' komutunu çalıştırın.</target>
+        <source>To list installed templates, run '{0}'.</source>
+        <target state="needs-review-translation">Yüklü şablonları listelemek için 'dotnet {0} --list' komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -765,8 +765,8 @@ Examples:
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="translated">NuGet.org sitesinde şablon aramak için “dotnet {0} {1} --search” komutunu çalıştırın.</target>
+        <source>To search for the templates on NuGet.org, run '{0}'.</source>
+        <target state="new">To search for the templates on NuGet.org, run '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

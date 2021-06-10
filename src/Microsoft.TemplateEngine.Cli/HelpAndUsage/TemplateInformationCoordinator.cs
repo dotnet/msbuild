@@ -20,63 +20,43 @@ using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
-    internal static class HelpForTemplateResolution
+    internal class TemplateInformationCoordinator
     {
-        internal static Task<New3CommandStatus> CoordinateHelpAndUsageDisplayAsync(
-            TemplateListResolutionResult templateResolutionResult,
-            IEngineEnvironmentSettings environmentSettings,
-            INewCommandInput commandInput,
-            IHostSpecificDataLoader hostDataLoader,
-            ITelemetryLogger telemetryLogger,
+        private readonly IEngineEnvironmentSettings _engineEnvironmentSettings;
+        private readonly TemplatePackageManager _templatePackageManager;
+        private readonly TemplateCreator _templateCreator;
+        private readonly IHostSpecificDataLoader _hostSpecificDataLoader;
+        private readonly ITelemetryLogger _telemetryLogger;
+        private readonly string? _defaultLanguage;
+
+        internal TemplateInformationCoordinator(
+            IEngineEnvironmentSettings engineEnvironmentSettings,
+            TemplatePackageManager templatePackageManager,
             TemplateCreator templateCreator,
-            string? defaultLanguage,
-            CancellationToken cancellationToken)
+            IHostSpecificDataLoader hostSpecificDataLoader,
+            ITelemetryLogger telemetryLogger,
+            string? defaultLanguage)
+
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            //in case only --help option is specified we don't need to show templates list
-            if (commandInput.IsHelpFlagSpecified && string.IsNullOrEmpty(commandInput.TemplateName))
-            {
-                ShowUsageHelp(commandInput, telemetryLogger);
-                return Task.FromResult(New3CommandStatus.Success);
-            }
-
-            // in case list is specified we always need to list templates
-            if (commandInput.IsListFlagSpecified)
-            {
-                return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
-            }
-            else // help flag specified or no flag specified
-            {
-                if (!string.IsNullOrEmpty(commandInput.TemplateName)
-                    && templateResolutionResult.HasUnambiguousTemplateGroup)
-                {
-                    // This will show detailed help on the template group, which only makes sense if there is a single template group adn all templates are the same language.
-                    return DisplayHelpForUnambiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, templateCreator, defaultLanguage, cancellationToken);
-                }
-                else
-                {
-                    return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
-                }
-            }
+            _engineEnvironmentSettings = engineEnvironmentSettings ?? throw new ArgumentNullException(nameof(engineEnvironmentSettings));
+            _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
+            _templateCreator = templateCreator ?? throw new ArgumentNullException(nameof(templateCreator));
+            _hostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
+            _telemetryLogger = telemetryLogger ?? throw new ArgumentNullException(nameof(telemetryLogger));
+            _defaultLanguage = defaultLanguage;
         }
 
         /// <summary>
-        /// Displays the help in case it is not possible to resolve template to use based on user input on template instantiation.
+        /// Displays the help in case it is not possible to resolve template to use based on user input.
+        /// Used for template instantiation and template help.
         /// </summary>
         /// <param name="resolutionResult">template resolution result.</param>
-        /// <param name="environmentSettings"></param>
-        /// <param name="templatePackageManager"></param>
         /// <param name="commandInput">command input used in CLI.</param>
-        /// <param name="defaultLanguage">default language for the host.</param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">cancellation token.</param>
         /// <returns></returns>
-        internal static Task<New3CommandStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
+        internal Task<New3CommandStatus> CoordinateAmbiguousTemplateResolutionDisplayAsync(
             TemplateResolutionResult resolutionResult,
-            IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager,
             INewCommandInput commandInput,
-            string? defaultLanguage,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -85,53 +65,88 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 case TemplateResolutionResult.Status.NoMatch:
                     Reporter.Error.WriteLine(
                         string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(commandInput)).Bold().Red());
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.CommandName).Bold().Red());
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.CommandName, commandInput.TemplateName).Bold().Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.ListCommandExample()).Bold().Red());
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.SearchCommandExample(commandInput.TemplateName)).Bold().Red());
                     return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
-                    DisplayTemplateList(resolutionResult.TemplateGroups, environmentSettings, commandInput, defaultLanguage, useErrorOutput: true);
+                    DisplayTemplateList(resolutionResult.TemplateGroups, commandInput, useErrorOutput: true);
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousLanguageHint.Bold().Red());
                     return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousTemplateGroupChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
-                    DisplayTemplateList(resolutionResult.TemplateGroups, environmentSettings, commandInput, defaultLanguage, useErrorOutput: true);
+                    DisplayTemplateList(resolutionResult.TemplateGroups, commandInput, useErrorOutput: true);
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHint.Bold().Red());
                     return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousParameterValueChoice:
+                    if (resolutionResult.UnambiguousTemplateGroup == null)
+                    {
+                        throw new ArgumentException($"{nameof(resolutionResult.UnambiguousTemplateGroup)} should not be null if {nameof(resolutionResult.ResolutionStatus)} is {nameof(TemplateResolutionResult.Status.AmbiguousParameterValueChoice)}");
+                    }
                     Reporter.Verbose.WriteLine(LocalizableStrings.Authoring_AmbiguousChoiceParameterValue);
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
                 case TemplateResolutionResult.Status.AmbiguousTemplateChoice:
+                    if (resolutionResult.UnambiguousTemplateGroup == null)
+                    {
+                        throw new ArgumentException($"{nameof(resolutionResult.UnambiguousTemplateGroup)} should not be null if {nameof(resolutionResult.ResolutionStatus)} is {nameof(TemplateResolutionResult.Status.AmbiguousParameterValueChoice)}");
+                    }
                     Reporter.Verbose.WriteLine(LocalizableStrings.Authoring_AmbiguousBestPrecedence);
-                    return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, environmentSettings, templatePackageManager, commandInput, cancellationToken);
+                    return DisplayAmbiguousPrecedenceErrorAsync(resolutionResult.UnambiguousTemplateGroup, commandInput, cancellationToken);
                 case TemplateResolutionResult.Status.InvalidParameter:
+                    if (resolutionResult.UnambiguousTemplateGroup == null)
+                    {
+                        throw new ArgumentException($"{nameof(resolutionResult.UnambiguousTemplateGroup)} should not be null if {nameof(resolutionResult.ResolutionStatus)} is {nameof(TemplateResolutionResult.Status.AmbiguousParameterValueChoice)}");
+                    }
                     return Task.FromResult(DisplayInvalidParameterError(resolutionResult.UnambiguousTemplateGroup, commandInput));
             }
             return Task.FromResult(New3CommandStatus.CreateFailed);
         }
 
-        // Displays the list of templates in a table, one row per template group.
-        //
-        // The columns displayed are as follows:
-        // Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
-        // (There is no check that the info doesn't vary.)
-        // - Template Name
-        // - Short Name: displays the first short name from the highest precedence template in the group.
-        // - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
-        // - Tags
-        internal static void DisplayTemplateList(IReadOnlyCollection<TemplateGroup> templateGroups, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage, bool useErrorOutput = false)
+        /// <summary>
+        /// Displays the list of templates in a table, one row per template group.
+        ///
+        /// The columns displayed are as follows:
+        /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
+        /// (There is no check that the info doesn't vary.)
+        /// - Template Name
+        /// - Short Name: displays the all available short names for the group.
+        /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
+        /// - Tags
+        /// The columns can be configured in <see cref="INewCommandInput.Columns"/> and <see cref="INewCommandInput.ShowAllColumns"/>.
+        /// </summary>
+        internal void DisplayTemplateList(
+            IReadOnlyCollection<TemplateGroup> templateGroups,
+            INewCommandInput commandInput,
+            bool useErrorOutput = false)
         {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templateGroups, commandInput.Language, defaultLanguage);
-            DisplayTemplateList(groupsForDisplay, environmentSettings, commandInput, useErrorOutput);
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templateGroups, commandInput.Language, _defaultLanguage);
+            DisplayTemplateList(groupsForDisplay, commandInput, useErrorOutput);
         }
 
-        internal static void DisplayTemplateList(IEnumerable<ITemplateInfo> templates, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string defaultLanguage, bool useErrorOutput = false)
+        /// <summary>
+        /// Displays the list of templates in a table, one row per template group.
+        ///
+        /// The columns displayed are as follows:
+        /// Except where noted, the values are taken from the highest-precedence template in the group. The info could vary among the templates in the group, but shouldn't.
+        /// (There is no check that the info doesn't vary.)
+        /// - Template Name
+        /// - Short Name: displays the all available short names for the group.
+        /// - Language: All languages supported by any template in the group are displayed, with the default language in brackets, e.g.: [C#]
+        /// - Tags
+        /// The columns can be configured in <see cref="INewCommandInput.Columns"/> and <see cref="INewCommandInput.ShowAllColumns"/>.
+        /// </summary>
+        internal void DisplayTemplateList(
+            IEnumerable<ITemplateInfo> templates,
+            INewCommandInput commandInput,
+            bool useErrorOutput = false)
         {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templates, commandInput.Language, defaultLanguage);
-            DisplayTemplateList(groupsForDisplay, environmentSettings, commandInput, useErrorOutput);
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templates, commandInput.Language, _defaultLanguage);
+            DisplayTemplateList(groupsForDisplay, commandInput, useErrorOutput);
         }
 
+#pragma warning disable SA1204 // Static elements should appear before instance elements
         internal static void DisplayInvalidParameters(IEnumerable<string> invalidParams)
+#pragma warning restore SA1204 // Static elements should appear before instance elements
         {
             _ = invalidParams ?? throw new ArgumentNullException(nameof(invalidParams));
 
@@ -145,7 +160,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        // Returns a list of the parameter names that are invalid for every template in the input group.
+        /// <summary>
+        /// Returns a list of the parameter names that are invalid for every template in the input group.
+        /// </summary>
         internal static void GetParametersInvalidForTemplatesInList(IReadOnlyCollection<ITemplateMatchInfo> templateList, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates)
         {
             IDictionary<string, int> invalidCounts = new Dictionary<string, int>();
@@ -175,18 +192,18 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 ?? new List<string>();
         }
 
-        internal static void ShowUsageHelp(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
+        internal void ShowUsageHelp(INewCommandInput commandInput)
         {
             if (commandInput.IsHelpFlagSpecified)
             {
-                telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
+                _telemetryLogger.TrackEvent(commandInput.CommandName + "-Help");
             }
 
             Reporter.Output.WriteLine(commandInput.HelpText);
             Reporter.Output.WriteLine();
         }
 
-        internal static New3CommandStatus HandleParseError(INewCommandInput commandInput, ITelemetryLogger telemetryLogger)
+        internal New3CommandStatus HandleParseError(INewCommandInput commandInput)
         {
             TemplateResolver.ValidateRemainingParameters(commandInput, out IReadOnlyList<string> invalidParams);
             DisplayInvalidParameters(invalidParams);
@@ -195,7 +212,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (commandInput.IsHelpFlagSpecified)
             {
                 // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
-                ShowUsageHelp(commandInput, telemetryLogger);
+                ShowUsageHelp(commandInput);
             }
             else if (invalidParams.Count > 0)
             {
@@ -215,7 +232,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <param name="commandName"></param>
         /// <param name="template"></param>
         /// <returns>the help command or null in case template does not have short name defined.</returns>
+#pragma warning disable SA1204 // Static elements should appear before instance elements
         internal static string? GetTemplateHelpCommand(string commandName, ITemplateInfo template)
+#pragma warning restore SA1204 // Static elements should appear before instance elements
         {
             if (template.ShortNameList.Any())
             {
@@ -224,104 +243,61 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return null;
         }
 
-        private static Task<New3CommandStatus> DisplayHelpForUnambiguousTemplateGroupAsync(
-            TemplateListResolutionResult templateResolutionResult,
-            IEngineEnvironmentSettings environmentSettings,
+        /// <summary>
+        /// Handles help display for the template (dotnet new3 template-name --help).
+        /// </summary>
+        /// <param name="commandInput">user command input.</param>
+        /// <param name="cancellationToken">cancellation token.</param>
+        /// <returns><see cref="New3CommandStatus"/> for operation.</returns>
+        internal async Task<New3CommandStatus> DisplayDetailedHelpAsync(
             INewCommandInput commandInput,
-            IHostSpecificDataLoader hostDataLoader,
-            TemplateCreator templateCreator,
-            string? defaultLanguage,
-            CancellationToken cancellationToken)
-        {
-            // sanity check: should never happen; as condition for unambiguous template group is checked above
-            if (!templateResolutionResult.UnambiguousTemplateGroup.Any())
-            {
-                return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
-            }
-
-            //if language is specified and all templates in unambigiuos group match the language show the help for that template
-            if (templateResolutionResult.AllTemplatesInUnambiguousTemplateGroupAreSameLanguage)
-            {
-                IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroupForDetailDisplay = templateResolutionResult.UnambiguousTemplateGroup;
-                return TemplateDetailedHelpForSingularTemplateGroupAsync(unambiguousTemplateGroupForDetailDisplay, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken);
-            }
-            //if language is not specified and group has template that matches the language show the help for that the template that matches the language
-            if (string.IsNullOrEmpty(commandInput.Language) && !string.IsNullOrEmpty(defaultLanguage) && templateResolutionResult.HasUnambiguousTemplateGroupForDefaultLanguage)
-            {
-                IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroupForDetailDisplay = templateResolutionResult.UnambiguousTemplatesForDefaultLanguage;
-                return TemplateDetailedHelpForSingularTemplateGroupAsync(unambiguousTemplateGroupForDetailDisplay, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken);
-            }
-            else
-            {
-                return DisplayListOrHelpForAmbiguousTemplateGroupAsync(templateResolutionResult, environmentSettings, commandInput, hostDataLoader, defaultLanguage, cancellationToken);
-            }
-        }
-
-        private static async Task<New3CommandStatus> TemplateDetailedHelpForSingularTemplateGroupAsync(
-            IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup,
-            IEngineEnvironmentSettings environmentSettings,
-            INewCommandInput commandInput,
-            IHostSpecificDataLoader hostDataLoader,
-            TemplateCreator templateCreator,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            // sanity check: should never happen; as condition for unambiguous template group is checked above
-            if (!unambiguousTemplateGroup.Any())
-            {
-                return New3CommandStatus.NotFound;
-            }
 
-            GetParametersInvalidForTemplatesInList(unambiguousTemplateGroup, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
-
-            if (invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0)
+            TemplateResolutionResult helpResolutionResult = TemplateResolver.GetTemplateResolutionResultForHelp(await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false), _hostSpecificDataLoader, commandInput, _defaultLanguage);
+            if (helpResolutionResult.GroupResolutionStatus == TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch && helpResolutionResult.TemplatesForDetailedHelp.Any())
             {
-                DisplayInvalidParameters(invalidForAllTemplates);
-                DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.SingleTemplateGroupPartialMatchSwitchesNotValidForAllMatches);
-            }
-
-            if (invalidForAllTemplates.Count == 0)
-            {
+                IReadOnlyCollection<ITemplateMatchInfo> unambiguousTemplateGroup = helpResolutionResult.TemplatesForDetailedHelp.ToList();
                 bool showImplicitlyHiddenParams = unambiguousTemplateGroup.Count > 1;
-                await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(unambiguousTemplateGroup, environmentSettings, commandInput, hostDataLoader, templateCreator, showImplicitlyHiddenParams, cancellationToken).ConfigureAwait(false);
+                return await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(unambiguousTemplateGroup, _engineEnvironmentSettings, commandInput, _hostSpecificDataLoader, _templateCreator, showImplicitlyHiddenParams, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                string? templateHelpCommand = GetTemplateHelpCommand(commandInput.CommandName, unambiguousTemplateGroup.First().Info);
-                if (!string.IsNullOrWhiteSpace(templateHelpCommand))
-                {
-                    Reporter.Error.WriteLine(
-                        string.Format(LocalizableStrings.InvalidParameterTemplateHint, templateHelpCommand).Bold().Red());
-                }
+                return await CoordinateAmbiguousTemplateResolutionDisplayAsync(helpResolutionResult, commandInput, cancellationToken).ConfigureAwait(false);
             }
-
-            return invalidForAllTemplates.Count > 0 || invalidForSomeTemplates.Count > 0
-                ? New3CommandStatus.InvalidParamValues
-                : New3CommandStatus.Success;
         }
 
-        private static Task<New3CommandStatus> DisplayListOrHelpForAmbiguousTemplateGroupAsync(
-            TemplateListResolutionResult templateResolutionResult,
-            IEngineEnvironmentSettings environmentSettings,
+        /// <summary>
+        /// Handles template list display (dotnet new3 --list).
+        /// </summary>
+        /// <param name="commandInput">user command input.</param>
+        /// <param name="cancellationToken">cancellation token.</param>
+        /// <returns></returns>
+        internal async Task<New3CommandStatus> DisplayTemplateGroupListAsync(
             INewCommandInput commandInput,
-            IHostSpecificDataLoader hostDataLoader,
-            string? defaultLanguage,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            TemplateListResolutionResult listingTemplateResolutionResult = TemplateResolver.GetTemplateResolutionResultForList(
+               await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false),
+               _hostSpecificDataLoader,
+               commandInput,
+               _defaultLanguage);
+
             // The following occurs when:
-            //      --alias <value> is specifed
+            //      --alias <value> is specified
             //      --help is specified
             //      template (group) can't be resolved
             if (!string.IsNullOrWhiteSpace(commandInput.Alias))
             {
                 Reporter.Error.WriteLine(LocalizableStrings.InvalidInputSwitch.Bold().Red());
                 Reporter.Error.WriteLine("  " + commandInput.TemplateParamInputFormat("--alias").Bold().Red());
-                return Task.FromResult(New3CommandStatus.NotFound);
+                return New3CommandStatus.NotFound;
             }
 
             bool hasInvalidParameters = false;
-            IReadOnlyCollection<ITemplateMatchInfo> templatesForDisplay = templateResolutionResult.ExactMatchedTemplates;
+            IReadOnlyCollection<ITemplateMatchInfo> templatesForDisplay = listingTemplateResolutionResult.ExactMatchedTemplates;
             GetParametersInvalidForTemplatesInList(templatesForDisplay, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
             if (invalidForAllTemplates.Any() || invalidForSomeTemplates.Any())
             {
@@ -330,32 +306,28 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 DisplayParametersInvalidForSomeTemplates(invalidForSomeTemplates, LocalizableStrings.PartialTemplateMatchSwitchesNotValidForAllMatches);
             }
 
-            if (templateResolutionResult.HasExactMatches)
+            if (listingTemplateResolutionResult.HasExactMatches)
             {
                 ShowTemplatesFoundMessage(commandInput);
-                DisplayTemplateList(templateResolutionResult.ExactMatchedTemplateGroups, environmentSettings, commandInput, defaultLanguage);
+                DisplayTemplateList(listingTemplateResolutionResult.ExactMatchedTemplateGroups, commandInput);
             }
             else
             {
-                ShowContextAndTemplateNameMismatchHelp(templateResolutionResult, commandInput);
+                ShowContextAndTemplateNameMismatchHelp(listingTemplateResolutionResult, commandInput);
             }
 
             if (!commandInput.IsListFlagSpecified)
             {
-                TemplateUsageHelp.ShowInvocationExamples(templateResolutionResult, hostDataLoader, commandInput.CommandName);
+                TemplateUsageHelp.ShowInvocationExamples(listingTemplateResolutionResult, _hostSpecificDataLoader, commandInput.CommandName);
             }
 
             if (hasInvalidParameters)
             {
-                return Task.FromResult(New3CommandStatus.NotFound);
-            }
-            else if (commandInput.IsListFlagSpecified || commandInput.IsHelpFlagSpecified)
-            {
-                return Task.FromResult(templateResolutionResult.HasExactMatches ? New3CommandStatus.Success : New3CommandStatus.NotFound);
+                return New3CommandStatus.NotFound;
             }
             else
             {
-                return Task.FromResult(New3CommandStatus.NotFound);
+                return listingTemplateResolutionResult.HasExactMatches ? New3CommandStatus.Success : New3CommandStatus.NotFound;
             }
         }
 
@@ -392,17 +364,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// Displays the help when <paramref name="unambiguousTemplateGroup"/> contains the invokable templates with ambiguous precedence.
         /// </summary>
         /// <param name="unambiguousTemplateGroup">resolved unambiguous template group to use based on the command input.</param>
-        /// <param name="environmentSettings"></param>
-        /// <param name="templatePackageManager"></param>
         /// <param name="commandInput">the command input.</param>
         /// <param name="cancellationToken">a cancellation token.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">when <paramref name="unambiguousTemplateGroup"/> is <see langword="null" />.</exception>
         /// <exception cref="ArgumentNullException">when <paramref name="commandInput"/> is <see langword="null" />.</exception>
-        private static async Task<New3CommandStatus> DisplayAmbiguousPrecedenceErrorAsync(
+        private async Task<New3CommandStatus> DisplayAmbiguousPrecedenceErrorAsync(
             TemplateGroup unambiguousTemplateGroup,
-            IEngineEnvironmentSettings environmentSettings,
-            TemplatePackageManager templatePackageManager,
             INewCommandInput commandInput,
             CancellationToken cancellationToken)
         {
@@ -421,14 +389,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     TemplateLanguage = template.Info.GetLanguage() ?? string.Empty,
                     TemplatePrecedence = template.Info.Precedence,
                     TemplateAuthor = template.Info.Author ?? string.Empty,
-                    TemplatePackage = await templatePackageManager.GetTemplatePackageAsync(template.Info, cancellationToken).ConfigureAwait(false) as IManagedTemplatePackage
+                    TemplatePackage = await _templatePackageManager.GetTemplatePackageAsync(template.Info, cancellationToken).ConfigureAwait(false) as IManagedTemplatePackage
                 });
             }
 
             HelpFormatter<AmbiguousTemplateDetails> formatter =
                 HelpFormatter
                     .For(
-                        environmentSettings,
+                        _engineEnvironmentSettings,
                         commandInput,
                         ambiguousTemplateDetails,
                         columnPadding: 2,
@@ -448,7 +416,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             string hintMessage = LocalizableStrings.AmbiguousTemplatesMultiplePackagesHint;
             if (unambiguousTemplateGroup.Templates.AllAreTheSame(t => t.Info.MountPointUri))
             {
-                IManagedTemplatePackage? templatePackage = await templatePackageManager.GetTemplatePackageAsync(
+                IManagedTemplatePackage? templatePackage = await _templatePackageManager.GetTemplatePackageAsync(
                     unambiguousTemplateGroup.Templates.First().Info, cancellationToken).ConfigureAwait(false) as IManagedTemplatePackage;
                 if (templatePackage != null)
                 {
@@ -459,16 +427,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return New3CommandStatus.NotFound;
         }
 
-        private static void DisplayTemplateList(
+        private void DisplayTemplateList(
             IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay,
-            IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
             bool useErrorOutput = false)
         {
             HelpFormatter<TemplateGroupTableRow> formatter =
                 HelpFormatter
                     .For(
-                        environmentSettings,
+                        _engineEnvironmentSettings,
                         commandInput,
                         groupsForDisplay,
                         columnPadding: 2,
@@ -486,7 +453,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             reporter.WriteLine(formatter.Layout());
         }
 
+#pragma warning disable SA1204 // Static elements should appear before instance elements
         private static void DisplayParametersInvalidForSomeTemplates(IReadOnlyList<string> invalidParams, string messageHeader)
+#pragma warning restore SA1204 // Static elements should appear before instance elements
         {
             if (invalidParams.Count > 0)
             {
@@ -526,11 +495,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             if (!commandInput.IsListFlagSpecified)
             {
                 // To list installed templates, run 'dotnet {0} --list'.
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.CommandName).Bold().Red());
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.ListCommandExample()).Bold().Red());
             }
 
             // To search for the templates on NuGet.org, run 'dotnet {0} <template name> --search'.
-            Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.CommandName, commandInput.TemplateName).Bold().Red());
+            Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.SearchCommandExample(commandInput.TemplateName)).Bold().Red());
             Reporter.Error.WriteLine();
         }
 

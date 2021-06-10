@@ -77,22 +77,16 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return new TemplateResolutionResult(commandInput.Language, coreMatchedTemplates);
         }
 
-        internal static TemplateListResolutionResult GetTemplateResolutionResultForListOrHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string? defaultLanguage)
+        internal static TemplateListResolutionResult GetTemplateResolutionResultForList(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string? defaultLanguage)
         {
-            IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates;
-
-            //we need different set of templates for help and list
-            //for list we need to show all exact and partial names by name
-            //for help if there is an exact match by shortname or name we need to show help for that exact template and also apply default language mapping in case language is not specified
-            if (commandInput.IsListFlagSpecified)
-            {
-                coreMatchedTemplates = PerformCoreTemplateQueryForList(templateInfo, hostDataLoader, commandInput);
-            }
-            else
-            {
-                coreMatchedTemplates = PerformCoreTemplateQueryForHelp(templateInfo, hostDataLoader, commandInput, defaultLanguage);
-            }
+            IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates = PerformCoreTemplateQueryForList(templateInfo, hostDataLoader, commandInput);
             return new TemplateListResolutionResult(coreMatchedTemplates);
+        }
+
+        internal static TemplateResolutionResult GetTemplateResolutionResultForHelp(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput, string? defaultLanguage)
+        {
+            IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates = PerformCoreTemplateQueryForHelp(templateInfo, hostDataLoader, commandInput, defaultLanguage);
+            return new TemplateResolutionResult(commandInput.Language, coreMatchedTemplates);
         }
 
         internal static IReadOnlyCollection<ITemplateMatchInfo> PerformCoreTemplateQueryForList(IReadOnlyList<ITemplateInfo> templateInfo, IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
@@ -131,8 +125,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning disable CS0618 // Type or member is obsolete
             IReadOnlyList<ITemplateMatchInfo> coreMatchedTemplates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
-                WellKnownSearchFilters.MatchesAtLeastOneCriteria,
-                CliNameFilter(commandInput.TemplateName),
+                WellKnownSearchFilters.MatchesAllCriteria,
+                CliExactShortNameFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.TypeFilter(commandInput.TypeFilter),
                 WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName),
@@ -140,20 +134,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             )
 #pragma warning restore CS0618 // Type or member is obsolete
             .Where(x => !IsTemplateHiddenByHostFile(x.Info, hostDataLoader)).ToList();
-
-            //for help if template name from CLI exactly matches the template name we should consider only that template
-            IReadOnlyList<ITemplateMatchInfo> matchesWithExactDispositionsInNameFields =
-                coreMatchedTemplates.Where(
-                    x => x.MatchDisposition.Any(
-                        y =>
-                            (y.Name == MatchInfo.BuiltIn.Name || y.Name == MatchInfo.BuiltIn.ShortName)
-                            && y.Kind == MatchKind.Exact)).ToList();
-
-            if (matchesWithExactDispositionsInNameFields.Count > 0)
-            {
-                coreMatchedTemplates = matchesWithExactDispositionsInNameFields;
-            }
-
             AddParameterMatchingToTemplates(coreMatchedTemplates, hostDataLoader, commandInput);
             return coreMatchedTemplates;
         }
@@ -204,7 +184,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             IReadOnlyCollection<ITemplateMatchInfo> templates = TemplateListFilter.GetTemplateMatchInfo(
                 filterableTemplateInfo,
                 WellKnownSearchFilters.MatchesAllCriteria,
-                CliNameFilter(commandInput.TemplateName),
+                CliExactShortNameFilter(commandInput.TemplateName),
                 WellKnownSearchFilters.LanguageFilter(commandInput.Language),
                 WellKnownSearchFilters.TypeFilter(commandInput.TypeFilter),
                 WellKnownSearchFilters.BaselineFilter(commandInput.BaselineName),
@@ -213,23 +193,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning restore CS0618 // Type or member is obsolete
             .Where(x => !IsTemplateHiddenByHostFile(x.Info, hostDataLoader)).ToList();
 
-            //select only the templates which do not have mismatches
-            //if any template has exact match for name - use those; otherwise partial name matches are also considered when resolving templates
-            IReadOnlyList<ITemplateMatchInfo> matchesWithExactDispositionsInNameFields =
-                templates.Where(
-                    x => x.MatchDisposition.Any(
-                        y =>
-                            (y.Name == MatchInfo.BuiltIn.Name || y.Name == MatchInfo.BuiltIn.ShortName)
-                            && y.Kind == MatchKind.Exact)).ToList();
-
-            if (matchesWithExactDispositionsInNameFields.Count > 0)
-            {
-                templates = matchesWithExactDispositionsInNameFields;
-            }
-
             //add specific template parameters matches to the list
             AddParameterMatchingToTemplates(templates, hostDataLoader, commandInput);
-
             return templates;
         }
 
@@ -463,6 +428,35 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 }
 
                 return new MatchInfo(MatchInfo.BuiltIn.Name, name, MatchKind.Mismatch);
+            };
+        }
+
+        /// <summary>
+        /// Filter for <see cref="TemplateListFilter.GetTemplateMatchInfo"></see>.
+        /// Filters <see cref="ITemplateInfo"/> by short name. Requires <see cref="TemplateInfoWithGroupShortNames"/> implementation.
+        /// The fields to be compared are <see cref="TemplateInfoWithGroupShortNames.GroupShortNameList"/> and they should exactly match user input.
+        /// Unlike <see cref="WellKnownSearchFilters.NameFilter(string)"/> the filter also matches other template group short names the template belongs to.
+        /// </summary>
+        /// <param name="name">the name to match with short name.</param>
+        /// <returns></returns>
+        private static Func<ITemplateInfo, MatchInfo?> CliExactShortNameFilter(string name)
+        {
+            return (template) =>
+            {
+                var groupAwareTemplate = template as TemplateInfoWithGroupShortNames ?? throw new ArgumentException("CliNameFilter filter supports only TemplateInfoWithGroupShortNames templates");
+
+                if (string.IsNullOrEmpty(name))
+                {
+                    return new MatchInfo(MatchInfo.BuiltIn.ShortName, name, MatchKind.Mismatch);
+                }
+                foreach (string shortName in groupAwareTemplate.GroupShortNameList)
+                {
+                    if (shortName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return new MatchInfo(MatchInfo.BuiltIn.ShortName, name, MatchKind.Exact);
+                    }
+                }
+                return new MatchInfo(MatchInfo.BuiltIn.ShortName, name, MatchKind.Mismatch);
             };
         }
 

@@ -202,8 +202,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="translated">Nie można rozpoznać szablonu, aby utworzyć wystąpienie, ponieważ te szablony pasują do danych wejściowych:</target>
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="needs-review-translation">Nie można rozpoznać szablonu, aby utworzyć wystąpienie, ponieważ te szablony pasują do danych wejściowych:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -212,8 +212,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
-        <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="translated">Nie można rozpoznać szablonu w celu utworzenia wystąpienia, ponieważ następujące zainstalowane szablony powodują konflikt:</target>
+        <source>Unable to resolve the template, the following installed templates are conflicting:</source>
+        <target state="needs-review-translation">Nie można rozpoznać szablonu w celu utworzenia wystąpienia, ponieważ następujące zainstalowane szablony powodują konflikt:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
@@ -508,8 +508,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="translated">Aby wyświetlić listę zainstalowanych szablonów, uruchom polecenie "dotnet {0} --list".</target>
+        <source>To list installed templates, run '{0}'.</source>
+        <target state="needs-review-translation">Aby wyświetlić listę zainstalowanych szablonów, uruchom polecenie "dotnet {0} --list".</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -765,8 +765,8 @@ Przykłady:
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="translated">Aby wyszukać szablony na stronie NuGet.org, uruchom polecenie "dotnet {0} {1} --search".</target>
+        <source>To search for the templates on NuGet.org, run '{0}'.</source>
+        <target state="new">To search for the templates on NuGet.org, run '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

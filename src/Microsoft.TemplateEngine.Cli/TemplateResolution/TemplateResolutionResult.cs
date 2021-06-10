@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +21,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// - the templates in the group may have different parameters and different choices for parameter symbols defined<br/>
     /// Template resolution is done in several steps:<br/>
     /// 1) the list of matched templates is defined based on command input (template name and filters used)<br/>
-    /// 2) the unambiguous template group to use is defined. In case of ambiguity, if the user didn't specify language to use, the groups with the templates defined in default language are preferred. In case unambiguous template group cannot be resolved, the template to instatiate cannot be resolved as well.<br/>
+    /// 2) the unambiguous template group to use is defined. In case of ambiguity, if the user didn't specify language to use, the groups with the templates defined in default language are preferred. In case unambiguous template group cannot be resolved, the template to instantiate cannot be resolved as well.<br/>
     /// 3) the template to invoke inside the group is defined:<br/>
     /// -- the template that matches template specific options in command input is preferred<br/>
     /// -- in case there are multiple templates, the one with highest precedence is selected<br/>
-    /// -- in case there are multiple templates with same precendence and user didn't specify the language to use, the default language template is preferred.<br/>
+    /// -- in case there are multiple templates with same precedence and user didn't specify the language to use, the default language template is preferred.<br/>
     /// -- Note that the template will not be resolved in case the value specified for choice parameter is not exact and there is an ambiguity between template to select:<br/>
     /// --- in case at least one template in the group has more than 1 choice value which starts with specified value in the command<br/>
     /// --- in case at least two templates in the group have 1 choice value which starts with specified value in the command.<br/>
@@ -36,11 +38,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         private Status _singularInvokableMatchStatus = Status.NotEvaluated;
 
-        private IReadOnlyCollection<TemplateGroup> _templateGroups;
+        private IReadOnlyCollection<TemplateGroup>? _templateGroups;
 
-        private ITemplateMatchInfo _templateToInvoke;
+        private ITemplateMatchInfo? _templateToInvoke;
 
-        private TemplateGroup _unambiguousTemplateGroup;
+        private TemplateGroup? _unambiguousTemplateGroup;
 
         private UnambiguousTemplateGroupStatus _unambigiousTemplateGroupStatus = UnambiguousTemplateGroupStatus.NotEvaluated;
 
@@ -141,7 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// Returns the template to invoke or <c>null</c> if the template to invoke cannot be determined.
         /// Has value only when <see cref="Status" /> is <see cref="Status.SingleMatch"/>.
         /// </summary>
-        internal ITemplateMatchInfo TemplateToInvoke
+        internal ITemplateMatchInfo? TemplateToInvoke
         {
             get
             {
@@ -190,7 +192,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// Returns unambiguous template group resolved; <c>null</c> if group cannot be resolved based on command input
         /// Has value only when <see cref="GroupResolutionStatus" /> is <see cref="UnambiguousTemplateGroupStatus.SingleMatch"/>.
         /// </summary>
-        internal TemplateGroup UnambiguousTemplateGroup
+        internal TemplateGroup? UnambiguousTemplateGroup
         {
             get
             {
@@ -202,19 +204,67 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             }
         }
 
+        internal IEnumerable<ITemplateMatchInfo> TemplatesForDetailedHelp
+        {
+            get
+            {
+                if (UnambiguousTemplateGroup == null || !UnambiguousTemplateGroup.InvokableTemplates.Any())
+                {
+                    return Array.Empty<ITemplateMatchInfo>();
+                }
+
+                if (_hasUserInputLanguage)
+                {
+                    return UnambiguousTemplateGroup.InvokableTemplates.Where(t => t.HasLanguageMatch());
+                }
+                else if (UnambiguousTemplateGroup.InvokableTemplates.Any(t => t.HasDefaultLanguageMatch()))
+                {
+                    return UnambiguousTemplateGroup.InvokableTemplates.Where(t => t.HasDefaultLanguageMatch());
+                }
+                else
+                {
+                    HashSet<string> languagesFound = new HashSet<string>();
+                    foreach (ITemplateMatchInfo template in UnambiguousTemplateGroup.InvokableTemplates)
+                    {
+                        string? language = template.Info.GetLanguage();
+                        if (!string.IsNullOrEmpty(language))
+                        {
+                            languagesFound.Add(language);
+                        }
+
+                        if (languagesFound.Count > 1)
+                        {
+                            //not possible to identify language to show template for
+                            return Array.Empty<ITemplateMatchInfo>();
+                        }
+                    }
+                    return UnambiguousTemplateGroup.InvokableTemplates;
+                }
+            }
+        }
+
         private void EvaluateTemplateToInvoke()
         {
-            //if no template groups were matched - no match
-            if (GroupResolutionStatus == UnambiguousTemplateGroupStatus.NoMatch)
+            EvaluateUnambiguousTemplateGroup();
+            switch (GroupResolutionStatus)
             {
-                _singularInvokableMatchStatus = Status.NoMatch;
-                return;
-            }
-
-            if (GroupResolutionStatus == UnambiguousTemplateGroupStatus.Ambiguous)
-            {
-                _singularInvokableMatchStatus = Status.AmbiguousTemplateGroupChoice;
-                return;
+                case UnambiguousTemplateGroupStatus.NotEvaluated:
+                    throw new ArgumentException($"{nameof(GroupResolutionStatus)} should not be {nameof(UnambiguousTemplateGroupStatus.NotEvaluated)} after running {nameof(EvaluateUnambiguousTemplateGroup)}");
+                case UnambiguousTemplateGroupStatus.NoMatch:
+                    _singularInvokableMatchStatus = Status.NoMatch;
+                    return;
+                case UnambiguousTemplateGroupStatus.Ambiguous:
+                    _singularInvokableMatchStatus = Status.AmbiguousTemplateGroupChoice;
+                    return;
+                case UnambiguousTemplateGroupStatus.SingleMatch:
+                    if (UnambiguousTemplateGroup == null)
+                    {
+                        throw new ArgumentException($"{nameof(UnambiguousTemplateGroup)} should not be null if running {nameof(GroupResolutionStatus)} is {nameof(UnambiguousTemplateGroupStatus.SingleMatch)}");
+                    }
+                    //valid state to proceed
+                    break;
+                default:
+                    throw new ArgumentException($"Unexpected value of {nameof(UnambiguousTemplateGroup)}: {GroupResolutionStatus}.");
             }
 
             //checking template options match
@@ -256,7 +306,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             }
 
             IEnumerable<ITemplateMatchInfo> highestPrecedenceTemplates = UnambiguousTemplateGroup.GetHighestPrecedenceInvokableTemplates(!_hasUserInputLanguage);
-            IEnumerable<string> templateLanguages = highestPrecedenceTemplates.Select(t => t.Info.GetLanguage()).Distinct(StringComparer.OrdinalIgnoreCase);
+            IEnumerable<string?> templateLanguages = highestPrecedenceTemplates.Select(t => t.Info.GetLanguage()).Distinct(StringComparer.OrdinalIgnoreCase);
 
             if (templateLanguages.Count() > 1)
             {

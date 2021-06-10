@@ -202,8 +202,8 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="translated">Impossible de résoudre le modèle à instancier. Ces modèles correspondent à votre entrée :</target>
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="needs-review-translation">Impossible de résoudre le modèle à instancier. Ces modèles correspondent à votre entrée :</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -212,8 +212,8 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
-        <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="translated">Impossible de résoudre le modèle à instancier, les modèles installés suivants sont en conflit :</target>
+        <source>Unable to resolve the template, the following installed templates are conflicting:</source>
+        <target state="needs-review-translation">Impossible de résoudre le modèle à instancier, les modèles installés suivants sont en conflit :</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
@@ -508,8 +508,8 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="translated">Pour répertorier les modèles installés, exécutez « dotnet {0}--list ».</target>
+        <source>To list installed templates, run '{0}'.</source>
+        <target state="needs-review-translation">Pour répertorier les modèles installés, exécutez « dotnet {0}--list ».</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -765,8 +765,8 @@ Exemples :
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="translated">Pour rechercher les modèles sur NuGet.org, exécutez « dotnet {0} {1} --search ».</target>
+        <source>To search for the templates on NuGet.org, run '{0}'.</source>
+        <target state="new">To search for the templates on NuGet.org, run '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

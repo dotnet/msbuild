@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,13 +19,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     {
         private readonly IReadOnlyCollection<ITemplateMatchInfo> _coreMatchedTemplates;
 
-        private IReadOnlyCollection<ITemplateMatchInfo> _exactMatchedTemplates;
+        private IReadOnlyCollection<ITemplateMatchInfo>? _exactMatchedTemplates;
 
-        private IReadOnlyCollection<ITemplateMatchInfo> _partiallyMatchedTemplates;
+        private IReadOnlyCollection<ITemplateMatchInfo>? _partiallyMatchedTemplates;
 
-        private IReadOnlyCollection<TemplateGroup> _exactMatchedTemplateGroups;
+        private IReadOnlyCollection<TemplateGroup>? _exactMatchedTemplateGroups;
 
-        private IReadOnlyCollection<TemplateGroup> _partiallyMatchedTemplateGroups;
+        private IReadOnlyCollection<TemplateGroup>? _partiallyMatchedTemplateGroups;
 
         internal TemplateListResolutionResult(IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates)
         {
@@ -136,16 +138,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Returns true when at least one template in unambiguous matches default language.
-        /// </summary>
-        internal bool HasUnambiguousTemplateGroupForDefaultLanguage => UnambiguousTemplatesForDefaultLanguage.Any();
-
-        /// <summary>
-        /// Returns collecion of templates from unamgibuous group that matches default language.
-        /// </summary>
-        internal IReadOnlyCollection<ITemplateMatchInfo> UnambiguousTemplatesForDefaultLanguage => UnambiguousTemplateGroup.Where(t => t.HasDefaultLanguageMatch()).ToList();
-
-        /// <summary>
         /// Returns true when at least one template exactly or partially matched templates by name and exactly matched language, filter, baseline (if specified in command paramaters).
         /// </summary>
         internal bool HasExactMatches => ExactMatchedTemplates.Any();
@@ -164,40 +156,5 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// Returns list of templates for unambiguous template group, otherwise empty list.
         /// </summary>
         internal IReadOnlyCollection<ITemplateMatchInfo> UnambiguousTemplateGroup => HasUnambiguousTemplateGroup ? ExactMatchedTemplates : new List<ITemplateMatchInfo>();
-
-        /// <summary>
-        /// Returns true if all the templates in unambiguous group have templates in same language.
-        /// </summary>
-        internal bool AllTemplatesInUnambiguousTemplateGroupAreSameLanguage
-        {
-            get
-            {
-                if (UnambiguousTemplateGroup.Count == 0)
-                {
-                    return false;
-                }
-
-                if (UnambiguousTemplateGroup.Count == 1)
-                {
-                    return true;
-                }
-
-                HashSet<string> languagesFound = new HashSet<string>();
-                foreach (ITemplateMatchInfo template in UnambiguousTemplateGroup)
-                {
-                    string language = template.Info.GetLanguage();
-                    if (!string.IsNullOrEmpty(language))
-                    {
-                        languagesFound.Add(language);
-                    }
-
-                    if (languagesFound.Count > 1)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
     }
 }

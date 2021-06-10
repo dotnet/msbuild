@@ -173,7 +173,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             text.Append(' ').AppendLine(LocalizableStrings.PossibleValuesHeader);
             int longestChoiceLength = possibleValues.Keys.Max(x => x.Length);
-            foreach (KeyValuePair<string, ParameterChoice> choiceInfo in possibleValues)
+            foreach (KeyValuePair<string, ParameterChoice> choiceInfo in possibleValues.OrderBy(x => x.Key, StringComparer.Ordinal))
             {
                 text.Append(' ', padWidth * 2).Append(choiceInfo.Key.PadRight(longestChoiceLength + padWidth));
 

@@ -23,7 +23,10 @@ namespace Microsoft.TemplateEngine.Cli.Alias
         // TODO: make this test more robust.
         private static readonly Regex ValidFirstTokenRegex = new Regex("^[a-z0-9]", RegexOptions.IgnoreCase);
 
-        internal static New3CommandStatus CoordinateAliasExpansion(INewCommandInput commandInput, AliasRegistry aliasRegistry, ITelemetryLogger telemetryLogger)
+        internal static New3CommandStatus CoordinateAliasExpansion(
+            INewCommandInput commandInput,
+            AliasRegistry aliasRegistry,
+            TemplateInformationCoordinator templateInformationCoordinator)
         {
             AliasExpansionStatus aliasExpansionStatus = AliasSupport.TryExpandAliases(commandInput, aliasRegistry);
             if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
@@ -38,7 +41,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
                 if (commandInput.HasParseError)
                 {
                     Reporter.Output.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
-                    return HelpForTemplateResolution.HandleParseError(commandInput, telemetryLogger);
+                    return templateInformationCoordinator.HandleParseError(commandInput);
                 }
             }
 

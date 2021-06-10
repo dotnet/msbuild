@@ -202,8 +202,8 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
-        <source>Unable to resolve the template to instantiate, these templates matched your input:</source>
-        <target state="translated">Die Vorlage für die Instanziierung konnte nicht aufgelöst werden, diese Vorlagen stimmen mit der Eingabe überein:</target>
+        <source>Unable to resolve the template, these templates matched your input:</source>
+        <target state="needs-review-translation">Die Vorlage für die Instanziierung konnte nicht aufgelöst werden, diese Vorlagen stimmen mit der Eingabe überein:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -212,8 +212,8 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
-        <source>Unable to resolve the template to instantiate, the following installed templates are conflicting:</source>
-        <target state="translated">Die Vorlage für die Instanziierung kann nicht aufgelöst werden, die folgenden installierten Vorlagen stehen in Konflikt:</target>
+        <source>Unable to resolve the template, the following installed templates are conflicting:</source>
+        <target state="needs-review-translation">Die Vorlage für die Instanziierung kann nicht aufgelöst werden, die folgenden installierten Vorlagen stehen in Konflikt:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
@@ -508,8 +508,8 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run 'dotnet {0} --list'.</source>
-        <target state="translated">Führen Sie "dotnet {0} --list" aus, um installierte Vorlagen aufzulisten.</target>
+        <source>To list installed templates, run '{0}'.</source>
+        <target state="needs-review-translation">Führen Sie "dotnet {0} --list" aus, um installierte Vorlagen aufzulisten.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -765,8 +765,8 @@ Beispiele:
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</source>
-        <target state="translated">Führen Sie "dotnet {0} {1} --search" aus, um nach den Vorlagen in NuGet.org zu suchen.</target>
+        <source>To search for the templates on NuGet.org, run '{0}'.</source>
+        <target state="new">To search for the templates on NuGet.org, run '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

@@ -71,7 +71,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine($"    dotnet {commandName} --help");
 
             // show a help example for template
-            string? templateHelpCommand = HelpForTemplateResolution.GetTemplateHelpCommand(commandName, bestMatchedTemplates.First().Info);
+            string? templateHelpCommand = TemplateInformationCoordinator.GetTemplateHelpCommand(commandName, bestMatchedTemplates.First().Info);
             if (!string.IsNullOrWhiteSpace(templateHelpCommand))
             {
                 Reporter.Output.WriteLine($"    {templateHelpCommand}");

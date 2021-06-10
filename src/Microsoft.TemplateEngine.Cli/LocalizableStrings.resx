@@ -518,7 +518,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>For more information, run '{0}'.</value>
   </data>
   <data name="ListTemplatesCommand" xml:space="preserve">
-    <value>To list installed templates, run 'dotnet {0} --list'.</value>
+    <value>To list installed templates, run '{0}'.</value>
   </data>
   <data name="ColumnNameAuthor" xml:space="preserve">
     <value>Author</value>
@@ -572,19 +572,19 @@ Examples:
     <value>Downloads</value>
   </data>
   <data name="SearchTemplatesCommand" xml:space="preserve">
-    <value>To search for the templates on NuGet.org, run 'dotnet {0} {1} --search'.</value>
+    <value>To search for the templates on NuGet.org, run '{0}'.</value>
   </data>
   <data name="AmbiguousParameterDetail" xml:space="preserve">
     <value>The value '{1}' is ambiguous for option {0}.</value>
   </data>
   <data name="AmbiguousTemplateGroupListHeader" xml:space="preserve">
-    <value>Unable to resolve the template to instantiate, these templates matched your input:</value>
+    <value>Unable to resolve the template, these templates matched your input:</value>
   </data>
   <data name="AmbiguousTemplateGroupListHint" xml:space="preserve">
     <value>Re-run the command using the template's exact short name.</value>
   </data>
   <data name="AmbiguousTemplatesHeader" xml:space="preserve">
-    <value>Unable to resolve the template to instantiate, the following installed templates are conflicting:</value>
+    <value>Unable to resolve the template, the following installed templates are conflicting:</value>
   </data>
   <data name="AmbiguousTemplatesMultiplePackagesHint" xml:space="preserve">
     <value>Uninstall the templates or the packages to keep only one template from the list.</value>

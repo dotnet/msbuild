@@ -32,6 +32,7 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly ITelemetryLogger _telemetryLogger;
         private readonly TemplateCreator _templateCreator;
         private readonly TemplatePackageManager _templatePackageManager;
+        private readonly TemplateInformationCoordinator _templateInformationCoordinator;
         private readonly AliasRegistry _aliasRegistry;
 
         /// <summary>
@@ -61,16 +62,13 @@ namespace Microsoft.TemplateEngine.Cli
             CommandName = commandName;
             _hostDataLoader = new HostSpecificDataLoader(EnvironmentSettings);
             _commandInput = commandInput;
-            _callbacks = callbacks;
-            if (callbacks == null)
-            {
-                callbacks = new New3Callbacks();
-            }
+            _callbacks = callbacks ?? new New3Callbacks();
 
             if (!EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out _defaultLanguage))
             {
                 _defaultLanguage = null;
             }
+            _templateInformationCoordinator = new TemplateInformationCoordinator(EnvironmentSettings, _templatePackageManager, _templateCreator, _hostDataLoader, _telemetryLogger, _defaultLanguage);
         }
 
         internal string TemplateName => _commandInput.TemplateName;
@@ -247,11 +245,11 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (!TemplateResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
             {
-                HelpForTemplateResolution.DisplayInvalidParameters(invalidParams);
+                TemplateInformationCoordinator.DisplayInvalidParameters(invalidParams);
                 if (_commandInput.IsHelpFlagSpecified)
                 {
                     // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
-                    HelpForTemplateResolution.ShowUsageHelp(_commandInput, _telemetryLogger);
+                    _templateInformationCoordinator.ShowUsageHelp(_commandInput);
                 }
                 else
                 {
@@ -261,55 +259,39 @@ namespace Microsoft.TemplateEngine.Cli
                 return New3CommandStatus.InvalidParamValues;
             }
 
-            // No other cases specified, we've fallen through to "Optional usage help + List"
-            TemplateListResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(
-                await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false),
-                _hostDataLoader,
-                _commandInput,
-                _defaultLanguage);
-            await HelpForTemplateResolution.CoordinateHelpAndUsageDisplayAsync(
-                templateResolutionResult,
-                EnvironmentSettings,
-                _commandInput,
-                _hostDataLoader,
-                _telemetryLogger,
-                _templateCreator,
-                _defaultLanguage,
-                default).ConfigureAwait(false);
+            // dotnet new -h case
+            if (_commandInput.IsHelpFlagSpecified)
+            {
+                _templateInformationCoordinator.ShowUsageHelp(_commandInput);
+                return New3CommandStatus.Success;
+            }
 
-            return New3CommandStatus.Success;
+            // No other cases specified, we've fallen through to "Optional usage help + List"
+            return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
         }
 
         private async Task<New3CommandStatus> EnterTemplateManipulationFlowAsync()
         {
-            if (_commandInput.IsListFlagSpecified || _commandInput.IsHelpFlagSpecified)
+            if (_commandInput.IsHelpFlagSpecified)
             {
-                TemplateListResolutionResult listingTemplateResolutionResult = TemplateResolver.GetTemplateResolutionResultForListOrHelp(
-                    await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false),
-                    _hostDataLoader,
-                    _commandInput,
-                    _defaultLanguage);
-                return await HelpForTemplateResolution.CoordinateHelpAndUsageDisplayAsync(
-                    listingTemplateResolutionResult,
-                    EnvironmentSettings,
-                    _commandInput,
-                    _hostDataLoader,
-                    _telemetryLogger,
-                    _templateCreator,
-                    _defaultLanguage,
-                    default).ConfigureAwait(false);
+                return await _templateInformationCoordinator.DisplayDetailedHelpAsync(_commandInput, default).ConfigureAwait(false);
+            }
+            if (_commandInput.IsListFlagSpecified)
+            {
+                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
             }
 
-            TemplateResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader, _commandInput, _defaultLanguage);
-            if (templateResolutionResult.ResolutionStatus == TemplateResolutionResult.Status.SingleMatch)
-            {
-                TemplateInvocationCoordinator invocationCoordinator = new TemplateInvocationCoordinator(EnvironmentSettings, _templatePackageManager, _commandInput, _telemetryLogger, CommandName, _inputGetter, _callbacks);
-                return await invocationCoordinator.CoordinateInvocationOrAcquisitionAsync(templateResolutionResult.TemplateToInvoke, CancellationToken.None).ConfigureAwait(false);
-            }
-            else
-            {
-                return await HelpForTemplateResolution.CoordinateAmbiguousTemplateResolutionDisplayAsync(templateResolutionResult, EnvironmentSettings, _templatePackageManager, _commandInput, _defaultLanguage, default).ConfigureAwait(false);
-            }
+            TemplateInvocationCoordinator invocationCoordinator = new TemplateInvocationCoordinator(
+                EnvironmentSettings,
+                _templatePackageManager,
+                _templateInformationCoordinator,
+                _hostDataLoader,
+                _telemetryLogger,
+                _defaultLanguage,
+                _inputGetter,
+                _callbacks);
+
+            return await invocationCoordinator.CoordinateInvocationAsync(_commandInput, default).ConfigureAwait(false);
         }
 
         private async Task<New3CommandStatus> ExecuteAsync()
@@ -317,7 +299,7 @@ namespace Microsoft.TemplateEngine.Cli
             // this is checking the initial parse, which is template agnostic.
             if (_commandInput.HasParseError)
             {
-                return HelpForTemplateResolution.HandleParseError(_commandInput, _telemetryLogger);
+                return _templateInformationCoordinator.HandleParseError(_commandInput);
             }
 
             if (_commandInput.IsHelpFlagSpecified)
@@ -341,7 +323,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 // The --alias param is for creating / updating / deleting aliases.
                 // If it's not present, try expanding aliases now.
-                New3CommandStatus aliasExpansionResult = AliasSupport.CoordinateAliasExpansion(_commandInput, _aliasRegistry, _telemetryLogger);
+                New3CommandStatus aliasExpansionResult = AliasSupport.CoordinateAliasExpansion(_commandInput, _aliasRegistry, _templateInformationCoordinator);
 
                 if (aliasExpansionResult != New3CommandStatus.Success)
                 {
@@ -378,7 +360,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 if (TemplatePackageCoordinator.IsTemplatePackageManipulationFlow(_commandInput))
                 {
-                    TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, EnvironmentSettings, _templatePackageManager, _defaultLanguage);
+                    TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, EnvironmentSettings, _templatePackageManager, _templateInformationCoordinator, _defaultLanguage);
                     return await packageCoordinator.ProcessAsync(_commandInput).ConfigureAwait(false);
                 }
 

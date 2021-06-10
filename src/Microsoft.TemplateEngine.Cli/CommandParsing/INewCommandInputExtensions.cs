@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using System.Linq;
+
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     /// <summary>
@@ -37,6 +39,16 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         internal static string ListCommandExample(this INewCommandInput command)
         {
             return $"dotnet {command.CommandName} --list";
+        }
+
+        internal static string SearchCommandExample(this INewCommandInput command, string templateName)
+        {
+            if (templateName.Any(char.IsWhiteSpace))
+            {
+                templateName = $"'{templateName}'";
+            }
+
+            return $"dotnet {command.CommandName} {templateName} --search";
         }
 
         internal static string UninstallCommandExample(this INewCommandInput command, string packageId = "", bool noArgs = false)

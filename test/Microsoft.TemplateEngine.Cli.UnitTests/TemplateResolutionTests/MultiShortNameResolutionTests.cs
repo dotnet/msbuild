@@ -77,10 +77,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     defaultLanguage);
 
                 Assert.Equal(TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, matchResult.GroupResolutionStatus);
-                Assert.Equal(3, matchResult.UnambiguousTemplateGroup.Templates.Count);
-                Assert.True(matchResult.UnambiguousTemplateGroup.Templates.All(t => WellKnownSearchFilters.MatchesAllCriteria(t)));
+                Assert.Equal(3, matchResult.UnambiguousTemplateGroup?.Templates.Count);
+                Assert.True(matchResult.UnambiguousTemplateGroup?.Templates.All(t => WellKnownSearchFilters.MatchesAllCriteria(t)));
 
-                foreach (ITemplateMatchInfo templateMatchInfo in matchResult.UnambiguousTemplateGroup.Templates)
+                foreach (ITemplateMatchInfo templateMatchInfo in matchResult.UnambiguousTemplateGroup!.Templates)
                 {
                     Assert.Equal("MultiName.Test", templateMatchInfo.Info.GroupIdentity);
                     if (templateMatchInfo.Info.GetLanguage()?.Equals(defaultLanguage, StringComparison.OrdinalIgnoreCase) ?? false)
@@ -107,8 +107,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
-                Assert.Equal("MultiName.Test.High.CSharp", matchResult.TemplateToInvoke.Info.Identity);
-                Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
+                Assert.Equal("MultiName.Test.High.CSharp", matchResult.TemplateToInvoke?.Info.Identity);
+                Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup?.ShortNames);
             }
         }
 
@@ -120,8 +120,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 INewCommandInput userInputs = new MockNewCommandInput(testShortName, "F#");
                 TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), userInputs, "C#");
                 Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
-                Assert.Equal("Multiname.Test.Only.FSharp", matchResult.TemplateToInvoke.Info.Identity);
-                Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
+                Assert.Equal("Multiname.Test.Only.FSharp", matchResult.TemplateToInvoke?.Info.Identity);
+                Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup?.ShortNames);
             }
         }
 
@@ -138,8 +138,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
             Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
-            Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke.Info.Identity);
-            Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
+            Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke?.Info.Identity);
+            Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup?.ShortNames);
         }
 
         [Theory(DisplayName = nameof(ParameterExistenceDisambiguatesMatchesWithMultipleShortNames))]
@@ -155,8 +155,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(MultiShortNameGroupTemplateInfo, new MockHostSpecificDataLoader(), commandInput, "C#");
             Assert.Equal(TemplateResolutionResult.Status.SingleMatch, matchResult.ResolutionStatus);
-            Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke.Info.Identity);
-            Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup.ShortNames);
+            Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke?.Info.Identity);
+            Assert.Equal(_shortNamesForGroup, matchResult.UnambiguousTemplateGroup?.ShortNames);
         }
     }
 }

@@ -58,6 +58,11 @@ namespace Microsoft.TemplateEngine.Cli
         /// <summary>
         /// Post action failed.
         /// </summary>
-        PostActionFailed = unchecked((int)0x80010003)
+        PostActionFailed = unchecked((int)0x80010003),
+
+        /// <summary>
+        /// Generic error when displaying help.
+        /// </summary>
+        DisplayHelpFailed = unchecked((int)0x80010004)
     }
 }

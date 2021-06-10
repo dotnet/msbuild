@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
 {
-    public class HelpForTemplateResolutionTests
+    public class TemplateInformationCoordinatorTests
     {
         [Fact(DisplayName = nameof(GetParametersInvalidForTemplatesInListTest))]
         public void GetParametersInvalidForTemplatesInListTest()
@@ -38,7 +38,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             ITemplateMatchInfo templateThreeMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateThreeDispositions);
             matchInfo.Add(templateThreeMatchInfo);
 
-            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
+            TemplateInformationCoordinator.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
 
             Assert.Equal(1, invalidForAllTemplates.Count);
             Assert.Contains("foo", invalidForAllTemplates);
@@ -65,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
-            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
+            TemplateInformationCoordinator.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
 
             Assert.Equal(0, invalidForAllTemplates.Count);
 
@@ -91,7 +91,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.HelpTests
             ITemplateMatchInfo templateTwoMatchInfo = new TemplateMatchInfo(new MockTemplateInfo(), templateTwoDispositions);
             matchInfo.Add(templateTwoMatchInfo);
 
-            HelpForTemplateResolution.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
+            TemplateInformationCoordinator.GetParametersInvalidForTemplatesInList(matchInfo, out IReadOnlyList<string> invalidForAllTemplates, out IReadOnlyList<string> invalidForSomeTemplates);
 
             Assert.Equal(1, invalidForAllTemplates.Count);
             Assert.Contains("foo", invalidForAllTemplates);

@@ -185,5 +185,200 @@ Options:
                 .And.HaveStdOut(ClassLibHelp)
                 .And.NotHaveStdOutContaining(HelpOutput);
         }
+
+        [Fact]
+        public void CannotShowHelpForTemplate_PartialNameMatch()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "class", "-h")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErr(
+@"No templates found matching: 'class'.
+To list installed templates, run 'dotnet new3 --list'.
+To search for the templates on NuGet.org, run 'dotnet new3 class --search'.");
+        }
+
+        [Fact]
+        public void CannotShowHelpForTemplate_FullNameMatch()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "Console Application", "-h")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErr(
+@"No templates found matching: 'Console Application'.
+To list installed templates, run 'dotnet new3 --list'.
+To search for the templates on NuGet.org, run 'dotnet new3 'Console Application' --search'.");
+        }
+
+        [Fact]
+        public void CannotShowHelpForTemplate_WhenAmbiguousLanguageChoice()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
+            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, "basic", "--help")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut()
+                .And.HaveStdErrContaining("Unable to resolve the template, these templates matched your input:")
+                .And.HaveStdErrContaining("Re-run the command specifying the language to use with --language option.")
+                .And.HaveStdErrContaining("basic").And.HaveStdErrContaining("F#").And.HaveStdErrContaining("VB");
+        }
+
+        [Fact]
+        public void CanShowHelpForTemplate_MatchOnChoice()
+        {
+            const string ConsoleHelp =
+@"Console Application (C#)
+Author: Microsoft
+Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+Options:                                                                            
+  --langVersion  Sets the LangVersion property in the created project file          
+                 text - Optional                                                    
+
+  --no-restore   If specified, skips the automatic restore of the project on create.
+                 bool - Optional                                                    
+                 Default: false                                                     ";
+
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "console", "--help", "--framework", "net5.0")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Pass()
+                .And.NotHaveStdErr()
+                .And.HaveStdOut(ConsoleHelp)
+                .And.NotHaveStdOutContaining(HelpOutput);
+        }
+
+        [Fact]
+        public void CannotShowHelpForTemplate_MatchOnChoiceWithoutValue()
+        {
+            string expectedOutput =
+@"Error: Invalid option(s):
+--framework 
+   '' is not a valid value for --framework. The possible values are:
+      net5.0          - Target net5.0
+      net6.0          - Target net6.0
+      netcoreapp1.0   - Target netcoreapp1.0
+      netcoreapp1.1   - Target netcoreapp1.1
+      netcoreapp2.0   - Target netcoreapp2.0
+      netcoreapp2.1   - Target netcoreapp2.1
+      netcoreapp2.2   - Target netcoreapp2.2
+      netcoreapp3.0   - Target netcoreapp3.0
+      netcoreapp3.1   - Target netcoreapp3.1
+
+For more information, run 'dotnet new3 console --help'.";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "console", "--help", "--framework")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.NotHaveStdOut()
+                .And.HaveStdErr(expectedOutput);
+        }
+
+        [Fact]
+        public void CannotShowHelpForTemplate_MatchOnUnexistingParam()
+        {
+            string expectedOutput =
+@"Error: Invalid option(s):
+--do-not-exist
+   '--do-not-exist' is not a valid option
+
+For more information, run 'dotnet new3 console --help'.";
+
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "console", "--help", "--do-not-exist")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.NotHaveStdOut()
+                .And.HaveStdErr(expectedOutput);
+        }
+
+        [Fact]
+        public void CanShowHelpForTemplate_MatchOnNonChoiceParam()
+        {
+            const string ConsoleHelp =
+@"Console Application (C#)
+Author: Microsoft
+Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+Options:                                                                             
+  -f|--framework  The target framework for the project.                              
+                      net6.0           - Target net6.0                               
+                      net5.0           - Target net5.0                               
+                      netcoreapp3.1    - Target netcoreapp3.1                        
+                      netcoreapp3.0    - Target netcoreapp3.0                        
+                      netcoreapp2.2    - Target netcoreapp2.2                        
+                      netcoreapp2.1    - Target netcoreapp2.1                        
+                      netcoreapp2.0    - Target netcoreapp2.0                        
+                      netcoreapp1.0    - Target netcoreapp1.0                        
+                      netcoreapp1.1    - Target netcoreapp1.1                        
+                  Default: net6.0                                                    
+
+  --langVersion   Sets the LangVersion property in the created project file          
+                  text - Optional                                                    
+                  Configured Value: 8.0                                              
+
+  --no-restore    If specified, skips the automatic restore of the project on create.
+                  bool - Optional                                                    
+                  Default: false                                                     ";
+
+        string home = TestUtils.CreateTemporaryFolder("Home");
+        string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+        new DotnetNewCommand(_log, "console", "--help", "--langVersion", "8.0")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Pass()
+                .And.NotHaveStdErr()
+                .And.HaveStdOut(ConsoleHelp)
+                .And.NotHaveStdOutContaining(HelpOutput);
+        }
+
+        [Fact]
+        public void CannotShowHelpForTemplate_MatchOnNonChoiceParamWithoutValue()
+        {
+            string expectedOutput =
+@"Error: Invalid option(s):
+--langVersion 
+   '' is not a valid value for --langVersion.";
+
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "console", "--help", "--langVersion")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.NotHaveStdOut()
+                .And.HaveStdErr(expectedOutput);
+        }
     }
 }

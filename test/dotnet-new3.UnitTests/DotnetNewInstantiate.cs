@@ -56,7 +56,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CanInstantiateTemplateWithSingleNonDefaultLanguageChoice()
+        public void CanInstantiateTemplate_WithSingleNonDefaultLanguageChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -73,7 +73,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CannotInstantiateTemplateWhenAmbiguousLanguageChoice()
+        public void CannotInstantiateTemplate_WhenAmbiguousLanguageChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -87,27 +87,38 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .Fail()
                 .And.NotHaveStdOut()
-                .And.HaveStdErrContaining("Unable to resolve the template to instantiate, these templates matched your input:")
+                .And.HaveStdErrContaining("Unable to resolve the template, these templates matched your input:")
                 .And.HaveStdErrContaining("Re-run the command specifying the language to use with --language option.")
                 .And.HaveStdErrContaining("basic").And.HaveStdErrContaining("F#").And.HaveStdErrContaining("VB");
         }
 
         [Fact]
-        public void CannotInstantiateTemplateWhenAmbiguousGroupChoice()
+        public void CannotInstantiateTemplate_OnAmbiguousGroupChoice()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "conf", "--quiet")
+            new DotnetNewCommand(_log, "class")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.NotHaveStdOut()
+                .And.NotHaveStdOutContaining("The template \"Class Library\" was created successfully.")
+                .And.HaveStdErrContaining("No templates found matching: 'class'.")
+                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining("To search for the templates on NuGet.org, run 'dotnet new3 class --search'.");
+
+            new DotnetNewCommand(_log, "conf")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
                 .Should()
                 .Fail()
                 .And.NotHaveStdOut()
-                .And.HaveStdErrContaining("Unable to resolve the template to instantiate, these templates matched your input:")
-                .And.HaveStdErrContaining("Re-run the command using the template's exact short name.")
-                .And.HaveStdErrContaining("webconfig").And.HaveStdErrContaining("nugetconfig").And.NotHaveStdErrContaining("classlib");
+                .And.HaveStdErrContaining("No templates found matching: 'conf'.")
+                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining("To search for the templates on NuGet.org, run 'dotnet new3 conf --search'.");
 
             new DotnetNewCommand(_log, "file")
                 .WithCustomHive(home)
@@ -116,13 +127,31 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .Fail()
                 .And.NotHaveStdOut()
-                .And.HaveStdErrContaining("Unable to resolve the template to instantiate, these templates matched your input:")
-                .And.HaveStdErrContaining("Re-run the command using the template's exact short name.")
-                .And.HaveStdErrContaining("tool-manifest").And.HaveStdErrContaining("sln").And.NotHaveStdErrContaining("console");
+                .And.HaveStdErrContaining("No templates found matching: 'file'.")
+                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining("To search for the templates on NuGet.org, run 'dotnet new3 file --search'.");
         }
 
         [Fact]
-        public void CannotInstantiateTemplateWhenParameterIsInvalid()
+        public void CannotInstantiateTemplate_WhenFullNameIsUsed()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "Console Application")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.NotHaveStdOut()
+                .And.NotHaveStdOutContaining("The template \"Console Application\" was created successfully.")
+                .And.HaveStdErrContaining("No templates found matching: 'Console Application'.")
+                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining("To search for the templates on NuGet.org, run 'dotnet new3 'Console Application' --search'.");
+        }
+
+        [Fact]
+        public void CannotInstantiateTemplate_WhenParameterIsInvalid()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -180,7 +209,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CannotInstantiateTemplateWhenPrecedenceIsSame()
+        public void CannotInstantiateTemplate_WhenPrecedenceIsSame()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -194,7 +223,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .Fail()
                 .And.NotHaveStdOut()
-                .And.HaveStdErrContaining("Unable to resolve the template to instantiate, the following installed templates are conflicting:")
+                .And.HaveStdErrContaining("Unable to resolve the template, the following installed templates are conflicting:")
                 .And.HaveStdErrContaining("Uninstall the templates or the packages to keep only one template from the list.")
                 .And.HaveStdErrContaining("TestAssets.SamePrecedenceGroup.BasicTemplate2")
                 .And.HaveStdErrContaining("TestAssets.SamePrecedenceGroup.BasicTemplate1")
@@ -207,7 +236,7 @@ namespace Dotnet_new3.IntegrationTests
         }
 
         [Fact]
-        public void CanInstantiateTemplateWithAlias()
+        public void CanInstantiateTemplate_WithAlias()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();

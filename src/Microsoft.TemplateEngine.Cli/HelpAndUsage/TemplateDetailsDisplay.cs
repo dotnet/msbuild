@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class TemplateDetailsDisplay
     {
-        internal static async Task ShowTemplateGroupHelpAsync(
+        internal static async Task<New3CommandStatus> ShowTemplateGroupHelpAsync(
             IReadOnlyCollection<ITemplateMatchInfo> templateGroup,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
@@ -28,9 +30,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (templateGroup.Count == 0 || !TemplateResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
+            if (templateGroup.Count == 0)
             {
-                return;
+                throw new ArgumentException($"{nameof(templateGroup)} should have at least one element.", nameof(templateGroup));
+            }
+            if (!TemplateResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
+            {
+                throw new ArgumentException($"{nameof(templateGroup)} should have all templates of same group.", nameof(templateGroup));
             }
 
             IReadOnlyList<ITemplateInfo> templateInfoList = templateGroup.Select(x => x.Info).ToList();
@@ -42,16 +48,18 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     Reporter.Error.WriteLine(groupParameterDetails.Value.AdditionalInfo.Bold().Red());
                     Reporter.Error.WriteLine();
-                    return;
+                    return New3CommandStatus.InvalidParamValues;
                 }
                 // get the input params valid for any param in the group
-                IReadOnlyDictionary<string, string> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
+                IReadOnlyDictionary<string, string?> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
                 ShowTemplateDetailHeaders(templateInfoList);
                 ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings, commandInput);
+                return New3CommandStatus.Success;
             }
             else
             {
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput.CommandName).Bold().Red());
+                return New3CommandStatus.DisplayHelpFailed;
             }
         }
 
@@ -64,7 +72,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             HashSet<string> languages = new HashSet<string>();
             foreach (ITemplateInfo templateInfo in templateGroup)
             {
-                string templateLanguage = templateInfo.GetLanguage();
+                string? templateLanguage = templateInfo.GetLanguage();
                 if (!string.IsNullOrWhiteSpace(templateLanguage))
                 {
                     languages.Add(templateLanguage);
@@ -96,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static void ShowParameterHelp(IReadOnlyDictionary<string, string> inputParams, bool showImplicitlyHiddenParams, TemplateGroupParameterDetails parameterDetails, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput)
+        private static void ShowParameterHelp(IReadOnlyDictionary<string, string?> inputParams, bool showImplicitlyHiddenParams, TemplateGroupParameterDetails parameterDetails, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput)
         {
             IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(
                 parameterDetails.AllParams.ParameterDefinitions,
@@ -135,7 +143,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         StringBuilder displayValue = new StringBuilder(255);
                         displayValue.AppendLine(param.Description);
 
-                        if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase) && param.Choices != null)
                         {
                             int longestChoiceLength = param.Choices.Keys.Max(x => x.Length);
 
@@ -158,8 +166,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         }
 
                         // determine the configured value
-                        string configuredValue = null;
-                        if (parameterDetails.AllParams.ResolvedValues.TryGetValue(param, out object resolvedValueObject))
+                        string? configuredValue = null;
+                        if (parameterDetails.AllParams.ResolvedValues.TryGetValue(param, out object? resolvedValueObject))
                         {
                             // Set the configured value as long as it's non-empty and not the default value.
                             // If it's the default, we're not sure if it was explicitly entered or not.
@@ -205,15 +213,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         // display the configured value if there is one
                         if (!string.IsNullOrEmpty(configuredValue))
                         {
-                            string realValue = configuredValue;
+                            string? realValue = configuredValue;
 
                             if (parameterDetails.InvalidParams.Contains(param.Name) ||
-                                (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase)
+                                (string.Equals(param.DataType, "choice", StringComparison.OrdinalIgnoreCase) && param.Choices != null
                                     && !param.Choices.ContainsKey(configuredValue)))
                             {
                                 realValue = realValue.Bold().Red();
                             }
-                            else if (parameterDetails.AllParams.TryGetRuntimeValue(environmentSettings, param.Name, out object runtimeVal) && runtimeVal != null)
+                            else if (parameterDetails.AllParams.TryGetRuntimeValue(environmentSettings, param.Name, out object? runtimeVal) && runtimeVal != null)
                             {
                                 realValue = runtimeVal.ToString();
                             }
@@ -261,13 +269,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns a composite of the input parameters and values which are valid for any template in the group.
-        private static IReadOnlyDictionary<string, string> CoalesceInputParameterValuesFromTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> templateGroup)
+        private static IReadOnlyDictionary<string, string?> CoalesceInputParameterValuesFromTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> templateGroup)
         {
-            Dictionary<string, string> inputValues = new Dictionary<string, string>();
+            Dictionary<string, string?> inputValues = new Dictionary<string, string?>();
 
             foreach (ITemplateMatchInfo template in templateGroup.OrderBy(x => x.Info.Precedence))
             {
-                foreach (KeyValuePair<string, string> paramAndValue in template.GetValidTemplateParameters())
+                foreach (KeyValuePair<string, string?> paramAndValue in template.GetValidTemplateParameters())
                 {
                     inputValues[paramAndValue.Key] = paramAndValue.Value;
                 }
@@ -309,7 +317,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
                 TemplateUsageInformation usageInformation = usageInformationNullable.Value;
                 HostSpecificTemplateData hostSpecificTemplateData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
-                HashSet<string> parametersToExplicitlyHide = hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>(StringComparer.Ordinal);
+                HashSet<string> parametersToExplicitlyHide = hostSpecificTemplateData.HiddenParameterNames ?? new HashSet<string>(StringComparer.Ordinal);
 
                 foreach (ITemplateParameter parameter in usageInformation.AllParameters.ParameterDefinitions)
                 {

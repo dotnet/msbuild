@@ -401,7 +401,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to resolve the template to instantiate, these templates matched your input:.
+        ///   Looks up a localized string similar to Unable to resolve the template, these templates matched your input:.
         /// </summary>
         internal static string AmbiguousTemplateGroupListHeader {
             get {
@@ -419,7 +419,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to resolve the template to instantiate, the following installed templates are conflicting:.
+        ///   Looks up a localized string similar to Unable to resolve the template, the following installed templates are conflicting:.
         /// </summary>
         internal static string AmbiguousTemplatesHeader {
             get {
@@ -953,7 +953,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To list installed templates, run &apos;dotnet {0} --list&apos;..
+        ///   Looks up a localized string similar to To list installed templates, run &apos;{0}&apos;..
         /// </summary>
         internal static string ListTemplatesCommand {
             get {
@@ -1391,7 +1391,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To search for the templates on NuGet.org, run &apos;dotnet {0} {1} --search&apos;..
+        ///   Looks up a localized string similar to To search for the templates on NuGet.org, run &apos;{0}&apos;..
         /// </summary>
         internal static string SearchTemplatesCommand {
             get {
