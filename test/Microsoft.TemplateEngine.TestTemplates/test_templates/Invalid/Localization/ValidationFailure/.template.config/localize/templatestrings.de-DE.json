@@ -10,6 +10,7 @@
     "postActions/pa0/manualInstructions/first_instruction/text": "pa0_manualInstructions_de-DE:äÄßöÖüÜ",
     "postActions/pa1/description": "pa1_desc_de-DE:äÄßöÖüÜ",
     "postActions/pa1/manualInstructions/third_instruction/text": "pa1_manualInstructions1_de-DE:äÄßöÖüÜ",
+    "postActions/pa1/manualInstructions/do-not-exist/text": "pa1_manualInstructions2_de-DE:äÄßöÖüÜ",
     "postActions/pa2/description": "pa2_desc_de-DE:äÄßöÖüÜ",
     "postActions/pa2/manualInstructions/default/text": "pa2_manualInstructions_de-DE:äÄßöÖüÜ"
 }

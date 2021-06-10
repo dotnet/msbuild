@@ -3,10 +3,10 @@
     "classifications": [ "Test Asset" ],
     "name": "name",
     "generatorVersions": "[1.0.0.0-*)",
-    "groupIdentity": "TestAssets.TemplateWithLocalization",
+    "groupIdentity": "TestAssets.Invalid.Localiation.ValidationFailure",
     "precedence": "100",
-    "identity": "TestAssets.TemplateWithLocalization",
-    "shortName": "TestAssets.TemplateWithLocalization",
+    "identity": "TestAssets.Invalid.Localiation.ValidationFailure",
+    "shortName": "TestAssets.Invalid.Localiation.ValidationFailure",
     "tags": {
         "language": "C#",
         "type": "project"
@@ -51,7 +51,6 @@
     },
     "postActions": [
         {
-            "id": "pa0",
             "description": "pa0_desc",
             "manualInstructions": [
                 {
@@ -59,8 +58,7 @@
                     "text": "pa0_manualInstructions"
                 }
             ],
-            "actionId": "58E1433C-303B-4713-8A47-26E7B03BD8A5",
-            "continueOnError":  true
+            "actionId": "58E1433C-303B-4713-8A47-26E7B03BD8A5"
         },
         {
             "id": "pa1",
@@ -79,8 +77,7 @@
                     "text": "pa1_manualInstructions2"
                 }
             ],
-            "actionId": "2B5CDBB7-1FAC-41EC-ADCC-08A73021BC40",
-            "continueOnError": true
+            "actionId": "2B5CDBB7-1FAC-41EC-ADCC-08A73021BC40"
         },
         {
             "id": "pa2",
@@ -89,8 +86,16 @@
                     "text": "pa2_manualInstructions"
                 }
             ],
-            "actionId": "58E1433C-303B-4713-8A47-26E7B03BD8A5",
-            "continueOnError": true
+            "actionId": "58E1433C-303B-4713-8A47-26E7B03BD8A5"
+        },
+        {
+            "id": "pa2",
+            "manualInstructions": [
+                {
+                    "text": "pa2_manualInstructions"
+                }
+            ],
+            "actionId": "58E1433C-303B-4713-8A47-26E7B03BD8A5"
         }
     ]
 }

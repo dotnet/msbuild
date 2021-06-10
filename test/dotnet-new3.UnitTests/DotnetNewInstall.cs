@@ -524,10 +524,12 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
-                .And.HaveStdOutContaining($"Error: Failed to load template from {invalidTemplatePath}:")
-                .And.HaveStdOutContaining($"Error:     Missing 'identity' in '/template.json'")
-                .And.HaveStdOutContaining($"Error:     Missing 'name' in '/template.json'")
-                .And.HaveStdOutContaining($"Error:     Missing 'shortName' in '/template.json'")
+                .And.HaveStdOutContaining($"Error: Failed to load template from {invalidTemplatePath}")
+                .And.HaveStdOutContaining($"  Missing 'identity'.")
+                .And.HaveStdOutContaining($"  Missing 'name'.")
+                .And.HaveStdOutContaining($"  Missing 'shortName'.")
+                .And.HaveStdOutContaining($"  The template root is outside the specified install source location.")
+                .And.HaveStdOutContaining($"  Source location './' is outside the specified install source location.")
                 .And.HaveStdOutContaining($"No templates were found in the package {invalidTemplatePath}.");
         }
     }
