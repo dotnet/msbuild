@@ -18,8 +18,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     public class WorkloadResolver : IWorkloadResolver
     {
         private readonly Dictionary<string, WorkloadManifest> _manifests = new Dictionary<string, WorkloadManifest>(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<WorkloadId, WorkloadDefinition> _workloads = new Dictionary<WorkloadId, WorkloadDefinition>();
-        private readonly Dictionary<WorkloadPackId, WorkloadPack> _packs = new Dictionary<WorkloadPackId, WorkloadPack>();
+        private readonly Dictionary<WorkloadId, (WorkloadDefinition workload, WorkloadManifest manifest)> _workloads = new Dictionary<WorkloadId, (WorkloadDefinition, WorkloadManifest)>();
+        private readonly Dictionary<WorkloadPackId, (WorkloadPack pack, WorkloadManifest manifest)> _packs = new Dictionary<WorkloadPackId, (WorkloadPack, WorkloadManifest)>();
         private IWorkloadManifestProvider? _manifestProvider;
         private string[] _currentRuntimeIdentifiers;
         private readonly string [] _dotnetRootPaths;
@@ -97,15 +97,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 using (var manifestStream = openManifestStream())
                 {
                     var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
-                    if (_manifests.ContainsKey(manifestId))
-                    {
-                        throw new Exception($"Duplicate workload manifest {manifestId}");
-                    }
                     if(!string.Equals (manifestId, manifest.Id, StringComparison.OrdinalIgnoreCase))
                     {
-                        throw new Exception($"Manifest provider {manifestProvider} supplied manifest '{manifestId}' does not match payload id '{manifest.Id}'");
+                        throw new WorkloadManifestCompositionException($"Manifest '{manifestId}' from provider {manifestProvider} does not match payload id '{manifest.Id}'");
                     }
-                    _manifests.Add(manifestId, manifest);
+                    if (!_manifests.TryAdd(manifestId, manifest))
+                    {
+                        throw new WorkloadManifestCompositionException($"Duplicate manifest '{manifestId}' from provider {manifestProvider}");
+                    }
                 }
             }
         }
@@ -125,12 +124,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         {
                             if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
                             {
-                                throw new Exception($"Inconsistency in workload manifest '{manifest.Id}': requires '{dependency.Key}' version at least {dependency.Value} but found {resolvedDependency.Version}");
+                                throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}': requires '{dependency.Key}' version at least {dependency.Value} but found {resolvedDependency.Version}");
                             }
                         }
                         else
                         {
-                            throw new Exception($"Inconsistency in workload manifest '{manifest.Id}': missing dependency '{dependency.Key}'");
+                            throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}': missing dependency '{dependency.Key}'");
                         }
                     }
                 }
@@ -140,11 +139,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     if (workload.Value is WorkloadRedirect redirect)
                     {
-                        (redirects ?? (redirects = new HashSet<WorkloadRedirect>())).Add(redirect);
+                        (redirects ??= new HashSet<WorkloadRedirect>()).Add(redirect);
                     }
                     else
                     {
-                        _workloads.Add(workload.Key, (WorkloadDefinition)workload.Value);
+                        if (!_workloads.TryAdd(workload.Key, ((WorkloadDefinition)workload.Value, manifest)))
+                        {
+                            throw new WorkloadManifestCompositionException($"Workload '{workload.Key}' in manifest '{manifest.Id}' conflicts with manifest '{_workloads[workload.Key].manifest.Id}'");
+                        }
                     }
                 }
 
@@ -157,7 +159,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         if (_workloads.TryGetValue(redirect.ReplaceWith, out var replacement))
                         {
-                            _workloads.Add(redirect.Id, replacement);
+                            if (!_workloads.TryAdd(redirect.Id, replacement))
+                            {
+                                throw new WorkloadManifestCompositionException($"Workload '{redirect.Id}' in manifest '{manifest.Id}' conflicts with manifest '{_workloads[redirect.Id].manifest.Id}'");
+                            }
                             return true;
                         }
                         return false;
@@ -171,7 +176,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 foreach (var pack in manifest.Packs)
                 {
-                    _packs.Add(pack.Key, pack.Value);
+                    if (!_packs.TryAdd(pack.Key, (pack.Value, manifest)))
+                    {
+                        throw new WorkloadManifestCompositionException($"Workload pack '{pack.Key}' in manifest '{manifest.Id}' conflicts with manifest '{_packs[pack.Key].manifest.Id}'");
+                    }
                 }
             }
         }
@@ -185,7 +193,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </remarks>
         public IEnumerable<PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind)
         {
-            foreach (var pack in _packs.Values)
+            foreach ((var pack, _) in _packs.Values)
             {
                 if (pack.Kind != kind)
                 {
@@ -303,12 +311,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private HashSet<WorkloadPackId> GetInstalledPacks()
         {
             var installedPacks = new HashSet<WorkloadPackId>();
-            foreach (var pack in _packs)
+            foreach ((WorkloadPackId id, (WorkloadPack pack, WorkloadManifest _)) in _packs)
             {
-                ResolvePackPath(pack.Value, out bool isInstalled);
+                ResolvePackPath(pack, out bool isInstalled);
                 if (isInstalled)
                 {
-                    installedPacks.Add(pack.Key);
+                    installedPacks.Add(id);
                 }
             }
             return installedPacks;
@@ -323,10 +331,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var id = new WorkloadId(workloadId);
 
-            if (!_workloads.TryGetValue(id, out var workload))
+            if (!_workloads.TryGetValue(id, out var value))
             {
                 throw new Exception($"Workload not found: {id}. Known workloads: {string.Join(" ", _workloads.Select(workload => workload.Key.ToString()))}");
             }
+            var workload = value.workload;
 
             if (workload.Extends?.Count > 0)
             {
@@ -344,7 +353,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             IEnumerable<WorkloadPackId> ExpandPacks (WorkloadId workloadId)
             {
-                if (!_workloads.TryGetValue (workloadId, out var workloadInfo))
+                if (!(_workloads.TryGetValue (workloadId) is (WorkloadDefinition workloadInfo, _)))
                 {
                     // inconsistent manifest
                     throw new Exception("Workload not found");
@@ -389,11 +398,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 throw new ArgumentException($"'{nameof(packId)}' cannot be null or whitespace", nameof(packId));
             }
 
-            if (_packs.TryGetValue(new WorkloadPackId (packId), out var pack))
+            if (_packs.TryGetValue(new WorkloadPackId (packId)) is (WorkloadPack pack, _))
             {
                 if (ResolveId(pack) is WorkloadPackId resolvedPackageId)
                 {
-                    var aliasedPath = GetPackPath(_dotnetRootPaths, resolvedPackageId, pack.Version, pack.Kind, out bool exists);
+                    var aliasedPath = GetPackPath(_dotnetRootPaths, resolvedPackageId, pack.Version, pack.Kind, out _);
                     return CreatePackInfo(pack, aliasedPath, resolvedPackageId);
                 }
             }
@@ -410,12 +419,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packIds)
         {
             var requestedPacks = new HashSet<WorkloadPackId>(packIds.Select(p => new WorkloadPackId(p)));
-            var expandedWorkloads = _workloads.Select(w => (w.Key, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.Value))));
+            var expandedWorkloads = _workloads.Select(w => (w.Key, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.Value.workload))));
             var finder = new WorkloadSuggestionFinder(GetInstalledPacks(), requestedPacks, expandedWorkloads);
 
             return new HashSet<WorkloadInfo>
             (
-                finder.GetBestSuggestion().Workloads.Select(s => new WorkloadInfo(s.ToString(), _workloads[s].Description))
+                finder.GetBestSuggestion().Workloads.Select(s => new WorkloadInfo(s.ToString(), _workloads[s].workload.Description))
             );
         }
 
@@ -424,7 +433,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// </summary>
         public IEnumerable<WorkloadDefinition> GetAvailableWorkloads()
         {
-            return _workloads.Values;
+            foreach ((WorkloadId _, (WorkloadDefinition workload, WorkloadManifest _)) in _workloads)
+            {
+                yield return workload;
+            }
         }
 
         /// <summary>
@@ -437,12 +449,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             foreach(var workloadId in installedWorkloads)
             {
-                var existingWorkload = _workloads[workloadId];
+                var existingWorkload = _workloads[workloadId].workload;
                 var existingPacks = GetPacksInWorkload(existingWorkload).ToHashSet();
-                var updatedWorkload = advertisingManifestResolver._workloads[workloadId];
+                var updatedWorkload = advertisingManifestResolver._workloads[workloadId].workload;
                 var updatedPacks = advertisingManifestResolver.GetPacksInWorkload(updatedWorkload);
 
-                if (!existingPacks.SetEquals(updatedPacks) || existingPacks.Any(p=> PackHasChanged(_packs[p], advertisingManifestResolver._packs[p])))
+                if (!existingPacks.SetEquals(updatedPacks) || existingPacks.Any(p=> PackHasChanged(_packs[p].pack, advertisingManifestResolver._packs[p].pack)))
                 {
                     yield return workloadId;
                 }
@@ -540,12 +552,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public WorkloadInfo GetWorkloadInfo(WorkloadId WorkloadId)
         {
-            if (!_workloads.TryGetValue(WorkloadId, out var workload))
+            if (_workloads.TryGetValue(WorkloadId) is (WorkloadDefinition workload, _))
             {
-                throw new Exception("Workload not found");
+                return new WorkloadInfo(workload.Id.ToString(), workload.Description);
             }
-
-            return new WorkloadInfo(workload.Id.ToString(), workload.Description);
+            throw new Exception("Workload not found");
         }
 
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId)
@@ -593,10 +604,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
     }
 
-#if !NETCOREAPP
-
     static class DictionaryExtensions
     {
+#if !NETCOREAPP
         public static bool TryAdd<TKey,TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue value) where TKey : notnull
         {
             if (dictionary.ContainsKey(key))
@@ -606,6 +616,23 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             dictionary.Add(key, value);
             return true;
         }
-    }
+
+        public static void Deconstruct<TKey,TValue>(this KeyValuePair<TKey,TValue> kvp, out TKey key, out TValue value)
+        {
+            key = kvp.Key;
+            value = kvp.Value;
+        }
 #endif
+
+        public static TValue? TryGetValue<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+            where TKey : notnull
+            where TValue : struct
+        {
+            if (dictionary.TryGetValue(key, out TValue value))
+            {
+                return value;
+            }
+            return default(TValue?);
+        }
+    }
 }
