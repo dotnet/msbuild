@@ -71,9 +71,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 {
                     // condition is required to filter matches on custom parameters
                     // TODO: when matching on custom parameters is refactored keep IsMatch condition only
-                    if (_coreMatchedTemplates.Where(t => t.IsInvokableMatch()).Any())
+                    if (_coreMatchedTemplates.Where(t => t.IsFilterableMatch()).Any())
                     {
-                        _exactMatchedTemplates = _coreMatchedTemplates.Where(t => t.IsInvokableMatch()).ToList();
+                        _exactMatchedTemplates = _coreMatchedTemplates.Where(t => t.IsFilterableMatch()).ToList();
                     }
                     else
                     {

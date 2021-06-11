@@ -54,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.AmbiguousParameterValue, "framework", "net")
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "framework", "net")
                 }
             };
 
@@ -69,7 +69,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.AmbiguousParameterValue, "framework", "net")
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "framework", "net")
                 }
             };
 
@@ -83,63 +83,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.AmbiguousParameterValue, "framework", "net"),
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "framework", "net"),
                     new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterName, "fake", null),
                     new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "OtherChoice", "fake")
-                }
-            };
-        }
-
-        public static IEnumerable<object[]> GetAmbiguousSingleStartsWithParametersTestData()
-        {
-            yield return new object[]
-            {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp3.1"),
-                new MockTemplateInfo[]
-                {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
-                },
-                System.Array.Empty<MockInvalidParameterInfo>()
-            };
-
-            yield return new object[]
-            {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
-                new MockTemplateInfo[]
-                {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
-                },
-                System.Array.Empty<MockInvalidParameterInfo>()
-            };
-
-            yield return new object[]
-            {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
-                new MockTemplateInfo[]
-                {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
-                },
-                new MockInvalidParameterInfo[]
-                {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.AmbiguousParameterValue, "framework", "net")
-                }
-            };
-
-            yield return new object[]
-            {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "net").WithTemplateOption("OtherChoice", "val1"),
-                new MockTemplateInfo[]
-                {
-                    new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1").WithChoiceParameter("OtherChoice", "val1", "val2"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0").WithChoiceParameter("OtherChoice", "val1", "val2"),
-                    new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net").WithChoiceParameter("OtherChoice", "val1", "val2"),
-                },
-                new MockInvalidParameterInfo[]
-                {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.AmbiguousParameterValue, "framework", "net"),
                 }
             };
         }
@@ -233,22 +179,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
             TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
             IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetInvalidParameterList();
-
-            Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
-            foreach (MockInvalidParameterInfo exp in expectedInvalidParams)
-            {
-                Assert.Single(invalidParameters.Where(param => param.ErrorKind == exp.Kind && param.InputFormat == exp.InputFormat && param.SpecifiedValue == exp.SpecifiedValue));
-            }
-        }
-
-        [Theory(DisplayName = nameof(GetAmbiguousSingleStartsWithParametersTest))]
-        [MemberData(nameof(GetAmbiguousSingleStartsWithParametersTestData))]
-        internal void GetAmbiguousSingleStartsWithParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
-        {
-            TemplateResolutionResult matchedTemplates = TemplateResolver.GetTemplateResolutionResult(templates, new MockHostSpecificDataLoader(), command, null);
-
-            TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
-            IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetAmbiguousSingleStartsWithParameters();
 
             Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
             foreach (MockInvalidParameterInfo exp in expectedInvalidParams)

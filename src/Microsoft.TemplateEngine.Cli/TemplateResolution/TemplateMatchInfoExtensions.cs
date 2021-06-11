@@ -16,18 +16,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             return templateMatchInfo.MatchDisposition.Any(x => x.Name == TemplateResolver.DefaultLanguageMatchParameterName && x.Kind == MatchKind.Exact);
         }
 
-        //https://github.com/dotnet/templating/issues/2494
-        //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
-        internal static bool HasAmbiguousParameterValueMatch(this ITemplateMatchInfo templateMatchInfo)
+        internal static bool IsInvokableMatch(this ITemplateMatchInfo templateMatchInfo)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            return templateMatchInfo.MatchDisposition.Any(x => x.Kind == MatchKind.AmbiguousValue);
-#pragma warning restore CS0618 // Type or member is obsolete
+            return templateMatchInfo.MatchDisposition.Count > 0
+                            && templateMatchInfo.MatchDisposition.All(x => x.Kind == MatchKind.Exact);
         }
 
-        //https://github.com/dotnet/templating/issues/2494
-        //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
-        internal static bool IsInvokableMatch(this ITemplateMatchInfo templateMatchInfo)
+        internal static bool IsFilterableMatch(this ITemplateMatchInfo templateMatchInfo)
         {
             return templateMatchInfo.MatchDisposition.Count > 0
                             && templateMatchInfo.MatchDisposition.All(x =>
@@ -37,11 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                                     x.Kind == MatchKind.Partial
                                     && (x.Name == MatchInfo.BuiltIn.Name
                                         || x.Name == MatchInfo.BuiltIn.ShortName
-                                        || x.Name == MatchInfo.BuiltIn.Classification
-                                        || x.Name == MatchInfo.BuiltIn.Author)
-#pragma warning disable CS0618 // Type or member is obsolete
-                                || x.Kind == MatchKind.SingleStartsWith);
-#pragma warning restore CS0618 // Type or member is obsolete
+                                        || x.Name == MatchInfo.BuiltIn.Author));
         }
 
         internal static bool HasInvalidParameterName(this ITemplateMatchInfo templateMatchInfo)
@@ -60,13 +51,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         // This is analogous to INewCommandInput.InputTemplateParams
         internal static IReadOnlyDictionary<string, string?> GetValidTemplateParameters(this ITemplateMatchInfo templateMatchInfo)
         {
-            //https://github.com/dotnet/templating/issues/2494
-            //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
             //the method should be revised as valid parameters should be taken from command and not from match dispositionS
-            return templateMatchInfo.MatchDisposition.OfType<ParameterMatchInfo>().Where(
-#pragma warning disable CS0618 // Type or member is obsolete
-                x => x.Kind == MatchKind.Exact || x.Kind == MatchKind.SingleStartsWith)
-#pragma warning restore CS0618 // Type or member is obsolete
+            return templateMatchInfo.MatchDisposition
+                .OfType<ParameterMatchInfo>()
+                .Where(x => x.Kind == MatchKind.Exact)
                 .ToDictionary(x => x.Name, x => x.Value);
         }
     }

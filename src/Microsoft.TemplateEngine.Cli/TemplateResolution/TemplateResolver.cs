@@ -162,7 +162,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 #pragma warning restore CS0618 // Type or member is obsolete
 
             AddParameterMatchingToTemplates(matchedTemplates, hostDataLoader, commandInput);
-            return matchedTemplates.Where(t => t.IsInvokableMatch()).ToList();
+            return matchedTemplates.Where(t => t.IsFilterableMatch()).ToList();
         }
 
         /// <summary>
@@ -254,7 +254,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                             if (paramDetails.IsChoice() && paramDetails.Choices != null)
                             {
                                 if (string.IsNullOrEmpty(paramValue)
-                                && !string.IsNullOrEmpty(paramDetails.DefaultIfOptionWithoutValue))
+                                    && !string.IsNullOrEmpty(paramDetails.DefaultIfOptionWithoutValue))
                                 {
                                     // The user provided the parameter switch on the command line, without a value.
                                     // In this case, the DefaultIfOptionWithoutValue is the effective value.
@@ -270,27 +270,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                                 {
                                     matchKind = MatchKind.Exact;
                                 }
-                                //https://github.com/dotnet/templating/issues/2494
-                                //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
                                 else
                                 {
-                                    int startsWithCount = paramDetails.Choices.Count(x => x.Key.StartsWith(paramValue, StringComparison.OrdinalIgnoreCase));
-                                    if (startsWithCount == 1)
-                                    {
-#pragma warning disable CS0618 // Type or member is obsolete
-                                        matchKind = MatchKind.SingleStartsWith;
-#pragma warning restore CS0618 // Type or member is obsolete
-                                    }
-                                    else if (startsWithCount > 1)
-                                    {
-#pragma warning disable CS0618 // Type or member is obsolete
-                                        matchKind = MatchKind.AmbiguousValue;
-#pragma warning restore CS0618 // Type or member is obsolete
-                                    }
-                                    else
-                                    {
-                                        matchKind = MatchKind.InvalidValue;
-                                    }
+                                    matchKind = MatchKind.InvalidValue;
                                 }
                             }
                             else // other parameter

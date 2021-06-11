@@ -73,17 +73,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             SingleMatch,
 
             /// <summary>
-            /// multiple template groups were resolved; not possible to determing the group to use.
+            /// multiple template groups were resolved; not possible to determine the group to use.
             /// </summary>
             AmbiguousTemplateGroupChoice,
 
             /// <summary>
-            /// single template group was resolved, but it is not possible to resolve choice parameter value to use.
-            /// </summary>
-            AmbiguousParameterValueChoice,
-
-            /// <summary>
-            /// single template group was resolved, but there is an ambiguous choice for template inside the group and the templates are of same language. Ususlly means that the installed templates are conflicting and the confict should be resolved by uninistalling some of templates.
+            /// single template group was resolved, but there is an ambiguous choice for template inside the group and the templates are of same language. Usually means that the installed templates are conflicting and the conflict should be resolved by uninistalling some of templates.
             /// </summary>
             AmbiguousTemplateChoice,
 
@@ -119,7 +114,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             SingleMatch,
 
             /// <summary>
-            /// multiple template groups were resolved; not possible to determing the group to use.
+            /// multiple template groups were resolved; not possible to determining the group to use.
             /// </summary>
             Ambiguous
         }
@@ -267,14 +262,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                     throw new ArgumentException($"Unexpected value of {nameof(UnambiguousTemplateGroup)}: {GroupResolutionStatus}.");
             }
 
-            //checking template options match
-            //if any template in the group has ambiguous parameter value match - cannot resolve template to instantiate
-            if (UnambiguousTemplateGroup.Templates.Any(x => x.HasAmbiguousParameterValueMatch()))
-            {
-                _singularInvokableMatchStatus = Status.AmbiguousParameterValueChoice;
-                return;
-            }
-
             //if no templates are invokable there is a problem with parameter name or value - cannot resolve template to instantiate
             if (!UnambiguousTemplateGroup.InvokableTemplates.Any())
             {
@@ -286,16 +273,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             {
                 _templateToInvoke = UnambiguousTemplateGroup.InvokableTemplates.Single();
                 _singularInvokableMatchStatus = Status.SingleMatch;
-                return;
-            }
-
-            // if multiple templates in the group have single starts with matches on the same parameter, it's ambiguous.
-            // For the case where one template has single starts with, and another has ambiguous - on the same param:
-            //      The one with single starts with is chosen as invokable because if the template with an ambiguous match
-            //      was not installed, the one with the singluar invokable would be chosen.
-            if (UnambiguousTemplateGroup.GetAmbiguousSingleStartsWithParameters().Any())
-            {
-                _singularInvokableMatchStatus = Status.AmbiguousParameterValueChoice;
                 return;
             }
 

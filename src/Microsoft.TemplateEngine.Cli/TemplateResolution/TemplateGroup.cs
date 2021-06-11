@@ -100,71 +100,13 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal IReadOnlyCollection<ITemplateMatchInfo> Templates { get; private set; }
 
         /// <summary>
-        /// Returns the ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates in the template group.
-        /// </summary>
-        /// <returns>the enumerator for ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates in the template group.</returns>
-        /// <remarks>The template group is not valid when there are at least one ambiguous <see cref="MatchKind.SingleStartsWith"/> parameters in invokable templates.</remarks>
-        internal IEnumerable<InvalidParameterInfo> GetAmbiguousSingleStartsWithParameters()
-        {
-            var invalidParameterList = new List<InvalidParameterInfo>();
-            HashSet<string> singleStartsWithParamNames = new HashSet<string>();
-            foreach (ITemplateMatchInfo checkTemplate in InvokableTemplates)
-            {
-                //https://github.com/dotnet/templating/issues/2494
-                //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
-                IEnumerable<ParameterMatchInfo> singleStartParams = checkTemplate.MatchDisposition
-                    .OfType<ParameterMatchInfo>()
-#pragma warning disable CS0618 // Type or member is obsolete
-                    .Where(x => x.Kind == MatchKind.SingleStartsWith);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-                foreach (var singleStartParam in singleStartParams)
-                {
-                    if (!singleStartsWithParamNames.Add(singleStartParam.Name))
-                    {
-                        invalidParameterList.Add(new InvalidParameterInfo(
-                                                InvalidParameterInfo.Kind.AmbiguousParameterValue,
-                                                singleStartParam.InputFormat,
-                                                singleStartParam.Value,
-                                                singleStartParam.Name));
-                    }
-                }
-            }
-            return invalidParameterList.Distinct();
-        }
-
-        /// <summary>
         /// Returns the invalid template specific parameters for the template group.
-        /// Invalid parameters can have: invalid name, invalid value (determined only for choice parameter symbols), ambiguous value (determined only for choice parameter symbols).
+        /// Invalid parameters can have: invalid name, invalid value (determined only for choice parameter symbols).
         /// </summary>
         /// <returns>The enumerator for invalid parameters in templates in the template group.</returns>
         internal IEnumerable<InvalidParameterInfo> GetInvalidParameterList()
         {
             List<InvalidParameterInfo> invalidParameterList = new List<InvalidParameterInfo>();
-
-            //collect the parameters which have ambiguous value match in all templates in the template group
-            IEnumerable<ParameterMatchInfo> ambiguousParametersForTemplates = Templates.SelectMany(template => template.MatchDisposition
-                .OfType<ParameterMatchInfo>()
-                //https://github.com/dotnet/templating/issues/2494
-                //after tab completion is implemented we no longer will be using this match kind - only exact matches will be allowed
-#pragma warning disable CS0618 // Type or member is obsolete
-                .Where(x => x.Kind == MatchKind.AmbiguousValue))
-#pragma warning restore CS0618 // Type or member is obsolete
-                .Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
-            foreach (ParameterMatchInfo parameter in ambiguousParametersForTemplates)
-            {
-                invalidParameterList.Add(new InvalidParameterInfo(
-                                                InvalidParameterInfo.Kind.AmbiguousParameterValue,
-                                                parameter.InputFormat,
-                                                parameter.Value,
-                                                parameter.Name));
-            }
-
-            if (InvokableTemplates.Any())
-            {
-                //add the parameters that have single starts with match in several invokable templates in template group
-                return invalidParameterList.Union(GetAmbiguousSingleStartsWithParameters()).ToList();
-            }
 
             //collect the parameters with invalid names for all templates in the template group
             IEnumerable<ParameterMatchInfo> parametersWithInvalidNames = Templates.SelectMany(

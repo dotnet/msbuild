@@ -334,7 +334,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithChoiceParameter("MyChoice", "value_2")
                 },
                 null,
-                TemplateResolutionResult.Status.AmbiguousParameterValueChoice,
+                TemplateResolutionResult.Status.InvalidParameter,
                 null
             };
 
@@ -350,7 +350,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithChoiceParameter("MyChoice", "value_2", "value_3")
                 },
                 null,
-                TemplateResolutionResult.Status.AmbiguousParameterValueChoice,
+                TemplateResolutionResult.Status.InvalidParameter,
                 null
             };
 
@@ -366,7 +366,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithChoiceParameter("MyChoice", "value_3", "value_4")
                 },
                 null,
-                TemplateResolutionResult.Status.AmbiguousParameterValueChoice,
+                TemplateResolutionResult.Status.InvalidParameter,
                 null
             };
 
@@ -521,20 +521,20 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithChoiceParameter("MyChoice", "value_2"),
             };
 
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousParameterValueChoice, null };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.InvalidParameter, null };
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithChoiceParameter("MyChoice", "value_1"),
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithChoiceParameter("MyChoice", "value_2", "value_3"),
             };
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousParameterValueChoice, null };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.InvalidParameter, null };
 
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group", precedence: 100).WithChoiceParameter("MyChoice", "value_1", "value_2"),
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group", precedence: 200).WithChoiceParameter("MyChoice", "value_3", "value_4"),
             };
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.AmbiguousParameterValueChoice, null };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.Status.InvalidParameter, null };
 
             templates = new MockTemplateInfo[]
             {

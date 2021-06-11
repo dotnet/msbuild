@@ -21,7 +21,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.False(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
             Assert.Empty(templateMatchInfo.GetInvalidParameterNames());
             Assert.Equal(0, templateMatchInfo.GetValidTemplateParameters().Count);
         }
@@ -35,7 +34,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.True(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
 
         [Fact(DisplayName = nameof(NamePartialMatch_ReportsCorrectly))]
@@ -46,8 +44,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Name, "test", MatchKind.Partial));
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.True(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
+            Assert.False(templateMatchInfo.IsInvokableMatch());
+            Assert.True(templateMatchInfo.IsFilterableMatch());
         }
 
         [Fact(DisplayName = nameof(NameMismatch_ReportsCorrectly))]
@@ -59,7 +57,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.False(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_ReportsCorrectly))]
@@ -71,7 +68,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.True(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMismatch_ReportsCorrectly))]
@@ -83,7 +79,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.False(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_NameMatch_ReportsCorrectly))]
@@ -96,7 +91,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.True(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_NameMismatch_ReportsCorrectly))]
@@ -109,7 +103,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_NamePartialMatch_ReportsCorrectly))]
@@ -121,8 +114,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Exact));
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.True(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
+            Assert.False(templateMatchInfo.IsInvokableMatch());
+            Assert.True(templateMatchInfo.IsFilterableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMismatch_NameMatch_ReportsCorrectly))]
@@ -135,7 +128,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMismatch_NamePartialMatch_ReportsCorrectly))]
@@ -148,7 +140,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
             Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.False(templateMatchInfo.HasAmbiguousParameterValueMatch());
         }
     }
 }

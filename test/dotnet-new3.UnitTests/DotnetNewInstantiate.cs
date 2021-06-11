@@ -188,7 +188,8 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut()
                 .And.HaveStdErrContaining("Error: Invalid option(s):")
-                .And.HaveStdErrContaining("   The value 'netcoreapp' is ambiguous for option --framework. The possible values are:")
+                .And.HaveStdErrContaining("--framework netcoreapp")
+                .And.HaveStdErrContaining("   'netcoreapp' is not a valid value for --framework. The possible values are:")
                 .And.HaveStdErrContaining("      netcoreapp2.1   - Target netcoreapp2.1")
                 .And.HaveStdErrContaining("      netcoreapp3.1   - Target netcoreapp3.1")
                 .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
@@ -201,7 +202,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut()
                 .And.HaveStdErrContaining("Error: Invalid option(s):")
-                .And.HaveStdErrContaining("   The value 'netcoreapp' is ambiguous for option --framework. The possible values are:")
+                .And.HaveStdErrContaining("   'netcoreapp' is not a valid value for --framework. The possible values are:")
                 .And.HaveStdErrContaining("      netcoreapp2.1   - Target netcoreapp2.1")
                 .And.HaveStdErrContaining("      netcoreapp3.1   - Target netcoreapp3.1")
                 .And.HaveStdErrContaining("   '--fake' is not a valid option")

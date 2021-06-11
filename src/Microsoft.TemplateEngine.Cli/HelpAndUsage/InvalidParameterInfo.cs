@@ -42,11 +42,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             /// The default name is invalid.
             /// </summary>
             InvalidDefaultValue,
-
-            /// <summary>
-            /// The value provided leads to ambiguous choice (for choice parameters only).
-            /// </summary>
-            AmbiguousParameterValue
         }
 
         /// <summary>
@@ -111,19 +106,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 {
                     invalidParamsErrorText.AppendLine(invalidParam.InputFormat);
                     invalidParamsErrorText.Append(' ', padWidth).AppendLine(string.Format(LocalizableStrings.InvalidParameterNameDetail, invalidParam.InputFormat));
-                }
-                else if (invalidParam.ErrorKind == Kind.AmbiguousParameterValue)
-                {
-                    invalidParamsErrorText.AppendLine(invalidParam.InputFormat + ' ' + invalidParam.SpecifiedValue);
-                    string header = string.Format(LocalizableStrings.AmbiguousParameterDetail, invalidParam.InputFormat, invalidParam.SpecifiedValue);
-                    if (templateGroup != null)
-                    {
-                        DisplayValidValues(invalidParamsErrorText, header, templateGroup.GetAmbiguousValuesForChoiceParameter(invalidParam.Canonical, invalidParam.SpecifiedValue), padWidth);
-                    }
-                    else
-                    {
-                        invalidParamsErrorText.Append(' ', padWidth).AppendLine(header);
-                    }
                 }
                 else if (invalidParam.ErrorKind == Kind.InvalidParameterValue)
                 {
