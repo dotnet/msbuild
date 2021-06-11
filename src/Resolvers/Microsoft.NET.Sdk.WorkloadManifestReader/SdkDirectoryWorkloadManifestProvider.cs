@@ -13,8 +13,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string _sdkRootPath;
         private readonly string _sdkVersionBand;
         private readonly string [] _manifestDirectories;
-        private static string[] _preview4ManifestIds = new string[] { "Microsoft.NET.Workload.Android", "Microsoft.NET.Workload.BlazorWebAssembly", "Microsoft.NET.Workload.iOS",
-            "Microsoft.NET.Workload.MacCatalyst", "Microsoft.NET.Workload.macOS", "Microsoft.NET.Workload.tvOS" };
+        private static HashSet<string> _outdatedManifestIds = new HashSet<string>() { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
+            "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
             : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
@@ -83,7 +83,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectories[0]))
                     {
-                        if (!_preview4ManifestIds.Any(prev4Manifest => workloadManifestDirectory.ToLowerInvariant().Contains(prev4Manifest.ToLowerInvariant())))
+                        if (!IsManifestIdOutdated(workloadManifestDirectory))
                         {
                             yield return workloadManifestDirectory;
                         }
@@ -107,12 +107,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 foreach (var workloadManifestDirectory in directoriesWithManifests.Values)
                 {
-                    if (!_preview4ManifestIds.Any(prev4Manifest => workloadManifestDirectory.ToLowerInvariant().Contains(prev4Manifest.ToLowerInvariant())))
+                    if (!IsManifestIdOutdated(workloadManifestDirectory))
                     {
                         yield return workloadManifestDirectory;
                     }
                 }
             }
+        }
+
+        private bool IsManifestIdOutdated(string workloadManifestDir)
+        {
+            var manifestId = Path.GetFileName(workloadManifestDir).ToLowerInvariant();
+            return _outdatedManifestIds.Contains(manifestId);
         }
     }
 }
