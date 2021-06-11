@@ -408,13 +408,20 @@ namespace Microsoft.NET.Build.Tests
                 }
             }
 
+            var getValuesCommand = new GetValuesCommand(testAsset, "LangVersion", targetFramework: "net6.0");
+            getValuesCommand.Execute().Should().Pass();
+
+            var values = getValuesCommand.GetValues();
+            var langVersion = values.FirstOrDefault() ?? string.Empty;
             if (!addPreviewFeatureProperty || !enablePreviewFeatures)
             {
                 Assert.False(contains);
+                Assert.True(langVersion.Equals(string.Empty, System.StringComparison.Ordinal));
             }
             else
             {
                 Assert.True(contains);
+                Assert.True(langVersion.Equals("Preview", System.StringComparison.Ordinal));
             }
         }
 
