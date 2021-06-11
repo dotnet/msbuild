@@ -100,7 +100,7 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData("net6.0")]
         public void It_creates_readytorun_symbols_when_switch_is_used(string targetFramework)
         {
-            TestProjectPublishing_Internal("CrossgenTest3", targetFramework, emitNativeSymbols: true, identifier: targetFramework);
+            TestProjectPublishing_Internal("CrossgenTest3", targetFramework, emitNativeSymbols: true, composite: false, identifier: targetFramework);
         }
 
         [Theory]
