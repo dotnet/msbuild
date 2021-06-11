@@ -52,6 +52,26 @@ namespace Microsoft.DotNet.Tools.Run.Tests
         [InlineData(new[] { "trust", "certificate MyCompanyCert  CE40881FF5F0AD3E58965DA20A9F571EF1651A56933748E1BF1C99E537C4E039 --algorithm SHA256" }, 0)]
         [InlineData(new[] { "trust", "source NuGet --configfile ..\nuget.config" }, 0)]
         [InlineData(new[] { "trust", "remove Nuget" }, 0)]
+        [InlineData(new[] { "sign", "foo.1.0.0.nupkg",
+                            "--certificate-path", "certficate.pfx",
+                            "--certificate-password", "PlaceholderPassword"}, 0)]
+        [InlineData(new[] { "sign", "foo.1.0.0.nupkg",
+                            "--certificate-path", "certficate.pfx",
+                            "--certificate-password", "PlaceholderPassword",
+                            "--overwrite" }, 0)]
+        [InlineData(new[] { "sign", "foo.1.0.0.nupkg",
+                            "--certificate-fingerprint", "CE40881FF5F0AD3E58965DA20A9F57",
+                            "--certificate-password", "PlaceholderPassword"}, 0)]
+        [InlineData(new[] { "sign", "foo.1.0.0.nupkg",
+                            "--certificate-store-name", "My",
+                            "--certificate-store-location", "CurrentUser",
+                            "--certificate-fingerprint", "CE40881FF5F0AD3E58965DA20A9F57",
+                            "--certificate-password", "PlaceholderPassword"}, 0)]
+        [InlineData(new[] { "sign", "foo.1.0.0.nupkg",
+                            "--certificate-store-name", "My",
+                            "--certificate-store-location", "CurrentUser",
+                            "--certificate-subject-name", "CE40881FF5F0AD3E58965DA20A9F57",
+                            "--certificate-password", "PlaceholderPassword"}, 0)]
         public void ItPassesCommandIfSupported(string[] inputArgs, int result)
         {
             // Arrange

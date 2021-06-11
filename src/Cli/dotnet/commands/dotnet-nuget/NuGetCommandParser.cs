@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(GetPushCommand());
             command.AddCommand(GetVerifyCommand());
             command.AddCommand(GetTrustCommand());
+            command.AddCommand(GetSignCommand());
 
             return command;
         }
@@ -106,6 +107,28 @@ namespace Microsoft.DotNet.Cli
             trustCommand.AddOption(CommonOptions.VerbosityOption());
 
             return trustCommand;
-        }        
+        }
+        
+        private static Command GetSignCommand()
+        {
+            var signCommand = new Command("sign");
+
+            signCommand.AddArgument(new Argument<IEnumerable<string>>() { Arity = ArgumentArity.OneOrMore });
+
+            signCommand.AddOption(new Option<string>(new string[] { "-o", "--output" }));
+            signCommand.AddOption(new Option<string>("--certificate-path"));
+            signCommand.AddOption(new Option<string>("--certificate-store-name"));
+            signCommand.AddOption(new Option<string>("--certificate-store-location"));
+            signCommand.AddOption(new Option<string>("--certificate-subject-name"));
+            signCommand.AddOption(new Option<string>("--certificate-fingerprint"));
+            signCommand.AddOption(new Option<string>("--certificate-password"));
+            signCommand.AddOption(new Option<string>("--hash-algorithm"));
+            signCommand.AddOption(new Option<string>("--timestamper"));
+            signCommand.AddOption(new Option<string>("--timestamp-hash-algorithm"));
+            signCommand.AddOption(new Option<bool>("--overwrite"));
+            signCommand.AddOption(CommonOptions.VerbosityOption());
+
+            return signCommand;
+        }
     }
 }
