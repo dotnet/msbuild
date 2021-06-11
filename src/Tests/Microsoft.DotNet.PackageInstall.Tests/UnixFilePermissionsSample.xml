@@ -1,0 +1,8 @@
+<FileList>
+	<!-- bgen -->
+	<File Path="tools/bin/bgen" Permission="755" />
+	<File Path="tools/lib/bgen/bgen" Permission="755" />
+	<!-- mlaunch -->
+	<File Path="tools/bin/mlaunch" Permission="755" />
+	<File Path="tools/lib/mlaunch/mlaunch.app/Contents/MacOS/mlaunch" Permission="755" />
+ </FileList>

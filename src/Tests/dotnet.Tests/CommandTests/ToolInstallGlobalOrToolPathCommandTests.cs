@@ -481,7 +481,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             {
             }
 
-            public void Set755Permission(string path)
+            public void SetPermission(string path, string chmodArgument)
             {
             }
         }

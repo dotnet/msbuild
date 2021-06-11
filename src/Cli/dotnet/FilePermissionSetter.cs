@@ -19,9 +19,9 @@ namespace Microsoft.DotNet.Tools
         /// (G)roup can read, can't write and can execute.
         /// (O)thers can read, can't write and can execute.
         /// </summary>
-        public void Set755Permission(string path)
+        public void SetPermission(string path, string chmodArgument)
         {
-            RunCommand(path, "755");
+            RunCommand(path, chmodArgument.ToString());
         }
 
         private static void RunCommand(string path, string chmodArgument)
