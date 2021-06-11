@@ -214,6 +214,24 @@ namespace ManifestReaderTests
          
         }
 
+        [Fact]
+        public void ItShouldIgnoreOutdatedManifestIds()
+        {
+            Initialize();
+
+            Directory.CreateDirectory(Path.Combine(_manifestDirectory, "iOS"));
+            File.WriteAllText(Path.Combine(_manifestDirectory, "iOS", "WorkloadManifest.json"), "iOSContent");
+            Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Microsoft.NET.Workload.Android"));
+            File.WriteAllText(Path.Combine(_manifestDirectory, "Microsoft.NET.Workload.Android", "WorkloadManifest.json"), "iOSContent");
+
+            var sdkDirectoryWorkloadManifestProvider
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100");
+
+            GetManifestContents(sdkDirectoryWorkloadManifestProvider)
+                .Should()
+                .BeEquivalentTo("iOSContent");
+        }
+
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
             return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.manifestStream).ReadToEnd());
