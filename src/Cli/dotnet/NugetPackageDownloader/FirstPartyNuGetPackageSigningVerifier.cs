@@ -46,9 +46,9 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         private static bool NuGetVerify(FilePath nupkgToVerify, out string commandOutput)
         {
-            var argsToPassToRestore = new[] {"verify", "--all", nupkgToVerify.Value};
+            var args = new[] {"verify", "--all", nupkgToVerify.Value};
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
-                .Create("nuget", argsToPassToRestore);
+                .Create("nuget", args);
 
             var commandResult = command.CaptureStdOut().Execute();
             commandOutput = commandResult.StdOut + Environment.NewLine + commandResult.StdErr;

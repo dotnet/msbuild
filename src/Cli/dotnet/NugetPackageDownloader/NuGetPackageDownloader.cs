@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly IFilePermissionSetter _filePermissionSetter;
         
         /// <summary>
-        /// In many commands we don't passing console logger to reduce the verbosity
+        /// In many commands we don't passing NuGetConsoleLogger and pass NullLogger instead to reduce the verbosity
         /// </summary>
         private readonly ILogger _verboseLogger;
         private readonly DirectoryPath _packageInstallDir;

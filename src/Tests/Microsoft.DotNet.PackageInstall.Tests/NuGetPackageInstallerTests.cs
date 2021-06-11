@@ -197,7 +197,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             ex.Message.Should().Contain(commandOutput);
         }
 
-        [PlatformSpecificFact(TestPlatforms.Linux | TestPlatforms.OSX | TestPlatforms.FreeBSD)]
+        [UnixOnlyFact]
         public async Task GivenANonWindowsMachineItShouldPrintMessageOnce()
         {
             BufferedReporter bufferedReporter = new BufferedReporter();
