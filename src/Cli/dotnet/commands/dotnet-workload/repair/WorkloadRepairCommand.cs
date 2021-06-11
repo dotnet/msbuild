@@ -57,7 +57,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption));
             var tempPackagesDir = new DirectoryPath(Path.Combine(tempDirPath, "dotnet-sdk-advertising-temp"));
-            nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
+            NullLogger nullLogger = new NullLogger();
+            nugetPackageDownloader ??= new NuGetPackageDownloader(
+                tempPackagesDir,
+                filePermissionSetter: null,
+                new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger), nullLogger);
             _workloadInstaller = workloadInstaller ?? 
                 WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader, dotnetDir, tempDirPath, _packageSourceLocation);
         }

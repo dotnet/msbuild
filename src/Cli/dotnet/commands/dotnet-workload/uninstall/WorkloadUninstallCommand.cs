@@ -42,8 +42,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadUninstallCommandParser.VersionOption), version, dotnetPath);
             var verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUninstallCommandParser.VerbosityOption);
             var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, _sdkVersion.ToString());
-            workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
-            nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(new DirectoryPath(Path.GetTempPath()), filePermissionSetter: null, new NullLogger());
+            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, dotnetPath, _sdkVersion.ToString());
+            nugetPackageDownloader ??= new NuGetPackageDownloader(new DirectoryPath(Path.GetTempPath()), filePermissionSetter: null, verboseLogger: new NullLogger());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             _workloadInstaller = WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, workloadResolver, verbosity, nugetPackageDownloader, dotnetPath);
         }

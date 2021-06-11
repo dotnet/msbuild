@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.NET.TestFramework;
+using Microsoft.NET.TestFramework.Utilities;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
@@ -33,7 +34,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             _tempDirectory = GetUniqueTempProjectPathEachTest();
             _logger = new NuGetTestLogger();
-            _installer = new NuGetPackageDownloader(_tempDirectory, null, _logger);
+            _installer =
+                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(), _logger);
         }
 
         [Fact]
@@ -152,6 +154,71 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             File.Exists(packagePath).Should().BeTrue();
             packagePath.Should().Contain(TestPackageId + "." + TestPreviewPackageVersion,
                 "Package should download higher package version");
+        }
+
+        [WindowsOnlyFact]
+        public async Task GivenANonSignedSdkItShouldPrintMessageOnce()
+        {
+            BufferedReporter bufferedReporter = new BufferedReporter();
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
+                _logger, bufferedReporter);
+            await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            // download 2 packages should only print the message once
+            string packagePath = await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            bufferedReporter.Lines.Should()
+                .ContainSingle(
+                    LocalizableStrings.SkipNuGetpackageSigningValidationSDKNotFirstParty);
+            File.Exists(packagePath).Should().BeTrue();
+        }
+
+        [WindowsOnlyFact]
+        public async Task WhenCalledWithNotSignedPackageItShouldThrowWithCommandOutput()
+        {
+            string commandOutput = "COMMAND OUTPUT";
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(verifyResult: false, commandOutput: commandOutput),
+                _logger);
+
+            NuGetPackageInstallerException ex = await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
+                nuGetPackageDownloader.DownloadPackageAsync(
+                    TestPackageId,
+                    new NuGetVersion(TestPackageVersion),
+                    new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()})));
+
+            ex.Message.Should().Contain(commandOutput);
+        }
+
+        [UnixOnlyFact]
+        public async Task GivenANonWindowsMachineItShouldPrintMessageOnce()
+        {
+            BufferedReporter bufferedReporter = new BufferedReporter();
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
+                _logger, bufferedReporter);
+            await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            // download 2 packages should only print the message once
+            string packagePath = await nuGetPackageDownloader.DownloadPackageAsync(
+                TestPackageId,
+                new NuGetVersion(TestPackageVersion),
+                new PackageSourceLocation(sourceFeedOverrides: new[] {GetTestLocalFeedPath()}));
+
+            bufferedReporter.Lines.Should()
+                .ContainSingle(
+                    LocalizableStrings.SkipNuGetpackageSigningValidationmacOSLinux);
+            File.Exists(packagePath).Should().BeTrue();
         }
 
         private static DirectoryPath GetUniqueTempProjectPathEachTest()

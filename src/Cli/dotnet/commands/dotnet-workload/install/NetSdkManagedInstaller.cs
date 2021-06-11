@@ -44,8 +44,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             _dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _tempPackagesDir = new DirectoryPath(tempDirPath ?? Path.GetTempPath());
-            _nugetPackageDownloader = nugetPackageDownloader ?? 
-                new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null, verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger());
+            ILogger logger = verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger();
+            _nugetPackageDownloader = nugetPackageDownloader ??
+                                      new NuGetPackageDownloader(_tempPackagesDir, filePermissionSetter: null,
+                                          new FirstPartyNuGetPackageSigningVerifier(_tempPackagesDir), logger);
             _workloadMetadataDir = Path.Combine(_dotnetDir, "metadata", "workloads");
             _reporter = reporter;
             _sdkFeatureBand = sdkFeatureBand;

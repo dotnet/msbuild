@@ -3,10 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -28,13 +32,26 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         };
 
         private readonly IFilePermissionSetter _filePermissionSetter;
-        private readonly ILogger _logger;
+        
+        /// <summary>
+        /// In many commands we don't passing NuGetConsoleLogger and pass NullLogger instead to reduce the verbosity
+        /// </summary>
+        private readonly ILogger _verboseLogger;
         private readonly DirectoryPath _packageInstallDir;
+        
+        /// <summary>
+        /// Reporter would output to the console regardless
+        /// </summary>
+        private readonly IReporter _reporter;
+        private readonly IFirstPartyNuGetPackageSigningVerifier _firstPartyNuGetPackageSigningVerifier;
+        private bool _validationMessagesDisplayed = false;
 
-        public NuGetPackageDownloader(DirectoryPath packageInstallDir, IFilePermissionSetter filePermissionSetter = null, ILogger logger = null)
+        public NuGetPackageDownloader(DirectoryPath packageInstallDir, IFilePermissionSetter filePermissionSetter = null, IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null, ILogger verboseLogger = null, IReporter reporter = null)
         {
             _packageInstallDir = packageInstallDir;
-            _logger = logger ?? new NuGetConsoleLogger();
+            _reporter = reporter ?? Reporter.Output;
+            _verboseLogger = verboseLogger ?? new NuGetConsoleLogger();
+            _firstPartyNuGetPackageSigningVerifier = firstPartyNuGetPackageSigningVerifier ?? new FirstPartyNuGetPackageSigningVerifier(tempDirectory: packageInstallDir, logger: _verboseLogger);
             _filePermissionSetter = new FilePermissionSetter();
         }
 
@@ -70,16 +87,54 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 resolvedPackageVersion,
                 destinationStream,
                 _cacheSettings,
-                _logger,
+                _verboseLogger,
                 cancellationToken);
 
             if (!success)
             {
                 throw new NuGetPackageInstallerException(
-                    $"Downloading {packageId} version {packageVersion.ToNormalizedString()} failed");
+                    string.Format("Downloading {0} version {1} failed", packageId, packageVersion.ToNormalizedString()));
             }
 
+            VerifySigning(nupkgPath);
+
             return nupkgPath;
+        }
+
+        private void VerifySigning(string nupkgPath)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (_firstPartyNuGetPackageSigningVerifier.IsExecutableIsFirstPartySignedWithoutValidation(new FilePath(
+                    typeof(DotNet.Cli.Program).Assembly.Location)))
+                {
+                    if (!_firstPartyNuGetPackageSigningVerifier.Verify(new FilePath(nupkgPath),
+                        out string commandOutput))
+                    {
+                        throw new NuGetPackageInstallerException(LocalizableStrings.FailedToValidatePackageSigning +
+                                                                 Environment.NewLine +
+                                                                 commandOutput);
+                    }
+                }
+                else
+                {
+                    if (!_validationMessagesDisplayed)
+                    {
+                        _reporter.WriteLine(
+                            LocalizableStrings.SkipNuGetpackageSigningValidationSDKNotFirstParty);
+                        _validationMessagesDisplayed = true;
+                    }
+                }
+            }
+            else
+            {
+                if (!_validationMessagesDisplayed)
+                {
+                    _reporter.WriteLine(
+                        LocalizableStrings.SkipNuGetpackageSigningValidationmacOSLinux);
+                    _validationMessagesDisplayed = true;
+                }
+            }
         }
 
         public async Task<string> GetPackageUrl(PackageId packageId,
@@ -106,7 +161,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 PackageSaveMode.Defaultv3,
                 XmlDocFileSaveMode.None,
                 null,
-                _logger);
+                _verboseLogger);
             NuGetPackagePathResolver packagePathResolver = new NuGetPackagePathResolver(targetFolder.Value);
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -244,7 +299,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 PackageSource packageSource = new PackageSource(source);
                 if (packageSource.TrySourceAsUri == null)
                 {
-                    _logger.LogWarning(string.Format(
+                    _verboseLogger.LogWarning(string.Format(
                         LocalizableStrings.FailedToLoadNuGetSource,
                         source));
                     continue;
@@ -397,7 +452,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 includePrerelease,
                 false,
                 _cacheSettings,
-                _logger,
+                _verboseLogger,
                 cancellationToken).ConfigureAwait(false);
 
             return (source, foundPackages);

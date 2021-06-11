@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 dotnetDir, _tempDirPath, packageSourceLocation: _packageSourceLocation);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
-            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
+            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null,  new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),new NullLogger());
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
         }
 

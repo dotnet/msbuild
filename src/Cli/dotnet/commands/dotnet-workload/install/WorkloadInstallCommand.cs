@@ -82,7 +82,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
-            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null, new NullLogger());
+            _nugetPackageDownloader = nugetPackageDownloader ??
+                                      new NuGetPackageDownloader(tempPackagesDir,
+                                          filePermissionSetter: null,
+                                          new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
+                                          new NullLogger());
             _workloadInstaller = workloadInstaller ?? 
                 WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, _nugetPackageDownloader, _dotnetPath, _tempDirPath, _packageSourceLocation);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
@@ -142,7 +146,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         _includePreviews, 
                         string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
                 }
-                    catch (Exception e)
+                catch (Exception e)
                 {
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);

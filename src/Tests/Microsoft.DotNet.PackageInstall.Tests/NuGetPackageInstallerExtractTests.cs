@@ -30,7 +30,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             string packageVersion = "12.0.3";
             NuGetTestLogger logger = new NuGetTestLogger(Log);
             NuGetPackageDownloader installer =
-                new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null, logger);
+                new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null,
+                    new MockFirstPartyNuGetPackageSigningVerifier(), logger);
             string packagePath =
                 await installer.DownloadPackageAsync(new PackageId(packageId), new NuGetVersion(packageVersion));
             string targetPath = Path.Combine(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()),
@@ -48,7 +49,10 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             NuGetTestLogger logger = new NuGetTestLogger(Log);
             NuGetPackageDownloader installer =
-                new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null, logger);
+                new NuGetPackageDownloader(
+                    new DirectoryPath(Directory.GetCurrentDirectory()),
+                    null,
+                    new MockFirstPartyNuGetPackageSigningVerifier(), logger);
             var allFiles = new List<string>()
             {
                 "/ExtractedPackage/Microsoft.Android.Sdk.Darwin.nuspec",
@@ -69,7 +73,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         {
             NuGetTestLogger logger = new NuGetTestLogger(Log);
             NuGetPackageDownloader installer =
-                new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null, logger);
+                new NuGetPackageDownloader(new DirectoryPath(Directory.GetCurrentDirectory()), null,
+                    new MockFirstPartyNuGetPackageSigningVerifier(), logger);
             var allFiles = new List<string>()
             {
                 "/ExtractedPackage/Not.In.Allow.List.nuspec",
