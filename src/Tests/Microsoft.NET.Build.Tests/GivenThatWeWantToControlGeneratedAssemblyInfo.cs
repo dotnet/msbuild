@@ -370,11 +370,25 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
-        [Theory]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, false)]
-        public void It_includes_requires_preview_features(bool addPreviewFeatureProperty, bool enablePreviewFeatures)
+        [Fact]
+        public void Requires_preview_features_enabled()
+        {
+            TestPreviewFeatures(true, true);
+        }
+
+        [Fact]
+        public void Requires_preview_features_disabled()
+        {
+            TestPreviewFeatures(true, false);
+        }
+
+        [Fact]
+        public void Requires_preview_features_not_specified()
+        {
+            TestPreviewFeatures(false, false);
+        }
+
+        private void TestPreviewFeatures(bool addPreviewFeatureProperty, bool enablePreviewFeatures)
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
