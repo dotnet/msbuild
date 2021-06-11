@@ -343,7 +343,7 @@ namespace Microsoft.NET.Build.Tests
         }
 
 
-        [Theory]
+        [WindowsOnlyTheory]
         //  Basic Windows TargetFramework
         [InlineData("net5.0-windows10.0.19041.0", false, null, "10.0.19041.*")]
         //  Basic UseWindowsSdkPreview usage
