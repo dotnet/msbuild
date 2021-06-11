@@ -190,6 +190,11 @@
     <Copy SourceFiles="@(InstalledSdks)"
           DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!-- The .NET SDK has a dependency on DependencyModel, but relies on having it "next to MSBuild" in the final
+         layout. Copy it from there to our little weirdo bootstrap layout. -->
+    <Copy SourceFiles="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Microsoft.Extensions.DependencyModel.dll"
+          DestinationFolder="$(BootstrapDestination)" />
+
     <Copy SourceFiles="@(InstalledExtensions)"
           DestinationFolder="$(BootstrapDestination)Current\%(RecursiveDir)" />
 
