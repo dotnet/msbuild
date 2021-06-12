@@ -272,6 +272,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 logger.LogMessage($"MockCache: GetCacheResultAsync for {buildRequest.ProjectFullPath}", MessageImportance.High);
 
+                buildRequest.ProjectInstance.ShouldNotBeNull("The cache plugin expects evaluated projects.");
+
                 if (_projectQuerySleepTime is not null)
                 {
                     await Task.Delay(_projectQuerySleepTime.Value);
