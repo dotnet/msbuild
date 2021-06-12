@@ -230,7 +230,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     await LateInitializePluginForVsWorkaround(request);
                 }
 
-                return await GetCacheResultAsync(cacheRequest.Submission.BuildRequestData);
+                return await GetCacheResultAsync(
+                    new BuildRequestData(
+                        request.Configuration.Project,
+                        request.Submission.BuildRequestData.TargetNames.ToArray()));
             }
 
             static bool IsDesignTimeBuild(ProjectInstance project)
