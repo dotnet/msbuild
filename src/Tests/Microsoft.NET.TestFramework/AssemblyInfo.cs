@@ -40,8 +40,7 @@ namespace Microsoft.NET.TestFramework
                     }
 
                     var paramCount = signature.ReadCompressedInteger();
-                    if (paramCount <= 0 || // must have at least 1 parameter
-                        signature.ReadSignatureTypeCode() != SignatureTypeCode.Void) // return type must be void
+                    if (paramCount <= 0)
                     {
                         parameterlessAttributes.Add(name);
                     }

@@ -48,7 +48,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifiers Condition=" '$(PackAsTool)' == 'true' ">$(RuntimeIdentifiers);$(PackAsToolShimRuntimeIdentifiers)</RuntimeIdentifiers>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(EnablePreviewFeatures)' == 'true'">
+  <PropertyGroup Condition="'$(EnablePreviewFeatures)' == 'true' And '$(LangVersion)' == ''">
     <LangVersion>Preview</LangVersion>
   </PropertyGroup>
 

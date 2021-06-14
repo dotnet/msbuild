@@ -370,46 +370,29 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
-        [Fact]
-        public void Requires_preview_features_enabled()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestPreviewFeatures(bool enablePreviewFeatures)
         {
-            TestPreviewFeatures(true, true);
-        }
-
-        [Fact]
-        public void Requires_preview_features_disabled()
-        {
-            TestPreviewFeatures(true, false);
-        }
-
-        [Fact]
-        public void Requires_preview_features_not_specified()
-        {
-            TestPreviewFeatures(false, false);
-        }
-
-        private void TestPreviewFeatures(bool addPreviewFeatureProperty, bool enablePreviewFeatures)
-        {
+            const string targetFramework = "net6.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: $"{addPreviewFeatureProperty}_{enablePreviewFeatures}")
+                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}")
                 .WithSource()
-                .WithTargetFramework("net6.0")
+                .WithTargetFramework(targetFramework)
                 .WithProjectChanges((path, project) =>
                 {
                     var ns = project.Root.Name.Namespace;
 
-                    if (addPreviewFeatureProperty)
-                    {
-                        project.Root.Add(
-                            new XElement(ns + "PropertyGroup",
-                                new XElement(ns + "EnablePreviewFeatures", $"{enablePreviewFeatures}")));
-                    }
+                    project.Root.Add(
+                        new XElement(ns + "PropertyGroup",
+                            new XElement(ns + "EnablePreviewFeatures", $"{enablePreviewFeatures}")));
                 });
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute().Should().Pass();
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("net6.0").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, "HelloWorld.dll");
 
             var parameterlessAttributes = AssemblyInfo.GetParameterlessAttributes(assemblyPath);
             bool contains = false;
@@ -422,12 +405,12 @@ namespace Microsoft.NET.Build.Tests
                 }
             }
 
-            var getValuesCommand = new GetValuesCommand(testAsset, "LangVersion", targetFramework: "net6.0");
+            var getValuesCommand = new GetValuesCommand(testAsset, "LangVersion", targetFramework: targetFramework);
             getValuesCommand.Execute().Should().Pass();
 
             var values = getValuesCommand.GetValues();
             var langVersion = values.FirstOrDefault() ?? string.Empty;
-            if (!addPreviewFeatureProperty || !enablePreviewFeatures)
+            if (!enablePreviewFeatures)
             {
                 Assert.False(contains);
                 Assert.True(langVersion.Equals(string.Empty, System.StringComparison.Ordinal));
