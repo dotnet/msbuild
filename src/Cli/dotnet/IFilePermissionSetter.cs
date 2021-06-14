@@ -3,6 +3,6 @@
     internal interface IFilePermissionSetter
     {
         void SetUserExecutionPermission(string path);
-        void Set755Permission(string path);
+        void SetPermission(string path, string chmodArgument);
     }
 }

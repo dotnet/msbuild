@@ -174,9 +174,29 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             if (!OperatingSystem.IsWindows())
             {
-                foreach (FilePath filePath in FindAllFilesNeedExecutablePermission(allFilesInPackage, targetFolder.Value))
+                string workloadUnixFilePermissions = allFilesInPackage.SingleOrDefault(p =>
+                    Path.GetRelativePath(targetFolder.Value, p).Equals("data/UnixFilePermissions.xml",
+                        StringComparison.OrdinalIgnoreCase));
+
+                if (workloadUnixFilePermissions != default)
                 {
-                    _filePermissionSetter.Set755Permission(filePath.Value);
+                    var permissionList = WorkloadUnixFilePermissions.FileList.Deserialize(workloadUnixFilePermissions);
+                    foreach (var fileAndPermission in permissionList.File)
+                    {
+                        _filePermissionSetter
+                            .SetPermission(
+                                Path.Combine(targetFolder.Value, fileAndPermission.Path),
+                                fileAndPermission.Permission);
+                    }
+                }
+                else
+                {
+                    // https://github.com/dotnet/sdk/issues/18239
+                    foreach (FilePath filePath in FindAllFilesNeedExecutablePermission(allFilesInPackage,
+                        targetFolder.Value))
+                    {
+                        _filePermissionSetter.SetPermission(filePath.Value, "755");
+                    }
                 }
             }
 
