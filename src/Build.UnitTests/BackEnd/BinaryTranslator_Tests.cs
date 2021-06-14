@@ -25,11 +25,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            ITranslator translator = BinaryTranslator.GetReadTranslator(stream, null);
-            Assert.Equal(TranslationDirection.ReadFromStream, translator.Mode);
+            using (ITranslator translator = BinaryTranslator.GetReadTranslator(stream, null))
+            {
+                Assert.Equal(TranslationDirection.ReadFromStream, translator.Mode);
+            }
 
-            translator = BinaryTranslator.GetWriteTranslator(stream);
-            Assert.Equal(TranslationDirection.WriteToStream, translator.Mode);
+            using (ITranslator translator = BinaryTranslator.GetWriteTranslator(stream))
+            {
+                Assert.Equal(TranslationDirection.WriteToStream, translator.Mode);
+            }
         }
 
         /// <summary>

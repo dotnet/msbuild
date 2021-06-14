@@ -671,19 +671,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (IsCacheable)
                     {
-                        ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
+                        using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
 
-                        try
-                        {
-                            _project.Cache(translator);
-                            _baseLookup = null;
+                        _project.Cache(translator);
+                        _baseLookup = null;
 
-                            IsCached = true;
-                        }
-                        finally
-                        {
-                            translator.Writer.BaseStream.Dispose();
-                        }
+                        IsCached = true;
                     }
                 }
             }
@@ -706,7 +699,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
+                using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
                 try
                 {
                     _project.RetrieveFromCache(translator);
