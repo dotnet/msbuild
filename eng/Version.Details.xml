@@ -193,6 +193,22 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>8ee0b03d15fe5a3fbba86fbcf165bd8e5da53d6e</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-preview.6.21314.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>160b33d1e1006274a610127ba98c97db67bc1cbe</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Authorization" Version="6.0.0-preview.6.21314.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>160b33d1e1006274a610127ba98c97db67bc1cbe</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Components.Web" Version="6.0.0-preview.6.21314.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>160b33d1e1006274a610127ba98c97db67bc1cbe</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.JSInterop" Version="6.0.0-preview.6.21314.1">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>160b33d1e1006274a610127ba98c97db67bc1cbe</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.Web.Xdt" Version="3.1.0" Pinned="true">
       <Uri>https://github.com/aspnet/xdt</Uri>
       <Sha>c01a538851a8ab1a1fbeb2e6243f391fff7587b4</Sha>
