@@ -3153,7 +3153,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (ArgumentException e) when (e.InnerException is BadImageFormatException)
             {
-                // BadImageFormatExceptions can be wrapped in ArgumentExceptions, so catch those, too.
+                // BadImageFormatExceptions can be wrapped in ArgumentExceptions, so catch those, too. See https://referencesource.microsoft.com/#mscorlib/system/reflection/module.cs,857
                 return;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
