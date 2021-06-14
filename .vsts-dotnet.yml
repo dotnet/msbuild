@@ -26,11 +26,13 @@ stages:
   displayName: Build
 
   jobs:
-  - template: /eng/common/templates/job/onelocbuild.yml
-    parameters:
-      CreatePr: false
-      LclSource: lclFilesfromPackage
-      LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+  - {{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    - template: /eng/common/templates/job/onelocbuild.yml
+      parameters:
+        CreatePr: false
+        LclSource: lclFilesfromPackage
+        LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+        MirrorRepo: {{msbuild}}
 
   - job: Windows_NT
     pool:
