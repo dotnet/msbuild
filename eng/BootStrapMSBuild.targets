@@ -190,8 +190,11 @@
     <Copy SourceFiles="@(InstalledSdks)"
           DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <!-- The .NET SDK has a dependency on DependencyModel, but relies on having it "next to MSBuild" in the final
-         layout. Copy it from there to our little weirdo bootstrap layout next to the SDK tasks. -->
+    <!-- The .NET SDK has a dependency on DependencyModel, but relies on having it in the final
+         MSBuild.deps.json, which differs from ours because it's generated in the SDK repo.
+
+         Copy it from "next to MSBuild" in the pre-bootstrap SDK to our little weirdo bootstrap
+         layout next to the SDK tasks, so it can get loaded by the SDK tasks that need it. -->
     <Copy SourceFiles="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Microsoft.Extensions.DependencyModel.dll"
           DestinationFolder="$(BootstrapDestination)Sdks\Microsoft.NET.Sdk\tools\net6.0" />
 
