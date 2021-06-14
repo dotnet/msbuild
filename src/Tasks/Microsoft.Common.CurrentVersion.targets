@@ -393,7 +393,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemGroup>
 
   <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
-    <IntermediateRefAssembly Include="$(IntermediateOutputPath)ref\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
+    <IntermediateRefAssembly Include="$(IntermediateOutputPath)refint\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
     <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
     <CreateDirectory Include="$(OutDir)ref" />
   </ItemGroup>
