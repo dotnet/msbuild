@@ -6,9 +6,9 @@
       <Sha>85a65ea1fca1d0867f699fed44d191358270bf6a</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.0.0-preview.1.66">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.0.0-preview.1.107">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>e84a10e4b0e6bccce7421af020728d9bbc3e64e0</Sha>
+      <Sha>7950d9b3c0b7fb9dc1c55700dc00e86e1ebd82f2</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Extensions.DependencyModel" Version="6.0.0-preview.2.21154.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
