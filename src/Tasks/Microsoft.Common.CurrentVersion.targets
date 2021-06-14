@@ -48,12 +48,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <TargetRuntime>Managed</TargetRuntime>
   </PropertyGroup>
 
-    <!-- Store values of certain intrinsic functions that won't change throughout the build. -->
-  <PropertyGroup Condition="'$(TargetFramework)' != ''">
-    <TargetFrameworkIdentifier Condition="'$(TargetFrameworkIdentifier)' == ''">$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</TargetFrameworkVersion>
-  </PropertyGroup>
-
   <!-- Because .NET 2.0 apps did not set TargetFrameworkIdentifier, we need to set it for them here by default.  If
        the runtime is set to Managed, we also need to set these.  Otherwise they should be blank (for instance Javascript or
        Native apps) because they do not target a .NET Framework. -->
