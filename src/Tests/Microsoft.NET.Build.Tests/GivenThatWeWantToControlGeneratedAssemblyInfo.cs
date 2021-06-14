@@ -391,7 +391,7 @@ namespace Microsoft.NET.Build.Tests
         private void TestPreviewFeatures(bool addPreviewFeatureProperty, bool enablePreviewFeatures)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld")
+                .CopyTestAsset("HelloWorld", identifier: $"{addPreviewFeatureProperty}_{enablePreviewFeatures}")
                 .WithSource()
                 .WithTargetFramework("net6.0")
                 .WithProjectChanges((path, project) =>
