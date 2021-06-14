@@ -23,7 +23,7 @@ namespace Microsoft.NET.Restore.Tests
         {
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/sdk/issues/17666")]
+        [WindowsOnlyFact]
         public void ItCanBuildProjectRestoredWithNuGet5_7()
         {
             var testProject = new TestProject()
