@@ -13,6 +13,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string _sdkRootPath;
         private readonly string _sdkVersionBand;
         private readonly string [] _manifestDirectories;
+        private static HashSet<string> _outdatedManifestIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
+            "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
             : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
@@ -81,7 +83,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     foreach (var workloadManifestDirectory in Directory.EnumerateDirectories(_manifestDirectories[0]))
                     {
-                        yield return workloadManifestDirectory;
+                        if (!IsManifestIdOutdated(workloadManifestDirectory))
+                        {
+                            yield return workloadManifestDirectory;
+                        }
                     }
                 }
             }
@@ -102,9 +107,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                 foreach (var workloadManifestDirectory in directoriesWithManifests.Values)
                 {
-                    yield return workloadManifestDirectory;
+                    if (!IsManifestIdOutdated(workloadManifestDirectory))
+                    {
+                        yield return workloadManifestDirectory;
+                    }
                 }
             }
+        }
+
+        private bool IsManifestIdOutdated(string workloadManifestDir)
+        {
+            var manifestId = Path.GetFileName(workloadManifestDir);
+            return _outdatedManifestIds.Contains(manifestId);
         }
     }
 }
