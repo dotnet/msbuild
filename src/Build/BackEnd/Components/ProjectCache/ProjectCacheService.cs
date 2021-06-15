@@ -50,6 +50,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         // Volatile because it is read by the BuildManager thread and written by one project cache service thread pool thread.
         // TODO: remove after we change VS to set the cache descriptor via build parameters.
         public volatile NullableBool? DesignTimeBuildsDetected;
+        private TaskCompletionSource<bool>? LateInitializationForVSWorkaroundCompleted;
 
         private ProjectCacheService(
             ProjectCachePluginBase projectCachePlugin,
@@ -225,12 +226,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 EvaluateProjectIfNecessary(request);
 
+                // Detect design time builds.
                 if (_projectCacheDescriptor.VsWorkaround)
                 {
-                    Interlocked.CompareExchange(
+                    var isDesignTimeBuild = IsDesignTimeBuild(request.Configuration.Project);
+
+                    var previousValue = Interlocked.CompareExchange(
                         ref DesignTimeBuildsDetected,
-                        new NullableBool(IsDesignTimeBuild(request.Configuration.Project)),
+                        new NullableBool(isDesignTimeBuild),
                         null);
+
+                    ErrorUtilities.VerifyThrowInternalError(
+                        previousValue is null || previousValue == false || isDesignTimeBuild,
+                        "Either all builds in a build session or design time builds, or none");
 
                     // No point progressing with expensive plugin initialization or cache query if design time build detected.
                     if (DesignTimeBuildsDetected)
@@ -240,11 +248,28 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     }
                 }
 
-                if (_projectCacheDescriptor.VsWorkaround)
-                {
                 // TODO: remove after we change VS to set the cache descriptor via build parameters.
+                // VS workaround needs to wait until the first project is evaluated to extract enough information to initialize the plugin.
+                // No cache request can progress until late initialization is complete.
+                if (_projectCacheDescriptor.VsWorkaround &&
+                    Interlocked.CompareExchange(
+                        ref LateInitializationForVSWorkaroundCompleted,
+                        new TaskCompletionSource<bool>(),
+                        null) is null)
+                {
                     await LateInitializePluginForVsWorkaround(request);
+                    LateInitializationForVSWorkaroundCompleted.SetResult(true);
                 }
+                else if (_projectCacheDescriptor.VsWorkaround)
+                {
+                    // Can't be null. If the thread got here it means another thread initialized the completion source.
+                    await LateInitializationForVSWorkaroundCompleted!.Task;
+                }
+
+                ErrorUtilities.VerifyThrowInternalError(
+                    LateInitializationForVSWorkaroundCompleted is null ||
+                    _projectCacheDescriptor.VsWorkaround && LateInitializationForVSWorkaroundCompleted.Task.IsCompleted,
+                    "Completion source should be null when this is not the VS workaround");
 
                 return await GetCacheResultAsync(
                     new BuildRequestData(
