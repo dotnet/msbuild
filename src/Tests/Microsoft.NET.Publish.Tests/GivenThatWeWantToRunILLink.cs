@@ -33,7 +33,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_only_runs_when_switch_is_enabled(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -108,33 +108,34 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("netcoreapp3.0", "copyused")]
-        [InlineData("net5.0", "copyused")]
-        [InlineData("net5.0", "link")]
-        public void ILLink_links_simple_app_without_analysis_warnings_and_it_runs(string targetFramework, string trimMode)
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
+        public void ILLink_links_simple_app_without_analysis_warnings_and_it_runs(string targetFramework)
         {
-            var projectName = "HelloWorld";
-            var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
+            foreach (var trimMode in new[] { "copyused", "link" })
+            {
+                var projectName = "HelloWorld";
+                var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
-            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + trimMode);
+                var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName);
+                var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + trimMode);
 
-            var publishCommand = new PublishCommand(testAsset);
-            publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", $"/p:TrimMode={trimMode}", "/p:SuppressTrimAnalysisWarnings=true")
-                .Should().Pass()
-                .And.NotHaveStdOutContaining("warning IL2075")
-                .And.NotHaveStdOutContaining("warning IL2026");
+                var publishCommand = new PublishCommand(testAsset);
+                publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", $"/p:TrimMode={trimMode}", "/p:SuppressTrimAnalysisWarnings=true")
+                    .Should().Pass()
+                    .And.NotHaveStdOutContaining("warning IL2075")
+                    .And.NotHaveStdOutContaining("warning IL2026");
 
-            var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
-            var exe = Path.Combine(publishDirectory.FullName, $"{testProject.Name}{Constants.ExeSuffix}");
+                var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid);
+                var exe = Path.Combine(publishDirectory.FullName, $"{testProject.Name}{Constants.ExeSuffix}");
 
-            var command = new RunExeCommand(Log, exe)
-                .Execute().Should().Pass()
-                .And.HaveStdOutContaining("Hello world");
+                var command = new RunExeCommand(Log, exe)
+                    .Execute().Should().Pass()
+                    .And.HaveStdOutContaining("Hello world");
+            }
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void PrepareForILLink_can_set_IsTrimmable(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -159,8 +160,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void PrepareForILLink_can_set_TrimMode(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -220,8 +220,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_roots_IntermediateAssembly(string targetFramework)
         {
              var projectName = "HelloWorld";
@@ -245,7 +244,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [InlineData(LatestTfm)]
         public void ILLink_respects_TrimmableAssembly(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -270,7 +269,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_respects_IsTrimmable_attribute(string targetFramework)
         {
             string projectName = "HelloWorld";
@@ -292,7 +291,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_IsTrimmable_metadata_can_override_attribute(string targetFramework)
         {
             string projectName = "HelloWorld";
@@ -317,7 +316,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_TrimMode_applies_to_IsTrimmable_assemblies(string targetFramework)
         {
             string projectName = "HelloWorld";
@@ -345,7 +344,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [InlineData(LatestTfm)]
         public void ILLink_can_set_TrimmerDefaultAction(string targetFramework)
         {
             string projectName = "HelloWorld";
@@ -391,7 +390,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(Net6Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_analysis_warnings_are_enabled_by_default(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -413,7 +412,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_accepts_option_to_enable_analysis_warnings(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -435,7 +434,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_accepts_option_to_disable_analysis_warnings(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -457,7 +456,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_accepts_option_to_enable_analysis_warnings_without_PublishTrimmed(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -475,13 +474,13 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [InlineData(LatestTfm)]
         public void ILLink_shows_single_warning_for_packagereferences_only(string targetFramework)
         {
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAssetName = "TrimmedAppWithReferences";
             var testAsset = _testAssetsManager
-                .CopyTestAsset(testAssetName)
+                .CopyTestAsset(testAssetName, identifier: targetFramework)
                 .WithSource();
 
             var publishCommand = new PublishCommand(testAsset, "App");
@@ -498,13 +497,13 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [InlineData(LatestTfm)]
         public void ILLink_accepts_option_to_show_all_warnings(string targetFramework)
         {
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAssetName = "TrimmedAppWithReferences";
             var testAsset = _testAssetsManager
-                .CopyTestAsset(testAssetName)
+                .CopyTestAsset(testAssetName, identifier: targetFramework)
                 .WithSource();
 
             var publishCommand = new PublishCommand(testAsset, "App");
@@ -518,13 +517,13 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [InlineData(LatestTfm)]
         public void ILLink_can_show_single_warning_per_assembly(string targetFramework)
         {
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
             var testAssetName = "TrimmedAppWithReferences";
             var testAsset = _testAssetsManager
-                .CopyTestAsset(testAssetName)
+                .CopyTestAsset(testAssetName, identifier: targetFramework)
                 .WithSource()
                 .WithProjectChanges(project => {
                     SetMetadata(project, "PackageReference", "TrimmerSingleWarn", "false");
@@ -546,7 +545,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_errors_fail_the_build(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -581,7 +580,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [InlineData(LatestTfm)]
         public void ILLink_verify_analysis_warnings_hello_world_app_trim_mode_copyused(string targetFramework)
         {
             var projectName = "AnalysisWarningsOnHelloWorldApp";
@@ -656,8 +655,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("net5.0")]
-        [InlineData("net6.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void TrimmingOptions_are_defaulted_correctly_on_trimmed_apps(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -714,7 +712,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_accepts_root_descriptor(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -836,7 +834,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_runs_incrementally(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -864,7 +862,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_defaults_keep_nonframework(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -900,14 +898,14 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_does_not_include_leftover_artifacts_on_second_run(string targetFramework)
         {
             var projectName = "HelloWorld";
             var referenceProjectName = "ClassLibForILLink";
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
-            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
+            var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName, referenceProjectIdentifier: targetFramework);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework)
                 .WithProjectChanges(project => EnableNonFrameworkTrimming(project))
                 .WithProjectChanges(project => AddRootDescriptor(project, $"{referenceProjectName}.xml"));
@@ -952,7 +950,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_keeps_symbols_by_default(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -985,7 +983,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_removes_symbols_when_debugger_support_is_disabled(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -1013,7 +1011,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_accepts_option_to_remove_symbols(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -1041,7 +1039,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_symbols_option_can_override_defaults_from_debugger_support(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -1075,7 +1073,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_can_treat_warnings_as_errors(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -1093,7 +1091,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_can_treat_warnings_not_as_errors(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -1114,7 +1112,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_can_ignore_warnings(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -1133,7 +1131,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_respects_analysis_level(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -1150,7 +1148,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_respects_warning_level_independently(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -1167,7 +1165,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net5.0")]
+        [MemberData(nameof(Net5Plus), MemberType = typeof(PublishTestUtils))]
         public void ILLink_can_treat_warnings_as_errors_independently(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -1187,7 +1185,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_error_on_portable_app(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -1203,7 +1201,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Theory]
-        [InlineData("netcoreapp3.0")]
+        [MemberData(nameof(SupportedTfms), MemberType = typeof(PublishTestUtils))]
         public void ILLink_displays_informational_warning(string targetFramework)
         {
             var projectName = "HelloWorld";
@@ -1296,7 +1294,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
-        [InlineData("net6.0")]
+        [InlineData(LatestTfm)]
         public void Build_respects_PublishTrimmed_property(string targetFramework)
         {
             var projectName = "AnalysisWarnings";
@@ -1675,7 +1673,7 @@ public static class UnusedNonTrimmableAssembly
             string referenceProjectName = null,
             bool usePackageReference = true,
             [CallerMemberName] string callingMethod = "",
-            string referenceProjectIdentifier = "",
+            string referenceProjectIdentifier = null,
             Action<TestProject> modifyReferencedProject = null,
             bool addAssemblyReference = false)
         {
@@ -1764,7 +1762,7 @@ public class ClassLib
 
             if (usePackageReference)
             {
-                var packageReference = GetPackageReference(referenceProject, callingMethod, referenceProjectIdentifier);
+                var packageReference = GetPackageReference(referenceProject, callingMethod, referenceProjectIdentifier ?? targetFramework);
                 testProject.PackageReferences.Add(packageReference);
                 testProject.AdditionalProperties.Add(
                     "RestoreAdditionalProjectSources",
