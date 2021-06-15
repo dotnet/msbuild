@@ -17,9 +17,34 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
+  <UsingTask TaskName="CreateWindowsSdkKnownFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="CheckForDuplicateFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ProcessFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="ResolveAppHosts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="AddWindowsSdkKnownFrameworkReferences"
+          Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(TargetPlatformIdentifier)' == 'Windows'">
+
+    <!-- Remove Windows SDK KnownFrameworkReference items from BundledVersions.props (they will eventually be removed, but that is in a different repo so
+         we can't do the change atomically -->
+    <ItemGroup>
+      <KnownFrameworkReference Remove="Microsoft.Windows.SDK.NET.Ref" />
+    </ItemGroup>
+    
+    <!-- Generate KnownFrameworkReference items for the Windows SDK pack -->
+    <CreateWindowsSdkKnownFrameworkReferences
+      UseWindowsSDKPreview="$(UseWindowsSDKPreview)"
+      WindowsSdkPackageVersion="$(WindowsSdkPackageVersion)"
+      TargetFrameworkIdentifier="$(TargetFrameworkIdentifier)"
+      TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
+      TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
+      TargetPlatformVersion="$(TargetPlatformVersion)"
+      WindowsSdkSupportedTargetPlatformVersions="@(WindowsSdkSupportedTargetPlatformVersion)">
+
+      <Output TaskParameter="KnownFrameworkReferences" ItemName="KnownFrameworkReference" />
+      
+    </CreateWindowsSdkKnownFrameworkReferences>
+  </Target>
 
   <!--
     ============================================================
@@ -34,6 +59,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   
   <Target Name="ProcessFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences;CollectPackageDownloads"
+          DependsOnTargets="AddWindowsSdkKnownFrameworkReferences"
           Condition="'@(FrameworkReference)' != ''">
     
     <CheckForDuplicateFrameworkReferences

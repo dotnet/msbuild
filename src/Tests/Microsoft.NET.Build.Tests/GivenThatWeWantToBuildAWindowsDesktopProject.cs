@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Xml.Linq;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -341,6 +342,60 @@ namespace Microsoft.NET.Build.Tests
             GetPropertyValue(testAsset, "TargetPlatformMoniker").Should().Be("Windows,Version=10.0.19041.0");
         }
 
+
+        [WindowsOnlyTheory]
+        //  Basic Windows TargetFramework
+        [InlineData("net5.0-windows10.0.19041.0", false, null, "10.0.19041.*")]
+        //  Basic UseWindowsSdkPreview usage
+        [InlineData("net5.0-windows10.0.99999.0", true, null, "10.0.99999-preview")]
+        //  Basic WindowsSdkPackageVersion usage
+        [InlineData("net5.0-windows10.0.19041.0", null, "10.0.99999-abc", "10.0.99999-abc")]
+        [InlineData("net5.0-windows10.0.19041.0", null, "10.0.99999.0", "10.0.99999.0")]
+        //  WindowsSdkPackageVersion should supercede UseWindowsSDKPreview property
+        [InlineData("net5.0-windows10.0.19041.0", true, "10.0.99999-abc", "10.0.99999-abc")]
+        public void ItUsesCorrectWindowsSdkPackVersion(string targetFramework, bool? useWindowsSDKPreview, string windowsSdkPackageVersion, string expectedWindowsSdkPackageVersion)
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = targetFramework
+            };
+            if (useWindowsSDKPreview != null)
+            {
+                testProject.AdditionalProperties["UsewindowsSdkPreview"] = useWindowsSDKPreview.Value.ToString();
+            }
+            if (!string.IsNullOrEmpty(windowsSdkPackageVersion))
+            {
+                testProject.AdditionalProperties["WindowsSdkPackageVersion"] = windowsSdkPackageVersion;
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework + useWindowsSDKPreview + windowsSdkPackageVersion);
+
+            var getValueCommand = new GetValuesCommand(testAsset, "PackageDownload", GetValuesCommand.ValueType.Item);
+            getValueCommand.ShouldRestore = false;
+            getValueCommand.DependsOnTargets = "_CheckForInvalidConfigurationAndPlatform;CollectPackageDownloads";
+            getValueCommand.MetadataNames.Add("Version");
+            getValueCommand.Execute()
+                .Should()
+                .Pass();
+
+            var packageDownloadValues = getValueCommand.GetValuesWithMetadata().Where(kvp => kvp.value == "Microsoft.Windows.SDK.NET.Ref").ToList();
+
+            packageDownloadValues.Count.Should().Be(1);
+
+            var packageDownloadVersion = packageDownloadValues.Single().metadata["Version"];
+            packageDownloadVersion[0].Should().Be('[');
+            packageDownloadVersion.Last().Should().Be(']');
+
+            //  The patch version of the Windows SDK Ref pack will change over time, so we use a '*' in the expected version to indicate that and replace it with
+            //  the 4th part of the version number of the resolved package.
+            var trimmedPackageDownloadVersion = packageDownloadVersion.Substring(1, packageDownloadVersion.Length - 2);
+            if (expectedWindowsSdkPackageVersion.Contains('*'))
+            {
+                expectedWindowsSdkPackageVersion = expectedWindowsSdkPackageVersion.Replace("*", new Version(trimmedPackageDownloadVersion).Revision.ToString());
+            }
+
+            trimmedPackageDownloadVersion.Should().Be(expectedWindowsSdkPackageVersion);
+        }
 
         private string GetPropertyValue(TestAsset testAsset, string propertyName)
         {
