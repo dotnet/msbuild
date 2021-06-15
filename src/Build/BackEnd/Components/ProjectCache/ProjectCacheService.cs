@@ -69,39 +69,43 @@ namespace Microsoft.Build.Experimental.ProjectCache
             // their verbosity levels.
             var loggerFactory = new Func<PluginLoggerBase>(() => new LoggingServiceToPluginLoggerAdapter(LoggerVerbosity.Normal, loggingService));
 
-            // TODO: remove after we change VS to set the cache descriptor via build parameters.
-            if (pluginDescriptor.VsWorkaround)
-            {
+            var service = new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
+
+            // TODO: remove the if after we change VS to set the cache descriptor via build parameters and always call BeginBuildAsync in FromDescriptorAsync.
                 // When running under VS we can't initialize the plugin until we evaluate a project (any project) and extract
                 // further information (set by VS) from it required by the plugin.
-                return new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
+            if (!pluginDescriptor.VsWorkaround)
+            {
+                await service.BeginBuildAsync();
             }
 
-            await InitializePlugin(pluginDescriptor, cancellationToken, loggerFactory, plugin);
-
-            return new ProjectCacheService(plugin, buildManager, loggerFactory, pluginDescriptor, cancellationToken);
+            return service;
         }
 
-        private static async Task InitializePlugin(
-            ProjectCacheDescriptor pluginDescriptor,
-            CancellationToken cancellationToken,
-            Func<PluginLoggerBase> loggerFactory,
-            ProjectCachePluginBase plugin
-        )
+        // TODO: remove vsWorkaroundOverrideDescriptor after we change VS to set the cache descriptor via build parameters.
+        private async Task BeginBuildAsync(ProjectCacheDescriptor? vsWorkaroundOverrideDescriptor = null)
         {
-            var logger = loggerFactory();
+            var logger = _loggerFactory();
 
             try
             {
-                await plugin.BeginBuildAsync(
+
+                if (_projectCacheDescriptor.VsWorkaround)
+                {
+                    logger.LogMessage("Running project cache with Visual Studio workaround");
+                }
+
+                var projectDescriptor = vsWorkaroundOverrideDescriptor ?? _projectCacheDescriptor;
+                await _projectCachePlugin.BeginBuildAsync(
                     new CacheContext(
-                        pluginDescriptor.PluginSettings,
+                        projectDescriptor.PluginSettings,
                         new IFileSystemAdapter(FileSystems.Default),
-                        pluginDescriptor.ProjectGraph,
-                        pluginDescriptor.EntryPoints),
+                        projectDescriptor.ProjectGraph,
+                        projectDescriptor.EntryPoints),
                     // TODO: Detect verbosity from logging service.
                     logger,
-                    cancellationToken);
+                    _cancellationToken);
+
             }
             catch (Exception e)
             {
@@ -281,7 +285,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     FileSystems.Default.FileExists(solutionPath),
                     $"Solution file does not exist: {solutionPath}");
 
-                await InitializePlugin(
+                await BeginBuildAsync(
                     ProjectCacheDescriptor.FromAssemblyPath(
                         _projectCacheDescriptor.PluginAssemblyPath!,
                         new[]
@@ -291,10 +295,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                                 configuration.Project.GlobalProperties)
                         },
                         projectGraph: null,
-                        _projectCacheDescriptor.PluginSettings),
-                    _cancellationToken,
-                    _loggerFactory,
-                    _projectCachePlugin);
+                        _projectCacheDescriptor.PluginSettings));
             }
 
             static bool MSBuildStringIsTrue(string msbuildString) =>
