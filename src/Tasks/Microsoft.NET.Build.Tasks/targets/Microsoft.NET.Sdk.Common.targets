@@ -48,6 +48,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifiers Condition=" '$(PackAsTool)' == 'true' ">$(RuntimeIdentifiers);$(PackAsToolShimRuntimeIdentifiers)</RuntimeIdentifiers>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(EnablePreviewFeatures)' == 'true' And '$(LangVersion)' == ''">
+    <LangVersion>Preview</LangVersion>
+  </PropertyGroup>
+
   <UsingTask TaskName="NETSdkError" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkWarning" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkInformation" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
