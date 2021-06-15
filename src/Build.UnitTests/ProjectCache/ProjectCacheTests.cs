@@ -31,6 +31,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             _output = output;
             _env = TestEnvironment.Create(output);
+            _env.DoNotLaunchDebugger();
 
             BuildManager.ProjectCacheItems.ShouldBeEmpty();
             _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.Count == 0));
@@ -432,10 +433,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             var graph = testData.CreateGraph(_env);
             var mockCache = new InstanceMockCache(testData);
 
-            buildParameters.ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+            // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
+            buildParameters = new BuildParameters(buildParameters, resetEnvironment: true)
+            {
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
                 mockCache,
                 null,
-                graph);
+                    graph)
+            };
 
             using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
 
@@ -471,7 +476,12 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 null,
                 graph);
 
-            buildParameters.ProjectCacheDescriptor = projectCacheDescriptor;
+            // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
+            buildParameters = new BuildParameters(buildParameters, resetEnvironment: true)
+            {
+                ProjectCacheDescriptor = projectCacheDescriptor
+            };
+
 
             using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
             var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
@@ -517,6 +527,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.RunningTests,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
+
+                // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
+                buildParameters = new BuildParameters(buildParameters, resetEnvironment: true);
 
                 BuildManager.ProjectCacheItems.ShouldBeEmpty();
 
@@ -934,8 +947,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Fact]
         public void GraphBuildErrorsIfMultiplePluginsAreFound()
         {
-            _env.DoNotLaunchDebugger();
-
             var graph = Helpers.CreateProjectGraph(
                 _env,
                 new Dictionary<int, int[]>
@@ -960,8 +971,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Fact]
         public void GraphBuildErrorsIfNotAllNodeDefineAPlugin()
         {
-            _env.DoNotLaunchDebugger();
-
             var graph = Helpers.CreateProjectGraph(
                 _env,
                 dependencyEdges: new Dictionary<int, int[]>
@@ -1014,8 +1023,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [MemberData(nameof(CacheExceptionLocationsTestData))]
         public void EngineShouldHandleExceptionsFromCachePluginViaBuildParameters(ErrorLocations errorLocations, ErrorKind errorKind)
         {
-            _env.DoNotLaunchDebugger();
-
             SetEnvironmentForErrorLocations(errorLocations, errorKind.ToString());
 
             var project = _env.CreateFile("1.proj", @$"
@@ -1135,8 +1142,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [MemberData(nameof(CacheExceptionLocationsTestData))]
         public void EngineShouldHandleExceptionsFromCachePluginViaGraphBuild(ErrorLocations errorLocations, ErrorKind errorKind)
         {
-            _env.DoNotLaunchDebugger();
-
             SetEnvironmentForErrorLocations(errorLocations, errorKind.ToString());
 
             var graph = Helpers.CreateProjectGraph(
@@ -1224,8 +1229,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Fact]
         public void EndBuildShouldGetCalledOnceWhenItThrowsExceptionsFromGraphBuilds()
         {
-            _env.DoNotLaunchDebugger();
-
             var project = _env.CreateFile(
                 "1.proj",
                 @$"
