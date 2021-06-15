@@ -279,15 +279,8 @@ namespace Microsoft.Build.Execution
                 {
                     using ITranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
 
-                    try
-                    {
-                        TranslateItems(translator);
-                        _cacheInfo = new CacheInfo();
-                    }
-                    finally
-                    {
-                        translator.Reader.BaseStream.Dispose();
-                    }
+                    TranslateItems(translator);
+                    _cacheInfo = new CacheInfo();
                 }
             }
         }

@@ -700,16 +700,10 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
-                try
-                {
-                    _project.RetrieveFromCache(translator);
 
-                    IsCached = false;
-                }
-                finally
-                {
-                    translator.Reader.BaseStream.Dispose();
-                }
+                _project.RetrieveFromCache(translator);
+
+                IsCached = false;
             }
         }
 
