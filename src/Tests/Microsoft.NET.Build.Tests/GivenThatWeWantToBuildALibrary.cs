@@ -963,7 +963,7 @@ namespace ProjectNameWithSpaces
             GetPropertyValue("RootNamespace").Should().Be("Project_Name_With_Spaces");
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.9.0-preview-21076-28")]
+        [WindowsOnlyFact]
         public void It_errors_on_windows_sdk_assembly_version_conflicts()
         {
             var testProjectA = new TestProject()
@@ -971,6 +971,10 @@ namespace ProjectNameWithSpaces
                 Name = "ProjA",
                 TargetFrameworks = "net5.0-windows10.0.19041"
             };
+            //  Use a previous version of the Microsoft.Windows.SDK.NET.Ref package, to
+            //  simulate the scenario where a project is compiling against a library from NuGet
+            //  which was built with a more recent SDK version.
+            testProjectA.AdditionalProperties["WindowsSdkPackageVersion"] = "10.0.19041.6-preview";
             testProjectA.SourceFiles.Add("ProjA.cs", @"namespace ProjA
 {
     public class ProjAClass
@@ -993,22 +997,7 @@ namespace ProjectNameWithSpaces
 }");
             testProjectA.ReferencedProjects.Add(testProjectB);
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProjectA)
-                .WithProjectChanges((path, project) =>
-                {
-                    if (Path.GetFileName(path).Equals("ProjA.csproj"))
-                    {
-                        //  Use a previous version of the Microsoft.Windows.SDK.NET.Ref package, to
-                        //  simulate the scenario where a project is compiling against a library from NuGet
-                        //  which was built with a more recent SDK version.
-                        var ns = project.Root.Name.Namespace;
-                        var itemGroup = project.Root.Elements(ns + "ItemGroup").First();
-                        var updateKnownFrameworkRef = new XElement(ns + "KnownFrameworkReference",
-                            new XAttribute("Update", "Microsoft.Windows.SDK.NET.Ref"),
-                            new XAttribute("TargetingPackVersion", "10.0.19041.6-preview"));
-                        itemGroup.Add(updateKnownFrameworkRef);
-                    }
-                });
+            var testAsset = _testAssetsManager.CreateTestProject(testProjectA);
 
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
