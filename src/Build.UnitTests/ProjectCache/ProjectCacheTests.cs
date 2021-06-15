@@ -437,8 +437,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             buildParameters = new BuildParameters(buildParameters, resetEnvironment: true)
             {
                 ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
-                mockCache,
-                null,
+                    mockCache,
+                    null,
                     graph)
             };
 
@@ -553,6 +553,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 }
 
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
+                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
                 AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
             }
@@ -617,6 +618,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 buildSession.Dispose();
 
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
+
+                // Design time builds should not initialize the plugin.
+                buildSession.Logger.FullLog.ShouldNotContain("Running project cache with Visual Studio workaround");
 
                 // Cache doesn't get initialized and queried.
                 buildSession.Logger.FullLog.ShouldNotContain("BeginBuildAsync");
@@ -1389,15 +1393,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // Even though the assembly cache is discovered, we'll be overriding it with a descriptor based cache.
                 BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
 
-                var cache = new InstanceMockCache(testData, TimeSpan.FromMilliseconds(50));
-
                 using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters
                 {
                     MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
-                    ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
-                        cache,
-                        entryPoints: null,
-                        graph),
                     UseSynchronousLogging = useSynchronousLogging,
                     DisableInProcNode = disableInprocNode
                 });
@@ -1425,7 +1423,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}})
                     .OverallResult.ShouldBe(BuildResultCode.Success);
 
-                cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
+                StringShouldContainSubstring(buildSession.Logger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for", graph.ProjectNodes.Count);
+
+                buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
+                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
             }
             finally
             {
