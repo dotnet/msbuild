@@ -395,7 +395,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
     <IntermediateRefAssembly Include="$(IntermediateOutputPath)refint\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
     <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
-    <CreateDirectory Include="$([System.IO.Directory]::GetParent($(TargetRefPath)))" />
+    <CreateDirectory Include="$(IntermediateOutputPath)ref" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
