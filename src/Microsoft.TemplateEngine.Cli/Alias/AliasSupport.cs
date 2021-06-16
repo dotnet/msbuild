@@ -23,33 +23,33 @@ namespace Microsoft.TemplateEngine.Cli.Alias
         // TODO: make this test more robust.
         private static readonly Regex ValidFirstTokenRegex = new Regex("^[a-z0-9]", RegexOptions.IgnoreCase);
 
-        internal static New3CommandStatus CoordinateAliasExpansion(
+        internal static (New3CommandStatus, INewCommandInput?) CoordinateAliasExpansion(
             INewCommandInput commandInput,
             AliasRegistry aliasRegistry,
             TemplateInformationCoordinator templateInformationCoordinator)
         {
-            AliasExpansionStatus aliasExpansionStatus = AliasSupport.TryExpandAliases(commandInput, aliasRegistry);
+            (AliasExpansionStatus aliasExpansionStatus, INewCommandInput? expandedCommandInput) = AliasSupport.TryExpandAliases(commandInput, aliasRegistry);
             if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
             {
                 Reporter.Output.WriteLine(LocalizableStrings.AliasExpansionError);
-                return New3CommandStatus.InvalidParamValues;
+                return (New3CommandStatus.InvalidParamValues, null);
             }
-            else if (aliasExpansionStatus == AliasExpansionStatus.Expanded)
+            else if (aliasExpansionStatus == AliasExpansionStatus.Expanded && expandedCommandInput != null)
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCommandAfterExpansion, string.Join(" ", commandInput.Tokens)));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCommandAfterExpansion, string.Join(" ", expandedCommandInput.Tokens)));
 
                 if (commandInput.HasParseError)
                 {
                     Reporter.Output.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
-                    return templateInformationCoordinator.HandleParseError(commandInput);
+                    return (templateInformationCoordinator.HandleParseError(expandedCommandInput), null);
                 }
             }
 
             // this is both for success and for no action.
-            return New3CommandStatus.Success;
+            return (New3CommandStatus.Success, expandedCommandInput);
         }
 
-        internal static AliasExpansionStatus TryExpandAliases(INewCommandInput commandInput, AliasRegistry aliasRegistry)
+        internal static (AliasExpansionStatus, INewCommandInput?) TryExpandAliases(INewCommandInput commandInput, AliasRegistry aliasRegistry)
         {
             List<string> inputTokens = commandInput.Tokens.ToList();
             inputTokens.RemoveAt(0);    // remove the command name
@@ -59,14 +59,14 @@ namespace Microsoft.TemplateEngine.Cli.Alias
                 // TryExpandCommandAliases() return value indicates error (cycle) or not error. It doesn't indicate whether or not expansions actually occurred.
                 if (!expandedTokens.SequenceEqual(inputTokens))
                 {
-                    commandInput.ResetArgs(expandedTokens.ToArray());
-                    return AliasExpansionStatus.Expanded;
+                    INewCommandInput expandedCommandInput = BaseCommandInput.Parse(expandedTokens.ToArray(), commandInput.CommandName);
+                    return (AliasExpansionStatus.Expanded, expandedCommandInput);
                 }
 
-                return AliasExpansionStatus.NoChange;
+                return (AliasExpansionStatus.NoChange, commandInput);
             }
 
-            return AliasExpansionStatus.ExpansionError;
+            return (AliasExpansionStatus.ExpansionError, null);
         }
 
         internal static New3CommandStatus ManipulateAliasIfValid(AliasRegistry aliasRegistry, string aliasName, List<string> inputTokens, HashSet<string> reservedAliasNames)

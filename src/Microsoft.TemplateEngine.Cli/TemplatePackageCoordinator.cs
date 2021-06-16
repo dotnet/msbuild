@@ -190,6 +190,11 @@ namespace Microsoft.TemplateEngine.Cli
         private async Task<New3CommandStatus> EnterInstallFlowAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+            _ = commandInput.ToInstallList ?? throw new ArgumentNullException(nameof(commandInput.ToInstallList));
+            if (!commandInput.ToInstallList.Any())
+            {
+                throw new ArgumentException($"{nameof(commandInput.ToInstallList)} should have at least one item to continue.", nameof(commandInput.ToInstallList));
+            }
             cancellationToken.ThrowIfCancellationRequested();
 
             New3CommandStatus resultStatus = New3CommandStatus.Success;
@@ -330,7 +335,7 @@ namespace Microsoft.TemplateEngine.Cli
             cancellationToken.ThrowIfCancellationRequested();
 
             New3CommandStatus result = New3CommandStatus.Success;
-            if (commandInput.ToUninstallList.Count <= 0 || commandInput.ToUninstallList[0] == null)
+            if (commandInput.ToUninstallList == null || commandInput.ToUninstallList.Count <= 0 || commandInput.ToUninstallList[0] == null)
             {
                 //display all installed template packages
                 await DisplayInstalledTemplatePackages(commandInput, cancellationToken).ConfigureAwait(false);
@@ -365,6 +370,7 @@ namespace Microsoft.TemplateEngine.Cli
         private async Task<(New3CommandStatus, Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>)> DetermineSourcesToUninstall(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             _ = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+            _ = commandInput.ToUninstallList ?? throw new ArgumentNullException(nameof(commandInput.ToUninstallList));
             cancellationToken.ThrowIfCancellationRequested();
 
             New3CommandStatus result = New3CommandStatus.Success;

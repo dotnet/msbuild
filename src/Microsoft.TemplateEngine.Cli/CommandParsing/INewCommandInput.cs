@@ -1,10 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
+#nullable enable
+
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
@@ -12,7 +11,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
     {
         string Alias { get; }
 
-        string AllowScriptsToRun { get; }
+        string? AllowScriptsToRun { get; }
 
         bool ApplyUpdates { get; }
 
@@ -22,7 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool CheckForUpdates { get; }
 
-        IReadOnlyCollection<string> Columns { get; }
+        IReadOnlyList<string> Columns { get; }
 
         string ColumnsParseError { get; }
 
@@ -30,7 +29,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool ExpandedExtraArgsFiles { get; }
 
-        IList<string> ExtraArgsFileNames { get; }
+        IReadOnlyList<string>? ExtraArgsFileNames { get; }
 
         bool HasColumnsParseError { get; }
 
@@ -38,9 +37,9 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         string HelpText { get; }
 
-        IReadOnlyDictionary<string, string> InputTemplateParams { get; }
+        //IReadOnlyDictionary<string, string> InputTemplateParams { get; }
 
-        IList<string> InstallNuGetSourceList { get; }
+        IReadOnlyList<string>? InstallNuGetSourceList { get; }
 
         bool IsDryRun { get; }
 
@@ -69,9 +68,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         string PackageFilter { get; }
 
-        List<string> RemainingArguments { get; }
-
-        IDictionary<string, IList<string>> RemainingParameters { get; }
+        IReadOnlyList<string> RemainingParameters { get; }
 
         bool SearchOnline { get; }
 
@@ -85,32 +82,14 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         string TemplateName { get; }
 
-        IList<string> ToInstallList { get; }
+        IReadOnlyList<string>? ToInstallList { get; }
 
         IReadOnlyList<string> Tokens { get; }
 
-        IList<string> ToUninstallList { get; }
+        IReadOnlyList<string>? ToUninstallList { get; }
 
         string TypeFilter { get; }
 
-        int Execute(params string[] args);
-
         bool HasDebuggingFlag(string flag);
-
-        void OnExecute(Func<Task<New3CommandStatus>> invoke);
-
-        void ReparseForTemplate(ITemplateInfo templateInfo, HostSpecificTemplateData hostSpecificTemplateData);
-
-        void ResetArgs(params string[] args);
-
-        bool TemplateParamHasValue(string paramName);
-
-        string TemplateParamInputFormat(string canonical);
-
-        string TemplateParamValue(string paramName);
-
-        bool TryGetCanonicalNameForVariant(string variant, out string canonical);
-
-        IReadOnlyList<string> VariantsForCanonical(string canonical);
     }
 }

@@ -42,11 +42,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
 
             HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
-            commandInput.ReparseForTemplate(templateInfo, hostData);
+            TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(templateInfo, commandInput, hostData);
+
 #pragma warning disable CS0618 // Type or member is obsolete
             allParams = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
-            templateCreator.ResolveUserParameters(template, allParams, commandInput.InputTemplateParams, out userParamsWithInvalidValues);
-            hasPostActionScriptRunner = await CheckIfTemplateHasScriptRunningPostActionsAsync(template, environmentSettings, commandInput, templateCreator, cancellationToken).ConfigureAwait(false);
+            templateCreator.ResolveUserParameters(template, allParams, reparsedCommand.InputTemplateParams, out userParamsWithInvalidValues);
+            hasPostActionScriptRunner = await CheckIfTemplateHasScriptRunningPostActionsAsync(template, environmentSettings, reparsedCommand, templateCreator, cancellationToken).ConfigureAwait(false);
             templateCreator.ReleaseMountPoints(template);
 #pragma warning restore CS0618 // Type or member is obsolete
 
@@ -57,15 +58,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 // Lookup the input param formats - userParamsWithInvalidValues has canonical.
                 foreach (string canonical in userParamsWithInvalidValues)
                 {
-                    commandInput.InputTemplateParams.TryGetValue(canonical, out string? specifiedValue);
-                    string inputFormat = commandInput.TemplateParamInputFormat(canonical);
+                    reparsedCommand.InputTemplateParams.TryGetValue(canonical, out string? specifiedValue);
+                    string inputFormat = reparsedCommand.TemplateParamInputFormat(canonical);
                     InvalidParameterInfo invalidParam = new InvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, inputFormat, specifiedValue, canonical);
                     invalidParameters.Add(invalidParam);
                 }
             }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            if (templateCreator.AnyParametersWithInvalidDefaultsUnresolved(defaultParamsWithInvalidValues, userParamsWithInvalidValues, commandInput.InputTemplateParams, out IReadOnlyList<string> defaultsWithUnresolvedInvalidValues))
+            if (templateCreator.AnyParametersWithInvalidDefaultsUnresolved(defaultParamsWithInvalidValues, userParamsWithInvalidValues, reparsedCommand.InputTemplateParams, out IReadOnlyList<string> defaultsWithUnresolvedInvalidValues))
 #pragma warning restore CS0618 // Type or member is obsolete
             {
                 IParameterSet templateParams = template.Generator.GetParametersForTemplate(environmentSettings, template);
@@ -77,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     if (param != null)
                     {
                         // Get the best input format available.
-                        IReadOnlyList<string> inputVariants = commandInput.VariantsForCanonical(param.Name);
+                        IReadOnlyList<string> inputVariants = reparsedCommand.VariantsForCanonical(param.Name);
                         string displayName = inputVariants.FirstOrDefault(x => x.Contains(param.Name))
                             ?? inputVariants.Aggregate("", (max, cur) => max.Length > cur.Length ? max : cur)
                             ?? param.Name;
@@ -94,9 +95,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             userParamsWithDefaultValues = new HashSet<string>();
             foreach (string paramName in allParams.ParameterDefinitions.Select(x => x.Name))
             {
-                inputFlagVariants[paramName] = commandInput.VariantsForCanonical(paramName);
+                inputFlagVariants[paramName] = reparsedCommand.VariantsForCanonical(paramName);
 
-                if (commandInput.TemplateParamHasValue(paramName) && string.IsNullOrEmpty(commandInput.TemplateParamValue(paramName)))
+                if (reparsedCommand.InputTemplateParams.ContainsKey(paramName) && string.IsNullOrEmpty(reparsedCommand.InputTemplateParams[paramName]))
                 {
                     userParamsWithDefaultValues.Add(paramName);
                 }
@@ -117,7 +118,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         private static async Task<bool> CheckIfTemplateHasScriptRunningPostActionsAsync(
             ITemplate template,
             IEngineEnvironmentSettings environmentSettings,
-            INewCommandInput commandInput,
+            TemplateCommandInput commandInput,
             TemplateCreator templateCreator,
             CancellationToken cancellationToken)
         {

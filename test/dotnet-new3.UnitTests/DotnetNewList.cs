@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;
@@ -35,6 +36,18 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
+
+            new DotnetNewCommand(_log, "c", "--list")
+             .WithCustomHive(_sharedHome.HomeDirectory)
+             .Execute()
+             .Should()
+             .ExitWith(0)
+             .And.NotHaveStdErr()
+             .And.HaveStdOutContaining("These templates matched your input: 'c'")
+             .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+             .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+             .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
+             .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
         }
 
         [Fact]
@@ -64,6 +77,18 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
                 .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
+
+            new DotnetNewCommand(_log, "application", "--list", "--tag", "Common")
+                 .WithCustomHive(_sharedHome.HomeDirectory)
+                 .Execute()
+                 .Should()
+                 .ExitWith(0)
+                 .And.NotHaveStdErr()
+                 .And.HaveStdOutContaining("These templates matched your input: 'application', tag='Common'")
+                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
+                 .And.NotHaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library");
         }
 
         [Fact]
@@ -103,7 +128,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr();
         }
 
-		[Fact]
+        [Fact]
         public void CanShowMultipleShortNames()
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
@@ -151,6 +176,369 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("These templates matched your input: 'razor'")
                 .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
+        }
+
+        [Fact]
+        public void CanFilterByChoiceParameter()
+        {
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list", "--framework")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: 'c', --framework")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list", "-f")
+              .WithCustomHive(_sharedHome.HomeDirectory)
+              .Execute()
+              .Should()
+              .ExitWith(0)
+              .And.NotHaveStdErr()
+              .And.HaveStdOutContaining("These templates matched your input: 'c', -f")
+              .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
+              .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+              .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "--framework")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: --framework")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "-f")
+              .WithCustomHive(_sharedHome.HomeDirectory)
+              .Execute()
+              .Should()
+              .ExitWith(0)
+              .And.NotHaveStdErr()
+              .And.HaveStdOutContaining("These templates matched your input: -f")
+              .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
+              .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+              .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+        }
+
+        [Fact]
+        public void CanFilterByNonChoiceParameter()
+        {
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list", "--langVersion")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: 'c', --langVersion")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "--langVersion")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: --langVersion")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+        }
+
+        [Fact]
+        public void IgnoresValueForNonChoiceParameter()
+        {
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list", "--no-restore", "invalid")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: 'c', --no-restore")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "--no-restore", "invalid")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: --no-restore")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+        }
+
+        [Fact]
+        public void CanFilterByChoiceParameterWithValue()
+        {
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list", "--framework", "net5.0")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: 'c', --framework='net5.0'")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "c", "--list", "-f", "net5.0")
+              .WithCustomHive(_sharedHome.HomeDirectory)
+              .Execute()
+              .Should()
+              .ExitWith(0)
+              .And.NotHaveStdErr()
+              .And.HaveStdOutContaining("These templates matched your input: 'c', -f")
+              .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+              .And.NotHaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+              .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "--framework", "net5.0")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: --framework")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.NotHaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+                .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "-f", "net5.0")
+              .WithCustomHive(_sharedHome.HomeDirectory)
+              .Execute()
+              .Should()
+              .ExitWith(0)
+              .And.NotHaveStdErr()
+              .And.HaveStdOutContaining("These templates matched your input: -f")
+              .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+              .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+              .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+              .And.NotHaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+              .And.NotHaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+        }
+
+        [Fact]
+        public void CannotListTemplatesWithUnknownParameter()
+        {
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "--unknown")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("No templates found matching: --unknown.")
+                .And.HaveStdErrContaining("9 template(s) partially matched, but failed on --unknown.")
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
+
+            new DotnetNewCommand(_log, "c", "--list", "--unknown")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("No templates found matching: 'c', --unknown.")
+                .And.HaveStdErrContaining("6 template(s) partially matched, but failed on --unknown.")
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
+        }
+
+        [Fact]
+        public void CannotListTemplatesWithValueForChoiceParameter()
+        {
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "--framework", "unknown")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("No templates found matching: --framework='unknown'.")
+                .And.HaveStdErrContaining("9 template(s) partially matched, but failed on --framework='unknown'.")
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
+
+            new DotnetNewCommand(_log, "c", "--list", "--framework", "unknown")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("No templates found matching: 'c', --framework='unknown'.")
+                .And.HaveStdErrContaining("6 template(s) partially matched, but failed on --framework='unknown'.")
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
+        }
+
+        [Fact]
+        public void CannotListTemplatesForInvalidFilters()
+        {
+            new DotnetNewCommand(_log, "--list")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
+                .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
+                .And.HaveStdOutMatching("Class Library\\s+classlib\\s+\\[C#\\],F#,VB\\s+Common/Library")
+                .And.HaveStdOutMatching("Simple Console Application\\s+app\\s+\\[C#\\]\\s+Common/Console")
+                .And.HaveStdOutMatching("NuGet Config\\s+nugetconfig\\s+Config");
+
+            new DotnetNewCommand(_log, "--list", "--language", "unknown", "--framework", "unknown")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("No templates found matching: language='unknown'.")
+                .And.HaveStdErrContaining("9 template(s) partially matched, but failed on language='unknown'.")
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
+
+            new DotnetNewCommand(_log, "c", "--list", "--language", "unknown", "--framework", "unknown")
+                .WithCustomHive(_sharedHome.HomeDirectory)
+                .Execute()
+                .Should().Fail()
+                .And.HaveStdErrContaining("No templates found matching: 'c', language='unknown'.")
+                .And.HaveStdErrContaining("6 template(s) partially matched, but failed on language='unknown'.")
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
         }
     }
 }

@@ -64,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                             group,
                             groupFilters,
                             templateFilters,
-                            CliFilters.TemplateParameterFilter(HostSpecificDataLoader, commandInput)));
+                            CliFilters.ListTemplateParameterFilter(HostSpecificDataLoader, commandInput)));
 
             return new TemplateResolutionResult(matchInformation, this);
         }

@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Newtonsoft.Json;
 using Xunit.Abstractions;
@@ -17,10 +17,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         // a list of all the parameters defined by the template
         private IReadOnlyList<string> _allParametersForTemplate;
 
-        private Dictionary<string, string> _templateOptions;
-        private Dictionary<string, string> _commandOptions;
+        private Dictionary<string, string?> _templateOptions;
+        private Dictionary<string, string?> _commandOptions;
 
-        public MockNewCommandInput(string templateName, string language = null, string type = null) : this()
+        public MockNewCommandInput(string templateName, string? language = null, string? type = null) : this()
         {
             TemplateName = templateName;
             if (!string.IsNullOrWhiteSpace(language))
@@ -35,35 +35,33 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public MockNewCommandInput()
         {
-            InputTemplateParams = new Dictionary<string, string>();
-            RemainingParameters = new Dictionary<string, IList<string>>();
-            RemainingArguments = new List<string>();
+            RemainingParameters = new List<string>();
             _allParametersForTemplate = new List<string>();
-            _commandOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            _templateOptions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _commandOptions = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            _templateOptions = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public string Alias { get; }
+        public string Alias { get; } = string.Empty;
 
-        public string AllowScriptsToRun { get; }
+        public string AllowScriptsToRun { get; } = string.Empty;
 
-        public string AuthorFilter => _commandOptions.ContainsKey("--author") ? _commandOptions["--author"] : string.Empty;
+        public string AuthorFilter => GetCommandOption("--author");
 
-        public string BaselineName => _commandOptions.ContainsKey("--baseline") ? _commandOptions["--baseline"] : string.Empty;
+        public string BaselineName => GetCommandOption("--baseline");
 
         public bool CheckForUpdates { get; }
 
         public bool ApplyUpdates { get; }
 
-        public IReadOnlyCollection<string> Columns
+        public IReadOnlyList<string> Columns
         {
             get
             {
                 if (_commandOptions.ContainsKey("--columns"))
                 {
-                    return _commandOptions["--columns"].Split(",");
+                    return _commandOptions["--columns"]?.Split(",") ?? Array.Empty<string>();
                 }
-                return new List<string>();
+                return Array.Empty<string>();
             }
         }
 
@@ -73,19 +71,15 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool ExpandedExtraArgsFiles { get; }
 
-        public IList<string> ExtraArgsFileNames { get; }
+        public IReadOnlyList<string> ExtraArgsFileNames { get; } = Array.Empty<string>();
 
         public bool HasColumnsParseError => throw new NotImplementedException();
 
         public bool HasParseError { get; }
 
-        public string HelpText { get; }
+        public string HelpText => throw new NotImplementedException();
 
-        // When using this mock, set the inputs using constructor input.
-        // This property gets assigned based on the constructor input and the template being worked with.
-        public IReadOnlyDictionary<string, string> InputTemplateParams { get; private set; }
-
-        public IList<string> InstallNuGetSourceList { get; }
+        public IReadOnlyList<string> InstallNuGetSourceList { get; } = Array.Empty<string>();
 
         public bool IsDryRun { get; }
 
@@ -101,25 +95,21 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool IsShowAllFlagSpecified { get; }
 
-        public string Language => _commandOptions.ContainsKey("--language") ? _commandOptions["--language"] : string.Empty;
+        public string Language => GetCommandOption("--language");
 
-        public string Name { get; }
+        public string Name { get; } = string.Empty;
 
-        public string OutputPath { get; }
+        public string OutputPath { get; } = string.Empty;
 
-        public string PackageFilter => _commandOptions.ContainsKey("--package") ? _commandOptions["--package"] : string.Empty;
-
-        // When using this mock, set the inputs using constructor input.
-        // This property gets assigned based on the constructor input and the template being worked with.
-        public List<string> RemainingArguments { get; private set; }
+        public string PackageFilter => GetCommandOption("--package");
 
         // When using this mock, set the inputs using constructor input.
         // This property gets assigned based on the constructor input and the template being worked with.
-        public IDictionary<string, IList<string>> RemainingParameters { get; private set; }
+        public IReadOnlyList<string> RemainingParameters { get; private set; }
 
         public bool SearchOnline { get; }
 
-        public string ShowAliasesAliasName { get; }
+        public string ShowAliasesAliasName { get; } = string.Empty;
 
         public bool ShowAliasesSpecified { get; }
 
@@ -127,22 +117,53 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool SkipUpdateCheck { get; }
 
-        public string TagFilter => _commandOptions.ContainsKey("--tag") ? _commandOptions["--tag"] : string.Empty;
+        public string TagFilter => GetCommandOption("--tag");
 
-        public string TemplateName { get; private set; }
+        public string TemplateName { get; private set; } = string.Empty;
 
-        public IList<string> ToInstallList { get; }
+        public IReadOnlyList<string> ToInstallList { get; } = Array.Empty<string>();
 
-        public IReadOnlyList<string> Tokens { get; }
+        public IReadOnlyList<string> Tokens
+        {
+            get
+            {
+                List<string> tokens = new List<string>();
+                if (!string.IsNullOrWhiteSpace(TemplateName))
+                {
+                    tokens.Add(TemplateName);
+                }
+                foreach (var option in _commandOptions)
+                {
+                    tokens.Add(option.Key);
+                    if (!string.IsNullOrWhiteSpace(option.Value))
+                    {
+                        tokens.Add(option.Value);
+                    }    
+                }
+                foreach (var option in _templateOptions)
+                {
+                    tokens.Add(option.Key);
+                    if (!string.IsNullOrWhiteSpace(option.Value))
+                    {
+                        tokens.Add(option.Value);
+                    }
+                }
+                return tokens;
+            }
+        }
 
-        public IList<string> ToUninstallList { get; }
+        public IReadOnlyList<string> ToUninstallList { get; } = Array.Empty<string>();
 
-        public string TypeFilter => _commandOptions.ContainsKey("--type") ? _commandOptions["--type"] : string.Empty;
+        public string TypeFilter => GetCommandOption("--type");
 
         public bool NoUpdateCheck => throw new NotImplementedException();
 
-        public MockNewCommandInput WithTemplateOption(string optionName, string optionValue = null)
+        public MockNewCommandInput WithTemplateOption(string optionName, string? optionValue = null)
         {
+            if (!optionName.StartsWith('-'))
+            {
+                optionName = "--" + optionName;
+            }
             _templateOptions[optionName] = optionValue;
             return this;
         }
@@ -159,15 +180,10 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             return this;
         }
 
-        public MockNewCommandInput WithCommandOption(string optionName, string optionValue = null)
+        public MockNewCommandInput WithCommandOption(string optionName, string? optionValue = null)
         {
             _commandOptions[optionName] = optionValue;
             return this;
-        }
-
-        public int Execute(params string[] args)
-        {
-            throw new NotImplementedException();
         }
 
         public bool HasDebuggingFlag(string flag)
@@ -175,90 +191,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             throw new NotImplementedException();
         }
 
-        public void OnExecute(Func<Task<New3CommandStatus>> invoke)
+        private string GetCommandOption(string name)
         {
-            throw new NotImplementedException();
-        }
-
-        public void ReparseForTemplate(ITemplateInfo templateInfo, HostSpecificTemplateData hostSpecificTemplateData)
-        {
-            Dictionary<string, string> templateParamValues = new Dictionary<string, string>();
-            Dictionary<string, IList<string>> remainingParams = new Dictionary<string, IList<string>>();
-
-            Dictionary<string, string> overrideToCanonicalMap = hostSpecificTemplateData.LongNameOverrides.ToDictionary(o => o.Value, o => o.Key);
-            foreach (KeyValuePair<string, string> shortNameOverride in hostSpecificTemplateData.ShortNameOverrides)
-            {
-                overrideToCanonicalMap[shortNameOverride.Value] = shortNameOverride.Key;
-            }
-
-            foreach (KeyValuePair<string, string> inputParam in _templateOptions)
-            {
-                ITemplateParameter matchedParam = default(ITemplateParameter);
-
-                if (templateInfo.Parameters != null)
-                {
-                    matchedParam = templateInfo.Parameters?.FirstOrDefault(x => string.Equals(x.Name, inputParam.Key));
-                }
-
-                if (matchedParam != default(ITemplateParameter))
-                {
-                    templateParamValues.Add(inputParam.Key, inputParam.Value);
-                }
-                else if (overrideToCanonicalMap.TryGetValue(inputParam.Key, out string canonical))
-                {
-                    templateParamValues.Add(canonical, inputParam.Value);
-                }
-                else
-                {
-                    remainingParams.Add(inputParam.Key, new List<string>());
-                }
-            }
-
-            InputTemplateParams = templateParamValues;
-            RemainingParameters = remainingParams;
-            RemainingArguments = remainingParams.Keys.ToList();
-
-            _allParametersForTemplate = templateInfo.Parameters.Select(x => x.Name).ToList();
-        }
-
-        public void ResetArgs(params string[] args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TemplateParamHasValue(string paramName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string TemplateParamInputFormat(string canonical)
-        {
-            return canonical;
-        }
-
-        public string TemplateParamValue(string paramName)
-        {
-            throw new NotImplementedException();
-        }
-
-        // Note: This doesn't really deal with variants.
-        // If the input "variant" is a parameter for the template, return true with the canonical set to the variant.
-        // Otherwise return false with the canonical as null.
-        public bool TryGetCanonicalNameForVariant(string variant, out string canonical)
-        {
-            if (_allParametersForTemplate.Contains(variant))
-            {
-                canonical = variant;
-                return true;
-            }
-
-            canonical = null;
-            return false;
-        }
-
-        public IReadOnlyList<string> VariantsForCanonical(string canonical)
-        {
-            throw new NotImplementedException();
+            return _commandOptions.ContainsKey(name) ? _commandOptions[name] ?? string.Empty : string.Empty;
         }
 
         #region IXunitSerializable implementation
@@ -266,8 +201,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         public void Deserialize(IXunitSerializationInfo info)
         {
             TemplateName = info.GetValue<string>("command_templateName");
-            _commandOptions = JsonConvert.DeserializeObject<Dictionary<string, string>>(info.GetValue<string>("command_options"));
-            _templateOptions = JsonConvert.DeserializeObject<Dictionary<string, string>>(info.GetValue<string>("command_templateOptions"));
+            _commandOptions = JsonConvert.DeserializeObject<Dictionary<string, string?>>(info.GetValue<string>("command_options"));
+            _templateOptions = JsonConvert.DeserializeObject<Dictionary<string, string?>>(info.GetValue<string>("command_templateOptions"));
         }
 
         public void Serialize(IXunitSerializationInfo info)

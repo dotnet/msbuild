@@ -57,10 +57,10 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (isMicrosoftAuthored)
             {
-                commandInput.InputTemplateParams.TryGetValue("Framework", out string? inputFrameworkValue);
+                parameters.TryGetValue("Framework", out string? inputFrameworkValue);
                 framework = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke, "Framework", inputFrameworkValue));
 
-                commandInput.InputTemplateParams.TryGetValue("auth", out string? inputAuthValue);
+                parameters.TryGetValue("auth", out string? inputAuthValue);
                 auth = TelemetryHelper.HashWithNormalizedCasing(TelemetryHelper.GetCanonicalValueForChoiceParamOrDefault(templateToInvoke, "auth", inputAuthValue));
             }
 
@@ -224,9 +224,9 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         // TODO: rework to avoid having to reparse.
                         // The canonical info could be in the ITemplateMatchInfo, but currently isn't.
-                        commandInput.ReparseForTemplate(template, _hostDataLoader.ReadHostSpecificTemplateData(template));
+                        TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, _hostDataLoader.ReadHostSpecificTemplateData(template));
                         IReadOnlyList<string> missingParamNamesCanonical = instantiateResult.ErrorMessage.Split(new[] { ',' })
-                            .Select(x => commandInput.VariantsForCanonical(x.Trim())
+                            .Select(x => reparsedCommand.VariantsForCanonical(x.Trim())
                                                         .DefaultIfEmpty(x.Trim()).First())
                             .ToList();
                         string fixedMessage = string.Join(", ", missingParamNamesCanonical);

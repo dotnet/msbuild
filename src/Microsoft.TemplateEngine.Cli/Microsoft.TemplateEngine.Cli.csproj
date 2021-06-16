@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="CommandParsing\NewCommandInputCli.cs" />
+    <None Include="CommandParsing\BaseCommandInput.cs" />
   </ItemGroup>
 
   <ItemGroup>

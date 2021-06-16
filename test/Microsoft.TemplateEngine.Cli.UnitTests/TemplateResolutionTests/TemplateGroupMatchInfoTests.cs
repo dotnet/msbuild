@@ -22,7 +22,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
         {
             yield return new object[]
             {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp3.0"),
+                new MockNewCommandInput("foo").WithTemplateOption("--framework", "netcoreapp3.0"),
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
@@ -30,13 +30,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "framework", "netcoreapp3.0")
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "--framework", "netcoreapp3.0")
                 }
             };
 
             yield return new object[]
             {
-                new MockNewCommandInput("foo").WithTemplateOption("fake", "netcoreapp3.0"),
+                new MockNewCommandInput("foo").WithTemplateOption("--fake", "netcoreapp3.0"),
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
@@ -44,13 +44,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterName, "fake", null)
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterName, "--fake", null)
                 }
             };
 
             yield return new object[]
             {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
+                new MockNewCommandInput("foo").WithTemplateOption("--framework", "net"),
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1"),
@@ -58,13 +58,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "framework", "net")
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "--framework", "net")
                 }
             };
 
             yield return new object[]
             {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "net"),
+                new MockNewCommandInput("foo").WithTemplateOption("--framework", "net"),
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1"),
@@ -73,13 +73,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "framework", "net")
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "--framework", "net")
                 }
             };
 
             yield return new object[]
             {
-                new MockNewCommandInput("foo").WithTemplateOption("framework", "net").WithTemplateOption("fake", "fake").WithTemplateOption("OtherChoice", "fake"),
+                new MockNewCommandInput("foo").WithTemplateOption("--framework", "net").WithTemplateOption("--fake", "fake").WithTemplateOption("--OtherChoice", "fake"),
                 new MockTemplateInfo[]
                 {
                     new MockTemplateInfo("foo", identity: "foo.1", groupIdentity: "foo.group").WithChoiceParameter("framework", "netcoreapp2.1", "netcoreapp3.1").WithChoiceParameter("OtherChoice", "val1", "val2"),
@@ -87,9 +87,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 },
                 new MockInvalidParameterInfo[]
                 {
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "framework", "net"),
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterName, "fake", null),
-                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "OtherChoice", "fake")
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "--framework", "net"),
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterName, "--fake", null),
+                    new MockInvalidParameterInfo(InvalidParameterInfo.Kind.InvalidParameterValue, "--OtherChoice", "fake")
                 }
             };
         }

@@ -10,20 +10,21 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
+using Microsoft.TemplateEngine.Cli.CommandParsing;
 
 namespace Microsoft.TemplateEngine.Cli
 {
     internal class CliTemplateEngineHost : ITemplateEngineHost
     {
-        private readonly New3Command _new3Command;
         private readonly ITemplateEngineHost _baseHost;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
+        private INewCommandInput _commandInput;
 
-        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, New3Command new3Command)
+        internal CliTemplateEngineHost(ITemplateEngineHost baseHost, INewCommandInput commandInput)
         {
             _baseHost = baseHost;
-            _new3Command = new3Command;
+            _commandInput = commandInput;
 
             bool enableVerboseLogging = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE"), out bool value) && value;
             _loggerFactory =
@@ -59,7 +60,7 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 const string fileName = "global.json";
 
-                string? workingPath = Path.Combine(FileSystem.GetCurrentDirectory(), _new3Command.OutputPath);
+                string? workingPath = Path.Combine(FileSystem.GetCurrentDirectory(), _commandInput.OutputPath);
                 bool found = false;
 
                 do
@@ -99,9 +100,16 @@ namespace Microsoft.TemplateEngine.Cli
             _baseHost.VirtualizeDirectory(path);
         }
 
+        internal void ResetCommand(INewCommandInput commandInput)
+        {
+            _commandInput = commandInput ?? throw new ArgumentNullException(nameof(commandInput));
+        }
+
         #region Obsolete
         [Obsolete]
+#pragma warning disable SA1202 // Elements should be ordered by access
         void ITemplateEngineHost.LogMessage(string message)
+#pragma warning restore SA1202 // Elements should be ordered by access
         {
             //do nothing
         }

@@ -1382,7 +1382,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To search for the templates on NuGet.org, run &apos;{0}&apos;..
+        ///   Looks up a localized string similar to To search for the templates on NuGet.org, run:.
         /// </summary>
         internal static string SearchTemplatesCommand {
             get {

@@ -43,6 +43,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         internal static string SearchCommandExample(this INewCommandInput command, string templateName)
         {
+            if (string.IsNullOrWhiteSpace(templateName))
+            {
+                templateName = "<TEMPLATE_NAME>";
+            }
+
             if (templateName.Any(char.IsWhiteSpace))
             {
                 templateName = $"'{templateName}'";

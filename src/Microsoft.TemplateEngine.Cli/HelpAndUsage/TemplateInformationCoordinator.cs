@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
@@ -65,7 +66,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     Reporter.Error.WriteLine(
                         string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(resolutionResult.Resolver.Filters, commandInput)).Bold().Red());
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.ListCommandExample()).Bold().Red());
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.SearchCommandExample(commandInput.TemplateName)).Bold().Red());
+                    // To search for the templates on NuGet.org, run 'dotnet {0} <template name> --search'.
+                    Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand.Bold().Red());
+                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName).Bold().Red());
+                    Reporter.Error.WriteLine();
                     return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
                     Reporter.Error.WriteLine(LocalizableStrings.AmbiguousTemplateGroupListHeader.Bold().Red());
@@ -239,11 +243,15 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             ListTemplateResolver resolver = new ListTemplateResolver(_templatePackageManager, _hostSpecificDataLoader);
             TemplateResolutionResult resolutionResult = await resolver.ResolveTemplatesAsync(commandInput, _defaultLanguage, cancellationToken).ConfigureAwait(false);
 
-            if (resolutionResult.HasTemplateGroupWithTemplateInfoMatches)
+            IReadOnlyDictionary<string, string?>? appliedParameterMatches = resolutionResult.GetAllMatchedParametersList();
+            if (resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters.Any())
             {
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplatesFoundMatchingInputParameters, GetInputParametersString(resolutionResult.Resolver.Filters, commandInput)));
+                Reporter.Output.WriteLine(
+                    string.Format(
+                        LocalizableStrings.TemplatesFoundMatchingInputParameters,
+                        GetInputParametersString(resolutionResult.Resolver.Filters, commandInput, appliedParameterMatches)));
                 Reporter.Output.WriteLine();
-                DisplayTemplateList(resolutionResult.TemplateGroupsWithMatchingTemplateInfo, commandInput);
+                DisplayTemplateList(resolutionResult.TemplateGroupsWithMatchingTemplateInfoAndParameters, commandInput);
                 return New3CommandStatus.Success;
             }
             else
@@ -252,7 +260,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 Reporter.Error.WriteLine(
                     string.Format(
                         LocalizableStrings.NoTemplatesMatchingInputParameters,
-                        GetInputParametersString(ListTemplateResolver.SupportedFilters, commandInput))
+                        GetInputParametersString(ListTemplateResolver.SupportedFilters, commandInput, appliedParameterMatches))
                     .Bold().Red());
 
                 if (resolutionResult.HasTemplateGroupMatches)
@@ -262,12 +270,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         string.Format(
                             LocalizableStrings.TemplatesNotValidGivenTheSpecifiedFilter,
                             resolutionResult.TemplateGroups.Count(),
-                            GetPartialMatchReason(resolutionResult, ListTemplateResolver.SupportedFilters, commandInput))
+                            GetPartialMatchReason(resolutionResult, commandInput, appliedParameterMatches))
                         .Bold().Red());
                 }
 
                 // To search for the templates on NuGet.org, run 'dotnet {0} <template name> --search'.
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.SearchTemplatesCommand, commandInput.SearchCommandExample(commandInput.TemplateName)).Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand.Bold().Red());
+                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName).Bold().Red());
                 Reporter.Error.WriteLine();
                 return New3CommandStatus.NotFound;
             }
@@ -321,7 +330,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (commandInput.RemainingParameters.Any())
             {
-                foreach (string flag in commandInput.RemainingParameters.Keys)
+                foreach (string flag in commandInput.RemainingParameters)
                 {
                     badParams.Add(flag);
                 }
@@ -460,10 +469,10 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         blankLineBetweenRows: false)
                     .DefineColumn(t => t.Name, out object nameColumn, LocalizableStrings.ColumnNameTemplateName, shrinkIfNeeded: true, minWidth: 15, showAlways: true)
                     .DefineColumn(t => t.ShortNames, LocalizableStrings.ColumnNameShortName, showAlways: true)
-                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.ColumnNameLanguage, NewCommandInputCli.LanguageColumnFilter, defaultColumn: true)
-                    .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, NewCommandInputCli.TypeColumnFilter, defaultColumn: false)
-                    .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, NewCommandInputCli.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
-                    .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, NewCommandInputCli.TagsColumnFilter, defaultColumn: true)
+                    .DefineColumn(t => t.Languages, out object languageColumn, LocalizableStrings.ColumnNameLanguage, BaseCommandInput.LanguageColumnFilter, defaultColumn: true)
+                    .DefineColumn(t => t.Type, LocalizableStrings.ColumnNameType, BaseCommandInput.TypeColumnFilter, defaultColumn: false)
+                    .DefineColumn(t => t.Author, LocalizableStrings.ColumnNameAuthor, BaseCommandInput.AuthorColumnFilter, defaultColumn: false, shrinkIfNeeded: true, minWidth: 10)
+                    .DefineColumn(t => t.Classifications, out object tagsColumn, LocalizableStrings.ColumnNameTags, BaseCommandInput.TagsColumnFilter, defaultColumn: true)
                     .OrderBy(nameColumn, StringComparer.OrdinalIgnoreCase);
 
             Reporter reporter = useErrorOutput ? Reporter.Error : Reporter.Output;
@@ -471,31 +480,61 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
 #pragma warning disable SA1204 // Static elements should appear before instance elements
-        private static string GetInputParametersString(IEnumerable<FilterOption> supportedFilters, INewCommandInput commandInput)
+        private static string GetInputParametersString(IEnumerable<FilterOption> supportedFilters, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
 #pragma warning restore SA1204 // Static elements should appear before instance elements
         {
             string separator = ", ";
-            string filters = string.Join(
-                separator,
-                supportedFilters
+            IEnumerable<string> appliedFilters = supportedFilters
                     .Where(filter => filter.IsFilterSet(commandInput))
-                    .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
-            return string.IsNullOrEmpty(commandInput.TemplateName)
-                ? filters
-                : string.IsNullOrEmpty(filters)
-                    ? $"'{commandInput.TemplateName}'"
-                    : $"'{commandInput.TemplateName}'" + separator + filters;
+                    .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'");
+
+            IEnumerable<string> appliedTemplateParameters = templateParameters?
+                   .Select(param => string.IsNullOrWhiteSpace(param.Value) ? param.Key : $"{param.Key}='{param.Value}'") ?? Array.Empty<string>();
+
+            StringBuilder inputParameters = new StringBuilder();
+            if (!string.IsNullOrWhiteSpace(commandInput.TemplateName))
+            {
+                inputParameters.Append($"'{commandInput.TemplateName}'");
+                if (appliedFilters.Any() || appliedTemplateParameters.Any())
+                {
+                    inputParameters.Append(separator);
+                }
+            }
+            if (appliedFilters.Any())
+            {
+                inputParameters.Append(string.Join(separator, appliedFilters));
+            }
+            if (appliedTemplateParameters.Any())
+            {
+                inputParameters.Append(string.Join(separator, appliedTemplateParameters));
+            }
+            return inputParameters.ToString();
         }
 
-        private static string GetPartialMatchReason(TemplateResolutionResult templateResolutionResult, IEnumerable<FilterOption> supportedFilters, INewCommandInput commandInput)
+        private static string GetPartialMatchReason(TemplateResolutionResult templateResolutionResult, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
         {
             string separator = ", ";
-            return string.Join(
-                separator,
-                supportedFilters
-                .OfType<TemplateFilterOption>()
-                .Where(filter => filter.IsFilterSet(commandInput) && filter.MismatchCriteria(templateResolutionResult))
-                .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
+
+            IEnumerable<string> appliedFilters = templateResolutionResult.Resolver.Filters
+                    .OfType<TemplateFilterOption>()
+                    .Where(filter => filter.IsFilterSet(commandInput) && filter.MismatchCriteria(templateResolutionResult))
+                    .Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'");
+
+            IEnumerable<string> appliedTemplateParameters = templateParameters?
+                   .Where(parameter =>
+                        templateResolutionResult.IsParameterMismatchReason(parameter.Key))
+                   .Select(param => string.IsNullOrWhiteSpace(param.Value) ? param.Key : $"{param.Key}='{param.Value}'") ?? Array.Empty<string>();
+
+            StringBuilder inputParameters = new StringBuilder();
+            if (appliedFilters.Any())
+            {
+                inputParameters.Append(string.Join(separator, appliedFilters));
+            }
+            if (appliedTemplateParameters.Any())
+            {
+                inputParameters.Append(string.Join(separator, appliedTemplateParameters));
+            }
+            return inputParameters.ToString();
         }
 
         private struct AmbiguousTemplateDetails

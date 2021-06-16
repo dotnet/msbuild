@@ -148,8 +148,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             {
                 try
                 {
-                    HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(template);
-                    commandInput.ReparseForTemplate(template, hostData);
+                    TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, hostDataLoader.ReadHostSpecificTemplateData(template));
 
                     Dictionary<string, ITemplateParameter> templateParameters =
                         template.Parameters.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
@@ -157,10 +156,10 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                     List<MatchInfo> matchInfos = new List<MatchInfo>();
 
                     // parameters are already parsed. But choice values aren't checked
-                    foreach (KeyValuePair<string, string> matchedParamInfo in commandInput.InputTemplateParams)
+                    foreach (KeyValuePair<string, string?> matchedParamInfo in reparsedCommand.InputTemplateParams)
                     {
                         string paramName = matchedParamInfo.Key;
-                        string paramValue = matchedParamInfo.Value;
+                        string? paramValue = matchedParamInfo.Value;
                         MatchKind matchKind;
                         ParameterMatchInfo.MismatchKind mismatchKind = ParameterMatchInfo.MismatchKind.NoMismatch;
 
@@ -202,12 +201,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                             matchKind = MatchKind.Mismatch;
                             mismatchKind = ParameterMatchInfo.MismatchKind.InvalidName;
                         }
-                        matchInfos.Add(new ParameterMatchInfo(paramName, paramValue, matchKind, mismatchKind, commandInput.TemplateParamInputFormat(paramName)));
+                        matchInfos.Add(new ParameterMatchInfo(paramName, paramValue, matchKind, mismatchKind, reparsedCommand.TemplateParamInputFormat(paramName)));
                     }
 
-                    foreach (string unmatchedParamName in commandInput.RemainingParameters.Keys.Where(x => !x.Contains(':'))) // filter debugging params
+                    foreach (string unmatchedParamName in reparsedCommand.RemainingParameters.Where(x => !x.Contains(':') && x.StartsWith('-'))) // filter debugging params and parameters that do not start with '-'
                     {
-                        if (commandInput.TryGetCanonicalNameForVariant(unmatchedParamName, out string canonical))
+                        if (reparsedCommand.TryGetCanonicalNameForVariant(unmatchedParamName, out string? canonical) && !string.IsNullOrWhiteSpace(canonical))
                         {
                             // the name is a known template param, it must have not parsed due to an invalid value
                             // Note (scp 2017-02-27): This probably can't happen, the param parsing doesn't check the choice values.
@@ -216,7 +215,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                                 value: null,
                                 MatchKind.Mismatch,
                                 ParameterMatchInfo.MismatchKind.InvalidName,
-                                commandInput.TemplateParamInputFormat(unmatchedParamName)));
+                                reparsedCommand.TemplateParamInputFormat(unmatchedParamName)));
                         }
                         else
                         {
@@ -235,7 +234,100 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 catch (CommandParserException ex)
                 {
                     string shortname = template.ShortNameList.Any() ? template.ShortNameList[0] : $"'{template.Name}'";
-                    // if we do actually throw, add a non-match
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.TemplateResolver_Warning_FailedToReparseTemplate,
+                            $"{template.Identity} ({shortname})"));
+                    Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, ex.ToString()));
+                }
+                return Array.Empty<MatchInfo>();
+            };
+        }
+
+        /// <summary>
+        /// Filters <see cref="ITemplateInfo"/> by template parameters read from <paramref name="commandInput"/>.
+        /// Unlike <see cref="TemplateParameterFilter(IHostSpecificDataLoader, INewCommandInput)"/>, consider template parameter a match when the template parameter exists in template definition, but given without value. This is needed for --list and --search that filters template by the supported parameters.
+        /// </summary>
+        internal static Func<ITemplateInfo, IEnumerable<MatchInfo>> ListTemplateParameterFilter(IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
+        {
+            return (template) =>
+            {
+                try
+                {
+                    TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, hostDataLoader.ReadHostSpecificTemplateData(template));
+
+                    Dictionary<string, ITemplateParameter> templateParameters =
+                        template.Parameters.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
+
+                    List<MatchInfo> matchInfos = new List<MatchInfo>();
+                    foreach (KeyValuePair<string, string?> matchedParamInfo in reparsedCommand.InputTemplateParams)
+                    {
+                        string paramName = matchedParamInfo.Key;
+                        string? paramValue = matchedParamInfo.Value;
+                        MatchKind matchKind;
+                        ParameterMatchInfo.MismatchKind mismatchKind = ParameterMatchInfo.MismatchKind.NoMismatch;
+
+                        if (templateParameters.TryGetValue(paramName, out ITemplateParameter? paramDetails))
+                        {
+                            if (paramDetails.IsChoice() && paramDetails.Choices != null)
+                            {
+                                // key is the value user should provide, value is description
+                                if (string.IsNullOrWhiteSpace(paramValue))
+                                {
+                                    matchKind = MatchKind.Exact;
+                                    paramValue = null;
+                                }
+                                else if (paramDetails.Choices.ContainsKey(paramValue))
+                                {
+                                    matchKind = MatchKind.Exact;
+                                }
+                                else
+                                {
+                                    matchKind = MatchKind.Mismatch;
+                                    mismatchKind = ParameterMatchInfo.MismatchKind.InvalidValue;
+                                }
+                            }
+                            else // other parameter
+                            {
+                                matchKind = MatchKind.Exact;
+                                paramValue = null;
+                            }
+                        }
+                        else
+                        {
+                            matchKind = MatchKind.Mismatch;
+                            mismatchKind = ParameterMatchInfo.MismatchKind.InvalidName;
+                        }
+                        matchInfos.Add(new ParameterMatchInfo(paramName, paramValue, matchKind, mismatchKind, reparsedCommand.TemplateParamInputFormat(paramName)));
+                    }
+
+                    foreach (string unmatchedParamName in reparsedCommand.RemainingParameters.Where(x => !x.Contains(':') && x.StartsWith('-'))) // filter debugging params and parameters that do not start with '-'
+                    {
+                        if (reparsedCommand.TryGetCanonicalNameForVariant(unmatchedParamName, out string? canonical) && !string.IsNullOrWhiteSpace(canonical))
+                        {
+                            matchInfos.Add(new ParameterMatchInfo(
+                                canonical,
+                                value: null,
+                                MatchKind.Mismatch,
+                                ParameterMatchInfo.MismatchKind.InvalidName,
+                                reparsedCommand.TemplateParamInputFormat(unmatchedParamName)));
+                        }
+                        else
+                        {
+                            // the name is not known
+                            matchInfos.Add(new ParameterMatchInfo(
+                                unmatchedParamName,
+                                value: null,
+                                MatchKind.Mismatch,
+                                ParameterMatchInfo.MismatchKind.InvalidName,
+                                unmatchedParamName));
+                        }
+                    }
+                    return matchInfos;
+                }
+                catch (CommandParserException ex)
+                {
+                    string shortname = template.ShortNameList.Any() ? template.ShortNameList[0] : $"'{template.Name}'";
                     Reporter.Error.WriteLine(
                         string.Format(
                             LocalizableStrings.TemplateResolver_Warning_FailedToReparseTemplate,

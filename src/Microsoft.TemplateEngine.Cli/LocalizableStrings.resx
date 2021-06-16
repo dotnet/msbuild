@@ -569,7 +569,7 @@ Examples:
     <value>Downloads</value>
   </data>
   <data name="SearchTemplatesCommand" xml:space="preserve">
-    <value>To search for the templates on NuGet.org, run '{0}'.</value>
+    <value>To search for the templates on NuGet.org, run:</value>
   </data>
   <data name="AmbiguousParameterDetail" xml:space="preserve">
     <value>The value '{1}' is ambiguous for option {0}.</value>

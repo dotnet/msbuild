@@ -28,38 +28,25 @@ namespace Microsoft.TemplateEngine.Cli
         private static readonly Guid _entryMutexGuid = new Guid("5CB26FD1-32DB-4F4C-B3DC-49CFD61633D2");
         private static Mutex? _entryMutex;
         private readonly ITelemetryLogger _telemetryLogger;
+        private readonly CliTemplateEngineHost _host;
         private readonly TemplateCreator _templateCreator;
         private readonly TemplatePackageManager _templatePackageManager;
         private readonly TemplateInformationCoordinator _templateInformationCoordinator;
         private readonly AliasRegistry _aliasRegistry;
-
-        /// <summary>
-        /// It's safe to access template agnostic information anytime after the first parse.
-        /// But there is never a guarantee which template the parse is in the context of.
-        /// </summary>
-        private readonly INewCommandInput _commandInput;
-
         private readonly IHostSpecificDataLoader _hostDataLoader;
         private readonly string? _defaultLanguage;
         private readonly New3Callbacks _callbacks;
         private readonly Func<string> _inputGetter = () => Console.ReadLine() ?? string.Empty;
 
-        internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput)
-            : this(commandName, host, telemetryLogger, callbacks, commandInput, null)
-        {
-        }
-
-        internal New3Command(string commandName, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, INewCommandInput commandInput, string? hivePath, bool virtualize = false)
+        internal New3Command(INewCommandInput commandInput, ITemplateEngineHost host, ITelemetryLogger telemetryLogger, New3Callbacks callbacks, string? hivePath, bool virtualize = false)
         {
             _telemetryLogger = telemetryLogger;
-            host = new CliTemplateEngineHost(host, this);
-            EnvironmentSettings = new EngineEnvironmentSettings(host, settingsLocation: hivePath, virtualizeSettings: virtualize);
+            _host = new CliTemplateEngineHost(host, commandInput);
+            EnvironmentSettings = new EngineEnvironmentSettings(_host, settingsLocation: hivePath, virtualizeSettings: virtualize);
             _templatePackageManager = new TemplatePackageManager(EnvironmentSettings);
             _templateCreator = new TemplateCreator(EnvironmentSettings);
             _aliasRegistry = new AliasRegistry(EnvironmentSettings);
-            CommandName = commandName;
             _hostDataLoader = new HostSpecificDataLoader(EnvironmentSettings);
-            _commandInput = commandInput;
             _callbacks = callbacks ?? new New3Callbacks();
 
             if (!EnvironmentSettings.Host.TryGetHostParamDefault("prefs:language", out _defaultLanguage))
@@ -68,12 +55,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
             _templateInformationCoordinator = new TemplateInformationCoordinator(EnvironmentSettings, _templatePackageManager, _templateCreator, _hostDataLoader, _telemetryLogger, _defaultLanguage);
         }
-
-        internal string TemplateName => _commandInput.TemplateName;
-
-        internal string OutputPath => _commandInput.OutputPath;
-
-        internal string CommandName { get; }
 
         internal EngineEnvironmentSettings EnvironmentSettings { get; private set; }
 
@@ -179,17 +160,15 @@ namespace Microsoft.TemplateEngine.Cli
                 telemetryLogger.TrackEvent(commandName + TelemetryConstants.CalledWithNoArgsEventSuffix);
             }
 
-            INewCommandInput commandInput = new NewCommandInputCli(commandName);
-            New3Command instance = new New3Command(commandName, host, telemetryLogger, callbacks, commandInput, hivePath, virtualize: ephemeralHiveFlag);
-
-            commandInput.OnExecute(instance.ExecuteAsync);
+            INewCommandInput commandInput = BaseCommandInput.Parse(args, commandName);
+            New3Command instance = new New3Command(commandInput, host, telemetryLogger, callbacks, hivePath, virtualize: ephemeralHiveFlag);
 
             int result;
             try
             {
                 using (Timing.Over(instance.EnvironmentSettings.Host.Logger, "Execute"))
                 {
-                    result = commandInput.Execute(args);
+                    result = (int)Task.Run(() => instance.ExecuteAsync(commandInput)).GetAwaiter().GetResult();
                 }
             }
             catch (Exception ex)
@@ -238,42 +217,41 @@ namespace Microsoft.TemplateEngine.Cli
             Reporter.Output.WriteLine($" {LocalizableStrings.CommitHash.PadRight(targetLength)} {GitInfo.CommitHash}");
         }
 
-        // TODO: make sure help / usage works right in these cases.
-        private async Task<New3CommandStatus> EnterMaintenanceFlowAsync()
+        private async Task<New3CommandStatus> EnterMaintenanceFlowAsync(INewCommandInput commandInput)
         {
             // dotnet new --list case
-            if (_commandInput.IsListFlagSpecified)
+            if (commandInput.IsListFlagSpecified)
             {
-                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
+                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(commandInput, default).ConfigureAwait(false);
             }
 
-            if (_commandInput.RemainingParameters.Any())
+            if (commandInput.RemainingParameters.Any())
             {
-                _templateInformationCoordinator.HandleParseError(_commandInput);
+                _templateInformationCoordinator.HandleParseError(commandInput);
                 return New3CommandStatus.InvalidParamValues;
             }
 
             // dotnet new -h case
-            if (_commandInput.IsHelpFlagSpecified)
+            if (commandInput.IsHelpFlagSpecified)
             {
-                _templateInformationCoordinator.ShowUsageHelp(_commandInput);
+                _templateInformationCoordinator.ShowUsageHelp(commandInput);
                 return New3CommandStatus.Success;
             }
 
             // No options specified - should information about dotnet new
-            return await _templateInformationCoordinator.DisplayCommandDescriptionAsync(_commandInput, default)
+            return await _templateInformationCoordinator.DisplayCommandDescriptionAsync(commandInput, default)
                 .ConfigureAwait(false);
         }
 
-        private async Task<New3CommandStatus> EnterTemplateManipulationFlowAsync()
+        private async Task<New3CommandStatus> EnterTemplateManipulationFlowAsync(INewCommandInput commandInput)
         {
-            if (_commandInput.IsHelpFlagSpecified)
+            if (commandInput.IsHelpFlagSpecified)
             {
-                return await _templateInformationCoordinator.DisplayTemplateHelpAsync(_commandInput, default).ConfigureAwait(false);
+                return await _templateInformationCoordinator.DisplayTemplateHelpAsync(commandInput, default).ConfigureAwait(false);
             }
-            if (_commandInput.IsListFlagSpecified)
+            if (commandInput.IsListFlagSpecified)
             {
-                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
+                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(commandInput, default).ConfigureAwait(false);
             }
 
             TemplateInvocationCoordinator invocationCoordinator = new TemplateInvocationCoordinator(
@@ -286,52 +264,53 @@ namespace Microsoft.TemplateEngine.Cli
                 _inputGetter,
                 _callbacks);
 
-            return await invocationCoordinator.CoordinateInvocationAsync(_commandInput, default).ConfigureAwait(false);
+            return await invocationCoordinator.CoordinateInvocationAsync(commandInput, default).ConfigureAwait(false);
         }
 
-        private async Task<New3CommandStatus> ExecuteAsync()
+        private async Task<New3CommandStatus> ExecuteAsync(INewCommandInput commandInput)
         {
-            // this is checking the initial parse, which is template agnostic.
-            if (_commandInput.HasParseError)
+            if (commandInput is null)
             {
-                return _templateInformationCoordinator.HandleParseError(_commandInput);
+                throw new ArgumentNullException(nameof(commandInput));
             }
 
-            if (_commandInput.IsHelpFlagSpecified)
+            if (commandInput.IsHelpFlagSpecified)
             {
-                _telemetryLogger.TrackEvent(CommandName + TelemetryConstants.HelpEventSuffix);
+                _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.HelpEventSuffix);
             }
 
-            if (_commandInput.ShowAliasesSpecified)
+            if (commandInput.ShowAliasesSpecified)
             {
-                return AliasSupport.DisplayAliasValues(EnvironmentSettings, _commandInput, _aliasRegistry, CommandName);
+                return AliasSupport.DisplayAliasValues(EnvironmentSettings, commandInput, _aliasRegistry, commandInput.CommandName);
             }
 
-            if (_commandInput.ExpandedExtraArgsFiles && string.IsNullOrEmpty(_commandInput.Alias))
+            if (commandInput.ExpandedExtraArgsFiles && string.IsNullOrEmpty(commandInput.Alias))
             {
                 // Only show this if there was no alias expansion.
                 // ExpandedExtraArgsFiles must be checked before alias expansion - it'll get reset if there's an alias.
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ExtraArgsCommandAfterExpansion, string.Join(" ", _commandInput.Tokens)));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.ExtraArgsCommandAfterExpansion, string.Join(" ", commandInput.Tokens)));
             }
 
-            if (string.IsNullOrEmpty(_commandInput.Alias))
+            if (string.IsNullOrEmpty(commandInput.Alias))
             {
                 // The --alias param is for creating / updating / deleting aliases.
                 // If it's not present, try expanding aliases now.
-                New3CommandStatus aliasExpansionResult = AliasSupport.CoordinateAliasExpansion(_commandInput, _aliasRegistry, _templateInformationCoordinator);
+                (New3CommandStatus aliasExpansionResult, INewCommandInput? expandedCommandInput) = AliasSupport.CoordinateAliasExpansion(commandInput, _aliasRegistry, _templateInformationCoordinator);
 
-                if (aliasExpansionResult != New3CommandStatus.Success)
+                if (aliasExpansionResult != New3CommandStatus.Success || expandedCommandInput == null)
                 {
-                    return aliasExpansionResult;
+                    return aliasExpansionResult != New3CommandStatus.Success ? aliasExpansionResult : New3CommandStatus.AliasFailed;
                 }
+                commandInput = expandedCommandInput;
+                _host.ResetCommand(commandInput);
             }
 
-            if (!Initialize())
+            if (!Initialize(commandInput))
             {
                 return New3CommandStatus.Success;
             }
 
-            bool forceCacheRebuild = _commandInput.HasDebuggingFlag("--debug:rebuildcache");
+            bool forceCacheRebuild = commandInput.HasDebuggingFlag("--debug:rebuildcache");
             try
             {
                 if (forceCacheRebuild)
@@ -348,28 +327,28 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                if (!string.IsNullOrEmpty(_commandInput.Alias) && !_commandInput.IsHelpFlagSpecified)
+                if (!string.IsNullOrEmpty(commandInput.Alias) && !commandInput.IsHelpFlagSpecified)
                 {
-                    return AliasSupport.ManipulateAliasIfValid(_aliasRegistry, _commandInput.Alias, _commandInput.Tokens.ToList(), await GetAllTemplateShortNamesAsync().ConfigureAwait(false));
+                    return AliasSupport.ManipulateAliasIfValid(_aliasRegistry, commandInput.Alias, commandInput.Tokens.ToList(), await GetAllTemplateShortNamesAsync().ConfigureAwait(false));
                 }
 
-                if (TemplatePackageCoordinator.IsTemplatePackageManipulationFlow(_commandInput))
+                if (TemplatePackageCoordinator.IsTemplatePackageManipulationFlow(commandInput))
                 {
                     TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, EnvironmentSettings, _templatePackageManager, _templateInformationCoordinator, _defaultLanguage);
-                    return await packageCoordinator.ProcessAsync(_commandInput).ConfigureAwait(false);
+                    return await packageCoordinator.ProcessAsync(commandInput).ConfigureAwait(false);
                 }
 
-                if (_commandInput.SearchOnline)
+                if (commandInput.SearchOnline)
                 {
-                    return await CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(EnvironmentSettings, _templatePackageManager, _commandInput, _defaultLanguage).ConfigureAwait(false);
+                    return await CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(EnvironmentSettings, _templatePackageManager, commandInput, _defaultLanguage).ConfigureAwait(false);
                 }
 
-                if (string.IsNullOrWhiteSpace(TemplateName))
+                if (string.IsNullOrWhiteSpace(commandInput.TemplateName))
                 {
-                    return await EnterMaintenanceFlowAsync().ConfigureAwait(false);
+                    return await EnterMaintenanceFlowAsync(commandInput).ConfigureAwait(false);
                 }
 
-                return await EnterTemplateManipulationFlowAsync().ConfigureAwait(false);
+                return await EnterTemplateManipulationFlowAsync(commandInput).ConfigureAwait(false);
             }
             catch (TemplateAuthoringException tae)
             {
@@ -378,15 +357,15 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        private bool Initialize()
+        private bool Initialize(INewCommandInput commandInput)
         {
-            bool reinitFlag = _commandInput.HasDebuggingFlag("--debug:reinit");
+            bool reinitFlag = commandInput.HasDebuggingFlag("--debug:reinit");
             if (reinitFlag)
             {
                 EnvironmentSettings.Host.FileSystem.DirectoryDelete(EnvironmentSettings.Paths.HostVersionSettingsDir, true);
             }
 
-            if (_commandInput.HasDebuggingFlag("--debug:showconfig"))
+            if (commandInput.HasDebuggingFlag("--debug:showconfig"))
             {
                 ShowConfig();
                 return false;

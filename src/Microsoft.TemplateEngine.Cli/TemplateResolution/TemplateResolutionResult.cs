@@ -147,13 +147,24 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         }
 
         /// <summary>
-        /// Returns template groups that matches command input  based on group filters and template info filters applied (template parameters matches are not considered in the match).
+        /// Returns template groups that matches command input based on group filters and template info filters applied (template parameters matches are not considered in the match).
         /// </summary>
         internal IEnumerable<TemplateGroup> TemplateGroupsWithMatchingTemplateInfo
         {
             get
             {
-                return _matchInformation.Where(groupMatchInfo => groupMatchInfo.IsGroupMatch && groupMatchInfo.TemplatesWithMatchingInfo.Any()).Select(groupMatchInfo => groupMatchInfo.GroupInfo);
+                return _matchInformation.Where(groupMatchInfo => groupMatchInfo.IsGroupAndTemplateInfoMatch).Select(groupMatchInfo => groupMatchInfo.GroupInfo);
+            }
+        }
+
+        /// <summary>
+        /// Returns template groups that matches command input based on group filters, template info filters and template parameters.
+        /// </summary>
+        internal IEnumerable<TemplateGroup> TemplateGroupsWithMatchingTemplateInfoAndParameters
+        {
+            get
+            {
+                return _matchInformation.Where(groupMatchInfo => groupMatchInfo.IsGroupAndTemplateInfoAndParametersMatch).Select(groupMatchInfo => groupMatchInfo.GroupInfo);
             }
         }
 
@@ -240,6 +251,41 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal bool HasTemplateGroupMatches => TemplateGroups.Any();
 
         internal BaseTemplateResolver Resolver => _resolver;
+
+        internal IReadOnlyDictionary<string, string?> GetAllMatchedParametersList()
+        {
+            Dictionary<string, string?> parameterList = new Dictionary<string, string?>();
+            if (!_matchInformation.Any())
+            {
+                return parameterList;
+            }
+            foreach (var templateGroup in _matchInformation.Where(group => group.IsGroupAndTemplateInfoMatch))
+            {
+                foreach (ParameterMatchInfo parameterMatchInfo in templateGroup.TemplateMatchInfos.SelectMany(template => template.MatchDisposition.OfType<ParameterMatchInfo>()))
+                {
+                    parameterList[parameterMatchInfo.InputFormat ?? parameterMatchInfo.Name] = parameterMatchInfo.Value;
+                }
+            }
+            return parameterList;
+        }
+
+        internal bool IsParameterMismatchReason(string parameterName)
+        {
+            foreach (var templateGroup in _matchedTemplateGroups)
+            {
+                if (templateGroup.TemplateMatchInfos.All(
+                    templateMatchInfo =>
+                        templateMatchInfo.MatchDisposition.Any(
+                            matchInfo =>
+                                matchInfo.GetType() == typeof(ParameterMatchInfo)
+                                 && matchInfo.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase)
+                                 && matchInfo.Kind == Abstractions.TemplateFiltering.MatchKind.Mismatch)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         private void EvaluateTemplateToInvoke()
         {
