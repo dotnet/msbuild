@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 using Microsoft.Build.Construction;
@@ -1935,14 +1936,29 @@ namespace Microsoft.Build.UnitTests
                 string[] entryTargets = null,
                 Dictionary<string, string> globalProperties = null)
             {
-                var buildResult = _buildManager.BuildRequest(
-                    new BuildRequestData(projectFile,
-                        globalProperties ?? new Dictionary<string, string>(),
-                        MSBuildConstants.CurrentToolsVersion,
-                        entryTargets ?? new string[0],
-                        null));
+                var buildTask = BuildProjectFileAsync(projectFile, entryTargets, globalProperties);
+                return buildTask.Result;
+            }
 
-                return buildResult;
+            public async Task<BuildResult> BuildProjectFileAsync(
+                string projectFile,
+                string[] entryTargets = null,
+                Dictionary<string, string> globalProperties = null)
+            {
+                var buildRequestData = new BuildRequestData(projectFile,
+                    globalProperties ?? new Dictionary<string, string>(),
+                    MSBuildConstants.CurrentToolsVersion,
+                    entryTargets ?? new string[0],
+                    null);
+
+                var completion = new TaskCompletionSource<BuildResult>();
+
+                _buildManager.PendBuildRequest(buildRequestData).ExecuteAsync(submission =>
+                {
+                    completion.SetResult(submission.BuildResult);
+                }, null);
+
+                return await completion.Task;
             }
 
             public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData)

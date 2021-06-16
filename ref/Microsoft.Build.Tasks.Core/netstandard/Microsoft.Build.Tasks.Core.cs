@@ -875,6 +875,18 @@ namespace Microsoft.Build.Tasks
         public override bool Execute() { throw null; }
         protected override string GenerateFullPathToTool() { throw null; }
     }
+    public sealed partial class SignFile : Microsoft.Build.Utilities.Task
+    {
+        public SignFile() { }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string CertificateThumbprint { get { throw null; } set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem SigningTarget { get { throw null; } set { } }
+        public string TargetFrameworkIdentifier { get { throw null; } set { } }
+        public string TargetFrameworkVersion { get { throw null; } set { } }
+        public string TimestampUrl { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
     {
         internal TaskExtension() { }

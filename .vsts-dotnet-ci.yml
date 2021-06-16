@@ -24,11 +24,13 @@ jobs:
     continueOnError: true
     condition: always()
   - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
+    displayName: Publish .NET Test Results
     inputs:
-      testRunTitle: 'Windows-on-full .NET Core 2.1'
+      testRunTitle: 'Windows-on-full .NET'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: |
+        artifacts/TestResults/**/*.xml
+        !**/*UnitTests_net472*.xml
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -69,11 +71,13 @@ jobs:
     continueOnError: true
     condition: always()
   - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
+    displayName: Publish .NET Test Results
     inputs:
-      testRunTitle: 'Windows-on-Core .NET Core 2.1'
+      testRunTitle: 'Windows-on-Core .NET'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: |
+        artifacts/TestResults/**/*.xml
+        !**/*UnitTests_net472*.xml
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -120,11 +124,13 @@ jobs:
     continueOnError: true
     condition: always()
   - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
+    displayName: Publish .NET Test Results
     inputs:
-      testRunTitle: 'Windows-on-full Release .NET Core 2.1'
+      testRunTitle: 'Windows-on-full Release .NET'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_netcoreapp2.1*.xml'
+      testResultsFiles: |
+        artifacts/TestResults/**/*.xml
+        !**/*UnitTests_net472*.xml
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -152,11 +158,13 @@ jobs:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
+    displayName: Publish .NET Test Results
     inputs:
-      testRunTitle: 'Linux .NET Core 2.1'
+      testRunTitle: 'Linux .NET'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
+      testResultsFiles: |
+        artifacts/TestResults/**/*.xml
+        !**/*UnitTests_net472*.xml
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -184,11 +192,13 @@ jobs:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
+    displayName: Publish .NET Test Results
     inputs:
-      testRunTitle: 'macOS .NET Core 2.1'
+      testRunTitle: 'macOS .NET'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests*.xml'
+      testResultsFiles: |
+        artifacts/TestResults/**/*.xml
+        !**/*UnitTests_net472*.xml
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true

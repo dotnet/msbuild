@@ -213,6 +213,12 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasLoggedErrors = true;
         }
 
+        internal void LogWarning(string messageResourceName, params object[] messageArgs)
+        {
+            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            _loggingService.LogWarning(_eventContext, null, BuildEventFileInfo.Empty, messageResourceName, messageArgs);
+        }
+
         /// <summary>
         /// Log a warning
         /// </summary>

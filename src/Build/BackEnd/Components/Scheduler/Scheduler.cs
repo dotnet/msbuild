@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -165,6 +166,10 @@ namespace Microsoft.Build.BackEnd
         /// If MSBUILDCUSTOMSCHEDULER is set, contains the requested scheduling algorithm
         /// </summary>
         private AssignUnscheduledRequestsDelegate _customRequestSchedulingAlgorithm;
+
+        private NodeLoggingContext _inprocNodeContext;
+
+        private int _loggedWarningsForProxyBuildsOnOutOfProcNodes = 0;
 
         /// <summary>
         /// Constructor.
@@ -610,6 +615,7 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
+            _inprocNodeContext =  new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
         }
 
         /// <summary>
@@ -791,6 +797,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We want to find more work first, and we assign traversals to the in-proc node first, if possible.
                     AssignUnscheduledRequestsByTraversalsFirst(responses, idleNodes);
+
+                    AssignUnscheduledProxyBuildRequestsToInProcNode(responses, idleNodes);
+
                     if (idleNodes.Count == 0)
                     {
                         return;
@@ -967,6 +976,27 @@ namespace Microsoft.Build.BackEnd
                             idleNodes.Remove(InProcNodeId);
                             break;
                         }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Proxy build requests <see cref="ProxyTargets"/> should be really cheap (only return properties and items) and it's not worth
+        /// paying the IPC cost and re-evaluating them on out of proc nodes (they are guaranteed to be evaluated in the Scheduler process).
+        /// </summary>
+        private void AssignUnscheduledProxyBuildRequestsToInProcNode(List<ScheduleResponse> responses, HashSet<int> idleNodes)
+        {
+            if (idleNodes.Contains(InProcNodeId))
+            {
+                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
+                foreach (SchedulableRequest request in unscheduledRequests)
+                {
+                    if (CanScheduleRequestToNode(request, InProcNodeId) && request.IsProxyBuildRequest())
+                    {
+                        AssignUnscheduledRequestToNode(request, InProcNodeId, responses);
+                        idleNodes.Remove(InProcNodeId);
+                        break;
                     }
                 }
             }
@@ -1348,7 +1378,27 @@ namespace Microsoft.Build.BackEnd
 
             responses.Add(ScheduleResponse.CreateScheduleResponse(nodeId, request.BuildRequest, mustSendConfigurationToNode));
             TraceScheduler("Executing request {0} on node {1} with parent {2}", request.BuildRequest.GlobalRequestId, nodeId, (request.Parent == null) ? -1 : request.Parent.BuildRequest.GlobalRequestId);
+
+            WarnWhenProxyBuildsGetScheduledOnOutOfProcNode();
+
             request.ResumeExecution(nodeId);
+
+            void WarnWhenProxyBuildsGetScheduledOnOutOfProcNode()
+            {
+                if (request.IsProxyBuildRequest() && nodeId != InProcNodeId)
+                {
+                    ErrorUtilities.VerifyThrow(
+                        _componentHost.BuildParameters.DisableInProcNode || _forceAffinityOutOfProc,
+                        "Proxy requests should only get scheduled to out of proc nodes when the inproc node is disabled");
+
+                    var loggedWarnings = Interlocked.CompareExchange(ref _loggedWarningsForProxyBuildsOnOutOfProcNodes, 1, 0);
+
+                    if (loggedWarnings == 0)
+                    {
+                        _inprocNodeContext.LogWarning("ProxyRequestNotScheduledOnInprocNode");
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -2053,6 +2103,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             if (IsTraversalRequest(request))
+            {
+                return NodeAffinity.InProc;
+            }
+
+            if (request.IsProxyBuildRequest())
             {
                 return NodeAffinity.InProc;
             }
