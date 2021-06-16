@@ -32,6 +32,7 @@ stages:
         LclSource: lclFilesfromPackage
         LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
         MirrorRepo: 'msbuild'
+        MirrorBranch: 'vs16.11' # should match condition above
 
   - job: Windows_NT
     pool:
