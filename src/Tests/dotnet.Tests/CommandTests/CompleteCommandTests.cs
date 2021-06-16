@@ -281,17 +281,17 @@ namespace Microsoft.DotNet.Tests.Commands
         public void GivenNuGetSignCommandItDisplaysCompletions()
         {
             var expected = new[] {
-                "--output",
+                "--certificate-fingerprint",
                 "--certificate-path",
                 "--certificate-store-name",
                 "--certificate-store-location",
                 "--certificate-subject-name",
-                "--certificate-fingerprint",
                 "--certificate-password",
                 "--hash-algorithm",
                 "--timestamper",
                 "--timestamp-hash-algorithm",
                 "--verbosity",
+                "--output",
                 "--overwrite",
                 "-o",
                 "--help",
