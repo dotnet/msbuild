@@ -135,7 +135,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 "locals",
                 "push",
                 "verify",
-                "trust"
+                "trust",
+                "sign"
             };
 
             var reporter = new BufferedReporter();
@@ -273,6 +274,36 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var reporter = new BufferedReporter();
             CompleteCommand.RunWithReporter(new[] { "dotnet nuget trust " }, reporter).Should().Be(0);
+            reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
+        }
+
+        [Fact]
+        public void GivenNuGetSignCommandItDisplaysCompletions()
+        {
+            var expected = new[] {
+                "--certificate-fingerprint",
+                "--certificate-path",
+                "--certificate-store-name",
+                "--certificate-store-location",
+                "--certificate-subject-name",
+                "--certificate-password",
+                "--hash-algorithm",
+                "--timestamper",
+                "--timestamp-hash-algorithm",
+                "--verbosity",
+                "--output",
+                "--overwrite",
+                "-o",
+                "--help",
+                "-v",
+                "-?",
+                "-h",
+                "/?",
+                "/h"
+            };
+
+            var reporter = new BufferedReporter();
+            CompleteCommand.RunWithReporter(new[] { "dotnet nuget sign " }, reporter).Should().Be(0);
             reporter.Lines.OrderBy(c => c).Should().Equal(expected.OrderBy(c => c));
         }
     }
