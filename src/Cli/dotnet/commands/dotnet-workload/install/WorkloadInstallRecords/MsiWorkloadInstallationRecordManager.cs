@@ -1,5 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#nullable disable
 
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +10,7 @@ using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
 {
+#pragma warning disable CA1416
     internal class MsiWorkloadInstallationRecordManager : IWorkloadInstallationRecordRepository
     {
         /// <summary>
@@ -62,4 +64,5 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             using RegistryKey wrk = _baseKey.CreateSubKey(Path.Combine(BasePath, $"{sdkFeatureBand}", $"{workloadId}"));
         }
     }
+#pragma warning restore CA1416
 }
