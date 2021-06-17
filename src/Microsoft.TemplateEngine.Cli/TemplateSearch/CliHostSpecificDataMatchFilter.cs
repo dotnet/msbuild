@@ -66,8 +66,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                             group,
                             groupFilters,
                             templateFilters,
-                            CliFilters.TemplateParameterFilter(hostSpecificDataLoader, _commandInput)));
-
+                            CliFilters.ListTemplateParameterFilter(hostSpecificDataLoader, _commandInput)));
             return matchInformation.Where(group => group.IsGroupAndTemplateInfoAndParametersMatch).SelectMany(group => group.TemplateMatchInfosWithMatchingParameters).ToList();
         };
     }

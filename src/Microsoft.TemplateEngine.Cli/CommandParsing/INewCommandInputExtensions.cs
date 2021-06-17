@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
@@ -41,19 +43,32 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return $"dotnet {command.CommandName} --list";
         }
 
-        internal static string SearchCommandExample(this INewCommandInput command, string templateName)
+        internal static string SearchCommandExample(this INewCommandInput command, string? templateName = null, IEnumerable<string>? additionalArgs = null, bool usePlaceholder = false)
         {
-            if (string.IsNullOrWhiteSpace(templateName))
+            if (usePlaceholder)
             {
                 templateName = "<TEMPLATE_NAME>";
             }
-
-            if (templateName.Any(char.IsWhiteSpace))
+            if (string.IsNullOrWhiteSpace(templateName) && (additionalArgs == null || !additionalArgs.Any()))
             {
-                templateName = $"'{templateName}'";
+                throw new ArgumentException($"{nameof(templateName)} should not be empty when {nameof(usePlaceholder)} is false and no additional arguments is given.", nameof(templateName));
+            }
+            string commandStr = $"dotnet {command.CommandName}";
+            if (!string.IsNullOrWhiteSpace(templateName))
+            {
+                if (templateName?.Any(char.IsWhiteSpace) ?? false)
+                {
+                    templateName = $"'{templateName}'";
+                }
+                commandStr += $" {templateName}";
             }
 
-            return $"dotnet {command.CommandName} {templateName} --search";
+            commandStr += $" --search";
+            if (additionalArgs?.Any() ?? false)
+            {
+                commandStr += $" {string.Join(" ", additionalArgs)}";
+            }
+            return commandStr;
         }
 
         internal static string UninstallCommandExample(this INewCommandInput command, string packageId = "", bool noArgs = false)

@@ -274,9 +274,16 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         .Bold().Red());
                 }
 
-                // To search for the templates on NuGet.org, run 'dotnet {0} <template name> --search'.
-                Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand.Bold().Red());
-                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName).Bold().Red());
+                // To search for the templates on NuGet.org, run:
+                Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+                if (string.IsNullOrWhiteSpace(commandInput.TemplateName))
+                {
+                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(usePlaceholder: true));
+                }
+                else
+                {
+                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName));
+                }
                 Reporter.Error.WriteLine();
                 return New3CommandStatus.NotFound;
             }
@@ -479,9 +486,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             reporter.WriteLine(formatter.Layout());
         }
 
-#pragma warning disable SA1204 // Static elements should appear before instance elements
-        private static string GetInputParametersString(IEnumerable<FilterOption> supportedFilters, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
-#pragma warning restore SA1204 // Static elements should appear before instance elements
+#pragma warning disable SA1202 // Elements should be ordered by access
+        internal static string GetInputParametersString(IEnumerable<FilterOption> supportedFilters, INewCommandInput commandInput, IReadOnlyDictionary<string, string?>? templateParameters = null)
+#pragma warning restore SA1202 // Elements should be ordered by access
         {
             string separator = ", ";
             IEnumerable<string> appliedFilters = supportedFilters
@@ -500,13 +507,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                     inputParameters.Append(separator);
                 }
             }
-            if (appliedFilters.Any())
+            if (appliedFilters.Concat(appliedTemplateParameters).Any())
             {
-                inputParameters.Append(string.Join(separator, appliedFilters));
-            }
-            if (appliedTemplateParameters.Any())
-            {
-                inputParameters.Append(string.Join(separator, appliedTemplateParameters));
+                inputParameters.Append(string.Join(separator, appliedFilters.Concat(appliedTemplateParameters)));
             }
             return inputParameters.ToString();
         }
@@ -526,13 +529,9 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                    .Select(param => string.IsNullOrWhiteSpace(param.Value) ? param.Key : $"{param.Key}='{param.Value}'") ?? Array.Empty<string>();
 
             StringBuilder inputParameters = new StringBuilder();
-            if (appliedFilters.Any())
+            if (appliedFilters.Concat(appliedTemplateParameters).Any())
             {
-                inputParameters.Append(string.Join(separator, appliedFilters));
-            }
-            if (appliedTemplateParameters.Any())
-            {
-                inputParameters.Append(string.Join(separator, appliedTemplateParameters));
+                inputParameters.Append(string.Join(separator, appliedFilters.Concat(appliedTemplateParameters)));
             }
             return inputParameters.ToString();
         }

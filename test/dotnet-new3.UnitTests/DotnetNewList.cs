@@ -473,10 +473,18 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.HaveStdErrContaining("No templates found matching: 'c', --unknown.")
                 .And.HaveStdErrContaining("6 template(s) partially matched, but failed on --unknown.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
+
+            new DotnetNewCommand(_log, "c", "--list", "--unknown", "--language", "C#")
+              .WithCustomHive(_sharedHome.HomeDirectory)
+              .Execute()
+              .Should().Fail()
+              .And.HaveStdErrContaining("No templates found matching: 'c', language='C#', --unknown.")
+              .And.HaveStdErrContaining("6 template(s) partially matched, but failed on language='C#', --unknown.")
+              .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
         }
 
         [Fact]
-        public void CannotListTemplatesWithValueForChoiceParameter()
+        public void CannotListTemplatesWithUnknownValueForChoiceParameter()
         {
             new DotnetNewCommand(_log, "--list")
                 .WithCustomHive(_sharedHome.HomeDirectory)

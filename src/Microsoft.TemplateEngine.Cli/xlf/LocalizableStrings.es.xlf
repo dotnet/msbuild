@@ -261,6 +261,46 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">Cambiar</target>
         <note />
       </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoSources">
+        <source>No remoted sources defined to search for the templates.</source>
+        <target state="new">No remoted sources defined to search for the templates.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
+        <source>Search failed: no template name is specified.</source>
+        <target state="new">Search failed: no template name is specified.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
+        <source>Template '{0}' was not found.</source>
+        <target state="new">Template '{0}' was not found.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
+        <source>Search failed: template name is too short, minimum 2 characters are required.</source>
+        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
+        <source>To use the template, run the following command to install the package:</source>
+        <target state="new">To use the template, run the following command to install the package:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
+        <source>Matches from template source: {0}</source>
+        <target state="new">Matches from template source: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
+        <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
+        <target state="new">To search for the template, specify template name or use one of supported filters: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
+        <source>Searching for the templates...</source>
+        <target state="new">Searching for the templates...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ColumnNameAuthor">
         <source>Author</source>
         <target state="translated">Autor</target>
@@ -455,6 +495,16 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
       <trans-unit id="Generic_Details">
         <source>Details: {0}</source>
         <target state="translated">Detalles: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_ExampleHeader">
+        <source>Example:</source>
+        <target state="new">Example:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_ExamplesHeader">
+        <source>Examples:</source>
+        <target state="new">Examples:</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
@@ -707,56 +757,6 @@ Las columnas admitidas son: idioma, etiquetas, autor y tipo.</target>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
         <target state="translated">Ejecutando "dotnet restore" en {0}...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineErrorNoTemplateNameOrFilter">
-        <source>Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}.
-Examples:
-        dotnet {1} &lt;template name&gt; --search
-        dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;template name&gt; --search --author Microsoft</source>
-        <target state="translated">No se pudo realizar la búsqueda: no se especificó ningún nombre de plantilla.
-Para buscar la plantilla, especifique el nombre de la plantilla o use uno de los filtros admitidos. {0}.
-Ejemplos:
-        dotnet {1} &lt;template name&gt; --search
-        dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;template name&gt; --search --author Microsoft</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineErrorTemplateNameIsTooShort">
-        <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="translated">No se pudo realizar la búsqueda: el nombre de la plantilla es demasiado corto, se requieren 2 caracteres como mínimo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineNoSources">
-        <source>No remoted sources defined to search for the templates.</source>
-        <target state="translated">No hay ningún origen remoto definido para buscar las plantillas.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineNotification">
-        <source>Searching for the templates...</source>
-        <target state="translated">Buscando las plantillas...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineTemplateNotFound">
-        <source>Template '{0}' was not found.</source>
-        <target state="translated">No se encontró la plantilla "{0}".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchResultInstallCommand">
-        <source>        dotnet {0} -i {1}</source>
-        <target state="translated">        dotnet {0} -i {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchResultInstallHeader">
-        <source>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</source>
-        <target state="translated">Para usar la plantilla, ejecute el siguiente comando para instalar el paquete: dotnet {0} -i &lt;package&gt;</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchResultSourceIndicator">
-        <source>Matches from template source: {0}</source>
-        <target state="translated">Coincidencias de origen de plantilla: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">

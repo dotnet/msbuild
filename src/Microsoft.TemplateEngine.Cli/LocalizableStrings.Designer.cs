@@ -509,6 +509,78 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No remoted sources defined to search for the templates..
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Error_NoSources {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Error_NoSources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search failed: no template name is specified..
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Error_NoTemplateName {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Error_NoTemplateName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template &apos;{0}&apos; was not found..
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Error_NotFound {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Error_NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search failed: template name is too short, minimum 2 characters are required..
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To use the template, run the following command to install the package:.
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Info_InstallHelp {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Info_InstallHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Matches from template source: {0}.
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Info_MatchesFromSource {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Info_MatchesFromSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To search for the template, specify template name or use one of supported filters: {0}..
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Info_SearchHelp {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Info_SearchHelp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Searching for the templates....
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Info_SearchInProgress {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Info_SearchInProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Author.
         /// </summary>
         internal static string ColumnNameAuthor {
@@ -832,6 +904,24 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string Generic_Details {
             get {
                 return ResourceManager.GetString("Generic_Details", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Example:.
+        /// </summary>
+        internal static string Generic_ExampleHeader {
+            get {
+                return ResourceManager.GetString("Generic_ExampleHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Examples:.
+        /// </summary>
+        internal static string Generic_ExamplesHeader {
+            get {
+                return ResourceManager.GetString("Generic_ExamplesHeader", resourceCulture);
             }
         }
         
@@ -1301,83 +1391,6 @@ namespace Microsoft.TemplateEngine.Cli {
         internal static string RunningDotnetRestoreOn {
             get {
                 return ResourceManager.GetString("RunningDotnetRestoreOn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Search failed: no template name is specified.
-        ///To search for the template, specify template name or use one of supported filters: {0}.
-        ///Examples:
-        ///        dotnet {1} &lt;template name&gt; --search
-        ///        dotnet {1} --search --author Microsoft
-        ///        dotnet {1} &lt;template name&gt; --search --author Microsoft.
-        /// </summary>
-        internal static string SearchOnlineErrorNoTemplateNameOrFilter {
-            get {
-                return ResourceManager.GetString("SearchOnlineErrorNoTemplateNameOrFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Search failed: template name is too short, minimum 2 characters are required..
-        /// </summary>
-        internal static string SearchOnlineErrorTemplateNameIsTooShort {
-            get {
-                return ResourceManager.GetString("SearchOnlineErrorTemplateNameIsTooShort", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No remoted sources defined to search for the templates..
-        /// </summary>
-        internal static string SearchOnlineNoSources {
-            get {
-                return ResourceManager.GetString("SearchOnlineNoSources", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Searching for the templates....
-        /// </summary>
-        internal static string SearchOnlineNotification {
-            get {
-                return ResourceManager.GetString("SearchOnlineNotification", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Template &apos;{0}&apos; was not found..
-        /// </summary>
-        internal static string SearchOnlineTemplateNotFound {
-            get {
-                return ResourceManager.GetString("SearchOnlineTemplateNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to         dotnet {0} -i {1}.
-        /// </summary>
-        internal static string SearchResultInstallCommand {
-            get {
-                return ResourceManager.GetString("SearchResultInstallCommand", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;.
-        /// </summary>
-        internal static string SearchResultInstallHeader {
-            get {
-                return ResourceManager.GetString("SearchResultInstallHeader", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Matches from template source: {0}.
-        /// </summary>
-        internal static string SearchResultSourceIndicator {
-            get {
-                return ResourceManager.GetString("SearchResultSourceIndicator", resourceCulture);
             }
         }
         

@@ -9,7 +9,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
+using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TableOutput;
+using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateSearch.Common;
 
@@ -37,9 +39,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         /// <param name="templatePackageManager"></param>
         /// <param name="commandInput">new command data.</param>
         /// <param name="defaultLanguage">default language for the host.</param>
-        /// <returns><c>New3CommandStatus.Success</c> when the templates were found and displayed;
-        /// <c>New3CommandStatus.Cancelled</c> when the command validation fails;
-        /// <c>New3CommandStatus.NotFound</c> when no templates found based on the filter criteria.
+        /// <returns><see cref="New3CommandStatus.Success"/> when the templates were found and displayed;
+        /// <see cref="New3CommandStatus.Cancelled"/> when the command validation fails;
+        /// <see cref="New3CommandStatus.NotFound"/> when no templates found based on the filter criteria.
         /// </returns>
         internal static async Task<New3CommandStatus> SearchForTemplateMatchesAsync(IEngineEnvironmentSettings environmentSettings, TemplatePackageManager templatePackageManager, INewCommandInput commandInput, string? defaultLanguage)
         {
@@ -48,14 +50,14 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 return New3CommandStatus.Cancelled;
             }
 
-            Reporter.Output.WriteLine(LocalizableStrings.SearchOnlineNotification);
+            Reporter.Output.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchInProgress);
             TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings, commandInput, defaultLanguage);
             var templatePackages = await templatePackageManager.GetTemplatePackagesAsync(force: false, cancellationToken: default).ConfigureAwait(false);
             SearchResults searchResults = await searchCoordinator.SearchAsync(templatePackages, default).ConfigureAwait(false);
 
             if (!searchResults.AnySources)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.SearchOnlineNoSources.Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoSources.Bold().Red());
                 return New3CommandStatus.NotFound;
             }
 
@@ -74,32 +76,58 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 }
 
                 Reporter.Output.WriteLine();
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.SearchResultInstallHeader, commandInput.CommandName));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp, commandInput.CommandName));
+                Reporter.Output.WriteCommand(commandInput.InstallCommandExample());
                 if (string.IsNullOrWhiteSpace(packageIdToShow))
                 {
                     packageIdToShow = searchResults.MatchesBySource[0].PacksWithMatches.First().Key.Name;
                 }
-                Reporter.Output.WriteLine("Example:");
-                Reporter.Output.WriteLine(string.Format(LocalizableStrings.SearchResultInstallCommand, commandInput.CommandName, packageIdToShow));
+                Reporter.Output.WriteLine(LocalizableStrings.Generic_ExampleHeader);
+                Reporter.Output.WriteCommand(commandInput.InstallCommandExample(packageID: packageIdToShow));
                 return New3CommandStatus.Success;
             }
             else
             {
-                string filters = string.Join(", ", SupportedFilters.Where(filter => filter.IsFilterSet(commandInput)).Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
-                string searchCriteria = string.IsNullOrWhiteSpace(commandInput.TemplateName)
-                    ? filters
-                    : string.IsNullOrWhiteSpace(filters) ? commandInput.TemplateName : string.Join(", ", commandInput.TemplateName, filters);
+                IReadOnlyDictionary<string, string?>? appliedParameterMatches = GetTemplateParametersFromCommand(commandInput);
+                // No templates found matching the following input parameter(s): {0}.
+                Reporter.Error.WriteLine(
+                    string.Format(
+                        LocalizableStrings.NoTemplatesMatchingInputParameters,
+                        TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches))
+                    .Bold().Red());
 
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, searchCriteria).Bold().Red());
                 return New3CommandStatus.NotFound;
             }
         }
 
+        private static IReadOnlyDictionary<string, string?>? GetAllMatchedParametersList(TemplateSourceSearchResult sourceResult)
+        {
+            Dictionary<string, string?> parameterList = new Dictionary<string, string?>();
+            if (!sourceResult.PacksWithMatches.Any())
+            {
+                return parameterList;
+            }
+            foreach (var pack in sourceResult.PacksWithMatches.Values)
+            {
+                foreach (ParameterMatchInfo parameterMatchInfo in pack.TemplateMatches.SelectMany(template => template.MatchDisposition.OfType<ParameterMatchInfo>()))
+                {
+                    if (!string.IsNullOrWhiteSpace(parameterMatchInfo.Value) || !parameterList.ContainsKey(parameterMatchInfo.InputFormat ?? parameterMatchInfo.Name))
+                    {
+                        parameterList[parameterMatchInfo.InputFormat ?? parameterMatchInfo.Name] = parameterMatchInfo.Value;
+                    }
+                }
+            }
+            return parameterList;
+        }
+
         private static void DisplayResultsForPack(TemplateSourceSearchResult sourceResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage)
         {
-            string sourceHeader = string.Format(LocalizableStrings.SearchResultSourceIndicator, sourceResult.SourceDisplayName);
-
-            Reporter.Output.WriteLine(sourceHeader);
+            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, sourceResult.SourceDisplayName));
+            IReadOnlyDictionary<string, string?>? appliedParameterMatches = GetAllMatchedParametersList(sourceResult);
+            Reporter.Output.WriteLine(
+                string.Format(
+                    LocalizableStrings.TemplatesFoundMatchingInputParameters,
+                    TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches)));
             Reporter.Output.WriteLine();
 
             IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(sourceResult, commandInput.Language, defaultLanguage);
@@ -141,22 +169,51 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         private static bool ValidateCommandInput(INewCommandInput commandInput)
         {
-            if (string.IsNullOrWhiteSpace(commandInput.TemplateName) && SupportedFilters.All(filter => !filter.IsFilterSet(commandInput)))
+            if (string.IsNullOrWhiteSpace(commandInput.TemplateName) && SupportedFilters.All(filter => !filter.IsFilterSet(commandInput)) && !commandInput.RemainingParameters.Any())
             {
-                Reporter.Error.WriteLine(string.Format(
-                                            LocalizableStrings.SearchOnlineErrorNoTemplateNameOrFilter,
-                                            string.Join(", ", SupportedFilters.Select(f => $"'{f.Name}'")),
-                                            commandInput.CommandName).Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoTemplateName.Red().Bold());
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SupportedFilters.Select(f => $"'{f.Name}'"))));
+                Reporter.Error.WriteLine(LocalizableStrings.Generic_ExamplesHeader);
+                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(usePlaceholder: true));
+                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(additionalArgs: new[] { "--author", "Microsoft" }));
+                Reporter.Error.WriteCommand(commandInput.SearchCommandExample(usePlaceholder: true, additionalArgs: new[] { "--author", "Microsoft" }));
                 return false;
             }
 
             if (!string.IsNullOrWhiteSpace(commandInput.TemplateName) && commandInput.TemplateName.Length < 2)
             {
-                Reporter.Error.WriteLine(LocalizableStrings.SearchOnlineErrorTemplateNameIsTooShort.Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort.Bold().Red());
                 return false;
             }
 
             return true;
+        }
+
+        private static IReadOnlyDictionary<string, string?> GetTemplateParametersFromCommand(INewCommandInput commandInput)
+        {
+            Dictionary<string, string?>? appliedParameterMatches = new Dictionary<string, string?>();
+            int i = 0;
+            while (i < commandInput.RemainingParameters.Count)
+            {
+                if (commandInput.RemainingParameters[i].StartsWith("-"))
+                {
+                    if (i + 1 >= commandInput.RemainingParameters.Count || commandInput.RemainingParameters[i + 1].StartsWith("-"))
+                    {
+                        appliedParameterMatches[commandInput.RemainingParameters[i]] = null;
+                        i++;
+                    }
+                    else
+                    {
+                        appliedParameterMatches[commandInput.RemainingParameters[i]] = commandInput.RemainingParameters[i + 1];
+                        i += 2;
+                    }
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            return appliedParameterMatches;
         }
 
         /// <summary>

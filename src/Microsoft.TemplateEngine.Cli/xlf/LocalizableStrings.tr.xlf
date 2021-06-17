@@ -261,6 +261,46 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Değişiklik</target>
         <note />
       </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoSources">
+        <source>No remoted sources defined to search for the templates.</source>
+        <target state="new">No remoted sources defined to search for the templates.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
+        <source>Search failed: no template name is specified.</source>
+        <target state="new">Search failed: no template name is specified.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
+        <source>Template '{0}' was not found.</source>
+        <target state="new">Template '{0}' was not found.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
+        <source>Search failed: template name is too short, minimum 2 characters are required.</source>
+        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
+        <source>To use the template, run the following command to install the package:</source>
+        <target state="new">To use the template, run the following command to install the package:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
+        <source>Matches from template source: {0}</source>
+        <target state="new">Matches from template source: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
+        <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
+        <target state="new">To search for the template, specify template name or use one of supported filters: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
+        <source>Searching for the templates...</source>
+        <target state="new">Searching for the templates...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ColumnNameAuthor">
         <source>Author</source>
         <target state="translated">Yazar</target>
@@ -455,6 +495,16 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       <trans-unit id="Generic_Details">
         <source>Details: {0}</source>
         <target state="translated">Ayrıntılar: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_ExampleHeader">
+        <source>Example:</source>
+        <target state="new">Example:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Generic_ExamplesHeader">
+        <source>Examples:</source>
+        <target state="new">Examples:</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
@@ -707,56 +757,6 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
         <target state="translated">'dotnet restore' {0} üzerinde çalıştırılıyor...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineErrorNoTemplateNameOrFilter">
-        <source>Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}.
-Examples:
-        dotnet {1} &lt;template name&gt; --search
-        dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;template name&gt; --search --author Microsoft</source>
-        <target state="translated">Arama başarısız oldu: şablon adı belirtilemedi.
-Şablonu aramak için şablon adını belirtin veya desteklenen filtrelerden birini kullanın: {0}.
-Örnekler:
-        dotnet {1} &lt;şablon adı&gt; --search
-        dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;şablon adı&gt; --search --author Microsoft</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineErrorTemplateNameIsTooShort">
-        <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="translated">Arama başarısız: şablon adı çok kısa, en az 2 karakter gerekiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineNoSources">
-        <source>No remoted sources defined to search for the templates.</source>
-        <target state="translated">Şablonları aramak için tanımlanmış uzak kaynak yok.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineNotification">
-        <source>Searching for the templates...</source>
-        <target state="translated">Şablonlar aranıyor...</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchOnlineTemplateNotFound">
-        <source>Template '{0}' was not found.</source>
-        <target state="translated">'{0}' şablonu bulunamadı.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchResultInstallCommand">
-        <source>        dotnet {0} -i {1}</source>
-        <target state="translated">        dotnet {0} -i {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchResultInstallHeader">
-        <source>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</source>
-        <target state="translated">Şablonu kullanmak için şu komutu çalıştırarak paketi yükleyin: dotnet {0} -i &lt;package&gt;</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SearchResultSourceIndicator">
-        <source>Matches from template source: {0}</source>
-        <target state="translated">Şablon kaynağındaki eşleşmeler: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">

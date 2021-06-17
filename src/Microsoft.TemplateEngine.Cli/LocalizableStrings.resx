@@ -487,16 +487,13 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="TemplatePackageCoordinator_Error_PackageForTemplateNotFound" xml:space="preserve">
     <value>Could not find the template package containing template '{0}'</value>
   </data>
-  <data name="SearchOnlineNotification" xml:space="preserve">
+  <data name="CliTemplateSearchCoordinator_Info_SearchInProgress" xml:space="preserve">
     <value>Searching for the templates...</value>
   </data>
-  <data name="SearchResultInstallCommand" xml:space="preserve">
-    <value>        dotnet {0} -i {1}</value>
+  <data name="CliTemplateSearchCoordinator_Info_InstallHelp" xml:space="preserve">
+    <value>To use the template, run the following command to install the package:</value>
   </data>
-  <data name="SearchResultInstallHeader" xml:space="preserve">
-    <value>To use the template, run the following command to install the package: dotnet {0} -i &lt;package&gt;</value>
-  </data>
-  <data name="SearchResultSourceIndicator" xml:space="preserve">
+  <data name="CliTemplateSearchCoordinator_Info_MatchesFromSource" xml:space="preserve">
     <value>Matches from template source: {0}</value>
   </data>
   <data name="UpdateApplyCommandHelp" xml:space="preserve">
@@ -536,18 +533,10 @@ The supported columns are: language, tags, author, type.</value>
   <data name="OptionDescriptionSearch" xml:space="preserve">
     <value>Searches for the templates on NuGet.org.</value>
   </data>
-  <data name="SearchOnlineErrorNoTemplateNameOrFilter" xml:space="preserve">
-    <value>Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: {0}.
-Examples:
-        dotnet {1} &lt;template name&gt; --search
-        dotnet {1} --search --author Microsoft
-        dotnet {1} &lt;template name&gt; --search --author Microsoft</value>
-  </data>
-  <data name="SearchOnlineNoSources" xml:space="preserve">
+  <data name="CliTemplateSearchCoordinator_Error_NoSources" xml:space="preserve">
     <value>No remoted sources defined to search for the templates.</value>
   </data>
-  <data name="SearchOnlineTemplateNotFound" xml:space="preserve">
+  <data name="CliTemplateSearchCoordinator_Error_NotFound" xml:space="preserve">
     <value>Template '{0}' was not found.</value>
   </data>
   <data name="OptionDescriptionAuthorFilter" xml:space="preserve">
@@ -556,7 +545,7 @@ Examples:
   <data name="OptionDescriptionPackageFilter" xml:space="preserve">
     <value>Filters the templates based on NuGet package ID. Applies to --search.</value>
   </data>
-  <data name="SearchOnlineErrorTemplateNameIsTooShort" xml:space="preserve">
+  <data name="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort" xml:space="preserve">
     <value>Search failed: template name is too short, minimum 2 characters are required.</value>
   </data>
   <data name="ColumnNamePackage" xml:space="preserve">
@@ -744,5 +733,17 @@ Examples:
   </data>
   <data name="TemplateInformationCoordinator_DotnetNew_TemplatesHeader" xml:space="preserve">
     <value>Common templates are:</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Error_NoTemplateName" xml:space="preserve">
+    <value>Search failed: no template name is specified.</value>
+  </data>
+  <data name="CliTemplateSearchCoordinator_Info_SearchHelp" xml:space="preserve">
+    <value>To search for the template, specify template name or use one of supported filters: {0}.</value>
+  </data>
+  <data name="Generic_ExampleHeader" xml:space="preserve">
+    <value>Example:</value>
+  </data>
+  <data name="Generic_ExamplesHeader" xml:space="preserve">
+    <value>Examples:</value>
   </data>
 </root>
