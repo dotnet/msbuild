@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ConfigOption);
             command.AddOption(AddSourceOption);
             command.AddOption(VerbosityOption);
-
+            command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
             return command;
         }
     }

@@ -82,15 +82,19 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
+            var restoreActionConfig = _parseResult.ToRestoreActionConfig();
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
-                                          new NullLogger());
-            _workloadInstaller = workloadInstaller ?? 
-                WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, _nugetPackageDownloader, _dotnetPath, _tempDirPath, _packageSourceLocation);
+                                          new NullLogger(), restoreActionConfig: restoreActionConfig);
+            _workloadInstaller = workloadInstaller ??
+                                 WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand,
+                                     _workloadResolver, _verbosity, _nugetPackageDownloader, _dotnetPath, _tempDirPath,
+                                     _packageSourceLocation, restoreActionConfig);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
+                _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
 
             ValidateWorkloadIdsInput();
         }

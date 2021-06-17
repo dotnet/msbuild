@@ -43,10 +43,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(DownloadToCacheOption);
             command.AddOption(TempDirOption);
             command.AddOption(FromPreviousSdkOption);
-            command.AddOption(WorkloadCommandRestorePassThroughOptions.DisableParallelOption);
-            command.AddOption(WorkloadCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
-            command.AddOption(WorkloadCommandRestorePassThroughOptions.NoCacheOption);
-            command.AddOption(WorkloadCommandRestorePassThroughOptions.InteractiveRestoreOption);
+            command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
             command.AddOption(VerbosityOption);
 
             return command;
