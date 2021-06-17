@@ -32,7 +32,12 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly IHostSpecificDataLoader _hostDataLoader;
         private readonly PostActionDispatcher _postActionDispatcher;
 
-        internal TemplateInvoker(IEngineEnvironmentSettings environment, ITelemetryLogger telemetryLogger, Func<string> inputGetter, New3Callbacks callbacks)
+        internal TemplateInvoker(
+            IEngineEnvironmentSettings environment,
+            ITelemetryLogger telemetryLogger,
+            Func<string> inputGetter,
+            New3Callbacks callbacks,
+            IHostSpecificDataLoader hostDataLoader)
         {
             _environment = environment;
             _telemetryLogger = telemetryLogger;
@@ -40,7 +45,7 @@ namespace Microsoft.TemplateEngine.Cli
             _callbacks = callbacks;
 
             _templateCreator = new TemplateCreator(_environment);
-            _hostDataLoader = new HostSpecificDataLoader(_environment);
+            _hostDataLoader = hostDataLoader;
             _postActionDispatcher = new PostActionDispatcher(_environment, _callbacks, _inputGetter);
         }
 

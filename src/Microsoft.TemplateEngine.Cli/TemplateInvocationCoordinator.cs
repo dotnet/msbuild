@@ -44,7 +44,7 @@ namespace Microsoft.TemplateEngine.Cli
             _templatePackageManager = templatePackageManager ?? throw new ArgumentNullException(nameof(templatePackageManager));
             _templateInformationCoordinator = templateInformationCoordinator ?? throw new ArgumentNullException(nameof(templateInformationCoordinator));
             _hostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
-            _invoker = new TemplateInvoker(_environment, _telemetryLogger, _inputGetter, _callbacks);
+            _invoker = new TemplateInvoker(_environment, _telemetryLogger, _inputGetter, _callbacks, _hostSpecificDataLoader);
         }
 
         internal async Task<New3CommandStatus> CoordinateInvocationAsync(INewCommandInput commandInput, CancellationToken cancellationToken)

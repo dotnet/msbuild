@@ -1,8 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Concurrent;
 using System.IO;
+using Microsoft.Extensions.Logging;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -37,14 +39,23 @@ namespace Microsoft.TemplateEngine.Cli
 
             if (templateInfo is ITemplateInfoHostJsonCache { HostData: JObject hostData })
             {
-                return new HostSpecificTemplateData(hostData);
+                try
+                {
+                    return new HostSpecificTemplateData(hostData);
+                }
+                catch (Exception e)
+                {
+                    _engineEnvironment.Host.Logger.LogDebug(e, $"Failed to load host data for template {templateInfo.ShortNameList?[0] ?? templateInfo.Name}: the json data in {nameof(ITemplateInfoHostJsonCache.HostData)} is incorrect.");
+                    return HostSpecificTemplateData.Default;
+                }
             }
 
+            IFile? file = null;
             try
             {
-                if (!string.IsNullOrEmpty(templateInfo.HostConfigPlace) && _engineEnvironment.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint))
+                if (!string.IsNullOrEmpty(templateInfo.HostConfigPlace) && _engineEnvironment.TryGetMountPoint(templateInfo.MountPointUri, out mountPoint) && mountPoint != null)
                 {
-                    var file = mountPoint!.FileInfo(templateInfo.HostConfigPlace);
+                    file = mountPoint.FileInfo(templateInfo.HostConfigPlace);
                     if (file != null && file.Exists)
                     {
                         JObject jsonData;
@@ -59,15 +70,15 @@ namespace Microsoft.TemplateEngine.Cli
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
-                // ignore malformed host files
+                _engineEnvironment.Host.Logger.LogDebug(e, $"Failed to load host data for template {templateInfo.ShortNameList?[0] ?? templateInfo.Name}, file: " +
+                    $"{file?.GetDisplayPath() ?? templateInfo.MountPointUri + templateInfo.HostConfigPlace}");
             }
             finally
             {
                 mountPoint?.Dispose();
             }
-
             return HostSpecificTemplateData.Default;
         }
     }
