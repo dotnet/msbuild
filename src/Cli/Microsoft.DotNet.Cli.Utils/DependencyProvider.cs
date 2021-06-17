@@ -24,6 +24,7 @@ namespace Microsoft.DotNet.Cli.Utils
     /// dependent entry. If there are no other dependents, it can proceed to remove the MSI, otherwise it should do nothing.
     /// </para>
     /// </summary>
+#pragma warning disable CA1416
     public sealed class DependencyProvider
     {
         /// <summary>
@@ -159,4 +160,5 @@ namespace Microsoft.DotNet.Cli.Utils
             return dependentsKey?.GetSubKeyNames() ?? Enumerable.Empty<string>();
         }
     }
+#pragma warning restore CA1416
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System.Runtime.Versioning;
 using System.Security.Principal;
 using System.Threading;
 
@@ -10,6 +11,9 @@ namespace Microsoft.DotNet.Cli.Utils
     /// <summary>
     /// Utility methods, specific to Windows.
     /// </summary>
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static class Windows
     {
         /// <summary>

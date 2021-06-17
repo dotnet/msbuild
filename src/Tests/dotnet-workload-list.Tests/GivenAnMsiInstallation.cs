@@ -11,6 +11,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {
+#pragma warning disable CA1416
     [Collection("MsiWorkloadRecords")]
     public class GivenAnMsiInstallation : IDisposable
     {
@@ -71,4 +72,5 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             RecordManager.WriteWorkloadInstallationRecord(new WorkloadId(workloadId), new SdkFeatureBand(sdkFeatureBand));
         }
     }
+#pragma warning restore CA1416
 }

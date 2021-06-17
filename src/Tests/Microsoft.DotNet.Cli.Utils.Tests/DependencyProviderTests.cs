@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Utils.Tests
 {
+#pragma warning disable CA1416
     public class DependencyProviderTests
     {
         [WindowsOnlyTheory]
@@ -96,4 +97,5 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             }
         }
     }
+#pragma warning restore CA1416
 }
