@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.100-preview.7.21317.2">
+    <Dependency Name="Microsoft.TemplateEngine.Cli" Version="6.0.100-preview.7.21317.3">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>365597b81153eb9fe3fd010689c9d2d8fc615895</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.100-preview.7.21317.2">
+    <Dependency Name="Microsoft.TemplateEngine.Abstractions" Version="6.0.100-preview.7.21317.3">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>365597b81153eb9fe3fd010689c9d2d8fc615895</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.100-preview.7.21317.2">
+    <Dependency Name="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="6.0.100-preview.7.21317.3">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>365597b81153eb9fe3fd010689c9d2d8fc615895</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.100-preview.7.21317.2">
+    <Dependency Name="Microsoft.TemplateEngine.Utils" Version="6.0.100-preview.7.21317.3">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>365597b81153eb9fe3fd010689c9d2d8fc615895</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.100-preview.7.21317.2">
+    <Dependency Name="Microsoft.TemplateSearch.Common" Version="6.0.100-preview.7.21317.3">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>365597b81153eb9fe3fd010689c9d2d8fc615895</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.100-preview.7.21317.2">
+    <Dependency Name="Microsoft.DotNet.Common.ItemTemplates" Version="6.0.100-preview.7.21317.3">
       <Uri>https://github.com/dotnet/templating</Uri>
       <Sha>365597b81153eb9fe3fd010689c9d2d8fc615895</Sha>
     </Dependency>
