@@ -14,9 +14,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 {
     internal class MockNewCommandInput : INewCommandInput, IXunitSerializable
     {
-        // a list of all the parameters defined by the template
-        private IReadOnlyList<string> _allParametersForTemplate;
-
         private Dictionary<string, string?> _templateOptions;
         private Dictionary<string, string?> _commandOptions;
 
@@ -35,8 +32,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public MockNewCommandInput()
         {
-            RemainingParameters = new List<string>();
-            _allParametersForTemplate = new List<string>();
             _commandOptions = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
             _templateOptions = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         }
@@ -105,7 +100,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         // When using this mock, set the inputs using constructor input.
         // This property gets assigned based on the constructor input and the template being worked with.
-        public IReadOnlyList<string> RemainingParameters { get; private set; }
+        public IReadOnlyList<string> RemainingParameters
+        {
+            get
+            {
+                List<string> remainingParams = new List<string>();
+                foreach (var option in _templateOptions)
+                {
+                    remainingParams.Add(option.Key);
+                    if (!string.IsNullOrWhiteSpace(option.Value))
+                    {
+                        remainingParams.Add(option.Value);
+                    }
+                }
+                return remainingParams;
+            }
+        }
 
         public bool SearchOnline { get; }
 

@@ -114,11 +114,9 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 commandName,
                 LocalizableStrings.CommandDescription,
                 Accept.NoArguments(),
-                true,
+                treatUnmatchedTokensAsErrors: true,
                 combinedArgs);
         }
-
-        internal static Command CreateNewCommandWithoutTemplateInfo(string commandName) => GetNewCommand(commandName, NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
 
         // Creates a command setup with the args for "new", plus args for the input template parameters.
         internal static Command CreateNewCommandWithArgsForTemplate(
@@ -176,14 +174,14 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return GetNewCommandForTemplate(commandName, templateName, NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs, paramOptionList.ToArray());
         }
 
-        private static Command GetNewCommand(string commandName, params Option[][] args)
+        internal static Command CreateNewCommandWithoutTemplateInfo(string commandName)
         {
-            Option[] combinedArgs = ArrayExtensions.CombineArrays(args);
-
+            Option[] combinedArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
             return Create.Command(
                 commandName,
                 LocalizableStrings.CommandDescription,
-                Accept.ZeroOrMoreArguments(),    // this can't be ZeroOrOneArguments() because template args would cause errors
+                Accept.ZeroOrOneArgument(),
+                treatUnmatchedTokensAsErrors: false,
                 combinedArgs);
         }
 

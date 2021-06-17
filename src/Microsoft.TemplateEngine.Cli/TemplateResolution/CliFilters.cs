@@ -254,6 +254,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             {
                 try
                 {
+                    //do not reparse if base command input doesn't have template parameters
+                    if (!commandInput.RemainingParameters.Any())
+                    {
+                        return Array.Empty<MatchInfo>();
+                    }
                     TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, hostDataLoader.ReadHostSpecificTemplateData(template));
 
                     Dictionary<string, ITemplateParameter> templateParameters =
