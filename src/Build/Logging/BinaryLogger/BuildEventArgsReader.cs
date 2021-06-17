@@ -307,7 +307,7 @@ namespace Microsoft.Build.Logging
 
                 // Attempt to infer skip reason from the data we have
                 skipReason = condition != null ?
-                    TargetSkipReason.ConditionWasFalse
+                    TargetSkipReason.ConditionWasFalse // condition expression only stored when false
                     : originallySucceeded ?
                         TargetSkipReason.PreviouslyBuiltSuccessfully
                         : TargetSkipReason.PreviouslyBuiltUnsuccessfully;
