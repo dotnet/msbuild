@@ -4232,6 +4232,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup Condition="'$(PublishSingleFile)' == 'true'">
       <_ClickOnceFiles Include="$(PublishedSingleFilePath)"/>
       <_ClickOnceFiles Include="@(_FilesExcludedFromBundle)"/>
+
+      <!-- Include file association icons from Content as loose files -->
+      <_FileAssociationIcons Include="%(FileAssociation.DefaultIcon)"/>
+      <_ClickOnceFiles Include="@(ContentWithTargetPath)" Condition="'%(Identity)'=='@(_FileAssociationIcons)'"/>
     </ItemGroup>
 
     <!-- For single file publish in .net core app, sign the SF EXE if signing is enabled -->
