@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
-        <target state="new">MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</target>
+        <target state="translated">MSB4274: Al deshabilitar el nodo InProc, se degrada el rendimiento cuando use los complementos de caché de proyectos que emiten solicitudes de compilación de proxy.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
