@@ -304,6 +304,13 @@ namespace Microsoft.Build.Logging
                 condition = ReadOptionalString();
                 evaluatedCondition = ReadOptionalString();
                 originallySucceeded = ReadBoolean();
+
+                // Attempt to infer skip reason from the data we have
+                skipReason = condition != null ?
+                    TargetSkipReason.ConditionWasFalse
+                    : originallySucceeded ?
+                        TargetSkipReason.PreviouslyBuiltSuccessfully
+                        : TargetSkipReason.PreviouslyBuiltUnsuccessfully;
             }
 
             var buildReason = (TargetBuiltReason)ReadInt32();
