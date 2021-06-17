@@ -6,7 +6,6 @@
     <TargetFramework Condition="'$(target-framework-override)' != ''">target-framework-override</TargetFramework>
     <LangVersion Condition="'$(langVersion)' != ''">$(ProjectLanguageVersion)</LangVersion>
     <Nullable Condition="'$(nullable)' == 'true'">enable</Nullable>
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
 
 </Project>
