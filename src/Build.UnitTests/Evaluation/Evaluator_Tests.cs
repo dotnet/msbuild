@@ -2587,6 +2587,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Project project = new Project(xml);
 
             string msbuildVersionProperty = project.GetPropertyValue("MSBuildVersion");
+            string msbuildFileVersionProperty = project.GetPropertyValue("MSBuildFileVersion");
+            string msbuildSemanticVersionProperty = project.GetPropertyValue("MSBuildSemanticVersion");
 
             Version.TryParse(msbuildVersionProperty, out Version msbuildVersionAsVersion).ShouldBeTrue();
 
@@ -2596,9 +2598,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Version parses missing elements into -1, and this property should be Major.Minor.Patch only
             msbuildVersionAsVersion.Revision.ShouldBe(-1);
 
+            msbuildFileVersionProperty.ShouldBe(ProjectCollection.Version.ToString());
             ProjectCollection.Version.ToString().ShouldStartWith(msbuildVersionProperty,
                 "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
 
+            msbuildSemanticVersionProperty.ShouldBe(ProjectCollection.DisplayVersion);
             ProjectCollection.DisplayVersion.ShouldStartWith(msbuildVersionProperty,
                 "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
         }

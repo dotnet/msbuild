@@ -1091,6 +1091,8 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        private static readonly string CachedFileVersion = ProjectCollection.Version.ToString();
+
         /// <summary>
         /// Set the built-in properties, most of which are read-only
         /// </summary>
@@ -1106,6 +1108,8 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.programFiles32, FrameworkLocationHelper.programFiles32);
             SetBuiltInProperty(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion);
             SetBuiltInProperty(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild);
+            SetBuiltInProperty(ReservedPropertyNames.fileVersion, CachedFileVersion);
+            SetBuiltInProperty(ReservedPropertyNames.semanticVersion, ProjectCollection.DisplayVersion);
 
             ValidateChangeWaveState();
 

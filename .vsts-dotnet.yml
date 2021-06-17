@@ -42,11 +42,13 @@ stages:
   displayName: Build
 
   jobs:
-  - template: /eng/common/templates/job/onelocbuild.yml
-    parameters:
-      CreatePr: false
-      LclSource: lclFilesfromPackage
-      LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs16.11') }}: # should track next-release's active dev branch
+    - template: /eng/common/templates/job/onelocbuild.yml
+      parameters:
+        LclSource: lclFilesfromPackage
+        LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
+        MirrorRepo: 'msbuild'
+        MirrorBranch: 'vs16.11' # should match condition above
 
   - job: Windows_NT
     pool:

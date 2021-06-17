@@ -179,6 +179,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='full'">true</_DebugSymbolsProduced>
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='portable'">true</_DebugSymbolsProduced>
     <_DebugSymbolsProduced Condition="'$(DebugType)'=='embedded'">false</_DebugSymbolsProduced>
+    <_DebugSymbolsProduced Condition="'$(ProduceOnlyReferenceAssembly)'=='true'">false</_DebugSymbolsProduced>
 
     <!-- Whether or not a .xml file is produced. -->
     <_DocumentationFileProduced>true</_DocumentationFileProduced>
