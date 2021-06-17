@@ -4,6 +4,7 @@
 using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
+using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateEngine.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -24,6 +25,11 @@ namespace Microsoft.TemplateEngine.Cli
         public HostSpecificTemplateData ReadHostSpecificTemplateData(ITemplateInfo templateInfo)
         {
             IMountPoint? mountPoint = null;
+
+            if (templateInfo is ITemplateInfoHostJsonCache withCache)
+            {
+                return withCache.HostData?.ToObject<HostSpecificTemplateData>() ?? HostSpecificTemplateData.Default;
+            }
 
             try
             {

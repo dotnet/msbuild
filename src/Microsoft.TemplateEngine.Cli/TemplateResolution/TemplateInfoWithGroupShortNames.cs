@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Edge.Settings;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
@@ -14,7 +16,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
     /// In addition to <see cref="ITemplateInfo"/> the class contains <see cref="GroupShortNameList"/> property which contains the short names of other templates in the template group.
     /// The class is used for template filtering using specific TemplateResolver.CliNameFilter which takes into account the short names of template group when matching names.
     /// </summary>
-    internal class TemplateInfoWithGroupShortNames : ITemplateInfo
+    internal class TemplateInfoWithGroupShortNames : ITemplateInfo, ITemplateInfoHostJsonCache
     {
         private ITemplateInfo _parent;
 
@@ -70,6 +72,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         public IReadOnlyDictionary<string, IBaselineInfo> BaselineInfo => _parent.BaselineInfo;
 
         public IReadOnlyDictionary<string, string> TagsCollection => _parent.TagsCollection;
+
+        public JObject? HostData => (_parent as ITemplateInfoHostJsonCache)?.HostData;
 
         bool ITemplateInfo.HasScriptRunningPostActions { get; set; }
 
