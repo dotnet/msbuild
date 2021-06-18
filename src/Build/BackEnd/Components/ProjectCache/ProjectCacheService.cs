@@ -251,19 +251,21 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 // TODO: remove after we change VS to set the cache descriptor via build parameters.
                 // VS workaround needs to wait until the first project is evaluated to extract enough information to initialize the plugin.
                 // No cache request can progress until late initialization is complete.
-                if (_projectCacheDescriptor.VsWorkaround &&
-                    Interlocked.CompareExchange(
-                        ref LateInitializationForVSWorkaroundCompleted,
-                        new TaskCompletionSource<bool>(),
-                        null) is null)
+                if (_projectCacheDescriptor.VsWorkaround)
                 {
-                    await LateInitializePluginForVsWorkaround(request);
-                    LateInitializationForVSWorkaroundCompleted.SetResult(true);
-                }
-                else if (_projectCacheDescriptor.VsWorkaround)
-                {
-                    // Can't be null. If the thread got here it means another thread initialized the completion source.
-                    await LateInitializationForVSWorkaroundCompleted!.Task;
+                    if (Interlocked.CompareExchange(
+                            ref LateInitializationForVSWorkaroundCompleted,
+                            new TaskCompletionSource<bool>(),
+                            null) is null)
+                    {
+                        await LateInitializePluginForVsWorkaround(request);
+                        LateInitializationForVSWorkaroundCompleted.SetResult(true);
+                    }
+                    else
+                    {
+                        // Can't be null. If the thread got here it means another thread initialized the completion source.
+                        await LateInitializationForVSWorkaroundCompleted!.Task;
+                    }
                 }
 
                 ErrorUtilities.VerifyThrowInternalError(
