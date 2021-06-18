@@ -45,8 +45,4 @@
         RuntimeFrameworkVersion="$(MicrosoftNETCoreAppRuntimePackageVersion)" />
   </ItemGroup>
 
-  <Import Project="src\Layout\redist\targets\BuildToolsetTasks.targets" Condition="'$(MSBuildProjectName)' != 'toolset-tasks'"/>
-
-  
-
 </Project>
