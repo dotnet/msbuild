@@ -42,11 +42,11 @@ namespace Microsoft.TemplateEngine.Cli
                     break;
                 case LogLevel.Error:
                 case LogLevel.Critical:
-                    textWriter.WriteLine($"Error: {message}");
+                    textWriter.WriteLine(string.Format(LocalizableStrings.GenericError, message));
                     WriteExceptionDetails(textWriter, logEntry);
                     break;
                 case LogLevel.Warning:
-                    textWriter.WriteLine($"Warning: {message}");
+                    textWriter.WriteLine(string.Format(LocalizableStrings.GenericWarning, message));
                     WriteExceptionDetails(textWriter, logEntry);
                     break;
                 case LogLevel.Debug:

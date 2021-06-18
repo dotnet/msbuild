@@ -981,7 +981,7 @@ Beispiele:
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Info_Success">
         <source>Success: {0} installed the following templates:</source>
-        <target state="new">Success: {0} installed the following templates:</target>
+        <target state="translated">Erfolg: {0} installierte die folgenden Vorlagen:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package">

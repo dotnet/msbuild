@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -164,8 +165,8 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And
                 .NotHaveStdErr()
-                .And.NotHaveStdOutContaining("Warning: Failed to read parse localization file").And.NotHaveStdOutContaining("localize/templatestrings.de-DE.json")
-                .And.HaveStdOutContaining($"Success: {tmpTemplateLocation} installed the following templates:").And.HaveStdOutContaining("TemplateWithLocalization")
+                .And.NotHaveStdOutContaining("Warnung: Fehler beim Lesen der Analyselokalisierungsdatei").And.NotHaveStdOutContaining("localize/templatestrings.de-DE.json")
+                .And.HaveStdOutContaining($"Erfolg: {tmpTemplateLocation} installierte die folgenden Vorlagen:").And.HaveStdOutContaining("TemplateWithLocalization")
                 .And.HaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
 
             //replace localization with bad file
@@ -181,7 +182,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Execute()
                 .Should()
                 .ExitWith(0)
-                .And.HaveStdOutContaining("Warning: Failed to read parse localization file").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
+                .And.HaveStdOutContaining("Warnung: Fehler beim Lesen der Analyselokalisierungsdatei").And.HaveStdOutContaining("localize/templatestrings.de-DE.json")
                 .And.HaveStdOutContaining("Die Vorlage \"name\" wurde erfolgreich erstellt.").And.NotHaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
         }
 
@@ -196,8 +197,8 @@ namespace Dotnet_new3.IntegrationTests
             TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
             var expectedErrors =
-@$"Warning: Localization file {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/localize/templatestrings.de-DE.json is not compatible with base configuration {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json, and will be skipped.
-  In localization file under the post action with id 'pa1', there are localized strings for manual instruction(s) with ids 'do-not-exist'. These manual instructions do not exist in the template.json file and should be removed from localization file.";
+Regex.Escape(@$"Warnung: Die Lokalisierungsdatei {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/localize/templatestrings.de-DE.json ist nicht mit der Basiskonfiguration {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json kompatibel und wird übersprungen.
+  In der Lokalisierungsdatei unter der POST-Aktion mit der ID „pa1“ befinden sich lokalisierte Zeichenfolgen für manuelle Anweisungen mit den IDs „do-not-exist“. Diese manuellen Anweisungen sind in der Datei „template.json“ nicht vorhanden und sollten aus der Lokalisierungsdatei entfernt werden.").Replace('„', '.').Replace('“', '.');
 
             new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
                 .WithCustomHive(home)
@@ -209,7 +210,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr()
                 .And.NotHaveStdOutContaining(expectedErrors)
-                .And.HaveStdOutContaining($"Success: {tmpTemplateLocation} installed the following templates:").And.HaveStdOutContaining("TemplateWithLocalization").And.HaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
+                .And.HaveStdOutContaining($"Erfolg: {tmpTemplateLocation} installierte die folgenden Vorlagen:").And.HaveStdOutContaining("TemplateWithLocalization").And.HaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
 
             //replace localization with bad file
             File.Copy(
@@ -224,7 +225,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Execute()
                 .Should()
                 .ExitWith(0)
-                .And.HaveStdOutContaining(expectedErrors)
+                .And.HaveStdOutMatching(expectedErrors)
                 .And.HaveStdOutContaining("Die Vorlage \"name\" wurde erfolgreich erstellt.").And.NotHaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
         }
     }
