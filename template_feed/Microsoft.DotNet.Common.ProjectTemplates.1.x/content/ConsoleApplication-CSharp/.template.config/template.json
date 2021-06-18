@@ -1,7 +1,10 @@
 {
-"$schema": "http://json.schemastore.org/template",
+  "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
-  "classifications": ["Common", "Console"],
+  "classifications": [
+    "Common",
+    "Console"
+  ],
   "name": "Console Application",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
@@ -58,7 +61,9 @@
     }
   },
   "primaryOutputs": [
-    { "path": "Company.ConsoleApplication1.csproj" },
+    {
+      "path": "Company.ConsoleApplication1.csproj"
+    },
     {
       "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
       "path": "Program.cs"
@@ -67,18 +72,22 @@
   "defaultName": "ConsoleApp1",
   "postActions": [
     {
+      "id": "restore",
       "condition": "(!skipRestore)",
       "description": "Restore NuGet packages required by this project.",
       "manualInstructions": [
-        { "text": "Run 'dotnet restore'" }
+        {
+          "text": "Run 'dotnet restore'"
+        }
       ],
       "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
       "continueOnError": true
     },
     {
+      "id": "open-file",
       "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
       "description": "Opens Program.cs in the editor",
-      "manualInstructions": [ ],
+      "manualInstructions": [],
       "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
       "args": {
         "files": "1"

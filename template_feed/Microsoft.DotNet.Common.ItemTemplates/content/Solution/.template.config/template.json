@@ -1,7 +1,9 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
-  "classifications": ["Solution"],
+  "classifications": [
+    "Solution"
+  ],
   "name": "Solution File",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "Create an empty solution containing no projects",
@@ -10,6 +12,10 @@
   "identity": "Microsoft.Standard.QuickStarts.Solution",
   "shortName": "sln",
   "sourceName": "Solution1",
-  "primaryOutputs": [ { "path": "Solution1.sln" } ],
+  "primaryOutputs": [
+    {
+      "path": "Solution1.sln"
+    }
+  ],
   "defaultName": "Solution1"
 }

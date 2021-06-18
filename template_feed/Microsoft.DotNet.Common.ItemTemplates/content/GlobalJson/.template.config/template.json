@@ -1,7 +1,9 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Microsoft",
-  "classifications": ["Config"],
+  "classifications": [
+    "Config"
+  ],
   "name": "global.json file",
   "generatorVersions": "[1.0.0.0-*)",
   "description": "A file for selecting the .NET Core SDK version.",
@@ -13,7 +15,11 @@
   "identity": "Microsoft.Standard.QuickStarts.GlobalJsonFile",
   "shortName": "globaljson",
   "sourceName": "unused",
-  "primaryOutputs": [ { "path": "global.json" } ],
+  "primaryOutputs": [
+    {
+      "path": "global.json"
+    }
+  ],
   "defaultName": "global.json",
   "symbols": {
     "HostIdentifier": {
@@ -37,13 +43,14 @@
         "fallbackVariableName": "dotnet-cli-version"
       },
       "replaces": "SDK_VERSION"
-    },
+    }
   },
   "postActions": [
     {
+      "id": "open-file",
       "condition": "(HostIdentifier != \"dotnetcli\" && HostIdentifier != \"dotnetcli-preview\")",
       "description": "Opens global.json in the editor",
-      "manualInstructions": [ ],
+      "manualInstructions": [],
       "actionId": "84C0DA21-51C8-4541-9940-6CA19AF04EE6",
       "args": {
         "files": "0"

@@ -1,0 +1,14 @@
+{
+  "author": "Microsoft",
+  "name": "Class Library",
+  "description": "A project for creating a class library that targets .NET Standard or .NET Core",
+  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
+  "symbols/Framework/description": "The target framework for the project.",
+  "symbols/Framework/choices/netcoreapp2.2/description": "Target netcoreapp2.2",
+  "symbols/Framework/choices/netstandard2.0/description": "Target netstandard2.0",
+  "symbols/langVersion/description": "Sets langVersion in the created project file",
+  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
+  "postActions/restore/description": "Restore NuGet packages required by this project.",
+  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
+  "postActions/open-file/description": "Opens Class1.vb in the editor"
+}
