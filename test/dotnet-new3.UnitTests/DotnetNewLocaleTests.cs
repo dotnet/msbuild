@@ -153,7 +153,7 @@ namespace Dotnet_new3.IntegrationTests
             var validTestTemplateLocation = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
             var invalidTestTemplateLocation = TestUtils.GetTestTemplateLocation("Invalid/Localization/InvalidFormat");
             var tmpTemplateLocation = TestUtils.CreateTemporaryFolder();
-            DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
+            TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
             new DotnetNewCommand(_log, "-i", tmpTemplateLocation)
                 .WithCustomHive(home)
@@ -193,7 +193,7 @@ namespace Dotnet_new3.IntegrationTests
             var validTestTemplateLocation = TestUtils.GetTestTemplateLocation("TemplateWithLocalization");
             var invalidTestTemplateLocation = TestUtils.GetTestTemplateLocation("Invalid/Localization/ValidationFailure");
             var tmpTemplateLocation = TestUtils.CreateTemporaryFolder();
-            DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
+            TestUtils.DirectoryCopy(validTestTemplateLocation, tmpTemplateLocation, copySubDirs: true);
 
             var expectedErrors =
 @$"Warning: Localization file {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/localize/templatestrings.de-DE.json is not compatible with base configuration {tmpTemplateLocation + Path.DirectorySeparatorChar}.template.config/template.json, and will be skipped.
@@ -226,42 +226,6 @@ namespace Dotnet_new3.IntegrationTests
                 .ExitWith(0)
                 .And.HaveStdOutContaining(expectedErrors)
                 .And.HaveStdOutContaining("Die Vorlage \"name\" wurde erfolgreich erstellt.").And.NotHaveStdOutContaining("name_de-DE:äÄßöÖüÜ");
-        }
-
-        private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-        {
-            // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-
-            if (!dir.Exists)
-            {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + sourceDirName);
-            }
-
-            DirectoryInfo[] dirs = dir.GetDirectories();
-
-            // If the destination directory doesn't exist, create it.       
-            Directory.CreateDirectory(destDirName);
-
-            // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                string tempPath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(tempPath, false);
-            }
-
-            // If copying subdirectories, copy them and their contents to new location.
-            if (copySubDirs)
-            {
-                foreach (DirectoryInfo subdir in dirs)
-                {
-                    string tempPath = Path.Combine(destDirName, subdir.Name);
-                    DirectoryCopy(subdir.FullName, tempPath, copySubDirs);
-                }
-            }
         }
     }
 }
