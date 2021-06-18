@@ -31,7 +31,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             _output = output;
             _env = TestEnvironment.Create(output);
-            _env.DoNotLaunchDebugger();
 
             BuildManager.ProjectCacheItems.ShouldBeEmpty();
             _env.WithInvariant(new CustomConditionInvariant(() => BuildManager.ProjectCacheItems.Count == 0));
