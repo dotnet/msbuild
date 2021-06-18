@@ -640,6 +640,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1071: '{0}' 的 PackageReference 指定了 `{1}` 版本。不建議指定這個套件版本。如需詳細資訊，請參閱 https://aka.ms/sdkimplicitrefs</target>
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
+      <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
+        <source>NETSDK1174: Placeholder</source>
+        <target state="new">NETSDK1174: Placeholder</target>
+        <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
         <target state="translated">NETSDK1011: 已從專案 '{0}' 取用資產，但在 '{1}' 中找不到相對應的 MSBuild 專案路徑。</target>

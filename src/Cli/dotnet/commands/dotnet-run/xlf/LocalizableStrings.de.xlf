@@ -108,8 +108,8 @@ Ein ausführbares Projekt muss ein ausführbares TFM (z. B. net5.0) und den Outp
         <note />
       </trans-unit>
       <trans-unit id="RunCommandProjectAbbreviationDeprecated">
-        <source>WARNING: The abbreviation of -p for --project is deprecated. Please use --project.</source>
-        <target state="new">WARNING: The abbreviation of -p for --project is deprecated. Please use --project.</target>
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="new">Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingLaunchSettingsFromMessage">

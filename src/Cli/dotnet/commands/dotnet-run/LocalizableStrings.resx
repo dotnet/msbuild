@@ -218,6 +218,6 @@ The current {1} is '{2}'.</value>
     <value>The property '{0}' must be an object if it is specified.</value>
   </data>
   <data name="RunCommandProjectAbbreviationDeprecated" xml:space="preserve">
-    <value>WARNING: The abbreviation of -p for --project is deprecated. Please use --project.</value>
+    <value>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</value>
   </data>
 </root>
