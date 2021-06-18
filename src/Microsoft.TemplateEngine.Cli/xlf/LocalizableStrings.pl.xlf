@@ -467,9 +467,9 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <target state="translated">Zezwala wewnętrznemu poleceniu dotnet restore na zatrzymanie działania i zaczekanie na wprowadzenie danych wejściowych lub wykonanie akcji przez użytkownika (na przykład ukończenie uwierzytelniania).</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidInputSwitch">
-        <source>Invalid input switch:</source>
-        <target state="translated">Nieprawidłowy przełącznik wejściowy:</target>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="new">Error: Invalid option(s):</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -493,13 +493,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
-        <source>For more information, run '{0}'.</source>
-        <target state="translated">Aby uzyskać więcej informacji, uruchom polecenie "{0}".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidTemplateParameterValues">
-        <source>Error: Invalid option(s):</source>
-        <target state="translated">Błąd: nieprawidłowe opcje:</target>
+        <source>For more information, run:</source>
+        <target state="new">For more information, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -1005,8 +1000,8 @@ Przykłady:
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
-        <source>These templates matched your input: {0}.</source>
-        <target state="translated">Te szablony pasują do danych wejściowych: {0}.</target>
+        <source>These templates matched your input: {0}</source>
+        <target state="needs-review-translation">Te szablony pasują do danych wejściowych: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">

@@ -17,6 +17,18 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
     internal static class CliTemplateSearchCoordinator
     {
+        private static IReadOnlyList<FilterOption> _supportedFilters = new[]
+        {
+            SupportedFilterOptions.AuthorFilter,
+            SupportedFilterOptions.BaselineFilter,
+            SupportedFilterOptions.LanguageFilter,
+            SupportedFilterOptions.TypeFilter,
+            SupportedFilterOptions.TagFilter,
+            SupportedFilterOptions.PackageFilter
+        };
+
+        internal static IReadOnlyList<FilterOption> SupportedFilters => _supportedFilters;
+
         /// <summary>
         /// Executes searching for the templates in configured remote sources.
         /// Performs validation for the commands, search for the templates in configured remote source, displays the results in table format.
@@ -73,7 +85,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
             else
             {
-                string filters = string.Join(", ", SupportedFilterOptions.SupportedSearchFilters.Where(filter => filter.IsFilterSet(commandInput)).Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
+                string filters = string.Join(", ", SupportedFilters.Where(filter => filter.IsFilterSet(commandInput)).Select(filter => $"{filter.Name}='{filter.FilterValue(commandInput)}'"));
                 string searchCriteria = string.IsNullOrWhiteSpace(commandInput.TemplateName)
                     ? filters
                     : string.IsNullOrWhiteSpace(filters) ? commandInput.TemplateName : string.Join(", ", commandInput.TemplateName, filters);
@@ -129,11 +141,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         private static bool ValidateCommandInput(INewCommandInput commandInput)
         {
-            if (string.IsNullOrWhiteSpace(commandInput.TemplateName) && SupportedFilterOptions.SupportedSearchFilters.All(filter => !filter.IsFilterSet(commandInput)))
+            if (string.IsNullOrWhiteSpace(commandInput.TemplateName) && SupportedFilters.All(filter => !filter.IsFilterSet(commandInput)))
             {
                 Reporter.Error.WriteLine(string.Format(
                                             LocalizableStrings.SearchOnlineErrorNoTemplateNameOrFilter,
-                                            string.Join(", ", SupportedFilterOptions.SupportedSearchFilters.Select(f => $"'{f.Name}'")),
+                                            string.Join(", ", SupportedFilters.Select(f => $"'{f.Name}'")),
                                             commandInput.CommandName).Bold().Red());
                 return false;
             }

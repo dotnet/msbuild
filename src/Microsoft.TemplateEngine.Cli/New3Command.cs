@@ -12,11 +12,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
-using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.Alias;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
-using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;
 using Microsoft.TemplateEngine.Edge;
 using Microsoft.TemplateEngine.Edge.Settings;
@@ -243,19 +241,15 @@ namespace Microsoft.TemplateEngine.Cli
         // TODO: make sure help / usage works right in these cases.
         private async Task<New3CommandStatus> EnterMaintenanceFlowAsync()
         {
-            if (!TemplateResolver.ValidateRemainingParameters(_commandInput, out IReadOnlyList<string> invalidParams))
+            // dotnet new --list case
+            if (_commandInput.IsListFlagSpecified)
             {
-                TemplateInformationCoordinator.DisplayInvalidParameters(invalidParams);
-                if (_commandInput.IsHelpFlagSpecified)
-                {
-                    // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
-                    _templateInformationCoordinator.ShowUsageHelp(_commandInput);
-                }
-                else
-                {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, CommandName).Bold().Red());
-                }
+                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
+            }
 
+            if (_commandInput.RemainingParameters.Any())
+            {
+                _templateInformationCoordinator.HandleParseError(_commandInput);
                 return New3CommandStatus.InvalidParamValues;
             }
 
@@ -264,12 +258,6 @@ namespace Microsoft.TemplateEngine.Cli
             {
                 _templateInformationCoordinator.ShowUsageHelp(_commandInput);
                 return New3CommandStatus.Success;
-            }
-
-            // dotnet new --list case
-            if (_commandInput.IsListFlagSpecified)
-            {
-                return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(_commandInput, default).ConfigureAwait(false);
             }
 
             // No options specified - should information about dotnet new
@@ -281,7 +269,7 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (_commandInput.IsHelpFlagSpecified)
             {
-                return await _templateInformationCoordinator.DisplayDetailedHelpAsync(_commandInput, default).ConfigureAwait(false);
+                return await _templateInformationCoordinator.DisplayTemplateHelpAsync(_commandInput, default).ConfigureAwait(false);
             }
             if (_commandInput.IsListFlagSpecified)
             {
@@ -409,13 +397,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         private async Task<HashSet<string>> GetAllTemplateShortNamesAsync()
         {
-            IReadOnlyCollection<ITemplateMatchInfo> allTemplates = TemplateResolver.PerformAllTemplatesQuery(await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false), _hostDataLoader);
-
+            IReadOnlyList<ITemplateInfo> allTemplates = await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false);
             HashSet<string> allShortNames = new HashSet<string>(StringComparer.Ordinal);
-
-            foreach (ITemplateMatchInfo templateMatchInfo in allTemplates)
+            foreach (ITemplateInfo info in allTemplates)
             {
-                allShortNames.UnionWith(templateMatchInfo.Info.ShortNameList);
+                allShortNames.UnionWith(info.ShortNameList);
             }
 
             return allShortNames;

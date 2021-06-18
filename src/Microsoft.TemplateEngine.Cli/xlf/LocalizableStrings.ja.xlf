@@ -467,9 +467,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">internal dotnet restore command を停止して、ユーザーの入力またはアクション (認証の完了など) を待機できるようにします。</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidInputSwitch">
-        <source>Invalid input switch:</source>
-        <target state="translated">無効な入力スイッチ:</target>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="new">Error: Invalid option(s):</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -493,13 +493,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
-        <source>For more information, run '{0}'.</source>
-        <target state="translated">詳しい情報を見るには以下を実行してください： '{0}'。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidTemplateParameterValues">
-        <source>Error: Invalid option(s):</source>
-        <target state="translated">エラー: オプション %s は無効です。</target>
+        <source>For more information, run:</source>
+        <target state="new">For more information, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -1005,8 +1000,8 @@ Examples:
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
-        <source>These templates matched your input: {0}.</source>
-        <target state="translated">これらのテンプレートは、入力: {0} と一致しました。</target>
+        <source>These templates matched your input: {0}</source>
+        <target state="needs-review-translation">これらのテンプレートは、入力: {0} と一致しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">

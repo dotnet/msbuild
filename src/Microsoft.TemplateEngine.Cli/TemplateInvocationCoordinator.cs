@@ -49,20 +49,20 @@ namespace Microsoft.TemplateEngine.Cli
 
         internal async Task<New3CommandStatus> CoordinateInvocationAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
-            TemplateResolutionResult templateResolutionResult = TemplateResolver.GetTemplateResolutionResult(
-                await _templatePackageManager.GetTemplatesAsync(default).ConfigureAwait(false),
-                _hostSpecificDataLoader,
-                commandInput,
-                _defaultLanguage);
+            InstantiateTemplateResolver resolver = new InstantiateTemplateResolver(_templatePackageManager, _hostSpecificDataLoader);
+            TemplateResolutionResult templateResolutionResult = await resolver.ResolveTemplatesAsync(commandInput, _defaultLanguage, default).ConfigureAwait(false);
 
             if (templateResolutionResult.ResolutionStatus == TemplateResolutionResult.Status.SingleMatch && templateResolutionResult.TemplateToInvoke != null)
             {
                 TemplatePackageCoordinator packageCoordinator = new TemplatePackageCoordinator(_telemetryLogger, _environment, _templatePackageManager, _templateInformationCoordinator);
 
                 // start checking for updates
-                var checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(templateResolutionResult.TemplateToInvoke.Info, commandInput, cancellationToken);
+                var checkForUpdateTask = packageCoordinator.CheckUpdateForTemplate(templateResolutionResult.TemplateToInvoke.Value.Template, commandInput, cancellationToken);
                 // start creation of template
-                var templateCreationTask = _invoker.InvokeTemplate(templateResolutionResult.TemplateToInvoke, commandInput);
+                var templateCreationTask = _invoker.InvokeTemplate(
+                    templateResolutionResult.TemplateToInvoke.Value.Template,
+                    templateResolutionResult.TemplateToInvoke.Value.Parameters,
+                    commandInput);
 
                 // await for both tasks to finish
                 await Task.WhenAll(checkForUpdateTask, templateCreationTask).ConfigureAwait(false);

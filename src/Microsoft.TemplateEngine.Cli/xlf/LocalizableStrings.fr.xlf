@@ -467,9 +467,9 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <target state="translated">Permet à la commande dotnet restore interne de s’arrêter et d’attendre une entrée ou une action de l’utilisateur (par exemple pour effectuer une authentification).</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidInputSwitch">
-        <source>Invalid input switch:</source>
-        <target state="translated">Commutateur d’entrée non valide :</target>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="new">Error: Invalid option(s):</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -493,13 +493,8 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
-        <source>For more information, run '{0}'.</source>
-        <target state="translated">Si vous souhaitez en savoir plus, exécutez « {0} ».</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidTemplateParameterValues">
-        <source>Error: Invalid option(s):</source>
-        <target state="translated">Erreur : option(s) non valide(s) :</target>
+        <source>For more information, run:</source>
+        <target state="new">For more information, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -1005,8 +1000,8 @@ Exemples :
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
-        <source>These templates matched your input: {0}.</source>
-        <target state="translated">Ces modèles correspondent à votre entrée : {0}.</target>
+        <source>These templates matched your input: {0}</source>
+        <target state="needs-review-translation">Ces modèles correspondent à votre entrée : {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">

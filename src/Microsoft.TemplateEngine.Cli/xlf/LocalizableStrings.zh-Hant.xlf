@@ -467,9 +467,9 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">允許內部 dotnet restore 命令停止並等候使用者輸入或動作 (例如: 完成驗證)。</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidInputSwitch">
-        <source>Invalid input switch:</source>
-        <target state="translated">輸入參數無效:</target>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="new">Error: Invalid option(s):</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -493,13 +493,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
-        <source>For more information, run '{0}'.</source>
-        <target state="translated">如需詳細資訊，請執行 '{0}'。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidTemplateParameterValues">
-        <source>Error: Invalid option(s):</source>
-        <target state="translated">錯誤: 選項無效:</target>
+        <source>For more information, run:</source>
+        <target state="new">For more information, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -1005,8 +1000,8 @@ Examples:
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
-        <source>These templates matched your input: {0}.</source>
-        <target state="translated">這些範本符合您的輸入: {0}。</target>
+        <source>These templates matched your input: {0}</source>
+        <target state="needs-review-translation">這些範本符合您的輸入: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">

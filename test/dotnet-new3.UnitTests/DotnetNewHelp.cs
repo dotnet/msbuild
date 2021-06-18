@@ -287,7 +287,8 @@ Options:
       netcoreapp3.0   - Target netcoreapp3.0
       netcoreapp3.1   - Target netcoreapp3.1
 
-For more information, run 'dotnet new3 console --help'.";
+For more information, run:
+   dotnet new3 console -h";
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -308,7 +309,8 @@ For more information, run 'dotnet new3 console --help'.";
 --do-not-exist
    '--do-not-exist' is not a valid option
 
-For more information, run 'dotnet new3 console --help'.";
+For more information, run:
+   dotnet new3 console -h";
 
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();

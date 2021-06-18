@@ -3,16 +3,35 @@
 
 #nullable enable
 
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 {
     internal class ParameterMatchInfo : MatchInfo
     {
-        internal ParameterMatchInfo(string name, string? value, MatchKind kind, string? inputFormat = null) : base(name, value, kind)
+        internal ParameterMatchInfo(string name, string? value, MatchKind kind, MismatchKind mismatchKind = MismatchKind.NoMismatch, string? inputFormat = null) : base(name, value, kind)
         {
             InputFormat = inputFormat;
+            ParameterMismatchKind = mismatchKind;
         }
+
+        internal enum MismatchKind
+        {
+            NoMismatch,
+
+            /// <summary>
+            /// The parameter name is not defined in <see cref="ITemplateInfo.Parameters"/>.
+            /// </summary>
+            InvalidName,
+
+            /// <summary>
+            ///  The parameter value is different format that is supported by <see cref="ITemplateInfo.Parameters"/> parameter.
+            /// </summary>
+            InvalidValue,
+        }
+
+        public MismatchKind ParameterMismatchKind { get; }
 
         public string? InputFormat { get; }
     }

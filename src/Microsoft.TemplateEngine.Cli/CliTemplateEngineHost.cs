@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             bool enableVerboseLogging = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE"), out bool value) && value;
             _loggerFactory =
-                Extensions.Logging.LoggerFactory.Create(builder =>
+                Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
                     builder
                         .SetMinimumLevel(enableVerboseLogging ? LogLevel.Trace : LogLevel.Information)
                         .AddConsole(config => config.FormatterName = nameof(CliConsoleFormatter))

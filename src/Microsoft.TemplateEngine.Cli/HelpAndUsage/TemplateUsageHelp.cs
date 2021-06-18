@@ -9,75 +9,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
-using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using TemplateCreator = Microsoft.TemplateEngine.Edge.Template.TemplateCreator;
 
 namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 {
     internal static class TemplateUsageHelp
     {
-        internal static void ShowInvocationExamples(TemplateListResolutionResult templateResolutionResult, IHostSpecificDataLoader hostDataLoader, string commandName)
-        {
-            const int ExamplesToShow = 2;
-            IReadOnlyList<string> preferredNameList = new List<string>() { "mvc" };
-            int numShown = 0;
-
-            IReadOnlyCollection<ITemplateMatchInfo> bestMatchedTemplates = templateResolutionResult.ExactMatchedTemplates;
-
-            if (bestMatchedTemplates.Count == 0)
-            {
-                return;
-            }
-
-            IList<ITemplateInfo> templateList = bestMatchedTemplates.Select(x => x.Info).ToList();
-            Reporter.Output.WriteLine("Examples:");
-            HashSet<string> usedGroupIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string preferredName in preferredNameList)
-            {
-                ITemplateInfo? template = templateList.FirstOrDefault(x => x.ShortNameList.Contains(preferredName, StringComparer.OrdinalIgnoreCase));
-
-                if (template != null)
-                {
-                    string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
-                    if (usedGroupIds.Add(identity))
-                    {
-                        GenerateUsageForTemplate(template, hostDataLoader, commandName);
-                        numShown++;
-                    }
-                    templateList.Remove(template);  // remove it so it won't get chosen again
-                }
-            }
-
-            // show up to 2 examples (total, including the above)
-            Random rnd = new Random();
-            for (int i = numShown; i < ExamplesToShow && templateList.Count > 0; i++)
-            {
-                int index = rnd.Next(0, templateList.Count - 1);
-                ITemplateInfo template = templateList[index];
-                string identity = string.IsNullOrWhiteSpace(template.GroupIdentity) ? string.IsNullOrWhiteSpace(template.Identity) ? string.Empty : template.Identity : template.GroupIdentity;
-                if (usedGroupIds.Add(identity) && !GenerateUsageForTemplate(template, hostDataLoader, commandName))
-                {
-                    --i;
-                }
-
-                templateList.Remove(template);  // remove it so it won't get chosen again
-            }
-
-            // show a help example
-            Reporter.Output.WriteLine($"    dotnet {commandName} --help");
-
-            // show a help example for template
-            string? templateHelpCommand = TemplateInformationCoordinator.GetTemplateHelpCommand(commandName, bestMatchedTemplates.First().Info);
-            if (!string.IsNullOrWhiteSpace(templateHelpCommand))
-            {
-                Reporter.Output.WriteLine($"    {templateHelpCommand}");
-            }
-        }
-
         // TODO: rework this method... it's a bit of a god-method, for very specific purposes.
         // Number of times I've deferred on reworking this method: 4
         internal static async Task<TemplateUsageInformation?> GetTemplateUsageInformationAsync(
@@ -102,7 +41,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 return null;
             }
 
-            TemplateResolver.ParseTemplateArgs(templateInfo, hostDataLoader, commandInput);
+            HostSpecificTemplateData hostData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
+            commandInput.ReparseForTemplate(templateInfo, hostData);
 #pragma warning disable CS0618 // Type or member is obsolete
             allParams = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
             templateCreator.ResolveUserParameters(template, allParams, commandInput.InputTemplateParams, out userParamsWithInvalidValues);
@@ -172,55 +112,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 VariantsForCanonicals = variantsForCanonicals,
                 HasPostActionScriptRunner = hasPostActionScriptRunner
             };
-        }
-
-        private static bool GenerateUsageForTemplate(ITemplateInfo templateInfo, IHostSpecificDataLoader hostDataLoader, string commandName)
-        {
-            HostSpecificTemplateData hostTemplateData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
-
-            if (hostTemplateData.UsageExamples != null)
-            {
-                if (hostTemplateData.UsageExamples.Count == 0)
-                {
-                    return false;
-                }
-
-                Reporter.Output.WriteLine($"    dotnet {commandName} {templateInfo.ShortNameList[0]} {hostTemplateData.UsageExamples[0]}");
-                return true;
-            }
-
-            Reporter.Output.Write($"    dotnet {commandName} {templateInfo.ShortNameList[0]}");
-            IReadOnlyList<ITemplateParameter> allParameterDefinitions = templateInfo.Parameters;
-            IEnumerable<ITemplateParameter> filteredParams = TemplateParameterHelpBase.FilterParamsForHelp(allParameterDefinitions, hostTemplateData.HiddenParameterNames, parametersToAlwaysShow: hostTemplateData.ParametersToAlwaysShow);
-
-            foreach (ITemplateParameter parameter in filteredParams)
-            {
-                if (string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(parameter.DefaultValue, "false", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                else if (string.Equals(parameter.DataType, "string", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-                else if (string.Equals(parameter.DataType, "choice", StringComparison.OrdinalIgnoreCase) && parameter.Choices?.Count == 1)
-                {
-                    continue;
-                }
-
-                string displayParameter = hostTemplateData.DisplayNameForParameter(parameter.Name);
-
-                Reporter.Output.Write($" --{displayParameter}");
-
-                if (!string.IsNullOrEmpty(parameter.DefaultValue) && !string.Equals(parameter.DataType, "bool", StringComparison.OrdinalIgnoreCase))
-                {
-                    Reporter.Output.Write($" {parameter.DefaultValue}");
-                }
-            }
-
-            Reporter.Output.WriteLine();
-            return true;
         }
 
         private static async Task<bool> CheckIfTemplateHasScriptRunningPostActionsAsync(

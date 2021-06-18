@@ -1,9 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
+using System.Threading.Tasks;
+using FakeItEasy;
+using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
@@ -12,7 +16,7 @@ using Xunit;
 
 namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 {
-    public class TemplateGroupTests
+    public class TemplateGroupMatchInfoTests
     {
         public static IEnumerable<object[]> GetInvalidParametersTestData()
         {
@@ -90,9 +94,9 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
             };
         }
 
-        public static IEnumerable<object[]> GetHighestPrecedenceInvokableTemplatesTestData()
+        public static IEnumerable<object?[]> GetHighestPrecedenceInvokableTemplatesTestData()
         {
-            yield return new object[]
+            yield return new object?[]
             {
                 new MockNewCommandInput("foo"),
                 new MockTemplateInfo[]
@@ -105,7 +109,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new string[] { "foo.3" }
             };
 
-            yield return new object[]
+            yield return new object?[]
             {
                 new MockNewCommandInput("foo"),
                 new MockTemplateInfo[]
@@ -144,7 +148,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new string[] { "foo.3" }
             };
 
-            yield return new object[]
+            yield return new object?[]
             {
                 new MockNewCommandInput("foo"),
                 new MockTemplateInfo[]
@@ -157,7 +161,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                 new string[] { "foo.1", "foo.2", "foo.3" }
             };
 
-            yield return new object[]
+            yield return new object?[]
             {
                 new MockNewCommandInput("foo"),
                 new MockTemplateInfo[]
@@ -173,11 +177,13 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
         [Theory(DisplayName = nameof(GetInvalidParametersTest))]
         [MemberData(nameof(GetInvalidParametersTestData))]
-        internal void GetInvalidParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
+        internal async Task GetInvalidParametersTest(MockNewCommandInput command, MockTemplateInfo[] templates, MockInvalidParameterInfo[] expectedInvalidParams)
         {
-            TemplateResolutionResult matchedTemplates = TemplateResolver.GetTemplateResolutionResult(templates, new MockHostSpecificDataLoader(), command, null);
+            InstantiateTemplateResolver resolver = new InstantiateTemplateResolver(templates, new MockHostSpecificDataLoader());
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(command, defaultLanguage: null, default).ConfigureAwait(false);
 
-            TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
+            Assert.NotNull(matchResult.UnambiguousTemplateGroupMatchInfo);
+            TemplateGroupMatchInfo templateGroup = matchResult.UnambiguousTemplateGroupMatchInfo!;
             IEnumerable<InvalidParameterInfo> invalidParameters = templateGroup.GetInvalidParameterList();
 
             Assert.Equal(expectedInvalidParams.Length, invalidParameters.Count());
@@ -189,33 +195,22 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
         [Theory(DisplayName = nameof(GetHighestPrecedenceInvokableTemplatesTest))]
         [MemberData(nameof(GetHighestPrecedenceInvokableTemplatesTestData))]
-        internal void GetHighestPrecedenceInvokableTemplatesTest(MockNewCommandInput command, MockTemplateInfo[] templates, string defaultLanguage, string[] expectedTemplates)
+        internal async Task GetHighestPrecedenceInvokableTemplatesTest(MockNewCommandInput command, MockTemplateInfo[] templates, string defaultLanguage, string[] expectedTemplates)
         {
-            TemplateResolutionResult matchedTemplates = TemplateResolver.GetTemplateResolutionResult(templates, new MockHostSpecificDataLoader(), command, defaultLanguage);
+            InstantiateTemplateResolver resolver = new InstantiateTemplateResolver(templates, new MockHostSpecificDataLoader());
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(command, defaultLanguage: defaultLanguage, default).ConfigureAwait(false);
 
-            TemplateGroup templateGroup = matchedTemplates.UnambiguousTemplateGroup;
+            Assert.NotNull(matchResult.UnambiguousTemplateGroupMatchInfo);
+            TemplateGroupMatchInfo templateGroup = matchResult.UnambiguousTemplateGroupMatchInfo!;
             bool useDefaultLanguage = string.IsNullOrWhiteSpace(command.Language) && !string.IsNullOrWhiteSpace(defaultLanguage);
-            IEnumerable<ITemplateMatchInfo> selectedTemplates = templateGroup.GetHighestPrecedenceInvokableTemplates(useDefaultLanguage);
+            IEnumerable<ITemplateInfo> selectedTemplates = templateGroup.GetHighestPrecedenceTemplates();
 
-            var identitiesToCheck = selectedTemplates.Select(t => t.Info.Identity);
+            var identitiesToCheck = selectedTemplates.Select(t => t.Identity);
 
             Assert.Equal(expectedTemplates.Length, selectedTemplates.Count());
             foreach (string exp in expectedTemplates)
             {
-                Assert.Single(selectedTemplates.Where(t => t.Info.Identity == exp));
-            }
-
-            bool success = templateGroup.TryGetHighestPrecedenceInvokableTemplate(out ITemplateMatchInfo selectedTemplate, useDefaultLanguage);
-
-            if (expectedTemplates.Length == 1)
-            {
-                Assert.Equal(expectedTemplates[0], selectedTemplate.Info.Identity);
-                Assert.True(success);
-            }
-            else
-            {
-                Assert.Null(selectedTemplate);
-                Assert.False(success);
+                Assert.Single(selectedTemplates.Where(t => t.Identity == exp));
             }
         }
     }

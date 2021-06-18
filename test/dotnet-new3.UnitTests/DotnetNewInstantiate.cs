@@ -153,6 +153,10 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CannotInstantiateTemplate_WhenParameterIsInvalid()
         {
+            string expectedCta =
+@"For more information, run:
+   dotnet new3 console -h"; 
+
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
@@ -165,7 +169,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdOut()
                 .And.HaveStdErrContaining("Error: Invalid option(s):")
                 .And.HaveStdErrContaining("   '--fake' is not a valid option")
-                .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
+                .And.HaveStdErrContaining(expectedCta);
 
             new DotnetNewCommand(_log, "console", "--framework", "fake")
                 .WithCustomHive(home)
@@ -178,7 +182,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   'fake' is not a valid value for --framework. The possible values are:")
                 .And.HaveStdErrContaining("      net5.0          - Target net5.0")
                 .And.HaveStdErrContaining("      netcoreapp3.1   - Target netcoreapp3.1")
-                .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
+                .And.HaveStdErrContaining(expectedCta);
 
             new DotnetNewCommand(_log, "console", "--framework", "netcoreapp")
                 .WithCustomHive(home)
@@ -192,7 +196,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   'netcoreapp' is not a valid value for --framework. The possible values are:")
                 .And.HaveStdErrContaining("      netcoreapp2.1   - Target netcoreapp2.1")
                 .And.HaveStdErrContaining("      netcoreapp3.1   - Target netcoreapp3.1")
-                .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
+                .And.HaveStdErrContaining(expectedCta);
 
             new DotnetNewCommand(_log, "console", "--framework", "netcoreapp", "--fake")
                 .WithCustomHive(home)
@@ -206,7 +210,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("      netcoreapp2.1   - Target netcoreapp2.1")
                 .And.HaveStdErrContaining("      netcoreapp3.1   - Target netcoreapp3.1")
                 .And.HaveStdErrContaining("   '--fake' is not a valid option")
-                .And.HaveStdErrContaining("For more information, run 'dotnet new3 console --help'.");
+                .And.HaveStdErrContaining(expectedCta);
         }
 
         [Fact]

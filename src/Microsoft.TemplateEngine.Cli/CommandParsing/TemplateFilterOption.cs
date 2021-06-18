@@ -20,7 +20,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             Func<INewCommandInput, string> filterValue,
             Func<INewCommandInput, bool> isFilterSet,
             Func<INewCommandInput, Func<ITemplateInfo, MatchInfo?>> matchFilter,
-            Func<TemplateListResolutionResult, bool> mismatchCriteria) : base(name, filterValue, isFilterSet)
+            Func<TemplateResolutionResult, bool> mismatchCriteria) : base(name, filterValue, isFilterSet)
         {
             TemplateMatchFilter = matchFilter ?? throw new ArgumentNullException(nameof(matchFilter));
             MismatchCriteria = mismatchCriteria ?? throw new ArgumentNullException(nameof(mismatchCriteria));
@@ -36,8 +36,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         internal Func<INewCommandInput, Func<ITemplateInfo, MatchInfo?>> TemplateMatchFilter { get; set; }
 
         /// <summary>
-        /// A predicate that returns if the filter option caused a mismatch in ListOrHelpTemplateListResolutionResult in case of partial match.
+        /// A predicate that returns if the filter option caused a mismatch in <see cref="TemplateResolutionResult"/> in case of partial match.
         /// </summary>
-        internal Func<TemplateListResolutionResult, bool> MismatchCriteria { get; set; }
+        internal Func<TemplateResolutionResult, bool> MismatchCriteria { get; set; }
     }
 }

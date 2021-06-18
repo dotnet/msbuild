@@ -467,9 +467,9 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">Permite que el comando interno dotnet restore se detenga y espere la entrada o acción del usuario (por ejemplo, para completar la autenticación).</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidInputSwitch">
-        <source>Invalid input switch:</source>
-        <target state="translated">Modificador de entrada no válido:</target>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="new">Error: Invalid option(s):</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -493,13 +493,8 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
-        <source>For more information, run '{0}'.</source>
-        <target state="translated">Para obtener más información, ejecute "{0}".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidTemplateParameterValues">
-        <source>Error: Invalid option(s):</source>
-        <target state="translated">Error: Opción u opciones no válidas:</target>
+        <source>For more information, run:</source>
+        <target state="new">For more information, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -1005,8 +1000,8 @@ Ejemplos:
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
-        <source>These templates matched your input: {0}.</source>
-        <target state="translated">Estas plantillas coinciden con su entrada: {0}.</target>
+        <source>These templates matched your input: {0}</source>
+        <target state="needs-review-translation">Estas plantillas coinciden con su entrada: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">

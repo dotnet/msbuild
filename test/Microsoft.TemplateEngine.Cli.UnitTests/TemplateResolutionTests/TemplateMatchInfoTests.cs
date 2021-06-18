@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#nullable enable
+
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
@@ -20,7 +22,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             ITemplateMatchInfo templateMatchInfo = new TemplateMatchInfo(templateInfo);
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.False(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
             Assert.Empty(templateMatchInfo.GetInvalidParameterNames());
             Assert.Equal(0, templateMatchInfo.GetValidTemplateParameters().Count);
         }
@@ -33,7 +34,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Name, "test", MatchKind.Exact));
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.True(templateMatchInfo.IsInvokableMatch());
         }
 
         [Fact(DisplayName = nameof(NamePartialMatch_ReportsCorrectly))]
@@ -44,8 +44,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Name, "test", MatchKind.Partial));
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.True(templateMatchInfo.IsFilterableMatch());
         }
 
         [Fact(DisplayName = nameof(NameMismatch_ReportsCorrectly))]
@@ -56,7 +54,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Name, "test", MatchKind.Mismatch));
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.False(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_ReportsCorrectly))]
@@ -67,7 +64,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Exact));
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.True(templateMatchInfo.IsInvokableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMismatch_ReportsCorrectly))]
@@ -78,7 +74,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Mismatch));
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.False(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_NameMatch_ReportsCorrectly))]
@@ -90,7 +85,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Exact));
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.True(templateMatchInfo.IsInvokableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_NameMismatch_ReportsCorrectly))]
@@ -102,7 +96,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Exact));
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMatch_NamePartialMatch_ReportsCorrectly))]
@@ -114,8 +107,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Exact));
             Assert.True(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
-            Assert.True(templateMatchInfo.IsFilterableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMismatch_NameMatch_ReportsCorrectly))]
@@ -127,7 +118,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Mismatch));
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
         }
 
         [Fact(DisplayName = nameof(TypeMismatch_NamePartialMatch_ReportsCorrectly))]
@@ -139,7 +129,6 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             templateMatchInfo.AddMatchDisposition(new MatchInfo(MatchInfo.BuiltIn.Type, "test", MatchKind.Mismatch));
             Assert.False(WellKnownSearchFilters.MatchesAllCriteria(templateMatchInfo));
             Assert.True(WellKnownSearchFilters.MatchesAtLeastOneCriteria(templateMatchInfo));
-            Assert.False(templateMatchInfo.IsInvokableMatch());
         }
     }
 }

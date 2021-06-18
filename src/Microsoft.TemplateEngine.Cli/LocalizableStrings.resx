@@ -175,13 +175,10 @@
   <data name="InstallHelp" xml:space="preserve">
     <value>Installs a source or a template package.</value>
   </data>
-  <data name="InvalidInputSwitch" xml:space="preserve">
-    <value>Invalid input switch:</value>
-  </data>
   <data name="InvalidParameterDetail" xml:space="preserve">
     <value>'{1}' is not a valid value for {0}.</value>
   </data>
-  <data name="InvalidTemplateParameterValues" xml:space="preserve">
+  <data name="InvalidCommandOptions" xml:space="preserve">
     <value>Error: Invalid option(s):</value>
   </data>
   <data name="ColumnNameLanguage" xml:space="preserve">
@@ -245,7 +242,7 @@
     <value>Templates</value>
   </data>
   <data name="TemplatesFoundMatchingInputParameters" xml:space="preserve">
-    <value>These templates matched your input: {0}.</value>
+    <value>These templates matched your input: {0}</value>
   </data>
   <data name="Type" xml:space="preserve">
     <value>Type</value>
@@ -515,7 +512,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>{0} template(s) partially matched, but failed on {1}.</value>
   </data>
   <data name="InvalidParameterTemplateHint" xml:space="preserve">
-    <value>For more information, run '{0}'.</value>
+    <value>For more information, run:</value>
   </data>
   <data name="ListTemplatesCommand" xml:space="preserve">
     <value>To list installed templates, run '{0}'.</value>

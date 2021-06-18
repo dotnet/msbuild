@@ -467,9 +467,9 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Umožňuje, aby se interní příkaz dotnet restore zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidInputSwitch">
-        <source>Invalid input switch:</source>
-        <target state="translated">Neplatný vstupní přepínač:</target>
+      <trans-unit id="InvalidCommandOptions">
+        <source>Error: Invalid option(s):</source>
+        <target state="new">Error: Invalid option(s):</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -493,13 +493,8 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <note />
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
-        <source>For more information, run '{0}'.</source>
-        <target state="translated">Pokud chcete získat další informace, spusťte {0}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidTemplateParameterValues">
-        <source>Error: Invalid option(s):</source>
-        <target state="translated">Chyba: Neplatné možnosti:</target>
+        <source>For more information, run:</source>
+        <target state="new">For more information, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -1005,8 +1000,8 @@ Příklady:
         <note />
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
-        <source>These templates matched your input: {0}.</source>
-        <target state="translated">Tyto šablony odpovídají vstupu: {0}</target>
+        <source>These templates matched your input: {0}</source>
+        <target state="needs-review-translation">Tyto šablony odpovídají vstupu: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">

@@ -7,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
-using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
@@ -28,7 +26,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// <param name="templates">the templates of the template group.</param>
         /// <exception cref="ArgumentNullException">when <paramref name="templates"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">when <paramref name="templates"/> is empty or don't have same <see cref="ITemplateInfo.GroupIdentity"/> defined.</exception>
-        internal TemplateGroup(IEnumerable<ITemplateMatchInfo> templates)
+        internal TemplateGroup(IEnumerable<ITemplateInfo> templates)
         {
             _ = templates ?? throw new ArgumentNullException(paramName: nameof(templates));
             if (!templates.Any())
@@ -39,7 +37,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             try
             {
                 //all templates in the group should have same group identity
-                GroupIdentity = templates.Select(t => string.IsNullOrWhiteSpace(t.Info.GroupIdentity) ? null : t.Info.GroupIdentity)
+                GroupIdentity = templates.Select(t => string.IsNullOrWhiteSpace(t.GroupIdentity) ? null : t.GroupIdentity)
                                             .Distinct(StringComparer.OrdinalIgnoreCase)
                                             .Single();
             }
@@ -64,18 +62,40 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             get
             {
                 HashSet<string> shortNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (ITemplateMatchInfo template in Templates)
+                foreach (ITemplateInfo template in Templates)
                 {
-                    if (template.Info is TemplateInfoWithGroupShortNames groupAwareTemplate)
-                    {
-                        shortNames.UnionWith(groupAwareTemplate.GroupShortNameList);
-                    }
-                    else
-                    {
-                        shortNames.UnionWith(template.Info.ShortNameList);
-                    }
+                    shortNames.UnionWith(template.ShortNameList);
                 }
                 return shortNames.ToList();
+            }
+        }
+
+        /// <summary>
+        /// Returns the list of languages defined for templates in the group.
+        /// </summary>
+        internal IReadOnlyList<string?> Languages
+        {
+            get
+            {
+                HashSet<string?> shortNames = new HashSet<string?>(StringComparer.OrdinalIgnoreCase);
+                foreach (ITemplateInfo template in Templates)
+                {
+                    shortNames.Add(template.GetLanguage());
+                }
+                return shortNames.ToList();
+            }
+        }
+
+        /// <summary>
+        /// Returns the full name of template group
+        /// Template group name is the name of highest precedence template in the group.
+        /// If multiple templates have the maximum precedence, the name of first one is returned.
+        /// </summary>
+        internal string Name
+        {
+            get
+            {
+                return GetHighestPrecedenceTemplates().First().Name;
             }
         }
 
@@ -90,202 +110,26 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal bool HasSingleTemplate => Templates.Count == 1;
 
         /// <summary>
-        /// Returns the enumerator to invokable templates in the group.
+        /// Returns the list of templates in the group.
         /// </summary>
-        internal IEnumerable<ITemplateMatchInfo> InvokableTemplates => Templates.Where(templates => templates.IsInvokableMatch());
+        internal IReadOnlyList<ITemplateInfo> Templates { get; private set; }
 
-        /// <summary>
-        /// Returns the collection of templates in the group.
-        /// </summary>
-        internal IReadOnlyCollection<ITemplateMatchInfo> Templates { get; private set; }
-
-        /// <summary>
-        /// Returns the invalid template specific parameters for the template group.
-        /// Invalid parameters can have: invalid name, invalid value (determined only for choice parameter symbols).
-        /// </summary>
-        /// <returns>The enumerator for invalid parameters in templates in the template group.</returns>
-        internal IEnumerable<InvalidParameterInfo> GetInvalidParameterList()
+        internal static IEnumerable<TemplateGroup> FromTemplateList (IEnumerable<ITemplateInfo> templates)
         {
-            List<InvalidParameterInfo> invalidParameterList = new List<InvalidParameterInfo>();
-
-            //collect the parameters with invalid names for all templates in the template group
-            IEnumerable<ParameterMatchInfo> parametersWithInvalidNames = Templates.SelectMany(
-                template => template.MatchDisposition
-                    .OfType<ParameterMatchInfo>()
-                    .Where(x => x.Kind == MatchKind.InvalidName)).Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
-
-            foreach (ParameterMatchInfo parameter in parametersWithInvalidNames)
-            {
-                if (Templates.All(
-                    template => template.MatchDisposition
-                        .OfType<ParameterMatchInfo>()
-                        .Any(x => x.Kind == MatchKind.InvalidName
-                                  && x.Name.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase))))
-                {
-                    invalidParameterList.Add(new InvalidParameterInfo(
-                                                InvalidParameterInfo.Kind.InvalidParameterName,
-                                                parameter.InputFormat,
-                                                parameter.Value,
-                                                parameter.Name));
-                }
-            }
-
-            //if there are templates which have a match for all template specific parameters, only they to be analyzed
-            var filteredTemplates = Templates.Where(template => !template.HasInvalidParameterName());
-            if (!filteredTemplates.Any())
-            {
-                filteredTemplates = Templates;
-            }
-
-            //collect the choice parameters with invalid values
-            IEnumerable<ParameterMatchInfo> invalidParameterValuesForTemplates = filteredTemplates.SelectMany(
-                template => template.MatchDisposition
-                    .OfType<ParameterMatchInfo>()
-                    .Where(x => x.Kind == MatchKind.InvalidValue))
-                .Distinct(new OrdinalIgnoreCaseMatchInfoComparer());
-            foreach (ParameterMatchInfo parameter in invalidParameterValuesForTemplates)
-            {
-                if (filteredTemplates.All(
-                   template => template.MatchDisposition
-                        .OfType<ParameterMatchInfo>()
-                        .Any(x => x.Kind == MatchKind.InvalidValue
-                                  && x.Name.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase))))
-                {
-                    invalidParameterList.Add(new InvalidParameterInfo(
-                                                InvalidParameterInfo.Kind.InvalidParameterValue,
-                                                parameter.InputFormat,
-                                                parameter.Value,
-                                                parameter.Name));
-                }
-            }
-
-            return invalidParameterList;
+            return templates
+              .GroupBy(x => x.GroupIdentity, x => !string.IsNullOrEmpty(x.GroupIdentity), StringComparer.OrdinalIgnoreCase)
+              .Select(group => new TemplateGroup(group.ToList()));
         }
 
-        /// <summary>
-        /// The method returns the single invokable template with highest precedence.
-        /// </summary>
-        /// <param name="highestPrecedenceTemplate">Contains the invokable template with highest precedence.</param>
-        /// <param name="useDefaultLanguage">Defines if default language template should be preferred in case of ambiguity.</param>
-        /// <returns>
-        /// <c>true</c> when single invokable template with highest precedence can be defined.
-        /// <c>false</c> otherwise.
-        /// </returns>
-        internal bool TryGetHighestPrecedenceInvokableTemplate(out ITemplateMatchInfo? highestPrecedenceTemplate, bool useDefaultLanguage = false)
+        private IEnumerable<ITemplateInfo> GetHighestPrecedenceTemplates()
         {
-            highestPrecedenceTemplate = null;
-            if (!InvokableTemplates.Any())
+            if (!Templates.Any())
             {
-                return false;
-            }
-            IEnumerable<ITemplateMatchInfo> highestPrecendenceTemplates = GetHighestPrecedenceInvokableTemplates(useDefaultLanguage);
-            if (highestPrecendenceTemplates.Count() == 1)
-            {
-                highestPrecedenceTemplate = highestPrecendenceTemplates.First();
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// The method returns the invokable templates with highest precedence.
-        /// </summary>
-        /// <param name="useDefaultLanguage">Defines if default language template should be preferred in case of ambiguity.</param>
-        /// <returns>
-        /// the enumerator of invokable templates with highest precedence.
-        /// </returns>
-        internal IEnumerable<ITemplateMatchInfo> GetHighestPrecedenceInvokableTemplates(bool useDefaultLanguage = false)
-        {
-            IEnumerable<ITemplateMatchInfo> highestPrecedenceTemplates;
-            if (!InvokableTemplates.Any())
-            {
-                return new List<ITemplateMatchInfo>();
+                throw new Exception($"{nameof(Templates)} cannot be empty collection");
             }
 
-            int highestPrecedence = InvokableTemplates.Max(t => t.Info.Precedence);
-            highestPrecedenceTemplates = InvokableTemplates.Where(t => t.Info.Precedence == highestPrecedence);
-
-            if (useDefaultLanguage && highestPrecedenceTemplates.Count() > 1)
-            {
-                IEnumerable<ITemplateMatchInfo> highestPrecedenceTemplatesForDefaultLanguage = highestPrecedenceTemplates.Where(t => t.HasDefaultLanguageMatch());
-                if (highestPrecedenceTemplatesForDefaultLanguage.Any())
-                {
-                    return highestPrecedenceTemplatesForDefaultLanguage;
-                }
-            }
-            return highestPrecedenceTemplates;
-        }
-
-        /// <summary>
-        /// Gets the list of valid choices for <paramref name="parameter"/>.
-        /// </summary>
-        /// <param name="parameter">parameter canonical name.</param>
-        /// <returns>the dictionary of valid choices and descriptions.</returns>
-        internal IDictionary<string, ParameterChoice> GetValidValuesForChoiceParameter(string parameter)
-        {
-            Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
-            foreach (ITemplateMatchInfo template in Templates)
-            {
-                ITemplateParameter? choiceParameter = template.Info.GetChoiceParameter(parameter);
-                if (choiceParameter != null && choiceParameter.Choices != null)
-                {
-                    foreach (var choice in choiceParameter.Choices)
-                    {
-                        validChoices[choice.Key] = choice.Value;
-                    }
-                }
-            }
-            return validChoices;
-        }
-
-        /// <summary>
-        /// Gets the list of ambiguous choices for <paramref name="parameter"/> for value <paramref name="value"/>.
-        /// </summary>
-        /// <param name="parameter">parameter canonical name.</param>
-        /// <param name="value">ambiguous value for the parameter to return possible choices for.</param>
-        /// <returns>the dictionary of possible choices and descriptions that are matching ambiguous input.</returns>
-        internal Dictionary<string, ParameterChoice> GetAmbiguousValuesForChoiceParameter(string parameter, string value)
-        {
-            Dictionary<string, ParameterChoice> validChoices = new Dictionary<string, ParameterChoice>();
-            foreach (ITemplateMatchInfo template in Templates)
-            {
-                ITemplateParameter? choiceParameter = template.Info.GetChoiceParameter(parameter);
-                if (choiceParameter != null && choiceParameter.Choices != null)
-                {
-                    foreach (var choice in choiceParameter.Choices)
-                    {
-                        if (choice.Key.StartsWith(value, StringComparison.OrdinalIgnoreCase))
-                        {
-                            validChoices[choice.Key] = choice.Value;
-                        }
-                    }
-                }
-            }
-            return validChoices;
-        }
-
-        private class OrdinalIgnoreCaseMatchInfoComparer : IEqualityComparer<ParameterMatchInfo>
-        {
-            public bool Equals(ParameterMatchInfo? x, ParameterMatchInfo? y)
-            {
-                if (x is null && y is null)
-                {
-                    return true;
-                }
-                if (x is null || y is null)
-                {
-                    return false;
-                }
-
-                return x.Kind == y.Kind
-                    && string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(x.Value, y.Value, StringComparison.OrdinalIgnoreCase);
-            }
-
-            public int GetHashCode(ParameterMatchInfo obj)
-            {
-                return (obj.Name.ToLowerInvariant(), obj.Value?.ToLowerInvariant(), obj.Kind).GetHashCode();
-            }
+            int highestPrecedence = Templates.Max(t => t.Precedence);
+            return Templates.Where(t => t.Precedence == highestPrecedence);
         }
     }
 }

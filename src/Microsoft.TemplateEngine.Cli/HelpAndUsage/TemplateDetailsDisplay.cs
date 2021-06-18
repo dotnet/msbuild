@@ -21,26 +21,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
     internal static class TemplateDetailsDisplay
     {
         internal static async Task<New3CommandStatus> ShowTemplateGroupHelpAsync(
-            IReadOnlyCollection<ITemplateMatchInfo> templateGroup,
+            TemplateGroupMatchInfo templateGroup,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
             IHostSpecificDataLoader hostDataLoader,
             TemplateCreator templateCreator,
-            bool showImplicitlyHiddenParams,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (templateGroup.Count == 0)
-            {
-                throw new ArgumentException($"{nameof(templateGroup)} should have at least one element.", nameof(templateGroup));
-            }
-            if (!TemplateResolver.AreAllTemplatesSameGroupIdentity(templateGroup))
-            {
-                throw new ArgumentException($"{nameof(templateGroup)} should have all templates of same group.", nameof(templateGroup));
-            }
 
-            IReadOnlyList<ITemplateInfo> templateInfoList = templateGroup.Select(x => x.Info).ToList();
-            TemplateGroupParameterDetails? groupParameterDetails = await DetermineParameterDispositionsForTemplateGroupAsync(templateInfoList, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken).ConfigureAwait(false);
+            IEnumerable<ITemplateInfo> templateInfos = templateGroup.TemplatesWithMatchingParametersForPreferredLanguage;
+            TemplateGroupParameterDetails? groupParameterDetails = await DetermineParameterDispositionsForTemplateGroupAsync(templateInfos, environmentSettings, commandInput, hostDataLoader, templateCreator, cancellationToken).ConfigureAwait(false);
 
             if (groupParameterDetails != null)
             {
@@ -52,7 +43,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
                 // get the input params valid for any param in the group
                 IReadOnlyDictionary<string, string?> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
-                ShowTemplateDetailHeaders(templateInfoList);
+                ShowTemplateDetailHeaders(templateInfos);
+                bool showImplicitlyHiddenParams = templateInfos.Count() > 1;
                 ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings, commandInput);
                 return New3CommandStatus.Success;
             }
@@ -63,7 +55,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
         }
 
-        private static void ShowTemplateDetailHeaders(IReadOnlyList<ITemplateInfo> templateGroup)
+        private static void ShowTemplateDetailHeaders(IEnumerable<ITemplateInfo> templateGroup)
         {
             // Use the highest precedence template for most of the output
             ITemplateInfo preferredTemplate = templateGroup.OrderByDescending(x => x.Precedence).First();
@@ -269,11 +261,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         // Returns a composite of the input parameters and values which are valid for any template in the group.
-        private static IReadOnlyDictionary<string, string?> CoalesceInputParameterValuesFromTemplateGroup(IReadOnlyCollection<ITemplateMatchInfo> templateGroup)
+        private static IReadOnlyDictionary<string, string?> CoalesceInputParameterValuesFromTemplateGroup(TemplateGroupMatchInfo templateGroup)
         {
             Dictionary<string, string?> inputValues = new Dictionary<string, string?>();
 
-            foreach (ITemplateMatchInfo template in templateGroup.OrderBy(x => x.Info.Precedence))
+            foreach (ITemplateMatchInfo template in templateGroup.TemplateMatchInfosWithMatchingParametersForPreferredLanguage.OrderBy(x => x.Info.Precedence))
             {
                 foreach (KeyValuePair<string, string?> paramAndValue in template.GetValidTemplateParameters())
                 {
@@ -285,7 +277,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         }
 
         private static async Task<TemplateGroupParameterDetails?> DetermineParameterDispositionsForTemplateGroupAsync(
-            IReadOnlyList<ITemplateInfo> templateGroup,
+            IEnumerable<ITemplateInfo> templateGroup,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
             IHostSpecificDataLoader hostDataLoader,

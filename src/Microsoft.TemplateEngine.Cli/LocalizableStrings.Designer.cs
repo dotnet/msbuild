@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class LocalizableStrings {
@@ -872,11 +872,11 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid input switch:.
+        ///   Looks up a localized string similar to Error: Invalid option(s):.
         /// </summary>
-        internal static string InvalidInputSwitch {
+        internal static string InvalidCommandOptions {
             get {
-                return ResourceManager.GetString("InvalidInputSwitch", resourceCulture);
+                return ResourceManager.GetString("InvalidCommandOptions", resourceCulture);
             }
         }
         
@@ -917,20 +917,11 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For more information, run &apos;{0}&apos;..
+        ///   Looks up a localized string similar to For more information, run:.
         /// </summary>
         internal static string InvalidParameterTemplateHint {
             get {
                 return ResourceManager.GetString("InvalidParameterTemplateHint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error: Invalid option(s):.
-        /// </summary>
-        internal static string InvalidTemplateParameterValues {
-            get {
-                return ResourceManager.GetString("InvalidTemplateParameterValues", resourceCulture);
             }
         }
         
@@ -1823,7 +1814,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to These templates matched your input: {0}..
+        ///   Looks up a localized string similar to These templates matched your input: {0}.
         /// </summary>
         internal static string TemplatesFoundMatchingInputParameters {
             get {

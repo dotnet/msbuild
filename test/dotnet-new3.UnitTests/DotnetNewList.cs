@@ -30,6 +30,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.HaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
@@ -58,6 +59,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: tag='Common'")
                 .And.HaveStdOutMatching("Template Name\\s+Short Name\\s+Language\\s+Tags")
                 .And.HaveStdOutMatching("Console Application\\s+console\\s+\\[C#\\],F#,VB\\s+Common/Console")
                 .And.NotHaveStdOutMatching("dotnet gitignore file\\s+gitignore\\s+Config")
@@ -97,7 +99,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Execute()
                 .Should()
                 .ExitWith(0)
-                .And.HaveStdOut(expectedOutput)
+                .And.HaveStdOutContaining(expectedOutput)
                 .And.NotHaveStdErr();
         }
 
@@ -125,6 +127,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
                 .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
 
             new DotnetNewCommand(_log, "webapp", "--list")
@@ -135,6 +138,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: 'webapp'")
                 .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
 
             new DotnetNewCommand(_log, "razor", "--list")
@@ -145,6 +149,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Should()
                 .ExitWith(0)
                 .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input: 'razor'")
                 .And.HaveStdOutMatching("ASP\\.NET Core Web App\\s+webapp,razor\\s+\\[C#\\]\\s+Web/MVC/Razor Pages");
         }
     }

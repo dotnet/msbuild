@@ -66,17 +66,17 @@ namespace Microsoft.TemplateEngine.Cli.TableOutput
         /// <param name="language">language from the command input.</param>
         /// <param name="defaultLanguage">default language.</param>
         /// <returns></returns>
-        internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(IReadOnlyCollection<TemplateGroup> templateGroupList, string? language, string? defaultLanguage)
+        internal static IReadOnlyList<TemplateGroupTableRow> GetTemplateGroupsForListDisplay(IEnumerable<TemplateGroup> templateGroupList, string? language, string? defaultLanguage)
         {
             List<TemplateGroupTableRow> templateGroupsForDisplay = new List<TemplateGroupTableRow>();
             foreach (TemplateGroup templateGroup in templateGroupList)
             {
-                ITemplateInfo highestPrecedenceTemplate = templateGroup.Templates.OrderByDescending(x => x.Info.Precedence).First().Info;
+                ITemplateInfo highestPrecedenceTemplate = templateGroup.Templates.OrderByDescending(x => x.Precedence).First();
                 TemplateGroupTableRow groupDisplayInfo = new TemplateGroupTableRow
                 {
                     Name = highestPrecedenceTemplate.Name,
                     ShortNames = string.Join(",", templateGroup.ShortNames),
-                    Languages = string.Join(",", GetLanguagesToDisplay(templateGroup.Templates.Select(t => t.Info), language, defaultLanguage)),
+                    Languages = string.Join(",", GetLanguagesToDisplay(templateGroup.Templates, language, defaultLanguage)),
                     Classifications = highestPrecedenceTemplate.Classifications != null ? string.Join("/", highestPrecedenceTemplate.Classifications) : string.Empty,
                     Author = highestPrecedenceTemplate.Author ?? string.Empty,
                     Type = highestPrecedenceTemplate.GetTemplateType() ?? string.Empty

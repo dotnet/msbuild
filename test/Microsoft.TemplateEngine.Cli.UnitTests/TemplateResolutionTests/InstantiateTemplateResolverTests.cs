@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using Microsoft.TemplateEngine.Mocks;
@@ -18,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
     //  otherwise an exception will be thrown in TemplateInfo.Parameters getter
     //  (just about every situation will get to the secondary matching)
     // MockNewCommandInput doesn't support everything in the interface, just enough for this type of testing.
-    public class TemplateResolverTests
+    public class InstantiateTemplateResolverTests
     {
         public static IEnumerable<object?[]> Get_TemplateResolution_UnambiguousGroup_TestData()
         {
@@ -32,7 +33,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("Template2", name: "Long name of Template2", identity: "Template2"),
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "Template2" }
             };
 
@@ -48,8 +49,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                       .WithTag("language", "LISP"),
                 },
                 "Perl",
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
-                new string[] { "foo.test.Lisp" }
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
+                new string[] { "foo.test.Perl", "foo.test.Lisp" }
             };
 
             //TestPerformCoreTemplateQuery_GroupIsFound
@@ -63,7 +64,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("bar", name: "Bar template", identity: "bar.test", groupIdentity: "bar.test.template", precedence: 100)
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test.old", "foo.test.new" }
             };
 
@@ -77,7 +78,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", name: "Foo template new", identity: "foo.test.new", groupIdentity: "foo.test.template").WithParameters("baz")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test.new", "foo.test.old" }
             };
 
@@ -91,7 +92,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", name: "Foo template new", identity: "foo.test.new", groupIdentity: "foo.test.template", precedence: 200).WithChoiceParameter("framework", "net5.0")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test.old", "foo.test.new" }
             };
 
@@ -104,7 +105,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test", groupIdentity: "foo.test.template", precedence: 100).WithParameters("bar"),
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test" }
             };
 
@@ -118,7 +119,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", name: "Foo template", identity: "foo.test.2x", groupIdentity: "foo.test.template", precedence: 200).WithChoiceParameter("framework", "net5.0")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test.1x", "foo.test.2x" }
             };
 
@@ -135,7 +136,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithChoiceParameter("MyChoice", "value_2")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test_1", "foo.test_2" }
             };
 
@@ -151,7 +152,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithChoiceParameter("MyChoice", "value_2", "value_3")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test_1", "foo.test_2" }
             };
 
@@ -167,7 +168,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithChoiceParameter("MyChoice", "value_3", "value_4")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test_1", "foo.test_2" }
             };
 
@@ -185,7 +186,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithChoiceParameter("OtherChoice", "foo_", "bar_1")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test_1", "foo.test_2" }
             };
 
@@ -199,7 +200,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                     .WithTag("language", "F#")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test_1" }
             };
 
@@ -215,7 +216,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                      .WithTag("language", "VB")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test_1.FSharp", "foo.test_1.VB" }
             };
 
@@ -231,7 +232,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                                      .WithTag("language", "VB")
                 },
                 null,
-                TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch,
+                TemplateResolutionResult.TemplateGroupStatus.SingleMatch,
                 new string[] { "foo.test_1.FSharp", "foo.test_1.VB" }
             };
 
@@ -241,46 +242,46 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("Template1", identity: "Template1"),
                     new MockTemplateInfo("Template2", identity: "Template2")
             };
-            yield return new object?[] { new MockNewCommandInput("Template2"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template2" } };
-            yield return new object?[] { new MockNewCommandInput("Template3"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, Array.Empty<string>() };
-            yield return new object?[] { new MockNewCommandInput("Template"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, Array.Empty<string>() };
+            yield return new object?[] { new MockNewCommandInput("Template2"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "Template2" } };
+            yield return new object?[] { new MockNewCommandInput("Template3"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.NoMatch, Array.Empty<string>() };
+            yield return new object?[] { new MockNewCommandInput("Template"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.NoMatch, Array.Empty<string>() };
 
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity: "Group", precedence: 100),
                     new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity: "Group", precedence: 200)
             };
-            yield return new object?[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
-            yield return new object?[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
-            yield return new object?[] { new MockNewCommandInput("ShortName"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, Array.Empty<string>() };
+            yield return new object?[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
+            yield return new object?[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
+            yield return new object?[] { new MockNewCommandInput("ShortName"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.NoMatch, Array.Empty<string>() };
 
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("ShortName1", identity: "Template1", groupIdentity: "Group"),
                     new MockTemplateInfo("ShortName2", identity: "Template2", groupIdentity: "Group")
             };
-            yield return new object?[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
-            yield return new object?[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
-            yield return new object?[] { new MockNewCommandInput("ShortName"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.NoMatch, Array.Empty<string>() };
+            yield return new object?[] { new MockNewCommandInput("ShortName1"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
+            yield return new object?[] { new MockNewCommandInput("ShortName2"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "Template1", "Template2" } };
+            yield return new object?[] { new MockNewCommandInput("ShortName"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.NoMatch, Array.Empty<string>() };
 
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("foo", identity: "foo.Perl", groupIdentity: "foo.group").WithTag("language", "Perl"),
             };
-            yield return new object?[] { new MockNewCommandInput("foo"), templates, "Perl", (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
-            yield return new object?[] { new MockNewCommandInput("foo"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
-            yield return new object?[] { new MockNewCommandInput("foo"), templates, "C#", (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
-            yield return new object?[] { new MockNewCommandInput("foo", language: "Perl"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
-            yield return new object?[] { new MockNewCommandInput("foo", language: "Perl"), templates, "Perl", (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
-            yield return new object?[] { new MockNewCommandInput("foo", language: "Perl"), templates, "C#", (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
+            yield return new object?[] { new MockNewCommandInput("foo"), templates, "Perl", (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
+            yield return new object?[] { new MockNewCommandInput("foo"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
+            yield return new object?[] { new MockNewCommandInput("foo"), templates, "C#", (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
+            yield return new object?[] { new MockNewCommandInput("foo", language: "Perl"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
+            yield return new object?[] { new MockNewCommandInput("foo", language: "Perl"), templates, "Perl", (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
+            yield return new object?[] { new MockNewCommandInput("foo", language: "Perl"), templates, "C#", (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl" } };
 
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("foo", identity: "foo.Perl", groupIdentity: "foo.group").WithTag("language", "Perl"),
                     new MockTemplateInfo("foo", identity: "foo.Lisp", groupIdentity: "foo.group").WithTag("language", "LISP")
             };
-            yield return new object?[] { new MockNewCommandInput("foo"), templates, "Perl", (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Perl", "foo.Lisp" } };
-            yield return new object?[] { new MockNewCommandInput("foo", language: "LISP"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.Lisp" } };
+            yield return new object?[] { new MockNewCommandInput("foo"), templates, "Perl", (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl", "foo.Lisp" } };
+            yield return new object?[] { new MockNewCommandInput("foo", language: "LISP"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.Perl", "foo.Lisp" } };
 
             templates = new MockTemplateInfo[]
             {
@@ -289,16 +290,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("bar", identity: "bar.200", groupIdentity: "bar.group", precedence: 200),
             };
 
-            yield return new object?[] { new MockNewCommandInput("foo"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.100", "foo.200" } };
+            yield return new object?[] { new MockNewCommandInput("foo"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.100", "foo.200" } };
 
             templates = new MockTemplateInfo[]
             {
                     new MockTemplateInfo("foo", identity: "foo.bar", groupIdentity: "foo.group").WithParameters("bar"),
                     new MockTemplateInfo("foo", identity: "foo.baz", groupIdentity: "foo.group").WithParameters("baz"),
             };
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("baz", "whatever"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.bar", "foo.baz" } };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("baz", "whatever"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.bar", "foo.baz" } };
 
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("bat", "whatever"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.bar", "foo.baz" } };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("bat", "whatever"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.bar", "foo.baz" } };
 
             templates = new MockTemplateInfo[]
             {
@@ -306,8 +307,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("framework", "net5.0"),
             };
 
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("framework", "net5.0"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp2.0"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("framework", "net5.0"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("framework", "netcoreapp2.0"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
 
             templates = new MockTemplateInfo[]
             {
@@ -315,8 +316,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
                     new MockTemplateInfo("foo", identity: "foo.2", groupIdentity: "foo.group").WithChoiceParameter("MyChoice", "value_2_example", "value_3_example"),
             };
 
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
-            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_1"), templates, null, (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
+            yield return new object?[] { new MockNewCommandInput("foo").WithTemplateOption("MyChoice", "value_1"), templates, null, (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch, new string[] { "foo.1", "foo.2" } };
         }
 
         public static IEnumerable<object?[]> Get_TemplateResolution_TemplateToInvoke_TestData()
@@ -608,16 +609,17 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
         [Theory(DisplayName = nameof(TemplateResolution_UnambiguousGroup_Test))]
         [MemberData(nameof(Get_TemplateResolution_UnambiguousGroup_TestData))]
-        internal void TemplateResolution_UnambiguousGroup_Test(MockNewCommandInput command, MockTemplateInfo[] templateSet, string? defaultLanguage, int expectedStatus, string[]? expectedIdentities)
+        internal async Task TemplateResolution_UnambiguousGroup_Test(MockNewCommandInput command, MockTemplateInfo[] templateSet, string? defaultLanguage, int expectedStatus, string[]? expectedIdentities)
         {
-            var matchResult = TemplateResolver.GetTemplateResolutionResult(templateSet, new MockHostSpecificDataLoader(), command, defaultLanguage);
+            InstantiateTemplateResolver resolver = new InstantiateTemplateResolver(templateSet, new MockHostSpecificDataLoader());
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(command, defaultLanguage: defaultLanguage, default).ConfigureAwait(false);
 
             Assert.Equal(expectedStatus, (int)matchResult.GroupResolutionStatus);
 
-            if (expectedStatus == (int)TemplateResolutionResult.UnambiguousTemplateGroupStatus.SingleMatch)
+            if (expectedStatus == (int)TemplateResolutionResult.TemplateGroupStatus.SingleMatch)
             {
                 Assert.NotNull(matchResult.UnambiguousTemplateGroup);
-                var identities = matchResult.UnambiguousTemplateGroup!.Templates.Select(t => t.Info.Identity);
+                var identities = matchResult.UnambiguousTemplateGroup!.Templates.Select(t => t.Identity);
                 if (expectedIdentities != null)
                 {
                     Assert.Equal(expectedIdentities.Length, identities.Count());
@@ -635,15 +637,16 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.TemplateResolutionTests
 
         [Theory(DisplayName = nameof(TemplateResolution_TemplateToInvoke_Test))]
         [MemberData(nameof(Get_TemplateResolution_TemplateToInvoke_TestData))]
-        internal void TemplateResolution_TemplateToInvoke_Test(MockNewCommandInput command, MockTemplateInfo[] templateSet, string? defaultLanguage, int expectedStatus, string? expectedIdentity)
+        internal async Task TemplateResolution_TemplateToInvoke_Test(MockNewCommandInput command, MockTemplateInfo[] templateSet, string? defaultLanguage, int expectedStatus, string? expectedIdentity)
         {
-            TemplateResolutionResult matchResult = TemplateResolver.GetTemplateResolutionResult(templateSet, new MockHostSpecificDataLoader(), command, defaultLanguage);
+            InstantiateTemplateResolver resolver = new InstantiateTemplateResolver(templateSet, new MockHostSpecificDataLoader());
+            TemplateResolutionResult matchResult = await resolver.ResolveTemplatesAsync(command, defaultLanguage: defaultLanguage, default).ConfigureAwait(false);
 
             Assert.Equal(expectedStatus, (int)matchResult.ResolutionStatus);
             if (expectedStatus == (int)TemplateResolutionResult.Status.SingleMatch)
             {
                 Assert.NotNull(matchResult.TemplateToInvoke);
-                Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke!.Info.Identity);
+                Assert.Equal(expectedIdentity, matchResult.TemplateToInvoke!.Value.Template.Identity);
             }
             else
             {
