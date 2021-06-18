@@ -1516,6 +1516,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact(Timeout = 20_000)]
         public void CancelledBuild()
         {
+            Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
@@ -1524,18 +1525,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
+
+            BuildParameters parameters = new ()
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger, new MockLogger(printEventsToStdout: true) },
+                EnableNodeReuse = false
+            };
+
             BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+
+            Console.WriteLine("CancelledBuild: beginning build");
             _buildManager.BeginBuild(_parameters);
+            Console.WriteLine("CancelledBuild: build begun");
+
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
+            Console.WriteLine("CancelledBuild: pend build returned");
+
 
             asyncResult.ExecuteAsync(null, null);
+            Console.WriteLine("CancelledBuild: ExecuteAsync called");
             _buildManager.CancelAllSubmissions();
+            Console.WriteLine("CancelledBuild: submissions cancelled");
+
             // This test intermittently hangs. This timeout is designed to prevent that, turning a hang into a failure.
             // Todo: Investigate why this test sometimes hangs.
-            asyncResult.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+            asyncResult.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue();
             asyncResult.IsCompleted.ShouldBeTrue("Failing to complete by this point indicates a hang.");
             BuildResult result = asyncResult.BuildResult;
             _buildManager.EndBuild();
+            Console.WriteLine("CancelledBuild: build ended");
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
             _logger.AssertLogDoesntContain("[errormessage]");
