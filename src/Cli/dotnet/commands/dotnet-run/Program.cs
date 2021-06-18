@@ -22,12 +22,22 @@ namespace Microsoft.DotNet.Tools.Run
                 throw new HelpException(string.Empty);
             }
 
+            string project = parseResult.ValueForOption<string>(RunCommandParser.ProjectOptionShort);
+            if (!string.IsNullOrEmpty(project))
+            {
+                Console.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
+            }
+            else
+            {
+                project = parseResult.ValueForOption<string>(RunCommandParser.ProjectOption);
+            }
+
             var command = new RunCommand(
                 configuration: parseResult.ValueForOption<string>(RunCommandParser.ConfigurationOption),
                 framework: parseResult.ValueForOption<string>(RunCommandParser.FrameworkOption),
                 runtime: parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
-                project: parseResult.ValueForOption<string>(RunCommandParser.ProjectOption),
+                project: project,
                 launchProfile: parseResult.ValueForOption<string>(RunCommandParser.LaunchProfileOption),
                 noLaunchProfile: parseResult.HasOption(RunCommandParser.NoLaunchProfileOption),
                 noRestore: parseResult.HasOption(RunCommandParser.NoRestoreOption) || parseResult.HasOption(RunCommandParser.NoBuildOption),

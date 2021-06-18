@@ -217,4 +217,7 @@ The current {1} is '{2}'.</value>
   <data name="ValueMustBeAnObject" xml:space="preserve">
     <value>The property '{0}' must be an object if it is specified.</value>
   </data>
+  <data name="RunCommandProjectAbbreviationDeprecated" xml:space="preserve">
+    <value>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</value>
+  </data>
 </root>
