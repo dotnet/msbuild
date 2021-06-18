@@ -4,7 +4,7 @@
 name: Sync SDK version
 
 on:
-  push:
+  pull_request:
     paths:
     - 'global.json'
     branches:
