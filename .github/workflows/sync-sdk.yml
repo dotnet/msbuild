@@ -8,7 +8,7 @@ on:
     paths:
     - 'global.json'
     branches:
-    - 'darc*'
+    - 'main'
 
 jobs:
   sync:
