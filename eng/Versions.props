@@ -117,10 +117,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/roslyn -->
-    <MicrosoftNetCompilersToolsetPackageVersion>4.0.0-2.21317.22</MicrosoftNetCompilersToolsetPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-2.21317.22</MicrosoftCodeAnalysisCSharpPackageVersion>
-    <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.0.0-2.21317.22</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
-    <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.0.0-2.21317.22</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>4.0.0-2.21317.28</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>4.0.0-2.21317.28</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>4.0.0-2.21317.28</MicrosoftCodeAnalysisCSharpFeaturesPackageVersion>
+    <MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>4.0.0-2.21317.28</MicrosoftCodeAnalysisWorkspacesMSBuildPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/aspnet/AspNetCore -->
