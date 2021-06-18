@@ -303,6 +303,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest)
         {
+            ErrorUtilities.VerifyThrowInternalNull(buildRequest.ProjectInstance, nameof(buildRequest.ProjectInstance));
+
             var queryDescription = $"{buildRequest.ProjectFullPath}" +
                                    $"\n\tTargets:[{string.Join(", ", buildRequest.TargetNames)}]" +
                                    $"\n\tGlobal Properties: {{{string.Join(",", buildRequest.GlobalProperties.Select(kvp => $"{kvp.Name}={kvp.EvaluatedValue}"))}}}";
