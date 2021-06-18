@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             foreach (string fullPath in GetFilesComplexGlobbingMatchingInfo.FilesToCreate.Select(i => Path.Combine(testFolder.Path, i.ToPlatformSlash())))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-                
+
                 File.WriteAllBytes(fullPath, new byte[1]);
             }
 
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests
                         ExpectNoMatches = NativeMethodsShared.IsLinux,
                     }
                 };
-                
+
 #if !MONO // https://github.com/mono/mono/issues/8441
                 yield return new object[]
                 {
@@ -2112,8 +2112,7 @@ namespace Microsoft.Build.UnitTests
                             int nextSlash = normalizedCandidate.IndexOfAny(FileMatcher.directorySeparatorCharacters, path.Length + 1);
                             if (nextSlash != -1)
                             {
-                                
-                                //UNC paths start with a \\ fragment. Match against \\ when path is empty (i.e., inside the current working directory)
+                                // UNC paths start with a \\ fragment. Match against \\ when path is empty (i.e., inside the current working directory)
                                 string match = normalizedCandidate.StartsWith(@"\\") && string.IsNullOrEmpty(path)
                                     ? @"\\"
                                     : normalizedCandidate.Substring(0, nextSlash);
@@ -2129,7 +2128,7 @@ namespace Microsoft.Build.UnitTests
                                     directories.Add(FileMatcher.Normalize(match));
                                 }
                                 else if    // Match patterns like ?emp
-                                    (
+                                (
                                     pattern.Substring(0, 1) == "?"
                                     && pattern.Length == baseMatch.Length
                                 )
@@ -2666,8 +2665,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-
-
-

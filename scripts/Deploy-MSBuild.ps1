@@ -12,7 +12,7 @@ Set-StrictMode -Version "Latest"
 $ErrorActionPreference = "Stop"
 
 function Copy-WithBackup ($origin) {
-    $directoryPart = Join-Path -Path $destination $origin.IntermediaryDirectories 
+    $directoryPart = Join-Path -Path $destination $origin.IntermediaryDirectories
     $destinationPath = Join-Path -Path $directoryPart (Split-Path $origin.SourceFile -leaf)
 
     if (Test-Path $destinationPath -PathType Leaf) {

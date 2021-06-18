@@ -277,10 +277,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </UsingTask>
                         <Target Name='SetEnv'>
                             <SetEnvv/>
-                        </Target>        
+                        </Target>
                         <Target Name='Message1'>
                             <Exec Command='echo What does a cat say : " + (NativeMethodsShared.IsWindows ? "%MOO%" : "$MOO") + @"' />
-                        </Target>       
+                        </Target>
 </Project>
 ");
 
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verify if idle nodes are shutdown when BuildManager.ShutdownAllNodes is evoked.
-        /// The final number of nodes has to be less or equal the number of nodes already in 
+        /// The final number of nodes has to be less or equal the number of nodes already in
         /// the system before this method was called.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
@@ -344,11 +344,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Generate a theoretically unique directory to put our dummy projects in.
             string shutdownProjectDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.InvariantCulture, "VSNodeShutdown_{0}_UnitTest", Process.GetCurrentProcess().Id));
 
-            // Create the dummy projects we'll be "building" as our excuse to connect to and shut down 
-            // all the nodes. 
+            // Create the dummy projects we'll be "building" as our excuse to connect to and shut down
+            // all the nodes.
             ProjectInstance rootProject = GenerateDummyProjects(shutdownProjectDirectory, numberOfParallelProjectsToBuild, projectCollection);
 
-            // Build the projects. 
+            // Build the projects.
             var buildParameters = new BuildParameters(projectCollection)
             {
                 OnlyLogCriticalEvents = true,
@@ -362,9 +362,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Tell the build manager to not disturb process wide state
             var requestData = new BuildRequestData(rootProject, new[] { "Build" }, null);
 
-            // Use a separate BuildManager for the node shutdown build, so that we don't have 
-            // to worry about taking dependencies on whether or not the existing ones have already 
-            // disappeared. 
+            // Use a separate BuildManager for the node shutdown build, so that we don't have
+            // to worry about taking dependencies on whether or not the existing ones have already
+            // disappeared.
             var shutdownManager = new BuildManager("IdleNodeShutdown");
             shutdownManager.Build(buildParameters, requestData);
 
@@ -551,7 +551,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure when we are doing an in-process build that even if the environment variable MSBUILDFORWARDPROPERTIESFROMCHILD is set that we still 
+        /// Make sure when we are doing an in-process build that even if the environment variable MSBUILDFORWARDPROPERTIESFROMCHILD is set that we still
         /// get all of the initial properties.
         /// </summary>
         [Fact]
@@ -631,7 +631,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure when we launch a child node and set MsBuildForwardAllPropertiesFromChild that we get all of our properties. This needs to happen 
+        /// Make sure when we launch a child node and set MsBuildForwardAllPropertiesFromChild that we get all of our properties. This needs to happen
         /// even if the msbuildforwardpropertiesfromchild is set to something.
         /// </summary>
         [Fact]
@@ -835,7 +835,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// We want to pass the toolsets from the parent to the child nodes so that any custom toolsets 
+        /// We want to pass the toolsets from the parent to the child nodes so that any custom toolsets
         /// defined on the parent are also available on the child nodes for tasks which use the global project
         /// collection
         /// </summary>
@@ -858,7 +858,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                <Reference Include='$(MSBuildToolsPath)\Microsoft.Build.dll'/>
 <Code Type='Method'>
  <![CDATA[
-                    
+
                                 public override bool Execute()
                                 {
                                     bool foundToolSet = false;
@@ -963,7 +963,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
               <Project>
                  <Target Name='Build'>
                      <Message Text='[Message]' Importance='high'/>
-                     <Warning Text='[Warn]'/>	
+                     <Warning Text='[Warn]'/>
                 </Target>
               </Project>
             ");
@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A build with a message, error and warning, verify that 
+        /// A build with a message, error and warning, verify that
         /// we only get errors, warnings, and project started and finished when OnlyLogCriticalEvents is true
         /// </summary>
         [Fact]
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
               <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                  <Target Name='test'>
                      <Message Text='[Message]' Importance='high'/>
-                     <Warning Text='[warn]'/>	
+                     <Warning Text='[warn]'/>
                      <Error Text='[errormessage]'/>
                 </Target>
               </Project>
@@ -1053,7 +1053,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A build with a message, error and warning, verify that 
+        /// A build with a message, error and warning, verify that
         /// we only get errors, warnings, messages, task and target messages OnlyLogCriticalEvents is false
         /// </summary>
         [Fact]
@@ -1063,7 +1063,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
               <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
                  <Target Name='test'>
                      <Message Text='[message]' Importance='high'/>
-                     <Warning Text='[warn]'/>	
+                     <Warning Text='[warn]'/>
                      <Error Text='[errormessage]'/>
                 </Target>
               </Project>
@@ -1386,9 +1386,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If two overlapping submissions are executed against the same project, with at least one 
-        /// target involved that skipped, make sure that the second one successfully completes 
-        /// (retrieved from the cache). 
+        /// If two overlapping submissions are executed against the same project, with at least one
+        /// target involved that skipped, make sure that the second one successfully completes
+        /// (retrieved from the cache).
         /// </summary>
         [Fact]
         public void OverlappingIdenticalBuildSubmissions()
@@ -1419,9 +1419,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// With two overlapping submissions, the first of which skips a target and the second 
-        /// of which should not, ensure that the second submission does not, in fact, skip 
-        /// the target.  (E.g. despite the fact that the target results are in the cache already 
+        /// With two overlapping submissions, the first of which skips a target and the second
+        /// of which should not, ensure that the second submission does not, in fact, skip
+        /// the target.  (E.g. despite the fact that the target results are in the cache already
         /// as 'skipped', ensure that we retry execution in case conditions have changed.)
         /// </summary>
         [Fact]
@@ -1619,7 +1619,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
-        /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
+        /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
         /// </summary>
         [Fact]
         public void CancelledBuildWithDelay40()
@@ -1650,7 +1650,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_TASKHOST
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.0 task, we should
-        /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly. 
+        /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
         /// </summary>
         [Fact]
         public void CancelledBuildInTaskHostWithDelay40()
@@ -2122,7 +2122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            
+
             string fileName = _env.CreateFile(".proj").Path;
             File.WriteAllText(fileName, contents);
             var data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, MSBuildDefaultToolsVersion, new string[0], null);
@@ -2181,9 +2181,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </PropertyGroup>
 <ItemGroup>
   <Foo Include='foo'/>
-  <Foo2 Include='foo2'/>    
+  <Foo2 Include='foo2'/>
 </ItemGroup>
- <Target Name='test'>   
+ <Target Name='test'>
    <Message Text='[$(DeleteMe)]'/>
    <Message Text='[$(Unmodified)]'/>
    <Message Text='[$(VirtualProp)]'/>
@@ -2243,7 +2243,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
    <Unmodified>unmodified</Unmodified>
    <VirtualProp>original</VirtualProp>
  </PropertyGroup>
- <Target Name='test'>   
+ <Target Name='test'>
    <Message Text='[$(Unmodified)]'/>
    <Message Text='[$(VirtualProp)]'/>
  </Target>
@@ -2294,7 +2294,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     innerBuildCacheDirectory = BuildAndCheckCache(innerBuildManager, new[] { outerBuildCacheDirectory });
 
-                    // Force the cache for this build manager (and only this build manager) to be cleared.  It should leave 
+                    // Force the cache for this build manager (and only this build manager) to be cleared.  It should leave
                     // behind the results from the other one.
                     innerBuildManager.ResetCaches();
                 }
@@ -2310,9 +2310,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If there's a P2P that otherwise succeeds, but has an AfterTarget that errors out, the 
+        /// If there's a P2P that otherwise succeeds, but has an AfterTarget that errors out, the
         /// overall build result -- and thus the return value of the MSBuild task -- should reflect
-        /// that failure. 
+        /// that failure.
         /// </summary>
         [Theory]
         [InlineData(false)]
@@ -2326,9 +2326,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <Target Name=`Build`>
     <MSBuild Projects=`" + projB + @"` />
- 
+
     <Warning Text=`We shouldn't reach here.` />
-  </Target>    
+  </Target>
 </Project>
 ";
 
@@ -2358,10 +2358,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If there's a P2P that otherwise succeeds, but has an AfterTarget that errors out, the 
+        /// If there's a P2P that otherwise succeeds, but has an AfterTarget that errors out, the
         /// overall build result -- and thus the return value of the MSBuild task -- should reflect
-        /// that failure.  Specifically tests where there are multiple entrypoint targets with 
-        /// AfterTargets, only one of which fails. 
+        /// that failure.  Specifically tests where there are multiple entrypoint targets with
+        /// AfterTargets, only one of which fails.
         /// </summary>
         [Theory]
         [InlineData(false)]
@@ -2375,9 +2375,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <Target Name=`Build`>
     <MSBuild Projects=`" + projB + @"` Targets=`Build;Build2` />
- 
+
     <Warning Text=`We shouldn't reach here.` />
-  </Target>    
+  </Target>
 </Project>
 ";
 
@@ -2424,9 +2424,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If there's a P2P that otherwise succeeds, but has an AfterTarget that errors out, the 
+        /// If there's a P2P that otherwise succeeds, but has an AfterTarget that errors out, the
         /// overall build result -- and thus the return value of the MSBuild task -- should reflect
-        /// that failure. This should also be true if the AfterTarget is an AfterTarget of the 
+        /// that failure. This should also be true if the AfterTarget is an AfterTarget of the
         /// entrypoint target.
         /// </summary>
         [Theory]
@@ -2441,9 +2441,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <Target Name=`Build`>
     <MSBuild Projects=`" + projB + @"` />
- 
+
     <Warning Text=`We shouldn't reach here.` />
-  </Target>    
+  </Target>
 </Project>
 ";
 
@@ -2477,9 +2477,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If a project is called into twice, with two different entrypoint targets that 
-        /// depend on non-overlapping sets of targets, and the first fails, the second 
-        /// should not inherit that failure if all the targets it calls succeed. 
+        /// If a project is called into twice, with two different entrypoint targets that
+        /// depend on non-overlapping sets of targets, and the first fails, the second
+        /// should not inherit that failure if all the targets it calls succeed.
         /// </summary>
         [Fact]
         public void NonOverlappingEnusingTrypointTargetsShouldNotInfluenceEachOthersResults()
@@ -2490,7 +2490,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contentsA = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
   <Target Name=`Build`>
-  
+
    <Message Text=`The next MSBuild call should FAIL, but the build will continue.` />
    <MSBuild Projects=`" + projB + @"` Targets=`Build` ContinueOnError=`true` />
    <Message Text=`The next MSBuild call should SUCCEED without error.` />
@@ -2504,8 +2504,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
   <Target Name=`Build`>
     <Error Text=`Forced error in Build` />
   </Target>
-  
-  
+
+
   <Target Name=`GetTargetPath`>
     <Message Text=`Success` />
   </Target>
@@ -2525,9 +2525,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// In a situation where we have two requests calling into the same project, with different entry point 
-        /// targets, one of which depends on "A;B", the other of which depends on "B", which has a dependency of 
-        /// its own on "A", that we still properly build.  
+        /// In a situation where we have two requests calling into the same project, with different entry point
+        /// targets, one of which depends on "A;B", the other of which depends on "B", which has a dependency of
+        /// its own on "A", that we still properly build.
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/933")]
@@ -2546,7 +2546,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contentsA = @"<?xml version='1.0' encoding='utf-8'?>
 <Project ToolsVersion='4.0' DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
   <ItemGroup>
-    <ProjectReference Include='" + projD + @"' /> 
+    <ProjectReference Include='" + projD + @"' />
     <ProjectReference Include='" + projC + @"' />
     <ProjectReference Include='" + projB + @"' />
   </ItemGroup>
@@ -2616,19 +2616,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If two requests are made for the same project, and they call in with 
-        /// just the right timing such that: 
+        /// If two requests are made for the same project, and they call in with
+        /// just the right timing such that:
         /// - request 1 builds for a while, reaches a P2P, and blocks
-        /// - request 2 starts building, skips for a while, reaches the above P2P, and 
-        ///   blocks waiting for request 1's results 
+        /// - request 2 starts building, skips for a while, reaches the above P2P, and
+        ///   blocks waiting for request 1's results
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
-        /// Then request 2 should end up exiting in the same fashion.  
-        /// 
-        /// This simple test verifies that if there are two error targets in a row, the 
-        /// second request will bail out where the first request did, as though it had 
-        /// executed the target, rather than skipping and continuing. 
+        ///
+        /// Then request 2 should end up exiting in the same fashion.
+        ///
+        /// This simple test verifies that if there are two error targets in a row, the
+        /// second request will bail out where the first request did, as though it had
+        /// executed the target, rather than skipping and continuing.
         /// </summary>
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
@@ -2705,9 +2705,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///   blocks waiting for request 1's results
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
+        ///
         /// Then request 2 should end up exiting in the same fashion.
-        /// 
+        ///
         /// This simple test verifies that if there are two error targets in a row, and the
         /// first has a chain of OnError targets, the OnError targets will all execute as
         /// expected in the first request, but be skipped by the second (since if it's "skipping
@@ -2825,9 +2825,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         ///   blocks waiting for request 1's results
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
+        ///
         /// Then request 2 should end up exiting in the same fashion.
-        /// 
+        ///
         /// This simple test verifies that if there are two error targets in a row, AND
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but
         /// will continue executing (on the first request) or skipping (on the second)
@@ -2909,18 +2909,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If two requests are made for the same project, and they call in with 
-        /// just the right timing such that: 
+        /// If two requests are made for the same project, and they call in with
+        /// just the right timing such that:
         /// - request 1 builds for a while, reaches a P2P, and blocks
-        /// - request 2 starts building, skips for a while, reaches the above P2P, and 
-        ///   blocks waiting for request 1's results 
+        /// - request 2 starts building, skips for a while, reaches the above P2P, and
+        ///   blocks waiting for request 1's results
         /// - request 1 resumes building, errors, and exits
         /// - request 2 resumes building
-        /// 
-        /// Then request 2 should end up exiting in the same fashion.  
-        /// 
-        /// This test verifies that if the errors are in AfterTargets, we still 
-        /// exit as though the target that those targets run after has already run. 
+        ///
+        /// Then request 2 should end up exiting in the same fashion.
+        ///
+        /// This test verifies that if the errors are in AfterTargets, we still
+        /// exit as though the target that those targets run after has already run.
         /// </summary>
 #if MONO
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
@@ -2990,10 +2990,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Related to the two tests above, if two requests are made for the same project, but 
-        /// for different entry targets, and a target fails in the first request, if the second 
-        /// request also runs that target, its skip-unsuccessful should behave in the same 
-        /// way as if the target had actually errored. 
+        /// Related to the two tests above, if two requests are made for the same project, but
+        /// for different entry targets, and a target fails in the first request, if the second
+        /// request also runs that target, its skip-unsuccessful should behave in the same
+        /// way as if the target had actually errored.
         /// </summary>
         [Fact]
         public void VerifyMultipleRequestForSameProjectWithErrors_DifferentEntrypoints()
@@ -3003,7 +3003,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string contentsA = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
-  <ItemGroup> 
+  <ItemGroup>
     <PR Include=`" + projB + @"`>
       <Targets>Build</Targets>
     </PR>
@@ -3120,7 +3120,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that we can submit multiple simultaneous submissions with 
+        /// Verify that we can submit multiple simultaneous submissions with
         /// legacy threading mode active and successfully build, and that one of those
         /// submissions can P2P to the other.
         /// </summary>
@@ -3201,12 +3201,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that we can submit multiple simultaneous submissions with 
+        /// Verify that we can submit multiple simultaneous submissions with
         /// legacy threading mode active and successfully build, and that one of those
         /// submissions can P2P to the other.
-        /// 
-        /// A variation of the above test, where multiple nodes are available, so the 
-        /// submissions aren't restricted to running strictly serially by the single in-proc 
+        ///
+        /// A variation of the above test, where multiple nodes are available, so the
+        /// submissions aren't restricted to running strictly serially by the single in-proc
         /// node.
         /// </summary>
 #if MONO
@@ -3309,7 +3309,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <ItemGroup>
   <Item Include='BaseItem'/>
 </ItemGroup>
- <Target Name='BaseTest'>   
+ <Target Name='BaseTest'>
    <Message Text='[$(Prop)]'/>
    <Message Text='[@(Item)]'/>
     <PropertyGroup>
@@ -3320,7 +3320,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </ItemGroup>
  </Target>
 
- <Target Name='MovedTest'>   
+ <Target Name='MovedTest'>
    <Message Text='[$(Prop)]'/>
    <Message Text='[@(Item)]'/>
  </Target>
@@ -3453,13 +3453,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <Target Name='One' Outputs='one.txt'>   
+ <Target Name='One' Outputs='one.txt'>
  </Target>
 
- <Target Name='Two' Outputs='two.txt'>   
+ <Target Name='Two' Outputs='two.txt'>
  </Target>
 
- <Target Name='Three' Outputs='three.txt'>   
+ <Target Name='Three' Outputs='three.txt'>
  </Target>
 </Project>
 ");
@@ -3581,8 +3581,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.CreateDirectory(shutdownProjectDirectory);
 
             // Generate the project.  It will have the following format.  Setting the AdditionalProperties
-            // causes the projects to be built to be separate configs, which allows us to build the same project 
-            // a bunch of times in parallel.  
+            // causes the projects to be built to be separate configs, which allows us to build the same project
+            // a bunch of times in parallel.
             //
             // <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>
             //   <ItemGroup>
