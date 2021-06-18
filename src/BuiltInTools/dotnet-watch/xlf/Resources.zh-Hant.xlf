@@ -22,6 +22,11 @@
         <target state="translated">無法同時指定 '--quiet' 和 '--verbose' 選項。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Warning_ProjectAbbreviationDeprecated">
+        <source>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</source>
+        <target state="new">Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

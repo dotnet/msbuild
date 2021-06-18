@@ -105,11 +105,11 @@ Examples:
 
         internal async Task<int> RunAsync(string[] args)
         {
-            var rootCommand = CreateRootCommand(HandleWatch);
+            var rootCommand = CreateRootCommand(HandleWatch, _reporter);
             return await rootCommand.InvokeAsync(args);
         }
 
-        internal static RootCommand CreateRootCommand(Func<CommandLineOptions, Task<int>> handler)
+        internal static RootCommand CreateRootCommand(Func<CommandLineOptions, Task<int>> handler, IReporter reporter)
         {
             var quiet = new Option<bool>(
                 new[] { "--quiet", "-q" },
@@ -137,8 +137,11 @@ Examples:
                     new[] { "--no-hot-reload" },
                     "Suppress hot reload for supported apps."),
                  new Option<string>(
-                    new[] { "--project", "-p" },
+                     "--project",
                     "The project to watch"),
+                 new Option<string>(
+                     "-p",
+                     "The project to watch") { IsHidden = true },
                  new Option<bool>(
                     "--list",
                     "Lists all discovered files without starting the watcher"),
@@ -147,6 +150,16 @@ Examples:
             root.TreatUnmatchedTokensAsErrors = false;
             root.Handler = CommandHandler.Create((CommandLineOptions options, ParseResult parseResults) =>
             {
+                if (string.IsNullOrEmpty(options.Project))
+                {
+                    var projectOptionShort = parseResults.ValueForOption<string>("-p");
+                    if (!string.IsNullOrEmpty(projectOptionShort))
+                    {
+                        reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);
+                        options.Project = projectOptionShort;
+                    }
+                }
+
                 string[] remainingArguments;
                 if (parseResults.UnparsedTokens.Any() && parseResults.UnmatchedTokens.Any())
                 {
