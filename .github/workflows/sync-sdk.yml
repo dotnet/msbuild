@@ -1,0 +1,28 @@
+# Update the SDK version stored in eng/Versions.props that must match
+# the one Arcade updates in global.json
+
+name: Sync SDK version
+
+on:
+  pull_request:
+    paths:
+    - 'global.json'
+    branches:
+    - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Copy global.json SDK to Versions
+      run: |
+        git config --global user.name 'MSBuild Automation'
+        git config --global user.email 'dotnet-bot@users.noreply.github.com'
+
+        sed -i "s/<DotNetCliVersion>[^<]*<\/DotNetCliVersion>/<DotNetCliVersion>$(jq -r '.tools.dotnet' global.json)<\/DotNetCliVersion>/" eng/Versions.props
+        git add eng/Versions.props
+    
+        git commit -m "Sync global.json version to $(jq -r '.tools.dotnet' global.json)"
+        
+        git push
