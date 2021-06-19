@@ -10,7 +10,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
-using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Sln.Add
 {
@@ -19,9 +18,6 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly string _fileOrDirectory;
         private readonly bool _inRoot;
         private readonly IList<string> _relativeRootSolutionFolders;
-
-        private const string InRootOption = "in-root";
-        private const string SolutionFolderOption = "solution-folder";
 
         public AddProjectToSolutionCommand(
             ParseResult parseResult) : base(parseResult)
@@ -37,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             }
 
-            _relativeRootSolutionFolders = string.IsNullOrEmpty(relativeRoot)? null : relativeRoot.Split(Path.DirectorySeparatorChar);
+            _relativeRootSolutionFolders = string.IsNullOrEmpty(relativeRoot) ? null : relativeRoot.Split(Path.DirectorySeparatorChar);
         }
 
         public override int Execute()
