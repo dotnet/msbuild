@@ -21,7 +21,7 @@ namespace Microsoft.Build.Evaluation
             
             readonly string _rootDirectory;
 
-            readonly ImmutableList<string> _excludes;
+            readonly ImmutableArray<string> _excludes;
 
             readonly ImmutableList<ProjectMetadataElement> _metadata;
 
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Evaluation
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }
 
-            public ImmutableList<string>.Builder Excludes { get; } = ImmutableList.CreateBuilder<string>();
+            public ImmutableArray<string>.Builder Excludes { get; } = ImmutableArray.CreateBuilder<string>();
 
             public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
