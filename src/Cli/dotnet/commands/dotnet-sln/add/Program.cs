@@ -26,14 +26,23 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             _inRoot = parseResult.ValueForOption<bool>(SlnAddParser.InRootOption);
             string relativeRoot = parseResult.ValueForOption<string>(SlnAddParser.SolutionFolderOption);
-
-            if (_inRoot && !string.IsNullOrEmpty(relativeRoot))
+            bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
+            
+            if (_inRoot && hasRelativeRoot)
             {
                 // These two options are mutually exclusive
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             }
 
-            _relativeRootSolutionFolders = string.IsNullOrEmpty(relativeRoot) ? null : relativeRoot.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            if (hasRelativeRoot)
+            {
+                relativeRoot = PathUtility.GetPathWithDirectorySeparator(relativeRoot);
+                _relativeRootSolutionFolders = relativeRoot.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                _relativeRootSolutionFolders = null;
+            }
         }
 
         public override int Execute()
