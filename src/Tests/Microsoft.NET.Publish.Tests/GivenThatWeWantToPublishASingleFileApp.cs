@@ -14,6 +14,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace Microsoft.NET.Publish.Tests
 {
@@ -28,6 +29,7 @@ namespace Microsoft.NET.Publish.Tests
         private const string ExcludeAlways = "/p:ExcludeAlways=true";
         private const string DontUseAppHost = "/p:UseAppHost=false";
         private const string ReadyToRun = "/p:PublishReadyToRun=true";
+        private const string ReadyToRunComposite = "/p:PublishReadyToRunComposite=true";
         private const string ReadyToRunWithSymbols = "/p:PublishReadyToRunEmitSymbols=true";
         private const string UseAppHost = "/p:UseAppHost=true";
         private const string IncludeDefault = "/p:IncludeSymbolsInSingleFile=false";
@@ -276,6 +278,49 @@ namespace Microsoft.NET.Publish.Tests
             GetPublishDirectory(publishCommand, "net6.0")
                 .Should()
                 .OnlyHaveFiles(expectedFiles);
+        }
+
+        [RequiresMSBuildVersionTheory("16.8.0")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_supports_composite_r2r(bool extractAll)
+        {
+            var projName = "SingleFileTest";
+            if (extractAll)
+            {
+                projName += "Extracted";
+            }
+
+            var testProject = new TestProject()
+            {
+                Name = projName,
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+            var publishCommand = new PublishCommand(testAsset);
+            var extraArgs = new List<string>() { PublishSingleFile, ReadyToRun, ReadyToRunComposite, RuntimeIdentifier };
+
+            if (extractAll)
+            {
+                extraArgs.Add(IncludeAllContent);
+            }
+
+            publishCommand
+                .Execute(extraArgs.ToArray())
+                .Should()
+                .Pass();
+
+            var publishDir = GetPublishDirectory(publishCommand, targetFramework: "net6.0").FullName;
+            var singleFilePath = Path.Combine(publishDir, $"{testProject.Name}{Constants.ExeSuffix}");
+
+            var command = new RunExeCommand(Log, singleFilePath);
+            command.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
         }
 
         [RequiresMSBuildVersionFact("16.8.0")]
