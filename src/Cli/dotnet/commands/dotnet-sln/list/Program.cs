@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
@@ -23,8 +22,9 @@ namespace Microsoft.DotNet.Tools.Sln.List
 
         public override int Execute()
         {
-            SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
-            if (slnFile.Projects.Count == 0)
+            var slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
+            var slnProjects = slnFile.Projects.Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid).ToArray();
+            if (slnProjects.Length == 0)
             {
                 Reporter.Output.WriteLine(CommonLocalizableStrings.NoProjectsFound);
             }
@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tools.Sln.List
             {
                 Reporter.Output.WriteLine($"{LocalizableStrings.ProjectsHeader}");
                 Reporter.Output.WriteLine(new string('-', LocalizableStrings.ProjectsHeader.Length));
-                foreach (var slnProject in slnFile.Projects.Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid))
+                foreach (var slnProject in slnProjects)
                 {
                     Reporter.Output.WriteLine(slnProject.FilePath);
                 }
