@@ -38,6 +38,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             throw new Exception("Test Failure");
         }
 
+        public Task<NuGetVersion> GetLatestPackageVerion(PackageId packageId, PackageSourceLocation packageSourceLocation = null, bool includePreview = false) => throw new NotImplementedException();
 
         public Task<string> GetPackageUrl(PackageId packageId,
             NuGetVersion packageVersion,

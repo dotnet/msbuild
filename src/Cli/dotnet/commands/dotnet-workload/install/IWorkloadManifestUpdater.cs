@@ -12,7 +12,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null);
 
-        public IEnumerable<(
+        Task BackgroundUpdateAdvertisingManifestsAsync();
+
+        IEnumerable<(
             ManifestId manifestId, 
             ManifestVersion existingVersion, 
             ManifestVersion newVersion,

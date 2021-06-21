@@ -62,5 +62,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             return new string[] { "mock-manifest-url" };
         }
+
+        public Task BackgroundUpdateAdvertisingManifestsAsync() => throw new System.NotImplementedException();
     }
 }

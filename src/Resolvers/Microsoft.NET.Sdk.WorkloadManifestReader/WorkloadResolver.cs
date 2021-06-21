@@ -457,5 +457,21 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
             return workloadDef.Platforms.Any(supportedPlatform => _currentRuntimeIdentifiers.Contains(supportedPlatform));
         }
+
+        public string GetManifestVersion(string manifestId)
+        {
+            (_, Stream manifestStream) = _manifestProvider.GetManifests().FirstOrDefault(manifest => manifest.manifestId.Contains(manifestId));
+
+            if (manifestStream == null)
+            {
+                throw new Exception($"Manifest with id {manifestId} does not exist.");
+            }
+
+            using (manifestStream)
+            {
+                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
+                return manifest.Version;
+            }
+        }
     }
 }
