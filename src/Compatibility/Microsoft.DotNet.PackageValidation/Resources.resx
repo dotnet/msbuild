@@ -156,4 +156,7 @@
   <data name="NonExistentPackagePath" xml:space="preserve">
     <value>Package '{0}' not found. Please provide a valid package path.</value>
   </data>
+  <data name="WroteSuppressions" xml:space="preserve">
+    <value>Successfully wrote compatibility suppressions to '{0}'.</value>
+  </data>
 </root>

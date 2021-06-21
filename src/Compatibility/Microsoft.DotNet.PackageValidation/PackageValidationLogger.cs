@@ -1,6 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
+using Microsoft.Build.Framework;
+using Microsoft.DotNet.Compatibility.ErrorSuppression;
 using Microsoft.NET.Build.Tasks;
 
 namespace Microsoft.DotNet.PackageValidation
@@ -8,15 +11,42 @@ namespace Microsoft.DotNet.PackageValidation
     internal class PackageValidationLogger : IPackageLogger
     {
         private readonly Logger _log;
+        private readonly SuppressionEngine _suppressionEngine;
+        private readonly bool _baselineAllErrors;
 
-        public PackageValidationLogger(Logger log)
+        public PackageValidationLogger(Logger log, string suppressionsFile)
+            : this(log, suppressionsFile, false) {}
+
+        public PackageValidationLogger(Logger log, string suppressionsFile, bool baselineAllErrors)
         {
             _log = log;
+            _suppressionEngine = baselineAllErrors && !File.Exists(suppressionsFile) ? SuppressionEngine.Create() : SuppressionEngine.CreateFromFile(suppressionsFile);
+            _baselineAllErrors = baselineAllErrors;
         }
 
-        public void LogError(string code, string format, params string[] args)
+        public void LogError(Suppression suppression, string code, string format, params string[] args)
         {
-            _log.LogNonSdkError(code, format, args);
+            if (!_suppressionEngine.IsErrorSuppressed(suppression))
+            {
+                if (_baselineAllErrors)
+                {
+                    _suppressionEngine.AddSuppression(suppression);
+                }
+                else
+                {
+                    _log.LogNonSdkError(code, format, args);
+                }
+            }
+        }
+
+        public void LogMessage(MessageImportance importance, string format, params string[] args) => _log.LogMessage(importance, format, args);
+
+        public void LogErrorHeader(string message) => _log.LogNonSdkError(null, message);
+
+        public void GenerateSuppressionsFile(string suppressionsFile)
+        {
+            _suppressionEngine.WriteSuppressionsToFile(suppressionsFile);
+            LogMessage(MessageImportance.High, Resources.WroteSuppressions, suppressionsFile);
         }
     }
 }

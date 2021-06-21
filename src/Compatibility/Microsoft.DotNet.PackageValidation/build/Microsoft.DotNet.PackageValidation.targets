@@ -12,10 +12,13 @@
 
   <Target Name="RunPackageValidation"
           AfterTargets="Pack"
-          Condition="$(IsPackable) == 'true'">
+          Condition="'$(IsPackable)' == 'true'">
 
     <PropertyGroup >
       <PackageValidationBaselinePath Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName.ToLower())', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName.ToLower()).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
+      <GenerateCompatibilitySuppressionFile Condition="'$(GenerateCompatibilitySuppressionFile)' == ''">false</GenerateCompatibilitySuppressionFile>
+      <_compatibilitySuppressionFilePath>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', 'CompatibilitySuppressions.xml'))</_compatibilitySuppressionFilePath>
+      <CompatibilitySuppressionFilePath Condition="'$(CompatibilitySuppressionFilePath)' == '' and (Exists($(_compatibilitySuppressionFilePath)) or '$(GenerateCompatibilitySuppressionFile)' == 'true')">$(_compatibilitySuppressionFilePath)</CompatibilitySuppressionFilePath>
     </PropertyGroup>
 
     <Error Condition="'$(PackageValidationBaselinePath)' != '' and !Exists('$(PackageValidationBaselinePath)')" Text="$(PackageValidationBaselinePath) does not exist. Please check the PackageValidationBaselinePath or PackageValidationBaselineVersion." />
@@ -26,6 +29,8 @@
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
       RunApiCompat="$([MSBuild]::ValueOrDefault('$(RunApiCompat)', 'true'))"
+      GenerateCompatibilitySuppressionFile="$(GenerateCompatibilitySuppressionFile)"
+      CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
       BaselinePackageTargetPath="$(PackageValidationBaselinePath)" />
   </Target>
 </Project>

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.Compatibility.ErrorSuppression;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
 
@@ -58,7 +59,11 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.ApplicableCompileTimeAsset, framework.ToString()))
                     {
-                        _log.LogError(DiagnosticIds.ApplicableCompileTimeAsset, Resources.NoCompatibleCompileTimeAsset, framework.ToString());
+                        _log.LogError(
+                            new Suppression { DiagnosticId = DiagnosticIds.ApplicableCompileTimeAsset, Target = framework.ToString() },
+                            DiagnosticIds.ApplicableCompileTimeAsset, 
+                            Resources.NoCompatibleCompileTimeAsset, 
+                            framework.ToString());
                     }
                     break;
                 }
@@ -68,7 +73,11 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.CompatibleRuntimeRidLessAsset, framework.ToString()))
                     {
-                        _log.LogError(DiagnosticIds.CompatibleRuntimeRidLessAsset, Resources.NoCompatibleRuntimeAsset, framework.ToString());
+                        _log.LogError(
+                            new Suppression { DiagnosticId = DiagnosticIds.CompatibleRuntimeRidLessAsset, Target = framework.ToString() },
+                            DiagnosticIds.CompatibleRuntimeRidLessAsset, 
+                            Resources.NoCompatibleRuntimeAsset, 
+                            framework.ToString());
                     }
                 }
                 else
@@ -92,7 +101,12 @@ namespace Microsoft.DotNet.PackageValidation
                     {
                         if (!_diagnosticBag.Filter(DiagnosticIds.CompatibleRuntimeRidSpecificAsset, framework.ToString() + "-" + rid))
                         {
-                            _log.LogError(DiagnosticIds.CompatibleRuntimeRidSpecificAsset, Resources.NoCompatibleRidSpecificRuntimeAsset, framework.ToString(), rid);
+                            _log.LogError(
+                                new Suppression { DiagnosticId = DiagnosticIds.CompatibleRuntimeRidSpecificAsset, Target = framework.ToString() + "-" + rid },
+                                DiagnosticIds.CompatibleRuntimeRidSpecificAsset, 
+                                Resources.NoCompatibleRidSpecificRuntimeAsset, 
+                                framework.ToString(), 
+                                rid);
                         }
                     }
                     else
