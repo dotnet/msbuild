@@ -25,8 +25,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly string _tempDirPath;
         private readonly PackageSourceLocation _packageSourceLocation;
 
-        public WorkloadManifestUpdater(
-            IReporter reporter,
+
+        public WorkloadManifestUpdater(IReporter reporter,
             IWorkloadManifestProvider workloadManifestProvider,
             INuGetPackageDownloader nugetPackageDownloader,
             string userHome,
@@ -90,8 +90,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 try
                 {
-                    var packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifest),
-                        packageSourceLocation: _packageSourceLocation, includePreview: includePreviews, downloadFolder: downloadPath);
+                    var packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
+                        GetManifestPackageId(_sdkFeatureBand, manifest),
+                        packageSourceLocation: _packageSourceLocation,
+                        includePreview: includePreviews, downloadFolder: downloadPath);
                     packagePaths.Add(packagePath);
                 }
                 catch (Exception)
@@ -160,8 +162,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 {
                     try
                     {
-                        packagePath = await _nugetPackageDownloader.DownloadPackageAsync(GetManifestPackageId(_sdkFeatureBand, manifestId),
-                            packageSourceLocation: _packageSourceLocation, includePreview: includePreviews);
+                        packagePath = await _nugetPackageDownloader.DownloadPackageAsync(
+                            GetManifestPackageId(_sdkFeatureBand, manifestId),
+                            packageSourceLocation: _packageSourceLocation,
+                            includePreview: includePreviews);
                     }
                     catch (NuGetPackageNotFoundException)
                     {

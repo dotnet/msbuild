@@ -77,7 +77,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(tempPackagesDir, null,
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
-                                          verboseLogger: nullLogger);
+                                          verboseLogger: nullLogger,
+                                          restoreActionConfig: _parseResult.ToRestoreActionConfig());
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
                 _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath);
         }

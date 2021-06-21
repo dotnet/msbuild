@@ -79,12 +79,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
-            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader,
-                dotnetDir, _tempDirPath, packageSourceLocation: _packageSourceLocation);
+            var restoreActionConfig = _parseResult.ToRestoreActionConfig();
+            _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter,
+                sdkFeatureBand, _workloadResolver, _verbosity, nugetPackageDownloader,
+                dotnetDir, _tempDirPath, packageSourceLocation: _packageSourceLocation, restoreActionConfig);
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
-            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir, filePermissionSetter: null,  new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),new NullLogger());
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
+            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir,
+                filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),
+                new NullLogger(), restoreActionConfig: restoreActionConfig);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
+                _workloadManifestProvider, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
         }
 
         public override int Execute()
@@ -114,7 +119,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 {
                     UpdateWorkloads(_includePreviews, string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
                 }
-                    catch (Exception e)
+                catch (Exception e)
                 {
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadUpdateFailed, e.Message), e);

@@ -27,6 +27,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(VersionOption);
             command.AddOption(TempDirOption);
             command.AddOption(IncludePreviewsOption);
+            command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
             return command;
         }
     }

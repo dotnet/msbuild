@@ -16,6 +16,7 @@ using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using NuGet.Configuration;
+using NuGet.Credentials;
 using NuGet.Packaging;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
@@ -25,12 +26,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
     internal class NuGetPackageDownloader : INuGetPackageDownloader
     {
-        private readonly SourceCacheContext _cacheSettings = new SourceCacheContext
-        {
-            NoCache = true,
-            DirectDownload = true
-        };
-
+        private readonly SourceCacheContext _cacheSettings;
         private readonly IFilePermissionSetter _filePermissionSetter;
         
         /// <summary>
@@ -38,7 +34,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         /// </summary>
         private readonly ILogger _verboseLogger;
         private readonly DirectoryPath _packageInstallDir;
-        
+        private readonly RestoreActionConfig _restoreActionConfig;
+
         /// <summary>
         /// Reporter would output to the console regardless
         /// </summary>
@@ -46,13 +43,26 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         private readonly IFirstPartyNuGetPackageSigningVerifier _firstPartyNuGetPackageSigningVerifier;
         private bool _validationMessagesDisplayed = false;
 
-        public NuGetPackageDownloader(DirectoryPath packageInstallDir, IFilePermissionSetter filePermissionSetter = null, IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null, ILogger verboseLogger = null, IReporter reporter = null)
+        public NuGetPackageDownloader(DirectoryPath packageInstallDir,
+            IFilePermissionSetter filePermissionSetter = null,
+            IFirstPartyNuGetPackageSigningVerifier firstPartyNuGetPackageSigningVerifier = null,
+            ILogger verboseLogger = null, IReporter reporter = null, RestoreActionConfig restoreActionConfig = null)
         {
             _packageInstallDir = packageInstallDir;
             _reporter = reporter ?? Reporter.Output;
             _verboseLogger = verboseLogger ?? new NuGetConsoleLogger();
-            _firstPartyNuGetPackageSigningVerifier = firstPartyNuGetPackageSigningVerifier ?? new FirstPartyNuGetPackageSigningVerifier(tempDirectory: packageInstallDir, logger: _verboseLogger);
-            _filePermissionSetter = new FilePermissionSetter();
+            _firstPartyNuGetPackageSigningVerifier = firstPartyNuGetPackageSigningVerifier ??
+                                                     new FirstPartyNuGetPackageSigningVerifier(
+                                                         tempDirectory: packageInstallDir, logger: _verboseLogger);
+            _filePermissionSetter = filePermissionSetter ?? new FilePermissionSetter();
+            _restoreActionConfig = restoreActionConfig ?? new RestoreActionConfig();
+
+            _cacheSettings = new SourceCacheContext
+            {
+                NoCache = _restoreActionConfig.NoCache,
+                DirectDownload = true,
+                IgnoreFailedSources = _restoreActionConfig.IgnoreFailedSources,
+            };
         }
 
         public async Task<string> DownloadPackageAsync(PackageId packageId,
@@ -63,7 +73,14 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         {
             CancellationToken cancellationToken = CancellationToken.None;
 
-            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion, packageSourceLocation, includePreview);
+            if (_restoreActionConfig.Interactive)
+            {
+                DefaultCredentialServiceUtility.SetupDefaultCredentialService(_verboseLogger,
+                    _restoreActionConfig.Interactive);
+            }
+
+            (var source, var resolvedPackageVersion) = await GetPackageSourceAndVerion(packageId, packageVersion,
+                packageSourceLocation, includePreview);
 
             FindPackageByIdResource resource = null;
             SourceRepository repository = Repository.Factory.GetCoreV3(source);
@@ -77,9 +94,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     string.Format(LocalizableStrings.FailedToLoadNuGetSource, source.Source));
             }
 
-            string nupkgPath = downloadFolder == null || !downloadFolder.HasValue ?
-                Path.Combine(_packageInstallDir.Value, packageId.ToString(), resolvedPackageVersion.ToNormalizedString(), $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg") :
-                Path.Combine(downloadFolder.Value.Value, $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg");
+            string nupkgPath = downloadFolder == null || !downloadFolder.HasValue
+                ? Path.Combine(_packageInstallDir.Value, packageId.ToString(),
+                    resolvedPackageVersion.ToNormalizedString(),
+                    $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg")
+                : Path.Combine(downloadFolder.Value.Value,
+                    $"{packageId}.{resolvedPackageVersion.ToNormalizedString()}.nupkg");
+
             Directory.CreateDirectory(Path.GetDirectoryName(nupkgPath));
             using FileStream destinationStream = File.Create(nupkgPath);
             bool success = await resource.CopyNupkgToStreamAsync(
@@ -93,7 +114,8 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             if (!success)
             {
                 throw new NuGetPackageInstallerException(
-                    string.Format("Downloading {0} version {1} failed", packageId, packageVersion.ToNormalizedString()));
+                    string.Format("Downloading {0} version {1} failed", packageId,
+                        packageVersion.ToNormalizedString()));
             }
 
             VerifySigning(nupkgPath);
@@ -361,11 +383,22 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     nameof(packageIdentifier));
             }
 
-            (PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)[] foundPackagesBySource =
-                await Task.WhenAll(
-                        packageSources.Select(source => GetPackageMetadataAsync(source, packageIdentifier,
-                            true, cancellationToken)))
-                    .ConfigureAwait(false);
+            (PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)[] foundPackagesBySource;
+
+            if (_restoreActionConfig.DisableParallel)
+            {
+                foundPackagesBySource = packageSources.Select(source => GetPackageMetadataAsync(source,
+                    packageIdentifier,
+                    true, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult()).ToArray();
+            }
+            else
+            {
+                foundPackagesBySource =
+                    await Task.WhenAll(
+                            packageSources.Select(source => GetPackageMetadataAsync(source, packageIdentifier,
+                                true, cancellationToken)))
+                        .ConfigureAwait(false);
+            }
 
             if (!foundPackagesBySource.Any())
             {
@@ -420,25 +453,57 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             List<Task<(PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)>> tasks = sources
                 .Select(source =>
                     GetPackageMetadataAsync(source, packageIdentifier, true, linkedCts.Token)).ToList();
-            while (tasks.Any())
+
+            bool TryGetPackageMetadata(
+                (PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages) sourceAndFoundPackages,
+                out (PackageSource, IPackageSearchMetadata) packageMetadataAsync)
             {
-                Task<(PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)> finishedTask =
-                    await Task.WhenAny(tasks).ConfigureAwait(false);
-                tasks.Remove(finishedTask);
-                (PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages) result =
-                    await finishedTask.ConfigureAwait(false);
-                if (result.foundPackages == null)
+                packageMetadataAsync = default;
+                if (sourceAndFoundPackages.foundPackages == null)
                 {
-                    continue;
+                    return false;
                 }
 
                 atLeastOneSourceValid = true;
                 IPackageSearchMetadata matchedVersion =
-                    result.foundPackages.FirstOrDefault(package => package.Identity.Version == packageVersion);
+                    sourceAndFoundPackages.foundPackages.FirstOrDefault(package =>
+                        package.Identity.Version == packageVersion);
                 if (matchedVersion != null)
                 {
                     linkedCts.Cancel();
-                    return (result.source, matchedVersion);
+                    {
+                        packageMetadataAsync = (sourceAndFoundPackages.source, matchedVersion);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            if (_restoreActionConfig.DisableParallel)
+            {
+                foreach (Task<(PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)> task in tasks)
+                {
+                    var result = task.ConfigureAwait(false).GetAwaiter().GetResult();
+                    if (TryGetPackageMetadata(result, out (PackageSource, IPackageSearchMetadata) packageMetadataAsync))
+                    {
+                        return packageMetadataAsync;
+                    }
+                }
+            }
+            else
+            {
+                while (tasks.Any())
+                {
+                    Task<(PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages)> finishedTask =
+                        await Task.WhenAny(tasks).ConfigureAwait(false);
+                    tasks.Remove(finishedTask);
+                    (PackageSource source, IEnumerable<IPackageSearchMetadata> foundPackages) result =
+                        await finishedTask.ConfigureAwait(false);
+                    if (TryGetPackageMetadata(result, out (PackageSource, IPackageSearchMetadata) packageMetadataAsync))
+                    {
+                        return packageMetadataAsync;
+                    }
                 }
             }
 
@@ -464,16 +529,27 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
             _ = source ?? throw new ArgumentNullException(nameof(source));
 
-            SourceRepository repository = Repository.Factory.GetCoreV3(source);
-            PackageMetadataResource resource = await repository
-                .GetResourceAsync<PackageMetadataResource>(cancellationToken).ConfigureAwait(false);
-            IEnumerable<IPackageSearchMetadata> foundPackages = await resource.GetMetadataAsync(
-                packageIdentifier,
-                includePrerelease,
-                false,
-                _cacheSettings,
-                _verboseLogger,
-                cancellationToken).ConfigureAwait(false);
+            IEnumerable<IPackageSearchMetadata> foundPackages;
+
+            try
+            {
+                SourceRepository repository = Repository.Factory.GetCoreV3(source);
+                PackageMetadataResource resource = await repository
+                    .GetResourceAsync<PackageMetadataResource>(cancellationToken).ConfigureAwait(false);
+
+                foundPackages = await resource.GetMetadataAsync(
+                    packageIdentifier,
+                    includePrerelease,
+                    false,
+                    _cacheSettings,
+                    _verboseLogger,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch (FatalProtocolException e) when (_restoreActionConfig.IgnoreFailedSources)
+            {
+                _verboseLogger.LogWarning(e.ToString());
+                foundPackages = Enumerable.Empty<PackageSearchMetadata>();
+            }
 
             return (source, foundPackages);
         }

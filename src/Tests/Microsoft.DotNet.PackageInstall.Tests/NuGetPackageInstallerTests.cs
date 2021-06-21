@@ -35,7 +35,8 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             _tempDirectory = GetUniqueTempProjectPathEachTest();
             _logger = new NuGetTestLogger();
             _installer =
-                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(), _logger);
+                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(),
+                    _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
         }
 
         [Fact]
@@ -65,6 +66,26 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     TestPackageId,
                     new NuGetVersion(TestPackageVersion),
                     new PackageSourceLocation(sourceFeedOverrides: new[] {nonExistFeed.Value})));
+        }
+
+        [Fact]
+        public async Task GivenAFailedSourceAndIgnoreFailedSourcesItShouldNotThrowFatalProtocolException ()
+        {
+            var installer =
+                new NuGetPackageDownloader(_tempDirectory, null, new MockFirstPartyNuGetPackageSigningVerifier(),
+                    _logger, restoreActionConfig: new RestoreActionConfig(IgnoreFailedSources: true, NoCache: true));
+
+            // should not throw FatalProtocolException
+            // when there is at least one valid source, it should pass.
+            // but it is hard to set up that in unit test
+            await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
+                installer.DownloadPackageAsync(
+                    TestPackageId,
+                    new NuGetVersion(TestPackageVersion),
+                    new PackageSourceLocation(sourceFeedOverrides: new[]
+                    {
+                        "https://nonexist.nuget.source/F/nonexist/api/v3/index.json"
+                    })));
         }
 
         [Fact]
@@ -162,7 +183,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             BufferedReporter bufferedReporter = new BufferedReporter();
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
-                _logger, bufferedReporter);
+                _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             await nuGetPackageDownloader.DownloadPackageAsync(
                 TestPackageId,
                 new NuGetVersion(TestPackageVersion),
@@ -186,7 +207,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             string commandOutput = "COMMAND OUTPUT";
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(verifyResult: false, commandOutput: commandOutput),
-                _logger);
+                _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
 
             NuGetPackageInstallerException ex = await Assert.ThrowsAsync<NuGetPackageInstallerException>(() =>
                 nuGetPackageDownloader.DownloadPackageAsync(
@@ -203,7 +224,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
             BufferedReporter bufferedReporter = new BufferedReporter();
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(isExecutableIsFirstPartySignedWithoutValidation: false),
-                _logger, bufferedReporter);
+                _logger, bufferedReporter, restoreActionConfig: new RestoreActionConfig(NoCache: true));
             await nuGetPackageDownloader.DownloadPackageAsync(
                 TestPackageId,
                 new NuGetVersion(TestPackageVersion),
