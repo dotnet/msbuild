@@ -18,7 +18,7 @@ jobs:
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/release/5.0.4xx')) }}:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
-      MirrorRepo: 
+      MirrorRepo: sdk
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
 - template: /eng/common/templates/job/job.yml
