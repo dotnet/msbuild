@@ -641,7 +641,7 @@ Copyright (c) .NET Foundation. All rights reserved.
              Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
              Condition="'@(_MSBuildProjectReferenceExistent)' != '' and '$(_GetChildProjectCopyToPublishDirectoryItems)' == 'true' and '%(_MSBuildProjectReferenceExistent.Private)' != 'false'"
              ContinueOnError="$(ContinueOnError)"
-             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)">
+             RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_AllChildProjectPublishItemsWithTargetPath"/>
 
