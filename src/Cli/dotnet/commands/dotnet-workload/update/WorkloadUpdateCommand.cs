@@ -29,6 +29,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private readonly bool _printDownloadLinkOnly;
         private readonly string _fromCacheOption;
         private readonly string _downloadToCacheOption;
+        private readonly bool _adManifestOnlyOption;
         private readonly PackageSourceLocation _packageSourceLocation;
         private readonly IReporter _reporter;
         private readonly bool _includePreviews;
@@ -63,6 +64,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _reporter = reporter ?? Reporter.Output;
             _includePreviews = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.IncludePreviewsOption);
             _fromPreviousSdk = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.FromPreviousSdkOption);
+            _adManifestOnlyOption = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.AdManifestOnlyOption);
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.DownloadToCacheOption);
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadUpdateCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
@@ -112,6 +114,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
                 _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
                 _reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
+            }
+            else if (_adManifestOnlyOption)
+            {
+                _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(_includePreviews, string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption)).Wait();
+                _reporter.WriteLine();
+                _reporter.WriteLine(LocalizableStrings.WorkloadUpdateAdManifestsSucceeded);
             }
             else
             {
