@@ -19,6 +19,7 @@ jobs:
   - template: /eng/common/templates/job/onelocbuild.yml
     parameters:
       MirrorRepo: sdk
+      MirrorBranch: release/5.0.4xx
       LclSource: lclFilesfromPackage
       LclPackageId: 'LCL-JUNO-PROD-DOTNETSDK'
 - template: /eng/common/templates/job/job.yml
