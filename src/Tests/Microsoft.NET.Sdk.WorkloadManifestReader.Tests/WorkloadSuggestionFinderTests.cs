@@ -197,12 +197,12 @@ namespace ManifestReaderTests
                 fileName =>
                 {
                     var versionDir = Path.GetDirectoryName(fileName);
-                    var idDir = Path.GetDirectoryName(versionDir);
+                    var idDir = Path.GetDirectoryName(versionDir)!;
                     return installedPacks.Contains(Path.GetFileName(idDir));
                 },
                 dirName =>
                 {
-                    var idDir = Path.GetDirectoryName(dirName);
+                    var idDir = Path.GetDirectoryName(dirName)!;
                     return installedPacks.Contains(Path.GetFileName(idDir));
                 });
         }
