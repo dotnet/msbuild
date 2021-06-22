@@ -1688,12 +1688,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Task>
   </UsingTask>
 
-  <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
-  <PropertyGroup>
-    <DefaultToVcxPlatformMapping>AnyCPU=Win32;x86=Win32;x64=x64</DefaultToVcxPlatformMapping>
-  </PropertyGroup>
-
-    <!--
+  <!--
     ====================================================================================
                                         _GetProjectReferencePlatformProperties
 
@@ -1735,7 +1730,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
     <ItemGroup>
       <_ProjectReferencePlatformPossibilities Condition="'$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj' and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
-        <PlatformLookupTable>$(DefaultToVcxPlatformMapping)</PlatformLookupTable>
+        <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
+        <PlatformLookupTable>AnyCPU=Win32;x86=Win32;x64=x64</PlatformLookupTable>
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
 
