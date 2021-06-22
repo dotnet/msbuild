@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.NET.TestFramework;
+using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
 

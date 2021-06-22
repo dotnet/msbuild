@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
+using Microsoft.DotNet.Compatibility.ErrorSuppression;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
 
@@ -47,7 +48,11 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString()))
                     {
-                        _log.LogError(DiagnosticIds.TargetFrameworkDropped, Resources.MissingTargetFramework, baselineTargetFramework.ToString());
+                        _log.LogError(
+                            new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkDropped, Target = baselineTargetFramework.ToString() },
+                            DiagnosticIds.TargetFrameworkDropped, 
+                            Resources.MissingTargetFramework, 
+                            baselineTargetFramework.ToString());
                     }
                 }
                 else if (_runApiCompat)
@@ -70,7 +75,11 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString()))
                     {
-                        _log.LogError(DiagnosticIds.TargetFrameworkDropped, Resources.MissingTargetFramework, baselineTargetFramework.ToString());
+                        _log.LogError(
+                            new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkDropped, Target = baselineTargetFramework.ToString() },
+                            DiagnosticIds.TargetFrameworkDropped, 
+                            Resources.MissingTargetFramework, 
+                            baselineTargetFramework.ToString());
                     }
                 }
                 else
@@ -97,7 +106,12 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (!_diagnosticBag.Filter(DiagnosticIds.TargetFrameworkDropped, baselineTargetFramework.ToString() + "-" + baselineRid))
                     {
-                        _log.LogError(DiagnosticIds.TargetFrameworkAndRidPairDropped, Resources.MissingTargetFrameworkAndRid, baselineTargetFramework.ToString(), baselineRid);
+                        _log.LogError(
+                            new Suppression { DiagnosticId = DiagnosticIds.TargetFrameworkAndRidPairDropped, Target = baselineTargetFramework.ToString() + "-" + baselineRid },
+                            DiagnosticIds.TargetFrameworkAndRidPairDropped, 
+                            Resources.MissingTargetFrameworkAndRid, 
+                            baselineTargetFramework.ToString(), 
+                            baselineRid);
                     }
                 }
                 else
