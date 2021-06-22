@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 try
                 {
-                    foreach ((string manifestId, Func<Stream> openManifestStream) in manifests)
+                    foreach ((string manifestId, string informationalPath, Func<Stream> openManifestStream) in manifests)
                     {
                         using (var manifestStream = openManifestStream())
                         {

@@ -190,7 +190,7 @@ namespace ManifestReaderTests
                 {  "AAA", MakeManifest("20.0.0", ("BBB", "5.0.0"), ("CCC", "63.0.0"), ("DDD", "25.0.0")) }
             };
 
-            var missingManifestEx = Assert.Throws<Exception>(() => WorkloadResolver.CreateForTests(missingManifestProvider, new[] { fakeRootPath }));
+            var missingManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(missingManifestProvider, new[] { fakeRootPath }));
             Assert.Contains("missing dependency", missingManifestEx.Message);
 
             var inconsistentManifestProvider = new InMemoryFakeManifestProvider
@@ -201,7 +201,7 @@ namespace ManifestReaderTests
                 {  "DDD", MakeManifest("30.0.0") },
             };
 
-            var inconsistentManifestEx = Assert.Throws<Exception>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
+            var inconsistentManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
             Assert.Contains("Inconsistency in workload manifest", inconsistentManifestEx.Message);
         }
 

@@ -62,7 +62,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private static void ThrowDuplicateKeyException<T> (ref Utf8JsonStreamReader reader, T key)
             => throw new WorkloadManifestFormatException(Strings.DuplicateKeyAtOffset, key?.ToString() ?? throw new ArgumentNullException (nameof(key)), reader.TokenStartIndex);
 
-        private static WorkloadManifest ReadWorkloadManifest(string id, ref Utf8JsonStreamReader reader)
+        private static WorkloadManifest ReadWorkloadManifest(string id, string? informationalPath, ref Utf8JsonStreamReader reader)
         {
             ConsumeToken(ref reader, JsonTokenType.StartObject);
 
@@ -155,6 +155,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             id,
                             version,
                             description,
+                            informationalPath,
                             workloads ?? new Dictionary<WorkloadId, BaseWorkloadDefinition> (),
                             packs ?? new Dictionary<WorkloadPackId, WorkloadPack> (),
                             dependsOn

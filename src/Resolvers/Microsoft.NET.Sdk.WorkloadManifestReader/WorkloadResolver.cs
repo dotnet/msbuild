@@ -92,15 +92,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private void LoadManifestsFromProvider(IWorkloadManifestProvider manifestProvider)
         {
-            foreach ((string manifestId, Func<Stream> openManifestStream) in manifestProvider.GetManifests())
+            foreach ((string manifestId, string? informationalPath, Func<Stream> openManifestStream) in manifestProvider.GetManifests())
             {
                 using (var manifestStream = openManifestStream())
                 {
-                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
-                    if(!string.Equals (manifestId, manifest.Id, StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new WorkloadManifestCompositionException($"Manifest '{manifestId}' from provider {manifestProvider} does not match payload id '{manifest.Id}'");
-                    }
+                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, informationalPath);
                     if (!_manifests.TryAdd(manifestId, manifest))
                     {
                         throw new WorkloadManifestCompositionException($"Duplicate manifest '{manifestId}' from provider {manifestProvider}");
@@ -124,12 +120,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         {
                             if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
                             {
-                                throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}': requires '{dependency.Key}' version at least {dependency.Value} but found {resolvedDependency.Version}");
+                                throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}' ({manifest.InformationalPath}): requires '{dependency.Key}' version at least {dependency.Value} but found {resolvedDependency.Version}");
                             }
                         }
                         else
                         {
-                            throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}': missing dependency '{dependency.Key}'");
+                            throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}' ({manifest.InformationalPath}): missing dependency '{dependency.Key}'");
                         }
                     }
                 }
@@ -145,7 +141,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         if (!_workloads.TryAdd(workload.Key, ((WorkloadDefinition)workload.Value, manifest)))
                         {
-                            throw new WorkloadManifestCompositionException($"Workload '{workload.Key}' in manifest '{manifest.Id}' conflicts with manifest '{_workloads[workload.Key].manifest.Id}'");
+                            WorkloadManifest conflictingManifest = _workloads[workload.Key].manifest;
+                            throw new WorkloadManifestCompositionException($"Workload '{workload.Key}' in manifest '{manifest.Id}' ({manifest.InformationalPath}) conflicts with manifest '{conflictingManifest.Id}' ({conflictingManifest.InformationalPath})");
                         }
                     }
                 }
@@ -161,7 +158,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         {
                             if (!_workloads.TryAdd(redirect.Id, replacement))
                             {
-                                throw new WorkloadManifestCompositionException($"Workload '{redirect.Id}' in manifest '{manifest.Id}' conflicts with manifest '{_workloads[redirect.Id].manifest.Id}'");
+                                WorkloadManifest conflictingManifest = _workloads[redirect.Id].manifest;
+                                throw new WorkloadManifestCompositionException($"Workload '{redirect.Id}' in manifest '{manifest.Id}' ({manifest.InformationalPath}) conflicts with manifest '{conflictingManifest.Id}' ({conflictingManifest.InformationalPath})");
                             }
                             return true;
                         }
@@ -178,7 +176,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     if (!_packs.TryAdd(pack.Key, (pack.Value, manifest)))
                     {
-                        throw new WorkloadManifestCompositionException($"Workload pack '{pack.Key}' in manifest '{manifest.Id}' conflicts with manifest '{_packs[pack.Key].manifest.Id}'");
+                        WorkloadManifest conflictingManifest = _packs[pack.Key].manifest;
+                        throw new WorkloadManifestCompositionException($"Workload pack '{pack.Key}' in manifest '{manifest.Id}' ({manifest.InformationalPath}) conflicts with manifest '{conflictingManifest.Id}' ({conflictingManifest.InformationalPath})");
                     }
                 }
             }

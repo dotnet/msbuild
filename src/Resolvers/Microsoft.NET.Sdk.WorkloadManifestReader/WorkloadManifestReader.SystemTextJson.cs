@@ -12,7 +12,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public partial class WorkloadManifestReader
     {
-        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream)
+        public static WorkloadManifest ReadWorkloadManifest(string manifestId, Stream manifestStream, string? informationalPath = null)
         {
             var readerOptions = new JsonReaderOptions
             {
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var reader = new Utf8JsonStreamReader(manifestStream, readerOptions);
 
-            return ReadWorkloadManifest(manifestId, ref reader);
+            return ReadWorkloadManifest(manifestId, informationalPath, ref reader);
         }
 
         private ref struct Utf8JsonStreamReader
