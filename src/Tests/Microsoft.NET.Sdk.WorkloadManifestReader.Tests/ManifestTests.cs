@@ -58,7 +58,7 @@ namespace ManifestReaderTests
             var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "Xamarin.Android.BuildTools");
 
             buildToolsPack.Should().NotBeNull();
-            buildToolsPack!.Id.Should().Be("Xamarin.Android.BuildTools");
+            buildToolsPack!.Id.ToString().Should().Be("Xamarin.Android.BuildTools");
             buildToolsPack.Version.Should().Be("8.4.7");
             buildToolsPack.Path.Should().Be(Path.Combine(fakeRootPath, "packs", "Xamarin.Android.BuildTools.Win64Host", "8.4.7"));
         }
@@ -123,7 +123,7 @@ namespace ManifestReaderTests
             var manifestProvider = new FakeManifestProvider(ManifestPath);
             var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
 
-            var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");
+            var pack = resolver.TryGetPackInfo(new WorkloadPackId("Xamarin.Android.Sdk"));
             pack.Should().NotBeNull();
 
             string expectedPath = additionalExists ? additionalPackPath : defaultPackPath;
@@ -145,7 +145,7 @@ namespace ManifestReaderTests
             var manifestProvider = new FakeManifestProvider(ManifestPath);
             var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
 
-            var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");
+            var pack = resolver.TryGetPackInfo(new WorkloadPackId("Xamarin.Android.Sdk"));
             pack.Should().NotBeNull();
 
             pack!.Path.Should().Be(defaultPackPath);

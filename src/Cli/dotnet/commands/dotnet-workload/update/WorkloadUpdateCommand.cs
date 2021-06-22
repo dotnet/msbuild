@@ -340,7 +340,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         {
             var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
             var workloads = GetUpdatableWorkloads();
-            var updatedPacks = workloads.SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+            var updatedPacks = workloads.SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
                 .Distinct()
                 .Select(packId => _workloadResolver.TryGetPackInfo(packId))
                 .Where(pack => pack != null);

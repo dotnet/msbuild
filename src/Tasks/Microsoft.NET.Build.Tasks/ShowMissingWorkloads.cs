@@ -34,7 +34,7 @@ namespace Microsoft.NET.Build.Tasks
                 var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion);
                 var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion);
 
-                var suggestedWorkloads = workloadResolver.GetWorkloadSuggestionForMissingPacks(MissingWorkloadPacks.Select(item => item.ItemSpec).ToList());
+                var suggestedWorkloads = workloadResolver.GetWorkloadSuggestionForMissingPacks(MissingWorkloadPacks.Select(item => new WorkloadPackId (item.ItemSpec)).ToList());
 
                 if (GenerateErrorsForMissingWorkloads)
                 {

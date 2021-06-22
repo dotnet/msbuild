@@ -124,8 +124,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var sdkFeatureVersion = "6.0.100";
             var installingWorkload = "simple-workload";
             var workloadPacks = new List<PackInfo>() {
-                new PackInfo("mock-pack-1", "1.0.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "mock-pack-1", "1.0.0"), "mock-pack-1"),
-                new PackInfo("mock-pack-2", "2.0.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "mock-pack-2", "2.0.0"), "mock-pack-2")
+                CreatePackInfo("mock-pack-1", "1.0.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "mock-pack-1", "1.0.0"), "mock-pack-1"),
+                CreatePackInfo("mock-pack-2", "2.0.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "mock-pack-2", "2.0.0"), "mock-pack-2")
             };
 
             // Lay out workload installs for a previous feature band
@@ -159,6 +159,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 .Should().BeTrue(because: "Workload install record should be present for current feature band");
         }
 
+        static PackInfo CreatePackInfo(string id, string version, WorkloadPackKind kind, string path, string resolvedPackageId) => new(new WorkloadPackId(id), version, kind, path, resolvedPackageId);
+
         [Fact]
         public void GivenWorkloadUpdateItUpdatesOutOfDatePacks()
         {
@@ -170,7 +172,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             installer.GarbageCollectionCalled.Should().BeTrue();
             installer.CachePath.Should().BeNull();
             installer.InstalledPacks.Count.Should().Be(8);
-            installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
+            installer.InstalledPacks.Where(pack => pack.Id.ToString().Contains("Android")).Count().Should().Be(8);
         }
 
         [Fact]
@@ -182,7 +184,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var exceptionThrown = Assert.Throws<GracefulException>(() => command.Execute());
             exceptionThrown.Message.Should().Contain("Failing pack: Xamarin.Android.Framework");
             var expectedPacks = mockWorkloadIds
-                .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId))
                 .Distinct()
                 .Select(packId => workloadResolver.TryGetPackInfo(packId))
                 .Where(pack => pack != null);
@@ -222,7 +224,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             installer.GarbageCollectionCalled.Should().BeTrue();
             installer.CachePath.Should().Contain(cachePath);
             installer.InstalledPacks.Count.Should().Be(8);
-            installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
+            installer.InstalledPacks.Where(pack => pack.Id.ToString().Contains("Android")).Count().Should().Be(8);
             nugetDownloader.DownloadCallParams.Count().Should().Be(0);
         }
 
@@ -310,8 +312,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var testDirectory = _testAssetsManager.CreateTestDirectory(testName: testName).Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
             var installedPacks = new PackInfo[] {
-                new PackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk"),
-                new PackInfo("Xamarin.Android.Framework", "8.2.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.2.0"), "Xamarin.Android.Framework")
+                CreatePackInfo("Xamarin.Android.Sdk", "8.4.7", WorkloadPackKind.Sdk, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Sdk", "8.4.7"), "Xamarin.Android.Sdk"),
+                CreatePackInfo("Xamarin.Android.Framework", "8.2.0", WorkloadPackKind.Framework, Path.Combine(dotnetRoot, "packs", "Xamarin.Android.Framework", "8.2.0"), "Xamarin.Android.Framework")
             };
             var installer = includeInstalledPacks ?
                 new MockPackWorkloadInstaller(failingWorkload, failingPack, installedWorkloads: installedWorkloads, installedPacks: installedPacks) :

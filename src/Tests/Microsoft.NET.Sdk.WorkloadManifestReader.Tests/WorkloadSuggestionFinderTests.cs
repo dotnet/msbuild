@@ -34,9 +34,9 @@ namespace ManifestReaderTests
 
             FakeFileSystemChecksSoThesePackagesAppearInstalled(resolver, "Xamarin.Android.Sdk", "Xamarin.Android.BuildTools");
 
-            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Mono.Android.Sdk" });
+            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Mono.Android.Sdk" }.Select(s => new WorkloadPackId(s)).ToList());
             suggestions.Count().Should().Be(1);
-            suggestions.First().Id.Should().Be("xamarin-android-build");
+            suggestions.First().Id.ToString().Should().Be("xamarin-android-build");
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace ManifestReaderTests
                 "Xamarin.Android.Runtime",
                 "Mono.Android.Sdk");
 
-            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Mono.Android.Runtime.x86", "Mono.Android.Runtime.Armv7a" });
+            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Mono.Android.Runtime.x86", "Mono.Android.Runtime.Armv7a" }.Select(s => new WorkloadPackId(s)).ToList());
             suggestions.Count().Should().Be(2);
             suggestions.Should().Contain(s => s.Id == "xamarin-android-build-armv7a");
             suggestions.Should().Contain(s => s.Id == "xamarin-android-build-x86");
@@ -73,9 +73,9 @@ namespace ManifestReaderTests
                 "Xamarin.Android.Runtime",
                 "Mono.Android.Sdk");
 
-            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Xamarin.Android.Templates", "Xamarin.Android.LLVM.Aot.armv7a" });
+            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Xamarin.Android.Templates", "Xamarin.Android.LLVM.Aot.armv7a" }.Select(s => new WorkloadPackId(s)).ToList());
             suggestions.Count().Should().Be(1);
-            suggestions.First().Id.Should().Be("xamarin-android-complete");
+            suggestions.First().Id.ToString().Should().Be("xamarin-android-complete");
         }
 
         [Fact]

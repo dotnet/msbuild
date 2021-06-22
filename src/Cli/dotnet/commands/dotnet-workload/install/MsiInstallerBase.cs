@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Installer.Windows
                     WorkloadPackRecord record = new WorkloadPackRecord
                     {
                         ProviderKeyName = (string)packVersionKey.GetValue("DependencyProviderKey"),
-                        PackId = packId,
+                        PackId = new NET.Sdk.WorkloadManifestReader.WorkloadPackId(packId),
                         PackVersion = new NuGetVersion(packVersion),
                         ProductCode = (string)packVersionKey.GetValue("ProductCode"),
                         ProductVersion = new Version((string)packVersionKey.GetValue("ProductVersion"))

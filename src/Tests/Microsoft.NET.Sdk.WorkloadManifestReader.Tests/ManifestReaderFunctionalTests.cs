@@ -27,7 +27,7 @@ namespace ManifestReaderTests
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Template);
             result.Should().HaveCount(1);
             var templateItem = result.First();
-            templateItem.Id.Should().Be("Xamarin.Android.Templates");
+            templateItem.Id.ToString().Should().Be("Xamarin.Android.Templates");
             templateItem.IsStillPacked.Should().BeFalse();
             templateItem.Kind.Should().Be(WorkloadPackKind.Template);
             templateItem.Path.Should()
@@ -41,7 +41,7 @@ namespace ManifestReaderTests
             var result = workloadResolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk);
             result.Should().HaveCount(5);
             var androidWorkloads = result.Single(w => w.Id == "Xamarin.Android.Sdk");
-            androidWorkloads.Id.Should().Be("Xamarin.Android.Sdk");
+            androidWorkloads.Id.ToString().Should().Be("Xamarin.Android.Sdk");
             androidWorkloads.IsStillPacked.Should().BeTrue();
             androidWorkloads.Kind.Should().Be(WorkloadPackKind.Sdk);
             androidWorkloads.Version.Should().Be("8.4.7");

@@ -22,10 +22,10 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         }
 
         public IEnumerable<WorkloadResolver.PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind) => throw new NotImplementedException();
-        public IEnumerable<string> GetPacksInWorkload(string workloadId) => throw new NotImplementedException();
-        public ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packId) => throw new NotImplementedException();
+        public IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadId workloadId) => throw new NotImplementedException();
+        public ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packId) => throw new NotImplementedException();
         public void RefreshWorkloadManifests() => throw new NotImplementedException();
-        public WorkloadResolver.PackInfo TryGetPackInfo(string packId) => throw new NotImplementedException();
+        public WorkloadResolver.PackInfo TryGetPackInfo(WorkloadPackId packId) => throw new NotImplementedException();
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId) => throw new NotImplementedException();
         public string GetManifestVersion(string manifestId) => throw new NotImplementedException();
         public IDictionary<string, string> GetInstalledManifests() => throw new NotImplementedException();

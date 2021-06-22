@@ -3,6 +3,9 @@
 #nullable disable
 
 using System;
+
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Installer.Windows
@@ -25,7 +28,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// <summary>
         /// The ID of the workload pack.
         /// </summary>
-        public string PackId
+        public WorkloadPackId PackId
         {
             get;
             set;

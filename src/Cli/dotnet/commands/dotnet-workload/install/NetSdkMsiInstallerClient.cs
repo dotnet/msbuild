@@ -96,10 +96,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
                 IEnumerable<PackInfo> expectedWorkloadPacks = installedWorkloads
-                    .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload.ToString()))
+                    .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
                     .Select(pack => _workloadResolver.TryGetPackInfo(pack))
                     .Where(pack => pack != null);
-                IEnumerable<string> expectedPackIds = expectedWorkloadPacks.Select(p => p.Id);
+                IEnumerable<WorkloadPackId> expectedPackIds = expectedWorkloadPacks.Select(p => p.Id);
 
                 foreach (PackInfo expectedPack in expectedWorkloadPacks)
                 {
@@ -219,7 +219,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public InstallationUnit GetInstallationUnit() => InstallationUnit.Packs;
 
-        public IEnumerable<(string, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             string dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
 

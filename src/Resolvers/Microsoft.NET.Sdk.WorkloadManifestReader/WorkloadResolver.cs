@@ -217,7 +217,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
 
         private PackInfo CreatePackInfo(WorkloadPack pack, string aliasedPath, WorkloadPackId resolvedPackageId) => new PackInfo(
-                pack.Id.ToString(),
+                pack.Id,
                 pack.Version,
                 pack.Kind,
                 aliasedPath,
@@ -321,28 +321,26 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return installedPacks;
         }
 
-        public IEnumerable<string> GetPacksInWorkload(string workloadId)
+        public IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadId workloadId)
         {
             if (string.IsNullOrEmpty(workloadId))
             {
                 throw new ArgumentException($"'{nameof(workloadId)}' cannot be null or empty", nameof(workloadId));
             }
 
-            var id = new WorkloadId(workloadId);
-
-            if (!_workloads.TryGetValue(id, out var value))
+            if (!_workloads.TryGetValue(workloadId, out var value))
             {
-                throw new Exception($"Workload not found: {id}. Known workloads: {string.Join(" ", _workloads.Select(workload => workload.Key.ToString()))}");
+                throw new Exception($"Workload not found: {workloadId}. Known workloads: {string.Join(" ", _workloads.Select(workload => workload.Key.ToString()))}");
             }
             var workload = value.workload;
 
             if (workload.Extends?.Count > 0)
             {
-                return GetPacksInWorkload(workload).Select (p => p.ToString());
+                return GetPacksInWorkload(workload);
             }
 
 #nullable disable
-            return workload.Packs.Select(p => p.ToString()) ?? Enumerable.Empty<string>();
+            return workload.Packs ?? Enumerable.Empty<WorkloadPackId>();
 #nullable restore
         }
 
@@ -390,11 +388,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <remarks>
         /// Used by the MSBuild SDK resolver to look up which versions of the SDK packs to import.
         /// </remarks>
-        public PackInfo? TryGetPackInfo(string packId)
+        public PackInfo? TryGetPackInfo(WorkloadPackId packId)
         {
-            if (string.IsNullOrWhiteSpace(packId))
+            if (string.IsNullOrEmpty(packId))
             {
-                throw new ArgumentException($"'{nameof(packId)}' cannot be null or whitespace", nameof(packId));
+                throw new ArgumentException($"'{nameof(packId)}' cannot be null or empty", nameof(packId));
             }
 
             if (_packs.TryGetValue(new WorkloadPackId (packId)) is (WorkloadPack pack, _))
@@ -415,15 +413,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <remarks>
         /// Used by the MSBuild workload resolver to emit actionable errors
         /// </remarks>
-        public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<string> packIds)
+        public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packIds)
         {
-            var requestedPacks = new HashSet<WorkloadPackId>(packIds.Select(p => new WorkloadPackId(p)));
+            var requestedPacks = new HashSet<WorkloadPackId>(packIds);
             var expandedWorkloads = _workloads.Select(w => (w.Key, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.Value.workload))));
             var finder = new WorkloadSuggestionFinder(GetInstalledPacks(), requestedPacks, expandedWorkloads);
 
             return new HashSet<WorkloadInfo>
             (
-                finder.GetBestSuggestion().Workloads.Select(s => new WorkloadInfo(s.ToString(), _workloads[s].workload.Description))
+                finder.GetBestSuggestion().Workloads.Select(s => new WorkloadInfo(s, _workloads[s].workload.Description))
             );
         }
 
@@ -500,7 +498,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public class PackInfo
         {
-            public PackInfo(string id, string version, WorkloadPackKind kind, string path, string resolvedPackageId)
+            public PackInfo(WorkloadPackId id, string version, WorkloadPackKind kind, string path, string resolvedPackageId)
             {
                 Id = id;
                 Version = version;
@@ -512,7 +510,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             /// <summary>
             /// The workload pack ID. The NuGet package ID <see cref="ResolvedPackageId"/> may differ from this.
             /// </summary>
-            public string Id { get; }
+            public WorkloadPackId Id { get; }
 
             public string Version { get; }
 
@@ -539,13 +537,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public class WorkloadInfo
         {
-            public WorkloadInfo(string id, string? description)
+            public WorkloadInfo(WorkloadId id, string? description)
             {
                 Id = id;
                 Description = description;
             }
 
-            public string Id { get; }
+            public WorkloadId Id { get; }
             public string? Description { get; }
         }
 
@@ -553,7 +551,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             if (_workloads.TryGetValue(WorkloadId) is (WorkloadDefinition workload, _))
             {
-                return new WorkloadInfo(workload.Id.ToString(), workload.Description);
+                return new WorkloadInfo(workload.Id, workload.Description);
             }
             throw new Exception("Workload not found");
         }

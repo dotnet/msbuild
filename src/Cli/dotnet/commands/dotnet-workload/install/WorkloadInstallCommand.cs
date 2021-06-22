@@ -373,7 +373,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var installedPacks = _workloadInstaller.GetPackInstaller().GetInstalledPacks(_sdkFeatureBand);
             return workloadIds
-                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
                 .Distinct()
                 .Select(packId => _workloadResolver.TryGetPackInfo(packId))
                 .Where(pack => pack != null)
