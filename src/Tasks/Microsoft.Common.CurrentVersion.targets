@@ -1732,7 +1732,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <GetNearestPlatformTask AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
                             ParentProjectPlatform="$(Platform)"
-                            PlatformLookupTable="%(_ProjectReferencePlatformPossibilities.PlatformLookupTable)"
+                            PlatformLookupTable="$(PlatformLookupTable);%(_ProjectReferencePlatformPossibilities.PlatformLookupTable)"
                             Condition="'@(_ProjectReferencePlatformPossibilities->Count())' != '0' and '%(_ProjectReferencePlatformPossibilities.PlatformOptions)' != ''">
       <Output ItemName="ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
     </GetNearestPlatformTask>
