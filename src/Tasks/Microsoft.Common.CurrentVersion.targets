@@ -1726,16 +1726,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferencePlatformPossibilities" />
     </MSBuild>
 
+    <!-- Managed Platform "source of truth" is $(PlatformTarget). For cpp it's $(Platform) -->
+    <PropertyGroup>
+      <ParentPlatform>$(PlatformTarget)</ParentPlatform>
+      <ParentPlatform Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">$(Platform)</ParentPlatform>
+    </PropertyGroup>
+
     <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
     <ItemGroup>
-      <!-- TODO: Add check for "if outer build is managed" -->
-      <_ProjectReferencePlatformPossibilities Condition="'%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
+      <_ProjectReferencePlatformPossibilities Condition="'$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj' and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
         <PlatformLookupTable>$(DefaultToVcxPlatformMapping)</PlatformLookupTable>
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
 
     <GetNearestPlatformTask AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
-                            ParentProjectPlatform="$(Platform)"
+                            ParentProjectPlatform="$(ParentPlatform)"
                             PlatformLookupTable="$(PlatformLookupTable);%(_ProjectReferencePlatformPossibilities.PlatformLookupTable)"
                             Condition="'@(_ProjectReferencePlatformPossibilities->Count())' != '0' and '%(_ProjectReferencePlatformPossibilities.PlatformOptions)' != ''">
       <Output ItemName="ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
