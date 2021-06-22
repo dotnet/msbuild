@@ -1612,9 +1612,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ParameterGroup>
     <Task>
       <Using Namespace="System.Collections.Generic"/>
+      <Using Namespace="System.Linq"/>
       <Code Type="Fragment" Language="cs">
       <![CDATA[
-
             Dictionary<string, string> translationTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (PlatformLookupTable != null)
             {
@@ -1645,36 +1645,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                 }
               }
 
-              // Default to anycpu, the "best case".
-              string buildChildProjectAs = "AnyCPU";
+              string buildChildProjectAs = "";
 
-              // If the child can't build as AnyCPU, look for alternatives.
-              if (!childPlatforms.Contains("AnyCPU"))
+              // Pri 1: Child project only has single option.
+              // TODO: Warn if the single option is incompatible with the parent?
+              if (childPlatforms.Count == 1)
               {
-                // If there is a translation from a parent's platform to something
-                // the child SHOULD build as, use that.
-                if (translationTable.ContainsKey(ParentProjectPlatform) &&
-                    childPlatforms.Contains(translationTable[ParentProjectPlatform]))
-                {
-                  buildChildProjectAs = translationTable[ParentProjectPlatform];
-                }
-                else if (childPlatforms.Contains(ParentProjectPlatform))
-                {
-                  buildChildProjectAs = ParentProjectPlatform;
-                }
-                else
-                {
-                  // Unable to determine what the child project should be built as.
-                  // Don't set NearestPlatform so we can undefine Platform/PlatformTarget when it's empty.
-                  buildChildProjectAs = "";
-                  Log.LogWarning("Could not determine what the child project should be built as.\nChild project will be built normally.");
-                }
+                buildChildProjectAs = childPlatforms.First();
+              }
+              // Pri 2: Translation table
+              else if (translationTable.ContainsKey(ParentProjectPlatform) &&
+                        childPlatforms.Contains(translationTable[ParentProjectPlatform]))
+              {
+                buildChildProjectAs = translationTable[ParentProjectPlatform];
+              }
+              // Pri 3: AnyCPU if possible
+              else if (childPlatforms.Contains("AnyCPU"))
+              {
+                buildChildProjectAs = "AnyCPU";
+              }
+              // Pri 4: Child has same platform as parent
+              else if (childPlatforms.Contains(ParentProjectPlatform))
+              {
+                buildChildProjectAs = ParentProjectPlatform;
+              }
+              else 
+              {
+                // Keep it empty, log a warning. Common.CurrentVersion.targets will undefine 
+                // Platform/PlatformTarget when this is the case.
+                Log.LogWarning("Could not determine what the child project should be built as.\nChild project will be built normally.");
               }
 
               AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildChildProjectAs);
               Log.LogMessage($"Project {AssignedProjectsWithPlatform[i].GetMetadata("Identity")} would be built as: {buildChildProjectAs}");
             }
-
       ]]>
       </Code>
     </Task>
