@@ -553,8 +553,8 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run '{0}'.</source>
-        <target state="translated">Per elencare i modelli installati, eseguire '{0}'.</target>
+        <source>To list installed templates, run:</source>
+        <target state="new">To list installed templates, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -745,8 +745,8 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
-        <source>Run dotnet {0} --help for usage information.</source>
-        <target state="translated">Esegui Dotnet {0} --help for usage information.</target>
+        <source>For usage information, run: </source>
+        <target state="new">For usage information, run: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -760,8 +760,8 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run '{0}'.</source>
-        <target state="translated">Per cercare i modelli in NuGet.org, eseguire '{0}'.</target>
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

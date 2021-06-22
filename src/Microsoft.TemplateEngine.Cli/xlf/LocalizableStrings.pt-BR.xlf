@@ -553,8 +553,8 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run '{0}'.</source>
-        <target state="translated">Para listar os modelos instalados, execute '{0}'.</target>
+        <source>To list installed templates, run:</source>
+        <target state="new">To list installed templates, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -745,8 +745,8 @@ As colunas com suporte são: idioma, marcas, autor, tipo.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
-        <source>Run dotnet {0} --help for usage information.</source>
-        <target state="translated">Execute o dotnet {0} --ajuda para obter informações de uso.</target>
+        <source>For usage information, run: </source>
+        <target state="new">For usage information, run: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -760,8 +760,8 @@ As colunas com suporte são: idioma, marcas, autor, tipo.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run '{0}'.</source>
-        <target state="translated">Para procurar os modelos em NuGet.org, execute '{0}'.</target>
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

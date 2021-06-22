@@ -26,6 +26,11 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             SupportedFilterOptions.TypeFilter
         };
 
+        private static IReadOnlyList<FilterOption> _supportedGroupFilters = new[]
+        {
+            SupportedFilterOptions.LanguageFilter
+        };
+
         public InstantiateTemplateResolver(TemplatePackageManager templatePackageManager, IHostSpecificDataLoader hostSpecificDataLoader)
             : base(templatePackageManager, hostSpecificDataLoader)
         {
@@ -36,9 +41,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         {
         }
 
-        internal static IReadOnlyList<FilterOption> SupportedFilters => _supportedFilters;
+        internal static IEnumerable<FilterOption> SupportedFilters => _supportedFilters.Concat(_supportedGroupFilters);
 
-        internal override IReadOnlyList<FilterOption> Filters => SupportedFilters;
+        internal override IEnumerable<FilterOption> Filters => SupportedFilters;
 
         internal override async Task<TemplateResolutionResult> ResolveTemplatesAsync(INewCommandInput commandInput, string? defaultLanguage, CancellationToken cancellationToken)
         {

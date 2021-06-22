@@ -1034,7 +1034,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To list installed templates, run &apos;{0}&apos;..
+        ///   Looks up a localized string similar to To list installed templates, run:.
         /// </summary>
         internal static string ListTemplatesCommand {
             get {
@@ -1368,7 +1368,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Run dotnet {0} --help for usage information..
+        ///   Looks up a localized string similar to For usage information, run: .
         /// </summary>
         internal static string RunHelpForInformationAboutAcceptedParameters {
             get {

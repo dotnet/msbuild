@@ -201,7 +201,9 @@ Options:
                 .Should().Fail()
                 .And.HaveStdErr(
 @"No templates found matching: 'class'.
-To list installed templates, run 'dotnet new3 --list'.
+
+To list installed templates, run:
+   dotnet new3 --list
 To search for the templates on NuGet.org, run:
    dotnet new3 class --search");
         }
@@ -219,7 +221,9 @@ To search for the templates on NuGet.org, run:
                 .Should().Fail()
                 .And.HaveStdErr(
 @"No templates found matching: 'Console Application'.
-To list installed templates, run 'dotnet new3 --list'.
+
+To list installed templates, run:
+   dotnet new3 --list
 To search for the templates on NuGet.org, run:
    dotnet new3 'Console Application' --search");
         }

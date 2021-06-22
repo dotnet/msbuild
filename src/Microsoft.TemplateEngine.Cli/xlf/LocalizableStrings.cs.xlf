@@ -553,8 +553,8 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run '{0}'.</source>
-        <target state="translated">Pokud chcete vypsat nainstalované šablony, spusťte {0}.</target>
+        <source>To list installed templates, run:</source>
+        <target state="new">To list installed templates, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -745,8 +745,8 @@ Podporované sloupce: language, tags, author, type</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
-        <source>Run dotnet {0} --help for usage information.</source>
-        <target state="translated">Pro informace o využití spusťte dotnet {0} --help.</target>
+        <source>For usage information, run: </source>
+        <target state="new">For usage information, run: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -760,8 +760,8 @@ Podporované sloupce: language, tags, author, type</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run '{0}'.</source>
-        <target state="translated">Pokud chcete hledat šablony na NuGet.org, spusťte {0}.</target>
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

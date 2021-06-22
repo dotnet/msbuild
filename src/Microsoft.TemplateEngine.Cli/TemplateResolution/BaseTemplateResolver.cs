@@ -32,7 +32,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
             HostSpecificDataLoader = hostSpecificDataLoader ?? throw new ArgumentNullException(nameof(hostSpecificDataLoader));
         }
 
-        internal abstract IReadOnlyList<FilterOption> Filters { get; }
+        internal abstract IEnumerable<FilterOption> Filters { get; }
 
         protected IHostSpecificDataLoader HostSpecificDataLoader { get; }
 

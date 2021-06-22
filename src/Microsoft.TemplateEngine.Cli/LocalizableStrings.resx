@@ -224,7 +224,7 @@
     <value>Rerun the command and pass --force to accept and create.</value>
   </data>
   <data name="RunHelpForInformationAboutAcceptedParameters" xml:space="preserve">
-    <value>Run dotnet {0} --help for usage information.</value>
+    <value>For usage information, run: </value>
   </data>
   <data name="ColumnNameShortName" xml:space="preserve">
     <value>Short Name</value>
@@ -512,7 +512,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>For more information, run:</value>
   </data>
   <data name="ListTemplatesCommand" xml:space="preserve">
-    <value>To list installed templates, run '{0}'.</value>
+    <value>To list installed templates, run:</value>
   </data>
   <data name="ColumnNameAuthor" xml:space="preserve">
     <value>Author</value>

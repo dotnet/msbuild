@@ -95,6 +95,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string CommandName { get; private set; }
 
+        public IEnumerable<string> Errors => CommandParseResult.Errors.Select(error => $"{error.Option}: {error.Message}");
+
         public bool ExpandedExtraArgsFiles { get; private set; }
 
         public IReadOnlyList<string>? ExtraArgsFileNames =>

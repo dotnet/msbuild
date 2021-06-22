@@ -52,8 +52,25 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut()
                 .And.HaveStdErrContaining("No templates found matching: 'webapp'.")
-                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining($"To list installed templates, run:{Environment.NewLine}   dotnet new3 --list")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 webapp --search");
+        }
+
+        [Fact]
+        public void CannotInstantiateTemplateWithUnknownLanguage()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+
+            new DotnetNewCommand(_log, "console", "--language", "D#")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .Fail()
+                .And.NotHaveStdOut()
+                .And.HaveStdErrContaining("No templates found matching: 'console', language='D#'.")
+                .And.HaveStdErrContaining($"To list installed templates, run:{Environment.NewLine}   dotnet new3 --list")
+                .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 console --search");
         }
 
         [Fact]
@@ -107,7 +124,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdOut()
                 .And.NotHaveStdOutContaining("The template \"Class Library\" was created successfully.")
                 .And.HaveStdErrContaining("No templates found matching: 'class'.")
-                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining($"To list installed templates, run:{Environment.NewLine}   dotnet new3 --list")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 class --search");
 
             new DotnetNewCommand(_log, "conf")
@@ -118,7 +135,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut()
                 .And.HaveStdErrContaining("No templates found matching: 'conf'.")
-                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining($"To list installed templates, run:{Environment.NewLine}   dotnet new3 --list")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 conf --search");
 
             new DotnetNewCommand(_log, "file")
@@ -129,7 +146,7 @@ namespace Dotnet_new3.IntegrationTests
                 .Fail()
                 .And.NotHaveStdOut()
                 .And.HaveStdErrContaining("No templates found matching: 'file'.")
-                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining($"To list installed templates, run:{Environment.NewLine}   dotnet new3 --list")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 file --search");
         }
 
@@ -147,7 +164,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdOut()
                 .And.NotHaveStdOutContaining("The template \"Console Application\" was created successfully.")
                 .And.HaveStdErrContaining("No templates found matching: 'Console Application'.")
-                .And.HaveStdErrContaining("To list installed templates, run 'dotnet new3 --list'.")
+                .And.HaveStdErrContaining($"To list installed templates, run:{Environment.NewLine}   dotnet new3 --list")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 'Console Application' --search");
         }
 

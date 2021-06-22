@@ -27,6 +27,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         string CommandName { get; }
 
+        IEnumerable<string> Errors { get; }
+
         bool ExpandedExtraArgsFiles { get; }
 
         IReadOnlyList<string>? ExtraArgsFileNames { get; }

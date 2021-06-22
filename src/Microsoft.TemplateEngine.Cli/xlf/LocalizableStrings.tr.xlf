@@ -553,8 +553,8 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <note />
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
-        <source>To list installed templates, run '{0}'.</source>
-        <target state="translated">Yüklü şablonları listelemek için '{0}' komutunu çalıştırın.</target>
+        <source>To list installed templates, run:</source>
+        <target state="new">To list installed templates, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -745,8 +745,8 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
-        <source>Run dotnet {0} --help for usage information.</source>
-        <target state="translated">Kullanım bilgileri için “dotnet {0} --help” komutunu çalıştırın.</target>
+        <source>For usage information, run: </source>
+        <target state="new">For usage information, run: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -760,8 +760,8 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
-        <source>To search for the templates on NuGet.org, run '{0}'.</source>
-        <target state="translated">NuGet.org sitesinde şablon aramak için ‘{0}’ komutunu çalıştırın.</target>
+        <source>To search for the templates on NuGet.org, run:</source>
+        <target state="new">To search for the templates on NuGet.org, run:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

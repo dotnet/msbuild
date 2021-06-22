@@ -243,7 +243,8 @@ namespace Microsoft.TemplateEngine.Cli
                     {
                         string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.Value.InvalidParameters);
                         Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{commandInput.CommandName} {commandInput.TemplateName}").Bold().Red());
+                        Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
+                        Reporter.Error.WriteCommand(commandInput.HelpCommandExample());
                     }
                     else
                     {

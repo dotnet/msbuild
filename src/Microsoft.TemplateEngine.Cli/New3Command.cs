@@ -274,6 +274,15 @@ namespace Microsoft.TemplateEngine.Cli
                 throw new ArgumentNullException(nameof(commandInput));
             }
 
+            // this check is checking the initial parse result
+            // the parse error occurs when no argument (template name) is specified and there are unparsed tokens
+            // unparsed tokens may be present in case template parameters are given
+            // for list and search unparsed tokens (template specific parameters) are supported and will be parsed later
+            if (!commandInput.IsListFlagSpecified && !commandInput.SearchOnline && commandInput.HasParseError)
+            {
+                return _templateInformationCoordinator.HandleParseError(commandInput);
+            }
+
             if (commandInput.IsHelpFlagSpecified)
             {
                 _telemetryLogger.TrackEvent(commandInput.CommandName + TelemetryConstants.HelpEventSuffix);

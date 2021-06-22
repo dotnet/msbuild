@@ -65,10 +65,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 case TemplateResolutionResult.Status.NoMatch:
                     Reporter.Error.WriteLine(
                         string.Format(LocalizableStrings.NoTemplatesMatchingInputParameters, GetInputParametersString(resolutionResult.Resolver.Filters, commandInput)).Bold().Red());
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.ListTemplatesCommand, commandInput.ListCommandExample()).Bold().Red());
-                    // To search for the templates on NuGet.org, run 'dotnet {0} <template name> --search'.
-                    Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand.Bold().Red());
-                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName).Bold().Red());
+                    Reporter.Error.WriteLine();
+
+                    Reporter.Error.WriteLine(LocalizableStrings.ListTemplatesCommand);
+                    Reporter.Error.WriteCommand(commandInput.ListCommandExample());
+
+                    Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
+                    Reporter.Error.WriteCommand(commandInput.SearchCommandExample(commandInput.TemplateName));
                     Reporter.Error.WriteLine();
                     return Task.FromResult(New3CommandStatus.NotFound);
                 case TemplateResolutionResult.Status.AmbiguousLanguageChoice:
@@ -152,22 +155,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             DisplayTemplateList(groupsForDisplay, commandInput, useErrorOutput);
         }
 
-#pragma warning disable SA1204 // Static elements should appear before instance elements
-        internal static void DisplayInvalidParameters(IEnumerable<string> invalidParams)
-#pragma warning restore SA1204 // Static elements should appear before instance elements
-        {
-            _ = invalidParams ?? throw new ArgumentNullException(nameof(invalidParams));
-
-            if (invalidParams.Any())
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.InvalidCommandOptions.Bold().Red());
-                foreach (string flag in invalidParams)
-                {
-                    Reporter.Error.WriteLine($"  {flag}".Bold().Red());
-                }
-            }
-        }
-
         internal void ShowUsageHelp(INewCommandInput commandInput)
         {
             if (commandInput.IsHelpFlagSpecified)
@@ -181,24 +168,46 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         internal New3CommandStatus HandleParseError(INewCommandInput commandInput)
         {
-            ValidateRemainingParameters(commandInput, out IReadOnlyList<string> invalidParams);
-            DisplayInvalidParameters(invalidParams);
+            if (!commandInput.HasParseError)
+            {
+                throw new ArgumentException($"{nameof(commandInput.HasParseError)} should be {true}");
+            }
 
             // TODO: get a meaningful error message from the parser
-            if (commandInput.IsHelpFlagSpecified)
+            if (commandInput.RemainingParameters.Any())
             {
-                // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
-                ShowUsageHelp(commandInput);
-            }
-            else if (invalidParams.Count > 0)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, commandInput.CommandName).Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidCommandOptions.Bold().Red());
+                foreach (string flag in commandInput.RemainingParameters)
+                {
+                    Reporter.Error.WriteLine($"  {flag}".Bold().Red());
+                }
             }
             if (commandInput.HasColumnsParseError)
             {
                 Reporter.Error.WriteLine(commandInput.ColumnsParseError.Bold().Red());
             }
 
+            //if other error, use command parser errors (not localized)
+            if (!commandInput.RemainingParameters.Any() && !commandInput.HasColumnsParseError)
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidCommandOptions.Bold().Red());
+                foreach (string error in commandInput.Errors)
+                {
+                    Reporter.Error.WriteLine($"  {error}".Bold().Red());
+                }
+                Reporter.Error.WriteLine();
+            }
+
+            if (commandInput.IsHelpFlagSpecified)
+            {
+                // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
+                ShowUsageHelp(commandInput);
+            }
+            else
+            {
+                Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
+                Reporter.Error.WriteCommand(commandInput.HelpCommandExample());
+            }
             return New3CommandStatus.InvalidParamValues;
         }
 
@@ -221,7 +230,13 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 && resolutionResult.ResolutionStatus != TemplateResolutionResult.Status.AmbiguousLanguageChoice
                 && resolutionResult.UnambiguousTemplateGroupMatchInfo!.TemplateMatchInfosWithMatchingParametersForPreferredLanguage.Any())
             {
-                return await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(resolutionResult.UnambiguousTemplateGroupMatchInfo, _engineEnvironmentSettings, commandInput, _hostSpecificDataLoader, _templateCreator, cancellationToken).ConfigureAwait(false);
+                return await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(
+                    resolutionResult.UnambiguousTemplateGroupMatchInfo,
+                    _engineEnvironmentSettings,
+                    commandInput,
+                    _hostSpecificDataLoader,
+                    _templateCreator,
+                    cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -274,6 +289,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                         .Bold().Red());
                 }
 
+                Reporter.Error.WriteLine();
                 // To search for the templates on NuGet.org, run:
                 Reporter.Error.WriteLine(LocalizableStrings.SearchTemplatesCommand);
                 if (string.IsNullOrWhiteSpace(commandInput.TemplateName))
@@ -327,26 +343,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return New3CommandStatus.Success;
         }
 
-        // This version relies on the commandInput being in the context desired - so the most recent parse would have to have been
-        // for what wants to be validated, either:
-        //  - not in the context of any template
-        //  - in the context of a specific template.
-        private static bool ValidateRemainingParameters(INewCommandInput commandInput, out IReadOnlyList<string> invalidParams)
-        {
-            List<string> badParams = new List<string>();
-
-            if (commandInput.RemainingParameters.Any())
-            {
-                foreach (string flag in commandInput.RemainingParameters)
-                {
-                    badParams.Add(flag);
-                }
-            }
-
-            invalidParams = badParams;
-            return !invalidParams.Any();
-        }
-
         /// <summary>
         /// Displays the help in case <paramref name="commandInput"/> contains invalid parameters for resolved <paramref name="templateGroupMatchInfo"/>.
         /// </summary>
@@ -366,8 +362,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (templateGroupMatchInfo.GroupInfo.ShortNames.Any())
             {
-                Reporter.Error.WriteLine(LocalizableStrings.InvalidParameterTemplateHint.Bold().Red());
-                Reporter.Error.WriteCommand(commandInput.HelpCommandExample(templateGroupMatchInfo.GroupInfo.ShortNames[0]).Bold().Red());
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidParameterTemplateHint);
+                Reporter.Error.WriteCommand(commandInput.HelpCommandExample(templateGroupMatchInfo.GroupInfo.ShortNames[0]));
             }
             return New3CommandStatus.InvalidParamValues;
         }

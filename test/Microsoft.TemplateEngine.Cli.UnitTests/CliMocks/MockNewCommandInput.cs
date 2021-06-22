@@ -168,6 +168,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public bool NoUpdateCheck => throw new NotImplementedException();
 
+        public IEnumerable<string> Errors => throw new NotImplementedException();
+
         public MockNewCommandInput WithTemplateOption(string optionName, string? optionValue = null)
         {
             if (!optionName.StartsWith('-'))
