@@ -1930,7 +1930,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
         <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <PlatformOptions>$(Platforms)</PlatformOptions>
+        <PlatformOptions>$(BuildArchitecturesAllowed)</PlatformOptions>
       </_ThisProjectPlatformMetadata>
     </ItemGroup>
   </Target>
