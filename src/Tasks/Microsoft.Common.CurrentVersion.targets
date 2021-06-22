@@ -1629,6 +1629,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                 string val = s.Split('=')[1]; 
                 translationTable[key]=val;
               }
+              Log.LogMessage($"Translation Table: {translationTable.Aggregate(new StringBuilder(), (sb, kvp) => sb.Append(kvp.Key + "=" + kvp.Value + ";"), sb => sb.ToString())}");
             }
 
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
@@ -1648,26 +1649,29 @@ Copyright (C) Microsoft Corporation. All rights reserved.
               string buildChildProjectAs = "";
 
               // Pri 1: Child project only has single option.
-              // TODO: Warn if the single option is incompatible with the parent?
               if (childPlatforms.Count == 1)
               {
                 buildChildProjectAs = childPlatforms.First();
+                Log.LogMessage($"Child project only has 1 platform option.");
               }
               // Pri 2: Translation table
               else if (translationTable.ContainsKey(ParentProjectPlatform) &&
                         childPlatforms.Contains(translationTable[ParentProjectPlatform]))
               {
                 buildChildProjectAs = translationTable[ParentProjectPlatform];
+                Log.LogMessage($"Found {ParentProjectPlatform}={buildChildProjectAs} in the given translation table: {translationTable.ToString()}.");
               }
               // Pri 3: AnyCPU if possible
               else if (childPlatforms.Contains("AnyCPU"))
               {
                 buildChildProjectAs = "AnyCPU";
+                Log.LogMessage($"Defaulting to AnyCPU.");
               }
               // Pri 4: Child has same platform as parent
               else if (childPlatforms.Contains(ParentProjectPlatform))
               {
                 buildChildProjectAs = ParentProjectPlatform;
+                Log.LogMessage($"Child and parent have the same platform.");
               }
               else 
               {
