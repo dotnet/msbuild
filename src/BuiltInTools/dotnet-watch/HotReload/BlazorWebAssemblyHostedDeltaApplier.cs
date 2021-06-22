@@ -18,10 +18,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public BlazorWebAssemblyHostedDeltaApplier(IReporter reporter)
         {
             _wasmApplier = new BlazorWebAssemblyDeltaApplier(reporter);
-            _hostApplier = new DefaultDeltaApplier(reporter)
-            {
-                SuppressBrowserRefreshAfterApply = true,
-            };
+            _hostApplier = new DefaultDeltaApplier(reporter);
         }
 
         public async ValueTask InitializeAsync(DotNetWatchContext context, CancellationToken cancellationToken)

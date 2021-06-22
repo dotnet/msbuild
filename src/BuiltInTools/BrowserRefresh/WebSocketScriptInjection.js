@@ -37,7 +37,7 @@ setTimeout(async function () {
         'UpdateStaticFile': () => updateStaticFile(payload.path),
         'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.deltas),
         'HotReloadDiagnosticsv1': () => displayDiagnostics(payload.diagnostics),
-        'HotReloadApplied': () => notifyHotReloadApplied(),
+        'AspNetCoreHotReloadApplied': () => aspnetCoreHotReloadApplied(),
       };
 
       if (payload.type && action.hasOwnProperty(payload.type)) {
@@ -157,6 +157,15 @@ setTimeout(async function () {
     el.textContent = 'Updated the page';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 520);
+  }
+
+  function aspnetCoreHotReloadApplied() {
+    if (window.Blazor) {
+      // If this page has any Blazor, don't refresh the browser.
+      notiifyHotReloadApplied();
+    } else {
+      location.reload();
+    }
   }
 
   function sendDeltaApplied() {
