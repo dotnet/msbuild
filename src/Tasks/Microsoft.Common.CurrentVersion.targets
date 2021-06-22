@@ -1620,10 +1620,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
             {
               foreach (string s in PlatformLookupTable.Split(';'))
               {
-                // Minimum translation: a,b
+                // Minimum translation: a=b
                 if (s.Length < 3) 
                 {
-                  break;
+                  continue;
                 }
                 string key = s.Split('=')[0];
                 string val = s.Split('=')[1]; 
@@ -1687,11 +1687,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!--
     ====================================================================================
-                                        _GetProjectReferenceTargetFrameworkProperties
+                                        _GetProjectReferencePlatformProperties
 
-    Builds the GetPlatforms target of all existing & opted-in project references to get a list
-    of all possible platforms of the referenced projects. Calls the
-    GetNearestPlatform task to determine the most compatible platform for each project.
+    If a project is opted in via $(EnableDynamicPlatformResolution), this target builds the GetPlatforms
+    target of all existing references to get a list of all possible platforms of the referenced projects. 
+    Calls the GetNearestPlatform task to determine the most compatible platform for each project.
     This prevents overbuilding a project when 'AnyCPU' is available, for example.
 
     ======================================================================================
@@ -1721,7 +1721,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
     <ItemGroup>
       <!-- TODO: Add check for "if outer build is managed" -->
-      <_ProjectReferencePlatformPossibilities Condition="'%(_ProjectReferencePlatformPossibilities.Extension)' == '.vcxproj' or '%(_ProjectReferencePlatformPossibilities.Extension)' == '.nativeproj'">
+      <_ProjectReferencePlatformPossibilities Condition="'%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
         <PlatformLookupTable>$(DefaultToVcxPlatformMapping)</PlatformLookupTable>
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
@@ -1729,7 +1729,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <GetNearestPlatformTask AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
                             ParentProjectPlatform="$(Platform)"
                             PlatformLookupTable="%(_ProjectReferencePlatformPossibilities.PlatformLookupTable)"
-                            Condition="'@(_ProjectReferencePlatformPossibilities->Count())' != '0' and '%(_ProjectReferencePlatformPossibilities.CanMultiPlatform)' == 'true'">
+                            Condition="'@(_ProjectReferencePlatformPossibilities->Count())' != '0' and '%(_ProjectReferencePlatformPossibilities.PlatformOptions)' != ''">
       <Output ItemName="ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
     </GetNearestPlatformTask>
 
@@ -1927,8 +1927,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
         <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
         <PlatformOptions>$(Platforms)</PlatformOptions>
-        <CanMultiPlatform>false</CanMultiPlatform>
-        <CanMultiPlatform Condition="$(Platforms.Contains(';')) == 'true'">true</CanMultiPlatform>
       </_ThisProjectPlatformMetadata>
     </ItemGroup>
   </Target>

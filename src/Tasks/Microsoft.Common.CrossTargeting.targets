@@ -28,8 +28,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
         <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
         <PlatformOptions>$(Platforms)</PlatformOptions>
-        <CanMultiPlatform>false</CanMultiPlatform>
-        <CanMultiPlatform Condition="$(Platforms.Contains(';')) == 'true'">true</CanMultiPlatform>
       </_ThisProjectPlatformMetadata>
     </ItemGroup>
   </Target>
