@@ -1,0 +1,21 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Class Library",
+  "description": "A project for creating a class library that targets .NET Standard or .NET Core",
+  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
+  "symbols/Framework/description": "The target framework for the project.",
+  "symbols/Framework/choices/netcoreapp1.0/description": "Target netcoreapp1.0",
+  "symbols/Framework/choices/netcoreapp1.1/description": "Target netcoreapp1.1",
+  "symbols/Framework/choices/netstandard1.0/description": "Target netstandard1.0",
+  "symbols/Framework/choices/netstandard1.1/description": "Target netstandard1.1",
+  "symbols/Framework/choices/netstandard1.2/description": "Target netstandard1.2",
+  "symbols/Framework/choices/netstandard1.3/description": "Target netstandard1.3",
+  "symbols/Framework/choices/netstandard1.4/description": "Target netstandard1.4",
+  "symbols/Framework/choices/netstandard1.5/description": "Target netstandard1.5",
+  "symbols/Framework/choices/netstandard1.6/description": "Target netstandard1.6",
+  "symbols/langVersion/description": "Sets langVersion in the created project file",
+  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
+  "postActions/restore/description": "Restore NuGet packages required by this project.",
+  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
+  "postActions/open-file/description": "Opens Class1.cs in the editor"
+}

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
@@ -203,7 +203,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
         <source>Unable to resolve the template, these templates matched your input:</source>
-        <target state="needs-review-translation">インスタンス化するテンプレートを解決できませんでした。次のテンプレートが入力と一致しました:</target>
+        <target state="translated">テンプレートを解決できませんでした。次のテンプレートが入力と一致しました:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -213,7 +213,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
         <source>Unable to resolve the template, the following installed templates are conflicting:</source>
-        <target state="needs-review-translation">インスタンスを作成するためのテンプレートを解決できません。次のインストールされたテンプレートが競合しています:</target>
+        <target state="translated">テンプレートを解決できません。次のインストールされたテンプレートが競合しています:</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
@@ -268,7 +268,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="ColumnNameCurrentVersion">
         <source>Current</source>
-        <target state="new">Current</target>
+        <target state="translated">現在</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameIdentity">
@@ -283,7 +283,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="ColumnNameLatestVersion">
         <source>Latest</source>
-        <target state="new">Latest</target>
+        <target state="translated">最新</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamePackage">
@@ -365,7 +365,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Create">
         <source>Create</source>
-        <target state="new">Create</target>
+        <target state="translated">作成</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateFailed">
@@ -454,12 +454,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Generic_Details">
         <source>Details: {0}</source>
-        <target state="new">Details: {0}</target>
+        <target state="translated">詳細: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
         <source>Installs a source or a template package.</source>
-        <target state="needs-review-translation">ソースまたはテンプレート パックをインストールします。</target>
+        <target state="translated">ソースまたはテンプレート パッケージをインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="InteractiveHelp">
@@ -469,7 +469,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
-        <target state="new">Error: Invalid option(s):</target>
+        <target state="translated">エラー: オプション %s は無効です。</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -494,7 +494,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
         <source>For more information, run:</source>
-        <target state="new">For more information, run:</target>
+        <target state="translated">詳しい情報を見るには、以下を実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -504,7 +504,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run '{0}'.</source>
-        <target state="needs-review-translation">インストールされているテンプレートを一覧表示するには、' dotnet {0}--list ' を実行してください。</target>
+        <target state="translated">インストールされているテンプレートを一覧表示するには、'{0}' を実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -559,7 +559,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="needs-review-translation">作成者に基づいてテンプレートをフィルターします。-- search と --list に適用されます。</target>
+        <target state="translated">テンプレートの作成者に基づいてテンプレートをフィルターします。--search または--list | -l オプションでのみ使用できます。</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
@@ -576,7 +576,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
-        <target state="new">Disables checking for the template package updates when instantiating a template.</target>
+        <target state="translated">テンプレートをインスタンス化する場合に、テンプレート パッケージの更新の確認を無効にします。</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
@@ -636,12 +636,12 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_NotSupported">
         <source>The post action {0} is not supported.</source>
-        <target state="new">The post action {0} is not supported.</target>
+        <target state="translated">POST アクション {0} はサポートされていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
         <source>Execution of 'Run script' post action is not allowed.</source>
-        <target state="new">Execution of 'Run script' post action is not allowed.</target>
+        <target state="translated">POST アクション 'Run script' の実行は許可されていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
@@ -671,7 +671,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
-        <target state="new">Failed to run the command: argument 'executable' is missing in post action configuration.</target>
+        <target state="translated">コマンドの実行は失敗しました: 引数 'executable' がPOST アクションの構成に存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
@@ -761,7 +761,7 @@ Examples:
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run '{0}'.</source>
-        <target state="new">To search for the templates on NuGet.org, run '{0}'.</target>
+        <target state="translated">NuGet.org のテンプレートを検索するには、'{0}' を実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
@@ -786,212 +786,212 @@ Examples:
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
         <source>The '{0}' command creates a .NET project based on a template.</source>
-        <target state="new">The '{0}' command creates a .NET project based on a template.</target>
+        <target state="translated">'{0}' コマンドを実行すると、テンプレートに基づいて .NET プロジェクトが作成されます。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint">
         <source>Display template options with:</source>
-        <target state="new">Display template options with:</target>
+        <target state="translated">テンプレート オプションを表示する方法:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ExampleHeader">
         <source>An example would be:</source>
-        <target state="new">An example would be:</target>
+        <target state="translated">例を次に示します:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
         <source>Display installed templates with:</source>
-        <target state="new">Display installed templates with:</target>
+        <target state="translated">インストールされているテンプレートを次の方法で表示します:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
         <source>Display templates available on NuGet.org with:</source>
-        <target state="new">Display templates available on NuGet.org with:</target>
+        <target state="translated">次の NuGet.org で利用可能なテンプレートを表示する:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_TemplatesHeader">
         <source>Common templates are:</source>
-        <target state="new">Common templates are:</target>
+        <target state="translated">一般的なテンプレート:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
-        <target state="new">Could not find the template package containing template '{0}'</target>
+        <target state="translated">テンプレート '{0}' を含むテンプレートパッケージが見つかりませんでした</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNameContainsTemplates">
         <source>{0} (contains {1} templates)</source>
-        <target state="new">{0} (contains {1} templates)</target>
+        <target state="translated">{0} ({1} テンプレートが含まれています)</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNotFound">
         <source>The template package '{0}' is not found.</source>
-        <target state="new">The template package '{0}' is not found.</target>
+        <target state="translated">テンプレート パッケージ '{0}' が見つかりません。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_TemplateIncludedToPackages">
         <source>The template '{0}' is included to the packages:</source>
-        <target state="new">The template '{0}' is included to the packages:</target>
+        <target state="translated">テンプレート '{0}' はパッケージに含まれています:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall">
         <source>Found no template packages to install.</source>
-        <target state="new">Found no template packages to install.</target>
+        <target state="translated">インストールするテンプレート パッケージが見つかりません。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
         <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
-        <target state="new">The command is attempting to install the template package '{0}' twice, check the arguments and retry.</target>
+        <target state="translated">コマンドがテンプレート パッケージ '{0}' を2回インストールしようとしています。引数を確認して、もう一度やり直してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
         <source>The following template packages will be installed:</source>
-        <target state="new">The following template packages will be installed:</target>
+        <target state="translated">次のパッケージがインストールされます:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
         <source>Failed to uninstall {0}, reason: {1}.</source>
-        <target state="new">Failed to uninstall {0}, reason: {1}.</target>
+        <target state="translated">{0} をアンインストールできませんでした。 理由: {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader">
         <source>To list installed template packages use:</source>
-        <target state="new">To list installed template packages use:</target>
+        <target state="translated">インストールされているテンプレート パッケージを一覧表示するには:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader">
         <source>To uninstall the template package use:</source>
-        <target state="new">To uninstall the template package use:</target>
+        <target state="translated">テンプレートパッケージをアンインストールするには:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_DetailsHeader">
         <source>Details:</source>
-        <target state="new">Details:</target>
+        <target state="translated">詳細:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_InstalledItems">
         <source>Currently installed items:</source>
-        <target state="new">Currently installed items:</target>
+        <target state="translated">現在インストールされているランタイム</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_Success">
         <source>Success: {0} was uninstalled.</source>
-        <target state="new">Success: {0} was uninstalled.</target>
+        <target state="translated">成功: {0} がアンインストールされました。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint">
         <source>Uninstall Command:</source>
-        <target state="new">Uninstall Command:</target>
+        <target state="translated">アンインストール コマンド:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
         <source>Failed to check update for {0}: {1}.</source>
-        <target state="new">Failed to check update for {0}: {1}.</target>
+        <target state="translated">{0}: {1} の更新を確認できませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds">
         <source>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</source>
-        <target state="new">Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</target>
+        <target state="translated">{0} の更新を確認できませんでした: NuGet フィードが構成されていないか、無効です。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotFound">
         <source>Failed to check update for {0}: the package is not available in configured NuGet feeds.</source>
-        <target state="new">Failed to check update for {0}: the package is not available in configured NuGet feeds.</target>
+        <target state="translated">{0} の更新プログラムを確認できませんでした: 構成されている NuGet フィードではパッケージを使用できません。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotSupported">
         <source>Failed to check update for {0}: the package is not supported.</source>
-        <target state="new">Failed to check update for {0}: the package is not supported.</target>
+        <target state="translated">{0} の更新プログラムを確認できませんでした: パッケージはサポートされていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
         <source>All template packages are up-to-date.</source>
-        <target state="new">All template packages are up-to-date.</target>
+        <target state="translated">すべてのテンプレートパッケージは最新の状態に更新されています。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated">
         <source>The following template packages will be updated:</source>
-        <target state="new">The following template packages will be updated:</target>
+        <target state="translated">次のテンプレート パッケージが更新されます:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader">
         <source>To update all the packages use:</source>
-        <target state="new">To update all the packages use:</target>
+        <target state="translated">すべてのパッケージを更新するには、以下を使います：:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailable">
         <source>An update for template package '{0}' is available.</source>
-        <target state="new">An update for template package '{0}' is available.</target>
+        <target state="translated">テンプレートパッケージ '{0}' の更新プログラムを使用できます。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages">
         <source>An update for template packages is available:</source>
-        <target state="new">An update for template packages is available:</target>
+        <target state="translated">テンプレート パッケージの更新プログラムを使用できます。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader">
         <source>To update the package use:</source>
-        <target state="new">To update the package use:</target>
+        <target state="translated">パッケージを更新するには、以下を使います:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError">
         <source>Failed to initialize NuGet credential service, details: {0}.</source>
-        <target state="new">Failed to initialize NuGet credential service, details: {0}.</target>
+        <target state="translated">NuGet 資格情報サービスを初期化できませんでした。詳細: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
         <source>{0} is already installed.</source>
-        <target state="new">{0} is already installed.</target>
+        <target state="translated">{0} は既にインストールされています。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_DownloadFailed">
         <source>{0} could not be installed, download failed.</source>
-        <target state="new">{0} could not be installed, download failed.</target>
+        <target state="translated">{0} をインストールできませんでした。ダウンロードできませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_GenericError">
         <source>{0} could not be installed.</source>
-        <target state="new">{0} could not be installed.</target>
+        <target state="translated">{0} をインストールできませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds">
         <source>{0} could not be installed, no NuGet feeds are configured or they are invalid.</source>
-        <target state="new">{0} could not be installed, no NuGet feeds are configured or they are invalid.</target>
+        <target state="translated">{0} をインストールできませんでした。NuGet フィードが構成されていないか、無効になっています。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidPackage">
         <source>Failed to install {0}, failed to uninstall previous version of the template package.</source>
-        <target state="new">Failed to install {0}, failed to uninstall previous version of the template package.</target>
+        <target state="translated">{0} をインストールできませんでした。以前のバージョンのテンプレート パッケージをアンインストールできませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_PackageNotFound">
         <source>{0} could not be installed, the package does not exist.</source>
-        <target state="new">{0} could not be installed, the package does not exist.</target>
+        <target state="translated">{0} をインストールできませんでした。パッケージが存在しません。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UninstallFailed">
         <source>Failed to install {0}, the template package is invalid.</source>
-        <target state="new">Failed to install {0}, the template package is invalid.</target>
+        <target state="translated">{0} をインストールできませんでした。テンプレート パッケージが無効です。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest">
         <source>{0} is not supported.</source>
-        <target state="new">{0} is not supported.</target>
+        <target state="translated">{0} はサポートされていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Info_Success">
         <source>Success: {0} installed the following templates:</source>
-        <target state="new">Success: {0} installed the following templates:</target>
+        <target state="translated">成功: {0}により次のテンプレートがインストールされました。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package">
         <source>No templates were found in the package {0}.</source>
-        <target state="new">No templates were found in the package {0}.</target>
+        <target state="translated">パッケージ {0} にテンプレートはありませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateResolver_Warning_FailedToReparseTemplate">
         <source>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</source>
-        <target state="new">[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</target>
+        <target state="translated">[警告]: テンプレート {0} の入力を解析できませんでした。これ以降の処理はスキップされます。</target>
         <note />
       </trans-unit>
       <trans-unit id="Templates">
@@ -1001,7 +1001,7 @@ Examples:
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
         <source>These templates matched your input: {0}</source>
-        <target state="needs-review-translation">これらのテンプレートは、入力: {0} と一致しました。</target>
+        <target state="translated">これらのテンプレートは、入力: {0} と一致しました</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
@@ -1026,7 +1026,7 @@ Examples:
       </trans-unit>
       <trans-unit id="UninstallHelp">
         <source>Uninstalls a source or a template package.</source>
-        <target state="needs-review-translation">ソースまたはテンプレート パックをアンインストールします。</target>
+        <target state="translated">ソースまたはテンプレート パッケージをアンインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
@@ -1036,12 +1036,12 @@ Examples:
       </trans-unit>
       <trans-unit id="UpdateApplyCommandHelp">
         <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="needs-review-translation">更新には現在インストールされているテンプレート パックを確認し、更新プログラムをインストールします。</target>
+        <target state="translated">更新のために現在インストールされているテンプレート パッケージを確認し、更新プログラムをインストールしてください。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateCheckCommandHelp">
         <source>Check the currently installed template packages for updates.</source>
-        <target state="needs-review-translation">更新には現在インストールされているテンプレート パックを確認してください。</target>
+        <target state="translated">更新のために現在インストールされているテンプレート パッケージを確認してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">

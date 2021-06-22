@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
@@ -203,7 +203,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHeader">
         <source>Unable to resolve the template, these templates matched your input:</source>
-        <target state="needs-review-translation">Impossible de résoudre le modèle à instancier. Ces modèles correspondent à votre entrée :</target>
+        <target state="translated">Impossible de résoudre le modèle, ces modèles correspondent à votre entrée :</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplateGroupListHint">
@@ -213,7 +213,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesHeader">
         <source>Unable to resolve the template, the following installed templates are conflicting:</source>
-        <target state="needs-review-translation">Impossible de résoudre le modèle à instancier, les modèles installés suivants sont en conflit :</target>
+        <target state="translated">Impossible de résoudre le modèle, les modèles installés suivants sont en conflit :</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTemplatesMultiplePackagesHint">
@@ -268,7 +268,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="ColumnNameCurrentVersion">
         <source>Current</source>
-        <target state="new">Current</target>
+        <target state="translated">Actuel</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameIdentity">
@@ -283,7 +283,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="ColumnNameLatestVersion">
         <source>Latest</source>
-        <target state="new">Latest</target>
+        <target state="translated">Dernier</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNamePackage">
@@ -365,7 +365,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="Create">
         <source>Create</source>
-        <target state="new">Create</target>
+        <target state="translated">Créer</target>
         <note />
       </trans-unit>
       <trans-unit id="CreateFailed">
@@ -454,12 +454,12 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="Generic_Details">
         <source>Details: {0}</source>
-        <target state="new">Details: {0}</target>
+        <target state="translated">Détails : {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
         <source>Installs a source or a template package.</source>
-        <target state="needs-review-translation">Installe une source ou un pack de modèles.</target>
+        <target state="translated">Installe une source ou un package de modèle.</target>
         <note />
       </trans-unit>
       <trans-unit id="InteractiveHelp">
@@ -469,7 +469,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="InvalidCommandOptions">
         <source>Error: Invalid option(s):</source>
-        <target state="new">Error: Invalid option(s):</target>
+        <target state="translated">Erreur : option(s) non valide(s) :</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNameParameter">
@@ -494,7 +494,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="InvalidParameterTemplateHint">
         <source>For more information, run:</source>
-        <target state="new">For more information, run:</target>
+        <target state="translated">Si vous souhaitez en savoir plus, exécutez :</target>
         <note />
       </trans-unit>
       <trans-unit id="LanguageParameter">
@@ -504,7 +504,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run '{0}'.</source>
-        <target state="needs-review-translation">Pour répertorier les modèles installés, exécutez « dotnet {0}--list ».</target>
+        <target state="translated">Pour répertorier les modèles installés, exécutez «{0}».</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -559,7 +559,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="OptionDescriptionAuthorFilter">
         <source>Filters the templates based on the template author. Applicable only with --search or --list | -l option.</source>
-        <target state="needs-review-translation">Filtre les modèles en fonction de l’auteur. S’applique à --search et --list.</target>
+        <target state="translated">Filtre les modèles en fonction de l’auteur du modèle. Applicable uniquement avec --search ou --list | -l option.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionColumns">
@@ -576,7 +576,7 @@ Les colonnes prises en charge sont : Langage, balises, auteur, type.</target>
       </trans-unit>
       <trans-unit id="OptionDescriptionNoUpdateCheck">
         <source>Disables checking for the template package updates when instantiating a template.</source>
-        <target state="new">Disables checking for the template package updates when instantiating a template.</target>
+        <target state="translated">Désactive la vérification des mises à jour du package de modèles lors de l’instanciation d’un modèle.</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionDescriptionPackageFilter">
@@ -636,12 +636,12 @@ Les colonnes prises en charge sont : Langage, balises, auteur, type.</target>
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_NotSupported">
         <source>The post action {0} is not supported.</source>
-        <target state="new">The post action {0} is not supported.</target>
+        <target state="translated">L’action de publication {0} n’est pas prise en charge.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionDispatcher_Error_RunScriptNotAllowed">
         <source>Execution of 'Run script' post action is not allowed.</source>
-        <target state="new">Execution of 'Run script' post action is not allowed.</target>
+        <target state="translated">L’exécution de l’action de publication « Exécuter le script » n’est pas autorisée.</target>
         <note />
       </trans-unit>
       <trans-unit id="PostActionFailedInstructionHeader">
@@ -671,7 +671,7 @@ Les colonnes prises en charge sont : Langage, balises, auteur, type.</target>
       </trans-unit>
       <trans-unit id="PostAction_ProcessStartProcessor_Error_ConfigMissingExecutable">
         <source>Failed to run the command: argument 'executable' is missing in post action configuration.</source>
-        <target state="new">Failed to run the command: argument 'executable' is missing in post action configuration.</target>
+        <target state="translated">Échec de l’exécution de la commande : l’argument « Exécutable » est manquant dans la configuration de l’action de publication.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProcessingPostActions">
@@ -761,7 +761,7 @@ Exemples :
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run '{0}'.</source>
-        <target state="new">To search for the templates on NuGet.org, run '{0}'.</target>
+        <target state="translated">Pour rechercher les modèles sur NuGet.org, exécutez «{0}».</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
@@ -786,212 +786,212 @@ Exemples :
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_Description">
         <source>The '{0}' command creates a .NET project based on a template.</source>
-        <target state="new">The '{0}' command creates a .NET project based on a template.</target>
+        <target state="translated">La commande «{0}» crée un projet .NET basé sur un modèle.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint">
         <source>Display template options with:</source>
-        <target state="new">Display template options with:</target>
+        <target state="translated">Affichez les options de modèle avec :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ExampleHeader">
         <source>An example would be:</source>
-        <target state="new">An example would be:</target>
+        <target state="translated">Voici un exemple :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
         <source>Display installed templates with:</source>
-        <target state="new">Display installed templates with:</target>
+        <target state="translated">Affichez les modèles installés avec :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
         <source>Display templates available on NuGet.org with:</source>
-        <target state="new">Display templates available on NuGet.org with:</target>
+        <target state="translated">Affichez les modèles disponibles sur NuGet.org avec :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_TemplatesHeader">
         <source>Common templates are:</source>
-        <target state="new">Common templates are:</target>
+        <target state="translated">Les modèles courants sont les suivants :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
-        <target state="new">Could not find the template package containing template '{0}'</target>
+        <target state="translated">Le package de modèle contenant le modèle « {0} » est introuvable</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNameContainsTemplates">
         <source>{0} (contains {1} templates)</source>
-        <target state="new">{0} (contains {1} templates)</target>
+        <target state="translated">{0} (contient {1} modèles)</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageNotFound">
         <source>The template package '{0}' is not found.</source>
-        <target state="new">The template package '{0}' is not found.</target>
+        <target state="translated">Le package de modèle «{0}» est introuvable.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_TemplateIncludedToPackages">
         <source>The template '{0}' is included to the packages:</source>
-        <target state="new">The template '{0}' is included to the packages:</target>
+        <target state="translated">Le modèle « {0} » est inclus dans les packages :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_FoundNoPackagesToInstall">
         <source>Found no template packages to install.</source>
-        <target state="new">Found no template packages to install.</target>
+        <target state="translated">Aucun package de modèles à installer trouvé.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Error_SameInstallRequests">
         <source>The command is attempting to install the template package '{0}' twice, check the arguments and retry.</source>
-        <target state="new">The command is attempting to install the template package '{0}' twice, check the arguments and retry.</target>
+        <target state="translated">La commande tente d’installer deux fois le package de modèles « {0} ». Vérifiez les arguments et réessayez.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Install_Info_PackagesToBeInstalled">
         <source>The following template packages will be installed:</source>
-        <target state="new">The following template packages will be installed:</target>
+        <target state="translated">Les packages de modèles suivants seront installés :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_GenericError">
         <source>Failed to uninstall {0}, reason: {1}.</source>
-        <target state="new">Failed to uninstall {0}, reason: {1}.</target>
+        <target state="translated">Échec de la désinstallation de {0}, raison : {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_ListPackagesHeader">
         <source>To list installed template packages use:</source>
-        <target state="new">To list installed template packages use:</target>
+        <target state="translated">Pour répertorier les packages de modèles installés, utilisez:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Error_UninstallCommandHeader">
         <source>To uninstall the template package use:</source>
-        <target state="new">To uninstall the template package use:</target>
+        <target state="translated">Pour désinstaller le package de modèles utilisez:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_DetailsHeader">
         <source>Details:</source>
-        <target state="new">Details:</target>
+        <target state="translated">Détails :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_InstalledItems">
         <source>Currently installed items:</source>
-        <target state="new">Currently installed items:</target>
+        <target state="translated">Éléments actuellement installés :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_Success">
         <source>Success: {0} was uninstalled.</source>
-        <target state="new">Success: {0} was uninstalled.</target>
+        <target state="translated">Opération réussie : {0} a été désinstallé.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint">
         <source>Uninstall Command:</source>
-        <target state="new">Uninstall Command:</target>
+        <target state="translated">Commande de désinstallation :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_GenericError">
         <source>Failed to check update for {0}: {1}.</source>
-        <target state="new">Failed to check update for {0}: {1}.</target>
+        <target state="translated">Échec de la vérification de la mise à jour pour {0} : {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_InvalidNuGetFeeds">
         <source>Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</source>
-        <target state="new">Failed to check update for {0}: no NuGet feeds are configured or they are invalid.</target>
+        <target state="translated">Échec de la vérification de la mise à jour pour {0} : aucun flux NuGet n’est configuré ou n’est valide.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotFound">
         <source>Failed to check update for {0}: the package is not available in configured NuGet feeds.</source>
-        <target state="new">Failed to check update for {0}: the package is not available in configured NuGet feeds.</target>
+        <target state="translated">Échec de la vérification de la mise à jour pour {0} : le package n’est pas disponible dans les flux NuGet configurés.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Error_PackageNotSupported">
         <source>Failed to check update for {0}: the package is not supported.</source>
-        <target state="new">Failed to check update for {0}: the package is not supported.</target>
+        <target state="translated">Échec de la vérification de la mise à jour pour {0} : le package n’est pas pris en charge.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_AllPackagesAreUpToDate">
         <source>All template packages are up-to-date.</source>
-        <target state="new">All template packages are up-to-date.</target>
+        <target state="translated">Tous les packages de modèles sont à jour.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_PackagesToBeUpdated">
         <source>The following template packages will be updated:</source>
-        <target state="new">The following template packages will be updated:</target>
+        <target state="translated">Les packages de modèles suivants seront mis à jour :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAllCommandHeader">
         <source>To update all the packages use:</source>
-        <target state="new">To update all the packages use:</target>
+        <target state="translated">Pour mettre à jour tous les packages, utilisez :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailable">
         <source>An update for template package '{0}' is available.</source>
-        <target state="new">An update for template package '{0}' is available.</target>
+        <target state="translated">Une mise à jour du package de modèles « {0} » est disponible.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateAvailablePackages">
         <source>An update for template packages is available:</source>
-        <target state="new">An update for template packages is available:</target>
+        <target state="translated">Une mise à jour du package de modèles est disponible:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Update_Info_UpdateSingleCommandHeader">
         <source>To update the package use:</source>
-        <target state="new">To update the package use:</target>
+        <target state="translated">Pour mettre à jour l’utilisation du package:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Verbose_NuGetCredentialServiceError">
         <source>Failed to initialize NuGet credential service, details: {0}.</source>
-        <target state="new">Failed to initialize NuGet credential service, details: {0}.</target>
+        <target state="translated">Échec de l’initialisation du service d’informations d’identification NuGet, détails : {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_AlreadyInstalled">
         <source>{0} is already installed.</source>
-        <target state="new">{0} is already installed.</target>
+        <target state="translated">{0} est déjà installé.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_DownloadFailed">
         <source>{0} could not be installed, download failed.</source>
-        <target state="new">{0} could not be installed, download failed.</target>
+        <target state="translated">{0} n’a pas pu être installé, échec du téléchargement.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_GenericError">
         <source>{0} could not be installed.</source>
-        <target state="new">{0} could not be installed.</target>
+        <target state="translated">{0} ne peut pas être installer.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidNuGetFeeds">
         <source>{0} could not be installed, no NuGet feeds are configured or they are invalid.</source>
-        <target state="new">{0} could not be installed, no NuGet feeds are configured or they are invalid.</target>
+        <target state="translated">{0} n’a pas pu être installé. Aucun flux NuGet n’est configuré ou n’est valide.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_InvalidPackage">
         <source>Failed to install {0}, failed to uninstall previous version of the template package.</source>
-        <target state="new">Failed to install {0}, failed to uninstall previous version of the template package.</target>
+        <target state="translated">Échec de l’installation de {0}. Échec de la désinstallation de la version précédente du package de modèle.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_PackageNotFound">
         <source>{0} could not be installed, the package does not exist.</source>
-        <target state="new">{0} could not be installed, the package does not exist.</target>
+        <target state="translated">{0} n’a pas pu être installé. Le package n’existe pas.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UninstallFailed">
         <source>Failed to install {0}, the template package is invalid.</source>
-        <target state="new">Failed to install {0}, the template package is invalid.</target>
+        <target state="translated">Échec de l’installation de {0}. Le package de modèle n’est pas valide.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Error_UnsupportedRequest">
         <source>{0} is not supported.</source>
-        <target state="new">{0} is not supported.</target>
+        <target state="translated">{0} n'est pas pris en charge.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Info_Success">
         <source>Success: {0} installed the following templates:</source>
-        <target state="new">Success: {0} installed the following templates:</target>
+        <target state="translated">Opération réussie : {0} a installé les modèles suivants :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_lnstall_Warning_No_Templates_In_Package">
         <source>No templates were found in the package {0}.</source>
-        <target state="new">No templates were found in the package {0}.</target>
+        <target state="translated">Aucun modèle n’a été trouvé dans le package {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateResolver_Warning_FailedToReparseTemplate">
         <source>[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</source>
-        <target state="new">[Warning]: Failed to parse input for template {0}, it will be skipped from further processing.</target>
+        <target state="translated">[Avertissement] : Échec de l’analyse de l’entrée pour le modèle {0}, il sera ignoré du prochain traitement.</target>
         <note />
       </trans-unit>
       <trans-unit id="Templates">
@@ -1001,7 +1001,7 @@ Exemples :
       </trans-unit>
       <trans-unit id="TemplatesFoundMatchingInputParameters">
         <source>These templates matched your input: {0}</source>
-        <target state="needs-review-translation">Ces modèles correspondent à votre entrée : {0}.</target>
+        <target state="translated">Ces modèles correspondent à votre entrée : {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplatesNotValidGivenTheSpecifiedFilter">
@@ -1026,7 +1026,7 @@ Exemples :
       </trans-unit>
       <trans-unit id="UninstallHelp">
         <source>Uninstalls a source or a template package.</source>
-        <target state="needs-review-translation">Désinstalle une source ou un pack de modèles.</target>
+        <target state="translated">Désinstalle une source ou un package de modèle.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnknownChangeKind">
@@ -1036,12 +1036,12 @@ Exemples :
       </trans-unit>
       <trans-unit id="UpdateApplyCommandHelp">
         <source>Check the currently installed template packages for update, and install the updates.</source>
-        <target state="needs-review-translation">Consultez les packs de modèles actuellement installés pour la mise à jour et installez les mises à jour.</target>
+        <target state="translated">Consultez les packages de modèles actuellement installés pour la mise à jour et installez les mises à jour.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateCheckCommandHelp">
         <source>Check the currently installed template packages for updates.</source>
-        <target state="needs-review-translation">Consultez les packs de modèles actuellement installés pour les mises à jour.</target>
+        <target state="translated">Consultez les packages de modèles actuellement installés pour les mises à jour.</target>
         <note />
       </trans-unit>
       <trans-unit id="Version">

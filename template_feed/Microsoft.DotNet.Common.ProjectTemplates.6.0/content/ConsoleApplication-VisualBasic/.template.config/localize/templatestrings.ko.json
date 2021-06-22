@@ -1,0 +1,13 @@
+﻿{
+  "author": "Microsoft",
+  "name": "Console Application",
+  "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
+  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
+  "symbols/Framework/description": "The target framework for the project.",
+  "symbols/Framework/choices/net6.0/description": "Target net6.0",
+  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
+  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
+  "postActions/restore/description": "Restore NuGet packages required by this project.",
+  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
+  "postActions/open-file/description": "Opens Program.vb in the editor"
+}
