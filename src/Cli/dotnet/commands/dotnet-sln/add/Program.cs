@@ -10,7 +10,6 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Sln.Internal;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
-using LocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tools.Sln.Add
 {
@@ -20,9 +19,6 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly bool _inRoot;
         private readonly IList<string> _relativeRootSolutionFolders;
 
-        private const string InRootOption = "in-root";
-        private const string SolutionFolderOption = "solution-folder";
-
         public AddProjectToSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
@@ -30,14 +26,23 @@ namespace Microsoft.DotNet.Tools.Sln.Add
 
             _inRoot = parseResult.ValueForOption<bool>(SlnAddParser.InRootOption);
             string relativeRoot = parseResult.ValueForOption<string>(SlnAddParser.SolutionFolderOption);
-
-            if (_inRoot && !string.IsNullOrEmpty(relativeRoot))
+            bool hasRelativeRoot = !string.IsNullOrEmpty(relativeRoot);
+            
+            if (_inRoot && hasRelativeRoot)
             {
                 // These two options are mutually exclusive
                 throw new GracefulException(LocalizableStrings.SolutionFolderAndInRootMutuallyExclusive);
             }
 
-            _relativeRootSolutionFolders = string.IsNullOrEmpty(relativeRoot)? null : relativeRoot.Split(Path.DirectorySeparatorChar);
+            if (hasRelativeRoot)
+            {
+                relativeRoot = PathUtility.GetPathWithDirectorySeparator(relativeRoot);
+                _relativeRootSolutionFolders = relativeRoot.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                _relativeRootSolutionFolders = null;
+            }
         }
 
         public override int Execute()

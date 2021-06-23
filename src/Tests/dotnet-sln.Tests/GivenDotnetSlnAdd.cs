@@ -1187,6 +1187,28 @@ EndGlobal
                 .BeVisuallyEquivalentTo(contentBefore);
         }
 
+        [Theory]
+        [InlineData("/TestFolder//", "ForwardSlash")]
+        [InlineData("\\TestFolder\\\\", "BackwardSlash")]
+        public void WhenSolutionFolderIsPassedWithDirectorySeparatorFolderStructureIsCorrect(string solutionFolder, string testIdentifier)
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojInSubDir", identifier: testIdentifier)
+                .WithSource()
+                .Path;
+
+            var projectToAdd = Path.Combine("src", "Lib", "Lib.csproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute($"sln", "App.sln", "add", "--solution-folder", solutionFolder, projectToAdd);
+            cmd.Should().Pass();
+
+            var slnPath = Path.Combine(projectDirectory, "App.sln");
+            var expectedSlnContents = GetExpectedSlnContents(slnPath, ExpectedSlnFileAfterAddingProjectWithSolutionFolderOption);
+            File.ReadAllText(slnPath)
+                .Should().BeVisuallyEquivalentTo(expectedSlnContents);
+        }
+
         private string GetExpectedSlnContents(
             string slnPath,
             string slnTemplate,
