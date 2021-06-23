@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 Directory.CreateDirectory(tempExtractionDir);
                                 var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
-                                FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempExtractionDir, packInfo.Path));
+                                FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(tempExtractionDir, packInfo.Path));
                             }
                         }
                         else
@@ -217,16 +217,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                            {
                                Directory.Delete(tempBackupDir, true);
                            }
-                           FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(manifestPath, tempBackupDir));
+                           FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(manifestPath, tempBackupDir));
                        }
                        Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
-                       FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(Path.Combine(tempExtractionDir, "data"), manifestPath));
+                       FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(Path.Combine(tempExtractionDir, "data"), manifestPath));
                    },
                     rollback: () =>
                     {
                         if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
                         {
-                            FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempBackupDir, manifestPath));
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(tempBackupDir, manifestPath));
                         }
                     });
 
