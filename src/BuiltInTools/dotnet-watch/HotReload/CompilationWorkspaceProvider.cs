@@ -17,12 +17,16 @@ namespace Microsoft.DotNet.Watcher.Tools
 {
     internal static class CompilationWorkspaceProvider
     {
-        public static Task<(Solution, WatchHotReloadService)> CreateWorkspaceAsync(string projectPath, IReporter reporter, CancellationToken cancellationToken)
+        public static Task<(Solution, WatchHotReloadService)> CreateWorkspaceAsync(
+            string projectPath,
+            Task<ImmutableArray<string>> hotReloadCapabilitiesTask,
+            IReporter reporter,
+            CancellationToken cancellationToken)
         {
             var taskCompletionSource = new TaskCompletionSource<(Solution, WatchHotReloadService)>(TaskCreationOptions.RunContinuationsAsynchronously);
             try
             {
-                CreateProject(taskCompletionSource, projectPath, reporter, cancellationToken);
+                CreateProject(taskCompletionSource, hotReloadCapabilitiesTask, projectPath, reporter, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -32,7 +36,12 @@ namespace Microsoft.DotNet.Watcher.Tools
             return taskCompletionSource.Task;
         }
 
-        static async void CreateProject(TaskCompletionSource<(Solution, WatchHotReloadService)> taskCompletionSource, string projectPath, IReporter reporter, CancellationToken cancellationToken)
+        static async void CreateProject(
+            TaskCompletionSource<(Solution, WatchHotReloadService)> taskCompletionSource,
+            Task<ImmutableArray<string>> hotReloadCapabilitiesTask,
+            string projectPath,
+            IReporter reporter,
+            CancellationToken cancellationToken)
         {
             var workspace = MSBuildWorkspace.Create();
 
@@ -50,7 +59,10 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             await workspace.OpenProjectAsync(projectPath, cancellationToken: cancellationToken);
             var currentSolution = workspace.CurrentSolution;
-            var hotReloadService = new WatchHotReloadService(workspace.Services, ImmutableArray.Create("Baseline", "AddDefinitionToExistingType", "NewTypeDefinition"));
+
+            var hotReloadCapabilities = await GetHotReloadCapabilitiesAsync(hotReloadCapabilitiesTask, reporter);
+            var hotReloadService = new WatchHotReloadService(workspace.Services, await hotReloadCapabilitiesTask);
+
             await hotReloadService.StartSessionAsync(currentSolution, cancellationToken);
 
             // Read the documents to memory
@@ -64,6 +76,24 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             taskCompletionSource.TrySetResult((currentSolution, hotReloadService));
+        }
+
+        private static async Task<ImmutableArray<string>> GetHotReloadCapabilitiesAsync(Task<ImmutableArray<string>> hotReloadCapabilitiesTask, IReporter reporter)
+        {
+            try
+            {
+                var capabilities = await hotReloadCapabilitiesTask;
+                reporter.Verbose($"Hot reload capabilities: {string.Join(" ", capabilities)}.");
+
+                return capabilities;
+            }
+            catch (Exception ex)
+            {
+                reporter.Verbose("Reading hot reload capabilities failed. Using default capabilities.");
+                reporter.Verbose(ex.ToString());
+
+                return ImmutableArray.Create("Baseline", "AddDefinitionToExistingType", "NewTypeDefinition");
+            }
         }
     }
 }

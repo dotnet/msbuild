@@ -55,7 +55,16 @@ namespace Microsoft.DotNet.Watcher.Tools
                 _currentSolution = null;
             }
 
-            _initializeTask = Task.Run(() => CompilationWorkspaceProvider.CreateWorkspaceAsync(context.FileSet.Project.ProjectPath, _reporter, cancellationToken), cancellationToken);
+            _initializeTask = Task.Run(async () =>
+            {
+                var (solution, service) = await CompilationWorkspaceProvider.CreateWorkspaceAsync(
+                    context.FileSet.Project.ProjectPath,
+                    _deltaApplier.GetApplyUpdateCapabilitiesAsync(context, cancellationToken),
+                    _reporter,
+                    cancellationToken);
+
+                return (solution, service);
+            }, cancellationToken);
 
             return;
         }
@@ -273,6 +282,6 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
         }
 
-        
+
     }
 }

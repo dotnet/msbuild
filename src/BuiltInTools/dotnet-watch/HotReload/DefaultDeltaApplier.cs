@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -20,7 +20,8 @@ namespace Microsoft.DotNet.Watcher.Tools
     {
         private static readonly string _namedPipeName = Guid.NewGuid().ToString();
         private readonly IReporter _reporter;
-        private Task _task;
+        private Task _connectionTask;
+        private Task<ImmutableArray<string>> _capabilities;
         private NamedPipeServerStream _pipe;
 
         public DefaultDeltaApplier(IReporter reporter)
@@ -35,7 +36,25 @@ namespace Microsoft.DotNet.Watcher.Tools
             if (!SuppressNamedPipeForTests)
             {
                 _pipe = new NamedPipeServerStream(_namedPipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-                _task = _pipe.WaitForConnectionAsync(cancellationToken);
+                _connectionTask = _pipe.WaitForConnectionAsync(cancellationToken);
+
+                _capabilities = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _connectionTask;
+                        // When the client connects, the first payload it sends is the initialization payload which includes the apply capabilities.
+                        var capabiltiies = ClientInitializationPayload.Read(_pipe).Capabilities;
+                        _reporter.Verbose($"Application supports the following capabilities {capabiltiies}.");
+                        return capabiltiies.Split(' ').ToImmutableArray();
+                    }
+                    catch
+                    {
+                        // Do nothing. This is awaited by Apply which will surface the error.
+                    }
+
+                    return ImmutableArray<string>.Empty;
+                });
             }
 
             if (context.Iteration == 0)
@@ -47,13 +66,15 @@ namespace Microsoft.DotNet.Watcher.Tools
                 context.ProcessSpec.EnvironmentVariables["DOTNET_MODIFIABLE_ASSEMBLIES"] = "debug";
                 context.ProcessSpec.EnvironmentVariables["DOTNET_HOTRELOAD_NAMEDPIPE_NAME"] = _namedPipeName;
             }
-
             return default;
         }
 
+        public Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesAsync(DotNetWatchContext context, CancellationToken cancellationToken)
+            => _capabilities;
+
         public async ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
         {
-            if (!_task.IsCompletedSuccessfully || !_pipe.IsConnected)
+            if (!_connectionTask.IsCompletedSuccessfully || !_pipe.IsConnected)
             {
                 // The client isn't listening
                 _reporter.Verbose("No client connected to receive delta updates.");

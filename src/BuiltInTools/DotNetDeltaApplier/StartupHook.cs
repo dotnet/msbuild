@@ -3,6 +3,7 @@
 
 using System;
 using System.IO.Pipes;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.HotReload;
 
@@ -46,6 +47,10 @@ internal sealed class StartupHook
             return;
         }
 
+        var initPayload = new ClientInitializationPayload { Capabilities = GetApplyUpdateCapabilities() };
+        Log("Writing capabilities: " + initPayload.Capabilities);
+        initPayload.Write(pipeClient);
+
         while (pipeClient.IsConnected)
         {
             var update = await UpdatePayload.ReadAsync(pipeClient, default);
@@ -56,6 +61,16 @@ internal sealed class StartupHook
 
         }
         Log("Stopped received delta updates. Server is no longer connected.");
+    }
+
+    private static string GetApplyUpdateCapabilities()
+    {
+        var method = typeof(System.Reflection.Metadata.AssemblyExtensions).GetMethod("GetApplyUpdateCapabilities", BindingFlags.NonPublic | BindingFlags.Static);
+        if (method is null)
+        {
+            return string.Empty;
+        }
+        return (string)method.Invoke(obj: null, parameters: null)!;
     }
 
     private static void Log(string message)

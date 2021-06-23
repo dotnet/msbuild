@@ -37,7 +37,8 @@ setTimeout(async function () {
         'UpdateStaticFile': () => updateStaticFile(payload.path),
         'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.deltas),
         'HotReloadDiagnosticsv1': () => displayDiagnostics(payload.diagnostics),
-        'AspNetCoreHotReloadApplied': () => aspnetCoreHotReloadApplied(),
+        'BlazorRequestApplyUpdateCapabilities': getBlazorWasmApplyUpdateCapabilities,
+        'AspNetCoreHotReloadApplied': () => aspnetCoreHotReloadApplied()
       };
 
       if (payload.type && action.hasOwnProperty(payload.type)) {
@@ -81,6 +82,16 @@ setTimeout(async function () {
     [...document.querySelectorAll('link')]
       .filter(l => l.baseURI === document.baseURI)
       .forEach(e => updateCssElement(e));
+  }
+
+  function getBlazorWasmApplyUpdateCapabilities() {
+    let applyUpdateCapabilities;
+    try {
+      applyUpdateCapabilities = window.Blazor._internal.getApplyUpdateCapabilities();
+    } catch {
+      applyUpdateCapabilities = '';
+    }
+    connection.send(applyUpdateCapabilities);
   }
 
   function updateCssElement(styleElement) {

@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return Task.CompletedTask;
             }
 
-            _reporter.Output("Hot reload suspended. To continue hot reload, press \"Ctrl + R\".");
+            _reporter.Output("Hot reload suspended. To continue hot reload, press \"Ctrl + Shift + R\".");
 
             return Task.Delay(-1, cancellationToken);
         }

@@ -29,13 +29,15 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web);
         private readonly List<WebSocket> _clientSockets = new();
         private readonly IReporter _reporter;
-        private readonly TaskCompletionSource _taskCompletionSource;
+        private readonly TaskCompletionSource _terminateWebSocket;
+        private readonly TaskCompletionSource _clientConnected;
         private IHost _refreshServer;
 
         public BrowserRefreshServer(IReporter reporter)
         {
             _reporter = reporter;
-            _taskCompletionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _terminateWebSocket = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _clientConnected = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         }
 
         public async ValueTask<IEnumerable<string>> StartAsync(CancellationToken cancellationToken)
@@ -99,8 +101,11 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
 
             _clientSockets.Add(await context.WebSockets.AcceptWebSocketAsync());
-            await _taskCompletionSource.Task;
+            _clientConnected.TrySetResult();
+            await _terminateWebSocket.Task;
         }
+
+        public Task WaitForClientConnectionAsync(CancellationToken cancellationToken) => _clientConnected.Task.WaitAsync(cancellationToken);
 
         public ValueTask SendJsonSerlialized<TValue>(TValue value, CancellationToken cancellationToken = default)
         {
@@ -146,7 +151,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 _refreshServer.Dispose();
             }
 
-            _taskCompletionSource.TrySetResult();
+            _terminateWebSocket.TrySetResult();
         }
 
         public async ValueTask<ValueWebSocketReceiveResult?> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)

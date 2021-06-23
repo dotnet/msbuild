@@ -99,4 +99,32 @@ namespace Microsoft.Extensions.HotReload
         Failed = -1,
         Success = 0,
     }
+
+    internal readonly struct ClientInitializationPayload
+    {
+        private const byte Version = 0;
+
+        public string Capabilities { get; init; }
+
+        public void Write(Stream stream)
+        {
+            using var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            binaryWriter.Write(Version);
+            binaryWriter.Write(Capabilities);
+            binaryWriter.Flush();
+        }
+
+        public static ClientInitializationPayload Read(Stream stream)
+        {
+            using var binaryReader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            var version = binaryReader.ReadByte();
+            if (version != Version)
+            {
+                throw new NotSupportedException($"Unsupported version {version}.");
+            }
+
+            var capabilities = binaryReader.ReadString();
+            return new ClientInitializationPayload { Capabilities = capabilities };
+        }
+    }
 }
