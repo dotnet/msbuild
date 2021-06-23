@@ -1781,11 +1781,17 @@ namespace Microsoft.Build.Execution
                 if (submission.BuildRequestData.GraphBuildOptions.Build)
                 {
                     var cacheServiceTask = Task.Run(() => SearchAndInitializeProjectCachePluginFromGraph(projectGraph));
-                    var targetListTask = Task.Run(() => projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames));
+                    var targetListTask = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
+
+                    DumpGraph(projectGraph, targetListTask);
 
                     using DisposablePluginService cacheService = cacheServiceTask.Result;
 
-                    resultsPerNode = BuildGraph(projectGraph, targetListTask.Result, submission.BuildRequestData);
+                    resultsPerNode = BuildGraph(projectGraph, targetListTask, submission.BuildRequestData);
+                }
+                else
+                {
+                    DumpGraph(projectGraph);
                 }
 
                 ErrorUtilities.VerifyThrow(
@@ -1848,6 +1854,18 @@ namespace Microsoft.Build.Execution
                 {
                     _overallBuildSuccess = false;
                 }
+            }
+
+            static void DumpGraph(ProjectGraph graph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetList = null)
+            {
+                if (Traits.Instance.DebugEngine is false)
+                {
+                    return;
+                }
+
+                var logPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_ProjectGraph.dot");
+
+                File.WriteAllText(logPath, graph.ToDot(targetList));
             }
         }
 
