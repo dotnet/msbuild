@@ -1653,7 +1653,7 @@ namespace Microsoft.Build.UnitTests
             "",
             "",
             "",
-            "^(?<FIXEDDIR>)(?<WILDCARDDIR>)(?<FILENAME>)$",
+            "^(?<WILDCARDDIR>)(?<FILENAME>)$",
             false,
             true
         )]
@@ -1723,7 +1723,7 @@ namespace Microsoft.Build.UnitTests
             "",
             @"*fo?ba?\",
             "*fo?ba?",
-            @"^(?<FIXEDDIR>)(?<WILDCARDDIR>[^/\\]*fo.ba.[/\\]+)(?<FILENAME>[^/\\]*fo.ba.)$",
+            @"^(?<WILDCARDDIR>[^/\\]*fo.ba.[/\\]+)(?<FILENAME>[^/\\]*fo.ba.)$",
             true,
             true
         )]
@@ -1733,7 +1733,7 @@ namespace Microsoft.Build.UnitTests
             "",
             "",
             "?oo*.",
-            @"^(?<FIXEDDIR>)(?<WILDCARDDIR>)(?<FILENAME>[^\.].oo[^\.]*)$",
+            @"^(?<WILDCARDDIR>)(?<FILENAME>[^\.].oo[^\.]*)$",
             false,
             true
         )]
@@ -1743,7 +1743,7 @@ namespace Microsoft.Build.UnitTests
             "",
             "",
             "*.*foo*.*",
-            @"^(?<FIXEDDIR>)(?<WILDCARDDIR>)(?<FILENAME>[^/\\]*foo[^/\\]*)$",
+            @"^(?<WILDCARDDIR>)(?<FILENAME>[^/\\]*foo[^/\\]*)$",
             false,
             true
         )]
@@ -1753,7 +1753,7 @@ namespace Microsoft.Build.UnitTests
             @"\foo///bar\\\",
             @"?foo///bar\\\",
             "foo",
-            @"^(?<FIXEDDIR>[/\\]+foo[/\\]+bar[/\\]+)(?<WILDCARDDIR>.foo[/\\]+bar[/\\]+)(?<FILENAME>foo)$",
+            @"^[/\\]+foo[/\\]+bar[/\\]+(?<WILDCARDDIR>.foo[/\\]+bar[/\\]+)(?<FILENAME>foo)$",
             true,
             true
         )]
@@ -1763,7 +1763,7 @@ namespace Microsoft.Build.UnitTests
             @"\./.\foo/.\./bar\./.\",
             @"?foo/.\./bar\./.\",
             "foo",
-            @"^(?<FIXEDDIR>[/\\]+foo[/\\]+bar[/\\]+)(?<WILDCARDDIR>.foo[/\\]+bar[/\\]+)(?<FILENAME>foo)$",
+            @"^[/\\]+foo[/\\]+bar[/\\]+(?<WILDCARDDIR>.foo[/\\]+bar[/\\]+)(?<FILENAME>foo)$",
             true,
             true
         )]
@@ -1773,7 +1773,7 @@ namespace Microsoft.Build.UnitTests
             @"foo\",
             @"**/**\bar/**\**/foo\**/**\",
             "bar",
-            @"^(?<FIXEDDIR>foo[/\\]+)(?<WILDCARDDIR>((.*/)|(.*\\)|())bar((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))foo((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/)))(?<FILENAME>bar)$",
+            @"^foo[/\\]+(?<WILDCARDDIR>((.*/)|(.*\\)|())bar((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))foo((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/)))(?<FILENAME>bar)$",
             true,
             true
         )]
@@ -1783,7 +1783,7 @@ namespace Microsoft.Build.UnitTests
             @"foo\\\.///",
             @"**\\\.///**\\\.///bar\\\.///**\\\.///**\\\.///foo\\\.///**\\\.///**\\\.///",
             "bar",
-            @"^(?<FIXEDDIR>foo[/\\]+)(?<WILDCARDDIR>((.*/)|(.*\\)|())bar((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))foo((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/)))(?<FILENAME>bar)$",
+            @"^foo[/\\]+(?<WILDCARDDIR>((.*/)|(.*\\)|())bar((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))foo((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/)))(?<FILENAME>bar)$",
             true,
             true
         )]
@@ -1821,7 +1821,7 @@ namespace Microsoft.Build.UnitTests
             @"$()+.[^{\",
             @"?$()+.[^{\",
             "$()+.[^{",
-            @"^(?<FIXEDDIR>\$\(\)\+\.\[\^\{[/\\]+)(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{)$",
+            @"^\$\(\)\+\.\[\^\{[/\\]+(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{)$",
             true,
             true
         )]
@@ -1831,7 +1831,7 @@ namespace Microsoft.Build.UnitTests
             @"\\\.\foo/",
             "",
             "bar",
-            @"^(?<FIXEDDIR>\\\\foo[/\\]+)(?<WILDCARDDIR>)(?<FILENAME>bar)$",
+            @"^\\\\foo[/\\]+(?<WILDCARDDIR>)(?<FILENAME>bar)$",
             false,
             true
         )]
@@ -1864,7 +1864,7 @@ namespace Microsoft.Build.UnitTests
             @"$()+.[^{|/",
             @"?$()+.[^{|/",
             "$()+.[^{|",
-            @"^(?<FIXEDDIR>\$\(\)\+\.\[\^\{\|[/\\]+)(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{\|[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{\|)$",
+            @"^\$\(\)\+\.\[\^\{\|[/\\]+(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{\|[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{\|)$",
             true,
             true
         )]
@@ -1874,7 +1874,7 @@ namespace Microsoft.Build.UnitTests
             @"///./foo/",
             "",
             "bar",
-            @"^(?<FIXEDDIR>[/\\]+foo[/\\]+)(?<WILDCARDDIR>)(?<FILENAME>bar)$",
+            @"^[/\\]+foo[/\\]+(?<WILDCARDDIR>)(?<FILENAME>bar)$",
             false,
             true
         )]
