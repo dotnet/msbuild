@@ -35,17 +35,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             if (left != null && right == null)
             {
-                AddDifference(left, DifferenceType.Removed, Resources.TypeExistsOnLeft);
+                differences.Add(CreateDifference(left, DiagnosticIds.TypeMustExist, DifferenceType.Removed, Resources.TypeExistsOnLeft));
             }
             else if (Settings.StrictMode && left == null && right != null)
             {
-                AddDifference(right, DifferenceType.Added, Resources.TypeExistsOnRight);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void AddDifference(ITypeSymbol symbol, DifferenceType type, string format)
-            {
-                differences.Add(new CompatDifference(DiagnosticIds.TypeMustExist, string.Format(format, symbol.ToDisplayString()), type, symbol));
+                differences.Add(CreateDifference(right, DiagnosticIds.TypeMustExist, DifferenceType.Added, Resources.TypeExistsOnRight));
             }
         }
 
@@ -58,23 +52,42 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             if (left != null && right == null)
             {
-                // Events and properties are handled via their accessors.
-                if (left.Kind == SymbolKind.Property || left.Kind == SymbolKind.Event)
-                    return;
-
-                if (left is IMethodSymbol method)
+                if (ShouldReportMissingMember(left))
                 {
-                    // Will be handled by a different rule
-                    if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
-                        return;
-
-                    // If method is an override or hides a base type definition removing it from right is compatible.
-                    if (method.IsOverride || FindMatchingOnBaseType(method))
-                        return;
+                    differences.Add(CreateDifference(left, DiagnosticIds.MemberMustExist, DifferenceType.Removed, Resources.MemberExistsOnLeft));
                 }
-
-                differences.Add(new CompatDifference(DiagnosticIds.MemberMustExist, string.Format(Resources.MemberExistsOnLeft, left.ToDisplayString()), DifferenceType.Removed, left));
             }
+            else if (Settings.StrictMode && left == null && right != null)
+            {
+                if (ShouldReportMissingMember(right))
+                {
+                    differences.Add(CreateDifference(right, DiagnosticIds.MemberMustExist, DifferenceType.Added, Resources.MemberExistsOnRight));
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private CompatDifference CreateDifference(ISymbol symbol, string id, DifferenceType type, string format) =>
+            new(id, string.Format(format, symbol.ToDisplayString()), type, symbol);
+
+        private bool ShouldReportMissingMember(ISymbol symbol)
+        {
+            // Events and properties are handled via their accessors.
+            if (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
+                return false;
+
+            if (symbol is IMethodSymbol method)
+            {
+                // Will be handled by a different rule
+                if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
+                    return false;
+
+                // If method is an override or hides a base type definition removing it from the comparing side is compatible.
+                if (method.IsOverride || FindMatchingOnBaseType(method))
+                    return false;
+            }
+
+            return true;
         }
 
         private bool FindMatchingOnBaseType(IMethodSymbol method)

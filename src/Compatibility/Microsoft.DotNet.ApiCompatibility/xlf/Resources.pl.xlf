@@ -37,6 +37,11 @@
         <target state="new">Member '{0}' exists on the left but not on the right</target>
         <note />
       </trans-unit>
+      <trans-unit id="MemberExistsOnRight">
+        <source>Member '{0}' exists on the right but not on the left</source>
+        <target state="new">Member '{0}' exists on the right but not on the left</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
         <source>Could not find the provided path '{0}' to load binaries from.</source>
         <target state="new">Could not find the provided path '{0}' to load binaries from.</target>
