@@ -67,4 +67,5 @@
 # Compatibility tools owned by runtime team
 # Area-Compatibility
 /src/Compatibility/ @Anipik, @safern, @ericstj
-/src/Tests/Microsoft.DotNet.ApiCompatibility/ @Anipik, @safern, @ericstj
+/src/Tests/Microsoft.DotNet.ApiCompatibility.Tests/ @Anipik, @safern, @ericstj
+/src/Tests/Microsoft.DotNet.PackageValidation.Tests/ @Anipik, @safern, @ericstj

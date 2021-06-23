@@ -38,13 +38,14 @@ namespace Microsoft.NET.TestFramework
             [CallerMemberName] string callingMethod = "",
             [CallerFilePath] string callerFilePath = null,
             string identifier = "",
-            string testAssetSubdirectory = "")
+            string testAssetSubdirectory = "",
+            bool allowCopyIfPresent = false)
         {
             var testProjectDirectory = GetAndValidateTestProjectDirectory(testProjectName, testAssetSubdirectory);
 
             var fileName = Path.GetFileNameWithoutExtension(callerFilePath);
             var testDestinationDirectory =
-                GetTestDestinationDirectoryPath(testProjectName, callingMethod + "_" + fileName, identifier);
+                GetTestDestinationDirectoryPath(testProjectName, callingMethod + "_" + fileName, identifier, allowCopyIfPresent);
             TestDestinationDirectories.Add(testDestinationDirectory);
 
             var testAsset = new TestAsset(testProjectDirectory, testDestinationDirectory, TestContext.Current.SdkVersion, Log);
@@ -112,7 +113,8 @@ namespace Microsoft.NET.TestFramework
         public static string GetTestDestinationDirectoryPath(
             string testProjectName,
             string callingMethodAndFileName,
-            string identifier)
+            string identifier,
+            bool allowCopyIfPresent = false)
         {
             string baseDirectory = TestContext.Current.TestExecutionDirectory;
             var directoryName = new StringBuilder(callingMethodAndFileName).Append(identifier);
@@ -141,7 +143,7 @@ namespace Microsoft.NET.TestFramework
 
             var directoryPath = Path.Combine(baseDirectory, directoryName.ToString());
 #if CI_BUILD
-            if (Directory.Exists(directoryPath))
+            if (!allowCopyIfPresent && Directory.Exists(directoryPath))
             {
                 throw new Exception($"Test dir {directoryPath} already exists");
             }

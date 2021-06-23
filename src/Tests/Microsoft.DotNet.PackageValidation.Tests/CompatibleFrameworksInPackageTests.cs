@@ -22,9 +22,10 @@ namespace Microsoft.DotNet.PackageValidation.Tests
         [Fact]
         public void CompatibleFrameworksInPackage()
         {
+            string name = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
             TestProject testProject = new()
             {
-                Name = "TestPackage",
+                Name = name,
                 TargetFrameworks = "netstandard2.0;net5.0",
             };
 
@@ -39,7 +40,6 @@ namespace PackageValidationTests
 #endif
     }
 }";
-
             testProject.SourceFiles.Add("Hello.cs", sourceCode);
             TestAsset asset = _testAssetsManager.CreateTestProject(testProject, testProject.Name);
             PackCommand packCommand = new PackCommand(Log, Path.Combine(asset.TestRoot, testProject.Name));
@@ -55,9 +55,10 @@ namespace PackageValidationTests
         [Fact]
         public void MultipleCompatibleFrameworksInPackage()
         {
+            string name = Path.GetFileNameWithoutExtension(Path.GetTempFileName());
             TestProject testProject = new()
             {
-                Name = "TestPackageMupltiple",
+                Name = name,
                 TargetFrameworks = "netstandard2.0;netcoreapp3.1;net5.0",
             };
 

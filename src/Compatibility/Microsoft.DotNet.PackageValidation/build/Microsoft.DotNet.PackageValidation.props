@@ -2,6 +2,6 @@
 <Project>
   <PropertyGroup>
     <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)..\tools\net472\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
-    <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\net6.0\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
+    <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)..\tools\netcoreapp3.1\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
   </PropertyGroup>
 </Project>

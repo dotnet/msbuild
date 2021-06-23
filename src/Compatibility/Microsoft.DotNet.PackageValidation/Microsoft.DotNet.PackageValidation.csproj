@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>

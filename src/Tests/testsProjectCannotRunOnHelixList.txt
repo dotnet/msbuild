@@ -9,3 +9,4 @@ dotnet.Tests
 msbuild.Integration.Tests
 dotnet-sln.Tests
 Microsoft.NET.Sdk.Publish.Tasks.Tests
+Microsoft.DotNet.PackageValidation.Tests

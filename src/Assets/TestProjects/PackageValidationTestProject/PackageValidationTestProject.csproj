@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <DefineConstants Condition="'$(ForceValidationProblem)' == 'true'">$(DefineConstants);ForceValidationProblem</DefineConstants>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildProjectDirectory)\..\..\..\..\src\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" />
+    <PackageReference Include="NuGet.Frameworks" Version="6.0.0-preview.1.66" />
+    <PackageReference Include="NuGet.Packaging" Version="6.0.0-preview.1.66" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.0-1.21277.15" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildProjectDirectory)\..\..\..\..\src\Compatibility\Microsoft.DotNet.PackageValidation\build\Microsoft.DotNet.PackageValidation.targets" />
+  
+  <PropertyGroup>
+    <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\netstandard2.0\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
+    <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\net6.0\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
+  </PropertyGroup>
+
+</Project>
