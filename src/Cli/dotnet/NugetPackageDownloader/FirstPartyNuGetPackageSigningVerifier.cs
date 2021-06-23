@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,13 +12,18 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.Packaging.Signing;
+using HashAlgorithmName = System.Security.Cryptography.HashAlgorithmName;
 
 namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
     internal class FirstPartyNuGetPackageSigningVerifier : IFirstPartyNuGetPackageSigningVerifier
     {
-        private const string FirstPartyCertificateThumbprint = "F404000FB11E61F446529981C7059A76C061631E";
-        private const string UpperFirstPartyCertificateThumbprint = "92C1588E85AF2201CE7915E8538B492F605B80C6";
+        private readonly HashSet<string> _firstPartyCertificateThumbprints =
+            new() {"3F9001EA83C560D712C24CF213C3D312CB3BFF51EE89435D3430BD06B5D0EECE"};
+
+        private readonly HashSet<string> _upperFirstPartyCertificateThumbprints =
+            new() {"51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862"};
+
         private const string FirstPartyCertificateSubject =
             "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US";
 
@@ -27,7 +33,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public FirstPartyNuGetPackageSigningVerifier(DirectoryPath? tempDirectory = null, ILogger logger = null)
         {
             _tempDirectory = tempDirectory ?? new DirectoryPath(Path.GetTempPath());
-            _logger = new NullLogger();
+            _logger = logger ?? new NullLogger();
         }
 
         public bool Verify(FilePath nupkgToVerify, out string commandOutput)
@@ -35,7 +41,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             return NuGetVerify(nupkgToVerify, out commandOutput) && IsFirstParty(nupkgToVerify);
         }
 
-        private bool IsFirstParty(FilePath nupkgToVerify)
+        internal bool IsFirstParty(FilePath nupkgToVerify)
         {
             var packageReader = new PackageArchiveReader(nupkgToVerify.Value);
             Directory.CreateDirectory(_tempDirectory.Value);
@@ -53,14 +59,16 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 }
 
                 X509Certificate2 firstCert = certificateChain.First();
-                if (firstCert.Thumbprint.Equals(FirstPartyCertificateThumbprint, StringComparison.OrdinalIgnoreCase))
+                if (_firstPartyCertificateThumbprints.Contains(firstCert.GetCertHashString(HashAlgorithmName.SHA256),
+                    StringComparer.OrdinalIgnoreCase))
                 {
                     return true;
                 }
 
                 if (firstCert.Subject.Equals(FirstPartyCertificateSubject, StringComparison.OrdinalIgnoreCase)
-                    && certificateChain[1].Thumbprint.Equals(UpperFirstPartyCertificateThumbprint,
-                        StringComparison.OrdinalIgnoreCase))
+                    && _upperFirstPartyCertificateThumbprints.Contains(
+                        certificateChain[1].GetCertHashString(HashAlgorithmName.SHA256),
+                        StringComparer.OrdinalIgnoreCase))
                 {
                     return true;
                 }
