@@ -43,31 +43,36 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        '$(AnalysisLevelPrefix)' != ''">$(AnalysisLevelPrefix)</EffectiveAnalysisLevel>
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
                                        '$(AnalysisLevel)' != ''">$(AnalysisLevel)</EffectiveAnalysisLevel>
+  </PropertyGroup>
+
+  <!-- Enable Analyzers based on EffectiveAnalysisLevel -->
+  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' != '' And
+                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">
 
     <!-- EnableNETAnalyzers Allows analyzers to be disabled in bulk via msbuild if the user wants to -->
-    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == '' And
-                                   '$(EffectiveAnalysisLevel)' != '' And
-                                    $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">true</EnableNETAnalyzers>
-    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">true</EnableNETAnalyzers>
 
     <!-- Intermediate step to enable ILLink.Analyzers so ILLink, Blazor, Xamarin, AOT, etc. can enable the same flags -->
     <EnableSingleFileAnalyzer Condition="'$(EnableSingleFileAnalyzer)' == '' And
                                          '$(PublishSingleFile)' == 'true'">true</EnableSingleFileAnalyzer>
+
     <EnableTrimAnalyzer Condition="'$(EnableTrimAnalyzer)' == '' And
                                    ('$(IsTrimmable)' == 'true' Or '$(PublishTrimmed)' == 'true')">true</EnableTrimAnalyzer>
 
-    <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
-    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
-
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
-    <WarningLevel Condition="'$(Language)' == 'C#' And
-                             '$(EffectiveAnalysisLevel)' != '' And
-                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '5.0'))">5</WarningLevel>
-    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
-    <WarningLevel Condition="'$(Language)' == 'C#' And
-                             '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
+    <WarningLevel Condition="'$(Language)' == 'C#'">5</WarningLevel>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableNETAnalyzers Condition="'$(EnableNETAnalyzers)' == ''">false</EnableNETAnalyzers>
+
+    <!-- EnforceCodeStyleInBuild Allows code style analyzers to be disabled in bulk via msbuild if the user wants to -->
+    <EnforceCodeStyleInBuild Condition="'$(EnforceCodeStyleInBuild)' == ''">false</EnforceCodeStyleInBuild>
+    <!-- If the user specified 'preview' we want to pick a very high warning level to opt into the highest possible warning wave -->
+    <WarningLevel Condition="'$(Language)' == 'C#' And '$(AnalysisLevel)' == 'preview'">9999</WarningLevel>
+  </PropertyGroup>
+
   <!-- Unconditionally import 'Microsoft.CodeAnalysis.NetAnalyzers.props' for all C# and VB projects for supporting https://github.com/dotnet/roslyn-analyzers/issues/3977 -->
   <Import Project="$(MSBuildThisFileDirectory)..\analyzers\build\Microsoft.CodeAnalysis.NetAnalyzers.props"
           Condition="'$(Language)' == 'C#' Or '$(Language)' == 'VB'" />
@@ -89,9 +94,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Analyzer
       Include="$(MSBuildThisFileDirectory)..\analyzers\Microsoft.CodeAnalysis.NetAnalyzers.dll"
       IsImplicitlyDefined="true" />
-    <!-- ILLinker Analyzers -->
+  </ItemGroup>
+
+  <!-- ILLinker Analyzers -->
+  <ItemGroup Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'">
     <Analyzer
-      Condition="'$(EnableSingleFileAnalyzer)' == 'true' Or '$(EnableTrimAnalyzer)' == 'true'"
       Include="$(MSBuildThisFileDirectory)..\analyzers\ILLink.*.dll"
       IsImplicitlyDefined="true" />
   </ItemGroup>

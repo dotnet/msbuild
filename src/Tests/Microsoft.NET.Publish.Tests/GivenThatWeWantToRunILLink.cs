@@ -465,6 +465,7 @@ namespace Microsoft.NET.Publish.Tests
             var testProject = CreateTestProjectWithAnalysisWarnings(targetFramework, projectName);
             testProject.AdditionalProperties["EnableTrimAnalyzer"] = "true";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
+            testProject.AdditionalProperties["EnableNETAnalyzers"] = "false";
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
@@ -1143,8 +1144,7 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true", "/p:SuppressTrimAnalysisWarnings=false",
                                     "/p:AnalysisLevel=0.0")
-                .Should().Pass()
-                .And.NotHaveStdOutMatching(@"warning IL\d\d\d\d");
+                .Should().Pass().And.NotHaveStdOutMatching(@"warning IL\d\d\d\d");
         }
 
         [RequiresMSBuildVersionTheory("16.8.0")]
