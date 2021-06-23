@@ -172,7 +172,7 @@ namespace Microsoft.Build.CommandLine
             // We don't know what the current build thinks this variable should be until RunTask(), but as a fallback in case there are
             // communications before we get the configuration set up, just go with what was already in the environment from when this node
             // was initially launched.
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
+            _debugCommunications = Traits.Instance.DebugNodeCommunication;
 
             _receivedPackets = new Queue<INodePacket>();
 
