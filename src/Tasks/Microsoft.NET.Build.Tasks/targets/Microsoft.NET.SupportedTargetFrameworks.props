@@ -15,46 +15,46 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project>
     <!-- .NET Core App -->
     <ItemGroup>
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v1.0" DisplayName=".NET Core 1.0" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v1.1" DisplayName=".NET Core 1.1" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v2.0" DisplayName=".NET Core 2.0" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v2.1" DisplayName=".NET Core 2.1" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v2.2" DisplayName=".NET Core 2.2" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.0" DisplayName=".NET Core 3.0" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.1" DisplayName=".NET Core 3.1" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v5.0" DisplayName=".NET 5.0" />
-        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v6.0" DisplayName=".NET 6.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v1.0" DisplayName=".NET Core 1.0" Alias="netcoreapp1.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v1.1" DisplayName=".NET Core 1.1" Alias="netcoreapp1.1" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v2.0" DisplayName=".NET Core 2.0" Alias="netcoreapp2.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v2.1" DisplayName=".NET Core 2.1" Alias="netcoreapp2.1" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v2.2" DisplayName=".NET Core 2.2" Alias="netcoreapp2.2" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.0" DisplayName=".NET Core 3.0" Alias="netcoreapp3.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v3.1" DisplayName=".NET Core 3.1" Alias="netcoreapp3.1" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v5.0" DisplayName=".NET 5.0" Alias="net5.0" />
+        <SupportedNETCoreAppTargetFramework Include=".NETCoreApp,Version=v6.0" DisplayName=".NET 6.0" Alias="net6.0" />
     </ItemGroup>
 
     <!-- .NET Standard -->
     <ItemGroup>
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.0" DisplayName=".NET Standard 1.0" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.1" DisplayName=".NET Standard 1.1" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.2" DisplayName=".NET Standard 1.2" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.3" DisplayName=".NET Standard 1.3" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.4" DisplayName=".NET Standard 1.4" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.5" DisplayName=".NET Standard 1.5" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.6" DisplayName=".NET Standard 1.6" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v2.0" DisplayName=".NET Standard 2.0" />
-        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v2.1" DisplayName=".NET Standard 2.1" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.0" DisplayName=".NET Standard 1.0" Alias="netstandard1.0" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.1" DisplayName=".NET Standard 1.1" Alias="netstandard1.1" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.2" DisplayName=".NET Standard 1.2" Alias="netstandard1.2" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.3" DisplayName=".NET Standard 1.3" Alias="netstandard1.3" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.4" DisplayName=".NET Standard 1.4" Alias="netstandard1.4" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.5" DisplayName=".NET Standard 1.5" Alias="netstandard1.5" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v1.6" DisplayName=".NET Standard 1.6" Alias="netstandard1.6" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v2.0" DisplayName=".NET Standard 2.0" Alias="netstandard2.0" />
+        <SupportedNETStandardTargetFramework Include=".NETStandard,Version=v2.1" DisplayName=".NET Standard 2.1" Alias="netstandard2.1" />
     </ItemGroup>
 
     <!-- .NET Framework -->
     <ItemGroup>
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v2.0"   DisplayName=".NET Framework 2.0" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v3.0"   DisplayName=".NET Framework 3.0" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v3.5"   DisplayName=".NET Framework 3.5" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.0"   DisplayName=".NET Framework 4.0" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5"   DisplayName=".NET Framework 4.5" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5.1" DisplayName=".NET Framework 4.5.1" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5.2" DisplayName=".NET Framework 4.5.2" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6"   DisplayName=".NET Framework 4.6" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6.1" DisplayName=".NET Framework 4.6.1" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6.2" DisplayName=".NET Framework 4.6.2" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7"   DisplayName=".NET Framework 4.7" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.1" DisplayName=".NET Framework 4.7.1" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.2" DisplayName=".NET Framework 4.7.2" />
-        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.8"   DisplayName=".NET Framework 4.8" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v2.0"   DisplayName=".NET Framework 2.0" Alias="net20" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v3.0"   DisplayName=".NET Framework 3.0" Alias="net30" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v3.5"   DisplayName=".NET Framework 3.5" Alias="net35" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.0"   DisplayName=".NET Framework 4.0" Alias="net40" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5"   DisplayName=".NET Framework 4.5" Alias="net45" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5.1" DisplayName=".NET Framework 4.5.1" Alias="net451" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.5.2" DisplayName=".NET Framework 4.5.2" Alias="net452" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6"   DisplayName=".NET Framework 4.6" Alias="net46" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6.1" DisplayName=".NET Framework 4.6.1" Alias="net461" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.6.2" DisplayName=".NET Framework 4.6.2" Alias="net462" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7"   DisplayName=".NET Framework 4.7" Alias="net47" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.1" DisplayName=".NET Framework 4.7.1" Alias="net471" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.7.2" DisplayName=".NET Framework 4.7.2" Alias="net472" />
+        <SupportedNETFrameworkTargetFramework Include=".NETFramework,Version=v4.8"   DisplayName=".NET Framework 4.8" Alias="net48" />
     </ItemGroup>
 
     <!-- All supported target frameworks -->
