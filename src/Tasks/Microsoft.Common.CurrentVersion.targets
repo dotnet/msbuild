@@ -1737,6 +1737,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
 
+    <Warning Condition="'%(_ProjectReferencePlatformPossibilities.PlatformOptions)' == ''" 
+           Text="EnableDynamicPlatformResolution is enabled, but '%(_ProjectReferencePlatformPossibilities.Identity)' has no 'Platforms' set. It will be built without a specified platform."/>
+
     <GetNearestPlatformTask AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
                             ParentProjectPlatform="$(ParentPlatform)"
                             PlatformLookupTable="$(PlatformLookupTable);%(_ProjectReferencePlatformPossibilities.PlatformLookupTable)"
