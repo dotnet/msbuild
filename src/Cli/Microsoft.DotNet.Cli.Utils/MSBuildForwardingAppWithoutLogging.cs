@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _argsToForward = argsToForward;
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
-            if (DoNotUseMSBUILDNOINPROCNODE)
+            if (UseMSBUILDNOINPROCNODE)
             {
                 // Force MSBuild to use external working node long living process for building projects
                 // We also refers to this as MSBuild Server V1 as entry process forwards most of the work to it.
