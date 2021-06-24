@@ -170,7 +170,8 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
                 .Execute($"--project", projectFile)
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
         [Fact]
@@ -186,7 +187,25 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
                 .Execute("--project", testProjectDirectory)
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
+        }
+
+        [Fact]
+        public void ItWarnsWhenShortFormOfProjectArgumentIsUsed()
+        {
+            var testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var projectFile = Path.Combine(testInstance.Path, testAppName + ".csproj");
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(Directory.GetParent(testInstance.Path).FullName)
+                .Execute($"-p", projectFile)
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.HaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
         [Fact]

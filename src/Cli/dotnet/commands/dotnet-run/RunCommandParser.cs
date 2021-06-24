@@ -15,7 +15,12 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
 
-        public static readonly Option ProjectOption = new Option<string>(new string[] { "-p", "--project" }, LocalizableStrings.CommandOptionProjectDescription);
+        public static readonly Option ProjectOption = new Option<string>("--project", LocalizableStrings.CommandOptionProjectDescription);
+
+        public static readonly Option ProjectOptionShort = new Option<string>("-p", LocalizableStrings.CommandOptionProjectDescription)
+        {
+            IsHidden = true
+        };
 
         public static readonly Option LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription);
 
@@ -35,6 +40,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FrameworkOption);
             command.AddOption(RuntimeOption);
             command.AddOption(ProjectOption);
+            command.AddOption(ProjectOptionShort);
             command.AddOption(LaunchProfileOption);
             command.AddOption(NoLaunchProfileOption);
             command.AddOption(NoBuildOption);

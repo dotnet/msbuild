@@ -36,7 +36,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             string[] dotnetRootPaths;
             if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
             {
-                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.DirectorySeparatorChar).Append(dotnetRootPath).ToArray();
+                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.PathSeparator).Append(dotnetRootPath).ToArray();
             }
             else
             {
@@ -61,7 +61,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             string[] dotnetRootPaths;
             if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
             {
-                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.DirectorySeparatorChar).Append(dotnetRootPath).ToArray();
+                dotnetRootPaths = packRootEnvironmentVariable.Split(Path.PathSeparator).Append(dotnetRootPath).ToArray();
             }
             else
             {

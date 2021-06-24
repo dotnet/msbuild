@@ -640,6 +640,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1071: PackageReference na balíček {0} určuje verzi {1}. Určení verze tohoto balíčku se nedoporučuje. Další informace najdete na adrese https://aka.ms/sdkimplicitrefs.</target>
         <note>{StrBegin="NETSDK1071: "}</note>
       </trans-unit>
+      <trans-unit id="PlaceholderRunCommandProjectAbbreviationDeprecated">
+        <source>NETSDK1174: Placeholder</source>
+        <target state="new">NETSDK1174: Placeholder</target>
+        <note>{StrBegin="NETSDK1174: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</note>
+      </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
         <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
         <target state="translated">NETSDK1011: Prostředky se používají z projektu {0}, ale v {1} se nenašla odpovídající cesta k projektu MSBuild.</target>
