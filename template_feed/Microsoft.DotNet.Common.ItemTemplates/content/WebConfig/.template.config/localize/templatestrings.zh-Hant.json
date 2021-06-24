@@ -2,5 +2,5 @@
   "author": "Microsoft",
   "name": "Web Config",
   "description": "用來設定 Web 應用程式設定的檔案",
-  "postActions/open-file/description": "Opens web.config in the editor"
+  "postActions/open-file/description": "在編輯器中開啟 web.config"
 }

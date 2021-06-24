@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Web Config",
+  "name": "웹 구성",
   "description": "웹 애플리케이션 설정을 구성하는 데 사용되는 파일입니다.",
-  "postActions/open-file/description": "Opens web.config in the editor"
+  "postActions/open-file/description": "편집기에서 web.config를 엽니다"
 }
