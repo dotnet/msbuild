@@ -1,14 +1,14 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Simple Console Application",
-  "description": "A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.",
-  "symbols/framework/description": "The target framework for the project.",
-  "symbols/framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/no-restore/description": "If specified, skips the automatic restore of the project on create.",
-  "symbols/nullable/description": "Whether to enable nullable reference types for this project.",
-  "symbols/target-framework-override/description": "Overrides the target framework",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "name": "Aplicativo de Console Simples",
+  "description": "Um projeto para criar um aplicativo de linha de comando que usa os recursos C# mais recentes e é executado no .NET Core no Windows, Linux e macOS.",
+  "symbols/framework/description": "A estrutura de destino do projeto.",
+  "symbols/framework/choices/net6.0/description": "Net6.0 de destino",
+  "symbols/langVersion/description": "Definir a propriedade LangVersion no arquivo do projeto criado",
+  "symbols/no-restore/description": "Se especificado, ignora a restauração automática do projeto em criação.",
+  "symbols/nullable/description": "Se os tipos de referência que permitem valor nulo devem ser habilitados para este projeto.",
+  "symbols/target-framework-override/description": "Substitui a estrutura de destino",
+  "postActions/restore/description": "Restaure os pacotes NuGet exigidos por este projeto.",
+  "postActions/restore/manualInstructions/default/text": "Executar 'dotnet restore'",
+  "postActions/open-file/description": "Abre Program.cs no editor"
 }

@@ -1,14 +1,14 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Simple Console Application",
-  "description": "A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.",
-  "symbols/framework/description": "The target framework for the project.",
-  "symbols/framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/no-restore/description": "If specified, skips the automatic restore of the project on create.",
-  "symbols/nullable/description": "Whether to enable nullable reference types for this project.",
-  "symbols/target-framework-override/description": "Overrides the target framework",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "name": "Einfache Konsolenanwendung",
+  "description": "Ein Projekt zum Erstellen einer Befehlszeilenanwendung, die die neuesten C#-Features verwendet und auf „.NET Core“ unter Windows, Linux und macOS ausgeführt wird.",
+  "symbols/framework/description": "Das Zielframework für das Projekt.",
+  "symbols/framework/choices/net6.0/description": "Auf „net6.0“ abzielen",
+  "symbols/langVersion/description": "Legt die „LangVersion“-Eigenschaft in der erstellten Projektdatei fest",
+  "symbols/no-restore/description": "Wenn angegeben, wird die automatische Wiederherstellung des Projekts beim Erstellen übersprungen.",
+  "symbols/nullable/description": "Ob Nullwerte zulassende Verweistypen für dieses Projekt aktiviert werden sollen.",
+  "symbols/target-framework-override/description": "Überschreibt das Zielframework",
+  "postActions/restore/description": "„NuGet-Pakete“ wiederherstellen, die für dieses Projekt erforderlich sind.",
+  "postActions/restore/manualInstructions/default/text": "„dotnet restore“ ausführen",
+  "postActions/open-file/description": "Öffnet „Program.cs“ im Editor."
 }

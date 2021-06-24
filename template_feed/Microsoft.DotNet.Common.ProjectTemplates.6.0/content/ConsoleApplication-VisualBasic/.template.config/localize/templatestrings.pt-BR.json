@@ -1,7 +1,7 @@
 ﻿{
   "author": "Microsoft",
   "name": "Console Application",
-  "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
+  "description": "Um projeto para criar um aplicativo de linha de comando que pode ser executado no .NET Core no Windows, Linux e macOS",
   "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
   "symbols/Framework/description": "The target framework for the project.",
   "symbols/Framework/choices/net6.0/description": "Target net6.0",

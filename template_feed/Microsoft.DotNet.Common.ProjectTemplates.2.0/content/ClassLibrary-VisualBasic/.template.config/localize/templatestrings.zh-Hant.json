@@ -1,7 +1,7 @@
 ﻿{
   "author": "Microsoft",
   "name": "Class Library",
-  "description": "A project for creating a class library that targets .NET Standard or .NET Core",
+  "description": "專案，用於建立以 .NET Standard 或 .NET Core 為目標的類別庫",
   "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
   "symbols/Framework/description": "The target framework for the project.",
   "symbols/Framework/choices/netcoreapp2.0/description": "Target netcoreapp2.0",

@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
   "name": "Web Config",
-  "description": "A file used to configure Web Application settings",
+  "description": "Archivo utilizado para configurar valores de aplicaciones web",
   "postActions/open-file/description": "Opens web.config in the editor"
 }

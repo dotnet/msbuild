@@ -1,13 +1,13 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
-  "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp2.1/description": "Target netcoreapp2.1",
-  "symbols/langVersion/description": "Sets langVersion in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "name": "Konsolenanwendung",
+  "description": "Ein Projekt zum Erstellen einer Befehlszeilenanwendung, die mit .NET Core unter Windows, Linux und macOS ausgeführt werden kann",
+  "symbols/TargetFrameworkOverride/description": "Überschreibt das Zielframework",
+  "symbols/Framework/description": "Das Zielframework für das Projekt.",
+  "symbols/Framework/choices/netcoreapp2.1/description": "Auf „netcoreapp2.1“ abzielen",
+  "symbols/langVersion/description": "Legt „LangVersion“ in der erstellten Projektdatei fest",
+  "symbols/skipRestore/description": "Wenn angegeben, wird die automatische Wiederherstellung des Projekts beim Erstellen übersprungen.",
+  "postActions/restore/description": "„NuGet-Pakete“ wiederherstellen, die für dieses Projekt erforderlich sind.",
+  "postActions/restore/manualInstructions/default/text": "„dotnet restore“ ausführen",
+  "postActions/open-file/description": "Öffnet „Program.cs“ im Editor."
 }

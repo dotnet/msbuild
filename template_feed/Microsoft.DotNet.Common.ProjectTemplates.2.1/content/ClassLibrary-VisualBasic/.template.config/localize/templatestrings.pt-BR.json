@@ -1,14 +1,14 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Class Library",
-  "description": "A project for creating a class library that targets .NET Standard or .NET Core",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp2.1/description": "Target netcoreapp2.1",
-  "symbols/Framework/choices/netstandard2.0/description": "Target netstandard2.0",
-  "symbols/langVersion/description": "Sets langVersion in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Class1.vb in the editor"
+  "name": "Biblioteca de Classes",
+  "description": "Um projeto para criar uma biblioteca de classes direcionada para o .NET Standard ou .NET Core",
+  "symbols/TargetFrameworkOverride/description": "Substitui a estrutura de destino",
+  "symbols/Framework/description": "A estrutura de destino do projeto.",
+  "symbols/Framework/choices/netcoreapp2.1/description": "Netcoreapp2.1 de destino",
+  "symbols/Framework/choices/netstandard2.0/description": "Netstandard2.0 de destino",
+  "symbols/langVersion/description": "Define langVersion no arquivo do projeto criado",
+  "symbols/skipRestore/description": "Se especificado, ignora a restauração automática do projeto em criação.",
+  "postActions/restore/description": "Restaure os pacotes NuGet exigidos por este projeto.",
+  "postActions/restore/manualInstructions/default/text": "Executar 'dotnet restore'",
+  "postActions/open-file/description": "Abre Class1.vb no editor"
 }

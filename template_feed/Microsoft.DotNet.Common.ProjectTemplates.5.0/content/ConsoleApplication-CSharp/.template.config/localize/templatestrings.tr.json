@@ -1,7 +1,7 @@
 ﻿{
   "author": "Microsoft",
   "name": "Console Application",
-  "description": "A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS",
+  "description": "Windows, Linux ve macOS'de .NET Core üzerinde çalışabilen bir komut satırı uygulaması oluşturma projesi",
   "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
   "symbols/Framework/description": "The target framework for the project.",
   "symbols/Framework/choices/net5.0/description": "Target net5.0",

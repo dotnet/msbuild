@@ -1,7 +1,7 @@
 ﻿{
   "author": "Microsoft",
   "name": "Class Library",
-  "description": "A project for creating a class library that targets .NET Standard or .NET Core",
+  "description": "Progetto per la creazione di una libreria di classi destinata a .NET Standard o .NET Core",
   "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
   "symbols/Framework/description": "The target framework for the project.",
   "symbols/Framework/choices/netcoreapp3.1/description": "Target netcoreapp3.1",
