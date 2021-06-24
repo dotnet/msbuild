@@ -4,6 +4,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
@@ -13,17 +14,17 @@ namespace Microsoft.TemplateEngine.TestHelper
     public class MonitoredFileSystem : IPhysicalFileSystem
     {
         private readonly IPhysicalFileSystem _baseFileSystem;
-        private List<DirectoryScanParameters> _directoriesScanned = new List<DirectoryScanParameters>();
-        private List<string> _filesOpened = new List<string>();
+        private ConcurrentBag<DirectoryScanParameters> _directoriesScanned = new();
+        private ConcurrentBag<string> _filesOpened = new();
 
         public MonitoredFileSystem(IPhysicalFileSystem baseFileSystem)
         {
             _baseFileSystem = baseFileSystem;
         }
 
-        public IReadOnlyList<DirectoryScanParameters> DirectoriesScanned => _directoriesScanned;
+        public IReadOnlyList<DirectoryScanParameters> DirectoriesScanned => _directoriesScanned.ToArray();
 
-        public IReadOnlyList<string> FilesOpened => _filesOpened;
+        public IReadOnlyList<string> FilesOpened => _filesOpened.ToArray();
 
         public void CreateDirectory(string path) => _baseFileSystem.CreateDirectory(path);
 
@@ -45,8 +46,8 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public void Reset()
         {
-            _directoriesScanned.Clear();
-            _filesOpened.Clear();
+            _directoriesScanned = new();
+            _filesOpened = new();
         }
 
         public void FileCopy(string sourcePath, string targetPath, bool overwrite) => _baseFileSystem.FileCopy(sourcePath, targetPath, overwrite);
