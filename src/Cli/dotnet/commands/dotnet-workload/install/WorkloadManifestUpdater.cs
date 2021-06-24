@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly string _userHome;
         private readonly string _tempDirPath;
         private readonly PackageSourceLocation _packageSourceLocation;
-
+        Func<string, string> _getEnvironmentVariable;
 
         public WorkloadManifestUpdater(IReporter reporter,
             IWorkloadManifestProvider workloadManifestProvider,
@@ -36,7 +36,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             INuGetPackageDownloader nugetPackageDownloader,
             string userHome,
             string tempDirPath,
-            PackageSourceLocation packageSourceLocation = null)
+            PackageSourceLocation packageSourceLocation = null,
+            Func<string, string> getEnvironmentVariable = null)
         {
             _reporter = reporter;
             _workloadManifestProvider = workloadManifestProvider;
@@ -46,6 +47,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _nugetPackageDownloader = nugetPackageDownloader;
             _sdkFeatureBand = new SdkFeatureBand(_workloadManifestProvider.GetSdkFeatureBand());
             _packageSourceLocation = packageSourceLocation;
+            _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
         }
 
         public async Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null)
@@ -55,7 +57,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 .ConfigureAwait(false);
         }
 
-        public async static Task BackgroundUpdateAdvertisingManifestsStaticAsync()
+        public async static Task BackgroundUpdateAdvertisingManifestsAsync()
         {
             try
             {
@@ -73,7 +75,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 var userHome = CliFolderPathCalculator.DotnetHomePath;
 
                 var manifestUpdater = new WorkloadManifestUpdater(reporter, workloadManifestProvider, workloadResolver, nugetPackageDownloader, userHome, tempPackagesDir.Value);
-                await manifestUpdater.BackgroundUpdateAdvertisingManifestsAsync();
+                await manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
             }
             catch (Exception)
             {
@@ -81,7 +83,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
 }
 
-        public async Task BackgroundUpdateAdvertisingManifestsAsync()
+        public async Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync()
         {
             if (!BackgroundUpdatesAreDisabled() &&
                 AdManifestSentinalIsDueForUpdate() &&
@@ -319,7 +321,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var sentinalPath = GetAdvertisingManifestSentinalPath();
             int updateIntervalHours;
-            if (!int.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS"), out updateIntervalHours))
+            if (!int.TryParse(_getEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS"), out updateIntervalHours))
             {
                 updateIntervalHours = 24;
             }
@@ -358,8 +360,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        private bool BackgroundUpdatesAreDisabled() => 
-            bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE"), out var disableEnvVar) && disableEnvVar;
+        private bool BackgroundUpdatesAreDisabled() =>
+            bool.TryParse(_getEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE"), out var disableEnvVar) && disableEnvVar;
 
         private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userHome, ".dotnet", ".workloadAdvertisingManifestSentinal");
 

@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         {
             (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater();
 
-            manifestUpdater.BackgroundUpdateAdvertisingManifestsAsync().Wait();
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
             var expectedDownloadedPackages = _installedManifests
                 .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-6.0.100"), null, null, null));
             nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
@@ -59,23 +59,14 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenAdvertisingManifestUpdateItUpdatesWhenDue()
         {
-            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater();
+            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS") ? "0" : string.Empty;
+            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
 
             var sentinalPath = Path.Combine(testDir, ".dotnet", _manifestSentinalFileName);
             File.WriteAllText(sentinalPath, string.Empty);
             var createTime = DateTime.Now;
 
-            var intervalEnvVar = "DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS";
-            var oldEnvVarVal = Environment.GetEnvironmentVariable(intervalEnvVar);
-            try
-            {
-                Environment.SetEnvironmentVariable(intervalEnvVar, "0");
-                manifestUpdater.BackgroundUpdateAdvertisingManifestsAsync().Wait();
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(intervalEnvVar, oldEnvVarVal);
-            }
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
 
             var expectedDownloadedPackages = _installedManifests
                 .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-6.0.100"), null, null, null));
@@ -93,7 +84,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             File.Create(sentinalPath);
             var createTime = DateTime.Now;
 
-            manifestUpdater.BackgroundUpdateAdvertisingManifestsAsync().Wait();
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
             nugetDownloader.DownloadCallParams.Should().BeEmpty();
             File.GetLastAccessTime(sentinalPath).Should().BeBefore(createTime);
         }
@@ -101,20 +92,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenAdvertisingManifestUpdateItHonorsDisablingEnvVar()
         {
-            (var manifestUpdater, var nugetDownloader, _) = GetTestUpdater();
+            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE") ? "true" :  string.Empty;
+            (var manifestUpdater, var nugetDownloader, _) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
 
-            var disableEnvVar = "DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE";
-            var oldEnvVarVal = Environment.GetEnvironmentVariable(disableEnvVar);
-            try
-            {
-                Environment.SetEnvironmentVariable(disableEnvVar, "true");
-                manifestUpdater.BackgroundUpdateAdvertisingManifestsAsync().Wait();
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(disableEnvVar, oldEnvVarVal);
-            }
-
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
             nugetDownloader.DownloadCallParams.Should().BeEmpty();
         }
 
@@ -195,7 +176,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
 
-        private (WorkloadManifestUpdater, MockNuGetPackageDownloader, string) GetTestUpdater([CallerMemberName] string testName = "")
+        private (WorkloadManifestUpdater, MockNuGetPackageDownloader, string) GetTestUpdater([CallerMemberName] string testName = "", Func<string, string> getEnvironmentVariable = null)
         {
             var testDir = _testAssetsManager.CreateTestDirectory(testName: testName).Path;
             var dotnetRoot = Path.Combine(testDir, "dotnet");
@@ -218,7 +199,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, new string[] { dotnetRoot });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir, getEnvironmentVariable: getEnvironmentVariable);
 
             return (manifestUpdater, nugetDownloader, testDir);
         }

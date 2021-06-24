@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tools
             string msbuildPath = null)
             : base(GetCommandArguments(msbuildArgs, noRestore), msbuildPath)
         {
-            Task.Run(() => WorkloadManifestUpdater.BackgroundUpdateAdvertisingManifestsStaticAsync());
+            Task.Run(() => WorkloadManifestUpdater.BackgroundUpdateAdvertisingManifestsAsync());
             SeparateRestoreCommand = GetSeparateRestoreCommand(msbuildArgs, noRestore, msbuildPath);
         }
 
