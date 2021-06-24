@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                 Directory.CreateDirectory(tempExtractionDir);
                                 var packFiles = _nugetPackageDownloader.ExtractPackageAsync(packagePath, new DirectoryPath(tempExtractionDir)).GetAwaiter().GetResult();
 
-                                FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(tempExtractionDir, packInfo.Path));
+                                FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(tempExtractionDir, packInfo.Path));
                             }
                         }
                         else
@@ -217,16 +217,16 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                            {
                                Directory.Delete(tempBackupDir, true);
                            }
-                           FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(manifestPath, tempBackupDir));
+                           FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(manifestPath, tempBackupDir));
                        }
                        Directory.CreateDirectory(Path.GetDirectoryName(manifestPath));
-                       FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(Path.Combine(tempExtractionDir, "data"), manifestPath));
+                       FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(tempExtractionDir, "data"), manifestPath));
                    },
                     rollback: () =>
                     {
                         if (!string.IsNullOrEmpty(tempBackupDir) && Directory.Exists(tempBackupDir))
                         {
-                            FileAccessRetrier.RetryOnMoveAccessFailure(() => WorkloadManifestUpdater.CopyDirectory(tempBackupDir, manifestPath));
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(tempBackupDir, manifestPath));
                         }
                     });
 

@@ -193,7 +193,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Directory.Delete(adManifestPath, true);
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
-                FileAccessRetrier.RetryOnMoveAccessFailure(() => CopyDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
+                FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
 
                 _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
 
@@ -271,24 +271,5 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         internal static PackageId GetManifestPackageId(SdkFeatureBand featureBand, ManifestId manifestId) =>
             new PackageId($"{manifestId}.Manifest-{featureBand}");
-
-        // Note: cannot use Directory.Move because it errors when copying across mounts
-        internal static void CopyDirectory(string sourcePath, string destPath)
-        {
-            if (!Directory.Exists(destPath))
-            {
-                Directory.CreateDirectory(destPath);
-            }
-
-            foreach (var dir in Directory.GetDirectories(sourcePath))
-            {
-                CopyDirectory(dir, Path.Combine(destPath, Path.GetFileName(dir)));
-            }
-
-            foreach (var file in Directory.GetFiles(sourcePath))
-            {
-                new FileInfo(file).CopyTo(Path.Combine(destPath, Path.GetFileName(file)), true);
-            }
-        }
     }
 }
