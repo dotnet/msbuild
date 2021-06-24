@@ -1,34 +1,21 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
-using System.Buffers;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Razor;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     public partial class RazorSourceGenerator
     {
-        private static SourceText GetProvideApplicationPartFactorySourceText()
-        {
-            var typeInfo = "Microsoft.AspNetCore.Mvc.ApplicationParts.ConsolidatedAssemblyApplicationPartFactory, Microsoft.AspNetCore.Mvc.Razor";
-            var assemblyInfo = $@"[assembly: global::Microsoft.AspNetCore.Mvc.ApplicationParts.ProvideApplicationPartFactoryAttribute(""{typeInfo}"")]";
-            return SourceText.From(assemblyInfo, Encoding.UTF8);
-        }
-
         private static string GetIdentifierFromPath(string filePath)
         {
             var builder = new StringBuilder(filePath.Length);
@@ -50,17 +37,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return builder.ToString();
         }
 
-        private static ParallelOptions GetParallelOptions(GeneratorExecutionContext generatorExecutionContext)
-        {
-            var options = new ParallelOptions { CancellationToken = generatorExecutionContext.CancellationToken };
-            var isConcurrentBuild = generatorExecutionContext.Compilation.Options.ConcurrentBuild;
-            if (Debugger.IsAttached || !isConcurrentBuild)
-            {
-                options.MaxDegreeOfParallelism = 1;
-            }
-            return options;
-        }
-
         private static void HandleDebugSwitch(bool waitForDebugger)
         {
             if (waitForDebugger)
@@ -72,27 +48,83 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        private static void AssertOrFailFast(bool condition, string message)
+        private static RazorProjectEngine GetDiscoveryProjectEngine(StaticCompilationTagHelperFeature tagHelperFeature, IEnumerable<MetadataReference> references, IEnumerable<SourceGeneratorProjectItem> items, string rootNamespace)
         {
-            if (!condition)
-            {
-                message ??= $"{nameof(AssertOrFailFast)} failed";
-                var stackTrace = new StackTrace();
-                Console.WriteLine(message);
-                Console.WriteLine(stackTrace);
+            var config = RazorConfiguration.Create(RazorLanguageVersion.Latest, "default", Enumerable.Empty<RazorExtension>(), true);
 
-                // Use FailFast so that the process fails rudely and goes through 
-                // windows error reporting (on Windows at least) for further analysis.
-                if (_razorContext is not null && _razorContext.ProduceHeapDumps)
+            var fileSystem = new VirtualRazorProjectFileSystem();
+            foreach (var item in items)
+            {
+                fileSystem.Add(item);
+            }
+
+            var discoveryProjectEngine = RazorProjectEngine.Create(config, fileSystem, b =>
+            {
+                b.Features.Add(new DefaultTypeNameFeature());
+                b.Features.Add(new ConfigureRazorCodeGenerationOptions(options =>
                 {
-                    Environment.FailFast(message);
+                    options.SuppressPrimaryMethodBody = true;
+                    options.SuppressChecksum = true;
+                }));
+
+                b.SetRootNamespace(rootNamespace);
+
+                b.Features.Add(new DefaultMetadataReferenceFeature { References = references.ToList() });
+
+                b.Features.Add(tagHelperFeature);
+                b.Features.Add(new DefaultTagHelperDescriptorProvider());
+
+                CompilerFeatures.Register(b);
+                RazorExtensions.Register(b);
+
+                b.SetCSharpLanguageVersion(LanguageVersion.Preview);
+            });
+
+            return discoveryProjectEngine;
+        }
+
+        private static RazorProjectEngine GetGenerationProjectEngine(IReadOnlyList<TagHelperDescriptor> tagHelpers, IEnumerable<SourceGeneratorProjectItem> items, RazorSourceGenerationOptions razorSourceGeneratorOptions)
+        {
+            var fileSystem = new VirtualRazorProjectFileSystem();
+            foreach (var item in items)
+            {
+                fileSystem.Add(item);
+            }
+
+            var projectEngine = RazorProjectEngine.Create(razorSourceGeneratorOptions.Configuration, fileSystem, b =>
+            {
+                b.Features.Add(new DefaultTypeNameFeature());
+                b.SetRootNamespace(razorSourceGeneratorOptions.RootNamespace);
+
+                b.Features.Add(new ConfigureRazorCodeGenerationOptions(options =>
+                {
+                    options.SuppressMetadataSourceChecksumAttributes = !razorSourceGeneratorOptions.GenerateMetadataSourceChecksumAttributes;
+                }));
+
+                b.Features.Add(new StaticTagHelperFeature { TagHelpers = tagHelpers });
+                b.Features.Add(new DefaultTagHelperDescriptorProvider());
+
+                CompilerFeatures.Register(b);
+                RazorExtensions.Register(b);
+
+                b.SetCSharpLanguageVersion(LanguageVersion.Preview);
+            });
+
+            return projectEngine;
+        }
+
+        private static TFeature? GetFeature<TFeature>(RazorProjectEngine engine)
+        {
+            var count = engine.EngineFeatures.Count;
+            for (var i = 0; i < count; i++)
+            {
+                if (engine.EngineFeatures[i] is TFeature feature)
+                {
+                    return feature;
                 }
             }
-            else
-            {
-                Debug.Assert(false, message);
-            }
+
+            return default;
         }
     }
 }

@@ -22,8 +22,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 relativePhysicalPath: "/foo",
                 fileKind: FileKinds.Legacy,
                 additionalText: new TestAdditionalText(string.Empty),
-                cssScope: null,
-                context: new GeneratorExecutionContext());
+                cssScope: null);
 
             // Act
             var physicalPath = projectItem.PhysicalPath;
@@ -44,8 +43,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 relativePhysicalPath: "/foo",
                 fileKind: FileKinds.Legacy,
                 additionalText: new TestAdditionalText(string.Empty),
-                cssScope: null,
-                context: new GeneratorExecutionContext());
+                cssScope: null);
 
             // Act
             var extension = projectItem.Extension;
@@ -67,8 +65,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 relativePhysicalPath: "/foo",
                 fileKind: FileKinds.Legacy,
                 additionalText: new TestAdditionalText(string.Empty),
-                cssScope: null,
-                context: new GeneratorExecutionContext());
+                cssScope: null);
 
             // Act
             var extension = projectItem.Extension;
@@ -89,8 +86,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 relativePhysicalPath: "/foo",
                 fileKind: FileKinds.Legacy,
                 additionalText: new TestAdditionalText(string.Empty),
-                cssScope: null,
-                context: new GeneratorExecutionContext());
+                cssScope: null);
 
             // Act
             var fileName = projectItem.FileName;
@@ -113,8 +109,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 relativePhysicalPath: "/foo",
                 fileKind: FileKinds.Legacy,
                 additionalText: new TestAdditionalText(string.Empty),
-                cssScope: null,
-                context: new GeneratorExecutionContext());
+                cssScope: null);
 
             // Act
             var fileName = projectItem.FilePathWithoutExtension;

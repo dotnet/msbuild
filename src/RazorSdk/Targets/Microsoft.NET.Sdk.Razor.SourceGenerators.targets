@@ -86,6 +86,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RazorAdditionalFile Include="@(_RazorOmnisharpWorkAround)" Condition="$([MSBuild]::IsOSPlatform(`Windows`))" />
     </ItemGroup>
 
+    <ItemGroup Condition="@(_RazorAdditionalFile->WithMetadataValue('Extension', '.cshtml')->Count()) > 0" >
+      <_RazorAssemblyAttribute Include="Microsoft.AspNetCore.Mvc.ApplicationParts.ProvideApplicationPartFactoryAttribute">
+        <_Parameter1>Microsoft.AspNetCore.Mvc.ApplicationParts.ConsolidatedAssemblyApplicationPartFactory, Microsoft.AspNetCore.Mvc.Razor</_Parameter1>
+      </_RazorAssemblyAttribute>
+    </ItemGroup>
+
     <EncodeRazorInputItem RazorInputItems="@(_RazorAdditionalFile)">
       <Output TaskParameter="EncodedRazorInputItems" ItemName="_RazorSpecialCharacterWorkaround" />
     </EncodeRazorInputItem>

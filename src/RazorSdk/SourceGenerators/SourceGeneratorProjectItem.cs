@@ -13,9 +13,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
     {
         private readonly string _fileKind;
 
-        private readonly GeneratorExecutionContext _context;
-
-        public SourceGeneratorProjectItem(string basePath, string filePath, string relativePhysicalPath, string fileKind, AdditionalText additionalText, string? cssScope, GeneratorExecutionContext context)
+        public SourceGeneratorProjectItem(string basePath, string filePath, string relativePhysicalPath, string fileKind, AdditionalText additionalText, string? cssScope)
         {
             BasePath = basePath;
             FilePath = filePath;
@@ -23,13 +21,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             _fileKind = fileKind;
             AdditionalText = additionalText;
             CssScope = cssScope;
-            _context = context;
             var text = AdditionalText.GetText();
-            if (text is null)
-            {
-                _context.ReportDiagnostic(Diagnostic.Create(RazorDiagnostics.SourceTextNotFoundDescriptor, Location.None, filePath));
-            }
-            else 
+            if (text is not null)
             {
                 RazorSourceDocument = new SourceTextRazorSourceDocument(AdditionalText.Path, relativePhysicalPath, text);
             }

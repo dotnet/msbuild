@@ -50,6 +50,8 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_TargetingNET50OrLater>true</_TargetingNET50OrLater>
         <_TargetingNET60OrLater>true</_TargetingNET60OrLater>
         <UseRazorSourceGenerator Condition="'$(UseRazorSourceGenerator)' == '' ">true</UseRazorSourceGenerator>
+        <!-- Required to support incremental source generator -->
+        <LangVersion Condition="'$(UseRazorSourceGenerator)' != '' ">preview</LangVersion>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">5.0</RazorLangVersion>
       </PropertyGroup>
     </When>
