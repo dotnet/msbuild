@@ -1702,7 +1702,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Target Name="_GetProjectReferencePlatformProperties"
           BeforeTargets="_GetProjectReferenceTargetFrameworkProperties"
-          Condition="'$(EnableDynamicPlatformResolution)' == 'true' and '$(BuildingInsideVisualStudio)' != 'true'">
+          Condition="'$(EnableDynamicPlatformResolution)' == 'true'
+                     and '$(BuildingInsideVisualStudio)' != 'true'
+                     and '@(_MSBuildProjectReferenceExistent->Count())' != '0'">
 
     <!-- Allow preset SetPlatform to override this operation -->
     <ItemGroup>
