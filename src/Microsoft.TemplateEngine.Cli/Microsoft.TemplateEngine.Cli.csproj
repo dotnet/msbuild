@@ -7,6 +7,9 @@
     <EnablePublicApiAnalyzer>true</EnablePublicApiAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Shared\JExtensions.cs" Link="JExtensions.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="CommandParsing\NewCommandInputCli.cs" />

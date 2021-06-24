@@ -141,8 +141,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
                 _aliases = new AliasModel();
                 return;
             }
-            string sourcesText = _environmentSettings.Host.FileSystem.ReadAllText(_aliasesFilePath);
-            JObject parsed = JObject.Parse(sourcesText);
+            JObject parsed = _environmentSettings.Host.FileSystem.ReadObject(_aliasesFilePath);
             IReadOnlyDictionary<string, IReadOnlyList<string>> commandAliases = ToStringListDictionary(parsed, StringComparer.OrdinalIgnoreCase, "CommandAliases");
 
             _aliases = new AliasModel(commandAliases);
@@ -150,8 +149,14 @@ namespace Microsoft.TemplateEngine.Cli.Alias
 
         private void Save()
         {
-            JObject serialized = JObject.FromObject(_aliases);
-            _environmentSettings.Host.FileSystem.WriteAllText(_aliasesFilePath, serialized.ToString());
+            if (_aliases is AliasModel { CommandAliases: { Count: > 0 } })
+            {
+                _environmentSettings.Host.FileSystem.WriteObject(_aliasesFilePath, _aliases);
+            }
+            else
+            {
+                _environmentSettings.Host.FileSystem.FileDelete(_aliasesFilePath);
+            }
         }
 
         // reads a dictionary whose values can either be string literals, or arrays of strings.
