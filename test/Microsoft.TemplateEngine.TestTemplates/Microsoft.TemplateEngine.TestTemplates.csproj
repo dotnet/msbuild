@@ -21,14 +21,4 @@
     <Content Include="nupkg_templates\**" />
     <None Include="nupkg_templates\**" CopyToOutputDirectory="Always" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="test_templates\PostActions\UnknownPostAction\.template.config\template.json" />
-    <None Remove="test_templates\PostActions\UnknownPostAction\Program.cs" />
-    <None Remove="test_templates\PostActions\RestoreNuGet\Invalid\.template.config\template.json" />
-    <None Remove="test_templates\PostActions\RestoreNuGet\Invalid\Invalid.csproj" />
-    <None Remove="test_templates\PostActions\RestoreNuGet\Invalid\Program.cs" />
-    <None Remove="test_templates\PostActions\UnknownPostAction\UnknownPostAction.csproj" />
-    <None Remove="test_templates\TemplateWithFileRenameDate\.template.config\template.json" />
-    <None Remove="test_templates\TemplateWithFileRenameDate\date_name.cs" />
-  </ItemGroup>
 </Project>

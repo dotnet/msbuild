@@ -64,5 +64,25 @@ namespace Microsoft.TemplateEngine.TestHelper
                 }
             }
         }
+
+        public static bool CompareFiles(string file1, string file2)
+        {
+            using var fs1 = new FileStream(file1, FileMode.Open);
+            using var fs2 = new FileStream(file2, FileMode.Open);
+            if (fs1.Length != fs2.Length)
+            {
+                return false;
+            }
+
+            int file1byte;
+            int file2byte;
+            do
+            {
+                file1byte = fs1.ReadByte();
+                file2byte = fs2.ReadByte();
+            }
+            while ((file1byte == file2byte) && (file1byte != -1));
+            return ((file1byte - file2byte) == 0);
+        }
     }
 }

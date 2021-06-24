@@ -361,5 +361,59 @@ namespace Dotnet_new3.IntegrationTests
                 .And.NotHaveStdErr()
                 .And.HaveStdOutContaining("The template \"ASP.NET Core Web App\" was created successfully.");
         }
+
+        [Fact]
+        public void CanInstantiateTemplate_WithBinaryFile_FromFolder()
+        {
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string templateLocation = TestUtils.GetTestTemplateLocation("TemplateWithBinaryFile");
+
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithBinaryFile")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Pass();
+
+            string sourceImage = Path.Combine(templateLocation, "image.png");
+            string targetImage = Path.Combine(workingDirectory, "image.png");
+
+            Assert.True(File.Exists(targetImage));
+
+            Assert.Equal(
+                new FileInfo(sourceImage).Length,
+                new FileInfo(targetImage).Length);
+            Assert.True(TestUtils.CompareFiles(sourceImage, targetImage), $"The content of {sourceImage} and {targetImage} is not same.");
+        }
+
+        [Fact]
+        public void CanInstantiateTemplate_WithBinaryFile_FromPackage()
+        {
+            string templateLocation = TestUtils.GetTestTemplateLocation("TemplateWithBinaryFile");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            string home = TestUtils.CreateTemporaryFolder("Home");
+
+            using var packageManager = new PackageManager();
+            string packageLocation = packageManager.PackTestTemplatesNuGetPackage();
+            Helpers.InstallNuGetTemplate(packageLocation, _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithBinaryFile")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should().Pass();
+
+            string sourceImage = Path.Combine(templateLocation, "image.png");
+            string targetImage = Path.Combine(workingDirectory, "image.png");
+
+            Assert.True(File.Exists(targetImage));
+
+            Assert.Equal(
+                new FileInfo(sourceImage).Length,
+                new FileInfo(targetImage).Length);
+            Assert.True(TestUtils.CompareFiles(sourceImage, targetImage), $"The content of {sourceImage} and {targetImage} is not same.");
+        }
     }
 }
