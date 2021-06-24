@@ -4737,7 +4737,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       This target enforces the dependency.
     -->
 
-    <MSBuildCopyContentTransitively Condition="$([MSBuild]::AreFeaturesEnabled('17.0'))">true</MSBuildCopyContentTransitively>
+    <MSBuildCopyContentTransitively Condition=" '$(MSBuildCopyContentTransitively)' == '' and $([MSBuild]::AreFeaturesEnabled('17.0'))">true</MSBuildCopyContentTransitively>
 
     <_TargetsThatPrepareProjectReferences Condition=" '$(MSBuildCopyContentTransitively)' == 'true' ">
       AssignProjectConfiguration;
