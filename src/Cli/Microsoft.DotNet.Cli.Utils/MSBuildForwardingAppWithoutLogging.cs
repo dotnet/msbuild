@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Utils
     internal class MSBuildForwardingAppWithoutLogging
     {
         private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_RUN_MSBUILD_OUTOFPROC");
-        private static readonly bool DoNotUseMSBUILDNOINPROCNODE = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_USE_MSBUILDNOINPROCNODE");
+        private static readonly bool UseMSBUILDNOINPROCNODE = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_USE_MSBUILDNOINPROCNODE");
 
         private const string MSBuildExeName = "MSBuild.dll";
 
