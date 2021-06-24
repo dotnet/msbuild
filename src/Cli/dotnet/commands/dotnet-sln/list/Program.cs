@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.CommandLine.Parsing;
 using System.Linq;
 using Microsoft.DotNet.Cli;
@@ -13,28 +14,38 @@ namespace Microsoft.DotNet.Tools.Sln.List
     internal class ListProjectsInSolutionCommand : CommandBase
     {
         private readonly string _fileOrDirectory;
+        private readonly bool _displaySolutionFolders;
 
         public ListProjectsInSolutionCommand(
             ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = parseResult.ValueForArgument<string>(SlnCommandParser.SlnArgument);
+            _displaySolutionFolders = parseResult.ValueForOption(SlnListParser.SolutionFolderOption);
         }
 
         public override int Execute()
         {
             var slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
-            var slnProjects = slnFile.Projects.Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid).ToArray();
-            if (slnProjects.Length == 0)
+
+            string[] paths = slnFile.Projects
+                .GetProjectsNotOfType(ProjectTypeGuids.SolutionFolderGuid)
+                .Select(project => _displaySolutionFolders ? project.GetFullSolutionFolderPath() : project.FilePath)
+                .ToArray();
+
+            if (paths.Length == 0)
             {
                 Reporter.Output.WriteLine(CommonLocalizableStrings.NoProjectsFound);
             }
             else
             {
-                Reporter.Output.WriteLine($"{LocalizableStrings.ProjectsHeader}");
-                Reporter.Output.WriteLine(new string('-', LocalizableStrings.ProjectsHeader.Length));
-                foreach (var slnProject in slnProjects)
+                Array.Sort(paths);
+
+                string header = _displaySolutionFolders ? LocalizableStrings.ProjectsSolutionFolderHeader : LocalizableStrings.ProjectsHeader;
+                Reporter.Output.WriteLine($"{header}");
+                Reporter.Output.WriteLine(new string('-', header.Length));
+                foreach (string slnProject in paths)
                 {
-                    Reporter.Output.WriteLine(slnProject.FilePath);
+                    Reporter.Output.WriteLine(slnProject);
                 }
             }
             return 0;

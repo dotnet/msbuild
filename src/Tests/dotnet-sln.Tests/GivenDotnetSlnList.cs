@@ -30,6 +30,7 @@ Arguments:
   <SLN_FILE>    The solution file to operate on. If not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
+  -s, --solution-folders  Display solution folder paths.
   -?, -h, --help    Show help and usage information";
 
         public GivenDotnetSlnList(ITestOutputHelper log) : base(log)
@@ -204,6 +205,26 @@ Options:
             var cmd = new DotnetCommand(Log)
                 .WithWorkingDirectory(projectDirectory)
                 .Execute("sln", "list");
+            cmd.Should().Pass();
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
+        }
+
+        [Fact]
+        public void WhenProjectsInSolutionFoldersPresentInTheSolutionItListsSolutionFolderPaths()
+        {
+            var expectedOutput = $@"{CommandLocalizableStrings.ProjectsSolutionFolderHeader}
+{new string('-', CommandLocalizableStrings.ProjectsSolutionFolderHeader.Length)}
+ConsoleApp1
+{Path.Combine("NestedSolution", "NestedFolder", "NestedFolder", "ConsoleApp2")}";
+
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("SlnFileWithSolutionItemsInNestedFolders")
+                .WithSource()
+                .Path;
+
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "list", "--solution-folders");
             cmd.Should().Pass();
             cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
         }
