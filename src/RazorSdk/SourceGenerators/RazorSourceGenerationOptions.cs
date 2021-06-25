@@ -3,6 +3,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
@@ -35,5 +36,10 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         /// </para>
         /// </summary>
         public bool SuppressRazorSourceGenerator { get; set; } = false;
+
+        /// <summary>
+        /// Gets the CSharp language version currently used by the compilation.
+        /// </summary>
+        public LanguageVersion CSharpLanguageVersion { get; set; } = LanguageVersion.Preview;
     }
 }

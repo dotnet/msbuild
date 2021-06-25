@@ -7,14 +7,16 @@ using System.Text;
 using System.Threading;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     public partial class RazorSourceGenerator
     {
-        private static (RazorSourceGenerationOptions?, Diagnostic?) ComputeRazorSourceGeneratorOptions(AnalyzerConfigOptionsProvider options, CancellationToken ct)
+        private static (RazorSourceGenerationOptions?, Diagnostic?) ComputeRazorSourceGeneratorOptions((AnalyzerConfigOptionsProvider, ParseOptions) pair, CancellationToken ct)
         {
+            var (options, parseOptions) = pair;
             var globalOptions = options.GlobalOptions;
 
             globalOptions.TryGetValue("build_property.RazorConfiguration", out var configurationName);
@@ -42,7 +44,8 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 SuppressRazorSourceGenerator = suppressRazorSourceGenerator == "true",
                 GenerateMetadataSourceChecksumAttributes = generateMetadataSourceChecksumAttributes == "true",
                 RootNamespace = rootNamespace ?? "ASP",
-                Configuration = razorConfiguration
+                Configuration = razorConfiguration,
+                CSharpLanguageVersion = ((CSharpParseOptions)parseOptions).LanguageVersion,
             };
 
             return (razorSourceGenerationOptions, diagnostic);

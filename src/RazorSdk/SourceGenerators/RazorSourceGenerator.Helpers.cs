@@ -48,17 +48,15 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             }
         }
 
-        private static RazorProjectEngine GetDiscoveryProjectEngine(StaticCompilationTagHelperFeature tagHelperFeature, IEnumerable<MetadataReference> references, IEnumerable<SourceGeneratorProjectItem> items, string rootNamespace)
+        private static RazorProjectEngine GetDiscoveryProjectEngine(StaticCompilationTagHelperFeature tagHelperFeature, IEnumerable<MetadataReference> references, IEnumerable<SourceGeneratorProjectItem> items, RazorSourceGenerationOptions razorSourceGeneratorOptions)
         {
-            var config = RazorConfiguration.Create(RazorLanguageVersion.Latest, "default", Enumerable.Empty<RazorExtension>(), true);
-
             var fileSystem = new VirtualRazorProjectFileSystem();
             foreach (var item in items)
             {
                 fileSystem.Add(item);
             }
 
-            var discoveryProjectEngine = RazorProjectEngine.Create(config, fileSystem, b =>
+            var discoveryProjectEngine = RazorProjectEngine.Create(razorSourceGeneratorOptions.Configuration, fileSystem, b =>
             {
                 b.Features.Add(new DefaultTypeNameFeature());
                 b.Features.Add(new ConfigureRazorCodeGenerationOptions(options =>
@@ -67,7 +65,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     options.SuppressChecksum = true;
                 }));
 
-                b.SetRootNamespace(rootNamespace);
+                b.SetRootNamespace(razorSourceGeneratorOptions.RootNamespace);
 
                 b.Features.Add(new DefaultMetadataReferenceFeature { References = references.ToList() });
 
@@ -77,7 +75,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 CompilerFeatures.Register(b);
                 RazorExtensions.Register(b);
 
-                b.SetCSharpLanguageVersion(LanguageVersion.Preview);
+                b.SetCSharpLanguageVersion(razorSourceGeneratorOptions.CSharpLanguageVersion);
             });
 
             return discoveryProjectEngine;
@@ -107,7 +105,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 CompilerFeatures.Register(b);
                 RazorExtensions.Register(b);
 
-                b.SetCSharpLanguageVersion(LanguageVersion.Preview);
+                b.SetCSharpLanguageVersion(razorSourceGeneratorOptions.CSharpLanguageVersion);
             });
 
             return projectEngine;

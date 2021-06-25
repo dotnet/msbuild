@@ -15,6 +15,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var razorSourceGeneratorOptionsWithDiagnostics = context.AnalyzerConfigOptionsProvider
+                .Combine(context.ParseOptionsProvider)
                 .Select(ComputeRazorSourceGeneratorOptions);
             var razorSourceGeneratorOptions = razorSourceGeneratorOptionsWithDiagnostics.ReportDiagnostics(context);
 
@@ -36,18 +37,20 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 {
                     var ((references, razorSourceGeneratorOptions), projectItems) = pair;
                     var tagHelperFeature = new StaticCompilationTagHelperFeature();
-                    return GetDiscoveryProjectEngine(tagHelperFeature, references, projectItems, razorSourceGeneratorOptions.RootNamespace);
+                    return GetDiscoveryProjectEngine(tagHelperFeature, references, projectItems, razorSourceGeneratorOptions);
                 });
 
             var syntaxTrees = sourceItems
                 .Combine(discoveryProjectEngine)
+                .Combine(context.ParseOptionsProvider)
                 .Select((pair, _) =>
                 {
-                    var (item, discoveryProjectEngine) = pair;
+                    var (itemAndDiscoveryEngine, parseOptions) = pair;
+                    var (item, discoveryProjectEngine) = itemAndDiscoveryEngine;
 
                     var codeGen = discoveryProjectEngine.Process(item);
                     var generatedCode = codeGen.GetCSharpDocument().GeneratedCode;
-                    return CSharpSyntaxTree.ParseText(generatedCode, new CSharpParseOptions(LanguageVersion.Preview));
+                    return CSharpSyntaxTree.ParseText(generatedCode, (CSharpParseOptions)parseOptions);
                 });
 
             var tagHelpersFromCompilation = syntaxTrees
