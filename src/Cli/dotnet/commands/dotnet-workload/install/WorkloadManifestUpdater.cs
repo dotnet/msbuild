@@ -12,6 +12,9 @@ using Microsoft.DotNet.ToolPackage;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Versioning;
+using Microsoft.DotNet.Configurer;
+using NuGet.Common;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -19,35 +22,83 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         private readonly IReporter _reporter;
         private readonly IWorkloadManifestProvider _workloadManifestProvider;
+        private readonly IWorkloadResolver _workloadResolver;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly SdkFeatureBand _sdkFeatureBand;
         private readonly string _userHome;
         private readonly string _tempDirPath;
         private readonly PackageSourceLocation _packageSourceLocation;
-
+        Func<string, string> _getEnvironmentVariable;
 
         public WorkloadManifestUpdater(IReporter reporter,
             IWorkloadManifestProvider workloadManifestProvider,
+            IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader,
             string userHome,
             string tempDirPath,
-            PackageSourceLocation packageSourceLocation = null)
+            PackageSourceLocation packageSourceLocation = null,
+            Func<string, string> getEnvironmentVariable = null)
         {
             _reporter = reporter;
             _workloadManifestProvider = workloadManifestProvider;
+            _workloadResolver = workloadResolver;
             _userHome = userHome;
             _tempDirPath = tempDirPath;
             _nugetPackageDownloader = nugetPackageDownloader;
             _sdkFeatureBand = new SdkFeatureBand(_workloadManifestProvider.GetSdkFeatureBand());
             _packageSourceLocation = packageSourceLocation;
+            _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
         }
 
         public async Task UpdateAdvertisingManifestsAsync(bool includePreviews, DirectoryPath? offlineCache = null)
         {
             var manifests = GetInstalledManifestIds();
-            foreach (var manifest in manifests)
+            await Task.WhenAll(manifests.Select(manifest => UpdateAdvertisingManifestAsync(manifest, includePreviews, offlineCache)))
+                .ConfigureAwait(false);
+        }
+
+        public async static Task BackgroundUpdateAdvertisingManifestsAsync()
+        {
+            try
             {
-                await UpdateAdvertisingManifestAsync(manifest, includePreviews, offlineCache);
+                var reporter = new NullReporter();
+                var dotnetPath = Path.GetDirectoryName(Environment.ProcessPath);
+                var sdkVersion = Product.Version;
+                var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetPath, sdkVersion);
+                var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, dotnetPath, sdkVersion);
+                var tempPackagesDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-sdk-advertising-temp"));
+                var nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
+                                              filePermissionSetter: null,
+                                              new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
+                                              new NullLogger(),
+                                              reporter);
+                var userHome = CliFolderPathCalculator.DotnetHomePath;
+
+                var manifestUpdater = new WorkloadManifestUpdater(reporter, workloadManifestProvider, workloadResolver, nugetPackageDownloader, userHome, tempPackagesDir.Value);
+                await manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
+            }
+            catch (Exception)
+            {
+                // Never surface messages on background updates
+            }
+}
+
+        public async Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync()
+        {
+            if (!BackgroundUpdatesAreDisabled() &&
+                AdManifestSentinalIsDueForUpdate() &&
+                UpdatedAdManifestPackagesExistAsync().GetAwaiter().GetResult())
+            {
+                await UpdateAdvertisingManifestsAsync(false);
+                var sentinalPath = GetAdvertisingManifestSentinalPath();
+                if (File.Exists(sentinalPath))
+                {
+                    File.SetLastAccessTime(sentinalPath, DateTime.Now);
+                }
+                else
+                {
+                    File.Create(sentinalPath);
+                }
             }
         }
 
@@ -265,6 +316,54 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 return new ManifestVersion(manifest.Version);
             }
         }
+
+        private bool AdManifestSentinalIsDueForUpdate()
+        {
+            var sentinalPath = GetAdvertisingManifestSentinalPath();
+            int updateIntervalHours;
+            if (!int.TryParse(_getEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS"), out updateIntervalHours))
+            {
+                updateIntervalHours = 24;
+            }
+
+            if (File.Exists(sentinalPath))
+            {
+                var lastAccessTime = File.GetLastAccessTime(sentinalPath);
+                if (lastAccessTime.AddHours(updateIntervalHours) > DateTime.Now)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private async Task<bool> UpdatedAdManifestPackagesExistAsync()
+        {
+            var manifests = GetInstalledManifestIds();
+            var avaliableUpdates = await Task.WhenAll(manifests.Select(manifest => NewerManifestPackageExists(manifest)))
+                .ConfigureAwait(false);
+            return avaliableUpdates.Any();
+        }
+
+        private async Task<bool> NewerManifestPackageExists(ManifestId manifest)
+        {
+            try
+            {
+                var currentVersion = NuGetVersion.Parse(_workloadResolver.GetManifestVersion(manifest.ToString()));
+                var latestVersion = await _nugetPackageDownloader.GetLatestPackageVerion(GetManifestPackageId(_sdkFeatureBand, manifest));
+                return latestVersion > currentVersion;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private bool BackgroundUpdatesAreDisabled() =>
+            bool.TryParse(_getEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE"), out var disableEnvVar) && disableEnvVar;
+
+        private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userHome, ".dotnet", ".workloadAdvertisingManifestSentinal");
 
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userHome, ".dotnet", "sdk-advertising", featureBand.ToString(), manifestId.ToString());

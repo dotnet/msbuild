@@ -3,13 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
@@ -552,6 +550,20 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             }
 
             return (source, foundPackages);
+        }
+
+        public async Task<NuGetVersion> GetLatestPackageVerion(PackageId packageId,
+             PackageSourceLocation packageSourceLocation = null,
+             bool includePreview = false)
+        {
+            CancellationToken cancellationToken = CancellationToken.None;
+            IPackageSearchMetadata packageMetadata;
+            IEnumerable<PackageSource> packagesSources = LoadNuGetSources(packageSourceLocation);
+
+            (_, packageMetadata) = await GetLatestVersionInternalAsync(packageId.ToString(), packagesSources,
+                includePreview, cancellationToken).ConfigureAwait(false);
+
+            return packageMetadata.Identity.Version;
         }
     }
 }

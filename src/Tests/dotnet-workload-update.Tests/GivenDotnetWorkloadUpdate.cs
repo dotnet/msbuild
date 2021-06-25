@@ -276,6 +276,16 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             exceptionThrown.Message.Should().Contain("not compatible with workload manifests");
         }
 
+        [Fact]
+        public void GivenOnlyUpdateAdManifestItSucceeds()
+        {
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--advertising-manifests-only" });
+            (_, var command, _, _, var manifestUpdater, _) = GetTestInstallers(parseResult);
+
+            command.Execute();
+            manifestUpdater.UpdateAdvertisingManifestsCallCount.Should().Be(1);
+        }
+
         internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",

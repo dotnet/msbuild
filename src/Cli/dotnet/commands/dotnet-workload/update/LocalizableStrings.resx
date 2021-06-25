@@ -144,4 +144,10 @@
   <data name="NoWorkloadsToUpdate" xml:space="preserve">
     <value>No workloads installed for this feature band. To update from the previous SDK, include the --from-previous-sdk option.</value>
   </data>
+  <data name="WorkloadUpdateAdManifestsSucceeded" xml:space="preserve">
+    <value>Successfully updated advertising manifests.</value>
+  </data>
+  <data name="AdManifestOnlyOptionDescription" xml:space="preserve">
+    <value>Only update advertising manifests.</value>
+  </data>
 </root>

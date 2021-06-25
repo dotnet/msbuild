@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Restore;
+using Microsoft.DotNet.Workloads.Workload.Install;
 
 namespace Microsoft.DotNet.Tools
 {
@@ -19,6 +21,7 @@ namespace Microsoft.DotNet.Tools
             string msbuildPath = null)
             : base(GetCommandArguments(msbuildArgs, noRestore), msbuildPath)
         {
+            Task.Run(() => WorkloadManifestUpdater.BackgroundUpdateAdvertisingManifestsAsync());
             SeparateRestoreCommand = GetSeparateRestoreCommand(msbuildArgs, noRestore, msbuildPath);
         }
 

@@ -13,8 +13,10 @@ using Microsoft.NET.TestFramework.Utilities;
 using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -22,42 +24,79 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
     {
         private readonly BufferedReporter _reporter;
         private readonly string _manifestFileName = "WorkloadManifest.json";
+        private readonly string _manifestSentinalFileName = ".workloadAdvertisingManifestSentinal";
+        private readonly ManifestId[] _installedManifests;
 
         public GivenWorkloadManifestUpdater(ITestOutputHelper log) : base(log)
         {
             _reporter = new BufferedReporter();
+            _installedManifests = new ManifestId[] { new ManifestId("test-manifest-1"), new ManifestId("test-manifest-2"), new ManifestId("test-manifest-3") };
         }
 
         [Fact]
         public void GivenWorkloadManifestUpdateItCanUpdateAdvertisingManifests()
         {
-            var testDir = _testAssetsManager.CreateTestDirectory().Path;
-            var featureBand = "6.0.100";
-            var dotnetRoot = Path.Combine(testDir, "dotnet");
-            var installedManifests = new ManifestId[] { new ManifestId("test-manifest-1"), new ManifestId("test-manifest-2"), new ManifestId("test-manifest-3") };
-
-            // Write mock manifests
-            var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
-            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", featureBand);
-            Directory.CreateDirectory(installedManifestDir);
-            Directory.CreateDirectory(adManifestDir);
-            foreach (var manifest in installedManifests)
-            {
-                Directory.CreateDirectory(Path.Combine(installedManifestDir, manifest.ToString()));
-                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
-            }
-
-            var manifestDirs = installedManifests
-                .Select(manifest => Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName))
-                .ToArray();
-            var workloadManifestProvider = new MockManifestProvider(manifestDirs);
-            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
+            (var manifestUpdater, var nugetDownloader, _) = GetTestUpdater();
 
             manifestUpdater.UpdateAdvertisingManifestsAsync(true).Wait();
-            var expectedDownloadedPackages = installedManifests
-                .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-{featureBand}"), null, null, null));
+            var expectedDownloadedPackages = _installedManifests
+                .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-6.0.100"), null, null, null));
             nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
+        }
+
+        [Fact]
+        public void GivenAdvertisingManifestUpdateItUpdatesWhenNoSentinalExists()
+        {
+            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater();
+
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
+            var expectedDownloadedPackages = _installedManifests
+                .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-6.0.100"), null, null, null));
+            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
+            File.Exists(Path.Combine(testDir, ".dotnet", _manifestSentinalFileName)).Should().BeTrue();
+        }
+
+        [Fact]
+        public void GivenAdvertisingManifestUpdateItUpdatesWhenDue()
+        {
+            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS") ? "0" : string.Empty;
+            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
+
+            var sentinalPath = Path.Combine(testDir, ".dotnet", _manifestSentinalFileName);
+            File.WriteAllText(sentinalPath, string.Empty);
+            var createTime = DateTime.Now;
+
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
+
+            var expectedDownloadedPackages = _installedManifests
+                .Select(id => ((PackageId, NuGetVersion, DirectoryPath?, PackageSourceLocation))(new PackageId($"{id}.manifest-6.0.100"), null, null, null));
+            nugetDownloader.DownloadCallParams.Should().BeEquivalentTo(expectedDownloadedPackages);
+            File.Exists(sentinalPath).Should().BeTrue();
+            File.GetLastAccessTime(sentinalPath).Should().BeAfter(createTime);
+        }
+
+        [Fact]
+        public void GivenAdvertisingManifestUpdateItDoesNotUpdateWhenNotDue()
+        {
+            (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater();
+
+            var sentinalPath = Path.Combine(testDir, ".dotnet", _manifestSentinalFileName);
+            File.Create(sentinalPath);
+            var createTime = DateTime.Now;
+
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
+            nugetDownloader.DownloadCallParams.Should().BeEmpty();
+            File.GetLastAccessTime(sentinalPath).Should().BeBefore(createTime);
+        }
+
+        [Fact]
+        public void GivenAdvertisingManifestUpdateItHonorsDisablingEnvVar()
+        {
+            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE") ? "true" :  string.Empty;
+            (var manifestUpdater, var nugetDownloader, _) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
+
+            manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
+            nugetDownloader.DownloadCallParams.Should().BeEmpty();
         }
 
         [Fact]
@@ -97,7 +136,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .ToArray();
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
 
             var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select( m => (m.manifestId, m.existingVersion,m .newVersion));
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
@@ -126,12 +166,42 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var workloadManifestProvider = new MockManifestProvider(new string[] { Path.Combine(installedManifestDir, manifestId, _manifestFileName) });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, nugetDownloader, testDir, testDir);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
             manifestUpdater.UpdateAdvertisingManifestsAsync(false, new DirectoryPath(offlineCache)).Wait();
 
             // We should have chosen the higher version manifest package to install/ extract
             nugetDownloader.ExtractCallParams.Count().Should().Be(1);
             nugetDownloader.ExtractCallParams[0].Item1.Should().Be(Path.Combine(offlineCache, $"{manifestId}.manifest-{featureBand}.3.0.0.nupkg"));
+        }
+
+
+        private (WorkloadManifestUpdater, MockNuGetPackageDownloader, string) GetTestUpdater([CallerMemberName] string testName = "", Func<string, string> getEnvironmentVariable = null)
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory(testName: testName).Path;
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+            var featureBand = "6.0.100";
+
+            // Write mock manifests
+            var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", featureBand);
+            Directory.CreateDirectory(installedManifestDir);
+            Directory.CreateDirectory(adManifestDir);
+            foreach (var manifest in _installedManifests)
+            {
+                Directory.CreateDirectory(Path.Combine(installedManifestDir, manifest.ToString()));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
+            }
+
+            var manifestDirs = _installedManifests
+                .Select(manifest => Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName))
+                .ToArray();
+            var workloadManifestProvider = new MockManifestProvider(manifestDirs);
+            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, new string[] { dotnetRoot });
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir, getEnvironmentVariable: getEnvironmentVariable);
+
+            return (manifestUpdater, nugetDownloader, testDir);
         }
 
         internal static string GetManifestContent(ManifestVersion version)
