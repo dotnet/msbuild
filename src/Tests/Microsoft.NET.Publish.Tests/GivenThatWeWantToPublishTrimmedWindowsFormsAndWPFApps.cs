@@ -39,7 +39,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                .HaveStdOutContaining("NETSDK1167");
+                .HaveStdOutContaining("NETSDK1175");
         }
 
         [WindowsOnlyFact]
@@ -55,7 +55,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
             testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
-            testProject.AdditionalProperties["NoWarn"] = "NETSDK1167";
+            testProject.AdditionalProperties["NoWarn"] = "NETSDK1175";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -64,7 +64,7 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass()
                 .And
-                //cannot check for absence of NETSDK1167 since that is used with /nowarn: in some configurations
+                //cannot check for absence of NETSDK1175 since that is used with /nowarn: in some configurations
                 .NotHaveStdOutContaining(Strings.@TrimmingWindowsFormsIsNotSupported);
         }
 

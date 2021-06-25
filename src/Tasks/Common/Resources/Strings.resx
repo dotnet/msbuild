@@ -775,14 +775,6 @@ To install these workloads, run the following command: {1}</value>
     <value>NETSDK1167: Compression in a single file bundle is only supported when publishing for .NET6 or higher.</value>
     <comment>{StrBegin="NETSDK1167: "}</comment>
   </data>
-  <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
-    <value>NETSDK1167: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
-    <comment>{StrBegin="NETSDK1167: "}</comment>
-  </data>
-  <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
-    <value>NETSDK1167: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
-    <comment>{StrBegin="NETSDK1167: "}</comment>
-  </data>
   <data name="TrimmingWpfIsNotSupported" xml:space="preserve">
     <value>NETSDK1168: WPF is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/wpf for more details.</value>
     <comment>{StrBegin="NETSDK1168: "}</comment>
@@ -806,5 +798,13 @@ To install these workloads, run the following command: {1}</value>
   <data name="InvalidTypeLibrary" xml:space="preserve">
     <value>NETSDK1173: The provided type library '{0}' is in an invalid format.</value>
     <comment>{StrBegin="NETSDK1173: "}</comment>
+  </data>
+  <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
+    <value>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
+    <comment>{StrBegin="NETSDK1167: "}</comment>
+  </data>
+  <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
+    <value>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
+    <comment>{StrBegin="NETSDK1167: "}</comment>
   </data>
 </root>

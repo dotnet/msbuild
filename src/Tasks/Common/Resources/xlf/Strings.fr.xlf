@@ -218,8 +218,8 @@
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="CompressionInSingleFileRequiresSelfContained">
-        <source>NETSDK1167: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
-        <target state="new">NETSDK1167: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
+        <source>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</source>
+        <target state="new">NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</target>
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="ConflictingRuntimePackInformation">
@@ -751,8 +751,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1127: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWindowsFormsIsNotSupported">
-        <source>NETSDK1167: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
-        <target state="new">NETSDK1167: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</target>
+        <source>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</source>
+        <target state="new">NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</target>
         <note>{StrBegin="NETSDK1167: "}</note>
       </trans-unit>
       <trans-unit id="TrimmingWpfIsNotSupported">
