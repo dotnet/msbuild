@@ -801,10 +801,14 @@ To install these workloads, run the following command: {1}</value>
   </data>
   <data name="CompressionInSingleFileRequiresSelfContained" xml:space="preserve">
     <value>NETSDK1174: Compression in a single file bundle is only supported when publishing a self-contained application.</value>
-    <comment>{StrBegin="NETSDK1167: "}</comment>
+    <comment>{StrBegin="NETSDK1174: "}</comment>
   </data>
   <data name="TrimmingWindowsFormsIsNotSupported" xml:space="preserve">
     <value>NETSDK1175: Windows Forms is not supported or recommended with trimming enabled. Please go to https://aka.ms/dotnet-illink/windows-forms for more details.</value>
-    <comment>{StrBegin="NETSDK1167: "}</comment>
+    <comment>{StrBegin="NETSDK1175: "}</comment>
+  </data>
+  <data name="PlaceholderRunCommandProjectAbbreviationDeprecated" xml:space="preserve">
+    <value>NETSDK1176: Placeholder</value>
+    <comment>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</comment>
   </data>
 </root>

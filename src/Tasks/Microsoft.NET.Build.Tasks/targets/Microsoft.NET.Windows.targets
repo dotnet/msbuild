@@ -24,6 +24,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <IncludeWindowsSDKRefFrameworkReferences>true</IncludeWindowsSDKRefFrameworkReferences>
   </PropertyGroup>
 
+  <!-- If UseWindowsSDKPreview is true, then allow any target platform version, not just the ones defined by the SDK -->
+  <PropertyGroup Condition="'$(UseWindowsSDKPreview)' == 'true'">
+    <TargetPlatformVersionSupported>true</TargetPlatformVersionSupported>
+  </PropertyGroup>
+
   <!-- Set 7.0 as the TargetPlatformVersion for windows. -->
   <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows' and '$(TargetPlatformVersion)' == ''" >
     <TargetPlatformVersion>7.0</TargetPlatformVersion>
