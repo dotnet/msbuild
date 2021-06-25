@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Utils
     internal class MSBuildForwardingAppWithoutLogging
     {
         private static readonly bool AlwaysExecuteMSBuildOutOfProc = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_RUN_MSBUILD_OUTOFPROC");
-        private static readonly bool DoNotUseMSBUILDNOINPROCNODE = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_DO_NOT_USE_MSBUILDNOINPROCNODE");
+        private static readonly bool UseMSBUILDNOINPROCNODE = Env.GetEnvironmentVariableAsBool("DOTNET_CLI_USE_MSBUILDNOINPROCNODE");
 
         private const string MSBuildExeName = "MSBuild.dll";
 
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Cli.Utils
             _argsToForward = argsToForward;
             MSBuildPath = msbuildPath ?? defaultMSBuildPath;
 
-            if (!DoNotUseMSBUILDNOINPROCNODE)
+            if (UseMSBUILDNOINPROCNODE)
             {
                 // Force MSBuild to use external working node long living process for building projects
                 // We also refers to this as MSBuild Server V1 as entry process forwards most of the work to it.
