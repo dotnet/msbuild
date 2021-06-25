@@ -57,6 +57,8 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == 'true'">
     <!-- RequiresUnreferenceCodeAttribute method called -->
     <NoWarn>$(NoWarn);IL2026</NoWarn>
+    <!-- RequiresUnreferencedCodeAttribute mismatch on virtual override -->
+    <NoWarn>$(NoWarn);IL2046</NoWarn>
   </PropertyGroup>
 
   <!--
@@ -209,8 +211,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <NoWarn>$(NoWarn);IL2041;IL2042;IL2043;IL2056</NoWarn>
       <!-- Reference to removed attribute type -->
       <NoWarn>$(NoWarn);IL2045</NoWarn>
-      <!-- RequiresUnreferencedCodeAttribute mismatch on virtual override -->
-      <NoWarn>$(NoWarn);IL2046</NoWarn>
       <!-- COM marshalling warning -->
       <NoWarn>$(NoWarn);IL2050</NoWarn>
       <!-- Reflection intrinsics with unknown arguments -->
