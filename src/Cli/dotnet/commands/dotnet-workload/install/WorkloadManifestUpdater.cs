@@ -244,7 +244,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     Directory.Delete(adManifestPath, true);
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(adManifestPath));
-                FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(Path.Combine(extractionPath, "data"), adManifestPath));
+                FileAccessRetrier.RetryOnMoveAccessFailure(() => DirectoryPath.MoveDirectory(Path.Combine(extractionPath, "data"), adManifestPath));
 
                 _reporter.WriteLine(string.Format(LocalizableStrings.AdManifestUpdated, manifestId));
 
