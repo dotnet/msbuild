@@ -123,6 +123,32 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
         }
 
+        internal static IReadOnlyDictionary<string, string?> GetTemplateParametersFromCommand(INewCommandInput commandInput)
+        {
+            Dictionary<string, string?>? templateParameters = new Dictionary<string, string?>();
+            int i = 0;
+            while (i < commandInput.RemainingParameters.Count)
+            {
+                if (commandInput.RemainingParameters[i].StartsWith("-"))
+                {
+                    string optionName = commandInput.RemainingParameters[i];
+                    List<string> arguments = new List<string>();
+                    while (i + 1 < commandInput.RemainingParameters.Count && !commandInput.RemainingParameters[i + 1].StartsWith("-"))
+                    {
+                        arguments.Add(commandInput.RemainingParameters[i + 1]);
+                        i++;
+                    }
+                    templateParameters[optionName] = arguments.Any() ? string.Join(",", arguments) : null;
+                    i++;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            return templateParameters;
+        }
+
         internal IReadOnlyList<string> VariantsForCanonical(string canonical)
         {
             if (_templateParamCanonicalToVariantMap == null || !_templateParamCanonicalToVariantMap.TryGetValue(canonical, out IReadOnlyList<string>? variants))

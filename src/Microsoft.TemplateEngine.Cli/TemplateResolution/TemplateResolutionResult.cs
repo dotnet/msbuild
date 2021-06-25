@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateResolution
@@ -252,21 +253,29 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         internal BaseTemplateResolver Resolver => _resolver;
 
-        internal IReadOnlyDictionary<string, string?> GetAllMatchedParametersList()
+        internal static IReadOnlyDictionary<string, string?> GetAllMatchedParametersList(IEnumerable<ITemplateMatchInfo> templateMatchInfos)
         {
             Dictionary<string, string?> parameterList = new Dictionary<string, string?>();
-            if (!_matchInformation.Any())
+            if (!templateMatchInfos.Any())
             {
                 return parameterList;
             }
-            foreach (var templateGroup in _matchInformation.Where(group => group.IsGroupAndTemplateInfoMatch))
+            foreach (ParameterMatchInfo parameterMatchInfo in templateMatchInfos.SelectMany(template => template.MatchDisposition.OfType<ParameterMatchInfo>()))
             {
-                foreach (ParameterMatchInfo parameterMatchInfo in templateGroup.TemplateMatchInfos.SelectMany(template => template.MatchDisposition.OfType<ParameterMatchInfo>()))
+                if (!string.IsNullOrWhiteSpace(parameterMatchInfo.Value) || !parameterList.ContainsKey(parameterMatchInfo.InputFormat ?? parameterMatchInfo.Name))
                 {
                     parameterList[parameterMatchInfo.InputFormat ?? parameterMatchInfo.Name] = parameterMatchInfo.Value;
                 }
             }
             return parameterList;
+        }
+
+        internal IReadOnlyDictionary<string, string?> GetAllMatchedParametersList()
+        {
+            return GetAllMatchedParametersList(
+                _matchInformation
+                    .Where(group => group.IsGroupAndTemplateInfoMatch) //this is needed as if the template group is not a match on group and info filaters, the parameter matches are not evaluated
+                    .SelectMany(group => group.TemplateMatchInfos));
         }
 
         internal bool IsParameterMismatchReason(string parameterName)

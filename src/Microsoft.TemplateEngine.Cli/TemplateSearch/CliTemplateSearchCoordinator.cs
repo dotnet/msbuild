@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
             else
             {
-                IReadOnlyDictionary<string, string?>? appliedParameterMatches = GetTemplateParametersFromCommand(commandInput);
+                IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandInput);
                 // No templates found matching the following input parameter(s): {0}.
                 Reporter.Error.WriteLine(
                     string.Format(
@@ -102,22 +102,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         private static IReadOnlyDictionary<string, string?>? GetAllMatchedParametersList(TemplateSourceSearchResult sourceResult)
         {
-            Dictionary<string, string?> parameterList = new Dictionary<string, string?>();
-            if (!sourceResult.PacksWithMatches.Any())
-            {
-                return parameterList;
-            }
-            foreach (var pack in sourceResult.PacksWithMatches.Values)
-            {
-                foreach (ParameterMatchInfo parameterMatchInfo in pack.TemplateMatches.SelectMany(template => template.MatchDisposition.OfType<ParameterMatchInfo>()))
-                {
-                    if (!string.IsNullOrWhiteSpace(parameterMatchInfo.Value) || !parameterList.ContainsKey(parameterMatchInfo.InputFormat ?? parameterMatchInfo.Name))
-                    {
-                        parameterList[parameterMatchInfo.InputFormat ?? parameterMatchInfo.Name] = parameterMatchInfo.Value;
-                    }
-                }
-            }
-            return parameterList;
+            return TemplateResolutionResult.GetAllMatchedParametersList(sourceResult.PacksWithMatches.Values.SelectMany(pack => pack.TemplateMatches));
         }
 
         private static void DisplayResultsForPack(TemplateSourceSearchResult sourceResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage)
@@ -187,33 +172,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
 
             return true;
-        }
-
-        private static IReadOnlyDictionary<string, string?> GetTemplateParametersFromCommand(INewCommandInput commandInput)
-        {
-            Dictionary<string, string?>? appliedParameterMatches = new Dictionary<string, string?>();
-            int i = 0;
-            while (i < commandInput.RemainingParameters.Count)
-            {
-                if (commandInput.RemainingParameters[i].StartsWith("-"))
-                {
-                    if (i + 1 >= commandInput.RemainingParameters.Count || commandInput.RemainingParameters[i + 1].StartsWith("-"))
-                    {
-                        appliedParameterMatches[commandInput.RemainingParameters[i]] = null;
-                        i++;
-                    }
-                    else
-                    {
-                        appliedParameterMatches[commandInput.RemainingParameters[i]] = commandInput.RemainingParameters[i + 1];
-                        i += 2;
-                    }
-                }
-                else
-                {
-                    i++;
-                }
-            }
-            return appliedParameterMatches;
         }
 
         /// <summary>
