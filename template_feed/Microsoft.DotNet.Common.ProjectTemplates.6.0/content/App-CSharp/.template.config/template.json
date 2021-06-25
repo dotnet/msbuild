@@ -26,37 +26,43 @@
       "choices": [
         {
           "choice": "net6.0",
-          "description": "Target net6.0"
+          "description": "Target net6.0",
+          "displayName": ".NET 6.0"
         }
       ],
       "replaces": "net6.0",
-      "defaultValue": "net6.0"
+      "defaultValue": "net6.0",
+      "displayName": "Framework"
     },
     "langVersion": {
       "type": "parameter",
       "datatype": "text",
       "description": "Sets the LangVersion property in the created project file",
       "defaultValue": "",
-      "replaces": "$(ProjectLanguageVersion)"
+      "replaces": "$(ProjectLanguageVersion)",
+      "displayName": "Language Version"
     },
     "no-restore": {
       "type": "parameter",
       "datatype": "bool",
       "description": "If specified, skips the automatic restore of the project on create.",
-      "defaultValue": "false"
+      "defaultValue": "false",
+      "displayName": "Skip restore"
     },
     "nullable": {
       "type": "parameter",
       "datatype": "bool",
       "defaultValue": "true",
-      "description": "Whether to enable nullable reference types for this project."
+      "description": "Whether to enable nullable reference types for this project.",
+      "displayName": "Enable nullable"
     },
     "target-framework-override": {
       "type": "parameter",
       "description": "Overrides the target framework",
       "replaces": "target-framework-override",
       "datatype": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "displayName": "Target framework override"
     },
     "HostIdentifier": {
       "type": "bind",

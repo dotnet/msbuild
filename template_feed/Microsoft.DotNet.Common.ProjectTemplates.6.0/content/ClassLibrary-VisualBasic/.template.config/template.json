@@ -38,7 +38,8 @@
       "description": "Overrides the target framework",
       "replaces": "TargetFrameworkOverride",
       "datatype": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "displayName": "Target framework override"
     },
     "Framework": {
       "type": "parameter",
@@ -47,26 +48,31 @@
       "choices": [
         {
           "choice": "net6.0",
-          "description": "Target net6.0"
+          "description": "Target net6.0",
+          "displayName": ".NET 6.0"
         },
         {
           "choice": "netstandard2.1",
-          "description": "Target netstandard2.1"
+          "description": "Target netstandard2.1",
+          "displayName": ".NET Standard 2.1"
         },
         {
           "choice": "netstandard2.0",
-          "description": "Target netstandard2.0"
+          "description": "Target netstandard2.0",
+          "displayName": ".NET Standard 2.0"
         }
       ],
       "replaces": "net6.0",
-      "defaultValue": "net6.0"
+      "defaultValue": "net6.0",
+      "displayName": "Framework"
     },
     "langVersion": {
       "type": "parameter",
       "datatype": "text",
       "description": "Sets the LangVersion property in the created project file",
       "defaultValue": "",
-      "replaces": "$(ProjectLanguageVersion)"
+      "replaces": "$(ProjectLanguageVersion)",
+      "displayName": "Language Version"
     },
     "HostIdentifier": {
       "type": "bind",
@@ -76,7 +82,8 @@
       "type": "parameter",
       "datatype": "bool",
       "description": "If specified, skips the automatic restore of the project on create.",
-      "defaultValue": "false"
+      "defaultValue": "false",
+      "displayName": "Skip restore"
     }
   },
   "primaryOutputs": [

@@ -38,7 +38,8 @@
       "description": "Overrides the target framework",
       "replaces": "TargetFrameworkOverride",
       "datatype": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "displayName": "Target framework override"
     },
     "Framework": {
       "type": "parameter",
@@ -47,19 +48,23 @@
       "choices": [
         {
           "choice": "netcoreapp3.0",
-          "description": "Target netcoreapp3.0"
+          "description": "Target netcoreapp3.0",
+          "displayName": ".NET Core 3.0"
         },
         {
           "choice": "netstandard2.1",
-          "description": "Target netstandard2.1"
+          "description": "Target netstandard2.1",
+          "displayName": ".NET Standard 2.1"
         },
         {
           "choice": "netstandard2.0",
-          "description": "Target netstandard2.0"
+          "description": "Target netstandard2.0",
+          "displayName": ".NET Standard 2.0"
         }
       ],
       "replaces": "netstandard2.0",
-      "defaultValue": "netstandard2.0"
+      "defaultValue": "netstandard2.0",
+      "displayName": "Framework"
     },
     "HostIdentifier": {
       "type": "bind",
@@ -69,7 +74,8 @@
       "type": "parameter",
       "datatype": "bool",
       "description": "If specified, skips the automatic restore of the project on create.",
-      "defaultValue": "false"
+      "defaultValue": "false",
+      "displayName": "Skip restore"
     }
   },
   "primaryOutputs": [

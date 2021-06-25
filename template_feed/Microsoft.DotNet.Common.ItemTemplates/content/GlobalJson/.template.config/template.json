@@ -29,11 +29,13 @@
     "SdkVersion": {
       "type": "parameter",
       "datatype": "string",
-      "description": "The version of the .NET Core SDK to use."
+      "description": "The version of the .NET Core SDK to use.",
+      "displayName": "SDK version"
     },
     "dotnet-cli-version": {
       "type": "parameter",
-      "datatype": "string"
+      "datatype": "string",
+      "displayName": "dotnet CLI version"
     },
     "CombinedVersion": {
       "type": "generated",

@@ -24,7 +24,8 @@
       "description": "Overrides the target framework",
       "replaces": "TargetFrameworkOverride",
       "datatype": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "displayName": "Target framework override"
     },
     "Framework": {
       "type": "parameter",
@@ -33,11 +34,13 @@
       "choices": [
         {
           "choice": "net6.0",
-          "description": "Target net6.0"
+          "description": "Target net6.0",
+          "displayName": ".NET 6.0"
         }
       ],
       "replaces": "net6.0",
-      "defaultValue": "net6.0"
+      "defaultValue": "net6.0",
+      "displayName": "Framework"
     },
     "HostIdentifier": {
       "type": "bind",
@@ -47,7 +50,8 @@
       "type": "parameter",
       "datatype": "bool",
       "description": "If specified, skips the automatic restore of the project on create.",
-      "defaultValue": "false"
+      "defaultValue": "false",
+      "displayName": "Skip restore"
     }
   },
   "primaryOutputs": [

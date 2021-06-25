@@ -24,7 +24,8 @@
       "description": "Overrides the target framework",
       "replaces": "TargetFrameworkOverride",
       "datatype": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "displayName": "Target framework override"
     },
     "Framework": {
       "type": "parameter",
@@ -33,14 +34,17 @@
       "choices": [
         {
           "choice": "netcoreapp1.0",
-          "description": "Target netcoreapp1.0"
+          "description": "Target netcoreapp1.0",
+          "displayName": ".NET Core 1.0"
         },
         {
           "choice": "netcoreapp1.1",
-          "description": "Target netcoreapp1.1"
+          "description": "Target netcoreapp1.1",
+          "displayName": ".NET Core 1.1"
         }
       ],
-      "defaultValue": "netcoreapp1.1"
+      "defaultValue": "netcoreapp1.1",
+      "displayName": "Framework"
     },
     "HostIdentifier": {
       "type": "bind",
@@ -50,7 +54,8 @@
       "type": "parameter",
       "datatype": "bool",
       "description": "If specified, skips the automatic restore of the project on create.",
-      "defaultValue": "false"
+      "defaultValue": "false",
+      "displayName": "Skip restore"
     }
   },
   "primaryOutputs": [
