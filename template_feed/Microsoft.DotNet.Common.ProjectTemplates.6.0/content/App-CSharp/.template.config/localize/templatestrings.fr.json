@@ -1,14 +1,14 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Simple Console Application",
-  "description": "A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.",
-  "symbols/framework/description": "The target framework for the project.",
-  "symbols/framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/no-restore/description": "If specified, skips the automatic restore of the project on create.",
-  "symbols/nullable/description": "Whether to enable nullable reference types for this project.",
-  "symbols/target-framework-override/description": "Overrides the target framework",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "name": "Application console simple",
+  "description": "Projet de création d’une application en ligne de commande qui utilise les dernières fonctionnalités C# et s’exécute sur .NET Core sur Windows, Linux et macOS.",
+  "symbols/framework/description": "Framework cible du projet.",
+  "symbols/framework/choices/net6.0/description": "Net6.0 cible",
+  "symbols/langVersion/description": "Définit la propriété LangVersion dans le fichier projet créé",
+  "symbols/no-restore/description": "S’il est spécifié, ignore la restauration automatique du projet lors de la création.",
+  "symbols/nullable/description": "Indique s’il faut activer les types référence Nullable pour ce projet.",
+  "symbols/target-framework-override/description": "Remplace l’infrastructure cible",
+  "postActions/restore/description": "Restaurez les packages NuGet requis par ce projet.",
+  "postActions/restore/manualInstructions/default/text": "Exécuter « dotnet restore »",
+  "postActions/open-file/description": "Ouvre Program.cs dans l’éditeur"
 }

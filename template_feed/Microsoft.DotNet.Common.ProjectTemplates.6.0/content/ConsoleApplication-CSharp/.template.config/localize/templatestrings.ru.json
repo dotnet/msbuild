@@ -1,13 +1,13 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "Консольное приложение",
   "description": "Проект для создания приложения командной строки, которое может выполняться в среде .NET Core в Windows, Linux и Mac OS",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Переопределяет целевую платформу",
+  "symbols/Framework/description": "Целевая платформа для проекта.",
+  "symbols/Framework/choices/net6.0/description": "Целевая платформа: net6.0",
+  "symbols/langVersion/description": "Задает свойство LangVersion в созданном файле проекта",
+  "symbols/skipRestore/description": "Если установлено, автоматическое восстановление проекта при создании пропускается.",
+  "postActions/restore/description": "Восстановление пакетов NuGet, необходимых для этого проекта.",
+  "postActions/restore/manualInstructions/default/text": "Выполнить команду \"dotnet restore\"",
+  "postActions/open-file/description": "Открывает файл Program.cs в редакторе"
 }

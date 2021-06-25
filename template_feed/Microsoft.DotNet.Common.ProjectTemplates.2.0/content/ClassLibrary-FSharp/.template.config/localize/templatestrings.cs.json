@@ -1,13 +1,13 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Class Library",
+  "name": "Knihovna tříd",
   "description": "Projekt pro vytvoření knihovny tříd určené pro .NET Standard nebo .NET Core",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp2.0/description": "Target netcoreapp2.0",
-  "symbols/Framework/choices/netstandard2.0/description": "Target netstandard2.0",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Library.fs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Přepíše cílovou architekturu.",
+  "symbols/Framework/description": "Cílová architektura pro projekt",
+  "symbols/Framework/choices/netcoreapp2.0/description": "Cílit na netcoreapp2.0",
+  "symbols/Framework/choices/netstandard2.0/description": "Cílit na netstandard2.0",
+  "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
+  "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
+  "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
+  "postActions/open-file/description": "Otevře Library.fs v editoru."
 }

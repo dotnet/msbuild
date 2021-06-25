@@ -1,13 +1,13 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "控制台应用程序",
   "description": "一个用于创建可在 Windows、Linux 和 macOS 上的 .NET Core 上运行的命令行应用程序的项目",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp3.0/description": "Target netcoreapp3.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.vb in the editor"
+  "symbols/TargetFrameworkOverride/description": "替代目标框架",
+  "symbols/Framework/description": "项目的目标框架。",
+  "symbols/Framework/choices/netcoreapp3.0/description": "目标netcoreapp3.0",
+  "symbols/langVersion/description": "在创建的项目文件中设置 LangVersion 属性",
+  "symbols/skipRestore/description": "如果指定，则在创建时跳过项目的自动还原。",
+  "postActions/restore/description": "还原此项目所需的 NuGet 包。",
+  "postActions/restore/manualInstructions/default/text": "运行“dotnet restore”",
+  "postActions/open-file/description": "在编辑器中打开 Program.vb"
 }

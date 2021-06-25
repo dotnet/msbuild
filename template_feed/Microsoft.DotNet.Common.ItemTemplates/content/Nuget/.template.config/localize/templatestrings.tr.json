@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "NuGet Config",
-  "description": "A file for configuring the locations NuGet will search for packages",
-  "postActions/open-file/description": "Opens nuget.config in the editor"
+  "name": "NuGet Yapılandırması",
+  "description": "NuGet'in paketleri arama yapacağı konumları yapılandırmaya yönelik dosya",
+  "postActions/open-file/description": "Düzenleyicide nuget.config’i açar"
 }

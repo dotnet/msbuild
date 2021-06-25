@@ -1,14 +1,14 @@
 ﻿{
-  "author": "Microsoft",
-  "name": "Simple Console Application",
-  "description": "A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.",
-  "symbols/framework/description": "The target framework for the project.",
-  "symbols/framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/no-restore/description": "If specified, skips the automatic restore of the project on create.",
-  "symbols/nullable/description": "Whether to enable nullable reference types for this project.",
-  "symbols/target-framework-override/description": "Overrides the target framework",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "author": "Майкрософт",
+  "name": "Простое консольное приложение",
+  "description": "Проект для создания приложения командной строки, которое использует новейшие функции C# и работает на платформе .NET Core в Windows, Linux и macOS.",
+  "symbols/framework/description": "Целевая платформа для проекта.",
+  "symbols/framework/choices/net6.0/description": "Целевая платформа: net6.0.",
+  "symbols/langVersion/description": "Задает свойство LangVersion в создаваемом файле проекта.",
+  "symbols/no-restore/description": "Позволяет пропускать автоматическое восстановление проекта при создании.",
+  "symbols/nullable/description": "Активация в проекте ссылочных типов, допускающих значение null.",
+  "symbols/target-framework-override/description": "Переопределяет целевую платформу.",
+  "postActions/restore/description": "Восстановление требуемых пакетов NuGet для этого проекта.",
+  "postActions/restore/manualInstructions/default/text": "Запуск \"dotnet restore\"",
+  "postActions/open-file/description": "Открывает Program.cs в редакторе."
 }

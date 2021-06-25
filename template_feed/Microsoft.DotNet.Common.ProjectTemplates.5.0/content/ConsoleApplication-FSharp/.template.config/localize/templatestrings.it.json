@@ -1,12 +1,12 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "Applicazione console",
   "description": "Progetto per la creazione di un'applicazione da riga di comando eseguibile in .NET Core in Windows, Linux e macOS",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/net5.0/description": "Target net5.0",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.fs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Ignora il framework di destinazione",
+  "symbols/Framework/description": "Il framework di destinazione per il progetto.",
+  "symbols/Framework/choices/net5.0/description": "Net5.0 di destinazione",
+  "symbols/skipRestore/description": "Se specificato, ignora il ripristino automatico del progetto durante la creazione.",
+  "postActions/restore/description": "Ripristina i pacchetti NuGet richiesti da questo progetto.",
+  "postActions/restore/manualInstructions/default/text": "Esegui 'dotnet restore'",
+  "postActions/open-file/description": "Apre Program.fs nell'editor"
 }

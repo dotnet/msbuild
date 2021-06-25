@@ -1,13 +1,13 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "Application console",
   "description": "Projet de création d'une application en ligne de commande pouvant s'exécuter sur .NET Core sur Windows, Linux et macOS",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp1.0/description": "Target netcoreapp1.0",
-  "symbols/Framework/choices/netcoreapp1.1/description": "Target netcoreapp1.1",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.fs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
+  "symbols/Framework/description": "Framework cible du projet.",
+  "symbols/Framework/choices/netcoreapp1.0/description": "Netcoreapp1.0 cible",
+  "symbols/Framework/choices/netcoreapp1.1/description": "Netcoreapp1.1 cible",
+  "symbols/skipRestore/description": "S’il est spécifié, ignore la restauration automatique du projet lors de la création.",
+  "postActions/restore/description": "Restaurez les packages NuGet requis par ce projet.",
+  "postActions/restore/manualInstructions/default/text": "Exécuter « dotnet restore »",
+  "postActions/open-file/description": "Ouvre Program.fs dans l’éditeur"
 }

@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Web Config",
+  "name": "Web 構成",
   "description": "Web アプリケーション設定の構成に使用されるファイル",
-  "postActions/open-file/description": "Opens web.config in the editor"
+  "postActions/open-file/description": "エディターで Web.config を開きます"
 }

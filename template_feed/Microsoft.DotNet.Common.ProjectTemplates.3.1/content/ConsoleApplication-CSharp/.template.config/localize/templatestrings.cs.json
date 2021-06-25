@@ -1,13 +1,13 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "Konzolová aplikace",
   "description": "Projekt pro vytvoření aplikace příkazového řádku, která běží na platformě .NET Core v systémech Windows, Linux a macOS",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp3.1/description": "Target netcoreapp3.1",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Přepíše cílovou architekturu.",
+  "symbols/Framework/description": "Cílová architektura pro projekt",
+  "symbols/Framework/choices/netcoreapp3.1/description": "Cílit na netcoreapp3.1",
+  "symbols/langVersion/description": "Nastaví vlastnost LangVersion ve vytvořeném souboru projektu.",
+  "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
+  "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
+  "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
+  "postActions/open-file/description": "Otevře Program.cs v editoru."
 }

@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "NuGet Config",
-  "description": "A file for configuring the locations NuGet will search for packages",
-  "postActions/open-file/description": "Opens nuget.config in the editor"
+  "name": "Configurazione NuGet",
+  "description": "Un file per la configurazione del NuGet dei percorsi eseguirà la ricerca dei pacchetti",
+  "postActions/open-file/description": "Apre nuget.config nell'editor"
 }

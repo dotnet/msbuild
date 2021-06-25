@@ -1,15 +1,15 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Class Library",
+  "name": "Библиотека классов",
   "description": "Проект для создания библиотеки классов, использующей .NET Standard или .NET Core",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp3.1/description": "Target netcoreapp3.1",
-  "symbols/Framework/choices/netstandard2.1/description": "Target netstandard2.1",
-  "symbols/Framework/choices/netstandard2.0/description": "Target netstandard2.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Class1.vb in the editor"
+  "symbols/TargetFrameworkOverride/description": "Переопределяет целевую платформу",
+  "symbols/Framework/description": "Целевая платформа для проекта.",
+  "symbols/Framework/choices/netcoreapp3.1/description": "Целевая платформа: netcoreapp3.1",
+  "symbols/Framework/choices/netstandard2.1/description": "Целевая платформа: netstandard2.1",
+  "symbols/Framework/choices/netstandard2.0/description": "Целевая платформа: netstandard2.0",
+  "symbols/langVersion/description": "Задает свойство LangVersion в созданном файле проекта",
+  "symbols/skipRestore/description": "Если установлено, автоматическое восстановление проекта при создании пропускается.",
+  "postActions/restore/description": "Восстановление пакетов NuGet, необходимых для этого проекта.",
+  "postActions/restore/manualInstructions/default/text": "Выполнить команду \"dotnet restore\"",
+  "postActions/open-file/description": "Открывает файл Class1.vb в редакторе"
 }

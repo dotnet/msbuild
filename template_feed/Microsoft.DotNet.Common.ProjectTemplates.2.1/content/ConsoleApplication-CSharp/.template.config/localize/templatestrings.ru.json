@@ -1,13 +1,13 @@
 ﻿{
-  "author": "Microsoft",
-  "name": "Console Application",
+  "author": "Майкрософт",
+  "name": "Консольное приложение",
   "description": "Проект для создания приложения командной строки, которое может выполняться в среде .NET Core в Windows, Linux и Mac OS",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp2.1/description": "Target netcoreapp2.1",
-  "symbols/langVersion/description": "Sets langVersion in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Переопределяет целевую платформу.",
+  "symbols/Framework/description": "Целевая платформа для проекта.",
+  "symbols/Framework/choices/netcoreapp2.1/description": "Целевая платформа: netcoreapp2.1.",
+  "symbols/langVersion/description": "Задает langVersion в создаваемом файле проекта.",
+  "symbols/skipRestore/description": "Позволяет пропускать автоматическое восстановление проекта при создании.",
+  "postActions/restore/description": "Восстановление требуемых пакетов NuGet для этого проекта.",
+  "postActions/restore/manualInstructions/default/text": "Запуск \"dotnet restore\"",
+  "postActions/open-file/description": "Открывает Program.cs в редакторе."
 }

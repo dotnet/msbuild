@@ -1,14 +1,14 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Simple Console Application",
-  "description": "A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.",
-  "symbols/framework/description": "The target framework for the project.",
-  "symbols/framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/no-restore/description": "If specified, skips the automatic restore of the project on create.",
-  "symbols/nullable/description": "Whether to enable nullable reference types for this project.",
-  "symbols/target-framework-override/description": "Overrides the target framework",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "name": "Basit Konsol Uygulaması",
+  "description": "En son C# özelliklerini kullanan ve Windows, Linux ile macOS üzerindeki .NET Core’da çalışan komut satırı uygulaması oluşturmaya yönelik proje.",
+  "symbols/framework/description": "Projenin hedef çerçevesi.",
+  "symbols/framework/choices/net6.0/description": "Hedef net6.0",
+  "symbols/langVersion/description": "Oluşturulan proje dosyasında LangVersion özelliğini ayarlar",
+  "symbols/no-restore/description": "Belirtilirse, oluşturma sırasında projenin otomatik geri yüklenmesini atlar.",
+  "symbols/nullable/description": "Bu proje için null atanabilir başvuru türlerinin etkinleştirilip etkinleştirilmeyeceğini belirtir.",
+  "symbols/target-framework-override/description": "Hedef çerçeveyi geçersiz kılar",
+  "postActions/restore/description": "Bu projenin gerektirdiği NuGet paketlerini geri yükleyin.",
+  "postActions/restore/manualInstructions/default/text": "'dotnet restore' çalıştır",
+  "postActions/open-file/description": "Düzenleyicide Program.cs’yi açar"
 }

@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Web Config",
+  "name": "Webová konfigurace",
   "description": "Soubor použitý pro konfiguraci nastavení webové aplikace",
-  "postActions/open-file/description": "Opens web.config in the editor"
+  "postActions/open-file/description": "Otevře web.config v editoru."
 }

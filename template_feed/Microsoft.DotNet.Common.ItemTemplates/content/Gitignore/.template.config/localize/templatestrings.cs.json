@@ -1,5 +1,5 @@
 ﻿{
   "author": "Microsoft",
-  "name": "dotnet gitignore file",
-  "description": "Creates a gitignore file for a dotnet project."
+  "name": "soubor gitignore pro dotnet",
+  "description": "Vytvoří soubor gitignore pro projekt dotnet."
 }

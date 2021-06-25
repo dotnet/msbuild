@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Web Config",
+  "name": "Веб-конфигурация",
   "description": "Файл, используемый для настройки параметров веб-приложения",
-  "postActions/open-file/description": "Opens web.config in the editor"
+  "postActions/open-file/description": "Открывает файл web.config в редакторе"
 }

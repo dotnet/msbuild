@@ -1,14 +1,14 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Simple Console Application",
-  "description": "A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.",
-  "symbols/framework/description": "The target framework for the project.",
-  "symbols/framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/no-restore/description": "If specified, skips the automatic restore of the project on create.",
-  "symbols/nullable/description": "Whether to enable nullable reference types for this project.",
-  "symbols/target-framework-override/description": "Overrides the target framework",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.cs in the editor"
+  "name": "Jednoduchá konzolová aplikace",
+  "description": "Projekt pro vytvoření aplikace příkazového řádku, která používá nejnovější funkce jazyka C# a běží na .NET Core v systémech Windows, Linux a macOS.",
+  "symbols/framework/description": "Cílová architektura pro projekt",
+  "symbols/framework/choices/net6.0/description": "Cílit na net6.0",
+  "symbols/langVersion/description": "Nastaví vlastnost LangVersion ve vytvořeném souboru projektu.",
+  "symbols/no-restore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
+  "symbols/nullable/description": "Určuje, jestli se mají pro tento projekt povolit odkazové typy s možnou hodnotou null.",
+  "symbols/target-framework-override/description": "Přepíše cílovou architekturu.",
+  "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
+  "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
+  "postActions/open-file/description": "Otevře Program.cs v editoru."
 }

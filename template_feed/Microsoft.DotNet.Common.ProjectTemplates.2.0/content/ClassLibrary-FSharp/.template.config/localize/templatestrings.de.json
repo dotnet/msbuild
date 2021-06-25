@@ -5,7 +5,7 @@
   "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
   "symbols/Framework/description": "The target framework for the project.",
   "symbols/Framework/choices/netcoreapp2.0/description": "Target netcoreapp2.0",
-  "symbols/Framework/choices/netstandard2.0/description": "Target netstandard2.0",
+  "symbols/Framework/choices/netstandard2.0/description": "Auf „netstandard2.0“ abzielen",
   "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
   "postActions/restore/description": "Restore NuGet packages required by this project.",
   "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",

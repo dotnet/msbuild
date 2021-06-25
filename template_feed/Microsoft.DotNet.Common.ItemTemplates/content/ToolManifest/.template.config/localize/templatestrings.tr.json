@@ -1,5 +1,5 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Dotnet local tool manifest file",
-  "description": "The file that defines available dotnet tools."
+  "name": "Dotnet yerel araç bildirimi dosyası",
+  "description": "Kullanılabilir dotnet araçlarını tanımlayan dosya."
 }

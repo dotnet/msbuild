@@ -1,7 +1,7 @@
 ﻿{
   "author": "Microsoft",
   "name": "global.json file",
-  "description": "A file for selecting the .NET Core SDK version.",
-  "symbols/SdkVersion/description": "The version of the .NET Core SDK to use.",
-  "postActions/open-file/description": "Opens global.json in the editor"
+  "description": ".NET Core SDK sürümünü seçmeye yönelik bir dosya.",
+  "symbols/SdkVersion/description": "Kullanılacak .NET Core SDK sürümü.",
+  "postActions/open-file/description": "Düzenleyicide global.json dosyasını açar"
 }

@@ -1,14 +1,14 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Class Library",
+  "name": "Biblioteca de Classes",
   "description": "Um projeto para criar uma biblioteca de classes direcionada para o .NET Standard ou .NET Core",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
+  "symbols/TargetFrameworkOverride/description": "Substitui a estrutura de destino",
   "symbols/Framework/description": "A estrutura de destino do projeto.",
   "symbols/Framework/choices/net6.0/description": "Net6.0 de destino",
   "symbols/Framework/choices/netstandard2.1/description": "Netstandard2.1 de destino",
   "symbols/Framework/choices/netstandard2.0/description": "Netstandard2.0 de destino",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
+  "symbols/skipRestore/description": "Se especificado, ignora a restauração automática do projeto sendo criado.",
+  "postActions/restore/description": "Restaura os pacotes do NuGet exigidos por este projeto.",
   "postActions/restore/manualInstructions/default/text": "Executar 'dotnet restore'",
   "postActions/open-file/description": "Abre Library.fs no editor"
 }

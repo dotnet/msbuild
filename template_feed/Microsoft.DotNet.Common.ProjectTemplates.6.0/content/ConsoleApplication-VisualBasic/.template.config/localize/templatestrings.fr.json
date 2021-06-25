@@ -1,13 +1,13 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "Application console",
   "description": "Projet de création d'une application en ligne de commande pouvant s'exécuter sur .NET Core sur Windows, Linux et macOS",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/net6.0/description": "Target net6.0",
-  "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.vb in the editor"
+  "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
+  "symbols/Framework/description": "Framework cible du projet.",
+  "symbols/Framework/choices/net6.0/description": "Net6.0 cible",
+  "symbols/langVersion/description": "Définit la propriété LangVersion dans le fichier projet créé",
+  "symbols/skipRestore/description": "S’il est spécifié, ignore la restauration automatique du projet lors de la création.",
+  "postActions/restore/description": "Restaurez les packages NuGet requis par ce projet.",
+  "postActions/restore/manualInstructions/default/text": "Exécuter « dotnet restore »",
+  "postActions/open-file/description": "Ouvre Program.vb dans l’éditeur"
 }

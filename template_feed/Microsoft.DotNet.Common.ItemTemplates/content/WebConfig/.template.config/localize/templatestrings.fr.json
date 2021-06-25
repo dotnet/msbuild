@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Web Config",
+  "name": "Configuration web",
   "description": "Fichier utilisé pour configurer des paramètres d'application web",
-  "postActions/open-file/description": "Opens web.config in the editor"
+  "postActions/open-file/description": "Ouvre web.config dans l’éditeur"
 }

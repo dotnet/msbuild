@@ -1,12 +1,12 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "Konsol Uygulaması",
   "description": "Windows, Linux ve macOS'de .NET Core üzerinde çalışabilen bir komut satırı uygulaması oluşturma projesi",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/net5.0/description": "Target net5.0",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.fs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Hedef çerçeveyi geçersiz kılar",
+  "symbols/Framework/description": "Projenin hedef çerçevesi.",
+  "symbols/Framework/choices/net5.0/description": "Hedef net5.0",
+  "symbols/skipRestore/description": "Belirtilirse, oluşturma sırasında projenin otomatik geri yüklenmesini atlar.",
+  "postActions/restore/description": "Bu projenin gerektirdiği NuGet paketlerini geri yükleyin.",
+  "postActions/restore/manualInstructions/default/text": "'dotnet restore' çalıştır",
+  "postActions/open-file/description": "Düzenleyicide Program.fs’yi açar"
 }
