@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
 using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -12,8 +13,11 @@ using Xunit;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.NET.HostModel;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Utilities;
+using NuGet.Packaging;
+using NuGet.Packaging.Signing;
 using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
@@ -240,6 +244,59 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                 .ContainSingle(
                     LocalizableStrings.SkipNuGetpackageSigningValidationmacOSLinux);
             File.Exists(packagePath).Should().BeTrue();
+        }
+
+        [WindowsOnlyFact]
+        // https://aka.ms/netsdkinternal-certificate-rotate
+        public void ItShouldHaveUpdateToDateCertificateSha()
+        {
+            NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
+                new MockFirstPartyNuGetPackageSigningVerifier(),
+                _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
+
+            var samplePackage = ExponentialRetry.ExecuteWithRetry<string>(
+                    action: DownloadMostRecentSamplePackageFromPublicFeed,
+                    shouldStopRetry: result => result != null,
+                    maxRetryCount: 3,
+                    timer: () => ExponentialRetry.Timer(ExponentialRetry.Intervals),
+                    taskDescription: "Run command while retry transient restore error")
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+
+            string DownloadMostRecentSamplePackageFromPublicFeed()
+            {
+                try
+                {
+                    return nuGetPackageDownloader.DownloadPackageAsync(
+                            new PackageId("Microsoft.iOS.Ref"), null, includePreview: true,
+                            packageSourceLocation: new PackageSourceLocation(
+                                sourceFeedOverrides: new[] {"https://api.nuget.org/v3/index.json"})).GetAwaiter()
+                        .GetResult();
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+
+            var firstPartyNuGetPackageSigningVerifier = new FirstPartyNuGetPackageSigningVerifier();
+            string shaFromPackage = GetShaFromSamplePackage(samplePackage);
+
+            firstPartyNuGetPackageSigningVerifier._firstPartyCertificateThumbprints.Contains(shaFromPackage).Should()
+                .BeTrue(
+                    $"Add {shaFromPackage} to the _firstPartyCertificateThumbprints of FirstPartyNuGetPackageSigningVerifier class. More info https://aka.ms/netsdkinternal-certificate-rotate");
+        }
+
+        private string GetShaFromSamplePackage(string samplePackage)
+        {
+            var packageReader = new PackageArchiveReader(samplePackage);
+            Directory.CreateDirectory(_tempDirectory.Value);
+            FilePath targetFilePath = _tempDirectory.WithFile(Path.GetRandomFileName());
+            packageReader.ExtractFile(".signature.p7s", targetFilePath.Value, _logger);
+            using var fs = new FileStream(targetFilePath.Value, FileMode.Open);
+            PrimarySignature primarySignature = PrimarySignature.Load(fs);
+            IX509CertificateChain certificateChain = SignatureUtility.GetCertificateChain(primarySignature);
+            var shaFromPackage = certificateChain[0].GetCertHashString(HashAlgorithmName.SHA256);
+            return shaFromPackage;
         }
 
         private static DirectoryPath GetUniqueTempProjectPathEachTest()

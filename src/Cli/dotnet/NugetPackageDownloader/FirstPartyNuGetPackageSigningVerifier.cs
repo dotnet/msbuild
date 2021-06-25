@@ -18,11 +18,15 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 {
     internal class FirstPartyNuGetPackageSigningVerifier : IFirstPartyNuGetPackageSigningVerifier
     {
-        private readonly HashSet<string> _firstPartyCertificateThumbprints =
-            new() {"3F9001EA83C560D712C24CF213C3D312CB3BFF51EE89435D3430BD06B5D0EECE"};
+        internal readonly HashSet<string> _firstPartyCertificateThumbprints =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                "3F9001EA83C560D712C24CF213C3D312CB3BFF51EE89435D3430BD06B5D0EECE",
+                "AA12DA22A49BCE7D5C1AE64CC1F3D892F150DA76140F210ABD2CBFFCA2C18A27"
+            };
 
         private readonly HashSet<string> _upperFirstPartyCertificateThumbprints =
-            new() {"51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862"};
+            new(StringComparer.OrdinalIgnoreCase) {"51044706BD237B91B89B781337E6D62656C69F0FCFFBE8E43741367948127862"};
 
         private const string FirstPartyCertificateSubject =
             "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US";
@@ -59,16 +63,14 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 }
 
                 X509Certificate2 firstCert = certificateChain.First();
-                if (_firstPartyCertificateThumbprints.Contains(firstCert.GetCertHashString(HashAlgorithmName.SHA256),
-                    StringComparer.OrdinalIgnoreCase))
+                if (_firstPartyCertificateThumbprints.Contains(firstCert.GetCertHashString(HashAlgorithmName.SHA256)))
                 {
                     return true;
                 }
 
                 if (firstCert.Subject.Equals(FirstPartyCertificateSubject, StringComparison.OrdinalIgnoreCase)
                     && _upperFirstPartyCertificateThumbprints.Contains(
-                        certificateChain[1].GetCertHashString(HashAlgorithmName.SHA256),
-                        StringComparer.OrdinalIgnoreCase))
+                        certificateChain[1].GetCertHashString(HashAlgorithmName.SHA256)))
                 {
                     return true;
                 }
