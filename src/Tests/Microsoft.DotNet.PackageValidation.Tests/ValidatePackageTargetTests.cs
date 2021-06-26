@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
 
             // No failures while running the package validation on a simple assembly.
             Assert.Equal(1, result.ExitCode);
-            Assert.Contains("error CP0002: Member 'PackageValidationTestProject.Program.SomeAPINotIn6_0()' exists on the left but not on the right", result.StdOut);
+            Assert.Contains("error CP0002: Member 'PackageValidationTestProject.Program.SomeAPINotIn6_0()' exists on lib/netstandard2.0/PackageValidationTestProject.dll but not on lib/net6.0/PackageValidationTestProject.dll", result.StdOut);
         }
 
         [Fact]

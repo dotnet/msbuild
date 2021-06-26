@@ -39,9 +39,11 @@ namespace Microsoft.DotNet.ApiCompatibility
 
         /// <summary>
         /// Callback function to get the <see cref="ComparingSettings"/> to be used when creating the settings to get the differences.
+        /// The callback takes a string leftName and string[] rightNames parameters to indicate API Compat via the settings what the 
+        /// name for the left and right the user specified.
         /// This callback is called at the beginning of every <see cref="GetDifferences"/> overload.
         /// </summary>
-        public Func<ComparingSettings> GetComparingSettings { get; set; }
+        public Func<string, string[], ComparingSettings> GetComparingSettings { get; set; }
 
         /// <summary>
         /// Get's the differences when comparing Left vs Right based on the settings at the moment this method is called.
@@ -50,7 +52,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="left">Left symbols to compare against.</param>
         /// <param name="right">Right symbols to compare against.</param>
         /// <returns>List of found differences.</returns>
-        public IEnumerable<CompatDifference> GetDifferences(IEnumerable<IAssemblySymbol> left, IEnumerable<IAssemblySymbol> right)
+        public IEnumerable<CompatDifference> GetDifferences(IEnumerable<IAssemblySymbol> left, IEnumerable<IAssemblySymbol> right, string leftName = null, string rightName = null)
         {
             if (left == null)
             {
@@ -62,7 +64,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 throw new ArgumentNullException(nameof(right));
             }
 
-            AssemblySetMapper mapper = new(GetComparingSettingsCore());
+            AssemblySetMapper mapper = new(GetComparingSettingsCore(leftName, new[] { rightName }));
             mapper.AddElement(left, ElementSide.Left);
             mapper.AddElement(right, ElementSide.Right);
 
@@ -78,7 +80,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="left">Left symbol to compare against.</param>
         /// <param name="right">Right symbol to compare against.</param>
         /// <returns>List of found differences.</returns>
-        public IEnumerable<CompatDifference> GetDifferences(IAssemblySymbol left, IAssemblySymbol right)
+        public IEnumerable<CompatDifference> GetDifferences(IAssemblySymbol left, IAssemblySymbol right, string leftName = null, string rightName = null)
         {
             if (left == null)
             {
@@ -90,7 +92,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 throw new ArgumentNullException(nameof(right));
             }
 
-            AssemblyMapper mapper = new(GetComparingSettingsCore());
+            AssemblyMapper mapper = new(GetComparingSettingsCore(leftName, new[] { rightName }));
             mapper.AddElement(left, ElementSide.Left);
             mapper.AddElement(right, ElementSide.Right);
 
@@ -120,10 +122,10 @@ namespace Microsoft.DotNet.ApiCompatibility
             }
 
             int rightCount = right.Count;
-            AssemblyMapper mapper = new(GetComparingSettingsCore(), rightSetSize: rightCount);
+            AssemblyMapper mapper = new(new ComparingSettings(), rightSetSize: rightCount);
             mapper.AddElement(left.Element, ElementSide.Left);
 
-            
+            string[] rightNames = new string[rightCount];
             for (int i = 0; i < rightCount; i++)
             {
                 if (right[i] == null)
@@ -131,8 +133,12 @@ namespace Microsoft.DotNet.ApiCompatibility
                     throw new ArgumentNullException(nameof(right), string.Format(Resources.ElementShouldNotBeNullAtIndex, i));
                 }
 
-                mapper.AddElement(right[i].Element, ElementSide.Right, i);
+                ElementContainer<IAssemblySymbol> element = right[i];
+                rightNames[i] = element.MetadataInformation.AssemblyId;
+                mapper.AddElement(element.Element, ElementSide.Right, i);
             }
+
+            mapper.Settings = GetComparingSettingsCore(left.MetadataInformation.AssemblyId, rightNames);
 
             DifferenceVisitor visitor = new(rightCount: rightCount, noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
             visitor.Visit(mapper);
@@ -149,12 +155,12 @@ namespace Microsoft.DotNet.ApiCompatibility
             return result;
         }
 
-        private ComparingSettings GetComparingSettingsCore()
+        private ComparingSettings GetComparingSettingsCore(string leftName, string[] rightNames)
         {
             if (GetComparingSettings != null)
-                return GetComparingSettings();
+                return GetComparingSettings(leftName, rightNames);
 
-            return new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(IncludeInternalSymbols), strictMode: StrictMode);
+            return new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(IncludeInternalSymbols), strictMode: StrictMode, leftName: leftName, rightNames: rightNames);
         }
     }
 }

@@ -136,16 +136,19 @@
     <value>Could not find matching assembly: '{0}' in any of the search directories.</value>
   </data>
   <data name="MemberExistsOnLeft" xml:space="preserve">
-    <value>Member '{0}' exists on the left but not on the right</value>
+    <value>Member '{0}' exists on {1} but not on {2}</value>
   </data>
   <data name="MemberExistsOnRight" xml:space="preserve">
-    <value>Member '{0}' exists on the right but not on the left</value>
+    <value>Member '{0}' exists on {2} but not on {1}</value>
   </data>
   <data name="ProvidedPathToLoadBinariesFromNotFound" xml:space="preserve">
     <value>Could not find the provided path '{0}' to load binaries from.</value>
   </data>
   <data name="ProvidedStreamDoesNotHaveMetadata" xml:space="preserve">
     <value>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</value>
+  </data>
+  <data name="RightNamesAtLeastOne" xml:space="preserve">
+    <value>Should at least contain one right name.</value>
   </data>
   <data name="ShouldBeGreaterThanZero" xml:space="preserve">
     <value>Value should be greater than 0.</value>
@@ -160,10 +163,10 @@
     <value>Stream position is greater than it's length, so there are no contents available to read.</value>
   </data>
   <data name="TypeExistsOnLeft" xml:space="preserve">
-    <value>Type '{0}' exists on the left but not on the right</value>
+    <value>Type '{0}' exists on {1} but not on {2}</value>
   </data>
   <data name="TypeExistsOnRight" xml:space="preserve">
-    <value>Type '{0}' exists on the right but not on the left</value>
+    <value>Type '{0}' exists on {2} but not on {1}</value>
   </data>
   <data name="VisitorRightCountShouldMatchMappersSetSize" xml:space="preserve">
     <value>The provided right count when creating the visitor should match the right set size specified for the mappers.</value>

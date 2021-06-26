@@ -49,7 +49,8 @@ namespace PackageValidationTests
             new CompatibleFrameworkInPackageValidator(string.Empty, null, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
             // TODO: add asserts for assembly and header metadata.
-            Assert.Contains("CP0002 Member 'PackageValidationTests.First.test(string)' exists on the left but not on the right", _log.errors);
+            string assemblyName = $"{asset.TestProject.Name}.dll";
+            Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(string)' exists on lib/netstandard2.0/{assemblyName} but not on lib/net5.0/{assemblyName}", _log.errors);
         }
         
         [Fact]
@@ -85,9 +86,11 @@ namespace PackageValidationTests
             Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
             new CompatibleFrameworkInPackageValidator(string.Empty, null, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
+
+            string assemblyName = $"{asset.TestProject.Name}.dll";
             // TODO: add asserts for assembly and header metadata.
-            Assert.Contains("CP0002 Member 'PackageValidationTests.First.test(string)' exists on the left but not on the right", _log.errors);
-            Assert.Contains("CP0002 Member 'PackageValidationTests.First.test(bool)' exists on the left but not on the right", _log.errors);
+            Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(string)' exists on lib/netstandard2.0/{assemblyName} but not on lib/netcoreapp3.1/{assemblyName}", _log.errors);
+            Assert.Contains($"CP0002 Member 'PackageValidationTests.First.test(bool)' exists on lib/netcoreapp3.1/{assemblyName} but not on lib/net5.0/{assemblyName}", _log.errors);
         }
     }
 }

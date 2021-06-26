@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using Microsoft.DotNet.ApiCompatibility.Rules;
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility
@@ -34,9 +35,9 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="ruleRunnerFactory">The factory to create a <see cref="IRuleRunner"/></param>
         /// <param name="filter">The symbol filter.</param>
         /// <param name="equalityComparer">The comparer to map metadata.</param>
-        public ComparingSettings(IRuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool strictMode = false)
+        public ComparingSettings(IRuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool strictMode = false, string leftName = null, string[] rightNames = null)
         {
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(strictMode);
+            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(leftName, rightNames, strictMode: strictMode);
             Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: false);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
         }

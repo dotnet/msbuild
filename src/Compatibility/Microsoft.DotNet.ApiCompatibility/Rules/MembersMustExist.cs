@@ -31,15 +31,15 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="TypeMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        private void RunOnTypeSymbol(ITypeSymbol left, ITypeSymbol right, IList<CompatDifference> differences)
+        private void RunOnTypeSymbol(ITypeSymbol left, ITypeSymbol right, string leftName, string rightName, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
             {
-                differences.Add(CreateDifference(left, DiagnosticIds.TypeMustExist, DifferenceType.Removed, Resources.TypeExistsOnLeft));
+                differences.Add(CreateDifference(left, DiagnosticIds.TypeMustExist, DifferenceType.Removed, Resources.TypeExistsOnLeft, leftName, rightName));
             }
             else if (Settings.StrictMode && left == null && right != null)
             {
-                differences.Add(CreateDifference(right, DiagnosticIds.TypeMustExist, DifferenceType.Added, Resources.TypeExistsOnRight));
+                differences.Add(CreateDifference(right, DiagnosticIds.TypeMustExist, DifferenceType.Added, Resources.TypeExistsOnRight, leftName, rightName));
             }
         }
 
@@ -48,27 +48,27 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        private void RunOnMemberSymbol(ISymbol left, ISymbol right, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol left, ISymbol right, string leftName, string rightName, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
             {
                 if (ShouldReportMissingMember(left))
                 {
-                    differences.Add(CreateDifference(left, DiagnosticIds.MemberMustExist, DifferenceType.Removed, Resources.MemberExistsOnLeft));
+                    differences.Add(CreateDifference(left, DiagnosticIds.MemberMustExist, DifferenceType.Removed, Resources.MemberExistsOnLeft, leftName, rightName));
                 }
             }
             else if (Settings.StrictMode && left == null && right != null)
             {
                 if (ShouldReportMissingMember(right))
                 {
-                    differences.Add(CreateDifference(right, DiagnosticIds.MemberMustExist, DifferenceType.Added, Resources.MemberExistsOnRight));
+                    differences.Add(CreateDifference(right, DiagnosticIds.MemberMustExist, DifferenceType.Added, Resources.MemberExistsOnRight, leftName, rightName));
                 }
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private CompatDifference CreateDifference(ISymbol symbol, string id, DifferenceType type, string format) =>
-            new(id, string.Format(format, symbol.ToDisplayString()), type, symbol);
+        private CompatDifference CreateDifference(ISymbol symbol, string id, DifferenceType type, string format, string leftName, string rightName) =>
+            new(id, string.Format(format, symbol.ToDisplayString(), leftName, rightName), type, symbol);
 
         private bool ShouldReportMissingMember(ISymbol symbol)
         {

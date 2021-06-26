@@ -33,13 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="MemberExistsOnLeft">
-        <source>Member '{0}' exists on the left but not on the right</source>
-        <target state="new">Member '{0}' exists on the left but not on the right</target>
+        <source>Member '{0}' exists on {1} but not on {2}</source>
+        <target state="new">Member '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="MemberExistsOnRight">
-        <source>Member '{0}' exists on the right but not on the left</source>
-        <target state="new">Member '{0}' exists on the right but not on the left</target>
+        <source>Member '{0}' exists on {2} but not on {1}</source>
+        <target state="new">Member '{0}' exists on {2} but not on {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProvidedPathToLoadBinariesFromNotFound">
@@ -50,6 +50,11 @@
       <trans-unit id="ProvidedStreamDoesNotHaveMetadata">
         <source>Provided stream for assembly '{0}' doesn't have any metadata to read. from.</source>
         <target state="new">Provided stream for assembly '{0}' doesn't have any metadata to read. from.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RightNamesAtLeastOne">
+        <source>Should at least contain one right name.</source>
+        <target state="new">Should at least contain one right name.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShouldBeGreaterThanZero">
@@ -73,13 +78,13 @@
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnLeft">
-        <source>Type '{0}' exists on the left but not on the right</source>
-        <target state="new">Type '{0}' exists on the left but not on the right</target>
+        <source>Type '{0}' exists on {1} but not on {2}</source>
+        <target state="new">Type '{0}' exists on {1} but not on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="TypeExistsOnRight">
-        <source>Type '{0}' exists on the right but not on the left</source>
-        <target state="new">Type '{0}' exists on the right but not on the left</target>
+        <source>Type '{0}' exists on {2} but not on {1}</source>
+        <target state="new">Type '{0}' exists on {2} but not on {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">

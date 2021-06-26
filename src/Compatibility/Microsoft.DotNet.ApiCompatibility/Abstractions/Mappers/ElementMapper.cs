@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         /// <summary>
         /// The <see cref="ComparingSettings"/> used to diff <see cref="Left"/> and <see cref="Right"/>.
         /// </summary>
-        public ComparingSettings Settings { get; }
+        public ComparingSettings Settings { get; internal set; }
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             if (rightSetSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(rightSetSize), Resources.ShouldBeGreaterThanZero);
 
-            Settings = settings;
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
             Right = new T[rightSetSize];
         }
 

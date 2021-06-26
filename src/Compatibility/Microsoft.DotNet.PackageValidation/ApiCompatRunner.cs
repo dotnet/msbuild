@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.PackageValidation
 
                     _log.LogMessage(MessageImportance.Low, apicompatTuples.header);
 
-                    IEnumerable<CompatDifference> differences = _differ.GetDifferences(leftSymbols, rightSymbols);
+                    IEnumerable<CompatDifference> differences = _differ.GetDifferences(leftSymbols, rightSymbols, leftName: apicompatTuples.leftAssemblyRelativePath, rightName: apicompatTuples.rightAssemblyRelativePath);
 
                     foreach (CompatDifference difference in differences)
                     {

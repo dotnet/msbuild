@@ -12,11 +12,18 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
     {
         private readonly RuleRunnerContext _context;
         private readonly RuleSettings _settings;
+        private readonly string _leftName;
+        private readonly string[] _rightNames;
 
-        internal RuleRunner(bool strictMode)
+        internal const string DEFAULT_LEFT_NAME = "left";
+        internal const string DEFAULT_RIGHT_NAME = "right";
+
+        internal RuleRunner(string leftName, string[] rightNames, bool strictMode)
         {
             _context = new RuleRunnerContext();
             _settings = new RuleSettings(strictMode);
+            _leftName = leftName;
+            _rightNames = rightNames;
             InitializeRules();
         }
 
@@ -38,21 +45,23 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
             void RunOnMapper(int rightIndex)
             {
+                string leftName = _leftName;
+                string rightName = rightIndex < _rightNames.Length ? _rightNames[rightIndex] : DEFAULT_RIGHT_NAME;
                 List<CompatDifference> differences = new();
                 T right = mapper.Right[rightIndex];
                 if (mapper is AssemblyMapper)
                 {
-                    _context.RunOnAssemblySymbolActions((IAssemblySymbol)mapper.Left, (IAssemblySymbol)right, differences);
+                    _context.RunOnAssemblySymbolActions((IAssemblySymbol)mapper.Left, (IAssemblySymbol)right, leftName, rightName, differences);
                 }
                 else if (mapper is TypeMapper tm)
                 {
                     if (tm.ShouldDiffElement(rightIndex))
-                        _context.RunOnTypeSymbolActions((ITypeSymbol)mapper.Left, (ITypeSymbol)right, differences);
+                        _context.RunOnTypeSymbolActions((ITypeSymbol)mapper.Left, (ITypeSymbol)right, leftName, rightName, differences);
                 }
                 else if (mapper is MemberMapper mm)
                 {
                     if (mm.ShouldDiffElement(rightIndex))
-                        _context.RunOnMemberSymbolActions((ISymbol)mapper.Left, (ISymbol)right, differences);
+                        _context.RunOnMemberSymbolActions((ISymbol)mapper.Left, (ISymbol)right, leftName, rightName, differences);
                 }
                 result.Add(differences);
             }

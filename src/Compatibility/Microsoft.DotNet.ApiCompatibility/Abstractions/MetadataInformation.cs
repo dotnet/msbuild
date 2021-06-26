@@ -13,20 +13,20 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     {
         public readonly string AssemblyName;
         public readonly string TargetFramework;
-        public readonly string AssemblyType;
+        public readonly string AssemblyId;
 
-        public MetadataInformation(string name, string targetFramework, string assemblyType)
+        public MetadataInformation(string name, string targetFramework, string assemblyId)
         {
             AssemblyName = name ?? string.Empty;
             TargetFramework = targetFramework ?? string.Empty;
-            AssemblyType = assemblyType ?? string.Empty;
+            AssemblyId = assemblyId ?? string.Empty;
         }
 
         public bool Equals(MetadataInformation other) =>
             string.Equals(AssemblyName, other.AssemblyName, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(TargetFramework, other.TargetFramework, StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(AssemblyType, other.AssemblyType, StringComparison.Ordinal);
+            string.Equals(AssemblyId, other.AssemblyId, StringComparison.Ordinal);
 
-        public override int GetHashCode() => HashCode.Combine(AssemblyName, TargetFramework, AssemblyType);
+        public override int GetHashCode() => HashCode.Combine(AssemblyName, TargetFramework, AssemblyId);
     }
 }
