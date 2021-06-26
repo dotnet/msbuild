@@ -21,6 +21,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             var sourceItemsWithDiagnostics = context.AdditionalTextsProvider
                 .Combine(context.AnalyzerConfigOptionsProvider)
+                .Where((pair) => pair.Item1.Path.EndsWith(".razor") || pair.Item1.Path.EndsWith(".cshtml"))
                 .Select(ComputeProjectItems);
 
             var sourceItems = sourceItemsWithDiagnostics.ReportDiagnostics(context);
