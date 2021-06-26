@@ -4,6 +4,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -102,6 +103,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 SetState(ProjectCacheServiceState.BeginBuildStarted);
 
+                logger.LogMessage("Initializing project cache plugin", MessageImportance.Low);
+                var timer = Stopwatch.StartNew();
+
                 if (_projectCacheDescriptor.VsWorkaround)
                 {
                     logger.LogMessage("Running project cache with Visual Studio workaround");
@@ -117,6 +121,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     // TODO: Detect verbosity from logging service.
                     logger,
                     _cancellationToken);
+
+                timer.Stop();
+                logger.LogMessage($"Finished initializing project cache plugin in {timer.Elapsed.TotalMilliseconds} ms", MessageImportance.Low);
 
                 SetState(ProjectCacheServiceState.BeginBuildFinished);
             }
@@ -413,7 +420,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 SetState(ProjectCacheServiceState.ShutdownStarted);
 
+                logger.LogMessage("Shutting down project cache plugin", MessageImportance.Low);
+                var timer = Stopwatch.StartNew();
+
                 await _projectCachePlugin.EndBuildAsync(logger, _cancellationToken);
+
+                timer.Stop();
+                logger.LogMessage($"Finished shutting down project cache plugin in {timer.Elapsed.TotalMilliseconds} ms", MessageImportance.Low);
 
                 if (logger.HasLoggedErrors)
                 {
