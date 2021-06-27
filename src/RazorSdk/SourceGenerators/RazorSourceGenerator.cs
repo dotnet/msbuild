@@ -57,7 +57,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var tagHelpersFromCompilation = syntaxTrees
                 .Combine(context.CompilationProvider)
                 .Combine(discoveryProjectEngine)
-                .Select((pair, _) =>
+                .SelectMany((pair, _) =>
                 {
                     var ((syntaxTrees, compilation), discoveryProjectEngine) = pair;
                     var tagHelperFeature = GetFeature<StaticCompilationTagHelperFeature>(discoveryProjectEngine);
@@ -83,7 +83,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     );
                 });
 
-            var tagHelpers = tagHelpersFromCompilation.Combine(tagHelpersFromReferences);
+            var tagHelpers = tagHelpersFromCompilation.Collect().Combine(tagHelpersFromReferences);
 
             var generationProjectEngine = tagHelpers.Combine(razorSourceGeneratorOptions).Combine(sourceItems.Collect())
                 .Select((pair, _) =>
@@ -91,7 +91,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     var (tagHelpersAndOptions, items) = pair;
                     var (tagHelpers, razorSourceGeneratorOptions) = tagHelpersAndOptions;
                     var (tagHelpersFromCompilation, tagHelpersFromReferences) = tagHelpers;
-                    var tagHelpersCount = tagHelpersFromCompilation.Count + tagHelpersFromReferences.Count;
+                    var tagHelpersCount = tagHelpersFromCompilation.Count() + tagHelpersFromReferences.Count;
                     var allTagHelpers = new List<TagHelperDescriptor>(tagHelpersCount);
                     allTagHelpers.AddRange(tagHelpersFromCompilation);
                     allTagHelpers.AddRange(tagHelpersFromReferences);
@@ -101,13 +101,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
             var generationInputs = sourceItems
                 .Combine(razorSourceGeneratorOptions)
-                .Combine(generationProjectEngine.Collect());
+                .Combine(generationProjectEngine);
 
             context.RegisterSourceOutput(generationInputs, (context, pair) =>
             {
-                var (sourceItemsAndOptions, projectEngines) = pair;
+                var (sourceItemsAndOptions, projectEngine) = pair;
                 var (projectItem, razorSourceGeneratorOptions) = sourceItemsAndOptions;
-                var projectEngine = projectEngines.Last();
 
                 var codeDocument = projectEngine.Process(projectItem);
                 var csharpDocument = codeDocument.GetCSharpDocument();
