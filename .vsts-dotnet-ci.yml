@@ -203,6 +203,8 @@ jobs:
     condition: always()
 
 - job: MonoOnMac
+  # Mono CI disabled for 16.7 because of SDK resolver errors
+  condition: eq(1,2)
   displayName: "macOS Mono"
   pool:
     vmImage: 'macOS-10.14'
