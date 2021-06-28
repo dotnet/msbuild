@@ -371,9 +371,10 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TestPreviewFeatures(bool enablePreviewFeatures)
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute)
         {
             const string targetFramework = "net6.0";
             var testAsset = _testAssetsManager
@@ -387,6 +388,13 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(
                         new XElement(ns + "PropertyGroup",
                             new XElement(ns + "EnablePreviewFeatures", $"{enablePreviewFeatures}")));
+
+                    if (enablePreviewFeatures && !generateRequiresPreviewFeaturesAttribute)
+                    {
+                        project.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "GenerateRequiresPreviewFeaturesAttribute", $"False")));
+                    }
                 });
 
             var buildCommand = new BuildCommand(testAsset);
@@ -410,13 +418,14 @@ namespace Microsoft.NET.Build.Tests
 
             var values = getValuesCommand.GetValues();
             var langVersion = values.FirstOrDefault() ?? string.Empty;
-            if (!enablePreviewFeatures)
+
+            if (generateRequiresPreviewFeaturesAttribute)
             {
-                Assert.False(contains);
+                Assert.True(contains);
             }
             else
             {
-                Assert.True(contains);
+                Assert.False(contains);
             }
         }
 

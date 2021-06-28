@@ -37,7 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyMetadataAttributes Condition="'$(GenerateAssemblyMetadataAttributes)' == ''">true</GenerateAssemblyMetadataAttributes>
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
     <GenerateInternalsVisibleToAttributes Condition="'$(GenerateInternalsVisibleToAttributes)' == ''">true</GenerateInternalsVisibleToAttributes>
-    <GeneratePreviewFeaturesAttribute Condition="'$(GeneratePreviewFeaturesAttribute)' == ''">true</GeneratePreviewFeaturesAttribute>
+    <GenerateRequiresPreviewFeaturesAttribute Condition="'$(GenerateRequiresPreviewFeaturesAttribute)' == ''">true</GenerateRequiresPreviewFeaturesAttribute>
   </PropertyGroup>
 
   <!--
@@ -115,7 +115,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_Parameter1>%(AssemblyMetadata.Identity)</_Parameter1>
         <_Parameter2>%(AssemblyMetadata.Value)</_Parameter2>
       </AssemblyAttribute>
-      <AssemblyAttribute Include="System.Runtime.Versioning.RequiresPreviewFeaturesAttribute" Condition="'$(EnablePreviewFeatures)' == 'true' and '$(GeneratePreviewFeaturesAttribute)' == 'true'">
+      <AssemblyAttribute Include="System.Runtime.Versioning.RequiresPreviewFeaturesAttribute" Condition="'$(EnablePreviewFeatures)' == 'true' and '$(GenerateRequiresPreviewFeaturesAttribute)' == 'true'">
       </AssemblyAttribute>
     </ItemGroup>
 
