@@ -1769,6 +1769,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   </Target>
 
+    <Target Name="GetPlatforms"
+          Returns="@(_ThisProjectPlatformMetadata)">
+    <ItemGroup>
+      <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
+        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <PlatformOptions>$(Platforms)</PlatformOptions>
+      </_ThisProjectPlatformMetadata>
+    </ItemGroup>
+  </Target>
+
   <!--
     ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
@@ -1932,16 +1942,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       -->
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' != 'true'" />
       <_MSBuildProjectReferenceExistent Include="@(AnnotatedProjects)" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="GetPlatforms"
-          Returns="@(_ThisProjectPlatformMetadata)">
-    <ItemGroup>
-      <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
-        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <PlatformOptions>$(Platforms)</PlatformOptions>
-      </_ThisProjectPlatformMetadata>
     </ItemGroup>
   </Target>
 
