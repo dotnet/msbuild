@@ -501,7 +501,7 @@ namespace Microsoft.Build.Shared
                 else
                 {
                     // Relative
-                    pathRoot = String.Empty;
+                    pathRoot = string.Empty;
                     startingElement = 0;
                 }
             }
@@ -516,7 +516,7 @@ namespace Microsoft.Build.Shared
                 // If there is a zero-length part, then that means there was an extra slash.
                 if (parts[i].Length == 0)
                 {
-                    longParts[i - startingElement] = String.Empty;
+                    longParts[i - startingElement] = string.Empty;
                 }
                 else
                 {
@@ -556,7 +556,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            return pathRoot + String.Join(s_directorySeparator, longParts);
+            return pathRoot + string.Join(s_directorySeparator, longParts);
         }
 
         /// <summary>
@@ -630,8 +630,8 @@ namespace Microsoft.Build.Shared
                  * 
                  *     **
                  */
-                fixedDirectoryPart = String.Empty;
-                wildcardDirectoryPart = String.Empty;
+                fixedDirectoryPart = string.Empty;
+                wildcardDirectoryPart = string.Empty;
                 filenamePart = filespec;
                 return;
             }
@@ -661,7 +661,7 @@ namespace Microsoft.Build.Shared
 
                 // We know the fixed director part now.
                 fixedDirectoryPart = filespec.Substring(0, indexOfLastDirectorySeparator + 1);
-                wildcardDirectoryPart = String.Empty;
+                wildcardDirectoryPart = string.Empty;
                 filenamePart = filespec.Substring(indexOfLastDirectorySeparator + 1);
                 return;
             }
@@ -682,7 +682,7 @@ namespace Microsoft.Build.Shared
                  * 
                  *      dir?\**
                  */
-                fixedDirectoryPart = String.Empty;
+                fixedDirectoryPart = string.Empty;
                 wildcardDirectoryPart = filespec.Substring(0, indexOfLastDirectorySeparator + 1);
                 filenamePart = filespec.Substring(indexOfLastDirectorySeparator + 1);
                 return;
@@ -1567,9 +1567,9 @@ namespace Microsoft.Build.Shared
             FixupParts fixupParts = null)
         {
             needsRecursion = false;
-            fixedDirectoryPart = String.Empty;
-            wildcardDirectoryPart = String.Empty;
-            filenamePart = String.Empty;
+            fixedDirectoryPart = string.Empty;
+            wildcardDirectoryPart = string.Empty;
+            filenamePart = string.Empty;
 
             if (!RawFileSpecIsValid(filespec))
             {
@@ -1661,7 +1661,7 @@ namespace Microsoft.Build.Shared
             internal bool isLegalFileSpec; // initially false
             internal bool isMatch; // initially false
             internal bool isFileSpecRecursive; // initially false
-            internal string wildcardDirectoryPart = String.Empty;
+            internal string wildcardDirectoryPart = string.Empty;
         }
 
         /// <summary>
@@ -1870,8 +1870,8 @@ namespace Microsoft.Build.Shared
             Match match = fileSpecRegex.Match(fileToMatch);
 
             isMatch = match.Success;
-            wildcardDirectoryPart = String.Empty;
-            filenamePart = String.Empty;
+            wildcardDirectoryPart = string.Empty;
+            filenamePart = string.Empty;
 
             if (isMatch)
             {
@@ -2085,7 +2085,7 @@ namespace Microsoft.Build.Shared
                         return SearchAction.ReturnEmptyList;
                     }
 
-                    stripProjectDirectory = !String.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
+                    stripProjectDirectory = !string.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
                 }
                 else
                 {
