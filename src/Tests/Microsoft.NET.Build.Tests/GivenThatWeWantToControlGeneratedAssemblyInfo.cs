@@ -378,7 +378,7 @@ namespace Microsoft.NET.Build.Tests
         {
             const string targetFramework = "net6.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}")
+                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}${generateRequiresPreviewFeaturesAttribute}")
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges((path, project) =>
