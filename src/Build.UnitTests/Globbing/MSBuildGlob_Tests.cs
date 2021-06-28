@@ -354,7 +354,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                 return NativeMethodsShared.IsWindows ? normalized.Replace("\\\\", "\\") : normalized;
             }
 
-            Assert.Equal(NormalizeSlashes(Path.Combine(FileUtilities.NormalizePath(globRoot), fixedDirectoryPart)), result.FixedDirectoryPartMatchGroup);
+            Assert.Equal(NormalizeSlashes(Path.Combine(globRoot, fixedDirectoryPart)), result.FixedDirectoryPartMatchGroup);
             Assert.Equal(NormalizeSlashes(wildcardDirectoryPart), result.WildcardDirectoryPartMatchGroup);
             Assert.Equal(NormalizeSlashes(filenamePart), result.FilenamePartMatchGroup);
         }
