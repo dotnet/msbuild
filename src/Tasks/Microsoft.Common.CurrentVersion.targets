@@ -1648,32 +1648,26 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
               string buildChildProjectAs = "";
 
-              // Pri 1: Child project only has single option.
-              if (childPlatforms.Count == 1)
-              {
-                buildChildProjectAs = childPlatforms.First();
-                Log.LogMessage($"Child project only has 1 platform option.");
-              }
-              // Pri 2: Translation table
-              else if (translationTable.ContainsKey(ParentProjectPlatform) &&
+              // Translation table takes priority
+              if (translationTable.ContainsKey(ParentProjectPlatform) &&
                         childPlatforms.Contains(translationTable[ParentProjectPlatform]))
               {
                 buildChildProjectAs = translationTable[ParentProjectPlatform];
                 Log.LogMessage($"Found {ParentProjectPlatform}={buildChildProjectAs} in the given translation table: {translationTable.ToString()}.");
               }
-              // Pri 3: AnyCPU if possible
+              // AnyCPU if possible
               else if (childPlatforms.Contains("AnyCPU"))
               {
                 buildChildProjectAs = "AnyCPU";
                 Log.LogMessage($"Defaulting to AnyCPU.");
               }
-              // Pri 4: Child has same platform as parent
+              // Try to prefer matching platforms
               else if (childPlatforms.Contains(ParentProjectPlatform))
               {
                 buildChildProjectAs = ParentProjectPlatform;
                 Log.LogMessage($"Child and parent have the same platform.");
               }
-              else 
+              else
               {
                 // Keep it empty, log a warning. Common.CurrentVersion.targets will undefine 
                 // Platform/PlatformTarget when this is the case.
