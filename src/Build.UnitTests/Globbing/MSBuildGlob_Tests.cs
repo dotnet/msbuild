@@ -353,7 +353,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                 return path.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
             }
 
-            Assert.Equal(NormalizeSlashes(Path.Combine(Path.GetFullPath(globRoot), fixedDirectoryPart)), result.FixedDirectoryPartMatchGroup);
+            Assert.Equal(NormalizeSlashes(Path.GetFullPath(Path.Combine(globRoot, fixedDirectoryPart))), result.FixedDirectoryPartMatchGroup);
             Assert.Equal(NormalizeSlashes(wildcardDirectoryPart), result.WildcardDirectoryPartMatchGroup);
             Assert.Equal(NormalizeSlashes(filenamePart), result.FilenamePartMatchGroup);
         }
