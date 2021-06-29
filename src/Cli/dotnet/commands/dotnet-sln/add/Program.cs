@@ -18,11 +18,17 @@ namespace Microsoft.DotNet.Tools.Sln.Add
         private readonly string _fileOrDirectory;
         private readonly bool _inRoot;
         private readonly IList<string> _relativeRootSolutionFolders;
+        private readonly IReadOnlyCollection<string> _arguments;
 
-        public AddProjectToSolutionCommand(
-            ParseResult parseResult) : base(parseResult)
+        public AddProjectToSolutionCommand(ParseResult parseResult) : base(parseResult)
         {
             _fileOrDirectory = parseResult.ValueForArgument<string>(SlnCommandParser.SlnArgument);
+
+            _arguments = parseResult.ValueForArgument(SlnAddParser.ProjectPathArgument)?.ToArray() ?? (IReadOnlyCollection<string>)Array.Empty<string>();
+            if (_arguments.Count == 0)
+            {
+                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
+            }
 
             _inRoot = parseResult.ValueForOption<bool>(SlnAddParser.InRootOption);
             string relativeRoot = parseResult.ValueForOption<string>(SlnAddParser.SolutionFolderOption);
@@ -43,27 +49,39 @@ namespace Microsoft.DotNet.Tools.Sln.Add
             {
                 _relativeRootSolutionFolders = null;
             }
+
+            var slnFile = _arguments.FirstOrDefault(path => path.EndsWith(".sln"));
+            if (slnFile != null)
+            {
+                string args;
+                if (_inRoot) args = $"--{SlnAddParser.InRootOption.Name} ";
+                else if (hasRelativeRoot) args = $"--{SlnAddParser.SolutionFolderOption.Name} {string.Join(" ", relativeRoot)} ";
+                else args = "";
+
+                var projectArgs = string.Join(" ", _arguments.Where(path => !path.EndsWith(".sln")));
+
+                throw new GracefulException(new string[]
+                {
+                    string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, slnFile),
+                    CommonLocalizableStrings.DidYouMean,
+                    $"  dotnet sln {slnFile} add {args}{projectArgs}"
+                });
+            }
         }
 
         public override int Execute()
         {
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            var arguments = (_parseResult.ValueForArgument<IEnumerable<string>>(SlnAddParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
-            if (arguments.Count == 0)
-            {
-                throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd);
-            }
+            PathUtility.EnsureAllPathsExist(_arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
 
-            PathUtility.EnsureAllPathsExist(arguments, CommonLocalizableStrings.CouldNotFindProjectOrDirectory, true);
-
-            var fullProjectPaths = arguments.Select(p =>
+            var fullProjectPaths = _arguments.Select(p =>
             {
                 var fullPath = Path.GetFullPath(p);
                 return Directory.Exists(fullPath) ?
                     MsbuildProject.GetProjectFileFromDirectory(fullPath).FullName :
                     fullPath;
-            }).ToList();
+            }).ToArray();
 
             var preAddProjectCount = slnFile.Projects.Count;
 

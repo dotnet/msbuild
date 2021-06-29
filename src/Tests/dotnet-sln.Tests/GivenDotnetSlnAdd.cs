@@ -1246,5 +1246,68 @@ EndGlobal
 
             return slnContents;
         }
+
+        [Fact]
+        public void WhenSolutionIsPassedAsProjectItPrintsSuggestionAndUsage()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "WhenSolutionIsPassedAsProject")
+                .WithSource()
+                .Path;
+
+            var projectArg = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "add", "App.sln", projectArg);
+            cmd.Should().Fail();
+            cmd.StdErr.Should().BeVisuallyEquivalentTo(
+                string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, "App.sln") + Environment.NewLine
+                + CommonLocalizableStrings.DidYouMean + Environment.NewLine
+                + $"  dotnet sln App.sln add {projectArg}"
+            );
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+        }
+
+        [Fact]
+        public void WhenSolutionIsPassedAsProjectWithInRootItPrintsSuggestionAndUsage()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "WhenSolutionIsPassedAsProject")
+                .WithSource()
+                .Path;
+
+            var projectArg = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "add", "--in-root", "App.sln", projectArg);
+            cmd.Should().Fail();
+            cmd.StdErr.Should().BeVisuallyEquivalentTo(
+                string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, "App.sln") + Environment.NewLine
+                + CommonLocalizableStrings.DidYouMean + Environment.NewLine
+                + $"  dotnet sln App.sln add --in-root {projectArg}"
+            );
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+        }
+
+        [Fact]
+        public void WhenSolutionIsPassedAsProjectWithSolutionFolderItPrintsSuggestionAndUsage()
+        {
+            var projectDirectory = _testAssetsManager
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "WhenSolutionIsPassedAsProject")
+                .WithSource()
+                .Path;
+
+            var projectArg = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand(Log)
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("sln", "add", "--solution-folder", "Lib", "App.sln", projectArg);
+            cmd.Should().Fail();
+            cmd.StdErr.Should().BeVisuallyEquivalentTo(
+                string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, "App.sln") + Environment.NewLine
+                + CommonLocalizableStrings.DidYouMean + Environment.NewLine
+                + $"  dotnet sln App.sln add --solution-folder Lib {projectArg}"
+            );
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(projectDirectory));
+        }
     }
 }

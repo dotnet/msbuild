@@ -18,16 +18,27 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
         private readonly string _fileOrDirectory;
         private readonly IReadOnlyCollection<string> _arguments;
 
-        public RemoveProjectFromSolutionCommand(
-            ParseResult parseResult) : base(parseResult)
+        public RemoveProjectFromSolutionCommand(ParseResult parseResult) : base(parseResult)
         {
-            _arguments = (parseResult.ValueForArgument<IEnumerable<string>>(SlnRemoveParser.ProjectPathArgument) ?? Array.Empty<string>()).ToList().AsReadOnly();
+            _fileOrDirectory = parseResult.ValueForArgument<string>(SlnCommandParser.SlnArgument);
+
+            _arguments = parseResult.ValueForArgument(SlnRemoveParser.ProjectPathArgument)?.ToArray() ?? (IReadOnlyCollection<string>)Array.Empty<string>();
             if (_arguments.Count == 0)
             {
                 throw new GracefulException(CommonLocalizableStrings.SpecifyAtLeastOneProjectToRemove);
             }
 
-            _fileOrDirectory = parseResult.ValueForArgument<string>(SlnCommandParser.SlnArgument);
+            var slnFile = _arguments.FirstOrDefault(path => path.EndsWith(".sln"));
+            if (slnFile != null)
+            {
+                var projectArgs = string.Join(" ", _arguments.Where(path => !path.EndsWith(".sln")));
+                throw new GracefulException(new string[]
+                {
+                    string.Format(CommonLocalizableStrings.SolutionArgumentMisplaced, slnFile),
+                    CommonLocalizableStrings.DidYouMean,
+                    $"  dotnet sln {slnFile} remove {projectArgs}"
+                });
+            }
         }
 
         public override int Execute()
@@ -43,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
                         MsbuildProject.GetProjectFileFromDirectory(fullPath).FullName :
                         fullPath
                 );
-            });
+            }).ToArray();
 
             bool slnChanged = false;
             foreach (var path in relativeProjectPaths)

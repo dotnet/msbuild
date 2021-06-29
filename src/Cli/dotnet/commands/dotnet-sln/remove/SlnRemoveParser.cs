@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnRemoveParser
     {
-        public static readonly Argument ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.RemoveProjectPathArgumentName)
+        public static readonly Argument<IEnumerable<string>> ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.RemoveProjectPathArgumentName)
         {
             Description = LocalizableStrings.RemoveProjectPathArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
