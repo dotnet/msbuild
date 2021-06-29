@@ -55,6 +55,8 @@
     <PackageReference Include="xunit.core" />
     <PackageReference Include="xunit.assert" />
 
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
+
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 

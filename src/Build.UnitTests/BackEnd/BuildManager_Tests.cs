@@ -3954,7 +3954,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Regression test for https://github.com/Microsoft/msbuild/issues/3047
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "out-of-proc nodes not working on mono yet")]
+        [SkipOnMono("out-of-proc nodes not working on mono yet")]
         public void MultiProcReentrantProjectWithCallTargetDoesNotFail()
         {
             var a =
