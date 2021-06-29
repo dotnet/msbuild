@@ -2,11 +2,8 @@ trigger:
   batch: true
   branches:
     include:
-    - master
-    - main
-    - release/*
-    - internal/release/3.*
-    - internal/release/5.*
+      - main
+      - release/*.*
 
 variables:
   - name: teamName
@@ -37,35 +34,6 @@ stages:
 - stage: build
   displayName: Build
   jobs:
-  - template: /eng/build.yml
-    parameters:
-      agentOs: Windows_NT
-      pool:
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          name: NetCorePublic-Pool
-          queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-        ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          name: NetCoreInternal-Pool
-          queue:  BuildPool.Windows.10.Amd64.VS2019.Pre
-      helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
-      strategy:
-        matrix:
-          Build_Release:
-            _BuildConfig: Release
-            ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-              _PublishType: none
-              _SignType: test
-              _Test: -test
-            ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-              _PublishType: blob
-              _SignType: real
-              _Test: ''
-  - template: /eng/common/templates/job/source-build.yml
-    parameters:
-      platform:
-        name: 'Managed'
-        container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343'
-  - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
         enableRichCodeNavigation: true
@@ -95,7 +63,6 @@ stages:
               _PublishType: none
               _SignType: test
               _Test: -test
-
     - template: /eng/build.yml
       parameters:
         agentOs: Windows_NT_TestAsTools
@@ -112,7 +79,6 @@ stages:
               _BuildConfig: Debug
               _PublishType: none
               _SignType: test
-
     - template: /eng/build.yml
       parameters:
         agentOs: Ubuntu_16_04
@@ -133,7 +99,6 @@ stages:
               _BuildConfig: Release
               _PublishType: none
               _SignType: test
-
     - template: /eng/build.yml
       parameters:
         agentOs: Darwin
@@ -149,33 +114,3 @@ stages:
               _BuildConfig: Release
               _PublishType: none
               _SignType: test
-
-  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    - template: /eng/common/templates/job/publish-build-assets.yml
-      parameters:
-        publishUsingPipelines: true
-        dependsOn:
-          - Windows_NT
-        queue:
-          name: Hosted VS2017
-- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: /eng/common/templates/post-build/post-build.yml
-    parameters:
-      publishingInfraVersion: 3
-      enableSymbolValidation: false
-      enableSigningValidation: false
-      enableNugetValidation: false
-      enableSourceLinkValidation: false
-      publishInstallersAndChecksums: true
-      SDLValidationParameters:
-        enable: false
-        params: ' -SourceToolsList @("policheck","credscan")
-        -TsaInstanceURL $(_TsaInstanceURL)
-        -TsaProjectName $(_TsaProjectName)
-        -TsaNotificationEmail $(_TsaNotificationEmail)
-        -TsaCodebaseAdmin $(_TsaCodebaseAdmin)
-        -TsaBugAreaPath $(_TsaBugAreaPath)
-        -TsaIterationPath $(_TsaIterationPath)
-        -TsaRepositoryName "dotnet-sdk"
-        -TsaCodebaseName "dotnet-sdk"
-        -TsaPublish $True'
