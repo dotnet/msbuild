@@ -1500,6 +1500,13 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
 
         [Fact]
+        // Schedules different requests for the same BuildRequestConfiguration in parallel.
+        // The first batch of the requests are cache misses, the second batch are cache hits via proxy builds.
+        // The first batch is delayed so it starts intermingling with the second batch.
+        // This test ensures that scheduling proxy builds on the inproc node works nicely within the Scheduler
+        // if the BuildRequestConfigurations for those proxy builds have built before (or are still building) on
+        // the out of proc node.
+        // More details: https://github.com/dotnet/msbuild/pull/6635 
         public void ProxyCacheHitsOnPreviousCacheMissesShouldWork()
         {
             var cacheNotApplicableTarget = "NATarget";
