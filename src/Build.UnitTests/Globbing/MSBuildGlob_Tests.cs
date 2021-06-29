@@ -350,11 +350,13 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             string NormalizeSlashes(string path)
             {
-                string normalized = path.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
-                return NativeMethodsShared.IsWindows ? normalized.Replace("\\\\", "\\") : normalized;
+                string normalizedPath = path.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
+                return NativeMethodsShared.IsWindows ? normalizedPath.Replace("\\\\", "\\") : normalizedPath;
             }
 
-            Assert.Equal(NormalizeSlashes(Path.Combine(FileUtilities.NormalizePath(globRoot), fixedDirectoryPart)), result.FixedDirectoryPartMatchGroup);
+            var rootedFixedDirectoryPart = Path.Combine(FileUtilities.NormalizePath(globRoot), fixedDirectoryPart);
+
+            Assert.Equal(FileUtilities.GetFullPathNoThrow(rootedFixedDirectoryPart), result.FixedDirectoryPartMatchGroup);
             Assert.Equal(NormalizeSlashes(wildcardDirectoryPart), result.WildcardDirectoryPartMatchGroup);
             Assert.Equal(NormalizeSlashes(filenamePart), result.FilenamePartMatchGroup);
         }
