@@ -160,9 +160,20 @@ namespace Microsoft.DotNet.Cli
 
         internal class DotnetHelpBuilder : HelpBuilder
         {
-            public DotnetHelpBuilder(IConsole console) : base(console) { }
+            public DotnetHelpBuilder(IConsole console, int maxWidth = int.MaxValue) : base(console, maxWidth) { }
 
-            public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => new DotnetHelpBuilder(new CommandLineConsole()));
+            public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => {
+                int windowWidth;
+                try
+                {
+                    windowWidth = System.Console.WindowWidth;
+                }
+                catch
+                {
+                    windowWidth = int.MaxValue;
+                }
+                return new DotnetHelpBuilder(new SystemConsole(), windowWidth);
+            });
 
             public override void Write(ICommand command)
             {
