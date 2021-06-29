@@ -388,7 +388,9 @@ namespace Dotnet_new3.IntegrationTests
             Assert.True(TestUtils.CompareFiles(sourceImage, targetImage), $"The content of {sourceImage} and {targetImage} is not same.");
         }
 
-        [Fact]
+#pragma warning disable xUnit1004 // Test methods should not be skipped
+        [Fact(Skip = "re-enable after https://github.com/dotnet/templating/issues/3325 is fixed")]
+#pragma warning restore xUnit1004 // Test methods should not be skipped
         public void CanInstantiateTemplate_WithBinaryFile_FromPackage()
         {
             string templateLocation = TestUtils.GetTestTemplateLocation("TemplateWithBinaryFile");
