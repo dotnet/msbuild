@@ -413,12 +413,10 @@ namespace Microsoft.NET.Build.Tests
             if (!enablePreviewFeatures)
             {
                 Assert.False(contains);
-                Assert.True(langVersion.Equals(string.Empty, System.StringComparison.Ordinal));
             }
             else
             {
                 Assert.True(contains);
-                Assert.True(langVersion.Equals("Preview", System.StringComparison.Ordinal));
             }
         }
 
