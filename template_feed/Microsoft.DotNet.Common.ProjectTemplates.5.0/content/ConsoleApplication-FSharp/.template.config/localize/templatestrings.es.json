@@ -1,12 +1,16 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Console Application",
+  "name": "Aplicación de consola",
   "description": "Proyecto para crear una aplicación de línea de comandos que se puede ejecutar en .NET Core en Windows, Linux y macOS.",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/net5.0/description": "Target net5.0",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Program.fs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Invalida la plataforma de destino",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
+  "symbols/Framework/description": "Marco de destino del proyecto.",
+  "symbols/Framework/choices/net5.0/description": "Destino Net 5.0",
+  "symbols/Framework/choices/net5.0/displayName": ".NET 5.0",
+  "symbols/Framework/displayName": "Framework",
+  "symbols/skipRestore/description": "Si se especifica, se omite la restauración automática del proyecto durante la creación.",
+  "symbols/skipRestore/displayName": "Skip restore",
+  "postActions/restore/description": "Restaure los paquetes NuGet necesarios para este proyecto.",
+  "postActions/restore/manualInstructions/default/text": "Ejecutar \"dotnet restore\"",
+  "postActions/open-file/description": "Abre Program.fs en el editor"
 }

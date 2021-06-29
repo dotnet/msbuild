@@ -3,5 +3,7 @@
   "name": "global.json file",
   "description": ".NET Core SDK sürümünü seçmeye yönelik bir dosya.",
   "symbols/SdkVersion/description": "Kullanılacak .NET Core SDK sürümü.",
+  "symbols/SdkVersion/displayName": "SDK version",
+  "symbols/dotnet-cli-version/displayName": "dotnet CLI version",
   "postActions/open-file/description": "Düzenleyicide global.json dosyasını açar"
 }

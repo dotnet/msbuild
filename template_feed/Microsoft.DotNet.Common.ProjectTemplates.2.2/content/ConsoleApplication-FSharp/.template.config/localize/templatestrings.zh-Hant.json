@@ -3,9 +3,13 @@
   "name": "主控台應用程式",
   "description": "專案，用於建立可在 Windows、Linux 及 macOS 於 .NET Core 執行的命令列應用程式",
   "symbols/TargetFrameworkOverride/description": "覆寫目標 Framework",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
   "symbols/Framework/description": "專案的目標 Framework。",
   "symbols/Framework/choices/netcoreapp2.2/description": "目標 netcoreapp2.2",
+  "symbols/Framework/choices/netcoreapp2.2/displayName": ".NET Core 2.2",
+  "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "若指定，會在建立時跳過專案的自動還原。",
+  "symbols/skipRestore/displayName": "Skip restore",
   "postActions/restore/description": "還原此專案所需的 NuGet 套件。",
   "postActions/restore/manualInstructions/default/text": "執行 'dotnet restore'",
   "postActions/open-file/description": "在編輯器中開啟 Program.fs"

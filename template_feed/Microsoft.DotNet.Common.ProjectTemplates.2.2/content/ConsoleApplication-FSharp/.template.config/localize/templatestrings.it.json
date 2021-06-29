@@ -3,9 +3,13 @@
   "name": "Applicazione console",
   "description": "Progetto per la creazione di un'applicazione da riga di comando eseguibile in .NET Core in Windows, Linux e macOS",
   "symbols/TargetFrameworkOverride/description": "Ignora il framework di destinazione",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
   "symbols/Framework/description": "Il framework di destinazione per il progetto.",
   "symbols/Framework/choices/netcoreapp2.2/description": "Netcoreapp2.2 di destinazione",
+  "symbols/Framework/choices/netcoreapp2.2/displayName": ".NET Core 2.2",
+  "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "Se specificato, ignora il ripristino automatico del progetto durante la creazione.",
+  "symbols/skipRestore/displayName": "Skip restore",
   "postActions/restore/description": "Ripristina i pacchetti NuGet richiesti da questo progetto.",
   "postActions/restore/manualInstructions/default/text": "Esegui 'dotnet restore'",
   "postActions/open-file/description": "Apre Program.fs nell'editor"

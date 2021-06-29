@@ -3,9 +3,13 @@
   "name": "Консольное приложение",
   "description": "Проект для создания приложения командной строки, которое может выполняться в среде .NET Core в Windows, Linux и Mac OS",
   "symbols/TargetFrameworkOverride/description": "Переопределяет целевую платформу",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
   "symbols/Framework/description": "Целевая платформа для проекта.",
   "symbols/Framework/choices/netcoreapp3.0/description": "Целевая платформа: netcoreapp3.0",
+  "symbols/Framework/choices/netcoreapp3.0/displayName": ".NET Core 3.0",
+  "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "Если установлено, автоматическое восстановление проекта при создании пропускается.",
+  "symbols/skipRestore/displayName": "Skip restore",
   "postActions/restore/description": "Восстановление пакетов NuGet, необходимых для этого проекта.",
   "postActions/restore/manualInstructions/default/text": "Выполнить команду \"dotnet restore\"",
   "postActions/open-file/description": "Открывает файл Program.fs в редакторе"

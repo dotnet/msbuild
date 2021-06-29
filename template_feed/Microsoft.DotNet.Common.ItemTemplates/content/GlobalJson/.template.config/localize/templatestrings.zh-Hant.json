@@ -3,5 +3,7 @@
   "name": "global.json 檔案",
   "description": "用於選取 .NET Core SDK 版本的檔案。",
   "symbols/SdkVersion/description": "要使用的 .NET Core SDK 版本。",
+  "symbols/SdkVersion/displayName": "SDK version",
+  "symbols/dotnet-cli-version/displayName": "dotnet CLI version",
   "postActions/open-file/description": "在編輯器中開啟 global.json"
 }

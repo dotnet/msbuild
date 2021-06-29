@@ -3,5 +3,7 @@
   "name": "global.json file",
   "description": "Soubor pro výběr verze .NET Core SDK",
   "symbols/SdkVersion/description": "Verze .NET Core SDK, která se má použít",
+  "symbols/SdkVersion/displayName": "SDK version",
+  "symbols/dotnet-cli-version/displayName": "dotnet CLI version",
   "postActions/open-file/description": "Otevře global.json v editoru."
 }

@@ -3,9 +3,13 @@
   "name": "Application console",
   "description": "Projet de création d'une application en ligne de commande pouvant s'exécuter sur .NET Core sur Windows, Linux et macOS",
   "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
   "symbols/Framework/description": "Framework cible du projet.",
   "symbols/Framework/choices/netcoreapp3.0/description": "Netcoreapp3.0 cible",
+  "symbols/Framework/choices/netcoreapp3.0/displayName": ".NET Core 3.0",
+  "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "S’il est spécifié, ignore la restauration automatique du projet lors de la création.",
+  "symbols/skipRestore/displayName": "Skip restore",
   "postActions/restore/description": "Restaurez les packages NuGet requis par ce projet.",
   "postActions/restore/manualInstructions/default/text": "Exécuter « dotnet restore »",
   "postActions/open-file/description": "Ouvre Program.fs dans l’éditeur"

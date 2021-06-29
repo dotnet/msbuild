@@ -3,5 +3,7 @@
   "name": "fichier global.json",
   "description": "Fichier permettant de sélectionner la version kit SDK .NET Core.",
   "symbols/SdkVersion/description": "Version du kit SDK .NET Core à utiliser.",
+  "symbols/SdkVersion/displayName": "SDK version",
+  "symbols/dotnet-cli-version/displayName": "dotnet CLI version",
   "postActions/open-file/description": "Ouvre global.json dans l’éditeur"
 }

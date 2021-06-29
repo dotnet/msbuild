@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Web Config",
+  "name": "Webkonfiguration",
   "description": "Eine Datei zum Konfigurieren von Webanwendungseinstellungen.",
-  "postActions/open-file/description": "Opens web.config in the editor"
+  "postActions/open-file/description": "Öffnet „web.config“ im Editor"
 }

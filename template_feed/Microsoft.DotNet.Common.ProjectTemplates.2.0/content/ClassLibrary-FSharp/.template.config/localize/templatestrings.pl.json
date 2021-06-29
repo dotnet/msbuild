@@ -1,13 +1,18 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Class Library",
+  "name": "Biblioteka klas",
   "description": "Projekt służący do tworzenia biblioteki klas przeznaczonej dla platformy .NET Standard lub .NET Core",
-  "symbols/TargetFrameworkOverride/description": "Overrides the target framework",
-  "symbols/Framework/description": "The target framework for the project.",
-  "symbols/Framework/choices/netcoreapp2.0/description": "Target netcoreapp2.0",
-  "symbols/Framework/choices/netstandard2.0/description": "Target netstandard2.0",
-  "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
-  "postActions/restore/description": "Restore NuGet packages required by this project.",
-  "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
-  "postActions/open-file/description": "Opens Library.fs in the editor"
+  "symbols/TargetFrameworkOverride/description": "Zastępuje platformę docelową",
+  "symbols/TargetFrameworkOverride/displayName": "Target framework override",
+  "symbols/Framework/description": "Platforma docelowa dla tego projektu.",
+  "symbols/Framework/choices/netcoreapp2.0/description": "Docelowy netcoreapp2.0",
+  "symbols/Framework/choices/netcoreapp2.0/displayName": ".NET Core 2.0",
+  "symbols/Framework/choices/netstandard2.0/description": "Docelowy netstandard2.0",
+  "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
+  "symbols/Framework/displayName": "Framework",
+  "symbols/skipRestore/description": "Jeśli ta opcja jest określona, pomija automatyczne przywracanie projektu podczas tworzenia.",
+  "symbols/skipRestore/displayName": "Skip restore",
+  "postActions/restore/description": "Przywróć pakiety NuGet wymagane przez ten projekt.",
+  "postActions/restore/manualInstructions/default/text": "Uruchom polecenie \"dotnet restore\"",
+  "postActions/open-file/description": "Otwiera bibliotekę Library.fs w edytorze"
 }

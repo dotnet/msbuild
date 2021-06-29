@@ -1,5 +1,5 @@
 ﻿{
   "author": "Microsoft",
-  "name": "Dotnet local tool manifest file",
-  "description": "The file that defines available dotnet tools."
+  "name": "Plik manifestu narzędzia lokalnego dotnet",
+  "description": "Plik definiujący dostępne narzędzia dotnet."
 }
