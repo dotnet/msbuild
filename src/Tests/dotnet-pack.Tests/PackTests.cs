@@ -287,5 +287,19 @@ namespace Microsoft.DotNet.Pack.Tests
                 result.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
             }
         }
+
+        [Fact]
+        public void DotnetPackAcceptsRuntimeOption()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("TestAppSimple")
+                .WithSource();
+
+            var result = new DotnetPackCommand(Log)
+                .WithWorkingDirectory(testInstance.Path)
+                .Execute("--runtime", "unknown");
+
+            result.Should().Fail()
+                .And.HaveStdOutContaining("NETSDK1083");
+        }
     }
 }
