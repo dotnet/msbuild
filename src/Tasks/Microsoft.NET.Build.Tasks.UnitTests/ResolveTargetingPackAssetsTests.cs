@@ -41,13 +41,23 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     })
             };
 
+            task.ProjectLanguage = "C#";
+
             task.Execute().Should().BeTrue();
 
             task.ReferencesToAdd[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "lib/Microsoft.Windows.SDK.NET.dll"));
             task.PlatformManifests[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, $"data{Path.DirectorySeparatorChar}PlatformManifest.txt"));
+            task.AnalyzersToAdd.Length.Should().Be(2);
+            task.AnalyzersToAdd[0].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "analyzers/dotnet/anyAnalyzer.dll"));
+            task.AnalyzersToAdd[1].ItemSpec.Should().Be(Path.Combine(mockPackageDirectory, "analyzers/dotnet/cs/csAnalyzer.dll"));
         }
 
         private readonly string _frameworkList =
-            "<FileList Name=\"cswinrt .NET Core 5.0\">	<File Type=\"Managed\" Path=\"lib/Microsoft.Windows.SDK.NET.dll\" PublicKeyToken=\"null\" AssemblyName=\"Microsoft.Windows.SDK.NET\" AssemblyVersion=\"10.0.18362.3\" FileVersion=\"10.0.18362.3\" /></FileList>";
+@"<FileList Name=""cswinrt .NET Core 5.0"">
+  <File Type=""Managed"" Path=""lib/Microsoft.Windows.SDK.NET.dll"" PublicKeyToken=""null"" AssemblyName=""Microsoft.Windows.SDK.NET"" AssemblyVersion=""10.0.18362.3"" FileVersion=""10.0.18362.3"" />
+  <File Type=""Analyzer"" Path=""analyzers/dotnet/anyAnalyzer.dll"" PublicKeyToken=""null"" AssemblyName=""anyAnalyzer"" AssemblyVersion=""10.0.18362.3"" FileVersion=""10.0.18362.3"" />
+  <File Type=""Analyzer"" Language=""cs"" Path=""analyzers/dotnet/cs/csAnalyzer.dll"" PublicKeyToken=""null"" AssemblyName=""csAnalyzer"" AssemblyVersion=""10.0.18362.3"" FileVersion=""10.0.18362.3"" />
+  <File Type=""Analyzer"" Language=""vb"" Path=""analyzers/dotnet/vb/vbAnalyzer.dll"" PublicKeyToken=""null"" AssemblyName=""vbAnalyzer"" AssemblyVersion=""10.0.18362.3"" FileVersion=""10.0.18362.3"" />
+</FileList>";
     }
 }

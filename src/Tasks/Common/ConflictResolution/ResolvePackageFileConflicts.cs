@@ -13,11 +13,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
     public class ResolvePackageFileConflicts : TaskWithAssemblyResolveHooks
     {
         private HashSet<ITaskItem> referenceConflicts = new HashSet<ITaskItem>();
+        private HashSet<ITaskItem> analyzerConflicts = new HashSet<ITaskItem>();
         private HashSet<ITaskItem> copyLocalConflicts = new HashSet<ITaskItem>();
         private HashSet<ConflictItem> compilePlatformWinners = new HashSet<ConflictItem>();
         private HashSet<ConflictItem> allConflicts = new HashSet<ConflictItem>();
 
         public ITaskItem[] References { get; set; }
+
+        public ITaskItem[] Analyzers { get; set; }
 
         public ITaskItem[] ReferenceCopyLocalPaths { get; set; }
 
@@ -45,6 +48,10 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
         [Output]
         public ITaskItem[] ReferencesWithoutConflicts { get; set; }
+
+        [Output]
+        public ITaskItem[] AnalyzersWithoutConflicts { get; set; }
+
 
         [Output]
         public ITaskItem[] ReferenceCopyLocalPathsWithoutConflicts { get; set; }
@@ -89,6 +96,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             //  Remove platform items which won a conflict with a reference but subsequently lost to something else
             compilePlatformWinners.ExceptWith(allConflicts);
+
+            // resolve analyzer conflicts
+            var analyzerItems = GetConflictTaskItems(Analyzers, ConflictItemType.Analyzer).ToArray();
+
+            using (var analyzerConflictScope = new ConflictResolver<ConflictItem>(packageRanks, packageOverrides, log))
+            {
+                analyzerConflictScope.ResolveConflicts(analyzerItems, ci => ci.FileName, HandleAnalyzerConflict);
+            }
 
             // resolve conflicts that clash in output
             IEnumerable<ConflictItem> copyLocalItems;
@@ -140,6 +155,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             }
 
             ReferencesWithoutConflicts = RemoveConflicts(References, referenceConflicts);
+            AnalyzersWithoutConflicts = RemoveConflicts(Analyzers, analyzerConflicts);
             ReferenceCopyLocalPathsWithoutConflicts = RemoveConflicts(ReferenceCopyLocalPaths, copyLocalConflicts);
             Conflicts = CreateConflictTaskItems(allConflicts);
 
@@ -230,6 +246,12 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     compilePlatformWinners.Add(winner);
                 }
             }
+            allConflicts.Add(loser);
+        }
+
+        private void HandleAnalyzerConflict(ConflictItem winner, ConflictItem loser)
+        {
+            analyzerConflicts.Add(loser.OriginalItem);
             allConflicts.Add(loser);
         }
 

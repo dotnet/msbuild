@@ -73,6 +73,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             var ret = new List<ConflictItem>();
             foreach (var file in frameworkList.Root.Elements("File"))
             {
+                var type = file.Attribute("Type")?.Value;
+
+                if (type?.Equals("Analyzer", StringComparison.OrdinalIgnoreCase) ?? false)
+                {
+                    continue;
+                }
+
                 var assemblyName = file.Attribute("AssemblyName")?.Value;
                 var assemblyVersionString = file.Attribute("Version")?.Value;
 

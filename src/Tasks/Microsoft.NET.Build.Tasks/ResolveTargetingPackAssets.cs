@@ -26,8 +26,13 @@ namespace Microsoft.NET.Build.Tasks
 
         public string NetCoreTargetingPackRoot { get; set; }
 
+        public string ProjectLanguage { get; set; }
+
         [Output]
         public ITaskItem[] ReferencesToAdd { get; set; }
+
+        [Output]
+        public ITaskItem[] AnalyzersToAdd { get; set; }
 
         [Output]
         public ITaskItem[] PlatformManifests { get; set; }
@@ -48,6 +53,7 @@ namespace Microsoft.NET.Build.Tasks
         protected override void ExecuteCore()
         {
             List<TaskItem> referencesToAdd = new List<TaskItem>();
+            List<TaskItem> analyzersToAdd = new List<TaskItem>();
             List<TaskItem> platformManifests = new List<TaskItem>();
             PackageConflictPreferredPackages = string.Empty;
             List<TaskItem> packageConflictOverrides = new List<TaskItem>();
@@ -123,8 +129,8 @@ namespace Microsoft.NET.Build.Tasks
 
                         string frameworkListPath = Path.Combine(targetingPackDataPath, "FrameworkList.xml");
 
-                        AddReferencesFromFrameworkList(frameworkListPath, targetingPackRoot, targetingPackDllFolder,
-                                                        targetingPack, referencesToAdd);
+                        AddItemsFromFrameworkList(frameworkListPath, targetingPackRoot, targetingPackDllFolder,
+                                                  targetingPack, referencesToAdd, analyzersToAdd);
 
                         if (File.Exists(platformManifestPath))
                         {
@@ -148,7 +154,10 @@ namespace Microsoft.NET.Build.Tasks
 
             //  Filter out duplicate references (which can happen when referencing two different profiles that overlap)
             List<TaskItem> deduplicatedReferences = DeduplicateItems(referencesToAdd);
-            ReferencesToAdd = deduplicatedReferences.Distinct() .ToArray();
+            ReferencesToAdd = deduplicatedReferences.Distinct().ToArray();
+
+            List<TaskItem> deduplicatedAnalyzers = DeduplicateItems(analyzersToAdd);
+            AnalyzersToAdd = deduplicatedAnalyzers.Distinct().ToArray();
 
             PlatformManifests = platformManifests.ToArray();
             PackageConflictOverrides = packageConflictOverrides.ToArray();
@@ -184,7 +193,7 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var dll in Directory.GetFiles(targetingPackAssetPath, "*.dll"))
             {
-                var reference = CreateReferenceItem(dll, targetingPack);
+                var reference = CreateItem(dll, targetingPack);
 
                 if (!Path.GetFileName(dll).Equals("netstandard.dll", StringComparison.OrdinalIgnoreCase))
                 {
@@ -195,9 +204,9 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-        private void AddReferencesFromFrameworkList(string frameworkListPath, string targetingPackRoot,
+        private void AddItemsFromFrameworkList(string frameworkListPath, string targetingPackRoot,
             string targetingPackDllFolder,
-            ITaskItem targetingPack, List<TaskItem> referenceItems)
+            ITaskItem targetingPack, List<TaskItem> referenceItems, List<TaskItem> analyzerItems)
         {
             XDocument frameworkListDoc = XDocument.Load(frameworkListPath);
 
@@ -234,17 +243,40 @@ namespace Microsoft.NET.Build.Tasks
                     continue;
                 }
 
-                string dllPath = usePathElementsInFrameworkListAsFallBack ?
+                string itemType = fileElement.Attribute("Type")?.Value;
+                bool isAnalyzer = itemType?.Equals("Analyzer", StringComparison.OrdinalIgnoreCase) ?? false;
+
+                string dllPath = usePathElementsInFrameworkListAsFallBack || isAnalyzer ?
                     Path.Combine(targetingPackRoot, fileElement.Attribute("Path").Value) :
                     GetDllPathViaAssemblyName(targetingPackDllFolder, fileElement);
 
-                var referenceItem = CreateReferenceItem(dllPath, targetingPack);
+                var item = CreateItem(dllPath, targetingPack);
 
-                referenceItem.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
-                referenceItem.SetMetadata("FileVersion", fileElement.Attribute("FileVersion").Value);
-                referenceItem.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken").Value);
+                item.SetMetadata("AssemblyVersion", fileElement.Attribute("AssemblyVersion").Value);
+                item.SetMetadata("FileVersion", fileElement.Attribute("FileVersion").Value);
+                item.SetMetadata("PublicKeyToken", fileElement.Attribute("PublicKeyToken").Value);
 
-                referenceItems.Add(referenceItem);
+                if (isAnalyzer)
+                {
+                    string itemLanguage = fileElement.Attribute("Language")?.Value;
+
+                    if (itemLanguage != null)
+                    {
+                        // expect cs instead of C#, fs rather than F# per NuGet conventions
+                        string projectLanguage = ProjectLanguage?.Replace('#', 's');
+
+                        if (projectLanguage == null || !projectLanguage.Equals(itemLanguage, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+                    }
+
+                    analyzerItems.Add(item);
+                }
+                else
+                {
+                    referenceItems.Add(item);
+                }
             }
         }
 
@@ -279,7 +311,7 @@ namespace Microsoft.NET.Build.Tasks
             return dllPath;
         }
 
-        private TaskItem CreateReferenceItem(string dll, ITaskItem targetingPack)
+        private TaskItem CreateItem(string dll, ITaskItem targetingPack)
         {
             var reference = new TaskItem(dll);
 
