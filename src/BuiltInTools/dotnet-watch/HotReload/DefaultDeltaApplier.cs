@@ -91,6 +91,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     ModuleId = c.ModuleId,
                     ILDelta = c.ILDelta.ToArray(),
                     MetadataDelta = c.MetadataDelta.ToArray(),
+                    UpdatedTypes = c.UpdatedTypes.ToArray(),
                 }),
             };
 

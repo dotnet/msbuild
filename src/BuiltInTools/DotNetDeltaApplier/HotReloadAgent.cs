@@ -184,8 +184,7 @@ namespace Microsoft.Extensions.HotReload
                 _handlerActions ??= GetMetadataUpdateHandlerActions();
                 var handlerActions = _handlerActions;
 
-                // TODO: Get types to pass in
-                Type[]? updatedTypes = null;
+                Type[]? updatedTypes = GetMetadataUpdateTypes(deltas);
 
                 for (var i = 0; i < deltas.Count; i++)
                 {
@@ -212,6 +211,29 @@ namespace Microsoft.Extensions.HotReload
             {
                 _log(ex.ToString());
             }
+        }
+
+        private Type[] GetMetadataUpdateTypes(IReadOnlyList<UpdateDelta> deltas)
+        {
+            List<Type>? types = null;
+
+            foreach (var delta in deltas)
+            {
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    if (TryGetModuleId(assembly) is Guid moduleId && moduleId == delta.ModuleId)
+                    {
+                        var type = assembly.GetTypes().FirstOrDefault(f => delta.UpdatedTypes.Any(d => d == f.MetadataToken));
+                        if (type != null)
+                        {
+                            types ??= new();
+                            types.Add(type);
+                        }
+                    }
+                }
+            }
+
+            return types?.ToArray() ?? Type.EmptyTypes;
         }
 
         public void ApplyDeltas(Assembly assembly, IReadOnlyList<UpdateDelta> deltas)

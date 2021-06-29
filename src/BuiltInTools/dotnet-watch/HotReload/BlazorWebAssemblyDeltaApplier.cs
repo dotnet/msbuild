@@ -98,6 +98,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                     ModuleId = c.ModuleId,
                     MetadataDelta = c.MetadataDelta.ToArray(),
                     ILDelta = c.ILDelta.ToArray(),
+                    UpdatedTypes = c.UpdatedTypes.ToArray(),
                 }),
             };
 
@@ -179,6 +180,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             public Guid ModuleId { get; init; }
             public byte[] MetadataDelta { get; init; }
             public byte[] ILDelta { get; init; }
+            public int[] UpdatedTypes { get; init; }
         }
 
         public readonly struct HotReloadDiagnostics

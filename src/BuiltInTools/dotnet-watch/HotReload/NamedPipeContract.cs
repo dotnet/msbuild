@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.HotReload
 {
     internal readonly struct UpdatePayload
     {
-        private static readonly byte Version = 0;
+        private static readonly byte Version = 1;
 
         public string ChangedFile { get; init; }
         public IReadOnlyList<UpdateDelta> Deltas { get; init; }
@@ -30,6 +30,7 @@ namespace Microsoft.Extensions.HotReload
                 binaryWriter.Write(delta.ModuleId.ToString());
                 await WriteBytesAsync(binaryWriter, delta.MetadataDelta, cancellationToken);
                 await WriteBytesAsync(binaryWriter, delta.ILDelta, cancellationToken);
+                WriteIntArray(binaryWriter, delta.UpdatedTypes);
             }
 
             static ValueTask WriteBytesAsync(BinaryWriter binaryWriter, byte[] bytes, CancellationToken cancellationToken)
@@ -37,6 +38,21 @@ namespace Microsoft.Extensions.HotReload
                 binaryWriter.Write(bytes.Length);
                 binaryWriter.Flush();
                 return binaryWriter.BaseStream.WriteAsync(bytes, cancellationToken);
+            }
+
+            static void WriteIntArray(BinaryWriter binaryWriter, int[] values)
+            {
+                if (values is null)
+                {
+                    binaryWriter.Write(0);
+                    return;
+                }
+
+                binaryWriter.Write(values.Length);
+                foreach (var value in values)
+                {
+                    binaryWriter.Write(value);
+                }
             }
         }
 
@@ -60,6 +76,7 @@ namespace Microsoft.Extensions.HotReload
                     ModuleId = Guid.Parse(binaryReader.ReadString()),
                     MetadataDelta = await ReadBytesAsync(binaryReader, cancellationToken),
                     ILDelta = await ReadBytesAsync(binaryReader, cancellationToken),
+                    UpdatedTypes = ReadIntArray(binaryReader),
                 };
 
                 deltas[i] = delta;
@@ -70,10 +87,11 @@ namespace Microsoft.Extensions.HotReload
                 ChangedFile = changedFile,
                 Deltas = deltas,
             };
-        
+
             static async ValueTask<byte[]> ReadBytesAsync(BinaryReader binaryReader, CancellationToken cancellationToken)
             {
                 var numBytes = binaryReader.ReadInt32();
+
                 var bytes = new byte[numBytes];
 
                 var read = 0;
@@ -84,6 +102,24 @@ namespace Microsoft.Extensions.HotReload
 
                 return bytes;
             }
+
+            static int[] ReadIntArray(BinaryReader binaryReader)
+            {
+                var numValues = binaryReader.ReadInt32();
+                if (numValues == 0)
+                {
+                    return Array.Empty<int>();
+                }
+
+                var values = new int[numValues];
+
+                for (var i = 0; i < numValues; i++)
+                {
+                    values[i] = binaryReader.ReadInt32();
+                }
+
+                return values;
+            }
         }
     }
 
@@ -92,6 +128,7 @@ namespace Microsoft.Extensions.HotReload
         public Guid ModuleId { get; init; }
         public byte[] MetadataDelta { get; init; }
         public byte[] ILDelta { get; init; }
+        public int[] UpdatedTypes { get; init; }
     }
 
     internal enum ApplyResult
