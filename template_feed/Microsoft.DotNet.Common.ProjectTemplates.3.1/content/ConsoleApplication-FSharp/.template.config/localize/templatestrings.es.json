@@ -6,7 +6,7 @@
   "symbols/TargetFrameworkOverride/displayName": "Target framework override",
   "symbols/Framework/description": "Marco de destino del proyecto.",
   "symbols/Framework/choices/netcoreapp3.1/description": "Destino Net Core App 3.1",
-  "symbols/Framework/choices/netcoreapp3.1/displayName": ".NET Core 3.1",
+  "symbols/Framework/choices/netcoreapp3.1/displayName": ".NET Core 3.1",
   "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "Si se especifica, se omite la restauración automática del proyecto durante la creación.",
   "symbols/skipRestore/displayName": "Skip restore",

@@ -429,7 +429,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="FileActionsWouldHaveBeenTaken">
         <source>File actions would have been taken:</source>
-        <target state="translated">Были бы предприняты действия с файлами:</target>
+        <target state="translated">Будут предприняты следующие действия с файлами:</target>
         <note />
       </trans-unit>
       <trans-unit id="ForcesTemplateCreation">
@@ -681,7 +681,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="RerunCommandAndPassForceToCreateAnyway">
         <source>Rerun the command and pass --force to accept and create.</source>
-        <target state="translated">Повторно выполните команду и передайте параметр --force, чтобы принять и создать.</target>
+        <target state="translated">Чтобы создать шаблон, повторно выполните команду и передайте параметр --force.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreFailed">
@@ -696,7 +696,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>Run dotnet {0} --help for usage information.</source>
-        <target state="translated">Запустить dotnet {0} --help для получения сведений об использовании.</target>
+        <target state="translated">Запуститe dotnet {0} --help для получения сведений об использовании.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -706,7 +706,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="RunningDotnetRestoreOn">
         <source>Running 'dotnet restore' on {0}...</source>
-        <target state="translated">Выполнение запуска "dotnet restore" на {0}...</target>
+        <target state="translated">Выполнение "dotnet restore" для {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="SearchOnlineErrorNoTemplateNameOrFilter">

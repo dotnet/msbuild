@@ -6,7 +6,7 @@
   "symbols/TargetFrameworkOverride/displayName": "Target framework override",
   "symbols/Framework/description": "Framework cible du projet.",
   "symbols/Framework/choices/netcoreapp2.2/description": "Netcoreapp2.2 cible",
-  "symbols/Framework/choices/netcoreapp2.2/displayName": ".NET Core 2.2",
+  "symbols/Framework/choices/netcoreapp2.2/displayName": ".NET Core 2.2",
   "symbols/Framework/choices/netstandard2.0/description": "Netstandard2.0 cible",
   "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
   "symbols/Framework/displayName": "Framework",
