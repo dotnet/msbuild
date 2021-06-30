@@ -432,10 +432,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             var graph = testData.CreateGraph(_env);
             var mockCache = new InstanceMockCache(testData);
 
-            buildParameters.ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
-                mockCache,
-                null,
-                graph);
+            // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
+            buildParameters = new BuildParameters(buildParameters, resetEnvironment: true)
+            {
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+                    mockCache,
+                    null,
+                    graph)
+            };
 
             using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
 
@@ -471,7 +475,12 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 null,
                 graph);
 
-            buildParameters.ProjectCacheDescriptor = projectCacheDescriptor;
+            // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
+            buildParameters = new BuildParameters(buildParameters, resetEnvironment: true)
+            {
+                ProjectCacheDescriptor = projectCacheDescriptor
+            };
+
 
             using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
             var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
@@ -518,6 +527,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
+                // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
+                buildParameters = new BuildParameters(buildParameters, resetEnvironment: true);
+
                 BuildManager.ProjectCacheItems.ShouldBeEmpty();
 
                 var graph = testData.CreateGraph(_env);
@@ -540,6 +552,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 }
 
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
+                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
                 AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
             }
@@ -604,6 +617,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 buildSession.Dispose();
 
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
+
+                // Design time builds should not initialize the plugin.
+                buildSession.Logger.FullLog.ShouldNotContain("Running project cache with Visual Studio workaround");
 
                 // Cache doesn't get initialized and queried.
                 buildSession.Logger.FullLog.ShouldNotContain("BeginBuildAsync");
@@ -934,8 +950,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Fact]
         public void GraphBuildErrorsIfMultiplePluginsAreFound()
         {
-            _env.DoNotLaunchDebugger();
-
             var graph = Helpers.CreateProjectGraph(
                 _env,
                 new Dictionary<int, int[]>
@@ -960,8 +974,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Fact]
         public void GraphBuildErrorsIfNotAllNodeDefineAPlugin()
         {
-            _env.DoNotLaunchDebugger();
-
             var graph = Helpers.CreateProjectGraph(
                 _env,
                 dependencyEdges: new Dictionary<int, int[]>
@@ -1014,8 +1026,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [MemberData(nameof(CacheExceptionLocationsTestData))]
         public void EngineShouldHandleExceptionsFromCachePluginViaBuildParameters(ErrorLocations errorLocations, ErrorKind errorKind)
         {
-            _env.DoNotLaunchDebugger();
-
             SetEnvironmentForErrorLocations(errorLocations, errorKind.ToString());
 
             var project = _env.CreateFile("1.proj", @$"
@@ -1135,8 +1145,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [MemberData(nameof(CacheExceptionLocationsTestData))]
         public void EngineShouldHandleExceptionsFromCachePluginViaGraphBuild(ErrorLocations errorLocations, ErrorKind errorKind)
         {
-            _env.DoNotLaunchDebugger();
-
             SetEnvironmentForErrorLocations(errorLocations, errorKind.ToString());
 
             var graph = Helpers.CreateProjectGraph(
@@ -1224,8 +1232,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [Fact]
         public void EndBuildShouldGetCalledOnceWhenItThrowsExceptionsFromGraphBuilds()
         {
-            _env.DoNotLaunchDebugger();
-
             var project = _env.CreateFile(
                 "1.proj",
                 @$"
@@ -1386,15 +1392,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // Even though the assembly cache is discovered, we'll be overriding it with a descriptor based cache.
                 BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
 
-                var cache = new InstanceMockCache(testData, TimeSpan.FromMilliseconds(50));
-
                 using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters
                 {
                     MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
-                    ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
-                        cache,
-                        entryPoints: null,
-                        graph),
                     UseSynchronousLogging = useSynchronousLogging,
                     DisableInProcNode = disableInprocNode
                 });
@@ -1422,7 +1422,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}})
                     .OverallResult.ShouldBe(BuildResultCode.Success);
 
-                cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
+                StringShouldContainSubstring(buildSession.Logger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for", graph.ProjectNodes.Count);
+
+                buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
+                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
             }
             finally
             {
