@@ -246,7 +246,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
 
         /// <summary>
         /// Filters <see cref="ITemplateInfo"/> by template parameters read from <paramref name="commandInput"/>.
-        /// Unlike <see cref="TemplateParameterFilter(IHostSpecificDataLoader, INewCommandInput)"/>, consider template parameter a match when the template parameter exists in template definition, but given without value. This is needed for --list and --search that filters template by the supported parameters.
+        /// Unlike <see cref="TemplateParameterFilter(IHostSpecificDataLoader, INewCommandInput)"/>, consider template parameter
+        /// a match when the template parameter exists in template definition, but given without value.
+        /// This is needed for --list and --search that filters template by the supported parameters.
         /// </summary>
         internal static Func<ITemplateInfo, IEnumerable<MatchInfo>> ListTemplateParameterFilter(IHostSpecificDataLoader hostDataLoader, INewCommandInput commandInput)
         {

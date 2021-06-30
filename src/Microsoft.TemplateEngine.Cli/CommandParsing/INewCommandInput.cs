@@ -39,8 +39,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         string HelpText { get; }
 
-        //IReadOnlyDictionary<string, string> InputTemplateParams { get; }
-
         IReadOnlyList<string>? InstallNuGetSourceList { get; }
 
         bool IsDryRun { get; }

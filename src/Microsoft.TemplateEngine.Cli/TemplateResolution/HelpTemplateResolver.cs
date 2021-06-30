@@ -27,7 +27,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         };
 
         private static IReadOnlyList<FilterOption> _supportedGroupFilters = new[]
-{
+        {
             SupportedFilterOptions.LanguageFilter
         };
 
