@@ -111,10 +111,6 @@ Copyright (c) .NET Foundation. All rights reserved.
                             '$(EnableCompressionInSingleFile)' == 'true' And
                             '$(SelfContained)' != 'true'"
                  ResourceName="CompressionInSingleFileRequiresSelfContained" />
-    <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
-                 ResourceName="TrimmingWindowsFormsIsNotSupported" />
-    <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
-                 ResourceName="TrimmingWpfIsNotSupported" />
 
     <PropertyGroup>
       <!-- Ensure any PublishDir has a trailing slash, so it can be concatenated -->

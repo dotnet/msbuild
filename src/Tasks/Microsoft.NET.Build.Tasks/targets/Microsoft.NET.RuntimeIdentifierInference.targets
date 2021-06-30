@@ -163,6 +163,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkWarning Condition="'$(PublishTrimmed)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                    ResourceName="PublishTrimmedRequiresVersion30" />
 
+    <!-- Generate Trimming warnings for WinForms and Wpf applications-->
+    <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
+                 ResourceName="TrimmingWindowsFormsIsNotSupported" />
+    <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
+                 ResourceName="TrimmingWpfIsNotSupported" />
+    
   </Target>
 
   <Target Name="_CheckForUnsupportedHostingUsage"
