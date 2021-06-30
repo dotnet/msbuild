@@ -14,6 +14,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion);
         bool IsWorkloadPlatformCompatible(WorkloadId workloadId);
         string GetManifestVersion(string manifestId);
+        IDictionary<string, string> GetInstalledManifests();
 
         /// <summary>
         /// Resolve the pack for this resolver's SDK band.

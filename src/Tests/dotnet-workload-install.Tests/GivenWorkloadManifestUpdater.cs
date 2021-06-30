@@ -17,6 +17,8 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -141,6 +143,126 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select( m => (m.manifestId, m.existingVersion,m .newVersion));
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
+        }
+
+        [Fact]
+        public void GivenWorkloadManifestRollbackItCanCalculateUpdates()
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var featureBand = "6.0.100";
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+            var expectedManifestUpdates = new (ManifestId, ManifestVersion, ManifestVersion)[] {
+                (new ManifestId("test-manifest-1"), new ManifestVersion("5.0.0"), new ManifestVersion("4.0.0")),
+                (new ManifestId("test-manifest-2"), new ManifestVersion("3.0.0"), new ManifestVersion("2.0.0")) };
+
+            // Write mock manifests
+            var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", featureBand);
+            Directory.CreateDirectory(installedManifestDir);
+            Directory.CreateDirectory(adManifestDir);
+            foreach ((var manifestId, var existingVersion, _) in expectedManifestUpdates)
+            {
+                Directory.CreateDirectory(Path.Combine(installedManifestDir, manifestId.ToString()));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifestId.ToString(), _manifestFileName), GetManifestContent(existingVersion));
+            }
+
+            var rollbackDefContent = JsonSerializer.Serialize(new Dictionary<string, string>() { { "test-manifest-1", "4.0.0" }, { "test-manifest-2", "2.0.0" } });
+            var rollbackDefPath = Path.Combine(testDir, "testRollbackDef.txt");
+            File.WriteAllText(rollbackDefPath, rollbackDefContent);
+
+            var manifestDirs = expectedManifestUpdates.Select(manifest => manifest.Item1)
+                .Select(manifest => Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName))
+                .ToArray();
+            var workloadManifestProvider = new MockManifestProvider(manifestDirs);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+
+            var manifestUpdates = manifestUpdater.CalculateManifestRollbacks(rollbackDefPath);
+            manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
+        }
+
+        [Fact]
+        public void GivenFromRollbackDefinitionItErrorsOnInstalledExtraneousManifestId()
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var featureBand = "6.0.100";
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+            var expectedManifestUpdates = new (ManifestId, ManifestVersion, ManifestVersion)[] {
+                (new ManifestId("test-manifest-1"), new ManifestVersion("5.0.0"), new ManifestVersion("4.0.0")),
+                (new ManifestId("test-manifest-2"), new ManifestVersion("3.0.0"), new ManifestVersion("2.0.0")) };
+
+            // Write mock manifests
+            var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", featureBand);
+            Directory.CreateDirectory(installedManifestDir);
+            Directory.CreateDirectory(adManifestDir);
+            foreach ((var manifestId, var existingVersion, _) in expectedManifestUpdates)
+            {
+                Directory.CreateDirectory(Path.Combine(installedManifestDir, manifestId.ToString()));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifestId.ToString(), _manifestFileName), GetManifestContent(existingVersion));
+            }
+
+            // Write extraneous manifest that the rollback definition will not have
+            Directory.CreateDirectory(Path.Combine(installedManifestDir, "test-manifest-3"));
+            File.WriteAllText(Path.Combine(installedManifestDir, "test-manifest-3", _manifestFileName), GetManifestContent(new ManifestVersion("1.0.0")));
+
+            var rollbackDefContent = JsonSerializer.Serialize(new Dictionary<string, string>() { { "test-manifest-1", "4.0.0" }, { "test-manifest-2", "2.0.0" } });
+            var rollbackDefPath = Path.Combine(testDir, "testRollbackDef.txt");
+            File.WriteAllText(rollbackDefPath, rollbackDefContent);
+
+            var manifestDirs = expectedManifestUpdates.Select(manifest => manifest.Item1)
+                .Append(new ManifestId("test-manifest-3"))
+                .Select(manifest => Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName))
+                .ToArray();
+            var workloadManifestProvider = new MockManifestProvider(manifestDirs);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+
+            var exceptionThrown = Assert.Throws<Exception>(() => manifestUpdater.CalculateManifestRollbacks(rollbackDefPath));
+            exceptionThrown.Message.Should().Contain(rollbackDefPath);
+        }
+
+        [Fact]
+        public void GivenFromRollbackDefinitionItErrorsOnExtraneousManifestIdInRollbackDefinition()
+        {
+            var testDir = _testAssetsManager.CreateTestDirectory().Path;
+            var featureBand = "6.0.100";
+            var dotnetRoot = Path.Combine(testDir, "dotnet");
+            var expectedManifestUpdates = new (ManifestId, ManifestVersion, ManifestVersion)[] {
+                (new ManifestId("test-manifest-1"), new ManifestVersion("5.0.0"), new ManifestVersion("4.0.0")),
+                (new ManifestId("test-manifest-2"), new ManifestVersion("3.0.0"), new ManifestVersion("2.0.0")) };
+
+            // Write mock manifests
+            var installedManifestDir = Path.Combine(testDir, "dotnet", "sdk-manifests", featureBand);
+            var adManifestDir = Path.Combine(testDir, ".dotnet", "sdk-advertising", featureBand);
+            Directory.CreateDirectory(installedManifestDir);
+            Directory.CreateDirectory(adManifestDir);
+            foreach ((var manifestId, var existingVersion, _) in expectedManifestUpdates)
+            {
+                Directory.CreateDirectory(Path.Combine(installedManifestDir, manifestId.ToString()));
+                File.WriteAllText(Path.Combine(installedManifestDir, manifestId.ToString(), _manifestFileName), GetManifestContent(existingVersion));
+            }
+
+            var rollbackDefContent = JsonSerializer.Serialize(new Dictionary<string, string>() {
+                { "test-manifest-1", "4.0.0" },
+                { "test-manifest-2", "2.0.0" },
+                { "test-manifest-3", "1.0.0" } // This manifest is not installed, should cause an error
+            });
+            var rollbackDefPath = Path.Combine(testDir, "testRollbackDef.txt");
+            File.WriteAllText(rollbackDefPath, rollbackDefContent);
+
+            var manifestDirs = expectedManifestUpdates.Select(manifest => manifest.Item1)
+                .Select(manifest => Path.Combine(installedManifestDir, manifest.ToString(), _manifestFileName))
+                .ToArray();
+            var workloadManifestProvider = new MockManifestProvider(manifestDirs);
+            var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+
+            var exceptionThrown = Assert.Throws<Exception>(() => manifestUpdater.CalculateManifestRollbacks(rollbackDefPath));
+            exceptionThrown.Message.Should().Contain(rollbackDefPath);
         }
 
         [Fact]

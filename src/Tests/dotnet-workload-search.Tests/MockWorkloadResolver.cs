@@ -29,5 +29,6 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public WorkloadResolver CreateTempDirResolver(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion) => throw new NotImplementedException();
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId) => throw new NotImplementedException();
         public string GetManifestVersion(string manifestId) => throw new NotImplementedException();
+        public IDictionary<string, string> GetInstalledManifests() => throw new NotImplementedException();
     }
 }

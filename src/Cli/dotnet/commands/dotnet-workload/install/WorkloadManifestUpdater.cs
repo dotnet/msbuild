@@ -15,6 +15,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 using Microsoft.DotNet.Configurer;
 using NuGet.Common;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -129,6 +130,22 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                         advertisingManifestVersionAndWorkloads.Value.Workloads));
                 }
             }
+
+            return manifestUpdates;
+        }
+
+        public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
+        {
+            var currentManifestIds = GetInstalledManifestIds();
+            var manifestRollbacks = ParseRollbackDefinitionFile(rollbackDefinitionFilePath);
+
+            if (!new HashSet<ManifestId>(currentManifestIds).SetEquals(manifestRollbacks.Select(manifest => manifest.Item1)))
+            {
+                throw new Exception(string.Format(LocalizableStrings.RollbackDefinitionContainsExtraneousManifestIds, rollbackDefinitionFilePath));
+            }
+
+            var manifestUpdates = manifestRollbacks
+                .Select(manifest => (manifest.Item1, GetInstalledManifestVersion(manifest.Item1), manifest.Item2));
 
             return manifestUpdates;
         }
@@ -358,6 +375,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 return false;
             }
+        }
+
+        private IEnumerable<(ManifestId, ManifestVersion)> ParseRollbackDefinitionFile(string rollbackDefinitionFilePath)
+        {
+            if (!File.Exists(rollbackDefinitionFilePath))
+            {
+                throw new ArgumentException(string.Format(LocalizableStrings.RollbackDefinitionFileDoesNotExist, rollbackDefinitionFilePath));
+            }
+            var fileContent = File.ReadAllText(rollbackDefinitionFilePath);
+            return JsonSerializer.Deserialize<IDictionary<string, string>>(fileContent)
+                .Select(manifest => (new ManifestId(manifest.Key), new ManifestVersion(manifest.Value)));
         }
 
         private bool BackgroundUpdatesAreDisabled() =>

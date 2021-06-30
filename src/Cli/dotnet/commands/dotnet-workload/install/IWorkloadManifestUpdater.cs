@@ -20,6 +20,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             ManifestVersion newVersion,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates();
 
+        IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)>
+            CalculateManifestRollbacks(string rollbackDefinitionFilePath);
+
         Task<IEnumerable<string>> DownloadManifestPackagesAsync(bool includePreviews, DirectoryPath downloadPath);
 
         Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir);
