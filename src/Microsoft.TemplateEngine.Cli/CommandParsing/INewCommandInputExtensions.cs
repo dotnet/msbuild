@@ -94,7 +94,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             return $"dotnet {command.CommandName} {templateName}";
         }
 
-        internal static string HelpCommandExample(this INewCommandInput command, string? templateName = null)
+        internal static string HelpCommandExample(this INewCommandInput command, string? templateName = null, string? language = null)
         {
             if (string.IsNullOrWhiteSpace(templateName))
             {
@@ -104,7 +104,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             {
                 templateName = $"'{templateName}'";
             }
-            return $"dotnet {command.CommandName} {templateName} -h";
+            string commandStr = $"dotnet {command.CommandName} {templateName} -h";
+            if (!string.IsNullOrWhiteSpace(language))
+            {
+                commandStr += $" --language {language}";
+            }
+            return commandStr;
         }
 
         internal static string New3CommandExample(this INewCommandInput command)

@@ -228,15 +228,23 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             if (resolutionResult.GroupResolutionStatus == TemplateResolutionResult.TemplateGroupStatus.SingleMatch
                 && resolutionResult.ResolutionStatus != TemplateResolutionResult.Status.AmbiguousLanguageChoice
-                && resolutionResult.UnambiguousTemplateGroupMatchInfo!.TemplateMatchInfosWithMatchingParametersForPreferredLanguage.Any())
+                && resolutionResult.UnambiguousTemplateGroup != null
+                && resolutionResult.UnambiguousTemplateGroupMatchInfo != null
+                && resolutionResult.UnambiguousTemplateGroupMatchInfo.TemplateMatchInfosWithMatchingParametersForPreferredLanguage.Any())
             {
-                return await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(
+                New3CommandStatus result = await TemplateDetailsDisplay.ShowTemplateGroupHelpAsync(
                     resolutionResult.UnambiguousTemplateGroupMatchInfo,
                     _engineEnvironmentSettings,
                     commandInput,
                     _hostSpecificDataLoader,
                     _templateCreator,
                     cancellationToken).ConfigureAwait(false);
+
+                if (result == New3CommandStatus.Success)
+                {
+                    DisplayHintForOtherLanguages(commandInput, resolutionResult);
+                }
+                return result;
             }
             else
             {
@@ -366,6 +374,44 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 Reporter.Error.WriteCommand(commandInput.HelpCommandExample(templateGroupMatchInfo.GroupInfo.ShortNames[0]));
             }
             return New3CommandStatus.InvalidParamValues;
+        }
+
+        private static void DisplayHintForOtherLanguages(INewCommandInput commandInput, TemplateResolutionResult resolutionResult)
+        {
+            if (resolutionResult.UnambiguousTemplateGroup == null || resolutionResult.UnambiguousTemplateGroupMatchInfo == null)
+            {
+                return;
+            }
+
+            if (resolutionResult.UnambiguousTemplateGroup.Languages.Count <= 1)
+            {
+                return;
+            }
+
+            string? preferredLanguage =
+                resolutionResult.UnambiguousTemplateGroupMatchInfo
+                    .TemplatesWithMatchingParametersForPreferredLanguage.First().GetLanguage();
+
+            List<string> supportedLanguages = new List<string>();
+            foreach (string? language in resolutionResult.UnambiguousTemplateGroup.Languages)
+            {
+                if (string.IsNullOrWhiteSpace(language))
+                {
+                    continue;
+                }
+                if (!language.Equals(preferredLanguage, StringComparison.OrdinalIgnoreCase))
+                {
+                    supportedLanguages.Add(language);
+                }
+            }
+            if (supportedLanguages.Any())
+            {
+                string supportedLanguagesStr = string.Join(", ", supportedLanguages.OrderBy(s => s, StringComparer.OrdinalIgnoreCase));
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint, supportedLanguagesStr));
+                Reporter.Output.WriteCommand(
+                    commandInput.HelpCommandExample(resolutionResult.UnambiguousTemplateGroup.ShortNames[0], supportedLanguages.First()));
+                Reporter.Output.WriteLine();
+            }
         }
 
         /// <summary>

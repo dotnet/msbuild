@@ -814,6 +814,11 @@ Les colonnes prises en charge sont : Langage, balises, auteur, type.</target>
         <target state="translated">Les modèles courants sont les suivants :</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
+        <source>To see help for other template languages ({0}), use --language option:</source>
+        <target state="new">To see help for other template languages ({0}), use --language option:</target>
+        <note>{0} is comma-separated list of supported programming languages by template.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">Le package de modèle contenant le modèle « {0} » est introuvable</target>

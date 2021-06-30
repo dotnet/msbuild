@@ -63,7 +63,11 @@ Options:
 
   --no-restore    If specified, skips the automatic restore of the project on create.
                   bool - Optional                                                    
-                  Default: false                                                     ";
+                  Default: false                                                     
+
+
+To see help for other template languages (F#, VB), use --language option:
+   dotnet new3 console -h --language F#";
 
         private const string ClassLibHelp =
 @"Class Library (C#)
@@ -100,7 +104,11 @@ Options:
 
   --nullable      Whether to enable nullable reference types for this project.       
                   bool - Optional                                                    
-                  Default: true                                                      ";
+                  Default: true                                                      
+
+
+To see help for other template languages (F#, VB), use --language option:
+   dotnet new3 classlib -h --language F#";
 
         private const string ConsoleAppHelp =
 @"Simple Console Application (C#)
@@ -261,7 +269,11 @@ Options:
 
   --no-restore   If specified, skips the automatic restore of the project on create.
                  bool - Optional                                                    
-                 Default: false                                                     ";
+                 Default: false                                                     
+
+
+To see help for other template languages (F#, VB), use --language option:
+   dotnet new3 console -h --language F#";
 
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -356,7 +368,11 @@ Options:
 
   --no-restore    If specified, skips the automatic restore of the project on create.
                   bool - Optional                                                    
-                  Default: false                                                     ";
+                  Default: false                                                     
+
+
+To see help for other template languages (F#, VB), use --language option:
+   dotnet new3 console -h --language F#";
 
         string home = TestUtils.CreateTemporaryFolder("Home");
         string workingDirectory = TestUtils.CreateTemporaryFolder();
@@ -369,6 +385,63 @@ Options:
                 .And.NotHaveStdErr()
                 .And.HaveStdOut(ConsoleHelp)
                 .And.NotHaveStdOutContaining(HelpOutput);
+        }
+
+        [Fact]
+        public void CanShowHelpForTemplate_MatchOnLanguage()
+        {
+            const string ConsoleHelp =
+@"Console Application (F#)
+Author: Microsoft
+Description: A project for creating a command-line application that can run on .NET Core on Windows, Linux and macOS
+Options:                                                                             
+  -f|--framework  The target framework for the project.                              
+                      net6.0           - Target net6.0                               
+                      net5.0           - Target net5.0                               
+                      netcoreapp3.1    - Target netcoreapp3.1                        
+                      netcoreapp3.0    - Target netcoreapp3.0                        
+                      netcoreapp2.2    - Target netcoreapp2.2                        
+                      netcoreapp2.1    - Target netcoreapp2.1                        
+                      netcoreapp2.0    - Target netcoreapp2.0                        
+                      netcoreapp1.0    - Target netcoreapp1.0                        
+                      netcoreapp1.1    - Target netcoreapp1.1                        
+                  Default: net6.0                                                    
+
+  --no-restore    If specified, skips the automatic restore of the project on create.
+                  bool - Optional                                                    
+                  Default: false                                                     
+
+
+To see help for other template languages (C#, VB), use --language option:
+   dotnet new3 console -h --language C#";
+
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "console", "--help", "--language", "F#")
+                    .WithCustomHive(home)
+                    .WithWorkingDirectory(workingDirectory)
+                    .Execute()
+                    .Should().Pass()
+                    .And.NotHaveStdErr()
+                    .And.HaveStdOut(ConsoleHelp)
+                    .And.NotHaveStdOutContaining(HelpOutput);
+        }
+
+        [Fact]
+        public void WontShowLanguageHintInCaseOfOneLang()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "app", "--help", "--language", "C#")
+                    .WithCustomHive(home)
+                    .WithWorkingDirectory(workingDirectory)
+                    .Execute()
+                    .Should().Pass()
+                    .And.NotHaveStdErr()
+                    .And.HaveStdOut(ConsoleAppHelp)
+                    .And.NotHaveStdOutContaining("To see help for other template languages");
         }
 
         [Fact]

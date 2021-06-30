@@ -814,6 +814,11 @@ Die unterstützten Spalten sind: Sprache, Tags, Autor, Typ.</target>
         <target state="translated">Allgemeine Vorlagen:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
+        <source>To see help for other template languages ({0}), use --language option:</source>
+        <target state="new">To see help for other template languages ({0}), use --language option:</target>
+        <note>{0} is comma-separated list of supported programming languages by template.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">Das Vorlagenpaket mit der Vorlage "{0}" wurde nicht gefunden.</target>

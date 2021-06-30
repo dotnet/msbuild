@@ -814,6 +814,11 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <target state="translated">Seguono dei modelli comuni:</target>
         <note />
       </trans-unit>
+      <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
+        <source>To see help for other template languages ({0}), use --language option:</source>
+        <target state="new">To see help for other template languages ({0}), use --language option:</target>
+        <note>{0} is comma-separated list of supported programming languages by template.</note>
+      </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
         <target state="translated">Non è stato possibile trovare il pacchetto di modelli contenente il modello '{0}'</target>

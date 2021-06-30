@@ -1494,6 +1494,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to To see help for other template languages ({0}), use --language option:.
+        /// </summary>
+        internal static string TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint {
+            get {
+                return ResourceManager.GetString("TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find the template package containing template &apos;{0}&apos;.
         /// </summary>
         internal static string TemplatePackageCoordinator_Error_PackageForTemplateNotFound {
