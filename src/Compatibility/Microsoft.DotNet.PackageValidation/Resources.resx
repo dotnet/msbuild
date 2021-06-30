@@ -159,4 +159,7 @@
   <data name="WroteSuppressions" xml:space="preserve">
     <value>Successfully wrote compatibility suppressions to '{0}'.</value>
   </data>
+  <data name="Baseline" xml:space="preserve">
+    <value>[Baseline]</value>
+  </data>
 </root>
