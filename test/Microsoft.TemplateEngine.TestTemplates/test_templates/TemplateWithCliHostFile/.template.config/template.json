@@ -1,0 +1,36 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithCliHostFile",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithCliHostFile",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithCliHostFile",
+  "shortName": "TestAssets.TemplateWithCliHostFile",
+  "sourceName": "bar",
+  "symbols": {
+    "test-param": {
+      "type": "parameter",
+      "description": "some description",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "ch1",
+          "displayName": "Choice 1"
+        },
+        {
+          "choice": "ch2",
+          "displayName": "Choice 2"
+        }
+      ],
+      "replaces": "replacetext",
+      "defaultValue": "ch1",
+      "displayName": "User Parameter"
+    }
+  },
+  "primaryOutputs": [
+    {
+      "path": "bar.cs"
+    }
+  ]
+}
