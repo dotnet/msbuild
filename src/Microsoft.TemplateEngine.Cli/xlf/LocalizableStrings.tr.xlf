@@ -263,42 +263,42 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoSources">
         <source>No remoted sources defined to search for the templates.</source>
-        <target state="new">No remoted sources defined to search for the templates.</target>
+        <target state="translated">Şablonları aramak için tanımlanmış uzak kaynak yok.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: no template name is specified.</source>
-        <target state="new">Search failed: no template name is specified.</target>
+        <target state="translated">Arama başarısız oldu: şablon adı belirtilmedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="new">Template '{0}' was not found.</target>
+        <target state="translated">'{0}' şablonu bulunamadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <target state="translated">Arama başarısız: şablon adı çok kısa, en az 2 karakter gerekiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
         <source>To use the template, run the following command to install the package:</source>
-        <target state="new">To use the template, run the following command to install the package:</target>
+        <target state="translated">Şablonu kullanmak için şu komutu çalıştırarak paketi yükleyin:</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
         <source>Matches from template source: {0}</source>
-        <target state="new">Matches from template source: {0}</target>
+        <target state="translated">Şablon kaynağındaki eşleşmeler: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="new">To search for the template, specify template name or use one of supported filters: {0}.</target>
+        <target state="translated">Şablonu aramak için şablon adını belirtin veya desteklenen filtrelerden birini kullanın: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
         <source>Searching for the templates...</source>
-        <target state="new">Searching for the templates...</target>
+        <target state="translated">Şablonlar aranıyor...</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
@@ -499,12 +499,12 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
         <source>Example:</source>
-        <target state="new">Example:</target>
+        <target state="translated">Örnek:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_ExamplesHeader">
         <source>Examples:</source>
-        <target state="new">Examples:</target>
+        <target state="translated">Örnekler:</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
@@ -554,7 +554,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">Yüklü şablonları listelemek için şunu çalıştırın:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -746,7 +746,7 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
-        <target state="new">For usage information, run: </target>
+        <target state="translated">Kullanım bilgileri için şunu çalıştırın: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -761,7 +761,7 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">NuGet.org sitesinde şablon aramak için şunu çalıştırın:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

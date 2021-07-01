@@ -263,42 +263,42 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoSources">
         <source>No remoted sources defined to search for the templates.</source>
-        <target state="new">No remoted sources defined to search for the templates.</target>
+        <target state="translated">沒有定義要搜尋範本的遠端來源。</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: no template name is specified.</source>
-        <target state="new">Search failed: no template name is specified.</target>
+        <target state="translated">搜尋失敗: 未指定範本名稱。</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="new">Template '{0}' was not found.</target>
+        <target state="translated">找不到範本 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <target state="translated">搜尋失敗: 範本名稱太短，至少需要 2 個字元。</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
         <source>To use the template, run the following command to install the package:</source>
-        <target state="new">To use the template, run the following command to install the package:</target>
+        <target state="translated">若要使用範本，請執行下列命令來安裝套件:</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
         <source>Matches from template source: {0}</source>
-        <target state="new">Matches from template source: {0}</target>
+        <target state="translated">來自範本來源的符合項目: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="new">To search for the template, specify template name or use one of supported filters: {0}.</target>
+        <target state="translated">若要搜尋範本，請指定範本名稱或使用支援的其中一個篩選: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
         <source>Searching for the templates...</source>
-        <target state="new">Searching for the templates...</target>
+        <target state="translated">正在搜尋範本...</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
@@ -499,12 +499,12 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
         <source>Example:</source>
-        <target state="new">Example:</target>
+        <target state="translated">範例:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_ExamplesHeader">
         <source>Examples:</source>
-        <target state="new">Examples:</target>
+        <target state="translated">範例:</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
@@ -554,7 +554,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">若要列出已安裝的範本，請執行:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -746,7 +746,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
-        <target state="new">For usage information, run: </target>
+        <target state="translated">如需使用資訊，請執行: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -761,7 +761,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">若要在範本上搜尋 NuGet.org，請執行:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">

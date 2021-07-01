@@ -263,42 +263,42 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoSources">
         <source>No remoted sources defined to search for the templates.</source>
-        <target state="new">No remoted sources defined to search for the templates.</target>
+        <target state="translated">Não há fontes remotas definidas para pesquisar os modelos.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: no template name is specified.</source>
-        <target state="new">Search failed: no template name is specified.</target>
+        <target state="translated">A pesquisa falhou: nenhum nome de modelo foi especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
         <source>Template '{0}' was not found.</source>
-        <target state="new">Template '{0}' was not found.</target>
+        <target state="translated">Modelo '{0}' não encontrado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
-        <target state="new">Search failed: template name is too short, minimum 2 characters are required.</target>
+        <target state="translated">Falha na pesquisa: o nome do modelo é muito curto, são necessários dois caracteres no mínimo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
         <source>To use the template, run the following command to install the package:</source>
-        <target state="new">To use the template, run the following command to install the package:</target>
+        <target state="translated">Para usar o modelo, execute o seguinte comando para instalar o pacote:</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
         <source>Matches from template source: {0}</source>
-        <target state="new">Matches from template source: {0}</target>
+        <target state="translated">Correspondências da origem do modelo: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="new">To search for the template, specify template name or use one of supported filters: {0}.</target>
+        <target state="translated">Para pesquisar o modelo, especifique o nome do modelo ou use um dos filtros compatíveis: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
         <source>Searching for the templates...</source>
-        <target state="new">Searching for the templates...</target>
+        <target state="translated">Procurando modelos...</target>
         <note />
       </trans-unit>
       <trans-unit id="ColumnNameAuthor">
@@ -499,12 +499,12 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
         <source>Example:</source>
-        <target state="new">Example:</target>
+        <target state="translated">Exemplo:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_ExamplesHeader">
         <source>Examples:</source>
-        <target state="new">Examples:</target>
+        <target state="translated">Exemplos:</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
@@ -554,7 +554,7 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">Para listar os modelos instalados, execute:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -746,7 +746,7 @@ As colunas com suporte são: idioma, marcas, autor, tipo.</target>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
-        <target state="new">For usage information, run: </target>
+        <target state="translated">Para obter informações de uso, execute: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -761,7 +761,7 @@ As colunas com suporte são: idioma, marcas, autor, tipo.</target>
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">Para pesquisar os modelos no NuGet.org, execute:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
