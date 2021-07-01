@@ -229,6 +229,43 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             exceptionThrown.Message.Should().Be(String.Format(Workloads.Workload.Install.LocalizableStrings.WorkloadNotSupportedOnPlatform, mockWorkloadId));
         }
 
+        [Fact]
+        public void GivenWorkloadInstallItDoesNotRemoveOldInstallsOnRollback()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { manifestPath }), new string[] { dotnetRoot });
+            var nugetDownloader = new FailingNuGetPackageDownloader(dotnetRoot);
+            var manifestUpdater = new MockWorkloadManifestUpdater();
+            var sdkFeatureVersion = "6.0.100";
+            var existingWorkload = "mock-1";
+            var installingWorkload = "mock-2";
+
+            // Successfully install a workload
+            var installParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", existingWorkload });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(dotnetRoot),
+                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute();
+
+            // Install a workload with a mocked nuget failure
+            installParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
+            installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
+                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            var exceptionThrown = Assert.Throws<GracefulException>(() => installCommand.Execute());
+            exceptionThrown.Message.Should().Contain("Test Failure");
+
+            // Existing installation is still present
+            var installRecordPath = Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads");
+            Directory.GetFiles(installRecordPath).Count().Should().Be(1);
+            File.Exists(Path.Combine(installRecordPath, existingWorkload))
+                .Should().BeTrue();
+            var packRecordDirs = Directory.GetDirectories(Path.Combine(dotnetRoot, "metadata", "workloads", "InstalledPacks", "v1"));
+            packRecordDirs.Count().Should().Be(3);
+            var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
+            installPacks.Count().Should().Be(3);
+        }
+
         private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
                 ParseResult parseResult,
                 [CallerMemberName] string testName = "",
