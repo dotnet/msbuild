@@ -7,79 +7,19 @@
         <target state="needs-review-translation">Hiermit stellen Sie die im lokalen Workloadmanifest definierten Workloads wieder her.</target>
         <note />
       </trans-unit>
-      <trans-unit id="InvalidPackageWarning">
-        <source>Warning: workload package '{0}' is invalid</source>
-        <target state="new">Warning: workload package '{0}' is invalid</target>
+      <trans-unit id="CouldNotFindAProject">
+        <source>Couldn't find a project. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="new">Couldn't find a project. Ensure a project exists in {0}, or pass the path to the project using {1}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoWorkloadsWereRestored">
-        <source>No workloads were restored.</source>
-        <target state="translated">Es wurden keine Workloads wiederhergestellt.</target>
+      <trans-unit id="FailedToRunTarget">
+        <source>Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</source>
+        <target state="new">Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PackageIdColumn">
-        <source>Package Id</source>
-        <target state="translated">Paket-ID</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionColumn">
-        <source>Version</source>
-        <target state="translated">Version</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CommandsColumn">
-        <source>Commands</source>
-        <target state="translated">Befehle</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionDescription">
-        <source>Add an additional NuGet package source to use during installation.</source>
-        <target state="translated">Hiermit wird eine weitere NuGet-Paketquelle zur Verwendung während der Installation hinzugefügt.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionName">
-        <source>SOURCE</source>
-        <target state="translated">SOURCE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigFileOptionDescription">
-        <source>The NuGet configuration file to use.</source>
-        <target state="translated">Die zu verwendende NuGet-Konfigurationsdatei.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigFileOptionName">
-        <source>FILE</source>
-        <target state="translated">FILE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionOptionDescription">
-        <source>The version of the workload package to install.</source>
-        <target state="translated">Die Version des zu installierenden Workloadpakets.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="VersionOptionName">
-        <source>VERSION</source>
-        <target state="translated">VERSION</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PackageFailedToRestore">
-        <source>Package "{0}" failed to restore, due to {1}</source>
-        <target state="translated">Das Paket "{0}" konnte nicht wiederhergestellt werden. Ursache: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RestoreFailed">
-        <source>Restore failed.</source>
-        <target state="translated">Fehler bei der Wiederherstellung.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RestoreSuccessful">
-        <source>Workload '{0}' (version '{1}') was restored. Available commands: {2}</source>
-        <target state="translated">Das Workload "{0}" (Version {1}) wurde wiederhergestellt. Verfügbare Befehle: {2}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RestorePartiallyFailed">
-        <source>Restore partially failed.</source>
-        <target state="translated">Die Wiederherstellung war nur teilweise möglich.</target>
+      <trans-unit id="InstallingWorkloads">
+        <source>Installing workloads: {0}</source>
+        <target state="new">Installing workloads: {0}</target>
         <note />
       </trans-unit>
     </body>

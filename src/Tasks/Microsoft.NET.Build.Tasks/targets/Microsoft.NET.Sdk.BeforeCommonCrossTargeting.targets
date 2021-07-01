@@ -13,5 +13,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultAssemblyInfo.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DefaultOutputPaths.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Workloads.CrossTargeting.targets" />
 
 </Project>
