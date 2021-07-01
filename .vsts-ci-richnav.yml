@@ -20,15 +20,6 @@ variables:
     value: false
   - name: PostBuildSign
     value: true
-  - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - name: PB_PublishBlobFeedUrl
-      value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-    - name: _DotNetPublishToBlobFeed
-      value: true
-    - name: _PublishToAzure
-      value: true
-  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-    - group: DotNet-CLI-SDLValidation-Params
 
 stages:
 - stage: build
@@ -41,15 +32,8 @@ stages:
         richCodeNavigationEnvironment: 'production'
         agentOs: Windows_NT_FullFramework
         pool:
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
             name: NetCorePublic-Pool
             queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-          ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCoreInternal-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
-        ${{ if ne(variables['System.TeamProject'], 'public') }}:
           helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
         strategy:
           matrix:
@@ -63,54 +47,3 @@ stages:
               _PublishType: none
               _SignType: test
               _Test: -test
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Windows_NT_TestAsTools
-        pool:
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCorePublic-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-          ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCoreInternal-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre
-        strategy:
-          matrix:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Ubuntu_16_04
-        pool:
-          ${{ if eq(variables['System.TeamProject'], 'public') }}:
-            name: NetCorePublic-Pool
-            queue: BuildPool.Ubuntu.1604.Amd64.Open
-          ${{ if ne(variables['System.TeamProject'], 'public') }}:
-            name: NetCoreInternal-Pool
-            queue: BuildPool.Ubuntu.1604.Amd64
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: Ubuntu.1604.Amd64.Open
-        ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: Ubuntu.1604.Amd64
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-    - template: /eng/build.yml
-      parameters:
-        agentOs: Darwin
-        pool:
-          name: Hosted macOS
-        ${{ if eq(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1014.Amd64.Open
-        ${{ if ne(variables['System.TeamProject'], 'public') }}:
-          helixTargetQueue: OSX.1014.Amd64
-        strategy:
-          matrix:
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
