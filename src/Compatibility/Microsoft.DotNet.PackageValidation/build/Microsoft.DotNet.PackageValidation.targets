@@ -2,12 +2,8 @@
 <Project>
   <UsingTask TaskName="Microsoft.DotNet.PackageValidation.ValidatePackage" AssemblyFile="$(DotNetPackageValidationAssembly)" />
 
-  <PropertyGroup>
-    <PackageValidationBaselineName>$([MSBuild]::ValueOrDefault('$(PackageValidationBaselineName)', '$(PackageId)'))</PackageValidationBaselineName>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">
-    <PackageDownload Include="$(PackageValidationBaselineName)" Version="[$(PackageValidationBaselineVersion)]" />
+    <PackageDownload Include="$([MSBuild]::ValueOrDefault('$(PackageValidationBaselineName)', '$(PackageId)'))" Version="[$(PackageValidationBaselineVersion)]" />
   </ItemGroup>
 
   <Target Name="RunPackageValidation"
@@ -15,6 +11,7 @@
           Condition="'$(IsPackable)' == 'true'">
 
     <PropertyGroup>
+      <PackageValidationBaselineName Condition="'$(PackageValidationBaselineName)' == ''">$(PackageId)</PackageValidationBaselineName>
       <PackageValidationBaselinePath Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">$([MSBuild]::NormalizePath('$(NuGetPackageRoot)', '$(PackageValidationBaselineName.ToLower())', '$(PackageValidationBaselineVersion)', '$(PackageValidationBaselineName.ToLower()).$(PackageValidationBaselineVersion).nupkg'))</PackageValidationBaselinePath>
       <GenerateCompatibilitySuppressionFile Condition="'$(GenerateCompatibilitySuppressionFile)' == ''">false</GenerateCompatibilitySuppressionFile>
       <_compatibilitySuppressionFilePath>$([MSBuild]::NormalizePath('$(MSBuildProjectDirectory)', 'CompatibilitySuppressions.xml'))</_compatibilitySuppressionFilePath>
