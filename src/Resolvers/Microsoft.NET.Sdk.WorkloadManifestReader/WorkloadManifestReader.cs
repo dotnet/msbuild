@@ -463,7 +463,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                             {
                                 throw new WorkloadManifestFormatException(Strings.RedirectWorkloadHasOtherKeys, id);
                             }
-                            return new WorkloadRedirect (id, replacementId);
+                            throw new NotImplementedException("Workload redirects are not yet fully implemented");
+                            //return new WorkloadRedirect (id, replacementId);
                         }
                         var isAbstract = isAbstractOrNull ?? false;
                         if (!isAbstract && kind == WorkloadDefinitionKind.Dev && string.IsNullOrEmpty (description))
