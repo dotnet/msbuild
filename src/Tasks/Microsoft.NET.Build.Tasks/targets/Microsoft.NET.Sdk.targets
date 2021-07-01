@@ -70,6 +70,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_DefaultUserProfileRuntimeStorePath Condition="$([MSBuild]::IsOSPlatform(`Windows`))">$(USERPROFILE)</_DefaultUserProfileRuntimeStorePath>
     <_DefaultUserProfileRuntimeStorePath>$([System.IO.Path]::Combine($(_DefaultUserProfileRuntimeStorePath), '.dotnet', 'store'))</_DefaultUserProfileRuntimeStorePath>
     <UserProfileRuntimeStorePath Condition="'$(UserProfileRuntimeStorePath)' == ''">$(_DefaultUserProfileRuntimeStorePath)</UserProfileRuntimeStorePath>
+    <PredefinedCulturesOnly Condition="'$(InvariantGlobalization)' == 'true' And '$(PredefinedCulturesOnly)' == ''">true</PredefinedCulturesOnly>
   </PropertyGroup>
 
   <!-- Opt into .NET Core resource-serialization strategy by default when targeting frameworks
@@ -392,6 +393,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Globalization.Invariant"
                                     Condition="'$(InvariantGlobalization)' != ''"
                                     Value="$(InvariantGlobalization)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Globalization.PredefinedCulturesOnly"
+                                    Condition="'$(PredefinedCulturesOnly)' != ''"
+                                    Value="$(PredefinedCulturesOnly)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Net.Http.EnableActivityPropagation"
@@ -961,7 +967,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
   -->
 
-  <UsingTask TaskName="CheckForUnsupportedWinMDReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />  
+  <UsingTask TaskName="CheckForUnsupportedWinMDReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="_BlockWinMDsOnUnsupportedTFMs"
           AfterTargets="PreBuildEvent"
@@ -972,7 +978,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
       ReferencePaths="@(ReferencePath)"
       />
-    
+
     <NETSdkError Condition="'$(OutputType)' == 'winmdobj'"
       ResourceName="WinMDObjNotSupportedOnTargetFramework"
       FormatArguments="$(TargetFrameworkMoniker)" />
@@ -1052,7 +1058,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsExecutable="$(_IsExecutable)"
       ReferencedProjects="@(_MSBuildProjectReferenceExistent)"
       />
-    
+
   </Target>
 
   <!--
@@ -1105,7 +1111,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == 'true'">
     <AfterMicrosoftNETSdkTargets>$(AfterMicrosoftNETSdkTargets);$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets</AfterMicrosoftNETSdkTargets>
   </PropertyGroup>
-  
+
   <!-- Note: Once WindowsDesktop is a workload this will be moved to WorkloadManifest.targets -->
   <ItemGroup Condition="'$(MicrosoftNETWindowsWorkloadInstalled)' == 'true' and
                         '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
