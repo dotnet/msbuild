@@ -4,6 +4,7 @@
 #nullable enable
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
@@ -289,6 +290,23 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             Assert.True(searchResults.AnySources);
             Assert.Equal(0, searchResults.MatchesBySource.Count);
+        }
+
+        [Fact]
+        public async Task CanReadSearchMetadata_FromBlob()
+        {
+            using EnvironmentSettingsHelper environmentSettingsHelper = new EnvironmentSettingsHelper();
+            var environmentSettings = environmentSettingsHelper.CreateEnvironment(virtualize: true);
+            var sourceFileProvider = new BlobStoreSourceFileProvider();
+            var metadataFileName = Path.Combine(TestUtils.CreateTemporaryFolder(), "NuGetTemplateSearchInfo.json");
+            await sourceFileProvider.TryAcquireFileFromCloudAsync(environmentSettings, metadataFileName).ConfigureAwait(false);
+            string content = File.ReadAllText(metadataFileName);
+            var config = new CliNuGetSearchCacheConfig(metadataFileName);
+            Assert.True(FileMetadataTemplateSearchCacheReader.TryReadDiscoveryMetadata(
+                environmentSettings,
+                content,
+                config,
+                out TemplateDiscoveryMetadata discoveryMetadata));
         }
 
         private static TemplateDiscoveryMetadata SetupDiscoveryMetadata(bool includehostData = false)

@@ -14,14 +14,19 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         private static readonly Func<JObject, object> CliHostDataReader = (cacheObject) =>
         {
-            try
+            Dictionary<string, HostSpecificTemplateData> cliData = new Dictionary<string, HostSpecificTemplateData>();
+            foreach (JProperty data in cacheObject.Properties())
             {
-                return cacheObject.ToObject<Dictionary<string, HostSpecificTemplateData>>();
+                try
+                {
+                    cliData[data.Name] = new HostSpecificTemplateData(data.Value as JObject);
+                }
+                catch (Exception ex)
+                {
+                    Reporter.Verbose.WriteLine($"Error deserializing the cli host specific template data for template {data.Name}, details:{ex}");
+                }
             }
-            catch (Exception ex)
-            {
-                throw new Exception("Error deserializing the cli host specific template data.", ex);
-            }
+            return cliData;
         };
 
         internal CliNuGetSearchCacheConfig(string templateDiscoveryFileName)
