@@ -157,6 +157,16 @@
         <target state="new">Manifest packages were not found, skipping manifest update...</target>
         <note />
       </trans-unit>
+      <trans-unit id="SourceOptionDescription">
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="new">The NuGet package source to use during the restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TempDirOptionDescription">
         <source>Configure the temporary directory used for this command (must be secure).</source>
         <target state="new">Configure the temporary directory used for this command (must be secure).</target>
@@ -195,16 +205,6 @@
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
         <target state="translated">Określona wersja „{0}” nie należy do prawidłowego zakresu wersji pakietu NuGet.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionDescription">
-        <source>Add an additional NuGet package source to use during installation.</source>
-        <target state="translated">Dodaj dodatkowe źródło pakietu NuGet do użycia podczas instalacji.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSourceOptionName">
-        <source>SOURCE</source>
-        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">

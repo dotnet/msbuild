@@ -74,9 +74,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
 
             var configOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
-            var addSourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.AddSourceOption);
-            _packageSourceLocation = string.IsNullOrEmpty(configOption) && (addSourceOption == null || !addSourceOption.Any()) ? null :
-                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  addSourceOption);
+            var sourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
+            _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
+                new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  sourceOption);
 
             _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
             _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());

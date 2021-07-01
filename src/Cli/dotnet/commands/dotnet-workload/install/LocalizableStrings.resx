@@ -129,11 +129,11 @@
   <data name="VersionOptionDescription" xml:space="preserve">
     <value>The version of the SDK.</value>
   </data>
-  <data name="AddSourceOptionName" xml:space="preserve">
+  <data name="SourceOptionName" xml:space="preserve">
     <value>SOURCE</value>
   </data>
-  <data name="AddSourceOptionDescription" xml:space="preserve">
-    <value>Add an additional NuGet package source to use during installation.</value>
+  <data name="SourceOptionDescription" xml:space="preserve">
+    <value>The NuGet package source to use during the restore.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
     <value>Install a workload.</value>
