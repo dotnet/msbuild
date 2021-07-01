@@ -233,6 +233,30 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             LoggedError
         }
 
+        public class ConfigurableMockCache : ProjectCachePluginBase
+        {
+            public Func<BuildRequestData, PluginLoggerBase, CancellationToken, Task<CacheResult>>? GetCacheResultImplementation { get; set; }
+            public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
+
+            public override Task<CacheResult> GetCacheResultAsync(
+                BuildRequestData buildRequest,
+                PluginLoggerBase logger,
+                CancellationToken cancellationToken)
+            {
+                return GetCacheResultImplementation != null
+                    ? GetCacheResultImplementation(buildRequest, logger, cancellationToken)
+                    : Task.FromResult(CacheResult.IndicateNonCacheHit(CacheResultType.CacheNotApplicable));
+            }
+
+            public override Task EndBuildAsync(PluginLoggerBase logger, CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
         public class InstanceMockCache : ProjectCachePluginBase
         {
             private readonly GraphCacheResponse? _testData;
@@ -1473,6 +1497,97 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
             cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
+        }
+
+        [Fact]
+        // Schedules different requests for the same BuildRequestConfiguration in parallel.
+        // The first batch of the requests are cache misses, the second batch are cache hits via proxy builds.
+        // The first batch is delayed so it starts intermingling with the second batch.
+        // This test ensures that scheduling proxy builds on the inproc node works nicely within the Scheduler
+        // if the BuildRequestConfigurations for those proxy builds have built before (or are still building) on
+        // the out of proc node.
+        // More details: https://github.com/dotnet/msbuild/pull/6635 
+        public void ProxyCacheHitsOnPreviousCacheMissesShouldWork()
+        {
+            var cacheNotApplicableTarget = "NATarget";
+            var cacheHitTarget = "CacheHitTarget";
+            var proxyTarget = "ProxyTarget";
+
+            var project =
+@$"
+<Project>
+    <Target Name='{cacheNotApplicableTarget}'>
+        <Exec Command=`{Helpers.GetSleepCommand(TimeSpan.FromMilliseconds(200))}` />
+        <Message Text='{cacheNotApplicableTarget} in $(MSBuildThisFile)' />
+    </Target>
+
+    <Target Name='{cacheHitTarget}'>
+        <Message Text='{cacheHitTarget} in $(MSBuildThisFile)' />
+    </Target>
+
+    <Target Name='{proxyTarget}'>
+        <Message Text='{proxyTarget} in $(MSBuildThisFile)' />
+    </Target>
+</Project>
+".Cleanup();
+
+            var projectPaths = Enumerable.Range(0, NativeMethodsShared.GetLogicalCoreCount())
+                .Select(i => _env.CreateFile($"project{i}.proj", project).Path)
+                .ToArray();
+
+            var cacheHitCount = 0;
+            var nonCacheHitCount = 0;
+
+            var buildParameters = new BuildParameters
+            {
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(
+                    new ConfigurableMockCache
+                    {
+                        GetCacheResultImplementation = (request, _, _) =>
+                        {
+                            var projectFile = request.ProjectFullPath;
+
+                            if (request.TargetNames.Contains(cacheNotApplicableTarget))
+                            {
+                                Interlocked.Increment(ref nonCacheHitCount);
+                                return Task.FromResult(CacheResult.IndicateNonCacheHit(CacheResultType.CacheNotApplicable));
+                            }
+                            else
+                            {
+                                Interlocked.Increment(ref cacheHitCount);
+                                return Task.FromResult(
+                                    CacheResult.IndicateCacheHit(
+                                        new ProxyTargets(new Dictionary<string, string> {{proxyTarget, cacheHitTarget}})));
+                            }
+                        }
+                    },
+                    projectPaths.Select(p => new ProjectGraphEntryPoint(p)).ToArray(),
+                    projectGraph: null),
+                MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount()
+            };
+
+            using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
+
+            var buildRequests = new List<(string, string)>();
+            buildRequests.AddRange(projectPaths.Select(r => (r, cacheNotApplicableTarget)));
+            buildRequests.AddRange(projectPaths.Select(r => (r, cacheHitTarget)));
+
+            var buildTasks = new List<Task<BuildResult>>();
+            foreach (var (projectPath, target) in buildRequests)
+            {
+                buildTasks.Add(buildSession.BuildProjectFileAsync(projectPath, new[] {target}));
+            }
+
+            foreach (var buildResult in buildTasks.Select(buildTask => buildTask.Result))
+            {
+                buildResult.Exception.ShouldBeNull();
+                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            }
+
+            buildSession.Logger.ProjectStartedEvents.Count.ShouldBe(2 * projectPaths.Length);
+
+            cacheHitCount.ShouldBe(projectPaths.Length);
+            nonCacheHitCount.ShouldBe(projectPaths.Length);
         }
 
         private static void StringShouldContainSubstring(string aString, string substring, int expectedOccurrences)
