@@ -57,6 +57,13 @@ namespace Microsoft.DotNet.Cli
             var command = new Command("install", LocalizableStrings.CommandDescription);
 
             command.AddArgument(WorkloadIdArgument);
+            AddWorkloadInstallCommandOptions(command);
+
+            return command;
+        }
+
+        internal static void AddWorkloadInstallCommandOptions(Command command)
+        {
             command.AddOption(VersionOption);
             command.AddOption(ConfigOption);
             command.AddOption(SourceOption);
@@ -68,8 +75,6 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(TempDirOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
             command.AddOption(VerbosityOption);
-
-            return command;
         }
     }
 }

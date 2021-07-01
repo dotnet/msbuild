@@ -86,7 +86,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                     })
             };
 
-            ParseResult listParseResult = Parser.GetWorkloadsInstance.Parse(new[]
+            ParseResult listParseResult = Parser.Instance.Parse(new[]
             {
                 "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "7.0.100"
             });
@@ -128,7 +128,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenLowerTargetVersionItShouldThrow()
         {
             _workloadListCommand = new WorkloadListCommand(
-                Parser.GetWorkloadsInstance.Parse(new[]
+                Parser.Instance.Parse(new[]
                 {
                     "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "5.0.306"
                 }),
@@ -148,7 +148,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenSameLowerTargetVersionBandItShouldNotThrow()
         {
             _workloadListCommand = new WorkloadListCommand(
-                Parser.GetWorkloadsInstance.Parse(new[]
+                Parser.Instance.Parse(new[]
                 {
                     "dotnet", "workload", "list", "--machine-readable", WorkloadInstallCommandParser.VersionOption.Aliases.First(), "6.0.100"
                 }),
