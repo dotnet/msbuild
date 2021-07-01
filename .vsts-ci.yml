@@ -68,9 +68,6 @@ stages:
   - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
     - template: /eng/build.yml
       parameters:
-        enableRichCodeNavigation: true
-        richCodeNavigationLanguage: 'csharp'
-        richCodeNavigationEnvironment: 'production'
         agentOs: Windows_NT_FullFramework
         pool:
           ${{ if eq(variables['System.TeamProject'], 'public') }}:
