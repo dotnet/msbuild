@@ -65,9 +65,9 @@
       <Uri>https://github.com/dotnet/msbuild</Uri>
       <Sha>1b7661f3647192b88c6ee6d9da24a43e63c5ff23</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.0-beta.21323.6">
+    <Dependency Name="Microsoft.FSharp.Compiler" Version="12.0.0-beta.21330.7">
       <Uri>https://github.com/dotnet/fsharp</Uri>
-      <Sha>9a1f3882a9f30d95cb5b3277077d0c1fd749e028</Sha>
+      <Sha>04bd9ae9f00e70a606a36be1decea53e79459d1e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.0-2.21329.25">
       <Uri>https://github.com/dotnet/roslyn</Uri>
