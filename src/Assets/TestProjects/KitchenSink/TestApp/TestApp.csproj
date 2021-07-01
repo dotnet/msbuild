@@ -6,26 +6,33 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
-  <!-- Host configuration properties -->
+  <!-- Host configuration properties
+       Keep this list in the same order as the configProperties in GivenThatWeWantToPublishAProjectWithAllFeatures. -->
   <PropertyGroup>
+    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
+    <DebuggerSupport>true</DebuggerSupport>
+    <EventSourceSupport>false</EventSourceSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
-    <ThreadPoolMinThreads>2</ThreadPoolMinThreads>
-    <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <UseNativeHttpHandler>true</UseNativeHttpHandler>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <_EnableConsumingManagedCodeFromNativeHosting>false</_EnableConsumingManagedCodeFromNativeHosting>
+    <EnableCppCLIHostActivation>false</EnableCppCLIHostActivation>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
     <TieredCompilation>true</TieredCompilation>
     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
     <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
     <StartupHookSupport>false</StartupHookSupport>
-    <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
-    <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
-    <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
-    <EventSourceSupport>false</EventSourceSupport>
-    <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
-    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
-    <DebuggerSupport>true</DebuggerSupport>
+    <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
+    <ThreadPoolMinThreads>2</ThreadPoolMinThreads>
+    <ThreadPoolMaxThreads>9</ThreadPoolMaxThreads>
   </PropertyGroup>
 
   <ItemGroup>

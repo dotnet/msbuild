@@ -404,6 +404,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(UseNativeHttpHandler)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Reflection.Metadata.MetadataUpdater.IsSupported"
+                                    Condition="'$(MetadataUpdaterSupport)' != ''"
+                                    Value="$(MetadataUpdaterSupport)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Resources.ResourceManager.AllowCustomResourceTypes"
                                     Condition="'$(CustomResourceTypesSupport)' != ''"
                                     Value="$(CustomResourceTypesSupport)"
