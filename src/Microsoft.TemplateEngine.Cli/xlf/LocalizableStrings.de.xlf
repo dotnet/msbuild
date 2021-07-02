@@ -276,6 +276,11 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <target state="translated">Vorlage "{0}" wurde nicht gefunden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
+        <source>Search failed: {0}</source>
+        <target state="new">Search failed: {0}</target>
+        <note>0 - localized error message</note>
+      </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
         <target state="translated">Fehler bei der Suche: Vorlagenname ist zu kurz, mindestens 2 Zeichen sind erforderlich.</target>

@@ -536,6 +536,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search failed: {0}.
+        /// </summary>
+        internal static string CliTemplateSearchCoordinator_Error_SearchFailure {
+            get {
+                return ResourceManager.GetString("CliTemplateSearchCoordinator_Error_SearchFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search failed: template name is too short, minimum 2 characters are required..
         /// </summary>
         internal static string CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort {

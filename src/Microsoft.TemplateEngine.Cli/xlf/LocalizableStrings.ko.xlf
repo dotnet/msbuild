@@ -276,6 +276,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">'{0}' 템플릿을 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
+        <source>Search failed: {0}</source>
+        <target state="new">Search failed: {0}</target>
+        <note>0 - localized error message</note>
+      </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
         <target state="translated">검색 실패: 템플릿 이름이 너무 짧습니다. 최소 2 자 이상이 필요합니다.</target>

@@ -276,6 +276,11 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">'{0}' şablonu bulunamadı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
+        <source>Search failed: {0}</source>
+        <target state="new">Search failed: {0}</target>
+        <note>0 - localized error message</note>
+      </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
         <target state="translated">Arama başarısız: şablon adı çok kısa, en az 2 karakter gerekiyor.</target>

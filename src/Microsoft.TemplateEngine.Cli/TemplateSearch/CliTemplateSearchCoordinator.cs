@@ -4,12 +4,13 @@
 #nullable enable
 
 using Microsoft.TemplateEngine.Abstractions;
+using Microsoft.TemplateEngine.Abstractions.TemplatePackage;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Cli.TableOutput;
-using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Edge.Settings;
 using Microsoft.TemplateSearch.Common;
+using Microsoft.TemplateSearch.Common.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 {
@@ -47,71 +48,88 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             }
 
             Reporter.Output.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchInProgress);
-            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings, commandInput, defaultLanguage);
-            var templatePackages = await templatePackageManager.GetTemplatePackagesAsync(force: false, cancellationToken: default).ConfigureAwait(false);
-            SearchResults searchResults = await searchCoordinator.SearchAsync(templatePackages, default).ConfigureAwait(false);
+            IReadOnlyList<IManagedTemplatePackage> templatePackages =
+                await templatePackageManager.GetManagedTemplatePackagesAsync(force: false, cancellationToken: default).ConfigureAwait(false);
 
-            if (!searchResults.AnySources)
+            TemplateSearchCoordinator searchCoordinator = CliTemplateSearchCoordinatorFactory.CreateCliTemplateSearchCoordinator(environmentSettings);
+            CliSearchFiltersFactory searchFiltersFactory = new CliSearchFiltersFactory(templatePackages);
+
+            IReadOnlyList<SearchResult>? searchResults = await searchCoordinator.SearchAsync(
+                searchFiltersFactory.GetPackFilter(commandInput),
+                CliSearchFiltersFactory.GetMatchingTemplatesFilter(commandInput),
+                default).ConfigureAwait(false);
+
+            if (!searchResults.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoSources.Bold().Red());
                 return New3CommandStatus.NotFound;
             }
 
-            if (searchResults.MatchesBySource.Count > 0)
+            string? packageIdToShow = null;
+            foreach (SearchResult result in searchResults)
             {
-                string? packageIdToShow = null;
-                foreach (TemplateSourceSearchResult sourceResult in searchResults.MatchesBySource)
+                if (!result.Success)
                 {
-                    DisplayResultsForPack(sourceResult, environmentSettings, commandInput, defaultLanguage);
-
-                    var firstMicrosoftAuthoredPack = sourceResult.PacksWithMatches.FirstOrDefault(p => p.Value.TemplateMatches.Any(t => string.Equals(t.Info.Author, "Microsoft")));
-                    if (!firstMicrosoftAuthoredPack.Equals(default(KeyValuePair<PackInfo, TemplatePackSearchResult>)))
-                    {
-                        packageIdToShow = firstMicrosoftAuthoredPack.Key.Name;
-                    }
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, result.Provider.Factory.DisplayName));
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Error_SearchFailure, result.ErrorMessage).Red().Bold());
+                    continue;
                 }
 
-                Reporter.Output.WriteLine();
+                Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, result.Provider.Factory.DisplayName));
+                if (result.SearchHits.Any())
+                {
+                    DisplayResultsForPack(result.SearchHits, environmentSettings, commandInput, defaultLanguage);
+
+                    if (string.IsNullOrWhiteSpace(packageIdToShow))
+                    {
+                        var firstMicrosoftAuthoredPack = result.SearchHits.FirstOrDefault(p => p.MatchedTemplates.Any(t => string.Equals(t.Author, "Microsoft")));
+                        if (firstMicrosoftAuthoredPack != default)
+                        {
+                            packageIdToShow = firstMicrosoftAuthoredPack.PackageInfo.Name;
+                        }
+                    }
+                }
+                else
+                {
+                    IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandInput);
+                    // No templates found matching the following input parameter(s): {0}.
+                    Reporter.Error.WriteLine(
+                        string.Format(
+                            LocalizableStrings.NoTemplatesMatchingInputParameters,
+                            TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches))
+                        .Bold().Red());
+                }
+            }
+            Reporter.Output.WriteLine();
+            if (searchResults.Where(r => r.Success).SelectMany(r => r.SearchHits).Any())
+            {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp, commandInput.CommandName));
                 Reporter.Output.WriteCommand(commandInput.InstallCommandExample());
                 if (string.IsNullOrWhiteSpace(packageIdToShow))
                 {
-                    packageIdToShow = searchResults.MatchesBySource[0].PacksWithMatches.First().Key.Name;
+                    packageIdToShow = searchResults.Where(r => r.Success).First().SearchHits[0].PackageInfo.Name;
                 }
                 Reporter.Output.WriteLine(LocalizableStrings.Generic_ExampleHeader);
                 Reporter.Output.WriteCommand(commandInput.InstallCommandExample(packageID: packageIdToShow));
                 return New3CommandStatus.Success;
             }
-            else
-            {
-                IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandInput);
-                // No templates found matching the following input parameter(s): {0}.
-                Reporter.Error.WriteLine(
-                    string.Format(
-                        LocalizableStrings.NoTemplatesMatchingInputParameters,
-                        TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches))
-                    .Bold().Red());
-
-                return New3CommandStatus.NotFound;
-            }
+            return New3CommandStatus.NotFound;
         }
 
-        private static IReadOnlyDictionary<string, string?>? GetAllMatchedParametersList(TemplateSourceSearchResult sourceResult)
+        private static void DisplayResultsForPack(
+            IReadOnlyList<(IPackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
+            IEngineEnvironmentSettings environmentSettings,
+            INewCommandInput commandInput,
+            string? defaultLanguage)
         {
-            return TemplateResolutionResult.GetAllMatchedParametersList(sourceResult.PacksWithMatches.Values.SelectMany(pack => pack.TemplateMatches));
-        }
-
-        private static void DisplayResultsForPack(TemplateSourceSearchResult sourceResult, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, string? defaultLanguage)
-        {
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_MatchesFromSource, sourceResult.SourceDisplayName));
-            IReadOnlyDictionary<string, string?>? appliedParameterMatches = GetAllMatchedParametersList(sourceResult);
+            IReadOnlyDictionary<string, string?>? appliedParameterMatches = TemplateCommandInput.GetTemplateParametersFromCommand(commandInput);
             Reporter.Output.WriteLine(
                 string.Format(
                     LocalizableStrings.TemplatesFoundMatchingInputParameters,
                     TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches)));
             Reporter.Output.WriteLine();
 
-            IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(sourceResult, commandInput.Language, defaultLanguage, environmentSettings.Environment);
+            IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(results, commandInput.Language, defaultLanguage, environmentSettings.Environment);
 
             HelpFormatter<SearchResultTableRow> formatter =
                 HelpFormatter
@@ -136,21 +154,17 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         }
 
         private static IReadOnlyCollection<SearchResultTableRow> GetSearchResultsForDisplay(
-            TemplateSourceSearchResult sourceResult,
+            IReadOnlyList<(IPackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
             string language,
             string? defaultLanguage,
             IEnvironment environment)
         {
             List<SearchResultTableRow> templateGroupsForDisplay = new List<SearchResultTableRow>();
 
-            foreach (TemplatePackSearchResult packSearchResult in sourceResult.PacksWithMatches.Values)
+            foreach (var packSearchResult in results)
             {
-                var templateGroupsForPack = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
-                    packSearchResult.TemplateMatches.Select(mi => mi.Info),
-                    language,
-                    defaultLanguage,
-                    environment);
-                templateGroupsForDisplay.AddRange(templateGroupsForPack.Select(t => new SearchResultTableRow(t, packSearchResult.PackInfo.Name, packSearchResult.PackInfo.TotalDownloads)));
+                var templateGroupsForPack = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(packSearchResult.MatchedTemplates, language, defaultLanguage, environment);
+                templateGroupsForDisplay.AddRange(templateGroupsForPack.Select(t => new SearchResultTableRow(t, packSearchResult.PackageInfo.Name, packSearchResult.PackageInfo.TotalDownloads)));
             }
 
             return templateGroupsForDisplay;

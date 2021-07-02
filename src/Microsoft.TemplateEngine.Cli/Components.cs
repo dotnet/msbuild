@@ -5,8 +5,6 @@
 
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
-using Microsoft.TemplateEngine.Cli.TemplateSearch;
-using Microsoft.TemplateSearch.Common;
 
 namespace Microsoft.TemplateEngine.Cli
 {
@@ -21,7 +19,6 @@ namespace Microsoft.TemplateEngine.Cli
                 (typeof(IPostActionProcessor), new ChmodPostActionProcessor()),
                 (typeof(IPostActionProcessor), new InstructionDisplayPostActionProcessor()),
                 (typeof(IPostActionProcessor), new ProcessStartPostActionProcessor()),
-                (typeof(ITemplateSearchSource), new CliNuGetMetadataSearchSource()),
             };
     }
 }

@@ -276,6 +276,11 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Šablona {0} se nenašla.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
+        <source>Search failed: {0}</source>
+        <target state="new">Search failed: {0}</target>
+        <note>0 - localized error message</note>
+      </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
         <target state="translated">Hledání se nepovedlo: název šablony je příliš krátký, vyžadují se minimálně 2 znaky.</target>

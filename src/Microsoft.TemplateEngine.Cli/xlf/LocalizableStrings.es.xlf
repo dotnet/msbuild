@@ -276,6 +276,11 @@ Ejecute "dotnet {1} --show-aliases" sin argumentos para mostrar todos los alias.
         <target state="translated">No se encontró la plantilla "{0}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
+        <source>Search failed: {0}</source>
+        <target state="new">Search failed: {0}</target>
+        <note>0 - localized error message</note>
+      </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
         <source>Search failed: template name is too short, minimum 2 characters are required.</source>
         <target state="translated">No se pudo realizar la búsqueda: el nombre de la plantilla es demasiado corto, se requieren 2 caracteres como mínimo.</target>

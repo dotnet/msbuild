@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli
@@ -59,12 +60,16 @@ namespace Microsoft.TemplateEngine.Cli
             SymbolInfo = symbolInfo;
         }
 
+        [JsonProperty]
         public List<string>? UsageExamples { get; set; }
 
+        [JsonProperty]
         public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> SymbolInfo { get; }
 
+        [JsonProperty]
         public bool IsHidden { get; }
 
+        [JsonIgnore]
         public HashSet<string> HiddenParameterNames
         {
             get
@@ -84,6 +89,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        [JsonIgnore]
         public HashSet<string> ParametersToAlwaysShow
         {
             get
@@ -103,6 +109,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        [JsonIgnore]
         public Dictionary<string, string> LongNameOverrides
         {
             get
@@ -121,6 +128,7 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
+        [JsonIgnore]
         public Dictionary<string, string> ShortNameOverrides
         {
             get

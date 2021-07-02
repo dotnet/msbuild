@@ -753,6 +753,10 @@ The supported columns are: language, tags, author, type.</value>
     <value>(empty)</value>
     <comment>shown when there is no data to show</comment>
   </data>
+  <data name="CliTemplateSearchCoordinator_Error_SearchFailure" xml:space="preserve">
+    <value>Search failed: {0}</value>
+    <comment>0 - localized error message</comment>
+  </data>
   <data name="InvalidSyntax" xml:space="preserve">
     <value>Invalid command syntax: use '{0}' instead.</value>
     <comment>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</comment>

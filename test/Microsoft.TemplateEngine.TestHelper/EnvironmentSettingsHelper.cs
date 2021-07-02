@@ -22,7 +22,8 @@ namespace Microsoft.TemplateEngine.TestHelper
             string? locale = null,
             bool virtualize = false,
             [CallerMemberName] string hostIdentifier = "",
-            bool loadDefaultGenerator = true)
+            bool loadDefaultGenerator = true,
+            IEnvironment? environment = null)
         {
             if (string.IsNullOrEmpty(locale))
             {
@@ -45,12 +46,12 @@ namespace Microsoft.TemplateEngine.TestHelper
             EngineEnvironmentSettings engineEnvironmentSettings;
             if (virtualize)
             {
-                engineEnvironmentSettings = new EngineEnvironmentSettings(host, virtualizeSettings: true);
+                engineEnvironmentSettings = new EngineEnvironmentSettings(host, virtualizeSettings: true, environment: environment);
             }
             else
             {
                 var templateEngineRoot = Path.Combine(CreateTemporaryFolder(), ".templateengine");
-                engineEnvironmentSettings = new EngineEnvironmentSettings(host, settingsLocation: templateEngineRoot);
+                engineEnvironmentSettings = new EngineEnvironmentSettings(host, settingsLocation: templateEngineRoot, environment: environment);
             }
             return engineEnvironmentSettings;
         }
