@@ -199,13 +199,9 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     continue;
                 }
 
-                if (ResolveId(pack) is WorkloadPackId resolvedPackageId)
+                if (ResolvePackPath(pack, out WorkloadPackId resolvedPackageId, out bool isInstalled) is string aliasedPath && isInstalled)
                 {
-                    var aliasedPath = GetPackPath(_dotnetRootPaths, resolvedPackageId, pack.Version, pack.Kind, out bool isInstalled);
-                    if (isInstalled)
-                    {
-                        yield return CreatePackInfo(pack, aliasedPath, resolvedPackageId);
-                    }
+                    yield return CreatePackInfo(pack, aliasedPath, resolvedPackageId);
                 }
             }
         }
@@ -251,57 +247,64 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <param name="isInstalled">Whether the pack is installed</param>
         /// <returns>The path to the pack, or null if the pack is not available on the host platform.</returns>
         private string? ResolvePackPath(WorkloadPack pack, out bool isInstalled)
+            => ResolvePackPath(pack, out _, out isInstalled);
+
+        private string? ResolvePackPath(
+            WorkloadPack pack,
+            out WorkloadPackId resolvedId,
+            out bool isInstalled)
         {
-            if (ResolveId(pack) is WorkloadPackId resolvedId)
+            resolvedId = ResolveId(pack) ?? default;
+            if (resolvedId is WorkloadPackId resolved)
             {
-                return GetPackPath(_dotnetRootPaths, resolvedId, pack.Version, pack.Kind, out isInstalled);
+                return GetPackPath(resolved, pack.Version, pack.Kind, out isInstalled);
             }
 
             isInstalled = false;
             return null;
-        }
 
-        private string GetPackPath(string [] dotnetRootPaths, WorkloadPackId packageId, string packageVersion, WorkloadPackKind kind, out bool isInstalled)
-        {
-            isInstalled = false;
-            string packPath = "";
-            bool isFile;
-            foreach (var rootPath in dotnetRootPaths)
+            string GetPackPath(WorkloadPackId resolvedPackageId, string packageVersion, WorkloadPackKind kind, out bool isInstalled)
             {
-                switch (kind)
+                isInstalled = false;
+                string packPath = "";
+                bool isFile;
+                foreach (var rootPath in _dotnetRootPaths)
                 {
-                    case WorkloadPackKind.Framework:
-                    case WorkloadPackKind.Sdk:
-                        packPath = Path.Combine(rootPath, "packs", packageId.ToString(), packageVersion);
-                        isFile = false;
-                        break;
-                    case WorkloadPackKind.Template:
-                        packPath = Path.Combine(rootPath, "template-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
-                        isFile = true;
-                        break;
-                    case WorkloadPackKind.Library:
-                        packPath = Path.Combine(rootPath, "library-packs", packageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
-                        isFile = true;
-                        break;
-                    case WorkloadPackKind.Tool:
-                        packPath = Path.Combine(rootPath, "tool-packs", packageId.ToString(), packageVersion);
-                        isFile = false;
-                        break;
-                    default:
-                        throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
-                }
+                    switch (kind)
+                    {
+                        case WorkloadPackKind.Framework:
+                        case WorkloadPackKind.Sdk:
+                            packPath = Path.Combine(rootPath, "packs", resolvedPackageId.ToString(), packageVersion);
+                            isFile = false;
+                            break;
+                        case WorkloadPackKind.Template:
+                            packPath = Path.Combine(rootPath, "template-packs", resolvedPackageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                            isFile = true;
+                            break;
+                        case WorkloadPackKind.Library:
+                            packPath = Path.Combine(rootPath, "library-packs", resolvedPackageId.GetNuGetCanonicalId() + "." + packageVersion.ToLowerInvariant() + ".nupkg");
+                            isFile = true;
+                            break;
+                        case WorkloadPackKind.Tool:
+                            packPath = Path.Combine(rootPath, "tool-packs", resolvedPackageId.ToString(), packageVersion);
+                            isFile = false;
+                            break;
+                        default:
+                            throw new ArgumentException($"The package kind '{kind}' is not known", nameof(kind));
+                    }
 
-                //can we do a more robust check than directory.exists?
-                isInstalled = isFile ?
-                    _fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath) :
-                    _directoryExistOverride?.Invoke(packPath) ?? Directory.Exists(packPath); ;
+                    //can we do a more robust check than directory.exists?
+                    isInstalled = isFile ?
+                        _fileExistOverride?.Invoke(packPath) ?? File.Exists(packPath) :
+                        _directoryExistOverride?.Invoke(packPath) ?? Directory.Exists(packPath); ;
 
-                if (isInstalled)
-                {
-                    break;
+                    if (isInstalled)
+                    {
+                        break;
+                    }
                 }
+                return packPath;
             }
-            return packPath;
         }
 
         /// <summary>
@@ -414,11 +417,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 throw new ArgumentException($"'{nameof(packId)}' cannot be null or empty", nameof(packId));
             }
 
-            if (_packs.TryGetValue(new WorkloadPackId (packId)) is (WorkloadPack pack, _))
+            if (_packs.TryGetValue(packId) is (WorkloadPack pack, _))
             {
-                if (ResolveId(pack) is WorkloadPackId resolvedPackageId)
+                if (ResolvePackPath(pack, out WorkloadPackId resolvedPackageId, out bool isInstalled) is string aliasedPath)
                 {
-                    var aliasedPath = GetPackPath(_dotnetRootPaths, resolvedPackageId, pack.Version, pack.Kind, out _);
                     return CreatePackInfo(pack, aliasedPath, resolvedPackageId);
                 }
             }
