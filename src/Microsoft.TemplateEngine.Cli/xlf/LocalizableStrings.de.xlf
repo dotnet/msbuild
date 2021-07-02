@@ -268,7 +268,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: no template name is specified.</source>
-        <target state="new">Search failed: no template name is specified.</target>
+        <target state="translated">Suchvorgang fehlgeschlagen: Es wurde kein Vorlagenname angegeben.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -283,7 +283,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
         <source>To use the template, run the following command to install the package:</source>
-        <target state="new">To use the template, run the following command to install the package:</target>
+        <target state="translated">Um die Vorlage zu verwenden, führen Sie den folgenden Befehl aus, um das Paket zu installieren:</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
@@ -293,7 +293,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="new">To search for the template, specify template name or use one of supported filters: {0}.</target>
+        <target state="translated">Um nach der Vorlage zu suchen, geben Sie den Vorlagennamen an, oder verwenden Sie einen der unterstützten Filter: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -499,12 +499,12 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
         <source>Example:</source>
-        <target state="new">Example:</target>
+        <target state="translated">Beispiel:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_ExamplesHeader">
         <source>Examples:</source>
-        <target state="new">Examples:</target>
+        <target state="translated">Beispiele:</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
@@ -554,7 +554,7 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">Um installierte Vorlagen aufzulisten, führen Sie folgende Aktion aus:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -746,7 +746,7 @@ Die unterstützten Spalten sind: Sprache, Tags, Autor, Typ.</target>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
-        <target state="new">For usage information, run: </target>
+        <target state="translated">Um Nutzungsinformationen zu erhalten, führen Sie folgende Aktion aus: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -761,7 +761,7 @@ Die unterstützten Spalten sind: Sprache, Tags, Autor, Typ.</target>
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">Um nach den Vorlagen unter NuGet.org zu suchen, führen Sie folgende Aktion aus:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
