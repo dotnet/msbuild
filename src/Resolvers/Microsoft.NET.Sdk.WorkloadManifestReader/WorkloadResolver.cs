@@ -437,7 +437,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packIds)
         {
             var requestedPacks = new HashSet<WorkloadPackId>(packIds);
-            var expandedWorkloads = _workloads.Select(w => (w.Value.workload.Id, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.Value.workload, w.Value.manifest).Select(p => p.packId))));
+            var availableWorkloads = GetAvailableWorkloadDefinitions();
+            var expandedWorkloads = availableWorkloads.Select(w => (w.workload.Id, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.workload, w.manifest).Select(p => p.packId))));
             var finder = new WorkloadSuggestionFinder(GetInstalledPacks(), requestedPacks, expandedWorkloads);
 
             return new HashSet<WorkloadInfo>
