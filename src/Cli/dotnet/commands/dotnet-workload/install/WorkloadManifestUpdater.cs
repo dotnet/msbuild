@@ -200,6 +200,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             finally
             {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                
                 if (!string.IsNullOrEmpty(extractionPath) && Directory.Exists(extractionPath))
                 {
                     Directory.Delete(extractionPath, true);
