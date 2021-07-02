@@ -145,6 +145,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
             finally
             {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
                 // Delete leftover dirs and files
                 foreach (var file in tempFilesToDelete)
                 {
@@ -223,6 +226,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempBackupDir, manifestPath));
                         }
                     });
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
 
                 // Delete leftover dirs and files
                 if (!string.IsNullOrEmpty(packagePath) && File.Exists(packagePath) && (offlineCache == null || !offlineCache.HasValue))

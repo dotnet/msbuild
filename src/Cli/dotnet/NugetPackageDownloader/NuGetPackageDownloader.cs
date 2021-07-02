@@ -89,6 +89,7 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                 _cacheSettings,
                 _verboseLogger,
                 cancellationToken);
+            destinationStream.Close();
 
             if (!success)
             {
