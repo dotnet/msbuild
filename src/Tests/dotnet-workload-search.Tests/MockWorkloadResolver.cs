@@ -9,17 +9,14 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
 {
     public class MockWorkloadResolver : IWorkloadResolver
     {
-        private readonly IEnumerable<WorkloadDefinition> _availableWorkloads;
+        private readonly IEnumerable<WorkloadResolver.WorkloadInfo> _availableWorkloads;
 
-        public MockWorkloadResolver(IEnumerable<WorkloadDefinition> availableWorkloads)
+        public MockWorkloadResolver(IEnumerable<WorkloadResolver.WorkloadInfo> availableWorkloads)
         {
             _availableWorkloads = availableWorkloads;
         }
 
-        public IEnumerable<WorkloadDefinition> GetAvailableWorkloads()
-        {
-            return _availableWorkloads;
-        }
+        public IEnumerable<WorkloadResolver.WorkloadInfo> GetAvailableWorkloads() => _availableWorkloads;
 
         public IEnumerable<WorkloadResolver.PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind) => throw new NotImplementedException();
         public IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadId workloadId) => throw new NotImplementedException();

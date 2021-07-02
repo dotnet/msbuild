@@ -445,13 +445,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         }
 
         /// <summary>
-        /// Returns the list of workloads defined by the manifests on disk
+        /// Returns the list of workloads available (installed or not) on the current platform, defined by the manifests on disk
         /// </summary>
-        public IEnumerable<WorkloadDefinition> GetAvailableWorkloads()
+        public IEnumerable<WorkloadInfo> GetAvailableWorkloads()
+            => GetAvailableWorkloadDefinitions().Select(w => new WorkloadInfo(w.workload.Id, w.workload.Description));
+
+        private IEnumerable<(WorkloadDefinition workload, WorkloadManifest manifest)> GetAvailableWorkloadDefinitions()
         {
-            foreach ((WorkloadId _, (WorkloadDefinition workload, WorkloadManifest _)) in _workloads)
+            foreach ((WorkloadId _, (WorkloadDefinition workload, WorkloadManifest manifest)) in _workloads)
             {
-                yield return workload;
+                if (!workload.IsAbstract && IsWorkloadPlatformCompatible(workload, manifest) && !IsWorkloadImplicitlyAbstract(workload, manifest))
+                {
+                    yield return (workload, manifest);
+                }
             }
         }
 
@@ -577,17 +583,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId)
         {
-            var workloadDef = GetAvailableWorkloads().FirstOrDefault(workload => workload.Id.ToString().Equals(workloadId.ToString()));
-            if (workloadDef == null)
+            if (_workloads.TryGetValue(workloadId) is not (WorkloadDefinition workload, WorkloadManifest manifest))
             {
-                throw new Exception("Workload not found");
+                throw new ArgumentException($"Workload '{workloadId}' not found", nameof(workloadId));
             }
-            if (workloadDef.Platforms == null)
-            {
-                return true;
-            }
-            return workloadDef.Platforms.Any(supportedPlatform => _currentRuntimeIdentifiers.Contains(supportedPlatform));
+            return IsWorkloadPlatformCompatible(workload, manifest);
         }
+
+        private bool IsWorkloadPlatformCompatible(WorkloadDefinition workload, WorkloadManifest manifest)
+            => EnumerateWorkloadWithExtends(workload, manifest).All(w =>
+                w.workload.Platforms == null || w.workload.Platforms.Count == 0 || w.workload.Platforms.Any(platform => _currentRuntimeIdentifiers.Contains(platform)));
+
+        private bool IsWorkloadImplicitlyAbstract(WorkloadDefinition workload, WorkloadManifest manifest) => !GetPacksInWorkload(workload, manifest).Any();
 
         public string GetManifestVersion(string manifestId)
         {

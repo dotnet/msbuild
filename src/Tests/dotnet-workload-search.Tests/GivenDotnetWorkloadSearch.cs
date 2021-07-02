@@ -18,20 +18,17 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
     public class GivenDotnetWorkloadSearch : SdkTest
     {
         private readonly BufferedReporter _reporter;
-        private readonly IEnumerable<WorkloadDefinition> _availableWorkloads =
-            new List<WorkloadDefinition>()
+        private readonly IEnumerable<WorkloadResolver.WorkloadInfo> _availableWorkloads =
+            new List<WorkloadResolver.WorkloadInfo>()
             {
-                new WorkloadDefinition(new WorkloadId("mock-workload-1"), false, null, WorkloadDefinitionKind.Dev, new List<WorkloadId>(), 
-                    new List<WorkloadPackId>(), new List<string>()),
-                new WorkloadDefinition(new WorkloadId("mock-workload-2"), false, string.Empty, WorkloadDefinitionKind.Build, null, 
-                    new List<WorkloadPackId>(), new List<string>() { "platform1", "platform2" }),
-                new WorkloadDefinition(new WorkloadId("mock-workload-3"), true, "Fake description 1", WorkloadDefinitionKind.Dev, 
-                    new List<WorkloadId>() { new WorkloadId("mock-workload-2") }, new List<WorkloadPackId>(), new List<string>()),
-                new WorkloadDefinition(new WorkloadId("fake-workload-1"), true, null, WorkloadDefinitionKind.Build, 
-                    new List<WorkloadId>(), new List<WorkloadPackId>(), null),
-                new WorkloadDefinition(new WorkloadId("fake-workload-2"), false, "Fake description 2", WorkloadDefinitionKind.Dev, null, 
-                    new List<WorkloadPackId>(), new List<string>())
+                CreateWorkloadInfo("mock-workload-1"),
+                CreateWorkloadInfo("mock-workload-2"),
+                CreateWorkloadInfo("fake-workload-1"),
+                CreateWorkloadInfo("fake-workload-2", "Fake description 2")
             };
+
+        static WorkloadResolver.WorkloadInfo CreateWorkloadInfo(string id, string description = null)
+            => new WorkloadResolver.WorkloadInfo(new WorkloadId(id), description);
 
         public GivenDotnetWorkloadSearch(ITestOutputHelper log) : base(log)
         {
@@ -43,7 +40,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         {
             _reporter.Clear();
             var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search");
-            var workloadResolver = new MockWorkloadResolver(new List<WorkloadDefinition>());
+            var workloadResolver = new MockWorkloadResolver(Enumerable.Empty<WorkloadResolver.WorkloadInfo>());
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
 
@@ -67,10 +64,6 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
                 {
                     output.Contains(workload.Description).Should().BeTrue();
                 }
-                if (workload.Platforms != null && workload.Platforms.Any())
-                {
-                    output.Contains(workload.Platforms.First().ToString()).Should().BeFalse();
-                }
             }
         }
 
@@ -90,10 +83,6 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
                 if (workload.Description != null)
                 {
                     output.Contains(workload.Description).Should().BeTrue();
-                }
-                if (workload.Platforms != null && workload.Platforms.Any())
-                {
-                    output.Contains(workload.Platforms.First().ToString()).Should().BeTrue();
                 }
             }
         }
