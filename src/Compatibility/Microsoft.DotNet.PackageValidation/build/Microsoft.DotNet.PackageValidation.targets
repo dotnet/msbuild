@@ -2,7 +2,7 @@
 <Project>
   <UsingTask TaskName="Microsoft.DotNet.PackageValidation.ValidatePackage" AssemblyFile="$(DotNetPackageValidationAssembly)" />
 
-  <ItemGroup Condition="'$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">
+  <ItemGroup Condition="'$(DisablePackageBaselineValidation)' != 'true' and '$(PackageValidationBaselinePath)' == '' and '$(PackageValidationBaselineVersion)' != ''">
     <PackageDownload Include="$([MSBuild]::ValueOrDefault('$(PackageValidationBaselineName)', '$(PackageId)'))" Version="[$(PackageValidationBaselineVersion)]" />
   </ItemGroup>
 
