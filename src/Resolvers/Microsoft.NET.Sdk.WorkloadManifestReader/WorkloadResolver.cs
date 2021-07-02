@@ -572,13 +572,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             public string? Description { get; }
         }
 
-        public WorkloadInfo GetWorkloadInfo(WorkloadId WorkloadId)
+        public WorkloadInfo GetWorkloadInfo(WorkloadId workloadId)
         {
-            if (_workloads.TryGetValue(WorkloadId) is (WorkloadDefinition workload, _))
+            if (_workloads.TryGetValue(workloadId) is not (WorkloadDefinition workload, _))
             {
-                return new WorkloadInfo(workload.Id, workload.Description);
+                throw new ArgumentException($"Workload '{workloadId}' not found", nameof(workloadId));
             }
-            throw new Exception("Workload not found");
+            return new WorkloadInfo(workload.Id, workload.Description);
         }
 
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId)
