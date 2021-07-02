@@ -336,7 +336,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             if (workload.Extends?.Count > 0)
             {
-                return GetPacksInWorkload(workload);
+                return GetPacksInWorkload(workload, value.manifest).Select(p => p.packId);
             }
 
 #nullable disable
@@ -344,42 +344,61 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 #nullable restore
         }
 
-        internal IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadDefinition workload)
+        private IEnumerable<(WorkloadDefinition workload, WorkloadManifest workloadManifest)> EnumerateWorkloadWithExtends(WorkloadDefinition workload, WorkloadManifest manifest)
         {
-            var dedup = new HashSet<WorkloadId>();
+            HashSet<WorkloadId>? dedup = null;
 
-            IEnumerable<WorkloadPackId> ExpandPacks (WorkloadId workloadId)
+            IEnumerable<(WorkloadDefinition workload, WorkloadManifest workloadManifest)> EnumerateWorkloadWithExtendsRec(WorkloadDefinition workload, WorkloadManifest manifest)
             {
-                if (!(_workloads.TryGetValue (workloadId) is (WorkloadDefinition workloadInfo, _)))
+                yield return (workload, manifest);
+
+                if (workload.Extends == null || workload.Extends.Count == 0)
                 {
-                    // inconsistent manifest
-                    throw new Exception("Workload not found");
+                    yield break;
                 }
 
-                if (workloadInfo.Packs != null && workloadInfo.Packs.Count > 0)
+                dedup ??= new HashSet<WorkloadId> { workload.Id };
+
+                foreach (var baseWorkloadId in workload.Extends)
                 {
-                    foreach (var p in workloadInfo.Packs)
+                    if (!dedup.Add(baseWorkloadId))
                     {
-                        yield return p;
+                        continue;
                     }
-                }
 
-                if (workloadInfo.Extends != null && workloadInfo.Extends.Count > 0)
-                {
-                    foreach (var e in workloadInfo.Extends)
+                    if (_workloads.TryGetValue(baseWorkloadId) is not (WorkloadDefinition baseWorkload, WorkloadManifest baseWorkloadManifest))
                     {
-                        if (dedup.Add(e))
-                        {
-                            foreach (var ep in ExpandPacks(e))
-                            {
-                                yield return ep;
-                            }
-                        }
+                        throw new WorkloadManifestCompositionException($"Could not find workload '{baseWorkloadId}' extended by workload '{workload.Id}' in manifest '{manifest.Id}' ({manifest.InformationalPath})");
+                    }
+
+                    // the workload's ID may not match the value we looked up if it's a redirect
+                    if (baseWorkloadId != baseWorkload.Id && !dedup.Add(baseWorkload.Id))
+                    {
+                        continue;
+                    }
+
+                    foreach (var enumeratedbaseWorkload in EnumerateWorkloadWithExtendsRec(baseWorkload, baseWorkloadManifest))
+                    {
+                        yield return enumeratedbaseWorkload;
                     }
                 }
             }
 
-            return ExpandPacks(workload.Id);
+            return EnumerateWorkloadWithExtendsRec(workload, manifest);
+        }
+
+        internal IEnumerable<(WorkloadPackId packId, WorkloadDefinition referencingWorkload, WorkloadManifest workloadDefinedIn)> GetPacksInWorkload(WorkloadDefinition workload, WorkloadManifest manifest)
+        {
+            foreach((WorkloadDefinition w, WorkloadManifest m) in EnumerateWorkloadWithExtends(workload, manifest))
+            {
+                if (w.Packs != null && w.Packs.Count > 0)
+                {
+                    foreach (var p in w.Packs)
+                    {
+                        yield return (p, w, m);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -416,7 +435,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packIds)
         {
             var requestedPacks = new HashSet<WorkloadPackId>(packIds);
-            var expandedWorkloads = _workloads.Select(w => (w.Key, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.Value.workload))));
+            var expandedWorkloads = _workloads.Select(w => (w.Value.workload.Id, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.Value.workload, w.Value.manifest).Select(p => p.packId))));
             var finder = new WorkloadSuggestionFinder(GetInstalledPacks(), requestedPacks, expandedWorkloads);
 
             return new HashSet<WorkloadInfo>
@@ -444,14 +463,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <returns></returns>
         public IEnumerable<WorkloadId> GetUpdatedWorkloads(WorkloadResolver advertisingManifestResolver, IEnumerable<WorkloadId> installedWorkloads)
         {
-            foreach(var workloadId in installedWorkloads)
+            foreach (var workloadId in installedWorkloads)
             {
-                var existingWorkload = _workloads[workloadId].workload;
-                var existingPacks = GetPacksInWorkload(existingWorkload).ToHashSet();
+                var existingWorkload = _workloads[workloadId];
+                var existingPacks = GetPacksInWorkload(existingWorkload.workload, existingWorkload.manifest).Select(p => p.packId).ToHashSet();
                 var updatedWorkload = advertisingManifestResolver._workloads[workloadId].workload;
-                var updatedPacks = advertisingManifestResolver.GetPacksInWorkload(updatedWorkload);
+                var updatedPacks = advertisingManifestResolver.GetPacksInWorkload(existingWorkload.workload, existingWorkload.manifest).Select(p => p.packId);
 
-                if (!existingPacks.SetEquals(updatedPacks) || existingPacks.Any(p=> PackHasChanged(_packs[p].pack, advertisingManifestResolver._packs[p].pack)))
+                if (!existingPacks.SetEquals(updatedPacks) || existingPacks.Any(p => PackHasChanged(_packs[p].pack, advertisingManifestResolver._packs[p].pack)))
                 {
                     yield return workloadId;
                 }
