@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
                         MsbuildProject.GetProjectFileFromDirectory(fullPath).FullName :
                         fullPath
                 );
-            }).ToArray();
+            });
 
             bool slnChanged = false;
             foreach (var path in relativeProjectPaths)

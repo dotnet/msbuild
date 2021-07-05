@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Tools.Sln.Add
                 return Directory.Exists(fullPath) ?
                     MsbuildProject.GetProjectFileFromDirectory(fullPath).FullName :
                     fullPath;
-            }).ToArray();
+            }).ToList();
 
             var preAddProjectCount = slnFile.Projects.Count;
 
