@@ -10,9 +10,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>7950d9b3c0b7fb9dc1c55700dc00e86e1ebd82f2</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.0-2.21327.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.0-2.21354.7">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>03a07d1dd606ce11d62c9a595041c4c2d44c39e3</Sha>
+      <Sha>687d7ea3149a9b40def15a51899e9692324e881e</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
