@@ -1251,7 +1251,7 @@ EndGlobal
         public void WhenSolutionIsPassedAsProjectItPrintsSuggestionAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "WhenSolutionIsPassedAsProject")
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
                 .WithSource()
                 .Path;
 
@@ -1272,7 +1272,7 @@ EndGlobal
         public void WhenSolutionIsPassedAsProjectWithInRootItPrintsSuggestionAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "WhenSolutionIsPassedAsProject")
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
                 .WithSource()
                 .Path;
 
@@ -1293,7 +1293,7 @@ EndGlobal
         public void WhenSolutionIsPassedAsProjectWithSolutionFolderItPrintsSuggestionAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "WhenSolutionIsPassedAsProject")
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
                 .WithSource()
                 .Path;
 

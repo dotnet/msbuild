@@ -741,7 +741,7 @@ EndGlobal
         public void WhenSolutionIsPassedAsProjectItPrintsSuggestionAndUsage()
         {
             var projectDirectory = _testAssetsManager
-                .CopyTestAsset("TestAppWithSlnAndCsprojFiles", identifier: "WhenSolutionIsPassedAsProject")
+                .CopyTestAsset("TestAppWithSlnAndCsprojFiles")
                 .WithSource()
                 .Path;
 
