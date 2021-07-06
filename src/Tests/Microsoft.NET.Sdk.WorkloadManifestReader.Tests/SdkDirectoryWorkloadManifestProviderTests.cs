@@ -99,6 +99,8 @@ namespace ManifestReaderTests
         {
             Initialize();
 
+            string sdkVersion = "5.0.100";
+
             var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
             Directory.CreateDirectory(additionalManifestDirectory);
 
@@ -106,8 +108,8 @@ namespace ManifestReaderTests
             environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
 
             //  Manifest in test hook directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestDirectory, "iOS"));
@@ -115,7 +117,7 @@ namespace ManifestReaderTests
 
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -127,6 +129,8 @@ namespace ManifestReaderTests
         {
             Initialize();
 
+            string sdkVersion = "5.0.100";
+
             var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
             Directory.CreateDirectory(additionalManifestDirectory);
 
@@ -134,15 +138,15 @@ namespace ManifestReaderTests
             environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
 
             //  Manifest in test hook directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
             File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "OverriddenAndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -154,6 +158,8 @@ namespace ManifestReaderTests
         public void ItSupportsMultipleTestHookFolders()
         {
             Initialize();
+
+            string sdkVersion = "5.0.100";
 
             var additionalManifestDirectory1 = Path.Combine(_testDirectory, "AdditionalManifests1");
             Directory.CreateDirectory(additionalManifestDirectory1);
@@ -172,18 +178,18 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "DefaultAndroidContent");
 
             //  Manifests in first additional directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory1, "Android", "WorkloadManifest.json"), "AndroidContent1");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent1");
 
             //  Manifests in second additional directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Android", "WorkloadManifest.json"), "AndroidContent2");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent2");
 
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Test"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Test", "WorkloadManifest.json"), "TestContent2");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test", "WorkloadManifest.json"), "TestContent2");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
