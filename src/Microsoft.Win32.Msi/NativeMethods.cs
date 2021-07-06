@@ -26,6 +26,10 @@ namespace Microsoft.Win32.Msi
     {
         [DllImport("msi.dll", CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        public static extern uint MsiConfigureProductEx(string szProduct, int iInstallLevel, InstallState eInstallState, string szCommandLine);
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         public static extern uint MsiEnableLog(uint dwLogMode, string szLogFile, uint dwLogAttributes);
 
         [DllImport("msi.dll", CharSet = CharSet.Unicode)]
@@ -47,7 +51,7 @@ namespace Microsoft.Win32.Msi
 
         [DllImport("msi.dll", CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        public static extern uint MsiReinstallProdcut(string szProduct, uint szReinstallMode);
+        public static extern uint MsiReinstallProduct(string szProduct, uint szReinstallMode);
 
         [DllImport("msi.dll", CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

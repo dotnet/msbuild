@@ -12,6 +12,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
+        void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
+
         void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand);
 
         void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath offlineCache, bool includePreviews);

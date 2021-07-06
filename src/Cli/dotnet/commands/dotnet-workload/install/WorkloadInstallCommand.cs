@@ -121,44 +121,52 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public override int Execute()
         {
-            if (_printDownloadLinkOnly)
+            try
             {
-                _reporter.WriteLine(string.Format(LocalizableStrings.ResolvingPackageUrls, string.Join(", ", _workloadIds)));
-                var packageUrls = GetPackageDownloadUrlsAsync(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews).GetAwaiter().GetResult();
+                if (_printDownloadLinkOnly)
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.ResolvingPackageUrls, string.Join(", ", _workloadIds)));
+                    var packageUrls = GetPackageDownloadUrlsAsync(_workloadIds.Select(id => new WorkloadId(id)), _skipManifestUpdate, _includePreviews).GetAwaiter().GetResult();
 
-                _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
-                _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
-                _reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
+                    _reporter.WriteLine("==allPackageLinksJsonOutputStart==");
+                    _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
+                    _reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
+                }
+                else if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
+                {
+                    try
+                    {
+                        DownloadToOfflineCacheAsync(_workloadIds.Select(id => new WorkloadId(id)), new DirectoryPath(_downloadToCacheOption), _skipManifestUpdate, _includePreviews).Wait();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        InstallWorkloads(
+                            _workloadIds.Select(id => new WorkloadId(id)),
+                            _skipManifestUpdate,
+                            _includePreviews,
+                            string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
+                    }
+                    catch (Exception e)
+                    {
+                        // Don't show entire stack trace
+                        throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
+                    }
+                }
             }
-			else if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
+            catch (Exception)
             {
-                try
-                {
-                    DownloadToOfflineCacheAsync(_workloadIds.Select(id => new WorkloadId(id)), new DirectoryPath(_downloadToCacheOption), _skipManifestUpdate, _includePreviews).Wait();
-                }
-                catch (Exception e)
-                {
-                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e);
-                }
-            }
-            else
-            {
-                try
-                {
-                    InstallWorkloads(
-                        _workloadIds.Select(id => new WorkloadId(id)),
-                        _skipManifestUpdate,
-                        _includePreviews, 
-                        string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
-                }
-                catch (Exception e)
-                {
-                    // Don't show entire stack trace
-                    throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
-                }
+                _workloadInstaller.Shutdown();
+                throw;
             }
 
-            return 0;
+            return _workloadInstaller.ExitCode;
         }
 
         public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false, bool includePreviews = false, DirectoryPath? offlineCache = null)

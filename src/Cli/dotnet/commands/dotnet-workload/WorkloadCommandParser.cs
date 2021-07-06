@@ -23,6 +23,8 @@ namespace Microsoft.DotNet.Cli
                 command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
             }
 
+            command.AddCommand(WorkloadElevateCommandParser.GetCommand());
+
             return command;
         }
     }

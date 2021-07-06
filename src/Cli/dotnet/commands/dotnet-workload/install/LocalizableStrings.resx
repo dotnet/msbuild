@@ -288,4 +288,10 @@
   <data name="RollbackDefinitionContainsExtraneousManifestIds" xml:space="preserve">
     <value>Invalid rollback definition. Manifest IDs in rollback definition {0} do not match installed manifest IDs.</value>
   </data>
+  <data name="InsufficientPrivilegeToStartServer" xml:space="preserve">
+    <value>Insufficient privilege to start the server.</value>
+  </data>
+  <data name="NoTrustWithParentPID" xml:space="preserve">
+    <value>Failed to establish a trust relationship with parent process ({0}).</value>
+  </data>
 </root>

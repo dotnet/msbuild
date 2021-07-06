@@ -8,6 +8,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     internal interface IInstaller
     {
+        int ExitCode { get; }
+
         InstallationUnit GetInstallationUnit();
 
         IWorkloadPackInstaller GetPackInstaller();
@@ -17,6 +19,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
         IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository();
+
+        void Shutdown();
     }
 
     internal enum InstallationUnit {

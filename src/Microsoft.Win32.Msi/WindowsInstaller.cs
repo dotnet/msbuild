@@ -13,6 +13,34 @@ namespace Microsoft.Win32.Msi
     public static class WindowsInstaller
     {
         /// <summary>
+        /// Install only the default authored features.
+        /// </summary>
+        public const int INSTALLLEVEL_DEFAULT = 0;
+
+        /// <summary>
+        /// Only install required features.
+        /// </summary>
+        public const int INSTALLLEVEL_MINIMUM = 1;
+
+        /// <summary>
+        /// Selects all features during an install.
+        /// </summary>
+        public const int INSTALLLEVEL_MAXIMUIM = 0xffff;
+
+        /// <summary>
+        /// Install or configure a product.
+        /// </summary>
+        /// <param name="productCode">Specifies the product code for the product to be configured.</param>
+        /// <param name="installLevel">Specifies how much of the product should be installed when installing the product to its default state.</param>
+        /// <param name="installState">Specifies the installation state for the product.</param>
+        /// <param name="commandLine">Specifies the command-line property settings.</param>
+        /// <returns></returns>
+        public static uint ConfigureProduct(string productCode, int installLevel, InstallState installState, string commandLine)
+        {
+            return NativeMethods.MsiConfigureProductEx(productCode, installLevel, installState, commandLine);
+        }
+
+        /// <summary>
         /// Installs or uninstalls a product.
         /// </summary>
         /// <param name="packagePath">Specifies the path and file name of the package to install. The value may be a URL 
@@ -165,7 +193,7 @@ namespace Microsoft.Win32.Msi
         /// </returns>
         public static uint ReinstallProduct(string productCode, ReinstallMode reinstallMode)
         {
-            return NativeMethods.MsiReinstallProdcut(productCode, (uint)reinstallMode);
+            return NativeMethods.MsiReinstallProduct(productCode, (uint)reinstallMode);
         }
 
         /// <summary>
