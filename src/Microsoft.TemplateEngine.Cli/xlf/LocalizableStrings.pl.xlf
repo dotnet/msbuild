@@ -268,7 +268,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: no template name is specified.</source>
-        <target state="new">Search failed: no template name is specified.</target>
+        <target state="translated">Wyszukiwanie nie powiodło się: nie określono nazwy szablonu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -283,7 +283,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_InstallHelp">
         <source>To use the template, run the following command to install the package:</source>
-        <target state="new">To use the template, run the following command to install the package:</target>
+        <target state="translated">Aby użyć szablonu, uruchom następujące polecenie w celu zainstalowania pakietu:</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_MatchesFromSource">
@@ -293,7 +293,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="new">To search for the template, specify template name or use one of supported filters: {0}.</target>
+        <target state="translated">Aby wyszukać szablonu, określ nazwę szablonu lub użyj jednego z obsługiwanych filtrów: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -499,12 +499,12 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
         <source>Example:</source>
-        <target state="new">Example:</target>
+        <target state="translated">Przykład:</target>
         <note />
       </trans-unit>
       <trans-unit id="Generic_ExamplesHeader">
         <source>Examples:</source>
-        <target state="new">Examples:</target>
+        <target state="translated">Przykłady:</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallHelp">
@@ -554,7 +554,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="ListTemplatesCommand">
         <source>To list installed templates, run:</source>
-        <target state="new">To list installed templates, run:</target>
+        <target state="translated">Aby wyświetlić listę zainstalowanych szablonów, uruchom:</target>
         <note />
       </trans-unit>
       <trans-unit id="ListsTemplates">
@@ -746,7 +746,7 @@ Obsługiwane kolumny to: język, tagi, autor, typ.</target>
       </trans-unit>
       <trans-unit id="RunHelpForInformationAboutAcceptedParameters">
         <source>For usage information, run: </source>
-        <target state="new">For usage information, run: </target>
+        <target state="translated">Aby uzyskać informacje o użyciu, uruchom: </target>
         <note />
       </trans-unit>
       <trans-unit id="RunningCommand">
@@ -761,7 +761,7 @@ Obsługiwane kolumny to: język, tagi, autor, typ.</target>
       </trans-unit>
       <trans-unit id="SearchTemplatesCommand">
         <source>To search for the templates on NuGet.org, run:</source>
-        <target state="new">To search for the templates on NuGet.org, run:</target>
+        <target state="translated">Aby wyszukać szablonów na stronie NuGet.org, uruchom:</target>
         <note />
       </trans-unit>
       <trans-unit id="SettingsReadError">
