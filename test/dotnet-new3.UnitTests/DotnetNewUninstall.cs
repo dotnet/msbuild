@@ -46,7 +46,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanListInstalledSources_NuGet()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -77,7 +77,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanListInstalledSources_WhenNothingIsInstalled()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-u", "--quiet")
+            new DotnetNewCommand(_log, "-u")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -133,7 +133,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanUninstall_NuGet()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -191,8 +191,8 @@ namespace Dotnet_new3.IntegrationTests
             string basicFSharp = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
             string basicVB = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicVB", _log, workingDirectory, home);
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "--quiet")
-                .WithCustomHive(home)
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
+                .WithCustomHive(home).WithDebug()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -233,7 +233,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CannotUninstallUnknownPackage()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -259,7 +259,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CannotUninstallByTemplateName()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -286,7 +286,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
-                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -295,7 +295,7 @@ namespace Dotnet_new3.IntegrationTests
                 .NotHaveStdErr();
 
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.3.1::5.0.0")
-                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()

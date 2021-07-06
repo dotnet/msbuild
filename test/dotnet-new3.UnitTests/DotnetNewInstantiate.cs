@@ -44,7 +44,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "webapp", "--quiet")
+            new DotnetNewCommand(_log, "webapp")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -178,7 +178,7 @@ namespace Dotnet_new3.IntegrationTests
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "console", "--fake", "--quiet")
+            new DotnetNewCommand(_log, "console", "--fake")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute()
@@ -332,7 +332,7 @@ namespace Dotnet_new3.IntegrationTests
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
             var commandResult = new DotnetNewCommand(_log, "console", "--no-restore")
-                .WithCustomHive(home).Quietly()
+                .WithCustomHive(home)
                 .WithWorkingDirectory(workingDirectory)
                 .Execute();
 

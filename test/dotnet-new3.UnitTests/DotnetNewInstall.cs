@@ -29,7 +29,7 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanInstallRemoteNuGetPackage()
         {
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -47,17 +47,17 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanInstallRemoteNuGetPackage_LatestVariations()
         {
-            var command1 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "--quiet")
+            var command1 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
-            var command2 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::", "--quiet")
+            var command2 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
 
-            var command3 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::*", "--quiet")
+            var command3 = new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::*")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute();
@@ -82,7 +82,7 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanInstallRemoteNuGetPackageWithVersion()
         {
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -101,7 +101,7 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanInstallRemoteNuGetPackageWithPrereleaseVersion()
         {
-            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates::0.6.37-beta", "--quiet", "--nuget-source", "https://api.nuget.org/v3/index.json")
+            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates::0.6.37-beta", "--nuget-source", "https://api.nuget.org/v3/index.json")
                 .WithCustomHive()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -118,7 +118,7 @@ namespace Dotnet_new3.IntegrationTests
         public void CanInstallRemoteNuGetPackageWithNuGetSource()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--quiet", "--nuget-source", "https://api.nuget.org/v3/index.json")
+            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--nuget-source", "https://api.nuget.org/v3/index.json")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -130,7 +130,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutMatching($"Success: Take\\.Blip\\.Client\\.Templates::([\\d\\.a-z-])+ installed the following templates:")
                 .And.HaveStdOutContaining("blip-console");
 
-            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--quiet", "--add-source", "https://api.nuget.org/v3/index.json")
+            new DotnetNewCommand(_log, "-i", "Take.Blip.Client.Templates", "--add-source", "https://api.nuget.org/v3/index.json")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -164,10 +164,9 @@ namespace Dotnet_new3.IntegrationTests
         [Fact]
         public void CanPrintDebugOutputWhenInstalling()
         {
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "--quiet")
-                .WithCustomHive()
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
+                .WithCustomHive().WithDebug()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
-                .WithEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE", "true")
                 .Execute()
                 .Should()
                 .ExitWith(0)
@@ -204,7 +203,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
                .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                .Execute()
@@ -215,7 +214,7 @@ namespace Dotnet_new3.IntegrationTests
                .And.HaveStdOutContaining("console")
                .And.HaveStdOutContaining("Console Application");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
@@ -233,7 +232,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "BlaBlaBla", "--quiet")
+            new DotnetNewCommand(_log, "-i", "BlaBlaBla")
                .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                .Execute()
@@ -246,7 +245,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::16.0.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0::16.0.0")
                .WithCustomHive(home)
                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                .Execute()
@@ -261,8 +260,8 @@ namespace Dotnet_new3.IntegrationTests
             string basicFSharp = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp");
             string basicVB = TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicVB");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "-i", basicFSharp, "-i", basicVB, "--quiet")
-                .WithCustomHive(home)
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Web.ProjectTemplates.5.0", "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0", "-i", basicFSharp, "-i", basicVB)
+                .WithCustomHive(home).WithDebug()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -329,7 +328,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
 
-            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0", "--quiet")
+            new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
                 .WithCustomHive(home)
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()

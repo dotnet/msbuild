@@ -44,9 +44,9 @@ namespace Dotnet_new3.IntegrationTests
             return this;
         }
 
-        public DotnetNewCommand Quietly()
+        public DotnetNewCommand WithDebug()
         {
-            Arguments.Add("--quiet");
+            WithEnvironmentVariable("DOTNET_CLI_CONTEXT_VERBOSE", "true");
             return this;
         }
 

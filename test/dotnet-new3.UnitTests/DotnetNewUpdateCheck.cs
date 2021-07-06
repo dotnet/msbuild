@@ -25,7 +25,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
-                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -86,7 +86,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
-                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -116,7 +116,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0::5.0.0")
-                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
@@ -159,7 +159,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
             new DotnetNewCommand(_log, "-i", "Microsoft.DotNet.Common.ProjectTemplates.5.0")
-                .WithCustomHive(home).WithoutBuiltInTemplates().Quietly()
+                .WithCustomHive(home).WithoutBuiltInTemplates()
                 .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should()
