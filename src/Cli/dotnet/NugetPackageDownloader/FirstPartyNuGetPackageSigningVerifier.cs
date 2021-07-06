@@ -47,14 +47,18 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         internal bool IsFirstParty(FilePath nupkgToVerify)
         {
-            var packageReader = new PackageArchiveReader(nupkgToVerify.Value);
-            Directory.CreateDirectory(_tempDirectory.Value);
-            FilePath targetFilePath = _tempDirectory.WithFile(Path.GetRandomFileName());
+            FileStream nupkgToVerifyFileStream = null;
+            FileStream targetFileStream = null;
             try
             {
+                nupkgToVerifyFileStream = new FileStream(nupkgToVerify.Value, FileMode.Open);
+                var packageReader = new PackageArchiveReader(nupkgToVerifyFileStream);
+                Directory.CreateDirectory(_tempDirectory.Value);
+                FilePath targetFilePath = _tempDirectory.WithFile(Path.GetRandomFileName());
+                targetFileStream = new FileStream(targetFilePath.Value, FileMode.Open);
+
                 packageReader.ExtractFile(".signature.p7s", targetFilePath.Value, _logger);
-                using var fs = new FileStream(targetFilePath.Value, FileMode.Open);
-                PrimarySignature primarySignature = PrimarySignature.Load(fs);
+                PrimarySignature primarySignature = PrimarySignature.Load(targetFileStream);
                 IX509CertificateChain certificateChain = SignatureUtility.GetCertificateChain(primarySignature);
 
                 if (certificateChain.Count < 2)
@@ -80,6 +84,17 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             catch (FileNotFoundException)
             {
                 return false;
+            }
+            finally
+            {
+                if (targetFileStream != null)
+                {
+                    targetFileStream.Close();
+                }
+                if (nupkgToVerifyFileStream != null)
+                {
+                    nupkgToVerifyFileStream.Close();
+                }
             }
         }
 
