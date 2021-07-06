@@ -67,8 +67,8 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public static bool CompareFiles(string file1, string file2)
         {
-            using var fs1 = new FileStream(file1, FileMode.Open);
-            using var fs2 = new FileStream(file2, FileMode.Open);
+            using var fs1 = new FileStream(file1, FileMode.Open, FileAccess.Read);
+            using var fs2 = new FileStream(file2, FileMode.Open, FileAccess.Read);
             if (fs1.Length != fs2.Length)
             {
                 return false;

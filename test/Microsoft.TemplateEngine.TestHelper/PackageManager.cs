@@ -110,7 +110,21 @@ namespace Microsoft.TemplateEngine.TestHelper
                 p.WaitForExit();
                 if (p.ExitCode != 0)
                 {
-                    throw new Exception($"Failed to pack the project {projectPath}");
+                    string? stdOut = null;
+                    string? stdErr = null;
+                    try
+                    {
+                        stdOut = p.StandardOutput.ReadToEnd();
+                        stdErr = p.StandardError.ReadToEnd();
+                    }
+                    catch
+                    {
+                        //do nothing in case streams cannot be read
+                    }
+
+                    throw new Exception($"Failed to pack the project {projectPath}: " +
+                        $"{Environment.NewLine}StdOut: {stdOut}." +
+                        $"{Environment.NewLine}StdErr: {stdErr}.");
                 }
 
                 string createdPackagePath = Directory.GetFiles(_packageLocation).Aggregate(
