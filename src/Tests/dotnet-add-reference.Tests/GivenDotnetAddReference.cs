@@ -127,6 +127,7 @@ Commands:
                 .Execute($"add", commandName);
             cmd.Should().Fail();
             cmd.StdErr.Should().Be(CommonLocalizableStrings.RequiredCommandNotPassed);
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(AddCommandHelpText(Directory.GetCurrentDirectory()));
         }
 
         [Fact]

@@ -70,9 +70,9 @@ namespace Microsoft.DotNet.Cli
                         : e.Message.Red().Bold());
 
                     var commandParsingException = e as CommandParsingException;
-                    if (commandParsingException != null)
+                    if (commandParsingException != null && commandParsingException.ParseResult != null)
                     {
-                        Reporter.Output.WriteLine(commandParsingException.HelpText);
+                        commandParsingException.ParseResult.ShowHelp();
                     }
 
                     return 1;
