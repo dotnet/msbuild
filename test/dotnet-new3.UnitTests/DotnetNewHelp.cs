@@ -102,10 +102,6 @@ Options:
                   bool - Optional                                                    
                   Default: false                                                     
 
-  --nullable      Whether to enable nullable reference types for this project.       
-                  bool - Optional                                                    
-                  Default: true                                                      
-
 
 To see help for other template languages (F#, VB), use --language option:
    dotnet new3 classlib -h --language F#";
@@ -120,11 +116,7 @@ Options:
 
   --no-restore   If specified, skips the automatic restore of the project on create.
                  bool - Optional                                                    
-                 Default: false                                                     
-
-  --nullable     Whether to enable nullable reference types for this project.       
-                 bool - Optional                                                    
-                 Default: true                                                      ";
+                 Default: false                                                     ";
 
         #endregion
         private readonly ITestOutputHelper _log;

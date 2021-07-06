@@ -261,6 +261,7 @@ Restore succeeded\.");
         [InlineData("LangVersion", null, "Class Library", "classlib", null, null)]
         [InlineData("TargetFramework", "net6.0", "Class Library", "classlib", null, null)]
         [InlineData("Nullable", null, "Class Library", "classlib", null, "netstandard2.0")]
+        [InlineData("Nullable", "enable", "Class Library", "classlib", null, "netstandard2.1")]
 
         [InlineData("Nullable", null, "Class Library", "classlib", "F#", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Class Library", "classlib", "F#", null)]
@@ -321,12 +322,6 @@ Restore succeeded\.");
         }
 
         [Theory]
-        //unset nullable
-        [InlineData("Nullable", null, "--nullable", "false", "Simple Console Application", "app", null, null)]
-        [InlineData("Nullable", null, "--nullable", "false", "Class Library", "classlib", null, null)]
-        [InlineData("Nullable", null, "--nullable", "true", "Class Library", "classlib", null, "netstandard2.0")]
-        [InlineData("Nullable", null, "--nullable", "false", "Class Library", "classlib", null, "netstandard2.0")]
-
         //language version
         [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Simple Console Application", "app", null, null)]
         [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Console Application", "console", null, null)]

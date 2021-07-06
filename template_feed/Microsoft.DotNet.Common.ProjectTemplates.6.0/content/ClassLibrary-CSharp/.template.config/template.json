@@ -84,13 +84,6 @@
       "description": "If specified, skips the automatic restore of the project on create.",
       "defaultValue": "false",
       "displayName": "Skip restore"
-    },
-    "Nullable": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "true",
-      "description": "Whether to enable nullable reference types for this project.",
-      "displayName": "Enable nullable"
     }
   },
   "primaryOutputs": [

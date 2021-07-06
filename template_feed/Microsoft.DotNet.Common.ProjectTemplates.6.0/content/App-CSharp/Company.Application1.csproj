@@ -5,7 +5,7 @@
     <TargetFramework Condition="'$(target-framework-override)' == ''">net6.0</TargetFramework>
     <TargetFramework Condition="'$(target-framework-override)' != ''">target-framework-override</TargetFramework>
     <LangVersion Condition="'$(langVersion)' != ''">$(ProjectLanguageVersion)</LangVersion>
-    <Nullable Condition="'$(nullable)' == 'true'">enable</Nullable>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>

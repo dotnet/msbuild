@@ -49,13 +49,6 @@
       "defaultValue": "false",
       "displayName": "Skip restore"
     },
-    "nullable": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "true",
-      "description": "Whether to enable nullable reference types for this project.",
-      "displayName": "Enable nullable"
-    },
     "target-framework-override": {
       "type": "parameter",
       "description": "Overrides the target framework",
