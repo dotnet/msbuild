@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.Graph;
 using Microsoft.DotNet.Watcher.Internal;
 using Microsoft.DotNet.Watcher.Tools;
 using Microsoft.Extensions.Tools.Internal;
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Watcher
                         {
                             if (fileItem.IsNewFile)
                             {
-                                if (MayRequireRecompilation(fileItem.FilePath))
+                                if (MayRequireRecompilation(context, fileItem.FilePath))
                                 {
                                     _reporter.Output($"New file: {fileItem.FilePath}. Rebuilding the application.");
                                     context.RequiresMSBuildRevaluation = true;
@@ -217,12 +217,32 @@ namespace Microsoft.DotNet.Watcher
             }
         }
 
-        private bool MayRequireRecompilation(string filePath)
+        private static bool MayRequireRecompilation(DotNetWatchContext context, string filePath)
         {
-            return filePath is not null &&
-                (filePath.EndsWith(".cs", StringComparison.Ordinal) ||
-                filePath.EndsWith(".razor", StringComparison.Ordinal) ||
-                filePath.EndsWith(".cshtml", StringComparison.Ordinal));
+            // This method is invoked when a new file is added to the workspace. To determine if we need to
+            // recompile, we'll see if it's any of the usual suspects (.cs, .cshtml, .razor) files.
+
+            if (filePath is null)
+            {
+                return false;
+            }
+
+            if (filePath.EndsWith(".cs", StringComparison.Ordinal) || filePath.EndsWith(".razor", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (filePath.EndsWith(".cshtml", StringComparison.Ordinal) &&
+                context.ProjectGraph.GraphRoots.FirstOrDefault() is { } project &&
+                project.ProjectInstance.GetPropertyValue("AddCshtmlFilesToDotNetWatchList") is not "false")
+            {
+                // For cshtml files, runtime compilation can opt out of watching cshtml files.
+                // Obviously this does not work if a user explicitly removed files out of the watch list,
+                // but we could wait for someone to report it before we think about ways to address it.
+                return true;
+            }
+
+            return false;
         }
 
         private static void ConfigureExecutable(DotNetWatchContext context, ProcessSpec processSpec)
