@@ -101,7 +101,7 @@ namespace Microsoft.NET.Publish.Tests
     }
 }");
             baselineConfigJsonObject["runtimeOptions"]["tfm"] = targetFramework;
-            baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] =
+            baselineConfigJsonObject["runtimeOptions"]["framework"]["version"] = 
                 targetFramework == "netcoreapp1.0" ? "1.0.5" : "1.1.2";
 
             runtimeConfigJsonObject
@@ -146,7 +146,7 @@ namespace Microsoft.NET.Publish.Tests
             {
                 File.GetLastWriteTimeUtc(file)
                     .Should().Be(
-                        modificationTime,
+                        modificationTime, 
                         because: $"Publish with NoBuild=true should not overwrite {file}");
             }
         }
@@ -209,7 +209,7 @@ namespace Microsoft.NET.Publish.Tests
             library.RuntimeAssemblyGroups[0].Runtime.Should().Be(string.Empty);
             library.RuntimeAssemblyGroups[0].AssetPaths.Count.Should().Be(1);
             library.RuntimeAssemblyGroups[0].AssetPaths[0].Should().Be($"{path}{dllName}.dll");
-
+            
             foreach (string locale in locales)
             {
                 // Try to get the locale as part of a dependency package: Humanizer.Core.af
@@ -221,7 +221,7 @@ namespace Microsoft.NET.Publish.Tests
                 {
                     localeLibrary = library;
                 }
-
+                
                 localeLibrary
                    .ResourceAssemblies
                    .FirstOrDefault(r => r.Locale == locale && r.Path == $"{path}{locale}/{dllName}.resources.dll")

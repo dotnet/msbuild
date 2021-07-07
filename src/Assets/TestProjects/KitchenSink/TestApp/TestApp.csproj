@@ -59,7 +59,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
-
+    
     <None Include="NoneCopyOutputAlways.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -74,7 +74,7 @@
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <!--
+    <!-- 
       The TestLibrary has a hard dependency on Newtonsoft.Json.
       The TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel.
       Microsoft.Extensions.DependencyModel depends on Newtonsoft.Json.
