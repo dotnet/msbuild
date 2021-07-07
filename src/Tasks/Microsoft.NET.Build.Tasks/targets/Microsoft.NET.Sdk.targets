@@ -75,7 +75,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
-    <PredefinedCulturesOnly Condition="'$(InvariantGlobalization)' == 'true' And '$(PredefinedCulturesOnly)' == ''">true</PredefinedCulturesOnly>
+    <PredefinedCulturesOnly Condition="'$(PredefinedCulturesOnly)' == '' and '$(InvariantGlobalization)' == 'true'">true</PredefinedCulturesOnly>
   </PropertyGroup>
 
   <!-- Opt into .NET Core resource-serialization strategy by default when targeting frameworks
