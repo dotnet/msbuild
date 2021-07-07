@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="CanOnlyHaveSingleFileWithNetCoreApp">
         <source>NETSDK1125: Publishing to a single-file is only supported for netcoreapp target.</source>
-        <target state="translated">NETSDK1125: netcoreapp 目标仅支持发布到单个文件。</target>
+        <target state="translated">NETSDK1125: 仅 netcoreapp 目标支持发布到单个文件。</target>
         <note>{StrBegin="NETSDK1125: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion_Info">
