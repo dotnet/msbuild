@@ -842,17 +842,17 @@ class Program
         }
 
         [Theory]
-        [InlineData("net5.0", false, false, false, "False,False")]  // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
-        [InlineData("net5.0", true, false, false, "True,False")]    // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
-        [InlineData("net5.0", false, true, true, "False,False")]    // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
-        [InlineData("net5.0", true, true, true, "True,False")]      // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
-        [InlineData("net6.0", false, false, false, "False,False")]  // predefinedCulturesOnly default value is false when Invariant is false or not defined
-        [InlineData("net6.0", false, false, true, "False,False")]   // predefinedCulturesOnly explicitly defined as false.
-        [InlineData("net6.0", false, true, true, "False,True")]     // predefinedCulturesOnly explicitly defined as true.
-        [InlineData("net6.0", true, false, false, "True,True")]     // predefinedCulturesOnly default value is true when Invariant is true
-        [InlineData("net6.0", true, false, true, "True,False")]     // predefinedCulturesOnly explicitly defined as false.
-        [InlineData("net6.0", true, true, true, "True,True")]       // predefinedCulturesOnly explicitly defined as true.
-        public void It_can_implicitly_define_predefined_Cultures_only(string targetFramework, bool invariantValue, bool predefinedCulturesOnlyValue, bool definePredefinedCulturesOnly, string expectedPredefinedCulturesOnlyValue)
+        [InlineData("net5.0", false, false, false, null)]   // Pre .NET 6.0 predefinedCulturesOnly not supported.
+        [InlineData("net5.0", true, false, false, null)]    // Pre .NET 6.0 predefinedCulturesOnly not supported.
+        [InlineData("net5.0", false, true, true, null)]     // Pre .NET 6.0 predefinedCulturesOnly not supported.
+        [InlineData("net5.0", true, true, true, null)]      // Pre .NET 6.0 predefinedCulturesOnly not supported.
+        [InlineData("net6.0", false, false, false, null)]   // predefinedCulturesOnly will not be included in the runtime config file if invariant is not defined.
+        [InlineData("net6.0", false, false, true, "False")] // predefinedCulturesOnly explicitly defined as false.
+        [InlineData("net6.0", false, true, true, "True")]   // predefinedCulturesOnly explicitly defined as true.
+        [InlineData("net6.0", true, false, false, "True")]  // predefinedCulturesOnly default value is true when Invariant is true.
+        [InlineData("net6.0", true, false, true, "False")]  // predefinedCulturesOnly explicitly defined as false.
+        [InlineData("net6.0", true, true, true, "True")]    // predefinedCulturesOnly explicitly defined as true.
+        public void It_can_implicitly_define_predefined_Cultures_only(string targetFramework, bool invariantValue, bool predefinedCulturesOnlyValue, bool definePredefinedCulturesOnly, string expectedPredefinedValue)
         {
             var testProj = new TestProject()
             {
@@ -869,32 +869,29 @@ class Program
             }
 
             var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: $"{targetFramework}{invariantValue}{predefinedCulturesOnlyValue}{definePredefinedCulturesOnly}");
-            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
-                using System;
-                using System.Reflection;
-                class Program
-                {
-                    static void Main(string[] args)
-                    {
-                        bool invariant = false;
-                        bool predefinedCulturesOnly = false;
-                        try { invariant = (bool) typeof(object).Assembly.GetType(""System.Globalization.GlobalizationMode"").GetProperty(""Invariant"", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null); } catch {}
-                        try { predefinedCulturesOnly = (bool) typeof(object).Assembly.GetType(""System.Globalization.GlobalizationMode"").GetProperty(""PredefinedCulturesOnly"", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null); } catch {}
-
-                        Console.WriteLine($""{invariant},{predefinedCulturesOnly}"");
-                    }
-                }
-            ");
-
             var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
                 .Pass();
 
-            var runCommand = new RunExeCommand(Log, Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, $"{testProj.Name}.exe"));
-            var stdOut = runCommand.Execute().StdOut.Split(Environment.NewLine.ToCharArray()).Where(line => !string.IsNullOrWhiteSpace(line));
-            stdOut.Should().BeEquivalentTo(expectedPredefinedCulturesOnlyValue);
+            string runtimeConfigName = $"{testProj.Name}.runtimeconfig.json";
+            var outputDirectory = buildCommand.GetOutputDirectory(testProj.TargetFrameworks);
+            outputDirectory.Should().HaveFile(runtimeConfigName);
+
+            string runtimeConfigFile = Path.Combine(outputDirectory.FullName, runtimeConfigName);
+            string runtimeConfigContents = File.ReadAllText(runtimeConfigFile);
+            JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
+            JToken predefinedCulturesOnly = runtimeConfig["runtimeOptions"]["configProperties"]["System.Globalization.PredefinedCulturesOnly"];
+
+            if (expectedPredefinedValue is null)
+            {
+                predefinedCulturesOnly.Should().BeNull();
+            }
+            else
+            {
+                predefinedCulturesOnly.Value<string>().Should().Be(expectedPredefinedValue);
+            }
         }
 
         [Theory]
@@ -961,8 +958,6 @@ class Program
             {
                 rollForward.Should().BeNull();
             }
-
-
         }
 
         [Theory]
