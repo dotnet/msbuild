@@ -230,7 +230,10 @@
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers"> 
     <Rule Id="AD0001" Action="Info" /> <!-- Analyzer threw an exception --> 
     <Rule Id="SA0001" Action="Info" /> <!-- XML comments --> 
+    <Rule Id="SA1000" Action="None" />
+    <Rule Id="SA1001" Action="None" />
     <Rule Id="SA1002" Action="Info" /> <!-- Semicolons should not be preceded by a space --> 
+    <Rule Id="SA1003" Action="None" />
     <Rule Id="SA1004" Action="Info" /> <!-- Documentation line should begin with a space --> 
     <Rule Id="SA1005" Action="Info" /> <!-- Single line comment should begin with a space --> 
     <Rule Id="SA1008" Action="Info" /> <!-- Opening parenthesis should not be preceded by a space --> 
@@ -240,25 +243,38 @@
     <Rule Id="SA1012" Action="Info" /> <!-- Opening brace should be followed by a space --> 
     <Rule Id="SA1013" Action="Info" /> <!-- Closing brace should be preceded by a space --> 
     <Rule Id="SA1015" Action="Info" /> <!-- Closing generic bracket should not be followed by a space --> 
+    <Rule Id="SA1019" Action="None" />
     <Rule Id="SA1021" Action="Info" /> <!-- Negative sign should be preceded by a space --> 
     <Rule Id="SA1023" Action="Info" /> <!-- Dereference symbol '*' should not be preceded by a space." --> 
     <Rule Id="SA1024" Action="Info" /> <!-- Colon should be followed by a space --> 
     <Rule Id="SA1025" Action="Info" /> <!-- Code should not contain multiple whitespace characters in a row --> 
+    <Rule Id="SA1026" Action="None" />
+    <Rule Id="SA1027" Action="None" />
+    <Rule Id="SA1028" Action="None" />
     <Rule Id="SA1100" Action="Info" /> <!-- Do not prefix calls with base unless local implementation exists --> 
-    <Rule Id="SA1101" Action="Info" /> <!-- Prefix calls to instance members of the local class or a base class with 'this.' --> 
+    <Rule Id="SA1101" Action="None" />
     <Rule Id="SA1106" Action="Info" /> <!-- Code should not contain empty statements --> 
     <Rule Id="SA1107" Action="Info" /> <!-- Code should not contain multiple statements on one line --> 
+    <Rule Id="SA1108" Action="None" />
     <Rule Id="SA1110" Action="Info" /> <!-- Opening parenthesis or bracket should be on declaration line --> 
     <Rule Id="SA1111" Action="Info" /> <!-- Closing parenthesis should be on line of last parameter --> 
+    <Rule Id="SA1112" Action="None" />
+    <Rule Id="SA1113" Action="None" />
     <Rule Id="SA1114" Action="Info" /> <!-- Parameter list should follow declaration --> 
+    <Rule Id="SA1115" Action="None" />
     <Rule Id="SA1116" Action="Info" /> <!-- Split parameters should start on line after declaration --> 
     <Rule Id="SA1117" Action="Info" /> <!-- Parameters should be on same line or separate lines --> 
+    <Rule Id="SA1118" Action="None" />
+    <Rule Id="SA1119" Action="None" />
     <Rule Id="SA1120" Action="Info" /> <!-- Comments should contain text --> 
+    <Rule Id="SA1121" Action="None" />
     <Rule Id="SA1122" Action="Info" /> <!-- Use string.Empty for empty strings --> 
     <Rule Id="SA1123" Action="Info" /> <!-- Region should not be located within a code element --> 
+    <Rule Id="SA1124" Action="None" />
     <Rule Id="SA1125" Action="Info" /> <!-- Use shorthand for nullable types --> 
     <Rule Id="SA1127" Action="Info" /> <!-- Generic type constraints should be on their own line --> 
     <Rule Id="SA1128" Action="Info" /> <!-- Put constructor initializers on their own line --> 
+    <Rule Id="SA1129" Action="None" />
     <Rule Id="SA1130" Action="Info" /> <!-- Use lambda syntax --> 
     <Rule Id="SA1131" Action="Info" /> <!-- Constant values should appear on the right-hand side of comparisons --> 
     <Rule Id="SA1132" Action="Info" /> <!-- Do not combine fields --> 
@@ -267,25 +283,35 @@
     <Rule Id="SA1135" Action="Info" /> <!-- Using directive should be qualified --> 
     <Rule Id="SA1136" Action="Info" /> <!-- Enum values should be on separate lines --> 
     <Rule Id="SA1137" Action="Info" /> <!-- Elements should have the same indentation --> 
+    <Rule Id="SA1139" Action="None" />
+    <Rule Id="SA1200" Action="None" />
     <Rule Id="SA1201" Action="Info" /> <!-- Elements should appear in the correct order --> 
     <Rule Id="SA1202" Action="Info" /> <!-- Elements should be ordered by access --> 
     <Rule Id="SA1203" Action="Info" /> <!-- Constants should appear before fields --> 
     <Rule Id="SA1204" Action="Info" /> <!-- Static elements should appear before instance elements --> 
+    <Rule Id="SA1205" Action="None" />
+    <Rule Id="SA1206" Action="None" />
     <Rule Id="SA1208" Action="Info" /> <!-- Using directive ordering --> 
     <Rule Id="SA1209" Action="Info" /> <!-- Using alias directives should be placed after all using namespace directives --> 
     <Rule Id="SA1210" Action="Info" /> <!-- Using directives should be ordered alphabetically by the namespaces --> 
     <Rule Id="SA1211" Action="Info" /> <!-- Using alias directive ordering --> 
+    <Rule Id="SA1212" Action="None" />
     <Rule Id="SA1214" Action="Info" /> <!-- Readonly fields should appear before non-readonly fields --> 
     <Rule Id="SA1216" Action="Info" /> <!-- Using static directives should be placed at the correct location --> 
     <Rule Id="SA1300" Action="Info" /> <!-- Element should begin with an uppercase letter --> 
     <Rule Id="SA1303" Action="Info" /> <!-- Const field names should begin with upper-case letter --> 
     <Rule Id="SA1304" Action="Info" /> <!-- Non-private readonly fields should begin with upper-case letter --> 
     <Rule Id="SA1306" Action="Info" /> <!-- Field should begin with lower-case letter --> 
+    <Rule Id="SA1307" Action="None" />
     <Rule Id="SA1308" Action="Info" /> <!-- Field should not begin with the prefix 's_' --> 
+    <Rule Id="SA1309" Action="None" />
+    <Rule Id="SA1310" Action="None" />
     <Rule Id="SA1311" Action="Info" /> <!-- Static readonly fields should begin with upper-case letter --> 
     <Rule Id="SA1312" Action="Info" /> <!-- Variable should begin with lower-case letter --> 
     <Rule Id="SA1313" Action="Info" /> <!-- Parameter should begin with lower-case letter --> 
+    <Rule Id="SA1314" Action="None" />
     <Rule Id="SA1316" Action="Info" /> <!-- Tuple element names should use correct casing --> 
+    <Rule Id="SA1400" Action="None" />
     <Rule Id="SA1401" Action="Info" /> <!-- Fields should be private --> 
     <Rule Id="SA1402" Action="Info" /> <!-- File may only contain a single type --> 
     <Rule Id="SA1403" Action="Info" /> <!-- File may only contain a single namespace --> 
@@ -293,6 +319,8 @@
     <Rule Id="SA1405" Action="Info" /> <!-- Debug.Assert should provide message text --> 
     <Rule Id="SA1407" Action="Info" /> <!-- Arithmetic expressions should declare precedence --> 
     <Rule Id="SA1408" Action="Info" /> <!-- Conditional expressions should declare precedence --> 
+    <Rule Id="SA1410" Action="None" />
+    <Rule Id="SA1411" Action="None" />
     <Rule Id="SA1413" Action="Info" /> <!-- Use trailing comma in multi-line initializers --> 
     <Rule Id="SA1414" Action="Info" /> <!-- Tuple types in signatures should have element names --> 
     <Rule Id="SA1500" Action="Info" /> <!-- Braces for multi-line statements should not share line --> 
@@ -311,8 +339,10 @@
     <Rule Id="SA1514" Action="Info" /> <!-- Element documentation header should be preceded by blank line --> 
     <Rule Id="SA1515" Action="Info" /> <!-- Single-line comment should be preceded by blank line --> 
     <Rule Id="SA1516" Action="Info" /> <!-- Elements should be separated by blank line --> 
+    <Rule Id="SA1517" Action="None" />
     <Rule Id="SA1519" Action="Info" /> <!-- Braces should not be omitted from multi-line child statement --> 
     <Rule Id="SA1520" Action="Info" /> <!-- Use braces consistently --> 
+    <Rule Id="SA1600" Action="None" />
     <Rule Id="SA1601" Action="Info" /> <!-- Partial elements should be documented --> 
     <Rule Id="SA1602" Action="Info" /> <!-- Enumeration items should be documented --> 
     <Rule Id="SA1604" Action="Info" /> <!-- Element documentation should have summary --> 
@@ -323,8 +353,10 @@
     <Rule Id="SA1611" Action="Info" /> <!-- The documentation for parameter 'message' is missing --> 
     <Rule Id="SA1612" Action="Info" /> <!-- The parameter documentation is at incorrect position --> 
     <Rule Id="SA1614" Action="Info" /> <!-- Element parameter documentation should have text --> 
+    <Rule Id="SA1615" Action="None" />
     <Rule Id="SA1616" Action="Info" /> <!-- Element return value documentation should have text --> 
     <Rule Id="SA1618" Action="Info" /> <!-- The documentation for type parameter is missing --> 
+    <Rule Id="SA1617" Action="None" />
     <Rule Id="SA1619" Action="Info" /> <!-- The documentation for type parameter is missing --> 
     <Rule Id="SA1622" Action="Info" /> <!-- Generic type parameter documentation should have text --> 
     <Rule Id="SA1623" Action="Info" /> <!-- Property documentation text --> 
