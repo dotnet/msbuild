@@ -423,6 +423,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(55, size);
         }
+
+        [Event(56, Keywords = Keywords.All)]
+        public void PerformDependencyAnalysisStart()
+        {
+            WriteEvent(56);
+        }
+
+        [Event(57, Keywords = Keywords.All)]
+        public void PerformDependencyAnalysisStop()
+        {
+            WriteEvent(57);
+        }
         #endregion
     }
 }
