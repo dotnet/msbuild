@@ -868,7 +868,7 @@ class Program
                 testProj.AdditionalProperties["PredefinedCulturesOnly"] = predefinedCulturesOnlyValue ? "true" : "false";
             }
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, identifier: $"{targetFramework}{invariantValue}{predefinedCulturesOnlyValue}{definePredefinedCulturesOnly}");
             File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
                 using System;
                 using System.Reflection;
