@@ -75,10 +75,10 @@ namespace Microsoft.NET.Build.Tests
             ITestOutputHelper log,
             TestAssetsManager testAssetsManager,
             string itemTypeOrPropertyName,
-            Action<GetValuesCommand> setup = null, 
+            Action<GetValuesCommand> setup = null,
             string[] msbuildArgs = null,
-            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item, 
-            [CallerMemberName] string callingMethod = "", 
+            GetValuesCommand.ValueType valueType = GetValuesCommand.ValueType.Item,
+            [CallerMemberName] string callingMethod = "",
             Action<XDocument> projectChanges = null,
             string identifier = null)
         {
@@ -316,14 +316,14 @@ namespace Microsoft.NET.Build.Tests
         [InlineData("netstandard1.6", new[] { "NETSTANDARD", "NETSTANDARD1_6", "NETSTANDARD1_0_OR_GREATER", "NETSTANDARD1_1_OR_GREATER", "NETSTANDARD1_2_OR_GREATER",
             "NETSTANDARD1_3_OR_GREATER", "NETSTANDARD1_4_OR_GREATER", "NETSTANDARD1_5_OR_GREATER", "NETSTANDARD1_6_OR_GREATER" })]
         [InlineData("net45", new[] { "NETFRAMEWORK", "NET45", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER" })]
-        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", 
+        [InlineData("net461", new[] { "NETFRAMEWORK", "NET461", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER" })]
-        [InlineData("net48", new[] { "NETFRAMEWORK", "NET48", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER", 
+        [InlineData("net48", new[] { "NETFRAMEWORK", "NET48", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER", "NET45_OR_GREATER",
             "NET451_OR_GREATER", "NET452_OR_GREATER", "NET46_OR_GREATER", "NET461_OR_GREATER", "NET462_OR_GREATER", "NET47_OR_GREATER", "NET471_OR_GREATER", "NET472_OR_GREATER", "NET48_OR_GREATER" })]
         [InlineData("netcoreapp1.0", new[] { "NETCOREAPP", "NETCOREAPP1_0", "NETCOREAPP1_0_OR_GREATER" })]
-        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", 
+        [InlineData("netcoreapp3.0", new[] { "NETCOREAPP", "NETCOREAPP3_0", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER",
             "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER" })]
-        [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", 
+        [InlineData("net5.0", new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER",
             "NETCOREAPP2_2_OR_GREATER", "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" })]
         [InlineData(".NETPortable,Version=v4.5,Profile=Profile78", new string[] { })]
         [InlineData(".NETFramework,Version=v4.0,Profile=Client", new string[] { "NETFRAMEWORK", "NET40", "NET20_OR_GREATER", "NET30_OR_GREATER", "NET35_OR_GREATER", "NET40_OR_GREATER" })]
@@ -366,7 +366,7 @@ namespace Microsoft.NET.Build.Tests
                         targetFrameworkProperties.Single().SetValue(targetFramework);
                     }
                 });
-            
+
             var libraryProjectDirectory = Path.Combine(testAsset.TestRoot, "TestLibrary");
 
             var getValuesCommand = new GetValuesCommand(Log, libraryProjectDirectory,
@@ -423,7 +423,7 @@ namespace Microsoft.NET.Build.Tests
                     }
                 });
 
-            AssertDefinedConstantsOutput(testAsset, targetFramework, 
+            AssertDefinedConstantsOutput(testAsset, targetFramework,
                 new[] { "NETCOREAPP", "NETCOREAPP1_0_OR_GREATER", "NETCOREAPP1_1_OR_GREATER", "NETCOREAPP2_0_OR_GREATER", "NETCOREAPP2_1_OR_GREATER", "NETCOREAPP2_2_OR_GREATER",  "NETCOREAPP3_0_OR_GREATER", "NETCOREAPP3_1_OR_GREATER", "NET", "NET5_0", "NET5_0_OR_GREATER" }
                 .Concat(expectedDefines).ToArray());
         }
@@ -839,6 +839,62 @@ class Program
             {
                 metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true) ? "true" : "");
             }
+        }
+
+        [Theory]
+        [InlineData("net5.0", false, false, false, "False,False")]  // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
+        [InlineData("net5.0", true, false, false, "True,False")]    // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
+        [InlineData("net5.0", false, true, true, "False,False")]    // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
+        [InlineData("net5.0", true, true, true, "True,False")]      // Pre .NET 6.0 predefinedCulturesOnly always false (no exist)
+        [InlineData("net6.0", false, false, false, "False,False")]  // predefinedCulturesOnly default value is false when Invariant is false or not defined
+        [InlineData("net6.0", false, false, true, "False,False")]   // predefinedCulturesOnly explicitly defined as false.
+        [InlineData("net6.0", false, true, true, "False,True")]     // predefinedCulturesOnly explicitly defined as true.
+        [InlineData("net6.0", true, false, false, "True,True")]     // predefinedCulturesOnly default value is true when Invariant is true
+        [InlineData("net6.0", true, false, true, "True,False")]     // predefinedCulturesOnly explicitly defined as false.
+        [InlineData("net6.0", true, true, true, "True,True")]       // predefinedCulturesOnly explicitly defined as true.
+        public void It_can_implicitly_define_predefined_Cultures_only(string targetFramework, bool invariantValue, bool predefinedCulturesOnlyValue, bool definePredefinedCulturesOnly, string expectedPredefinedCulturesOnlyValue)
+        {
+            var testProj = new TestProject()
+            {
+                Name = "CheckPredefineCulturesOnly",
+                TargetFrameworks = targetFramework,
+                IsExe = true,
+            };
+
+            testProj.AdditionalProperties["InvariantGlobalization"] = invariantValue ? "true" : "false";
+
+            if (definePredefinedCulturesOnly)
+            {
+                testProj.AdditionalProperties["PredefinedCulturesOnly"] = predefinedCulturesOnlyValue ? "true" : "false";
+            }
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProj, targetFramework);
+            File.WriteAllText(Path.Combine(testAsset.Path, testProj.Name, $"{testProj.Name}.cs"), @"
+                using System;
+                using System.Reflection;
+                class Program
+                {
+                    static void Main(string[] args)
+                    {
+                        bool invariant = false;
+                        bool predefinedCulturesOnly = false;
+                        try { invariant = (bool) typeof(object).Assembly.GetType(""System.Globalization.GlobalizationMode"").GetProperty(""Invariant"", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null); } catch {}
+                        try { predefinedCulturesOnly = (bool) typeof(object).Assembly.GetType(""System.Globalization.GlobalizationMode"").GetProperty(""PredefinedCulturesOnly"", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null); } catch {}
+
+                        Console.WriteLine($""{invariant},{predefinedCulturesOnly}"");
+                    }
+                }
+            ");
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
+            buildCommand
+                .Execute()
+                .Should()
+                .Pass();
+
+            var runCommand = new RunExeCommand(Log, Path.Combine(buildCommand.GetOutputDirectory(targetFramework).FullName, $"{testProj.Name}.exe"));
+            var stdOut = runCommand.Execute().StdOut.Split(Environment.NewLine.ToCharArray()).Where(line => !string.IsNullOrWhiteSpace(line));
+            stdOut.Should().BeEquivalentTo(expectedPredefinedCulturesOnlyValue);
         }
 
         [Theory]

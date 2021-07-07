@@ -71,7 +71,6 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Diagnostics.Debugger.IsSupported"": true,
             ""System.Diagnostics.Tracing.EventSource.IsSupported"": false,
             ""System.Globalization.Invariant"": true,
-            ""System.Globalization.PredefinedCulturesOnly"": true,
             ""System.GC.Concurrent"": false,
             ""System.GC.Server"": true,
             ""System.GC.RetainVM"": false,

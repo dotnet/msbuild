@@ -13,7 +13,6 @@
     <DebuggerSupport>true</DebuggerSupport>
     <EventSourceSupport>false</EventSourceSupport>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <PredefinedCulturesOnly>true</PredefinedCulturesOnly>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
