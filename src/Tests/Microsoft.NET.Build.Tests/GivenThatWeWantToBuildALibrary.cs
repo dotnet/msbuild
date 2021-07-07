@@ -842,10 +842,10 @@ class Program
         }
 
         [Theory]
-        [InlineData("net5.0", false, false, false, null)]   // Pre .NET 6.0 predefinedCulturesOnly not supported.
-        [InlineData("net5.0", true, false, false, null)]    // Pre .NET 6.0 predefinedCulturesOnly not supported.
-        [InlineData("net5.0", false, true, true, null)]     // Pre .NET 6.0 predefinedCulturesOnly not supported.
-        [InlineData("net5.0", true, true, true, null)]      // Pre .NET 6.0 predefinedCulturesOnly not supported.
+        [InlineData("net5.0", false, false, false, null)]   // Pre .NET 6.0 predefinedCulturesOnly is not supported.
+        [InlineData("net5.0", true, false, false, null)]    // Pre .NET 6.0 predefinedCulturesOnly is not supported.
+        [InlineData("net5.0", false, true, true, "True")]   // Pre .NET 6.0 predefinedCulturesOnly can end up in the runtime config file but with no effect at runtime.
+        [InlineData("net5.0", true, true, true, "True")]    // Pre .NET 6.0 predefinedCulturesOnly can end up in the runtime config file but with no effect at runtime.
         [InlineData("net6.0", false, false, false, null)]   // predefinedCulturesOnly will not be included in the runtime config file if invariant is not defined.
         [InlineData("net6.0", false, false, true, "False")] // predefinedCulturesOnly explicitly defined as false.
         [InlineData("net6.0", false, true, true, "True")]   // predefinedCulturesOnly explicitly defined as true.
