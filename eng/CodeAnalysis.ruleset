@@ -245,6 +245,7 @@
     <Rule Id="SA1024" Action="None" /> <!-- Colon should be followed by a space --> 
     <Rule Id="SA1025" Action="None" /> <!-- Code should not contain multiple whitespace characters in a row --> 
     <Rule Id="SA1100" Action="None" /> <!-- Do not prefix calls with base unless local implementation exists --> 
+    <Rule Id="SA1101" Action="None" /> <!-- Prefix calls to instance members of the local class or a base class with 'this.' --> 
     <Rule Id="SA1106" Action="None" /> <!-- Code should not contain empty statements --> 
     <Rule Id="SA1107" Action="None" /> <!-- Code should not contain multiple statements on one line --> 
     <Rule Id="SA1110" Action="None" /> <!-- Opening parenthesis or bracket should be on declaration line --> 
