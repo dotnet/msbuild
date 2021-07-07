@@ -120,6 +120,9 @@
   <data name="AssemblySearchDirectoryDoesNotExist" xml:space="preserve">
     <value>Provided assembly search directory '{0}' does not exist.</value>
   </data>
+  <data name="CannotAddAbstractMember" xml:space="preserve">
+    <value>Cannot add abstract member '{0}' to {1} because does not exist on {2}</value>
+  </data>
   <data name="CouldNotResolveReference" xml:space="preserve">
     <value>Could not resolve reference '{0}' in any of the provided search directories.</value>
   </data>
