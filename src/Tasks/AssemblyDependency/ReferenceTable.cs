@@ -407,6 +407,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+            reference.FullPath = FileUtilities.NormalizePath(reference.FullPath);
             References[assemblyName] = reference;
         }
 
