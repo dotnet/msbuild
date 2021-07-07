@@ -886,7 +886,7 @@ class Program
                 }
             ");
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.Path, testProj.Name));
+            var buildCommand = new BuildCommand(testAsset);
             buildCommand
                 .Execute()
                 .Should()
