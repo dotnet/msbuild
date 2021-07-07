@@ -572,8 +572,9 @@ namespace Microsoft.NET.Publish.Tests
 
             var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateLinkDir = Path.Combine(intermediateDirectory, "linked");
 
-            var linkSemaphore = Path.Combine(intermediateDirectory, "Link.semaphore");
+            var linkSemaphore = Path.Combine(intermediateLinkDir, "Link.semaphore");
             var publishedDll = Path.Combine(publishDirectory, $"{projectName}.dll");
 
             File.Exists(linkSemaphore).Should().BeFalse();
@@ -848,8 +849,9 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testAsset);
 
             var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateLinkDir = Path.Combine(intermediateDirectory, "linked");
 
-            var linkSemaphore = Path.Combine(intermediateDirectory, "Link.semaphore");
+            var linkSemaphore = Path.Combine(intermediateLinkDir, "Link.semaphore");
 
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true").Should().Pass();
             DateTime semaphoreFirstModifiedTime = File.GetLastWriteTimeUtc(linkSemaphore);
@@ -915,9 +917,10 @@ namespace Microsoft.NET.Publish.Tests
 
             var publishDirectory = publishCommand.GetOutputDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
             var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: targetFramework, runtimeIdentifier: rid).FullName;
+            var intermediateLinkDir = Path.Combine(intermediateDirectory, "linked");
             var linkedDirectory = Path.Combine(intermediateDirectory, "linked");
 
-            var linkSemaphore = Path.Combine(intermediateDirectory, "Link.semaphore");
+            var linkSemaphore = Path.Combine(intermediateLinkDir, "Link.semaphore");
 
             // Link, keeping classlib
             publishCommand.Execute($"/p:RuntimeIdentifier={rid}", "/p:PublishTrimmed=true").Should().Pass();
