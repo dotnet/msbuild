@@ -1616,7 +1616,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
 
   <Target Name="_GetProjectReferencePlatformProperties"
-          BeforeTargets="_GetProjectReferenceTargetFrameworkProperties"
+          DependsOnTargets="_GetProjectReferenceTargetFrameworkProperties"
           Condition="'$(EnableDynamicPlatformResolution)' == 'true'
                      and '$(BuildingInsideVisualStudio)' != 'true'
                      and '@(_MSBuildProjectReferenceExistent->Count())' != '0'">
@@ -1628,15 +1628,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 
-    <MSBuild Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="GetPlatforms"
-        BuildInParallel="$(BuildInParallel)"
-        ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);TargetFramework;RuntimeIdentifier$(_GlobalPropertiesToRemoveFromProjectReferences)"
-        Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"
-        SkipNonexistentTargets="true">
-      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferencePlatformPossibilities" />
-    </MSBuild>
+    <ItemGroup>
+      <_ProjectReferencePlatformPossibilities Include="@(_MSBuildProjectReferenceExistent)" 
+                                              Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
+    </ItemGroup>
 
     <!-- Managed Platform "source of truth" is $(PlatformTarget). For cpp it's $(Platform) -->
     <PropertyGroup>
@@ -1652,7 +1647,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
 
-    <Warning Condition="'@(_ProjectReferencePlatformPossibilities.SkipGetPlatformProperties)' == '' and '%(_ProjectReferencePlatformPossibilities.PlatformOptions)' == ''" 
+    <Warning Condition="'%(_ProjectReferencePlatformPossibilities.PlatformOptions)' == ''" 
            Text="EnableDynamicPlatformResolution is enabled, but '%(_ProjectReferencePlatformPossibilities.Identity)' has no 'Platforms' set. It will be built without a specified platform."/>
 
     <GetCompatiblePlatform AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
@@ -1682,16 +1677,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_MSBuildProjectReferenceExistent Include="@(ProjectsWithNearestPlatform)"/>
     </ItemGroup>
 
-  </Target>
-
-    <Target Name="GetPlatforms"
-          Returns="@(_ThisProjectPlatformMetadata)">
-    <ItemGroup>
-      <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
-        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <PlatformOptions>$(Platforms)</PlatformOptions>
-      </_ThisProjectPlatformMetadata>
-    </ItemGroup>
   </Target>
 
   <!--
@@ -1884,6 +1869,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <!-- Extract necessary information for SetPlatform negotiation -->
+        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <PlatformOptions>$(Platforms)</PlatformOptions>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
@@ -1951,7 +1939,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PrepareProjectReferencesDependsOn>
       AssignProjectConfiguration;
       _SplitProjectReferencesByFileExistence;
-      _GetProjectReferenceTargetFrameworkProperties
+      _GetProjectReferenceTargetFrameworkProperties;
+      _GetProjectReferencePlatformProperties
     </PrepareProjectReferencesDependsOn>
   </PropertyGroup>
 

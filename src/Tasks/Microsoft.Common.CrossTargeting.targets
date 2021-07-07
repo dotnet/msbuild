@@ -21,16 +21,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore')"/>
 
   <Import Project="$(CustomBeforeMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonCrossTargetingTargets)')"/>
-
-  <Target Name="GetPlatforms"
-          Returns="@(_ThisProjectPlatformMetadata)">
-    <ItemGroup>
-      <_ThisProjectPlatformMetadata Include="$(MSBuildProjectFullPath)">
-        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <PlatformOptions>$(Platforms)</PlatformOptions>
-      </_ThisProjectPlatformMetadata>
-    </ItemGroup>
-  </Target>
   
   <Target Name="GetTargetFrameworks"
           DependsOnTargets="GetTargetFrameworksWithPlatformFromInnerBuilds"
@@ -56,6 +46,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <!-- Extract necessary information for SetPlatform negotiation -->
+        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <PlatformOptions>$(Platforms)</PlatformOptions>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
