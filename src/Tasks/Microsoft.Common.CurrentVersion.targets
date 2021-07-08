@@ -1652,7 +1652,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
 
-    <Warning Condition="'%(_ProjectReferencePlatformPossibilities.PlatformOptions)' == ''" 
+    <Warning Condition="'%(_ProjectReferencePlatformPossibilities.PlatformOptions)' == ''"
+           Code="MSB3982" 
            Text="EnableDynamicPlatformResolution is enabled, but '%(_ProjectReferencePlatformPossibilities.Identity)' has no 'Platforms' set. It will be built without a specified platform."/>
 
     <GetCompatiblePlatform AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
