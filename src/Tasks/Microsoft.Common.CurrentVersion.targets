@@ -1642,7 +1642,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_ProjectReferencePlatformPossibilities Condition="'$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj' and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
         <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
-        <PlatformLookupTable>AnyCPU=Win32;x86=Win32;x64=x64</PlatformLookupTable>
+        <PlatformLookupTable Condition="$(PlatformLookupTable) == ''">AnyCPU=Win32;x86=Win32</PlatformLookupTable>
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
 
