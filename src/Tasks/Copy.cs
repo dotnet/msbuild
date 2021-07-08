@@ -12,6 +12,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.Tasks
 {
@@ -426,6 +427,8 @@ namespace Microsoft.Build.Tasks
                 DestinationFiles.Length, // Set length to common case of 1:1 source->dest.
                 StringComparer.OrdinalIgnoreCase);
 
+            MSBuildEventSource.Log.CopyStart(true);
+
             // Now that we have a list of destinationFolder files, copy from source to destinationFolder.
             for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
@@ -459,6 +462,8 @@ namespace Microsoft.Build.Tasks
                     destinationFilesSuccessfullyCopied.Add(DestinationFiles[i]);
                 }
             }
+
+            MSBuildEventSource.Log.CopyStop(true);
 
             return success;
         }
@@ -499,6 +504,8 @@ namespace Microsoft.Build.Tasks
             var partitionsByDestination = new Dictionary<string, List<int>>(
                 DestinationFiles.Length, // Set length to common case of 1:1 source->dest.
                 StringComparer.OrdinalIgnoreCase);
+
+            MSBuildEventSource.Log.CopyStart(false);
 
             for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
@@ -588,6 +595,8 @@ namespace Microsoft.Build.Tasks
                     destinationFilesSuccessfullyCopied.Add(DestinationFiles[i]);
                 }
             }
+
+            MSBuildEventSource.Log.CopyStop(false);
 
             return success;
         }

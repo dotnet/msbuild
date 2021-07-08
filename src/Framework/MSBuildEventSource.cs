@@ -425,15 +425,27 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(56, Keywords = Keywords.All)]
-        public void PerformDependencyAnalysisStart()
+        public void TargetUpToDateStart()
         {
             WriteEvent(56);
         }
 
         [Event(57, Keywords = Keywords.All)]
-        public void PerformDependencyAnalysisStop()
+        public void TargetUpToDateStop(int result)
         {
-            WriteEvent(57);
+            WriteEvent(57, result);
+        }
+
+        [Event(58, Keywords = Keywords.All)]
+        public void CopyStart(bool singleThreaded)
+        {
+            WriteEvent(58, singleThreaded);
+        }
+
+        [Event(59, Keywords = Keywords.All)]
+        public void CopyStop(bool singleThreaded)
+        {
+            WriteEvent(59, singleThreaded);
         }
         #endregion
     }
