@@ -164,6 +164,8 @@ namespace Microsoft.NET.Build.Tests
             var project = XDocument.Load(projFile);
             var ns = project.Root.Name.Namespace;
             project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().Value = "net472";
+            //  The template sets Nullable to "enable", which isn't supported on .NET Framework
+            project.Root.Elements(ns + "PropertyGroup").Elements(ns + "Nullable").Remove();
             project.Save(projFile);
 
             var buildCommand = new BuildCommand(Log, testDirectory);

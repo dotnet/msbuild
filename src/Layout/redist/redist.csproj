@@ -11,9 +11,7 @@
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
   </PropertyGroup>
 
-  <!-- This is currently imported in Directory.Build.targets -->
-  <!--<Import Project="targets\BuildToolsetTasks.targets" />-->
-  
+  <Import Project="targets\BuildToolsetTasks.targets" />
   <Import Project="targets\GetRuntimeInformation.targets" />
   <Import Project="targets\Version.targets" />
   <Import Project="targets\BundledSdks.targets" />
