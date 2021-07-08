@@ -1615,6 +1615,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ======================================================================================
   -->
 
+  <!-- Managed projects need to have PlatformTarget set for SetPlatform negotiation. Default to $(Platform), which is AnyCPU by default. -->
+  <PropertyGroup>
+    <PlatformTarget Condition="'$(EnableDynamicPlatformResolution)' == 'true' and '$(PlatformTarget)' == ''
+                                and '$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj'">$(Platform)</PlatformTarget>
+  </PropertyGroup>
+
   <Target Name="_GetProjectReferencePlatformProperties"
           Condition="'$(EnableDynamicPlatformResolution)' == 'true'
                      and '$(BuildingInsideVisualStudio)' != 'true'
