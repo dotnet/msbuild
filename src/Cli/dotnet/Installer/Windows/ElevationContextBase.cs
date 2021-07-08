@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Installer.Windows
     internal abstract class ElevationContextBase
     {
         /// <summary>
-        /// Gets whether the current process has already been elevated.
+        /// Gets whether the current process has start a second, elevated copy of the host.
         /// </summary>
         public bool HasElevated
         {
