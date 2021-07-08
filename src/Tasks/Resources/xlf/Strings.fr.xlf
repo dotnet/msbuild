@@ -1327,8 +1327,8 @@
         <note>{StrBegin="MSB3441: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoCompatiblePlatformFound">
-        <source>MSB3981: Could not determine what {0} should be built as. The project will be built normally.</source>
-        <target state="new">MSB3981: Could not determine what {0} should be built as. The project will be built normally.</target>
+        <source>MSB3981: Could not determine what '{0}' should be built as. The project will be built normally.</source>
+        <target state="new">MSB3981: Could not determine what '{0}' should be built as. The project will be built normally.</target>
         <note>{StrBegin="MSB3981: "}</note>
       </trans-unit>
       <trans-unit id="GetFrameworkSdkPath.CouldNotFindSDK">
