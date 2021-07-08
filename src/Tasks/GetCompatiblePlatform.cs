@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks
                           childPlatforms.Contains(translationTable[ParentProjectPlatform]))
                 {
                     buildChildProjectAs = translationTable[ParentProjectPlatform];
-                    Log.LogMessage($"Found {ParentProjectPlatform}={buildChildProjectAs} in the given translation table: {translationTable.ToString()}.");
+                    Log.LogMessage($"Found {ParentProjectPlatform}={buildChildProjectAs} in the given translation table.");
                 }
                 // AnyCPU if possible
                 else if (childPlatforms.Contains("AnyCPU"))
@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                     buildChildProjectAs = "AnyCPU";
                     Log.LogMessage($"Defaulting to AnyCPU.");
                 }
-                // Try to prefer matching platforms
+                // Prefer matching platforms
                 else if (childPlatforms.Contains(ParentProjectPlatform))
                 {
                     buildChildProjectAs = ParentProjectPlatform;
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Keep it empty, log a warning. Common.CurrentVersion.targets will undefine 
                     // Platform/PlatformTarget when this is the case.
-                    Log.LogWarning("Could not determine what the child project should be built as.\nChild project will be built normally.");
+                    Log.LogWarningFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", AssignedProjectsWithPlatform[i].ItemSpec);
                 }
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildChildProjectAs);
