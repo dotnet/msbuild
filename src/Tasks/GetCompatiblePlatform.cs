@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Keep it empty, log a warning. Common.CurrentVersion.targets will undefine 
                     // Platform/PlatformTarget when this is the case.
-                    Log.LogWarningFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", AssignedProjectsWithPlatform[i].ItemSpec);
+                    Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", AssignedProjectsWithPlatform[i].ItemSpec);
                 }
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildChildProjectAs);

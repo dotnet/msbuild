@@ -2898,7 +2898,7 @@
         MSB3981 - MSB3990   Task: GetCompatiblePlatform
   -->
   <data name="GetCompatiblePlatform.NoCompatiblePlatformFound">
-    <value>MSB3981: Could not determine what {0} should be built as. The project will be built normally.</value>
+    <value>MSB3981: Could not determine what '{0}' should be built as. The project will be built normally.</value>
     <comment>{StrBegin="MSB3981: "}</comment>
   </data>
 
