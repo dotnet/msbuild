@@ -82,4 +82,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports_DotNet)' != 'true'
+                      and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
+                      and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
+    <Import Include="System" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.IO" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Net.Http" />
+    <Import Include="System.Threading" />
+    <Import Include="System.Threading.Tasks" />
+  </ItemGroup>
+
 </Project>

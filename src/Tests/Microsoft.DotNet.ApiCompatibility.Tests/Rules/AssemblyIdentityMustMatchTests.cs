@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void AssemblyCultureMustBeCompatible()
         {
             // setting different assembly culture for net6.0
@@ -54,7 +54,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             TestAsset testAsset = _testAssetsManager.CreateTestProject(testProject);
             BuildCommand buildCommand = new(testAsset);
             buildCommand.Execute().Should().Pass();
-            
+
             string leftDllPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "Project.dll");
             string rightDllPath = Path.Combine(buildCommand.GetOutputDirectory("net6.0").FullName, "Project.dll");
             IAssemblySymbol leftSymbols = new AssemblySymbolLoader().LoadAssembly(leftDllPath);
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void AssemblyVersionMustBeCompatible()
         {
             // setting different assembly culture for netstanard2.0
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void AssemblyVersionMustBeStrictlyCompatible()
         {
             // setting different assembly culture for netstanard2.0
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void AssemblyKeyTokenMustBeCompatible()
         {
             var testAsset = _testAssetsManager
@@ -165,7 +165,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Empty(differences);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void LeftAssemblyKeyTokenNull()
         {
             var testAsset = _testAssetsManager
@@ -185,7 +185,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Empty(differences);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void RightAssemblyKeyTokenNull()
         {
             var testAsset = _testAssetsManager
@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void RetargetableFlagSet()
         {
             var testAsset = _testAssetsManager
@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
             Assert.Empty(differences);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void LeftAssemblyKeyTokenNullStrictMode()
         {
             var testAsset = _testAssetsManager

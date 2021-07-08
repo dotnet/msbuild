@@ -20,7 +20,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_windows_Forms_app_with_warning()
         {
             var targetFramework = "net6.0-windows";
@@ -42,7 +42,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("NETSDK1175");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_windows_Forms_app_with_warning_suppressed()
         {
             var targetFramework = "net6.0-windows";
@@ -66,8 +66,7 @@ namespace Microsoft.NET.Publish.Tests
                 .NotHaveStdOutContaining(Strings.@TrimmingWindowsFormsIsNotSupported);
         }
 
-
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_windows_Forms_app_with_warning()
         {
             var targetFramework = "net6.0-windows";
@@ -91,7 +90,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("NETSDK1175");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_windows_Forms_app_with_warning_suppressed()
         {
             var targetFramework = "net6.0-windows";
@@ -118,7 +117,7 @@ namespace Microsoft.NET.Publish.Tests
                 .NotHaveStdOutContaining(Strings.@TrimmingWindowsFormsIsNotSupported);
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_wpf_app_with_warning()
         {
             var targetFramework = "net6.0-windows";
@@ -140,7 +139,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("NETSDK1168");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_builds_wpf_app_with_warning_Suppressed()
         {
             var targetFramework = "net6.0-windows";
@@ -165,7 +164,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_wpf_app_with_warning()
         {
             var targetFramework = "net6.0-windows";
@@ -189,7 +188,7 @@ namespace Microsoft.NET.Publish.Tests
                 .HaveStdOutContaining("NETSDK1168");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_wpf_app_with_warning_Suppressed()
         {
             var targetFramework = "net6.0-windows";

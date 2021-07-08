@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "true" });
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/18800")]
         public void It_builds_successfully_when_targeting_net_framework()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
@@ -241,7 +241,7 @@ namespace Microsoft.NET.Build.Tests
                 .NotHaveStdOutContaining("NETSDK1140");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void UseWPFCanBeSetInDirectoryBuildTargets()
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
@@ -367,7 +367,7 @@ namespace Microsoft.NET.Build.Tests
                 getValueCommand.GetValues()
                     .Should()
                     .Contain("windows");
-            } 
+            }
             else
             {
                 getValueCommand.GetValues()

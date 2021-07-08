@@ -167,7 +167,7 @@ namespace Microsoft.NET.Build.Tests
                 .And.HaveStdOutContaining(SupportedOSPlatformAttribute("Windows10.0.18362.0"));
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void WhenTargetingWindowsSupportedOSVersionPropertySetsTargetPlatformMinVersion()
         {
             TestProject testProject = SetUpProject("net6.0-windows10.0.19041");
@@ -190,7 +190,7 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand.GetValues()
                 .Should()
-                .BeEquivalentTo("10.0.18362.0");                
+                .BeEquivalentTo("10.0.18362.0");
         }
 
         [WindowsOnlyFact]
@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tests
 
             return expected;
         }
-  
+
         private static string SupportedOSPlatformAttribute(string supportedOSPlatform)
         {
             string expected = string.IsNullOrEmpty(supportedOSPlatform) ?

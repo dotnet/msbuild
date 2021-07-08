@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>$(AspNetTestTfm)</TargetFramework>
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <!-- Removing implicit namespace imports for web since AspNetCore.App is removed -->
+    <DisableImplicitNamespaceImports_Web>true</DisableImplicitNamespaceImports_Web>
   </PropertyGroup>
 
   <ItemGroup>
