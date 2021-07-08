@@ -2,9 +2,39 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Resources.resx">
     <body>
+      <trans-unit id="AssemblyNameDoesNotExist">
+        <source>Assembly with name '{0}' does not exist at {1}.</source>
+        <target state="new">Assembly with name '{0}' does not exist at {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyNameDoesNotMatch">
+        <source>{2} assembly name '{0}' does not match with {3} assembly name '{1}'.</source>
+        <target state="new">{2} assembly name '{0}' does not match with {3} assembly name '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyPublicKeyTokenDoesNotMatch">
+        <source>{2} assembly token '{0}' does not match with {3} '{1}'.</source>
+        <target state="new">{2} assembly token '{0}' does not match with {3} '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AssemblySearchDirectoryDoesNotExist">
         <source>Provided assembly search directory '{0}' does not exist.</source>
         <target state="new">Provided assembly search directory '{0}' does not exist.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssembyCultureDoesNotMatch">
+        <source>{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</source>
+        <target state="new">{2} assembly culture '{0}' does not match with {3} assembly culture '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssembyVersionDoesNotMatch">
+        <source>{3} assembly version '{1}' should be equal to {2} version '{0}'.</source>
+        <target state="new">{3} assembly version '{1}' should be equal to {2} version '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssembyVersionIsNotCompatible">
+        <source>{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</source>
+        <target state="new">{2} assembly version '{0}' should be equal to or higher than {3} version '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">

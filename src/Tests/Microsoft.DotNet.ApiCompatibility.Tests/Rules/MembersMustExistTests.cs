@@ -213,7 +213,7 @@ namespace CompatTests
 ";
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, assemblyName: "DifferentName");
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new();
             differ.IncludeInternalSymbols = includeInternals;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
