@@ -23,7 +23,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
     [SupportedOSPlatform("windows")]
-    internal class NetSdkMsiInstallerClient : MsiInstallerBase, IWorkloadPackInstaller, IDisposable
+    internal class NetSdkMsiInstallerClient : MsiInstallerBase, IWorkloadPackInstaller
     {
         private INuGetPackageDownloader _nugetPackageDownloader;
 
@@ -34,8 +34,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly PackageSourceLocation _packageSourceLocation;
 
         private readonly string _dependent;
-
-        private bool _disposed;
 
         public int ExitCode => Restart ? unchecked((int)Error.SUCCESS_REBOOT_REQUIRED) : unchecked((int)Error.SUCCESS);
 
@@ -319,7 +317,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 UpdateAgent.Start();
             }
-            else if (IsClient && Dispatcher.IsConnected)
+            else if (IsClient && Dispatcher != null && Dispatcher.IsConnected)
             {
                 InstallResponseMessage response = Dispatcher.SendShutdownRequest();
             }
@@ -408,28 +406,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
 
             return installedFeatureBands;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (IsElevated)
-                {
-                    // Restart the update agent if we started it.
-                    UpdateAgent.Start();
-                }
-
-                Dispatcher.SendShutdownRequest();
-
-                _disposed = true;
-            }
         }
 
         /// <summary>

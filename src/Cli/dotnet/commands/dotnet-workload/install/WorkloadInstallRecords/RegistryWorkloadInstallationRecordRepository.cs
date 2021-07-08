@@ -64,10 +64,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             }
             else if (IsClient)
             {
-                Dispatcher.SendWorkloadRecordRequest(InstallRequestType.DeleteWorkloadInstallationRecord,
+                InstallResponseMessage response = Dispatcher.SendWorkloadRecordRequest(InstallRequestType.DeleteWorkloadInstallationRecord,
                     workloadId, sdkFeatureBand);
-
-                //LogAndExitOnFailure(response, $"Failed to delete workload record key.");
+                ExitOnFailure(response, "Failed to delete workload record key.");
             }
         }
 
@@ -107,8 +106,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             }
             else if (IsClient)
             {
-                Dispatcher.SendWorkloadRecordRequest(InstallRequestType.WriteWorkloadInstallationRecord,
+                InstallResponseMessage response = Dispatcher.SendWorkloadRecordRequest(InstallRequestType.WriteWorkloadInstallationRecord,
                     workloadId, sdkFeatureBand);
+
+                ExitOnFailure(response, "Failed to write workload record key.");
             }
         }
     }
