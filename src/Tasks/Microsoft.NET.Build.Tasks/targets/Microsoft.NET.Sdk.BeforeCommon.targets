@@ -270,4 +270,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ProjectCapability Include="GenerateDocumentationFile" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <IsNetCoreAppTargetingLatestTFM Condition="'$(IsNetCoreAppTargetingLatestTFM)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' == '6.0'">true</IsNetCoreAppTargetingLatestTFM>
+  </PropertyGroup>
+
 </Project>

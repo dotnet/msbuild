@@ -371,14 +371,14 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, false)]
-        public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute)
+        [InlineData(true, true, "net5.0")]
+        [InlineData(true, true, "net6.0")]
+        [InlineData(true, false, "net6.0")]
+        [InlineData(false, false, "net6.0")]
+        public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute, string targetFramework)
         {
-            const string targetFramework = "net6.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}${generateRequiresPreviewFeaturesAttribute}")
+                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}${generateRequiresPreviewFeaturesAttribute}${targetFramework}")
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges((path, project) =>
@@ -419,11 +419,22 @@ namespace Microsoft.NET.Build.Tests
             var values = getValuesCommand.GetValues();
             var langVersion = values.FirstOrDefault() ?? string.Empty;
 
-            if (generateRequiresPreviewFeaturesAttribute)
+            if (enablePreviewFeatures && generateRequiresPreviewFeaturesAttribute)
             {
-                Assert.True(contains);
+                if (targetFramework == "net6.0")
+                {
+                    Assert.Equal("Preview", langVersion);
+                    Assert.True(contains);
+                }
+                else
+                {
+                    // The assembly level attribute is generated only for the latest TFM for the given sdk
+                    Assert.False(contains);
+                    Assert.NotEqual("Preview", langVersion);
+                }
             }
-            else
+
+            if (!generateRequiresPreviewFeaturesAttribute)
             {
                 Assert.False(contains);
             }

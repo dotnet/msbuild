@@ -37,7 +37,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateAssemblyMetadataAttributes Condition="'$(GenerateAssemblyMetadataAttributes)' == ''">true</GenerateAssemblyMetadataAttributes>
     <IncludeSourceRevisionInInformationalVersion Condition="'$(IncludeSourceRevisionInInformationalVersion)' == ''">true</IncludeSourceRevisionInInformationalVersion>
     <GenerateInternalsVisibleToAttributes Condition="'$(GenerateInternalsVisibleToAttributes)' == ''">true</GenerateInternalsVisibleToAttributes>
-    <GenerateRequiresPreviewFeaturesAttribute Condition="'$(GenerateRequiresPreviewFeaturesAttribute)' == ''">true</GenerateRequiresPreviewFeaturesAttribute>
+    <GenerateRequiresPreviewFeaturesAttribute Condition="'$(GenerateRequiresPreviewFeaturesAttribute)' == '' and '$(IsNetCoreAppTargetingLatestTFM)' == 'true'">true</GenerateRequiresPreviewFeaturesAttribute>
   </PropertyGroup>
 
   <!--
