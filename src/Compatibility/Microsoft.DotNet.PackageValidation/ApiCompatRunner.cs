@@ -22,10 +22,11 @@ namespace Microsoft.DotNet.PackageValidation
         private readonly ApiComparer _differ = new();
         private readonly IPackageLogger _log;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, IPackageLogger log)
+        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, IPackageLogger log)
         {
             _differ.NoWarn = noWarn;
             _differ.IgnoredDifferences = ignoredDifferences;
+            _differ.StrictMode = enableStrictMode;
             _log = log;
         }
 

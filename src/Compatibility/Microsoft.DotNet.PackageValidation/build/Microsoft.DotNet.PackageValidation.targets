@@ -24,6 +24,8 @@
       RuntimeGraph="$(RuntimeIdentifierGraphPath)"
       NoWarn="$(NoWarn)"
       RunApiCompat="$([MSBuild]::ValueOrDefault('$(RunApiCompat)', 'true'))"
+      EnableStrictModeForCompatibleTfms="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleTfms)', 'true'))"
+      EnableStrictModeForCompatibleFrameworksInPackage="$([MSBuild]::ValueOrDefault('$(EnableStrictModeForCompatibleFrameworksInPackage)', 'false'))"
       GenerateCompatibilitySuppressionFile="$(GenerateCompatibilitySuppressionFile)"
       CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
       BaselinePackageTargetPath="$(PackageValidationBaselinePath)"

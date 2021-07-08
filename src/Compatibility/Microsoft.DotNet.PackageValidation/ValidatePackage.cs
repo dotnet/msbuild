@@ -18,6 +18,10 @@ namespace Microsoft.DotNet.PackageValidation
 
         public bool RunApiCompat { get; set; }
 
+        public bool EnableStrictModeForCompatibleTfms { get; set; }
+
+        public bool EnableStrictModeForCompatibleFrameworksInPackage { get; set; }
+
         public string BaselinePackageTargetPath { get; set; }
 
         public bool DisablePackageBaselineValidation { get; set; }
@@ -37,8 +41,8 @@ namespace Microsoft.DotNet.PackageValidation
             Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph);
             PackageValidationLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile);
 
-            new CompatibleTfmValidator(NoWarn, null, RunApiCompat, logger).Validate(package);
-            new CompatibleFrameworkInPackageValidator(NoWarn, null, logger).Validate(package);
+            new CompatibleTfmValidator(NoWarn, null, RunApiCompat, EnableStrictModeForCompatibleTfms, logger).Validate(package);
+            new CompatibleFrameworkInPackageValidator(NoWarn, null, EnableStrictModeForCompatibleFrameworksInPackage, logger).Validate(package);
 
             if (!DisablePackageBaselineValidation && !string.IsNullOrEmpty(BaselinePackageTargetPath))
             {
