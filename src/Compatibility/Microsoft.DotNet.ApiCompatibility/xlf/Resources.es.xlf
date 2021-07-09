@@ -38,8 +38,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CannotAddAbstractMember">
-        <source>Cannot add abstract member '{0}' to {1} because does not exist on {2}</source>
-        <target state="new">Cannot add abstract member '{0}' to {1} because does not exist on {2}</target>
+        <source>Cannot add abstract member '{0}' to {1} because it does not exist on {2}</source>
+        <target state="new">Cannot add abstract member '{0}' to {1} because it does not exist on {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotAddMemberToInterface">
+        <source>Cannot add interface member '{0}' to {1} because it does not exist on {2}</source>
+        <target state="new">Cannot add interface member '{0}' to {1} because it does not exist on {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotResolveReference">

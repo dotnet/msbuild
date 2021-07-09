@@ -13,5 +13,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         public const string AssemblyIdentityMustMatch = "CP0003";
         public const string MatchingAssemblyDoesNotExist = "CP0004";
         public const string CannotAddAbstractMember = "CP0005";
+        public const string CannotAddMemberToInterface = "CP0006";
     }
 }

@@ -14,7 +14,7 @@ using Microsoft.NET.TestFramework.ProjectConstruction;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Microsoft.DotNet.ApiCompatibility.Tests.Rules
+namespace Microsoft.DotNet.ApiCompatibility.Tests
 {
     public class AssemblyIdentityMustMatchTests : SdkTest
     {
