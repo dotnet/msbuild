@@ -12,6 +12,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.Tasks
 {
@@ -431,6 +432,7 @@ namespace Microsoft.Build.Tasks
             {
                 bool copyComplete = false;
                 string destPath = DestinationFiles[i].ItemSpec;
+                MSBuildEventSource.Log.CopyUpToDateStart(destPath);
                 if (filesActuallyCopied.TryGetValue(destPath, out string originalSource))
                 {
                     if (String.Equals(originalSource, SourceFiles[i].ItemSpec, StringComparison.OrdinalIgnoreCase))
@@ -440,8 +442,15 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                if (!copyComplete)
+                if (copyComplete)
                 {
+                    SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
+                    destinationFilesSuccessfullyCopied.Add(DestinationFiles[i]);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destPath);
+                }
+                else
+                {
+                    MSBuildEventSource.Log.CopyUpToDateStop(destPath);
                     if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec), new FileState(DestinationFiles[i].ItemSpec), copyFile))
                     {
                         filesActuallyCopied[destPath] = SourceFiles[i].ItemSpec;
@@ -451,12 +460,6 @@ namespace Microsoft.Build.Tasks
                     {
                         success = false;
                     }
-                }
-
-                if (copyComplete)
-                {
-                    SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
-                    destinationFilesSuccessfullyCopied.Add(DestinationFiles[i]);
                 }
             }
 
@@ -534,14 +537,22 @@ namespace Microsoft.Build.Tasks
                         string sourcePath = sourceItem.ItemSpec;
 
                         // Check if we just copied from this location to the destination, don't copy again.
+                        MSBuildEventSource.Log.CopyUpToDateStart(sourcePath);
                         bool copyComplete = partitionIndex > 0 &&
                                             String.Equals(
                                                 sourcePath,
                                                 SourceFiles[partition[partitionIndex - 1]].ItemSpec,
                                                 StringComparison.OrdinalIgnoreCase);
 
-                        if (!copyComplete)
+                        if (copyComplete)
                         {
+                            sourceItem.CopyMetadataTo(destItem);
+                            successFlags[fileIndex] = (IntPtr)1;
+                            MSBuildEventSource.Log.CopyUpToDateStop(sourcePath);
+                        }
+                        else
+                        {
+                            MSBuildEventSource.Log.CopyUpToDateStop(sourcePath);
                             if (DoCopyIfNecessary(
                                 new FileState(sourceItem.ItemSpec),
                                 new FileState(destItem.ItemSpec),
@@ -554,12 +565,6 @@ namespace Microsoft.Build.Tasks
                                 // Thread race to set outer variable but they race to set the same (false) value.
                                 success = false;
                             }
-                        }
-
-                        if (copyComplete)
-                        {
-                            sourceItem.CopyMetadataTo(destItem);
-                            successFlags[fileIndex] = (IntPtr)1;
                         }
                     }
                 },
