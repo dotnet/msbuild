@@ -22,10 +22,11 @@ namespace Microsoft.DotNet.PackageValidation
         private readonly ApiComparer _differ = new();
         private readonly IPackageLogger _log;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, IPackageLogger log)
+        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, IPackageLogger log)
         {
             _differ.NoWarn = noWarn;
             _differ.IgnoredDifferences = ignoredDifferences;
+            _differ.StrictMode = enableStrictMode;
             _log = log;
         }
 
@@ -45,17 +46,18 @@ namespace Microsoft.DotNet.PackageValidation
 
                     _log.LogMessage(MessageImportance.Low, apicompatTuples.header);
 
-                    IEnumerable<CompatDifference> differences = _differ.GetDifferences(leftSymbols, rightSymbols, leftName: apicompatTuples.leftAssemblyRelativePath, rightName: apicompatTuples.rightAssemblyRelativePath);
+                    string leftName = apicompatTuples.leftAssemblyRelativePath;
+                    bool isBaselineSuppression = false;
+                    if (!apicompatTuples.leftAssemblyPackagePath.Equals(apicompatTuples.rightAssemblyPackagePath, System.StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        isBaselineSuppression = true;
+                        leftName = Resources.Baseline + " " + leftName;
+                    }
+
+                    IEnumerable<CompatDifference> differences = _differ.GetDifferences(leftSymbols, rightSymbols, leftName: leftName, rightName: apicompatTuples.rightAssemblyRelativePath);
 
                     foreach (CompatDifference difference in differences)
                     {
-                        // Only include package version when comparing assets from different packages.
-                        bool isBaselineSuppression = false;
-                        if (!apicompatTuples.leftAssemblyPackagePath.Equals(apicompatTuples.rightAssemblyPackagePath, System.StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            isBaselineSuppression = true;
-                        }
-
                         _log.LogError(
                             new Suppression
                             {

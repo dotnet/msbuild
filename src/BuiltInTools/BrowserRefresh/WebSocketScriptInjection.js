@@ -173,7 +173,7 @@ setTimeout(async function () {
   function aspnetCoreHotReloadApplied() {
     if (window.Blazor) {
       // If this page has any Blazor, don't refresh the browser.
-      notiifyHotReloadApplied();
+      notifyHotReloadApplied();
     } else {
       location.reload();
     }

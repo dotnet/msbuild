@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.PackageValidation
             _baselinePackage = baselinePackage;
             _runApiCompat = runApiCompat;
             _log = log;
-            _apiCompatRunner = new(noWarn, ignoredDifferences, _log);
+            _apiCompatRunner = new(noWarn, ignoredDifferences, false, _log);
             _diagnosticBag = new(noWarn?.Split(';')?.Where(t => s_diagList.Contains(t)), ignoredDifferences);
         }
 

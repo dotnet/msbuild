@@ -149,7 +149,7 @@ namespace Microsoft.NET.Build.Tests
             getValuesCommand.GetValues().ShouldBeEquivalentTo(new[] { "true" });
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901", Skip = "https://github.com/dotnet/sdk/issues/18800")]
         public void It_builds_successfully_when_targeting_net_framework()
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
@@ -164,6 +164,8 @@ namespace Microsoft.NET.Build.Tests
             var project = XDocument.Load(projFile);
             var ns = project.Root.Name.Namespace;
             project.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").Single().Value = "net472";
+            //  The template sets Nullable to "enable", which isn't supported on .NET Framework
+            project.Root.Elements(ns + "PropertyGroup").Elements(ns + "Nullable").Remove();
             project.Save(projFile);
 
             var buildCommand = new BuildCommand(Log, testDirectory);
@@ -239,7 +241,7 @@ namespace Microsoft.NET.Build.Tests
                 .NotHaveStdOutContaining("NETSDK1140");
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void UseWPFCanBeSetInDirectoryBuildTargets()
         {
             var testDir = _testAssetsManager.CreateTestDirectory();
@@ -365,7 +367,7 @@ namespace Microsoft.NET.Build.Tests
                 getValueCommand.GetValues()
                     .Should()
                     .Contain("windows");
-            } 
+            }
             else
             {
                 getValueCommand.GetValues()

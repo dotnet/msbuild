@@ -26,11 +26,11 @@ namespace Microsoft.DotNet.PackageValidation
         private readonly ApiCompatRunner _apiCompatRunner;
         private readonly IPackageLogger _log;
 
-        public CompatibleTfmValidator(string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, IPackageLogger log)
+        public CompatibleTfmValidator(string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, bool enableStrictMode, IPackageLogger log)
         {
             _runApiCompat = runApiCompat;
             _log = log;
-            _apiCompatRunner = new(noWarn, ignoredDifferences, _log);
+            _apiCompatRunner = new(noWarn, ignoredDifferences, enableStrictMode, _log);
             _diagnosticBag = new(noWarn?.Split(';')?.Where(t => s_diagList.Contains(t)), ignoredDifferences);
         }
 

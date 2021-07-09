@@ -29,15 +29,16 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
         public IReadOnlyList<IEnumerable<CompatDifference>> Run<T>(ElementMapper<T> mapper)
         {
-            List<List<CompatDifference>> result = new();
+            int rightLength = mapper.Right.Length;
+            List<CompatDifference>[] result = new List<CompatDifference>[rightLength];
 
-            if (mapper.Right.Length == 1)
+            if (rightLength == 1)
             {
                 RunOnMapper(0);
             }
             else
             {
-                for (int j = 0; j < mapper.Right.Length; j++)
+                for (int j = 0; j < rightLength; j++)
                 {
                     RunOnMapper(j);
                 }
@@ -49,21 +50,28 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 string rightName = rightIndex < _rightNames.Length ? _rightNames[rightIndex] : DEFAULT_RIGHT_NAME;
                 List<CompatDifference> differences = new();
                 T right = mapper.Right[rightIndex];
-                if (mapper is AssemblyMapper)
+                if (mapper is AssemblyMapper am)
                 {
-                    _context.RunOnAssemblySymbolActions((IAssemblySymbol)mapper.Left, (IAssemblySymbol)right, leftName, rightName, differences);
+                    _context.RunOnAssemblySymbolActions(am.Left, (IAssemblySymbol)right, leftName, rightName, differences);
                 }
                 else if (mapper is TypeMapper tm)
                 {
                     if (tm.ShouldDiffElement(rightIndex))
-                        _context.RunOnTypeSymbolActions((ITypeSymbol)mapper.Left, (ITypeSymbol)right, leftName, rightName, differences);
+                        _context.RunOnTypeSymbolActions(tm.Left, (ITypeSymbol)right, leftName, rightName, differences);
                 }
                 else if (mapper is MemberMapper mm)
                 {
                     if (mm.ShouldDiffElement(rightIndex))
-                        _context.RunOnMemberSymbolActions((ISymbol)mapper.Left, (ISymbol)right, leftName, rightName, differences);
+                        _context.RunOnMemberSymbolActions(
+                            mm.Left,
+                            (ISymbol)right,
+                            mm.ContainingType.Left,
+                            mm.ContainingType.Right[rightIndex],
+                            leftName,
+                            rightName,
+                            differences);
                 }
-                result.Add(differences);
+                result[rightIndex] = differences;
             }
 
             return result;

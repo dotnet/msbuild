@@ -56,7 +56,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             var manifestDirectoryEnvironmentVariable = getEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
             if (manifestDirectoryEnvironmentVariable != null)
             {
-                _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator).Append(manifestDirectory).ToArray();
+                //  Append the SDK version band to each manifest root specified via the environment variable.  This allows the same
+                //  environment variable settings to be shared by multiple SDKs.
+                _manifestDirectories = manifestDirectoryEnvironmentVariable.Split(Path.PathSeparator)
+                    .Select(p => Path.Combine(p, _sdkVersionBand))
+                    .Append(manifestDirectory).ToArray();
             }
             else
             {

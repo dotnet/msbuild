@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.DotNet.ApiCompatibility.Extensions;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -15,9 +16,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         }
 
         public bool Include(ISymbol symbol) =>
-            symbol.DeclaredAccessibility == Accessibility.Public ||
-            symbol.DeclaredAccessibility == Accessibility.Protected ||
-            symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal ||
+            symbol.IsVisibleOutsideOfAssembly() ||
             (_includeInternalSymbols && symbol.DeclaredAccessibility != Accessibility.Private);
     }
 }

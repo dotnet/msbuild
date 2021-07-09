@@ -12,6 +12,11 @@
         <target state="new">API compatibility errors between '{0}' (left) and '{1}' (right):</target>
         <note />
       </trans-unit>
+      <trans-unit id="Baseline">
+        <source>[Baseline]</source>
+        <target state="new">[Baseline]</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CompatibleFrameworkInPackageValidatorHeader">
         <source>Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</source>
         <target state="new">Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</target>

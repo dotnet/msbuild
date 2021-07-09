@@ -14,5 +14,10 @@ namespace PackageValidationTestProject
   }
 #endif
 #endif
+#if !AddBreakingChange
+  public void SomeApiNotInLatestVersion()
+  {
+  }
+#endif
     }
 }

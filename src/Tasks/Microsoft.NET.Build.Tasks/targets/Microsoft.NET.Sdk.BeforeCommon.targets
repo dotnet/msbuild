@@ -60,12 +60,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <!--
-    Use RuntimeIdentifier to determine PlatformTarget.
-    Also, enforce that RuntimeIdentifier is always specified for .NETFramework executables.
-  -->
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
-
-  <!--
     Import targets from RazorSDK if referenced
     Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets
     Sdks\Microsoft.NET.Sdk.Razor\build\netstandard2.0\Microsoft.NET.Sdk.Razor.BeforeCommon.targets
@@ -74,6 +68,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Import workload targets -->
   <Import Project="Microsoft.NET.Sdk.ImportWorkloads.targets" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />
+
+  <!--
+    Use RuntimeIdentifier to determine PlatformTarget.
+    Also, enforce that RuntimeIdentifier is always specified for .NETFramework executables.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.RuntimeIdentifierInference.targets" />
 
   <!-- Checks for EOL frameworks -->
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.EolTargetFrameworks.targets" />

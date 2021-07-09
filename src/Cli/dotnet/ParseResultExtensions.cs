@@ -26,7 +26,8 @@ namespace Microsoft.DotNet.Cli
                 {
                     throw new CommandParsingException(
                         message: string.Join(Environment.NewLine,
-                                             parseResult.Errors.Select(e => e.Message)));
+                                             parseResult.Errors.Select(e => e.Message)), 
+                        parseResult: parseResult);
                 }
             }
             else if (parseResult.HasOption("--help"))

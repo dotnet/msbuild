@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
             _errorReporter = reporter ?? Reporter.Error;
 
             _configFilePath = result.ValueForOption<string>(WorkloadRestoreCommandParser.ConfigOption);
-            _sources = result.ValueForOption<string[]>(WorkloadRestoreCommandParser.AddSourceOption);
+            _sources = result.ValueForOption<string[]>(WorkloadRestoreCommandParser.SourceOption);
             _verbosity =
                 Enum.GetName(result.ValueForOption<VerbosityOptions>(WorkloadRestoreCommandParser.VerbosityOption));
         }

@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli
     {
         public static readonly Option ConfigOption = WorkloadInstallCommandParser.ConfigOption;
 
-        public static readonly Option AddSourceOption = WorkloadInstallCommandParser.AddSourceOption;
+        public static readonly Option SourceOption = WorkloadInstallCommandParser.SourceOption;
 
         public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
 
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Cli
             Command command = new("update", LocalizableStrings.CommandDescription);
 
             command.AddOption(ConfigOption);
-            command.AddOption(AddSourceOption);
+            command.AddOption(SourceOption);
             command.AddOption(VersionOption);
             command.AddOption(PrintDownloadLinkOnlyOption);
             command.AddOption(FromCacheOption);

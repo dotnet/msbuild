@@ -256,7 +256,7 @@ namespace Microsoft.NET.Publish.Tests
                 .NotHaveFiles(unexpectedFiles);
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void No_runtime_files_6_0()
         {
             var testProject = new TestProject()
@@ -280,7 +280,7 @@ namespace Microsoft.NET.Publish.Tests
                 .OnlyHaveFiles(expectedFiles);
         }
 
-        [RequiresMSBuildVersionTheory("16.8.0")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(true)]
         [InlineData(false)]
         public void It_supports_composite_r2r(bool extractAll)
@@ -569,7 +569,7 @@ namespace Microsoft.NET.Publish.Tests
             appHostSize.Should().BeLessThan(singleFileSize);
         }
 
-        [RequiresMSBuildVersionTheory("16.8.0")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net6.0")]
         public void ILLink_analyzer_warnings_are_produced(string targetFramework)
         {
@@ -586,7 +586,7 @@ namespace Microsoft.NET.Publish.Tests
                 .And.HaveStdOutContaining("(10,13): warning IL3001");
         }
 
-        [RequiresMSBuildVersionTheory("16.8.0")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net6.0")]
         public void ILLink_linker_analyzer_warnings_are_not_produced(string targetFramework)
         {
@@ -605,7 +605,7 @@ namespace Microsoft.NET.Publish.Tests
                 .And.NotHaveStdOutContaining("IL2026");
         }
 
-        [RequiresMSBuildVersionTheory("16.8.0")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("net6.0")]
         public void ILLink_analyzer_warnings_are_produced_using_EnableSingleFileAnalyzer(string targetFramework)
         {
@@ -743,7 +743,7 @@ class C
                 .HaveStdOutContaining(Strings.CompressionInSingleFileRequires60);
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_errors_when_enabling_compression_without_selfcontained()
         {
             var testProject = new TestProject()
@@ -766,7 +766,7 @@ class C
                 .HaveStdOutContaining(Strings.CompressionInSingleFileRequiresSelfContained);
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_compresses_single_file_as_directed()
         {
             var testProject = new TestProject()
@@ -797,7 +797,7 @@ class C
             uncompressedSize.Should().BeGreaterThan(compressedSize);
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_does_not_compress_single_file_by_default()
         {
             var testProject = new TestProject()

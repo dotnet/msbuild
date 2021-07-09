@@ -45,5 +45,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
                     yield return baseType;
             }
         }
+
+        internal static bool IsVisibleOutsideOfAssembly(this ISymbol symbol) =>
+            symbol.DeclaredAccessibility == Accessibility.Public ||
+            symbol.DeclaredAccessibility == Accessibility.Protected ||
+            symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal;
     }
 }

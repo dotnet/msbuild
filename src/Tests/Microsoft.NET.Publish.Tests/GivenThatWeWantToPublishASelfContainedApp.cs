@@ -245,7 +245,7 @@ namespace Microsoft.NET.Publish.Tests
                 });
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void NoStaticLibs()
         {
              var testAsset = _testAssetsManager

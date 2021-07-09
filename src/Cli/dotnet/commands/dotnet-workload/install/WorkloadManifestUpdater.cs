@@ -98,7 +98,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 else
                 {
-                    File.Create(sentinalPath);
+                    File.Create(sentinalPath).Close();
                 }
             }
         }

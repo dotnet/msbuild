@@ -398,8 +398,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             if (PackIsInstalled(packInfo))
             {
                 _reporter.WriteLine(string.Format(LocalizableStrings.DeletingWorkloadPack, packInfo.Id, packInfo.Version));
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
                 if (IsSingleFilePack(packInfo))
                 {
                     File.Delete(packInfo.Path);
@@ -435,8 +433,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var packInstallRecord = GetPackInstallRecordPath(packInfo, featureBand);
             if (File.Exists(packInstallRecord))
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
                 File.Delete(packInstallRecord);
 
                 var packRecordVersionDir = Path.GetDirectoryName(packInstallRecord);

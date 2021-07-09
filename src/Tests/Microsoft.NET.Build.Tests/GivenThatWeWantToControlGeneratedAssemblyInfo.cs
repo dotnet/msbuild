@@ -370,14 +370,15 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TestPreviewFeatures(bool enablePreviewFeatures)
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute)
         {
             const string targetFramework = "net6.0";
             var testAsset = _testAssetsManager
-                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}")
+                .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}${generateRequiresPreviewFeaturesAttribute}")
                 .WithSource()
                 .WithTargetFramework(targetFramework)
                 .WithProjectChanges((path, project) =>
@@ -387,6 +388,13 @@ namespace Microsoft.NET.Build.Tests
                     project.Root.Add(
                         new XElement(ns + "PropertyGroup",
                             new XElement(ns + "EnablePreviewFeatures", $"{enablePreviewFeatures}")));
+
+                    if (enablePreviewFeatures && !generateRequiresPreviewFeaturesAttribute)
+                    {
+                        project.Root.Add(
+                            new XElement(ns + "PropertyGroup",
+                                new XElement(ns + "GenerateRequiresPreviewFeaturesAttribute", $"False")));
+                    }
                 });
 
             var buildCommand = new BuildCommand(testAsset);
@@ -410,17 +418,18 @@ namespace Microsoft.NET.Build.Tests
 
             var values = getValuesCommand.GetValues();
             var langVersion = values.FirstOrDefault() ?? string.Empty;
-            if (!enablePreviewFeatures)
-            {
-                Assert.False(contains);
-            }
-            else
+
+            if (generateRequiresPreviewFeaturesAttribute)
             {
                 Assert.True(contains);
             }
+            else
+            {
+                Assert.False(contains);
+            }
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_doesnt_includes_requires_preview_features()
         {
             var testAsset = _testAssetsManager

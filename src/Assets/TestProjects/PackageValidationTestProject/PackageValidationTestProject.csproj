@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <DefineConstants Condition="'$(ForceValidationProblem)' == 'true'">$(DefineConstants);ForceValidationProblem</DefineConstants>
+    <DefineConstants Condition="'$(AddBreakingChange)' == 'true'">$(DefineConstants);AddBreakingChange</DefineConstants>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 

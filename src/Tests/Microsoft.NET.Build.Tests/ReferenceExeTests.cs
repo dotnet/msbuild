@@ -136,7 +136,7 @@ namespace Microsoft.NET.Build.Tests
                     .Fail()
                     .And
                     .HaveStdOutContaining(buildFailureCode);
-            }            
+            }
         }
 
         [Theory]
@@ -157,7 +157,7 @@ namespace Microsoft.NET.Build.Tests
         {
             MainSelfContained = false;
             ReferencedSelfContained = false;
-            
+
             CreateProjects();
 
             ReferencedProject.TargetFrameworks = "netcoreapp3.1";
@@ -232,7 +232,7 @@ namespace Microsoft.NET.Build.Tests
             ReferencedSelfContained = selfContained;
 
             TestWithPublish = true;
-            
+
             CreateProjects();
 
             RunTest();
@@ -260,7 +260,7 @@ namespace Microsoft.NET.Build.Tests
             RunTest();
         }
 
-        [Theory]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData("xunit")]
         [InlineData("mstest")]
         public void TestProjectCanReferenceExe(string testTemplateName)

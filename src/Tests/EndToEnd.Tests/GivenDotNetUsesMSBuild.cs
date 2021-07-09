@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
         }
 
-        [RequiresMSBuildVersionFact("16.8.0")]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             string projectDirectory = _testAssetsManager.CreateTestDirectory().Path;

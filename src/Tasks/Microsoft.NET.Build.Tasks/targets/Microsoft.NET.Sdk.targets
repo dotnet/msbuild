@@ -39,6 +39,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ComputeNETCoreBuildOutputFiles Condition=" '$(ComputeNETCoreBuildOutputFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</ComputeNETCoreBuildOutputFiles>
     <_GenerateRuntimeConfigurationPropertyInputsCache Condition="'$(_GenerateRuntimeConfigurationPropertyInputsCache)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).genruntimeconfig.cache</_GenerateRuntimeConfigurationPropertyInputsCache>
     <_GenerateRuntimeConfigurationPropertyInputsCache>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_GenerateRuntimeConfigurationPropertyInputsCache)))</_GenerateRuntimeConfigurationPropertyInputsCache>
+    <DisableImplicitNamespaceImports Condition="'$(DisableImplicitNamespaceImports)'==''">$(DisableImplicitFrameworkReferences)</DisableImplicitNamespaceImports>
   </PropertyGroup>
 
   <ItemGroup>
@@ -72,6 +73,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <UserProfileRuntimeStorePath Condition="'$(UserProfileRuntimeStorePath)' == ''">$(_DefaultUserProfileRuntimeStorePath)</UserProfileRuntimeStorePath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
+    <PredefinedCulturesOnly Condition="'$(PredefinedCulturesOnly)' == '' and '$(InvariantGlobalization)' == 'true'">true</PredefinedCulturesOnly>
+  </PropertyGroup>
+
   <!-- Opt into .NET Core resource-serialization strategy by default when targeting frameworks
        that support it by default.
        -->
@@ -94,6 +99,11 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '3.1'))">
     <AvailablePlatforms>$(AvailablePlatforms),ARM64</AvailablePlatforms>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Turn off support for metadata updates in non-Debug builds by default. -->
+    <MetadataUpdaterSupport Condition="'$(MetadataUpdaterSupport)' == '' and '$(Configuration)' != 'Debug'">false</MetadataUpdaterSupport>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -394,6 +404,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Value="$(InvariantGlobalization)"
                                     Trim="true" />
 
+    <RuntimeHostConfigurationOption Include="System.Globalization.PredefinedCulturesOnly"
+                                    Condition="'$(PredefinedCulturesOnly)' != ''"
+                                    Value="$(PredefinedCulturesOnly)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.Net.Http.EnableActivityPropagation"
                                     Condition="'$(HttpActivityPropagationSupport)' != ''"
                                     Value="$(HttpActivityPropagationSupport)"
@@ -402,6 +417,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Net.Http.UseNativeHttpHandler"
                                     Condition="'$(UseNativeHttpHandler)' != ''"
                                     Value="$(UseNativeHttpHandler)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Reflection.Metadata.MetadataUpdater.IsSupported"
+                                    Condition="'$(MetadataUpdaterSupport)' != ''"
+                                    Value="$(MetadataUpdaterSupport)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Resources.ResourceManager.AllowCustomResourceTypes"
@@ -956,7 +976,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   ============================================================
   -->
 
-  <UsingTask TaskName="CheckForUnsupportedWinMDReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />  
+  <UsingTask TaskName="CheckForUnsupportedWinMDReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <Target Name="_BlockWinMDsOnUnsupportedTFMs"
           AfterTargets="PreBuildEvent"
@@ -967,7 +987,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
       ReferencePaths="@(ReferencePath)"
       />
-    
+
     <NETSdkError Condition="'$(OutputType)' == 'winmdobj'"
       ResourceName="WinMDObjNotSupportedOnTargetFramework"
       FormatArguments="$(TargetFrameworkMoniker)" />
@@ -1047,7 +1067,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsExecutable="$(_IsExecutable)"
       ReferencedProjects="@(_MSBuildProjectReferenceExistent)"
       />
-    
+
   </Target>
 
   <!--
@@ -1073,6 +1093,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DesignerSupport.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateImplicitNamespaceImports.targets" Condition="'$(DisableImplicitNamespaceImports)' != 'true' and '$(Language)' == 'C#'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateSupportedRuntime.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.CrossGen.targets" />
@@ -1100,7 +1121,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition=" '$(ImportWindowsDesktopTargets)' == 'true'">
     <AfterMicrosoftNETSdkTargets>$(AfterMicrosoftNETSdkTargets);$(MSBuildThisFileDirectory)../../Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.NET.Sdk.WindowsDesktop.targets</AfterMicrosoftNETSdkTargets>
   </PropertyGroup>
-  
+
   <!-- Note: Once WindowsDesktop is a workload this will be moved to WorkloadManifest.targets -->
   <ItemGroup Condition="'$(MicrosoftNETWindowsWorkloadInstalled)' == 'true' and
                         '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
