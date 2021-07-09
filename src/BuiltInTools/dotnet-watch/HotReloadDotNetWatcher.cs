@@ -38,7 +38,8 @@ namespace Microsoft.DotNet.Watcher
             {
                 new MSBuildEvaluationFilter(fileSetFactory),
                 new DotNetBuildFilter(_processRunner, _reporter),
-                new LaunchBrowserFilter(_dotNetWatchOptions),
+                new LaunchBrowserFilter(dotNetWatchOptions),
+                new BrowserRefreshFilter(dotNetWatchOptions, _reporter),
             };
             _rudeEditDialog = new(reporter, _console);
         }
