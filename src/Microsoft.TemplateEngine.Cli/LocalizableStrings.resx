@@ -726,7 +726,7 @@ The supported columns are: language, tags, author, type.</value>
     <value>Display template options with:</value>
   </data>
   <data name="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint" xml:space="preserve">
-    <value>Display installed templates with:</value>
+    <value>Display all installed templates with:</value>
   </data>
   <data name="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint" xml:space="preserve">
     <value>Display templates available on NuGet.org with:</value>

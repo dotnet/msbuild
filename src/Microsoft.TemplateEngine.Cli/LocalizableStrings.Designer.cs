@@ -1467,7 +1467,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display installed templates with:.
+        ///   Looks up a localized string similar to Display all installed templates with:.
         /// </summary>
         internal static string TemplateInformationCoordinator_DotnetNew_ListTemplatesHint {
             get {

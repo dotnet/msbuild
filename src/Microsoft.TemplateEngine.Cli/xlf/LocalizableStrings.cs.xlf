@@ -800,8 +800,8 @@ Podporované sloupce: language, tags, author, type</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">Zobrazit nainstalované šablony pomocí:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">Zobrazit nainstalované šablony pomocí:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

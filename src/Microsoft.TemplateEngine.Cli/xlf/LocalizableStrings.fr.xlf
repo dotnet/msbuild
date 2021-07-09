@@ -800,8 +800,8 @@ Les colonnes prises en charge sont : Langage, balises, auteur, type.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">Affichez les modèles installés avec :</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">Affichez les modèles installés avec :</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

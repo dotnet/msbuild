@@ -800,8 +800,8 @@ Die unterstützten Spalten sind: Sprache, Tags, Autor, Typ.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">Installierte Vorlagen anzeigen mit:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">Installierte Vorlagen anzeigen mit:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

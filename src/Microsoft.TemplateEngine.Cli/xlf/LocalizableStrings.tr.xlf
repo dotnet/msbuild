@@ -800,8 +800,8 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">Yüklü şablonları görüntüle:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">Yüklü şablonları görüntüle:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

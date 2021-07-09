@@ -47,7 +47,7 @@ An example would be:
 
 Display template options with:
    dotnet new3 app -h
-Display installed templates with:
+Display all installed templates with:
    dotnet new3 --list
 Display templates available on NuGet.org with:
    dotnet new3 ap --search");

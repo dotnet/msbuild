@@ -800,8 +800,8 @@ The supported columns are: language, tags, author, type.</source>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">インストールされているテンプレートを次の方法で表示します:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">インストールされているテンプレートを次の方法で表示します:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

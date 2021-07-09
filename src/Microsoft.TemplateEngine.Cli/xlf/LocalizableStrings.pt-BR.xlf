@@ -800,8 +800,8 @@ As colunas com suporte são: idioma, marcas, autor, tipo.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">Exibir modelos instalados com:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">Exibir modelos instalados com:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

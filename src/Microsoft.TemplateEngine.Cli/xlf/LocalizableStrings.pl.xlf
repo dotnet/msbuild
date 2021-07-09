@@ -800,8 +800,8 @@ Obsługiwane kolumny to: język, tagi, autor, typ.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">Wyświetl zainstalowane szablony za pomocą:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">Wyświetl zainstalowane szablony za pomocą:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

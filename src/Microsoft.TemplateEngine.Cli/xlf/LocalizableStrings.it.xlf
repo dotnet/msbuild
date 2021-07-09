@@ -800,8 +800,8 @@ Le colonne supportate sono: lingua, tag, autore, tipo.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">Visualizzare i modelli installati con:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">Visualizzare i modelli installati con:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">

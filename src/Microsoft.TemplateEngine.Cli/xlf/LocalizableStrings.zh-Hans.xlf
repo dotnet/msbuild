@@ -800,8 +800,8 @@ The supported columns are: language, tags, author, type.</source>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
-        <source>Display installed templates with:</source>
-        <target state="translated">通过以下方式显示已安装的模板:</target>
+        <source>Display all installed templates with:</source>
+        <target state="needs-review-translation">通过以下方式显示已安装的模板:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
