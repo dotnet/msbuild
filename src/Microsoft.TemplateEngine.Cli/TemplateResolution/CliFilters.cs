@@ -149,10 +149,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                 try
                 {
                     TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, hostDataLoader.ReadHostSpecificTemplateData(template));
-
-                    Dictionary<string, ITemplateParameter> templateParameters =
-                        template.Parameters.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
-
                     List<MatchInfo> matchInfos = new List<MatchInfo>();
 
                     // parameters are already parsed. But choice values aren't checked
@@ -163,7 +159,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                         MatchKind matchKind;
                         ParameterMatchInfo.MismatchKind mismatchKind = ParameterMatchInfo.MismatchKind.NoMismatch;
 
-                        if (templateParameters.TryGetValue(paramName, out ITemplateParameter? paramDetails))
+                        ITemplateParameter? paramDetails = template.Parameters.FirstOrDefault(param => param.Name.Equals(paramName));
+                        if (paramDetails != null)
                         {
                             if (paramDetails.IsChoice() && paramDetails.Choices != null)
                             {
@@ -263,9 +260,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                     }
                     TemplateCommandInput reparsedCommand = TemplateCommandInput.ParseForTemplate(template, commandInput, hostDataLoader.ReadHostSpecificTemplateData(template));
 
-                    Dictionary<string, ITemplateParameter> templateParameters =
-                        template.Parameters.ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase);
-
                     List<MatchInfo> matchInfos = new List<MatchInfo>();
                     foreach (KeyValuePair<string, string?> matchedParamInfo in reparsedCommand.InputTemplateParams)
                     {
@@ -273,8 +267,8 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
                         string? paramValue = matchedParamInfo.Value;
                         MatchKind matchKind;
                         ParameterMatchInfo.MismatchKind mismatchKind = ParameterMatchInfo.MismatchKind.NoMismatch;
-
-                        if (templateParameters.TryGetValue(paramName, out ITemplateParameter? paramDetails))
+                        ITemplateParameter? paramDetails = template.Parameters.FirstOrDefault(param => param.Name.Equals(paramName));
+                        if (paramDetails != null)
                         {
                             if (paramDetails.IsChoice() && paramDetails.Choices != null)
                             {
