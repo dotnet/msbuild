@@ -289,7 +289,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         [Fact]
         public void GivenPrintRollbackDefinitionItIncludesAllInstalledManifests()
         {
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--print-rollback-definition-only" });
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--print-rollback" });
             (_, var updateCommand, _, _, _, _) = GetTestInstallers(parseResult);
 
             updateCommand.Execute();
