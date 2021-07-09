@@ -679,26 +679,24 @@ namespace Microsoft.NET.Publish.Tests
                 parsedVersion.Major >= 6)
             {
                 JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"].Value<bool>()
+                JToken configProperties = runtimeConfig["runtimeOptions"]["configProperties"];
+                configProperties["System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"].Value<bool>()
                     .Should().BeFalse();
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Resources.ResourceManager.AllowCustomResourceTypes"].Value<bool>()
+                configProperties["System.Resources.ResourceManager.AllowCustomResourceTypes"].Value<bool>()
                     .Should().BeFalse();
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Runtime.InteropServices.BuiltInComInterop.IsSupported"].Value<bool>()
+                configProperties["System.Runtime.InteropServices.BuiltInComInterop.IsSupported"].Value<bool>()
                     .Should().BeFalse();
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"].Value<bool>()
+                configProperties["System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting"].Value<bool>()
                     .Should().BeFalse();
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Runtime.InteropServices.EnableCppCLIHostActivation"].Value<bool>()
+                configProperties["System.Runtime.InteropServices.EnableCppCLIHostActivation"].Value<bool>()
                     .Should().BeFalse();
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.StartupHookProvider.IsSupported"].Value<bool>()
+                configProperties["System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"].Value<bool>()
                     .Should().BeFalse();
-                runtimeConfig["runtimeOptions"]["configProperties"]
-                    ["System.Threading.Thread.EnableAutoreleasePool"].Value<bool>()
+                configProperties["System.StartupHookProvider.IsSupported"].Value<bool>()
+                    .Should().BeFalse();
+                configProperties["System.Text.Encoding.EnableUnsafeUTF7Encoding"].Value<bool>()
+                    .Should().BeFalse();
+                configProperties["System.Threading.Thread.EnableAutoreleasePool"].Value<bool>()
                     .Should().BeFalse();
             }
             else
@@ -708,7 +706,9 @@ namespace Microsoft.NET.Publish.Tests
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.BuiltInComInterop.IsSupported");
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableConsumingManagedCodeFromNativeHosting");
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.EnableCppCLIHostActivation");
+                runtimeConfigContents.Should().NotContain("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization");
                 runtimeConfigContents.Should().NotContain("System.StartupHookProvider.IsSupported");
+                runtimeConfigContents.Should().NotContain("System.Text.Encoding.EnableUnsafeUTF7Encoding");
                 runtimeConfigContents.Should().NotContain("System.Threading.Thread.EnableAutoreleasePool");
             }
         }
