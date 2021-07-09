@@ -31,6 +31,10 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();
 
+        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption();
+
+        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
+
         public static Command GetCommand()
         {
             var command = new Command("build", LocalizableStrings.AppFullName);
@@ -49,6 +53,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoIncrementalOption);
             command.AddOption(NoDependenciesOption);
             command.AddOption(NoLogoOption);
+            command.AddOption(SelfContainedOption);
+            command.AddOption(NoSelfContainedOption);
 
             return command;
         }

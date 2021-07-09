@@ -80,6 +80,11 @@ export PATH="$PATH:{0}"
         <target state="translated">Найдено несколько проектов в "{0}". Выберите один.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoSelfContainedOptionDescription">
+        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
+        <target state="new">Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
         <source>Project already has a reference to `{0}`.</source>
         <target state="translated">Проект уже содержит ссылку на "{0}".</target>
@@ -133,6 +138,13 @@ export PATH="$PATH:{0}"
       <trans-unit id="Package">
         <source>Package</source>
         <target state="translated">Пакет</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">

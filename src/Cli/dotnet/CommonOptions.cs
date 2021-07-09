@@ -93,6 +93,18 @@ namespace Microsoft.DotNet.Cli
 
         public static Option DebugOption() => new Option<bool>("--debug");
 
+        public static Option SelfContainedOption() =>
+            new ForwardedOption<bool>(
+                "--self-contained",
+                CommonLocalizableStrings.SelfContainedOptionDescription)
+            .ForwardAsSingle(o => $"-property:SelfContained={o}");
+
+        public static Option NoSelfContainedOption() =>
+            new ForwardedOption<bool>(
+                "--no-self-contained",
+                CommonLocalizableStrings.NoSelfContainedOptionDescription)
+            .ForwardAs("-property:SelfContained=false");
+
         public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
         {
             return verbosity.Equals(VerbosityOptions.diag) ||
