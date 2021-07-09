@@ -30,6 +30,7 @@ namespace Microsoft.DotNet.Cli
             BuildCommandParser.GetCommand(),
             BuildServerCommandParser.GetCommand(),
             CleanCommandParser.GetCommand(),
+            CleanupCommandParser.GetCommand(),
             CompleteCommandParser.GetCommand(),
             FsiCommandParser.GetCommand(),
             ListCommandParser.GetCommand(),
