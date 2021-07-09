@@ -4740,9 +4740,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       GetCopyToOutputDirectoryItems depends on an unspecified dependency _SplitProjectReferencesByFileExistence -> AssignProjectConfiguration (https://github.com/microsoft/msbuild/issues/4677).
       When the unspecified dependency does not happen by accident, content copying is only 1 level deep instead of transitive.
       This target enforces the dependency.
-
-      TODO: make transitive content copying the default when the breaking change is acceptable.
     -->
+
+    <MSBuildCopyContentTransitively Condition=" '$(MSBuildCopyContentTransitively)' == '' and $([MSBuild]::AreFeaturesEnabled('17.0'))">true</MSBuildCopyContentTransitively>
+
     <_TargetsThatPrepareProjectReferences Condition=" '$(MSBuildCopyContentTransitively)' == 'true' ">
       AssignProjectConfiguration;
       _SplitProjectReferencesByFileExistence
