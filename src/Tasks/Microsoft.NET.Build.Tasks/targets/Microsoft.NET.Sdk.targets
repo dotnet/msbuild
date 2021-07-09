@@ -102,6 +102,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Turn off support for metadata updates in non-Debug builds by default. -->
+    <MetadataUpdaterSupport Condition="'$(MetadataUpdaterSupport)' == '' and '$(Configuration)' != 'Debug'">false</MetadataUpdaterSupport>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <CoreBuildDependsOn>
       _CheckForBuildWithNoBuild;
       $(CoreBuildDependsOn);
