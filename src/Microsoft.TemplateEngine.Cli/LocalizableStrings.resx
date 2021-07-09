@@ -748,6 +748,6 @@ The supported columns are: language, tags, author, type.</value>
   </data>
   <data name="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint" xml:space="preserve">
     <value>To see help for other template languages ({0}), use --language option:</value>
-    <comment>{0} is comma-separated list of supported programming languages by template.</comment>
+    <comment>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</comment>
   </data>
 </root>

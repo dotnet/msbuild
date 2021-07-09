@@ -817,7 +817,7 @@ Obsługiwane kolumny to: język, tagi, autor, typ.</target>
       <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
         <source>To see help for other template languages ({0}), use --language option:</source>
         <target state="new">To see help for other template languages ({0}), use --language option:</target>
-        <note>{0} is comma-separated list of supported programming languages by template.</note>
+        <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
         <source>Could not find the template package containing template '{0}'</source>
