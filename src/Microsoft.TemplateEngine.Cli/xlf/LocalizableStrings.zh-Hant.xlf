@@ -816,7 +816,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
         <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="new">To see help for other template languages ({0}), use --language option:</target>
+        <target state="translated">若要查看其他範本語言的說明 ({0})，請使用 --language 選項:</target>
         <note>{0} is comma-separated list of supported programming languages by template.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
