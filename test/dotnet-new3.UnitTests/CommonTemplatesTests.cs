@@ -65,10 +65,6 @@ namespace Dotnet_new3.IntegrationTests
         [InlineData("Class Library", "classlib", "C#", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "VB", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "F#", "netstandard2.0")]
-
-        [InlineData("Simple Console Application", "app")]
-        [InlineData("Simple Console Application", "app", "C#")]
-        [InlineData("Simple Console Application", "app", "C#", "net6.0")]
         public void AllCommonProjectsCreateRestoreAndBuild(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();
@@ -175,10 +171,6 @@ Restore succeeded\.");
         [InlineData("Class Library", "classlib", "C#", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "VB", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "F#", "netstandard2.0")]
-
-        [InlineData("Simple Console Application", "app")]
-        [InlineData("Simple Console Application", "app", "C#")]
-        [InlineData("Simple Console Application", "app", "C#", "net6.0")]
         public void AllCommonProjectsCreate_NoRestore(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();
@@ -231,15 +223,13 @@ Restore succeeded\.");
         }
 
         [Theory]
-        [InlineData("Nullable", "enable", "Simple Console Application", "app", null, null)]
-        [InlineData("CheckForOverflowUnderflow", null, "Simple Console Application", "app", null, null)]
-        [InlineData("LangVersion", null, "Simple Console Application", "app", null, null)]
-        [InlineData("TargetFramework", "net6.0", "Simple Console Application", "app", null, null)]
-
-        [InlineData("Nullable", null, "Console Application", "console", null, null)]
+        [InlineData("Nullable", "enable", "Console Application", "console", null, null)]
         [InlineData("CheckForOverflowUnderflow", null, "Console Application", "console", null, null)]
         [InlineData("LangVersion", null, "Console Application", "console", null, null)]
         [InlineData("TargetFramework", "net6.0", "Console Application", "console", null, null)]
+        [InlineData("Nullable", null, "Console Application", "console", null, "net5.0")]
+        [InlineData("Nullable", null, "Console Application", "console", null, "netcoreapp3.1")]
+        [InlineData("Nullable", null, "Console Application", "console", null, "netcoreapp2.1")]
 
         [InlineData("Nullable", null, "Console Application", "console", "F#", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Console Application", "console", "F#", null)]
@@ -319,7 +309,6 @@ Restore succeeded\.");
 
         [Theory]
         //language version
-        [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Simple Console Application", "app", null, null)]
         [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Console Application", "console", null, null)]
         [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Console Application", "console", "VB", null)]
         [InlineData("LangVersion", "9.0", "--langVersion", "9.0", "Class Library", "classlib", null, null)]

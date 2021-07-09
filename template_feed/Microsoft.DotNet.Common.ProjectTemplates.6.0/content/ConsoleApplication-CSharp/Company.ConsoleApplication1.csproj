@@ -4,8 +4,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework Condition="'$(TargetFrameworkOverride)' == ''">net6.0</TargetFramework>
     <TargetFramework Condition="'$(TargetFrameworkOverride)' != ''">TargetFrameworkOverride</TargetFramework>
-    <RootNamespace Condition="'$(name)' != '$(name{-VALUE-FORMS-}safe_namespace)'">Company.ConsoleApplication1</RootNamespace>
     <LangVersion Condition="'$(langVersion)' != ''">$(ProjectLanguageVersion)</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>

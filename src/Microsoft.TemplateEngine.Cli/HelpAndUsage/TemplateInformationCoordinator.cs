@@ -329,17 +329,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             await ShowCuratedListAsync(commandInput, cancellationToken).ConfigureAwait(false);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
-            Reporter.Output.WriteCommand(commandInput.InstantiateTemplateExample("app"));
+            Reporter.Output.WriteCommand(commandInput.InstantiateTemplateExample("console"));
             Reporter.Output.WriteLine();
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_DisplayOptionsHint);
-            Reporter.Output.WriteCommand(commandInput.HelpCommandExample("app"));
+            Reporter.Output.WriteCommand(commandInput.HelpCommandExample("console"));
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ListTemplatesHint);
             Reporter.Output.WriteCommand(commandInput.ListCommandExample());
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint);
-            Reporter.Output.WriteCommand(commandInput.SearchCommandExample("ap"));
+            Reporter.Output.WriteCommand(commandInput.SearchCommandExample("web"));
 
             Reporter.Output.WriteLine();
 
@@ -418,7 +418,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             {
                 "Microsoft.Common.Library", //classlib
                 "Microsoft.Common.Console", //console
-                "Microsoft.Common.App", //app
                 "Microsoft.Common.WPF", //wpf
                 "Microsoft.Common.WinForms", //winforms
                 "Microsoft.Web.Blazor.Wasm", //blazorwasm

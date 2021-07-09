@@ -36,21 +36,20 @@ namespace Dotnet_new3.IntegrationTests
 @"The 'dotnet new3' command creates a .NET project based on a template.
 
 Common templates are:
-Template Name               Short Name  Language    Tags          
---------------------------  ----------  ----------  --------------
-Class Library               classlib    [C#],F#,VB  Common/Library
-Console Application         console     [C#],F#,VB  Common/Console
-Simple Console Application  app         [C#]        Common/Console
+Template Name        Short Name  Language    Tags          
+-------------------  ----------  ----------  --------------
+Class Library        classlib    [C#],F#,VB  Common/Library
+Console Application  console     [C#],F#,VB  Common/Console
 
 An example would be:
-   dotnet new3 app
+   dotnet new3 console
 
 Display template options with:
-   dotnet new3 app -h
+   dotnet new3 console -h
 Display all installed templates with:
    dotnet new3 --list
 Display templates available on NuGet.org with:
-   dotnet new3 ap --search");
+   dotnet new3 web --search");
         }
 
         [Fact]

@@ -106,18 +106,6 @@ Options:
 To see help for other template languages (F#, VB), use --language option:
    dotnet new3 classlib -h --language F#";
 
-        private const string ConsoleAppHelp =
-@"Simple Console Application (C#)
-Author: Microsoft
-Description: A project for creating a command line application that uses the latest C# features and runs on .NET Core on Windows, Linux and macOS.
-Options:                                                                            
-  --langVersion  Sets the LangVersion property in the created project file          
-                 text - Optional                                                    
-
-  --no-restore   If specified, skips the automatic restore of the project on create.
-                 bool - Optional                                                    
-                 Default: false                                                     ";
-
         #endregion
         private readonly ITestOutputHelper _log;
 
@@ -176,16 +164,6 @@ Options:
                 .And.NotHaveStdErr()
                 .And.HaveStdOut(ClassLibHelp)
                 .And.NotHaveStdOutContaining(HelpOutput);
-
-            new DotnetNewCommand(_log, "app", "-h")
-                 .WithCustomHive(home)
-                 .WithWorkingDirectory(workingDirectory)
-                 .Execute()
-                 .Should()
-                 .ExitWith(0)
-                 .And.NotHaveStdErr()
-                 .And.HaveStdOut(ConsoleAppHelp)
-                 .And.NotHaveStdOutContaining(HelpOutput);
         }
 
         [Fact]
@@ -426,13 +404,12 @@ To see help for other template languages (C#, VB), use --language option:
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
 
-            new DotnetNewCommand(_log, "app", "--help", "--language", "C#")
+            new DotnetNewCommand(_log, "globaljson", "--help")
                     .WithCustomHive(home)
                     .WithWorkingDirectory(workingDirectory)
                     .Execute()
                     .Should().Pass()
                     .And.NotHaveStdErr()
-                    .And.HaveStdOut(ConsoleAppHelp)
                     .And.NotHaveStdOutContaining("To see help for other template languages");
         }
 
