@@ -1660,14 +1660,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                             ParentProjectPlatform="$(ParentPlatform)"
                             PlatformLookupTable="$(PlatformLookupTable);%(_ProjectReferencePlatformPossibilities.PlatformLookupTable)"
                             Condition="'@(_ProjectReferencePlatformPossibilities->Count())' != '0' and '%(_ProjectReferencePlatformPossibilities.PlatformOptions)' != ''">
-      <Output ItemName="ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
+      <Output ItemName="_ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
     </GetCompatiblePlatform>
 
     <!-- If GetCompatiblePlatform didn't run, @(ProjectsWithPlatformAssignment) will be empty.
          Don't do anything in this case. Ex: A project references many projects
          that can't multiplatform.  -->
-    <ItemGroup Condition="'@(ProjectsWithPlatformAssignment->Count())' != '0'">
-      <ProjectsWithNearestPlatform Include="@(ProjectsWithPlatformAssignment)"/>
+    <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment->Count())' != '0'">
+      <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
