@@ -15,8 +15,8 @@
     <!-- Instead of using the version of M.C.C defined in Version.props we pin to a minimum required
     version to avoid issues with loading newer versions of the assembly in VS/VS Code. -->
     <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="$(MicrosoftAspNetCoreRazorLanguageVersion)" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.0-2.21322.50" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.0-2.21322.50" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.0-2.21354.7" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.0-2.21354.7" />
     <PackageReference Include="Microsoft.CodeAnalysis.Razor" Version="$(MicrosoftCodeAnalysisRazorVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="$(MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion)" GeneratePathProperty="true" />
   </ItemGroup>
