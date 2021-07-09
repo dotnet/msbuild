@@ -205,6 +205,19 @@ namespace Microsoft.DotNet.Tools
             return false;
         }
 
+        public bool IsTargetingNetCoreVersionOrAbove(NuGetFramework framework)
+        {
+            foreach (var tfm in GetTargetFrameworks())
+            {
+                if (tfm.Framework.Equals(".NETCoreApp") && tfm.Version >= framework.Version)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private Project GetEvaluatedProject()
         {
             try

@@ -59,11 +59,6 @@ La valeur par défaut est de publier une application dépendante du framework.</
         <target state="translated">Configuration pour laquelle la publication est effectuée. La valeur par défaut pour la plupart des projets est 'Debug'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Les options '--self-contained' et '--no-self-contained' sont en conflit. Spécifiez uniquement l'une de ces options.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -59,11 +59,6 @@ Per impostazione predefinita, viene generato un pacchetto dipendente dal framewo
         <target state="translated">Configurazione per cui eseguire la pubblicazione. L'impostazione predefinita per la maggior parte dei progetti è 'Debug'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Le opzioni '--self-contained' e '--no-self-contained' sono in conflitto tra loro. Specificare una sola delle opzioni.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

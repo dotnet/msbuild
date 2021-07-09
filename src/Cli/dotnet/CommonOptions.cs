@@ -6,6 +6,11 @@ using Microsoft.DotNet.Tools;
 using System.CommandLine;
 using System.IO;
 using Microsoft.DotNet.Tools.Common;
+using System.Collections.Generic;
+using Microsoft.DotNet.Cli.Utils;
+using System.Linq;
+using Microsoft.Build.Evaluation;
+using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -111,6 +116,34 @@ namespace Microsoft.DotNet.Cli
                 verbosity.Equals(VerbosityOptions.diagnostic) ||
                 verbosity.Equals(VerbosityOptions.d) ||
                 verbosity.Equals(VerbosityOptions.detailed);
+        }
+
+        public static void ValidateSelfContainedOptions(bool hasSelfContainedOption, bool hasNoSelfContainedOption, bool hasRuntimeOption, IEnumerable<string> projectArgs)
+        {
+            if (hasSelfContainedOption && hasNoSelfContainedOption)
+            {
+                throw new GracefulException(CommonLocalizableStrings.SelfContainAndNoSelfContainedConflict);
+            }
+
+            if (!(hasSelfContainedOption || hasNoSelfContainedOption) && hasRuntimeOption)
+            {
+                projectArgs = projectArgs.Any() ? projectArgs : new string[] { Directory.GetCurrentDirectory() };
+                foreach (var project in projectArgs)
+                {
+                    try
+                    {
+                        var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), project, false);
+                        if (msbuildProj.IsTargetingNetCoreVersionOrAbove(NuGetFramework.Parse("net6.0")))
+                        {
+                            Reporter.Output.WriteLine(CommonLocalizableStrings.RuntimeOptionShouldBeUsedWithSelfContained.Yellow());
+                        }
+                    }
+                    catch
+                    {
+                        // Project file is not valid, continue and msbuild will error
+                    }
+                }
+            }
         }
     }
 

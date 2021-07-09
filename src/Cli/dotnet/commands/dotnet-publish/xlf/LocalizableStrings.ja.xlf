@@ -59,11 +59,6 @@ The default is to publish a framework-dependent application.</source>
         <target state="translated">公開する対象の構成。大部分のプロジェクトで、既定値は 'Debug' です。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">'--self-contained' と '--no-self-contained' オプションは競合しています。いずれかのオプションのみを指定してください。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

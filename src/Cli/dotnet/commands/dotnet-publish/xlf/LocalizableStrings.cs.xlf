@@ -59,11 +59,6 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
         <target state="translated">Konfigurace pro publikování. Výchozí možností pro většinu projektů je Debug.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Možnosti --self-contained a --no-self-contained jsou vzájemně konfliktní. Zadejte pouze jednu z nich.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

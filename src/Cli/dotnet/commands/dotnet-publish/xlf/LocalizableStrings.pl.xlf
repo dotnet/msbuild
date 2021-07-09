@@ -59,11 +59,6 @@ Domyślnie publikowana jest aplikacja zależna od struktury.</target>
         <target state="translated">Konfiguracja, dla której ma być wykonane publikowanie. W przypadku większości projektów ustawienie domyślne to „Debugowanie”.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Występuje konflikt między opcjami „--self-contained” i „--no-self-contained”. Określ tylko jedną z tych opcji.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

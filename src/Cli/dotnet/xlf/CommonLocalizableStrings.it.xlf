@@ -140,6 +140,16 @@ export PATH="$PATH:{0}"
         <target state="translated">Pacchetto</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionShouldBeUsedWithSelfContained">
+        <source>Warning: The '-r|--runtime' option should be used with '--self-contained' or '--no-self-contained'.</source>
+        <target state="new">Warning: The '-r|--runtime' option should be used with '--self-contained' or '--no-self-contained'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
+        <target state="new">The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>

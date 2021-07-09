@@ -59,11 +59,6 @@ Varsayılan durum, çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
         <target state="translated">Yayımlanacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">'--self-contained' ve '--no-self-contained' seçenekleri birbiriyle çakışır. Seçeneklerden yalnızca birini belirtin.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

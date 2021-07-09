@@ -59,11 +59,6 @@ O padrão é publicar uma aplicação dependente de framework.</target>
         <target state="translated">A configuração para a qual a publicação ocorrerá. O padrão para a maioria dos projetos é 'Debug'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">As opções '--self-contained' e '--no-self-contained' são conflitantes entre si. Especifique apenas uma das opções.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

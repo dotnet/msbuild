@@ -40,6 +40,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
 
+        public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
+
         public static Command GetCommand()
         {
             var command = new Command("publish", LocalizableStrings.AppDescription);
@@ -53,7 +55,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoSelfContainedOption);
             command.AddOption(NoLogoOption);
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
-            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(RuntimeOption);
             command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
             command.AddOption(CommonOptions.VersionSuffixOption());
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());

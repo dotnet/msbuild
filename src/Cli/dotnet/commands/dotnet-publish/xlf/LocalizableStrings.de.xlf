@@ -59,11 +59,6 @@ Standardmäßig wird eine Framework-abhängige Anwendung veröffentlicht.</targe
         <target state="translated">Die Konfiguration für die Veröffentlichung. Der Standardwert für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Die Optionen "--self-contained" und "--no-self-contained" stehen in Konflikt zueinander. Geben Sie nur eine der Optionen an.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

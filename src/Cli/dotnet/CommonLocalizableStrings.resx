@@ -681,4 +681,10 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="NoSelfContainedOptionDescription" xml:space="preserve">
     <value>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</value>
   </data>
+  <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
+    <value>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</value>
+  </data>
+  <data name="RuntimeOptionShouldBeUsedWithSelfContained" xml:space="preserve">
+    <value>Warning: The '-r|--runtime' option should be used with '--self-contained' or '--no-self-contained'.</value>
+  </data>
 </root>

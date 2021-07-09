@@ -59,11 +59,6 @@ El valor predeterminado es publicar una aplicación dependiente del marco.</targ
         <target state="translated">La configuración para la que se publica. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Las opciones "--self-contained" y "--no-self-contained" están en conflicto entre sí. Especifique solo una de ellas.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

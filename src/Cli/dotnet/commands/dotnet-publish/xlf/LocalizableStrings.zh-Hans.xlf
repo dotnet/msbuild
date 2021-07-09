@@ -59,11 +59,6 @@ The default is to publish a framework-dependent application.</source>
         <target state="translated">要发布的配置。大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">"--self-contained" 和 "--no-self-contained" 选项彼此冲突。请仅指定其中一个选项。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

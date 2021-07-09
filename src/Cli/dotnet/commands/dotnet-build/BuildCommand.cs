@@ -32,11 +32,10 @@ namespace Microsoft.DotNet.Tools.Build
 
             parseResult.ShowHelpOrErrorIfAppropriate();
 
-            if (parseResult.HasOption(BuildCommandParser.SelfContainedOption) &&
-                parseResult.HasOption(BuildCommandParser.NoSelfContainedOption))
-            {
-                throw new GracefulException(Publish.LocalizableStrings.SelfContainAndNoSelfContainedConflict);
-            }
+            CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(BuildCommandParser.SelfContainedOption),
+                parseResult.HasOption(BuildCommandParser.NoSelfContainedOption),
+                parseResult.HasOption(BuildCommandParser.RuntimeOption),
+                parseResult.ValueForArgument<IEnumerable<string>>(BuildCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
 
             msbuildArgs.Add($"-consoleloggerparameters:Summary");
 

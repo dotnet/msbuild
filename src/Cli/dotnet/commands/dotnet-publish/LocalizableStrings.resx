@@ -151,7 +151,4 @@ The default is to publish a framework-dependent application.</value>
   <data name="CmdNoLogo" xml:space="preserve">
     <value>Do not display the startup banner or the copyright message.</value>
   </data>
-  <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
-    <value>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</value>
-  </data>
 </root>
