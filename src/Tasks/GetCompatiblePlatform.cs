@@ -42,6 +42,12 @@ namespace Microsoft.Build.Tasks
             {
                 AssignedProjectsWithPlatform[i] = new TaskItem(AnnotatedProjects[i]);
 
+                if (string.IsNullOrEmpty(AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions")))
+                {
+                    Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", AssignedProjectsWithPlatform[i].ItemSpec);
+                    continue;
+                }
+
                 HashSet<string> childPlatforms = new HashSet<string>();
                 foreach (string s in AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions").Split(';'))
                 {
@@ -58,7 +64,7 @@ namespace Microsoft.Build.Tasks
                           childPlatforms.Contains(translationTable[ParentProjectPlatform]))
                 {
                     buildChildProjectAs = translationTable[ParentProjectPlatform];
-                    Log.LogMessage($"Found {ParentProjectPlatform}={buildChildProjectAs} in the given translation table.");
+                    Log.LogMessage($"Found '{ParentProjectPlatform}={buildChildProjectAs}' in the given translation table.");
                 }
                 // AnyCPU if possible
                 else if (childPlatforms.Contains("AnyCPU"))
@@ -80,7 +86,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildChildProjectAs);
-                Log.LogMessage($"Project {AssignedProjectsWithPlatform[i].GetMetadata("Identity")} would be built as: {buildChildProjectAs}");
+                Log.LogMessage($"Project '{AssignedProjectsWithPlatform[i].ItemSpec}' will build with Platform: '{buildChildProjectAs}'");
             }
 
             return true;

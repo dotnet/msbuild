@@ -2901,7 +2901,10 @@
     <value>MSB3981: Could not determine what '{0}' should be built as. The project will be built normally.</value>
     <comment>{StrBegin="MSB3981: "}</comment>
   </data>
-  <!-- MSB3982 in Microsoft.Common.CurrentVersion.targets -->
+  <data name="GetCompatiblePlatform.NoPlatformsListed">
+    <value>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' metadata set. It will be built without a specified platform.</value>
+    <comment>{StrBegin="MSB3982: "}</comment>
+  </data>
 
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
