@@ -47,7 +47,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
-        <IsVcxOrNativeProj Condition="'%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <!-- This target does not run for cpp projects. -->
+        <IsVcxOrNativeProj>false</IsVcxOrNativeProj>
         <PlatformOptions>$(Platforms)</PlatformOptions>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
