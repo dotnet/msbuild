@@ -31,5 +31,6 @@ The opt-out comes in the form of setting the environment variable `MSBuildDisabl
 ### 17.0
 - [Scheduler should honor BuildParameters.DisableInprocNode](https://github.com/dotnet/msbuild/pull/6400)
 - [Don't compile globbing regexes on .NET Framework](https://github.com/dotnet/msbuild/pull/6632)
+- [Default to transitively copying content items](https://github.com/dotnet/msbuild/pull/6622)
 
 ## Change Waves No Longer In Rotation
