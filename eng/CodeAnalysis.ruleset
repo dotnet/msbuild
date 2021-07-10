@@ -8,7 +8,6 @@
       <Rule Id="BCL0015" Action="None" />            <!-- Invalid P/Invoke call --> 
       <Rule Id="BCL0020" Action="Warning" />         <!-- Invalid SR.Format call --> 
    </Rules> 
-   CommentEnd 
    <Rules AnalyzerId="Microsoft.CodeAnalysis.NetAnalyzers" RuleNamespace="Microsoft.CodeAnalysis.NetAnalyzers"> 
       <Rule Id="CA1000" Action="None" />             <!-- Do not declare static members on generic types --> 
       <Rule Id="CA1001" Action="None" />             <!-- Types that own disposable fields should be disposable --> 
@@ -28,7 +27,9 @@
       <Rule Id="CA1028" Action="None" />             <!-- Enum Storage should be Int32 --> 
       <Rule Id="CA1030" Action="None" />             <!-- Use events where appropriate --> 
       <Rule Id="CA1031" Action="None" />             <!-- Do not catch general exception types --> 
+	  <Rule Id="CA1032" Action="Info" />
       <Rule Id="CA1033" Action="None" />             <!-- Interface methods should be callable by child types --> 
+	  <Rule Id="CA1034" Action="Info" />
       <Rule Id="CA1036" Action="None" />             <!-- Override methods on comparable types --> 
       <Rule Id="CA1040" Action="None" />             <!-- Avoid empty interfaces --> 
       <Rule Id="CA1041" Action="None" />             <!-- Provide ObsoleteAttribute message --> 
@@ -53,7 +54,7 @@
       <Rule Id="CA1068" Action="None" />             <!-- CancellationToken parameters must come last --> 
       <Rule Id="CA1069" Action="None" />             <!-- Enums values should not be duplicated --> 
       <Rule Id="CA1070" Action="Info" />             <!-- Do not declare event fields as virtual --> 
-      <Rule Id="CA1200" Action="Warning" />          <!-- Avoid using cref tags with a prefix --> 
+      <Rule Id="CA1200" Action="Info" />             <!-- Avoid using cref tags with a prefix --> 
       <Rule Id="CA1303" Action="None" />             <!-- Do not pass literals as localized parameters --> 
       <Rule Id="CA1304" Action="None" />             <!-- Specify CultureInfo --> 
       <Rule Id="CA1305" Action="None" />             <!-- Specify IFormatProvider --> 
@@ -65,28 +66,35 @@
       <Rule Id="CA1502" Action="None" />             <!-- Avoid excessive complexity --> 
       <Rule Id="CA1505" Action="None" />             <!-- Avoid unmaintainable code --> 
       <Rule Id="CA1506" Action="None" />             <!-- Avoid excessive class coupling --> 
-      <Rule Id="CA1507" Action="Warning" />          <!-- Use nameof to express symbol names --> 
+      <Rule Id="CA1507" Action="Info" />             <!-- Use nameof to express symbol names --> 
       <Rule Id="CA1508" Action="None" />             <!-- Avoid dead conditional code --> 
       <Rule Id="CA1509" Action="None" />             <!-- Invalid entry in code metrics rule specification file --> 
       <Rule Id="CA1700" Action="None" />             <!-- Do not name enum values 'Reserved' --> 
+	  <Rule Id="CA1707" Action="Info" />
       <Rule Id="CA1710" Action="None" />             <!-- Identifiers should have correct suffix --> 
       <Rule Id="CA1711" Action="None" />             <!-- Identifiers should not have incorrect suffix --> 
       <Rule Id="CA1712" Action="None" />             <!-- Do not prefix enum values with type name --> 
+	  <Rule Id="CA1714" Action="Info" />
       <Rule Id="CA1715" Action="None" />             <!-- Identifiers should have correct prefix --> 
       <Rule Id="CA1716" Action="None" />             <!-- Identifiers should not match keywords --> 
+	  <Rule Id="CA1717" Action="Info" />
       <Rule Id="CA1720" Action="None" />             <!-- Identifier contains type name --> 
       <Rule Id="CA1721" Action="None" />             <!-- Property names should not match get methods --> 
       <Rule Id="CA1724" Action="None" />             <!-- Type names should not match namespaces --> 
       <Rule Id="CA1801" Action="None" />             <!-- Review unused parameters --> 
-      <Rule Id="CA1802" Action="Warning" />          <!-- Use literals where appropriate --> 
-      <Rule Id="CA1805" Action="Warning" />          <!-- Do not initialize unnecessarily --> 
+      <Rule Id="CA1802" Action="Info" />             <!-- Use literals where appropriate --> 
+      <Rule Id="CA1805" Action="Info" />             <!-- Do not initialize unnecessarily --> 
+	  <Rule Id="CA1806" Action="Info" />
       <Rule Id="CA1810" Action="Warning" />          <!-- Initialize reference type static fields inline --> 
       <Rule Id="CA1812" Action="None" />             <!-- Avoid uninstantiated internal classes --> 
+	  <Rule Id="CA1814" Action="Info" />
+	  <Rule Id="CA1815" Action="Info" />
       <Rule Id="CA1816" Action="None" />             <!-- Dispose methods should call SuppressFinalize --> 
+	  <Rule Id="CA1819" Action="Info" />
       <Rule Id="CA1820" Action="None" />             <!-- Test for empty strings using string length --> 
       <Rule Id="CA1821" Action="Warning" />          <!-- Remove empty Finalizers --> 
       <Rule Id="CA1822" Action="None" />             <!-- Mark members as static --> 
-      <Rule Id="CA1823" Action="Warning" />          <!-- Avoid unused private fields --> 
+      <Rule Id="CA1823" Action="Info" />             <!-- Avoid unused private fields --> 
       <Rule Id="CA1824" Action="Warning" />          <!-- Mark assemblies with NeutralResourcesLanguageAttribute -->
       <Rule Id="CA1825" Action="Warning" />          <!-- Avoid zero-length array allocations. --> 
       <Rule Id="CA1827" Action="Warning" />          <!-- Do not use Count() or LongCount() when Any() can be used --> 
@@ -103,7 +111,7 @@
       <Rule Id="CA1838" Action="Warning" />          <!-- Avoid 'StringBuilder' parameters for P/Invokes --> 
       <Rule Id="CA2000" Action="None" />             <!-- Dispose objects before losing scope --> 
       <Rule Id="CA2002" Action="None" />             <!-- Do not lock on objects with weak identity --> 
-      <Rule Id="CA2007" Action="Warning" />          <!-- Consider calling ConfigureAwait on the awaited task --> 
+      <Rule Id="CA2007" Action="Info" />             <!-- Consider calling ConfigureAwait on the awaited task --> 
       <Rule Id="CA2008" Action="Warning" />          <!-- Do not create tasks without passing a TaskScheduler --> 
       <Rule Id="CA2009" Action="Warning" />          <!-- Do not call ToImmutableCollection on an ImmutableCollection value --> 
       <Rule Id="CA2011" Action="Warning" />          <!-- Avoid infinite recursion --> 
@@ -123,6 +131,7 @@
       <Rule Id="CA2213" Action="None" />             <!-- Disposable fields should be disposed --> 
       <Rule Id="CA2215" Action="None" />             <!-- Dispose methods should call base class dispose --> 
       <Rule Id="CA2216" Action="None" />             <!-- Disposable types should declare finalizer --> 
+	  <Rule Id="CA2219" Action="None" />
       <Rule Id="CA2224" Action="None" />             <!-- Override Equals on overloading operator equals --> 
       <Rule Id="CA2225" Action="None" />             <!-- Operator overloads have named alternates --> 
       <Rule Id="CA2226" Action="None" />             <!-- Operators should have symmetrical overloads --> 
@@ -315,7 +324,7 @@
     <Rule Id="SA1401" Action="Info" /> <!-- Fields should be private --> 
     <Rule Id="SA1402" Action="Info" /> <!-- File may only contain a single type --> 
     <Rule Id="SA1403" Action="Info" /> <!-- File may only contain a single namespace --> 
-    <Rule Id="SA1404" Action="Warning" /> <!-- Code analysis suppression should have justification --> 
+    <Rule Id="SA1404" Action="Info" /> <!-- Code analysis suppression should have justification --> 
     <Rule Id="SA1405" Action="Info" /> <!-- Debug.Assert should provide message text --> 
     <Rule Id="SA1407" Action="Info" /> <!-- Arithmetic expressions should declare precedence --> 
     <Rule Id="SA1408" Action="Info" /> <!-- Conditional expressions should declare precedence --> 
@@ -355,12 +364,13 @@
     <Rule Id="SA1614" Action="Info" /> <!-- Element parameter documentation should have text --> 
     <Rule Id="SA1615" Action="None" />
     <Rule Id="SA1616" Action="Info" /> <!-- Element return value documentation should have text --> 
-    <Rule Id="SA1618" Action="Info" /> <!-- The documentation for type parameter is missing --> 
     <Rule Id="SA1617" Action="None" />
+	<Rule Id="SA1618" Action="Info" /> <!-- The documentation for type parameter is missing --> 
     <Rule Id="SA1619" Action="Info" /> <!-- The documentation for type parameter is missing --> 
     <Rule Id="SA1622" Action="Info" /> <!-- Generic type parameter documentation should have text --> 
     <Rule Id="SA1623" Action="Info" /> <!-- Property documentation text --> 
     <Rule Id="SA1624" Action="Info" /> <!-- Because the property only contains a visible get accessor, the documentation summary text should begin with 'Gets' --> 
+	<Rule Id="SA1625" Action="Info" />
     <Rule Id="SA1626" Action="Info" /> <!-- Single-line comments should not use documentation style slashes --> 
     <Rule Id="SA1627" Action="Info" /> <!-- The documentation text within the \'exception\' tag should not be empty --> 
     <Rule Id="SA1629" Action="Info" /> <!-- Documentation text should end with a period --> 
