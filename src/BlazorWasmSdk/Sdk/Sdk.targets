@@ -21,4 +21,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <Import Project="$(_BlazorWebAssemblyTargetsFile)" />
+
 </Project>
