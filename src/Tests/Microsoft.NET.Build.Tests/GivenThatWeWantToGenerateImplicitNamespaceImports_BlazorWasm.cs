@@ -90,6 +90,7 @@ global using global::System.Threading.Tasks;
                 TargetFrameworks = tfm,
                 ProjectSdk = "Microsoft.NET.Sdk.BlazorWebAssembly"
             };
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.AspNetCore.Components.WebAssembly", "5.0.0"));
             testProject.SourceFiles["Program.cs"] = @"
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
