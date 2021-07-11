@@ -32,7 +32,6 @@ namespace Microsoft.NET.Build.Tests
 
             var outputDirectory = buildCommand.GetIntermediateDirectory(tfm);
 
-
             outputDirectory.Should().HaveFile(importFileName);
 
             File.ReadAllText(Path.Combine(outputDirectory.FullName, importFileName)).Should().Be(
