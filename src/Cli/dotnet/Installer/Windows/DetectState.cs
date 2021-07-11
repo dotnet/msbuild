@@ -3,6 +3,10 @@
 
 namespace Microsoft.DotNet.Installer.Windows
 {
+    /// <summary>
+    /// The state associated with a Windows Installer package after
+    /// attempting to detect it.
+    /// </summary>
     internal enum DetectState
     {
         /// <summary>
@@ -10,7 +14,7 @@ namespace Microsoft.DotNet.Installer.Windows
         /// </summary>
         Unknown = 0,
         /// <summary>
-        /// The package is already installed
+        /// The package is already installed.
         /// </summary>
         Present = 1,
         /// <summary>

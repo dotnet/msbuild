@@ -359,7 +359,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public void Shutdown()
         {
-            
+            // Perform any additional cleanup here that's intended to run at the end of the command, regardless
+            // of success or failure. For file based installs, there shouldn't be any additional work to 
+            // perform.
         }
 
         private bool HasFeatureBandMarkerFile(string packIdDir, SdkFeatureBand featureBand)
