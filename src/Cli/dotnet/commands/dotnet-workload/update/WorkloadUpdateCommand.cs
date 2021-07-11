@@ -30,6 +30,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private readonly string _fromCacheOption;
         private readonly string _downloadToCacheOption;
         private readonly bool _adManifestOnlyOption;
+        private readonly bool _printRollbackDefinitionOnly;
+        private readonly string _fromRollbackDefinition;
         private readonly PackageSourceLocation _packageSourceLocation;
         private readonly IReporter _reporter;
         private readonly bool _includePreviews;
@@ -72,6 +74,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
                 parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.TempDirOption));
+            _printRollbackDefinitionOnly = parseResult.ValueForOption<bool>(WorkloadUpdateCommandParser.PrintRollbackOption);
+            _fromRollbackDefinition = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.FromRollbackFileOption);
 
             var configOption = parseResult.ValueForOption<string>(WorkloadUpdateCommandParser.ConfigOption);
             var sourceOption = parseResult.ValueForOption<string[]>(WorkloadUpdateCommandParser.SourceOption);
@@ -121,6 +125,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 _reporter.WriteLine();
                 _reporter.WriteLine(LocalizableStrings.WorkloadUpdateAdManifestsSucceeded);
             }
+            else if (_printRollbackDefinitionOnly)
+            {
+                var manifests = _workloadResolver.GetInstalledManifests();
+
+                _reporter.WriteLine("==workloadRollbackDefinitionJsonOutputStart==");
+                _reporter.WriteLine(JsonSerializer.Serialize(manifests));
+                _reporter.WriteLine("==workloadRollbackDefinitionJsonOutputEnd==");
+            }
             else
             {
                 try
@@ -145,8 +157,10 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
             var workloadIds = GetUpdatableWorkloads();
             _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
-            var manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates()
-                .Select(m => (m.manifestId, m.existingVersion, m.newVersion));
+            
+            var manifestsToUpdate = string.IsNullOrWhiteSpace(_fromRollbackDefinition) ?
+                _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion)) :
+                _workloadManifestUpdater.CalculateManifestRollbacks(_fromRollbackDefinition);
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 

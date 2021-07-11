@@ -286,6 +286,17 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             manifestUpdater.UpdateAdvertisingManifestsCallCount.Should().Be(1);
         }
 
+        [Fact]
+        public void GivenPrintRollbackDefinitionItIncludesAllInstalledManifests()
+        {
+            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--print-rollback" });
+            (_, var updateCommand, _, _, _, _) = GetTestInstallers(parseResult);
+
+            updateCommand.Execute();
+            _reporter.Lines.Count().Should().Be(3);
+            string.Join("", _reporter.Lines).Should().Contain("Sample.json");
+        }
+
         internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
             ParseResult parseResult,
             [CallerMemberName] string testName = "",

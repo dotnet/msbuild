@@ -473,5 +473,19 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 return manifest.Version;
             }
         }
+
+        public IDictionary<string, string> GetInstalledManifests()
+        {
+            var manifests = new Dictionary<string, string>();
+            foreach ((string manifestId, Stream manifestStream) in _manifestProvider.GetManifests())
+            {
+                using (manifestStream)
+                {
+                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
+                    manifests.Add(manifestId, manifest.Version);
+                }
+            }
+            return manifests;
+        }
     }
 }

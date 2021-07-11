@@ -17,6 +17,11 @@
         <target state="new">Include workloads installed with previous SDK versions in update.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FromRollbackDefinitionOptionDescription">
+        <source>Update workloads based on specified rollback definition file.</source>
+        <target state="new">Update workloads based on specified rollback definition file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoWorkloadsToUpdate">
         <source>No workloads installed for this feature band. To update from the previous SDK, include the --from-previous-sdk option.</source>
         <target state="new">No workloads installed for this feature band. To update from the previous SDK, include the --from-previous-sdk option.</target>

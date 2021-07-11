@@ -137,6 +137,16 @@
         <target state="new">Installation roll back failed: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
+        <source>Invalid rollback definition. Manifest IDs in rollback definition {0} do not match installed manifest IDs.</source>
+        <target state="new">Invalid rollback definition. Manifest IDs in rollback definition {0} do not match installed manifest IDs.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RollbackDefinitionFileDoesNotExist">
+        <source>Provided rollback definition file {0} does not exist.</source>
+        <target state="new">Provided rollback definition file {0} does not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RollingBackInstall">
         <source>Workload installation failed, rolling back installed packs...</source>
         <target state="new">Workload installation failed, rolling back installed packs...</target>

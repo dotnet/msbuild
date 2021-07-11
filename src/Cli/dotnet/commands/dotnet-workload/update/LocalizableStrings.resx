@@ -150,4 +150,7 @@
   <data name="AdManifestOnlyOptionDescription" xml:space="preserve">
     <value>Only update advertising manifests.</value>
   </data>
+  <data name="FromRollbackDefinitionOptionDescription" xml:space="preserve">
+    <value>Update workloads based on specified rollback definition file.</value>
+  </data>
 </root>

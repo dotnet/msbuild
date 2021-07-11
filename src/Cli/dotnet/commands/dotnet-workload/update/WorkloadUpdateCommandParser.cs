@@ -32,6 +32,16 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option AdManifestOnlyOption = new Option<bool>("--advertising-manifests-only", LocalizableStrings.AdManifestOnlyOptionDescription);
 
+        public static readonly Option PrintRollbackOption = new Option<bool>("--print-rollback")
+        {
+            IsHidden = true
+        };
+
+        public static readonly Option FromRollbackFileOption = new Option<string>("--from-rollback-file", LocalizableStrings.FromRollbackDefinitionOptionDescription)
+        {
+            IsHidden = true
+        };
+
         public static Command GetCommand()
         {
             Command command = new("update", LocalizableStrings.CommandDescription);
@@ -48,6 +58,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(AdManifestOnlyOption);
             command.AddWorkloadCommandNuGetRestoreActionConfigOptions();
             command.AddOption(VerbosityOption);
+            command.AddOption(PrintRollbackOption);
+            command.AddOption(FromRollbackFileOption);
 
             return command;
         }
