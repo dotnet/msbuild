@@ -14,7 +14,6 @@ namespace Microsoft.NET.Build.Tests
 {
     public class GivenThatWeWantToGenerateImplicitNamespaceImports_BlazorWasm : SdkTest
     {
-
         public GivenThatWeWantToGenerateImplicitNamespaceImports_BlazorWasm(ITestOutputHelper log) : base(log) { }
 
         [RequiresMSBuildVersionFact("17.0.0.32901")]
