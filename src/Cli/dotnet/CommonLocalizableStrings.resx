@@ -678,13 +678,13 @@ setx PATH "%PATH%;{0}"
     <value>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</value>
   </data>
-  <data name="NoSelfContainedOptionDescription" xml:space="preserve">
-    <value>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</value>
+  <data name="FrameworkDependentOptionDescription" xml:space="preserve">
+    <value>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</value>
   </data>
   <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
     <value>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</value>
   </data>
-  <data name="RuntimeOptionShouldBeUsedWithSelfContained" xml:space="preserve">
-    <value>Warning: The '-r|--runtime' option should be used with '--self-contained' or '--no-self-contained'.</value>
+  <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
+    <value>Warning: The  '--self-contained' or '--no-self-contained' option should be used with '-r|--runtime'.</value>
   </data>
 </root>

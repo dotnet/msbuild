@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Cli
         public static Option NoSelfContainedOption() =>
             new ForwardedOption<bool>(
                 "--no-self-contained",
-                CommonLocalizableStrings.NoSelfContainedOptionDescription)
+                CommonLocalizableStrings.FrameworkDependentOptionDescription)
             .ForwardAs("-property:SelfContained=false");
 
         public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Cli
                         var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), project, false);
                         if (msbuildProj.IsTargetingNetCoreVersionOrAbove(NuGetFramework.Parse("net6.0")))
                         {
-                            Reporter.Output.WriteLine(CommonLocalizableStrings.RuntimeOptionShouldBeUsedWithSelfContained.Yellow());
+                            Reporter.Output.WriteLine(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime.Yellow());
                         }
                     }
                     catch

@@ -75,14 +75,14 @@ export PATH="$PATH:{0}"
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FrameworkDependentOptionDescription">
+        <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
+        <target state="new">Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="new">Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -140,11 +140,6 @@ export PATH="$PATH:{0}"
         <target state="translated">패키지</target>
         <note />
       </trans-unit>
-      <trans-unit id="RuntimeOptionShouldBeUsedWithSelfContained">
-        <source>Warning: The '-r|--runtime' option should be used with '--self-contained' or '--no-self-contained'.</source>
-        <target state="new">Warning: The '-r|--runtime' option should be used with '--self-contained' or '--no-self-contained'.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
         <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
         <target state="new">The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</target>
@@ -155,6 +150,11 @@ export PATH="$PATH:{0}"
 The default is 'true' if a runtime identifier is specified.</source>
         <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
+        <source>Warning: The  '--self-contained' or '--no-self-contained' option should be used with '-r|--runtime'.</source>
+        <target state="new">Warning: The  '--self-contained' or '--no-self-contained' option should be used with '-r|--runtime'.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">

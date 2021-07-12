@@ -188,7 +188,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .HaveStdOutContaining(CommonLocalizableStrings.RuntimeOptionShouldBeUsedWithSelfContained);
+               .HaveStdOutContaining(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime);
         }
 
         [Fact]
@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .NotHaveStdOutContaining(CommonLocalizableStrings.RuntimeOptionShouldBeUsedWithSelfContained);
+               .NotHaveStdOutContaining(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime);
         }
 
         [Fact]
@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .NotHaveStdOutContaining(CommonLocalizableStrings.RuntimeOptionShouldBeUsedWithSelfContained);
+               .NotHaveStdOutContaining(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime);
         }
     }
 }
