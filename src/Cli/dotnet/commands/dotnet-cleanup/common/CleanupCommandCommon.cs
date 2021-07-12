@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli.Cleanup
                 dotnetFormatArgs.Add("--include-generated");
             }
 
-            if (parseResult.HasOption(IncludeGeneratedOption) &&
+            if (parseResult.HasOption(VerbosityOption) &&
                 parseResult.ValueForOption(VerbosityOption) is string { Length: > 0 } verbosity)
             {
                 dotnetFormatArgs.Add("--verbosity");

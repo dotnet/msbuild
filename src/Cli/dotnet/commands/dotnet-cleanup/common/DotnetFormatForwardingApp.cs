@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -25,6 +26,9 @@ namespace Microsoft.DotNet.Cli
                   depsFile: GetDepsFilePath(),
                   runtimeConfig: GetRuntimeConfigPath())
         {
+            Arugments = argsToForward.ToArray();
         }
+
+        public string[] Arugments { get; }
     }
 }
