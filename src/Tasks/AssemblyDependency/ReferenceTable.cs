@@ -410,7 +410,7 @@ namespace Microsoft.Build.Tasks
             if (reference.FullPath.Length > 0 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
             {
                 // Saves effort and makes deduplication possible downstream
-                reference.FullPath = FileUtilities.NormalizePath(reference.FullPath);
+                reference.NormalizeFullPath();
             }
 
             References[assemblyName] = reference;

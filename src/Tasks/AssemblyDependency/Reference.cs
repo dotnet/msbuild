@@ -513,6 +513,11 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        internal void NormalizeFullPath()
+        {
+            _fullPath = FileUtilities.NormalizePath(_fullPath);
+        }
+
         /// <summary>
         /// The directory that this assembly lives in.
         /// </summary>
