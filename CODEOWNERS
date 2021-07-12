@@ -28,7 +28,8 @@
 /src/src/Assets/TestProjects/Razor*/ @captainsafia, @pranavkm, @mkArtakMSFT
 
 # Area-Cleanup
-/src/Cli/dotnet/commands/dotnet-cleanup @jmarolf @JoeRobich
+/src/Cli/dotnet/commands/dotnet-cleanup @jmarolf, @JoeRobich
+/src/Tests/dotnet-cleanup.Tests @jmarolf, @JoeRobich
 
 # Area-NuGet
 /src/Cli/dotnet/commands/dotnet-add/dotnet-add-package @dotnet/nuget-team
