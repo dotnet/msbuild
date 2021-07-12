@@ -118,5 +118,21 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
                 }
             }
         }
+
+        [Fact]
+        public void GivenSearchResultsAreOrdered()
+        {
+            _reporter.Clear();
+            var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search");
+            var workloadResolver = new MockWorkloadResolver(_avaliableWorkloads);
+            var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
+            command.Execute();
+
+            _reporter.Lines[3].Should().Contain("fake-workload-1");
+            _reporter.Lines[4].Should().Contain("fake-workload-2");
+            _reporter.Lines[5].Should().Contain("mock-workload-1");
+            _reporter.Lines[6].Should().Contain("mock-workload-2");
+            _reporter.Lines[7].Should().Contain("mock-workload-3");
+        }
     }
 }
