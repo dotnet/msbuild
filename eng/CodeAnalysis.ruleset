@@ -27,9 +27,9 @@
       <Rule Id="CA1028" Action="None" />             <!-- Enum Storage should be Int32 --> 
       <Rule Id="CA1030" Action="None" />             <!-- Use events where appropriate --> 
       <Rule Id="CA1031" Action="None" />             <!-- Do not catch general exception types --> 
-	  <Rule Id="CA1032" Action="Info" />
+      <Rule Id="CA1032" Action="None" />
       <Rule Id="CA1033" Action="None" />             <!-- Interface methods should be callable by child types --> 
-	  <Rule Id="CA1034" Action="Info" />
+      <Rule Id="CA1034" Action="None" />
       <Rule Id="CA1036" Action="None" />             <!-- Override methods on comparable types --> 
       <Rule Id="CA1040" Action="None" />             <!-- Avoid empty interfaces --> 
       <Rule Id="CA1041" Action="None" />             <!-- Provide ObsoleteAttribute message --> 
@@ -70,27 +70,27 @@
       <Rule Id="CA1508" Action="None" />             <!-- Avoid dead conditional code --> 
       <Rule Id="CA1509" Action="None" />             <!-- Invalid entry in code metrics rule specification file --> 
       <Rule Id="CA1700" Action="None" />             <!-- Do not name enum values 'Reserved' --> 
-	  <Rule Id="CA1707" Action="Info" />
+      <Rule Id="CA1707" Action="None" />
       <Rule Id="CA1710" Action="None" />             <!-- Identifiers should have correct suffix --> 
       <Rule Id="CA1711" Action="None" />             <!-- Identifiers should not have incorrect suffix --> 
       <Rule Id="CA1712" Action="None" />             <!-- Do not prefix enum values with type name --> 
-	  <Rule Id="CA1714" Action="Info" />
+      <Rule Id="CA1714" Action="None" />
       <Rule Id="CA1715" Action="None" />             <!-- Identifiers should have correct prefix --> 
       <Rule Id="CA1716" Action="None" />             <!-- Identifiers should not match keywords --> 
-	  <Rule Id="CA1717" Action="Info" />
+      <Rule Id="CA1717" Action="None" />
       <Rule Id="CA1720" Action="None" />             <!-- Identifier contains type name --> 
       <Rule Id="CA1721" Action="None" />             <!-- Property names should not match get methods --> 
       <Rule Id="CA1724" Action="None" />             <!-- Type names should not match namespaces --> 
       <Rule Id="CA1801" Action="None" />             <!-- Review unused parameters --> 
       <Rule Id="CA1802" Action="Info" />             <!-- Use literals where appropriate --> 
       <Rule Id="CA1805" Action="Info" />             <!-- Do not initialize unnecessarily --> 
-	  <Rule Id="CA1806" Action="Info" />
+      <Rule Id="CA1806" Action="None" />
       <Rule Id="CA1810" Action="Info" />             <!-- Initialize reference type static fields inline --> 
       <Rule Id="CA1812" Action="None" />             <!-- Avoid uninstantiated internal classes --> 
-	  <Rule Id="CA1814" Action="Info" />
-	  <Rule Id="CA1815" Action="Info" />
+      <Rule Id="CA1814" Action="None" />
+      <Rule Id="CA1815" Action="None" />
       <Rule Id="CA1816" Action="None" />             <!-- Dispose methods should call SuppressFinalize --> 
-	  <Rule Id="CA1819" Action="Info" />
+      <Rule Id="CA1819" Action="None" />
       <Rule Id="CA1820" Action="None" />             <!-- Test for empty strings using string length --> 
       <Rule Id="CA1821" Action="Warning" />          <!-- Remove empty Finalizers --> 
       <Rule Id="CA1822" Action="None" />             <!-- Mark members as static --> 
@@ -131,7 +131,7 @@
       <Rule Id="CA2213" Action="None" />             <!-- Disposable fields should be disposed --> 
       <Rule Id="CA2215" Action="None" />             <!-- Dispose methods should call base class dispose --> 
       <Rule Id="CA2216" Action="None" />             <!-- Disposable types should declare finalizer --> 
-	  <Rule Id="CA2219" Action="None" />
+      <Rule Id="CA2219" Action="None" />
       <Rule Id="CA2224" Action="None" />             <!-- Override Equals on overloading operator equals --> 
       <Rule Id="CA2225" Action="None" />             <!-- Operator overloads have named alternates --> 
       <Rule Id="CA2226" Action="None" />             <!-- Operators should have symmetrical overloads --> 
@@ -365,12 +365,12 @@
     <Rule Id="SA1615" Action="None" />
     <Rule Id="SA1616" Action="Info" /> <!-- Element return value documentation should have text --> 
     <Rule Id="SA1617" Action="None" />
-	<Rule Id="SA1618" Action="Info" /> <!-- The documentation for type parameter is missing --> 
+      <Rule Id="SA1618" Action="Info" /> <!-- The documentation for type parameter is missing --> 
     <Rule Id="SA1619" Action="Info" /> <!-- The documentation for type parameter is missing --> 
     <Rule Id="SA1622" Action="Info" /> <!-- Generic type parameter documentation should have text --> 
     <Rule Id="SA1623" Action="Info" /> <!-- Property documentation text --> 
     <Rule Id="SA1624" Action="Info" /> <!-- Because the property only contains a visible get accessor, the documentation summary text should begin with 'Gets' --> 
-	<Rule Id="SA1625" Action="Info" />
+      <Rule Id="SA1625" Action="None" />
     <Rule Id="SA1626" Action="Info" /> <!-- Single-line comments should not use documentation style slashes --> 
     <Rule Id="SA1627" Action="Info" /> <!-- The documentation text within the \'exception\' tag should not be empty --> 
     <Rule Id="SA1629" Action="Info" /> <!-- Documentation text should end with a period --> 
