@@ -65,6 +65,14 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Delegates the Dispose call the to the underlying BinaryReader.
+            /// </summary>
+            public void Dispose()
+            {
+                _reader.Close();
+            }
+
+            /// <summary>
             /// Gets the reader, if any.
             /// </summary>
             public BinaryReader Reader
@@ -714,6 +722,14 @@ namespace Microsoft.Build.BackEnd
             {
                 _packetStream = packetStream;
                 _writer = new BinaryWriter(packetStream);
+            }
+
+            /// <summary>
+            /// Delegates the Dispose call the to the underlying BinaryWriter.
+            /// </summary>
+            public void Dispose()
+            {
+                _writer.Close();
             }
 
             /// <summary>

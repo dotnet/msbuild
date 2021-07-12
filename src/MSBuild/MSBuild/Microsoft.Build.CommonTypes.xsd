@@ -1680,9 +1680,19 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="OutputType" _locComment="" -->Type of output to generate (WinExe, Exe, or Library)</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:element name="PackageOutputPath" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackageOutputPath" -->Path to the output folder for the package generated when calling Pack.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="PackageTargetFallback" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_text="PackageTargetFallback" _locComment="" -->Allows packages using alternative monikers to be referenced in this project, which include older (e.g. dnxcore50, dotnet5.x) and Portable Class Library names.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PackAsTool" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PackAsTool" _locComment="" -->Indicate whether the NuGet package should be configured as a .NET tool suitable for use with "dotnet tool install".</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="AssetTargetFallback" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -1829,6 +1839,11 @@ elementFormDefault="qualified">
     <xs:element name="TargetPlatformVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetPlatformMinVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetZone" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="ToolCommandName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="ToolCommandName" -->Specifies the command that will invoke the tool after it's installed.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="TreatWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TrustUrlParameters" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
