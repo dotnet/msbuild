@@ -36,7 +36,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     throw new InvalidOperationException(LocalizableStrings.OSDoesNotSupportMsi);
                 }
 
-                return new NetSdkMsiInstaller();
+                return NetSdkMsiInstallerClient.Create(sdkFeatureBand, workloadResolver,
+                    nugetPackageDownloader, verbosity, packageSourceLocation, reporter);
             }
 
             if (elevationRequired && !CanWriteToDotnetRoot(dotnetDir))

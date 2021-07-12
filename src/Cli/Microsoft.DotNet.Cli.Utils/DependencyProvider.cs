@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -24,7 +25,9 @@ namespace Microsoft.DotNet.Cli.Utils
     /// dependent entry. If there are no other dependents, it can proceed to remove the MSI, otherwise it should do nothing.
     /// </para>
     /// </summary>
-#pragma warning disable CA1416
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public sealed class DependencyProvider
     {
         /// <summary>
@@ -50,7 +53,8 @@ namespace Microsoft.DotNet.Cli.Utils
         public readonly RegistryKey BaseKey;
 
         /// <summary>
-        /// Gets all dependents associated with the provider key.
+        /// Gets all dependents associated with the provider key. The property always enumerates the
+        /// provider's dependent entries in the registry.
         /// </summary>
         public IEnumerable<string> Dependents => GetDependents();
 
@@ -81,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <param name="providerKeyName">The name of the dependency provider key.</param>
         /// <param name="allUsers"><see langword="true" /> if the provider belongs to a per-machine installation; 
         /// <see langword="false"/> otherwise.</param>
-        public DependencyProvider(string providerKeyName, bool allUsers)
+        public DependencyProvider(string providerKeyName, bool allUsers = true)
         {
             if (providerKeyName is null)
             {
@@ -160,5 +164,4 @@ namespace Microsoft.DotNet.Cli.Utils
             return dependentsKey?.GetSubKeyNames() ?? Enumerable.Empty<string>();
         }
     }
-#pragma warning restore CA1416
 }

@@ -6,14 +6,34 @@ namespace Microsoft.Win32.Msi
     public static class Error
     {
         /// <summary>
+        /// The operation was successful.
+        /// </summary>
+        public const int S_OK = 0;
+
+        /// <summary>
         /// The operation completed successfully.
         /// </summary>
         public const uint SUCCESS = 0;
 
         /// <summary>
+        /// Incorrect function.
+        /// </summary>
+        public const uint INVALID_FUNCTION = 1;
+
+        /// <summary>
+        /// The system cannot find the file specified.
+        /// </summary>
+        public const uint FILE_NOT_FOUND = 2;
+
+        /// <summary>
         ///  Access is denied.
         /// </summary>
         public const uint ACCESS_DENIED = 5;
+
+        /// <summary>
+        /// The data is invalid.
+        /// </summary>
+        public const uint INVALID_DATA = 13;
 
         /// <summary>
         /// The parameter is not valid.
@@ -76,6 +96,11 @@ namespace Microsoft.Win32.Msi
         public const uint BAD_CONFIGURATION = 1610;
 
         /// <summary>
+        /// Another installation is already in progress. Complete that installation before proceeding with this install.
+        /// </summary>
+        public const uint INSTALL_ALREADY_RUNNING = 1618;
+
+        /// <summary>
         /// This installation package could not be opened. Verify that the package exists and that you can access it, or contact the application vendor to verify that this is a valid Windows Installer package.
         /// </summary>
         public const uint INSTALL_PACKAGE_OPEN_FAILED = 1619;
@@ -120,6 +145,17 @@ namespace Microsoft.Win32.Msi
             // #define __HRESULT_FROM_WIN32(x) ((HRESULT)(x) <= 0 ? ((HRESULT)(x)) : ((HRESULT) (((x) & 0x0000FFFF) | (FACILITY_WIN32 << 16) | 0x80000000)))
 
             return (int)errorCode <= 0 ? (int)errorCode : (int)((errorCode & 0x0000ffff) | (FacilityWin32 << 16) | 0x8000000);
+        }
+
+        /// <summary>
+        /// Determines if the specified error indicates a success result.
+        /// </summary>
+        /// <param name="error">The error code to check.</param>
+        /// <returns><see langword="true"/> if the error is <see cref="SUCCESS"/>, <see cref="SUCCESS_REBOOT_INITIATED"/>, or
+        /// <see cref="SUCCESS_REBOOT_REQUIRED"/>; <see langword="false"/> otherwise.</returns>
+        public static bool Success(uint error)
+        {
+            return error == SUCCESS || error == SUCCESS_REBOOT_INITIATED || error == SUCCESS_REBOOT_REQUIRED;
         }
     }
 }

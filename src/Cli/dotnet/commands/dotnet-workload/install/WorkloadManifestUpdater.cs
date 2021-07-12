@@ -16,6 +16,7 @@ using NuGet.Versioning;
 using Microsoft.DotNet.Configurer;
 using NuGet.Common;
 using System.Text.Json;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -82,7 +83,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             {
                 // Never surface messages on background updates
             }
-}
+        }
 
         public async Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync()
         {
@@ -104,8 +105,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         public IEnumerable<(
-            ManifestId manifestId, 
-            ManifestVersion existingVersion, 
+            ManifestId manifestId,
+            ManifestVersion existingVersion,
             ManifestVersion newVersion,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
         {
@@ -396,7 +397,15 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userHome, ".dotnet", "sdk-advertising", featureBand.ToString(), manifestId.ToString());
 
+        //internal static PackageId GetManifestPackageId(SdkFeatureBand featureBand, ManifestId manifestId) =>
+        //    new PackageId($"{manifestId}.Manifest-{featureBand}");
+
         internal static PackageId GetManifestPackageId(SdkFeatureBand featureBand, ManifestId manifestId) =>
-            new PackageId($"{manifestId}.Manifest-{featureBand}");
+            WorkloadInstallerFactory.GetWorkloadInstallType(featureBand, Path.GetDirectoryName(Environment.ProcessPath)) switch
+            {
+                InstallType.FileBased => new PackageId($"{manifestId}.Manifest-{featureBand}"),
+                InstallType.Msi => new PackageId($"{manifestId}.Manifest-{featureBand}.Msi.{RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant()}"),
+                _ => throw new Exception(),
+            };
     }
 }

@@ -92,6 +92,11 @@
         <target state="new">Installing workload manifest {0} version {1}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InsufficientPrivilegeToStartServer">
+        <source>Insufficient privilege to start the server.</source>
+        <target state="new">Insufficient privilege to start the server.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidWorkloadConfiguration">
         <source>The settings file in the workload's NuGet package is invalid: {0}</source>
         <target state="new">The settings file in the workload's NuGet package is invalid: {0}</target>
@@ -120,6 +125,11 @@
       <trans-unit id="NoManifestsExistForFeatureBand">
         <source>No manifests exist for SDK version {0}.</source>
         <target state="new">No manifests exist for SDK version {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoTrustWithParentPID">
+        <source>Failed to establish a trust relationship with parent process ({0}).</source>
+        <target state="new">Failed to establish a trust relationship with parent process ({0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="OSDoesNotSupportMsi">

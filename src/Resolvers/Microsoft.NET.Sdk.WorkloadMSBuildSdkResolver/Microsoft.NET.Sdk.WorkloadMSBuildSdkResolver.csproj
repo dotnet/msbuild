@@ -20,7 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.NET.Sdk.WorkloadManifestReader\Microsoft.NET.Sdk.WorkloadManifestReader.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.NativeWrapper\Microsoft.DotNet.NativeWrapper.csproj" />
-    <Compile Include="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\**\*.cs" LinkBase="WorkloadInstallRecords" />
+    <Compile Include="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\**\*.cs" 
+             Exclude="..\..\Cli\dotnet\commands\dotnet-workload\install\WorkloadInstallRecords\RegistryWorkloadInstallationRecordRepository.cs"
+             LinkBase="WorkloadInstallRecords" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">

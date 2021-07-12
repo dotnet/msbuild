@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly bool _printDownloadLinkOnly;
         private readonly bool _includePreviews;
         private readonly VerbosityOptions _verbosity;
-        private readonly IReadOnlyCollection<string> _workloadIds; 
+        private readonly IReadOnlyCollection<string> _workloadIds;
         private readonly IInstaller _workloadInstaller;
         private IWorkloadResolver _workloadResolver;
         private IWorkloadManifestProvider _workloadManifestProvider;
@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 _reporter.WriteLine(JsonSerializer.Serialize(packageUrls));
                 _reporter.WriteLine("==allPackageLinksJsonOutputEnd==");
             }
-			else if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
+            else if (!string.IsNullOrWhiteSpace(_downloadToCacheOption))
             {
                 try
                 {
@@ -138,6 +138,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 catch (Exception e)
                 {
+                    _workloadInstaller.Shutdown();
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadCacheDownloadFailed, e.Message), e);
                 }
             }
@@ -148,24 +149,25 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     InstallWorkloads(
                         _workloadIds.Select(id => new WorkloadId(id)),
                         _skipManifestUpdate,
-                        _includePreviews, 
+                        _includePreviews,
                         string.IsNullOrWhiteSpace(_fromCacheOption) ? null : new DirectoryPath(_fromCacheOption));
                 }
                 catch (Exception e)
                 {
+                    _workloadInstaller.Shutdown();
                     // Don't show entire stack trace
                     throw new GracefulException(string.Format(LocalizableStrings.WorkloadInstallationFailed, e.Message), e);
                 }
             }
 
-            return 0;
+            return _workloadInstaller.ExitCode;
         }
 
         public void InstallWorkloads(IEnumerable<WorkloadId> workloadIds, bool skipManifestUpdate = false, bool includePreviews = false, DirectoryPath? offlineCache = null)
         {
             _reporter.WriteLine();
 
-            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestsToUpdate = new List<(ManifestId,  ManifestVersion, ManifestVersion)>();
+            IEnumerable<(ManifestId, ManifestVersion, ManifestVersion)> manifestsToUpdate = new List<(ManifestId, ManifestVersion, ManifestVersion)>();
             if (!skipManifestUpdate)
             {
                 // Update currently installed workloads
@@ -173,7 +175,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 workloadIds = workloadIds.Concat(installedWorkloads).Distinct();
 
                 _workloadManifestUpdater.UpdateAdvertisingManifestsAsync(includePreviews, offlineCache).Wait();
-                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates().Select( m => (m.manifestId, m.existingVersion,m .newVersion));
+                manifestsToUpdate = _workloadManifestUpdater.CalculateManifestUpdates().Select(m => (m.manifestId, m.existingVersion, m.newVersion));
             }
 
             InstallWorkloadsWithInstallRecord(workloadIds, _sdkFeatureBand, manifestsToUpdate, offlineCache);
@@ -192,7 +194,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             IEnumerable<WorkloadId> workloadIds,
             SdkFeatureBand sdkFeatureBand,
             IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> manifestsToUpdate,
-			DirectoryPath? offlineCache)
+            DirectoryPath? offlineCache)
         {
             if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
             {
@@ -224,16 +226,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             recordRepo.WriteWorkloadInstallationRecord(workloadId, sdkFeatureBand);
                         }
                     },
-                    rollback: () => {
+                    rollback: () =>
+                    {
                         try
                         {
-                             _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
-							
-							 foreach (var manifest in manifestsToUpdate)
-                             {
-                                 _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand);
-                             }
-							
+                            _reporter.WriteLine(LocalizableStrings.RollingBackInstall);
+
+                            foreach (var manifest in manifestsToUpdate)
+                            {
+                                _workloadInstaller.InstallWorkloadManifest(manifest.manifestId, manifest.existingVersion, sdkFeatureBand);
+                            }
+
                             foreach (var packId in workloadPackToInstall)
                             {
                                 installer.RollBackWorkloadPackInstall(packId, sdkFeatureBand);
@@ -305,7 +308,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
             }
         }
-		
+
         private async Task UseTempManifestsToResolvePacksAsync(DirectoryPath tempPath, bool includePreview)
         {
             var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);

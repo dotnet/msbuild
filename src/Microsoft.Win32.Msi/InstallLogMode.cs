@@ -93,5 +93,8 @@ namespace Microsoft.Win32.Msi
         RMFILESINUSE = (1 << (InstallMessage.RMFILESINUSE >> 24)),
         INSTALLSTART = (1 << (InstallMessage.INSTALLSTART >> 24)),
         INSTALLEND = (1 << (InstallMessage.INSTALLEND >> 24)),
+
+        DEFAULT = FATALEXIT | ERROR | WARNING | USER | INFO | RESOLVESOURCE |
+            OUTOFDISKSPACE | ACTIONSTART | ACTIONDATA | COMMONDATA | PROPERTYDUMP
     }
 }

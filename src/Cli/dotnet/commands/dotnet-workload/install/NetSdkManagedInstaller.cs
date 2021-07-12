@@ -33,6 +33,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         private readonly PackageSourceLocation _packageSourceLocation;
         private readonly RestoreActionConfig _restoreActionConfig;
 
+        public int ExitCode => 0;
+
         public NetSdkManagedInstaller(IReporter reporter,
             SdkFeatureBand sdkFeatureBand,
             IWorkloadResolver workloadResolver,
@@ -167,6 +169,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     }
                 }
             }
+        }
+
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        {
+            InstallWorkloadPack(packInfo, sdkFeatureBand, offlineCache);
         }
 
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
@@ -348,6 +355,13 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 .Where(packIdDir => HasFeatureBandMarkerFile(packIdDir, sdkFeatureBand))
                 .SelectMany(packIdPath => Directory.GetDirectories(packIdPath))
                 .Select(packVersionPath => (Path.GetFileName(Path.GetDirectoryName(packVersionPath)), Path.GetFileName(packVersionPath)));
+        }
+
+        public void Shutdown()
+        {
+            // Perform any additional cleanup here that's intended to run at the end of the command, regardless
+            // of success or failure. For file based installs, there shouldn't be any additional work to 
+            // perform.
         }
 
         private bool HasFeatureBandMarkerFile(string packIdDir, SdkFeatureBand featureBand)
