@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Cli.Cleanup
         }.DefaultToCurrentDirectory();
 
         internal static readonly Option<bool> NoRestoreOption = new(new[] { "--no-restore" }, LocalizableStrings.Doesnt_execute_an_implicit_restore_before_formatting);
+        internal static readonly Option<bool> VerifyNoChanges = new(new[] { "--verify-no-changes" }, LocalizableStrings.Verify_no_formatting_changes_would_be_performed_Terminates_with_a_non_zero_exit_code_if_any_files_would_have_been_formatted);
         internal static readonly Option<string[]> DiagnosticsOption = new(new[] { "--diagnostics" }, () => Array.Empty<string>(), LocalizableStrings.A_space_separated_list_of_diagnostic_ids_to_use_as_a_filter_when_fixing_code_style_or_3rd_party_issues);
         internal static readonly Option<string> SeverityOption = new Option<string>("--severity", LocalizableStrings.The_severity_of_diagnostics_to_fix_Allowed_values_are_info_warn_and_error).FromAmong(SeverityLevels);
         internal static readonly Option<string[]> IncludeOption = new(new[] { "--include" }, () => Array.Empty<string>(), LocalizableStrings.A_list_of_relative_file_or_folder_paths_to_include_in_formatting_All_files_are_formatted_if_empty);
@@ -43,6 +44,7 @@ namespace Microsoft.DotNet.Cli.Cleanup
         {
             command.AddArgument(SlnOrProjectArgument);
             command.AddOption(NoRestoreOption);
+            command.AddOption(VerifyNoChanges);
             command.AddOption(IncludeOption);
             command.AddOption(ExcludeOption);
             command.AddOption(IncludeGeneratedOption);
@@ -56,6 +58,11 @@ namespace Microsoft.DotNet.Cli.Cleanup
             if (parseResult.HasOption(NoRestoreOption))
             {
                 dotnetFormatArgs.Add("--no-restore");
+            }
+
+            if (parseResult.HasOption(VerifyNoChanges))
+            {
+                dotnetFormatArgs.Add("--check");
             }
 
             if (parseResult.HasOption(IncludeGeneratedOption))

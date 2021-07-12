@@ -67,6 +67,11 @@
         <target state="new">The severity of diagnostics to fix. Allowed values are info, warn, and error.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Verify_no_formatting_changes_would_be_performed_Terminates_with_a_non_zero_exit_code_if_any_files_would_have_been_formatted">
+        <source>Verify no formatting changes would be performed. Terminates with a non-zero exit code if any files would have been formatted.</source>
+        <target state="new">Verify no formatting changes would be performed. Terminates with a non-zero exit code if any files would have been formatted.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

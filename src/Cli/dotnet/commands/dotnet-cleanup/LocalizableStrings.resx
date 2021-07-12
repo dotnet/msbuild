@@ -156,4 +156,7 @@
   <data name="The_severity_of_diagnostics_to_fix_Allowed_values_are_info_warn_and_error" xml:space="preserve">
     <value>The severity of diagnostics to fix. Allowed values are info, warn, and error.</value>
   </data>
+  <data name="Verify_no_formatting_changes_would_be_performed_Terminates_with_a_non_zero_exit_code_if_any_files_would_have_been_formatted" xml:space="preserve">
+    <value>Verify no formatting changes would be performed. Terminates with a non-zero exit code if any files would have been formatted.</value>
+  </data>
 </root>
