@@ -271,7 +271,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </ItemGroup>
 
   <PropertyGroup>
-    <IsNetCoreAppTargetingLatestTFM Condition="'$(IsNetCoreAppTargetingLatestTFM)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' == '6.0'">true</IsNetCoreAppTargetingLatestTFM>
+    <IsNetCoreAppTargetingLatestTFM Condition="'$(IsNetCoreAppTargetingLatestTFM)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_TargetFrameworkVersionWithoutV)' == '$(NETCoreAppMaximumVersion)'">true</IsNetCoreAppTargetingLatestTFM>
   </PropertyGroup>
 
 </Project>

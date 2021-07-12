@@ -370,13 +370,48 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
+        private static string _cachedCurrentTFM = null;
+
+        private static string CurrentTFM
+        {
+            get
+            {
+                if (_cachedCurrentTFM == null)
+                {
+                    var logger = new StringTestLogger();
+                    var testAssetsManager = new TestAssetsManager(logger);
+                    TestDirectory testDirectory = testAssetsManager.CreateTestDirectory();
+                    string path = testDirectory.Path;
+                    var cmd = new DotnetCommand(logger)
+                        .WithWorkingDirectory(path)
+                        .Execute("new", "console");
+
+                    string lines = File.ReadAllText(Path.Combine(path, "CurrentTFM.csproj"));
+                    string startTargetFrameworkText = @"<TargetFramework>";
+                    string endTargetFrameworkText = @"</TargetFramework>";
+                    int startIndex = lines.IndexOf(startTargetFrameworkText);
+                    startIndex += startTargetFrameworkText.Length;
+                    int endIndex = lines.IndexOf(endTargetFrameworkText);
+                    string tfm = lines.Substring(startIndex, endIndex - startIndex);
+                    _cachedCurrentTFM = tfm;
+                }
+
+                return _cachedCurrentTFM;
+            }
+        }
+
         [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(true, true, "net5.0")]
-        [InlineData(true, true, "net6.0")]
-        [InlineData(true, false, "net6.0")]
-        [InlineData(false, false, "net6.0")]
+        [InlineData(true, true, "")]
+        [InlineData(true, false, "")]
+        [InlineData(false, false, "")]
         public void TestPreviewFeatures(bool enablePreviewFeatures, bool generateRequiresPreviewFeaturesAttribute, string targetFramework)
         {
+            if (targetFramework == "")
+            {
+                targetFramework = CurrentTFM;
+            }
+
             var testAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld", identifier: $"{enablePreviewFeatures}${generateRequiresPreviewFeaturesAttribute}${targetFramework}")
                 .WithSource()
@@ -421,16 +456,16 @@ namespace Microsoft.NET.Build.Tests
 
             if (enablePreviewFeatures && generateRequiresPreviewFeaturesAttribute)
             {
-                if (targetFramework == "net6.0")
-                {
-                    Assert.Equal("Preview", langVersion);
-                    Assert.True(contains);
-                }
-                else
+                if (targetFramework == "net5.0")
                 {
                     // The assembly level attribute is generated only for the latest TFM for the given sdk
                     Assert.False(contains);
                     Assert.NotEqual("Preview", langVersion);
+                }
+                else
+                {
+                    Assert.Equal("Preview", langVersion);
+                    Assert.True(contains);
                 }
             }
 
