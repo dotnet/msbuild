@@ -84,7 +84,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- C# implicit imports -->
   <ItemGroup Condition=" '$(DisableImplicitNamespaceImports_DotNet)' != 'true'
-                      and '$(MSBuildProjectExtension)' == '.csproj'
+                      and '$(Language)' == 'C#'
                       and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                       and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
     <Import Include="System" />
@@ -98,7 +98,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- VB implicit imports -->
   <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true'
-                      and '$(MSBuildProjectExtension)' == '.vbproj'
+                      and '$(Language)' == 'VB'
                       and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- These namespaces are present in 2.0 Framework assemblies -->
     <Import Include="Microsoft.VisualBasic" />
@@ -114,7 +114,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Include="System.Threading.Tasks" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
   </ItemGroup>
   <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true'
-                      and '$(MSBuildProjectExtension)' == '.vbproj'
+                      and '$(Language)' == 'VB'
                       and '$(_IsNETCoreOrNETStandard)' == 'true'">
     <Import Include="Microsoft.VisualBasic" />
     <Import Include="System" />
