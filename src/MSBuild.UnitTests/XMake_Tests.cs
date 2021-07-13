@@ -1200,22 +1200,19 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileSupportsThisFileDirectory()
         {
-            using (var env = UnitTests.TestEnvironment.Create())
-            {
-                var content = ObjectModelHelpers.CleanupFileContents(
-                    "<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var content = ObjectModelHelpers.CleanupFileContents(
+                "<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
 
-                var directory = env.CreateFolder();
-                directory.CreateFile("Directory.Build.rsp", "/p:A=%MSBuildThisFileDirectory%");
-                var projectPath = directory.CreateFile("my.proj", content).Path;
+            var directory = _env.CreateFolder();
+            directory.CreateFile("Directory.Build.rsp", "/p:A=%MSBuildThisFileDirectory%");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
 
-                var msbuildParameters = "\"" + projectPath + "\"";
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
-                successfulExit.ShouldBeTrue();
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
+            successfulExit.ShouldBeTrue();
 
-                output.ShouldContain($"[A={directory.Path}{Path.DirectorySeparatorChar}]");
-            }
+            output.ShouldContain($"[A={directory.Path}{Path.DirectorySeparatorChar}]");
         }
 
         /// <summary>
@@ -2173,18 +2170,15 @@ $@"<Project>
                 "<Project>" +
                 "<Target Name=\"t\"><Message Text=\"Hello\"/></Target>" +
                 "</Project>";
-            using (var env = UnitTests.TestEnvironment.Create())
-            {
-                var tempDir = env.CreateFolder();
-                var projectFile = tempDir.CreateFile("missingloggertest.proj", projectString);
+            var tempDir = _env.CreateFolder();
+            var projectFile = tempDir.CreateFile("missingloggertest.proj", projectString);
 
-                var parametersLoggerOptional = $"{logger} -verbosity:diagnostic \"{projectFile.Path}\"";
+            var parametersLoggerOptional = $"{logger} -verbosity:diagnostic \"{projectFile.Path}\"";
 
-                var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
-                successfulExit.ShouldBe(true);
-                output.ShouldContain("Hello", output);
-                output.ShouldContain("The specified logger could not be created and will not be used.", output);
-            }
+            var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
+            successfulExit.ShouldBe(true);
+            output.ShouldContain("Hello", output);
+            output.ShouldContain("The specified logger could not be created and will not be used.", output);
         }
 
         [Theory]
@@ -2212,45 +2206,40 @@ $@"<Project>
         [Fact]
         public void BinaryLogContainsImportedFiles()
         {
-            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+            var testProject = _env.CreateFile("Importer.proj", ObjectModelHelpers.CleanupFileContents(@"
+            <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Import Project=""TestProject.proj"" />
+
+                <Target Name=""Build"">
+                </Target>
+
+            </Project>"));
+
+            _env.CreateFile("TestProject.proj", @"
+            <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+              <Target Name=""Build"">
+                <Message Text=""Hello from TestProject!"" />
+              </Target>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLogLocation}/output.binlog\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            RunnerUtilities.ExecMSBuild($"\"{binLogLocation}/output.binlog\" \"/bl:{binLogLocation}/replay.binlog;ProjectImports=ZipFile\"", out success, _output);
+
+            using (ZipArchive archive = ZipFile.OpenRead($"{binLogLocation}/replay.ProjectImports.zip"))
             {
-                var testProject = testEnvironment.CreateFile("Importer.proj", ObjectModelHelpers.CleanupFileContents(@"
-                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                    <Import Project=""TestProject.proj"" />
-
-                    <Target Name=""Build"">
-                    </Target>
-
-                </Project>"));
-
-                testEnvironment.CreateFile("TestProject.proj", @"
-                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                  <Target Name=""Build"">
-                    <Message Text=""Hello from TestProject!"" />
-                  </Target>
-                </Project>
-                ");
-
-                string binLogLocation = testEnvironment.DefaultTestDirectory.Path;
-
-                string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLogLocation}/output.binlog\"", out var success, _output);
-
-                success.ShouldBeTrue(output);
-
-                RunnerUtilities.ExecMSBuild($"\"{binLogLocation}/output.binlog\" \"/bl:{binLogLocation}/replay.binlog;ProjectImports=ZipFile\"", out success, _output);
-
-                using (ZipArchive archive = ZipFile.OpenRead($"{binLogLocation}/replay.ProjectImports.zip"))
-                {
-                     archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
-                }
+                 archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
             }
         }
 
         [Fact]
         public void EndToEndWarnAsErrors()
         {
-            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
-
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
 
   <Target Name=""IssueWarning"">
@@ -2259,7 +2248,7 @@ $@"<Project>
 
 </Project>");
 
-            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+            TransientTestProjectWithFiles testProject = _env.CreateTestProjectWithFiles(projectContents);
 
             RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" -warnaserror", out bool success, _output);
 
@@ -2271,44 +2260,40 @@ $@"<Project>
         [Fact]
         public void BuildSlnOutOfProc()
         {
-            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
-            {
-                string solutionFileContents =
-                    @"
-Microsoft Visual Studio Solution File, Format Version 12.00
+            string solutionFileContents =
+@"Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'TestProject', 'TestProject.proj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
 EndProject
 Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Mixed Platforms = Debug|Mixed Platforms
-        Release|Any CPU = Release|Any CPU
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.ActiveCfg = CSConfig1|Any CPU
-        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.Build.0 = CSConfig1|Any CPU
-    EndGlobalSection
+GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    Debug|Mixed Platforms = Debug|Mixed Platforms
+    Release|Any CPU = Release|Any CPU
+EndGlobalSection
+GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.ActiveCfg = CSConfig1|Any CPU
+    {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.Build.0 = CSConfig1|Any CPU
+EndGlobalSection
 EndGlobal
-                    ".Replace("'", "\"");
+                ".Replace("'", "\"");
 
-                var testSolution = testEnvironment.CreateFile("TestSolution.sln", ObjectModelHelpers.CleanupFileContents(solutionFileContents));
+            var testSolution = _env.CreateFile("TestSolution.sln", ObjectModelHelpers.CleanupFileContents(solutionFileContents));
 
-                string testMessage = "Hello from TestProject!";
-                testEnvironment.CreateFile("TestProject.proj", @$"
-                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                  <Target Name=""Build"">
-                    <Message Text=""{testMessage}"" />
-                  </Target>
-                </Project>
-                ");
+            string testMessage = "Hello from TestProject!";
+            _env.CreateFile("TestProject.proj", @$"
+            <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+              <Target Name=""Build"">
+                <Message Text=""{testMessage}"" />
+              </Target>
+            </Project>
+            ");
 
-                testEnvironment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
-                string output = RunnerUtilities.ExecMSBuild($"\"{testSolution.Path}\" /p:Configuration=Debug", out var success, _output);
+            string output = RunnerUtilities.ExecMSBuild($"\"{testSolution.Path}\" /p:Configuration=Debug", out var success, _output);
 
-                success.ShouldBeTrue(output);
-                output.ShouldContain(testMessage);
-            }
+            success.ShouldBeTrue(output);
+            output.ShouldContain(testMessage);
         }
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
@@ -2404,32 +2389,29 @@ EndGlobal
 
         private (bool result, string output) ExecuteMSBuildExe(string projectContents, IDictionary<string, string> filesToCreate = null, IDictionary<string, string> envsToCreate = null, params string[] arguments)
         {
-            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+            TransientTestProjectWithFiles testProject = _env.CreateTestProjectWithFiles(projectContents, new string[0]);
+
+            if (filesToCreate != null)
             {
-                TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents, new string[0]);
-
-                if (filesToCreate != null)
+                foreach (var item in filesToCreate)
                 {
-                    foreach (var item in filesToCreate)
-                    {
-                        File.WriteAllText(Path.Combine(testProject.TestRoot, item.Key), item.Value);
-                    }
+                    File.WriteAllText(Path.Combine(testProject.TestRoot, item.Key), item.Value);
                 }
-
-                if (envsToCreate != null)
-                {
-                    foreach (var env in envsToCreate)
-                    {
-                        testEnvironment.SetEnvironmentVariable(env.Key, env.Value);
-                    }
-                }
-
-                bool success;
-
-                string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success, _output);
-
-                return (success, output);
             }
+
+            if (envsToCreate != null)
+            {
+                foreach (var env in envsToCreate)
+                {
+                    _env.SetEnvironmentVariable(env.Key, env.Value);
+                }
+            }
+
+            bool success;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success, _output);
+
+            return (success, output);
         }
 
         public void Dispose()
