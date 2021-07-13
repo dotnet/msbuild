@@ -516,6 +516,8 @@ namespace Microsoft.Build.Tasks
         internal void NormalizeFullPath()
         {
             _fullPath = FileUtilities.NormalizePath(_fullPath);
+            _fullPathWithoutExtension = null;
+            _directoryName = null;
         }
 
         /// <summary>
