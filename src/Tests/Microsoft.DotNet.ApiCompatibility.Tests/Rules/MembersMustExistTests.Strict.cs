@@ -22,9 +22,9 @@ namespace CompatTests
 {
   public class First
   {
-    public string Parameterless() { }
+    public string Parameterless() => string.Empty;
   }
-  public delegate void EventHandler(object sender EventArgs e);
+  public delegate void EventHandler(object sender, System.EventArgs e);
 }
 ";
 
@@ -33,15 +33,15 @@ namespace CompatTests
 {
   public class First
   {
-    public string Parameterless() { }
+    public string Parameterless() => string.Empty;
     public void ShouldReportMethod(string a, string b) { }
     public string ShouldReportMissingProperty { get; }
-    public string this[int index] { get; }
+    public string this[int index] { get => string.Empty; }
     public event EventHandler ShouldReportMissingEvent;
     public int ReportMissingField = 0;
   }
 
-  public delegate void EventHandler(object sender EventArgs e);
+  public delegate void EventHandler(object sender, System.EventArgs e);
 }
 ";
 
@@ -73,9 +73,9 @@ namespace CompatTests
   public class FirstBase
   {
     public void MyMethod() { }
-    public string MyMethodWithParams(string a, int b, FirstBase c) { }
-    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) { }
-    public virtual string MyVirtualMethod() { }
+    public string MyMethodWithParams(string a, int b, FirstBase c) => string.Empty;
+    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) => throw null;
+    public virtual string MyVirtualMethod() => string.Empty;
   }
   public class Second : FirstBase { }
 }
@@ -87,16 +87,16 @@ namespace CompatTests
   public class FirstBase
   {
     public void MyMethod() { }
-    public string MyMethodWithParams(string a, int b, FirstBase c) { }
-    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) { }
-    public virtual string MyVirtualMethod() { }
+    public string MyMethodWithParams(string a, int b, FirstBase c) => string.Empty;
+    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) => throw null;
+    public virtual string MyVirtualMethod() => string.Empty;
   }
   public class Second : FirstBase
   {
     public new void MyMethod() { }
-    public new string MyMethodWithParams(string a, int b, FirstBase c) { }
-    public new T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) { }
-    public override string MyVirtualMethod() { }
+    public new string MyMethodWithParams(string a, int b, FirstBase c) => string.Empty;
+    public new T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) => throw null;
+    public override string MyVirtualMethod() => string.Empty;
   }
 }
 ";
@@ -117,11 +117,11 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, string b) { }
-    public string MultipleOverrides(string a, int b, string c) { }
-    public string MultipleOverrides(string a, int b, int c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => string.Empty;
+    public string MultipleOverrides(string a, string b) => string.Empty;
+    public string MultipleOverrides(string a, int b, string c) => string.Empty;
+    public string MultipleOverrides(string a, int b, int c) => string.Empty;
   }
 }
 ";
@@ -131,9 +131,9 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, int b, int c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => string.Empty;
+    public string MultipleOverrides(string a, int b, int c) => string.Empty;
   }
 }
 ";
@@ -163,11 +163,11 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, string b) { }
-    public string MultipleOverrides(string a, int b, string c) { }
-    internal string MultipleOverrides(string a, int b, int c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => string.Empty;
+    public string MultipleOverrides(string a, string b) => string.Empty;
+    public string MultipleOverrides(string a, int b, string c) => string.Empty;
+    internal string MultipleOverrides(string a, int b, int c) => string.Empty;
     internal int InternalProperty { get; set; }
   }
 }
@@ -178,10 +178,10 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, string b) { }
-    public string MultipleOverrides(string a, int b, string c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => string.Empty;
+    public string MultipleOverrides(string a, string b) => string.Empty;
+    public string MultipleOverrides(string a, int b, string c) => string.Empty;
     internal int InternalProperty { get; }
   }
 }
@@ -218,8 +218,8 @@ namespace CompatTests
 {
   public class First
   {
-    public string Parameterless() { }
-    public string MissingMethodRight() { }
+    public string Parameterless() => string.Empty;
+    public string MissingMethodRight() => string.Empty;
   }
 }
 ";
@@ -229,7 +229,7 @@ namespace CompatTests
 {
   public class First
   {
-    public string Parameterless() { }
+    public string Parameterless() => string.Empty;
     public void MissingMethodLeft(string a, string b) { }
   }
 }

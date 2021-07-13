@@ -82,9 +82,9 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             string leftSyntax = @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
-    public class FirstNested
+    public abstract class FirstNested
     {
       public class SecondNested
       {
@@ -99,9 +99,9 @@ namespace CompatTests
             { @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
-    public class FirstNested
+    public abstract class FirstNested
     {
       public class SecondNested
       {
@@ -114,14 +114,14 @@ namespace CompatTests
             @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
-    public class FirstNested
+    public abstract class FirstNested
     {
-      public class SecondNested
+      public abstract class SecondNested
       {
         public void SomeMethod() { }
-        public abstract void SomeAbstractMethod() { }
+        public abstract void SomeAbstractMethod();
       }
     }
   }
@@ -130,11 +130,11 @@ namespace CompatTests
             @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
-    public class FirstNested
+    public abstract class FirstNested
     {
-      public abstract void FirstNestedAbstract() { }
+      public abstract void FirstNestedAbstract();
       public class SecondNested
       {
         public void SomeMethod() { }
@@ -185,10 +185,10 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     public void SomeMethod() { }
-    public abstract void SomeAbstractMember() { }
+    public abstract void SomeAbstractMember();
   }
 }
 "
@@ -199,7 +199,7 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     private First() { }
     public void SomeMethod() { }
@@ -209,11 +209,11 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     public First() { }
     public void SomeMethod() { }
-    public abstract void SomeAbstractMember() { }
+    public abstract void SomeAbstractMember();
   }
 }
 "
@@ -224,7 +224,7 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     internal First() { }
     public void SomeMethod() { }
@@ -234,11 +234,11 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     protected First() { }
     public void SomeMethod() { }
-    public abstract void SomeAbstractMember() { }
+    public abstract void SomeAbstractMember();
   }
 }
 "
@@ -252,19 +252,19 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
-    public abstract void FirstAbstract() { }
+    public abstract void FirstAbstract();
   }
 }
 ",
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
-    public abstract void FirstAbstract() { }
-    public abstract string SecondAbstract() => throw null;
+    public abstract void FirstAbstract();
+    public abstract string SecondAbstract();
   }
 }
 "
@@ -275,21 +275,21 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     protected First() { }
-    public abstract void FirstAbstract() { }
+    public abstract void FirstAbstract();
   }
 }
 ",
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     protected First() { }
-    public abstract void FirstAbstract() { }
-    public abstract string SecondAbstract() => throw null;
+    public abstract void FirstAbstract();
+    public abstract string SecondAbstract();
   }
 }
 "
@@ -302,21 +302,21 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     private First() { }
-    public abstract void FirstAbstract() { }
+    public abstract void FirstAbstract();
   }
 }
 ",
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     private First() { }
-    public abstract void FirstAbstract() { }
-    public abstract string SecondAbstract() => throw null;
+    public abstract void FirstAbstract();
+    public abstract string SecondAbstract();
   }
 }
 "
@@ -328,21 +328,21 @@ namespace CompatTests
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     internal First() { }
-    public abstract void FirstAbstract() { }
+    public abstract void FirstAbstract();
   }
 }
 ",
                 @"
 namespace CompatTests
 {
-  public class First
+  public abstract class First
   {
     internal First() { }
-    public abstract void FirstAbstract() { }
-    public abstract string SecondAbstract() => throw null;
+    public abstract void FirstAbstract();
+    public abstract string SecondAbstract();
   }
 }
 "

@@ -50,7 +50,7 @@ namespace CompatTests
 {
   public class First
   {
-    public string Method1() { }
+    public string Method1() => string.Empty;
   }
 }
 ";
@@ -94,7 +94,7 @@ namespace CompatTests
 {
   public class First
   {
-    public string Method1() { }
+    public string Method1() => string.Empty;
   }
 }
 ";

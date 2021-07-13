@@ -28,11 +28,15 @@ namespace CompatTests
   public interface IFoo
   {
     string MyMethod();
-    static MyField = 2;
-    int MyPropertyWithDefaultImplementation { get { } set { } }
-    event EventHandler MyEvent { add { } remove { } }
     byte MyPropertyWithoutDefaultImplementation { get; set; }
-    event EventHandler MyEventWithoutImplementation;
+    event System.EventHandler MyEventWithoutImplementation;
+
+    // .NET Framework doesn't support default implementations.
+#if !NETFRAMEWORK
+    static int MyField = 2;
+    event System.EventHandler MyEvent { add { } remove { } }
+    int MyPropertyWithDefaultImplementation { get => 0; set { } }
+#endif
   }
 }
 ";
@@ -82,11 +86,15 @@ namespace CompatTests
   public interface IFoo
   {
     string MyMethod();
-    static MyField = 2;
-    int MyPropertyWithDefaultImplementation { get { } set { } }
-    event EventHandler MyEvent { add { } remove { } }
     byte MyPropertyWithoutDefaultImplementation { get; set; }
-    event EventHandler MyEventWithoutImplementation;
+    event System.EventHandler MyEventWithoutImplementation;
+
+    // .NET Framework doesn't support default implementations.
+#if !NETFRAMEWORK
+    static int MyField = 2;
+    int MyPropertyWithDefaultImplementation { get => 0; set { } }
+    event System.EventHandler MyEvent { add { } remove { } }
+#endif
   }
 }
 ";
@@ -114,7 +122,7 @@ namespace CompatTests
   {
     string MyMethod();
     int MyProperty { get; set; }
-    event EventHandler MyEvent;
+    event System.EventHandler MyEvent;
   }
 }
 ";
@@ -127,8 +135,12 @@ namespace CompatTests
   {
     string MyMethod();
     int MyProperty { get; set; }
-    event EventHandler MyEvent;
+    event System.EventHandler MyEvent;
+
+    // .NET Framework doesn't support default implementations.
+#if !NETFRAMEWORK
     int MyPropertyWithDIM { get => 0; set { } }
+#endif
   }
 }
 ",
@@ -139,9 +151,13 @@ namespace CompatTests
   {
     string MyMethod();
     int MyProperty { get; set; }
-    event EventHandler MyEvent;
-    event EventHandler MyOtherEvent;
+    event System.EventHandler MyEvent;
+    event System.EventHandler MyOtherEvent;
+
+    // .NET Framework doesn't support default implementations.
+#if !NETFRAMEWORK
     static int MyField = 3;
+#endif
   }
 }
 ",
@@ -152,11 +168,15 @@ namespace CompatTests
   {
     string MyMethod();
     string MyOtherMethod();
-    string MyOtherMethodWithDIM() => string.Empty;
     int MyProperty { get; set; }
-    event EventHandler MyEvent;
-    event EventHandler MyOtherEventWithDIM { add { } remove { } }
+    event System.EventHandler MyEvent;
+
+    // .NET Framework doesn't support default implementations.
+#if !NETFRAMEWORK
+    string MyOtherMethodWithDIM() => string.Empty;
+    event System.EventHandler MyOtherEventWithDIM { add { } remove { } }
     static int MyField = 3;
+#endif
   }
 }
 "};
@@ -205,7 +225,7 @@ namespace CompatTests
   public interface IFoo
   {
     string MyMethod();
-    private string MyPrivateMethod();
+    internal string MyPrivateMethod();
   }
 }
 "
@@ -227,7 +247,11 @@ namespace CompatTests
   public interface IFoo
   {
     int MyProperty { get; set; }
+
+    // .NET Framework doesn't support default implementations.
+#if !NETFRAMEWORK
     byte MyOtherProperty { get => (byte)0; set { } }
+#endif
   }
 }
 "
@@ -239,7 +263,7 @@ namespace CompatTests
 {
   public interface IFoo
   {
-    event EventHandler EventHandler;
+    event System.EventHandler MyEvent;
   }
 }
 ",
@@ -248,9 +272,13 @@ namespace CompatTests
 {
   public interface IFoo
   {
-    event EventHandler EventHandler;
+    event System.EventHandler MyEvent;
+
+    // .NET Framework doesn't support default implementations.
+#if !NETFRAMEWORK
     static int MyField = 32;
     int MyMethod() => 0;
+#endif
   }
 }
 "
