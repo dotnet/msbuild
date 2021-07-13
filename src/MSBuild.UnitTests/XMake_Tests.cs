@@ -139,11 +139,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SplitUnquotedTest()
         {
-            List<string> sa;
-            int emptySplits;
-
             // nothing quoted
-            sa = QuotingUtilities.SplitUnquoted("abcdxyz");
+            var sa = QuotingUtilities.SplitUnquoted("abcdxyz");
             sa.Count.ShouldBe(1);
             sa[0].ShouldBe("abcdxyz");
 
@@ -167,7 +164,7 @@ namespace Microsoft.Build.UnitTests
             sa[2].ShouldBe("dxyz");
 
             // nothing quoted
-            sa = QuotingUtilities.SplitUnquoted("abc,c;dxyz", 2, false, false, out emptySplits, ';', ',');
+            sa = QuotingUtilities.SplitUnquoted("abc,c;dxyz", 2, false, false, out var emptySplits, ';', ',');
             emptySplits.ShouldBe(0);
             sa.Count.ShouldBe(2);
             sa[0].ShouldBe("abc");
@@ -332,10 +329,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UnquoteTest()
         {
-            int doubleQuotesRemoved;
-
             // "cde" is quoted
-            QuotingUtilities.Unquote("abc\"cde\"xyz", out doubleQuotesRemoved).ShouldBe("abccdexyz");
+            QuotingUtilities.Unquote("abc\"cde\"xyz", out var doubleQuotesRemoved).ShouldBe("abccdexyz");
             doubleQuotesRemoved.ShouldBe(2);
 
             // "xyz" is quoted (the terminal double-quote is assumed)
@@ -395,8 +390,7 @@ namespace Microsoft.Build.UnitTests
         public void ExtractSwitchParametersTest()
         {
             string commandLineArg = "\"/p:foo=\"bar";
-            int doubleQuotesRemovedFromArg;
-            string unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
+            string unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out var doubleQuotesRemovedFromArg);
             MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':')).ShouldBe(":\"foo=\"bar");
             doubleQuotesRemovedFromArg.ShouldBe(2);
 
@@ -649,8 +643,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + pathToProjectFile + "\"";
 
-                bool successfulExit;
-                output = RunnerUtilities.ExecMSBuild(newPathToMSBuildExe, msbuildParameters, out successfulExit);
+                output = RunnerUtilities.ExecMSBuild(newPathToMSBuildExe, msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeFalse();
             }
             catch (Exception ex)
@@ -815,8 +808,7 @@ namespace Microsoft.Build.UnitTests
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
             File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
-            bool successfulExit;
-            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
             successfulExit.ShouldBeFalse();
 
             output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
@@ -831,7 +823,6 @@ namespace Microsoft.Build.UnitTests
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
             File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
-            bool successfulExit;
             string pathToMSBuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
             // This @pathToMSBuildExe is used directly with Process, so don't quote it on
             // Unix
@@ -840,7 +831,7 @@ namespace Microsoft.Build.UnitTests
                 pathToMSBuildExe = "\"" + pathToMSBuildExe + "\"";
             }
 
-            string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out successfulExit);
+            string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out var successfulExit);
             successfulExit.ShouldBeFalse();
 
             output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
@@ -861,8 +852,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
 
-                bool successfulExit;
-                output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeFalse();
             }
             finally
@@ -922,8 +912,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=1]");
@@ -958,8 +947,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=]");
@@ -995,8 +983,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=2]");
@@ -1041,8 +1028,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=1]");
@@ -1077,8 +1063,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(exePath, msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=1]");
@@ -1111,8 +1096,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeFalse();
 
                 output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
@@ -1147,8 +1131,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=]");
@@ -1180,8 +1163,7 @@ namespace Microsoft.Build.UnitTests
 
                 var msbuildParameters = "\"" + projectPath + "\"";
 
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
+                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit);
                 successfulExit.ShouldBeTrue();
 
                 output.ShouldContain("[A=]");
@@ -2407,9 +2389,7 @@ EndGlobal
                 }
             }
 
-            bool success;
-
-            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out success, _output);
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out var success, _output);
 
             return (success, output);
         }
