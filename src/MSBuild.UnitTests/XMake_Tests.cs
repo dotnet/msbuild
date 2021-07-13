@@ -182,8 +182,8 @@ namespace Microsoft.Build.UnitTests
             emptySplits.ShouldBe(0);
             sa.Count.ShouldBe(4);
             sa[0].ShouldBe("abc");
-            sa[1].ShouldBe(String.Empty);
-            sa[2].ShouldBe(String.Empty);
+            sa[1].ShouldBe(string.Empty);
+            sa[2].ShouldBe(string.Empty);
             sa[3].ShouldBe("dxyz");
 
             // "c d" is quoted
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.SetConsoleUI();
 
             // Make sure this doesn't throw an exception.
-            string bar = String.Format(CultureInfo.CurrentUICulture, "{0}", 1);
+            string bar = string.Format(CultureInfo.CurrentUICulture, "{0}", 1);
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
@@ -883,7 +883,7 @@ namespace Microsoft.Build.UnitTests
             // Find the project in the current directory
             _env.SetCurrentDirectory(directory);
 
-            string output = RunnerUtilities.ExecMSBuild(String.Empty, out var successfulExit);
+            string output = RunnerUtilities.ExecMSBuild(string.Empty, out var successfulExit);
             successfulExit.ShouldBeTrue();
 
             output.ShouldContain("[A=1]");
@@ -1584,14 +1584,14 @@ namespace Microsoft.Build.UnitTests
                 List<string> fileNamesToReturn = new List<string>();
                 foreach (string file in _directoryFileNameList)
                 {
-                    if (String.Equals(searchPattern, "*.sln", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(searchPattern, "*.sln", StringComparison.OrdinalIgnoreCase))
                     {
                         if (FileUtilities.IsSolutionFilename(file))
                         {
                             fileNamesToReturn.Add(file);
                         }
                     }
-                    else if (String.Equals(searchPattern, "*.*proj", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(searchPattern, "*.*proj", StringComparison.OrdinalIgnoreCase))
                     {
                         if (Path.GetExtension(file).Contains("proj"))
                         {
@@ -2389,7 +2389,7 @@ EndGlobal
                 }
             }
 
-            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {String.Join(" ", arguments)}", out var success, _output);
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {string.Join(" ", arguments)}", out var success, _output);
 
             return (success, output);
         }
