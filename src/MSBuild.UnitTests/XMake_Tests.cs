@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             var arguments = new List<string>();
-            arguments.AddRange(new string[] { "/p:a=b", "/p:c=d" });
+            arguments.AddRange(new[] { "/p:a=b", "/p:c=d" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             var arguments = new List<string>();
-            arguments.AddRange(new string[] { "/m:2" });
+            arguments.AddRange(new[] { "/m:2" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             var arguments = new List<string>();
-            arguments.AddRange(new string[] { "/m:3", "/m" });
+            arguments.AddRange(new[] { "/m:3", "/m" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches switches = new CommandLineSwitches();
 
             var arguments = new List<string>();
-            arguments.AddRange(new string[] { "/m:" });
+            arguments.AddRange(new[] { "/m:" });
 
             MSBuildApp.GatherCommandLineSwitches(arguments, switches);
 
@@ -515,15 +515,15 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ValidMaxCPUCountSwitch()
         {
-            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "1" }).ShouldBe(1);
-            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "2" }).ShouldBe(2);
-            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "3" }).ShouldBe(3);
-            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "4" }).ShouldBe(4);
-            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "8" }).ShouldBe(8);
-            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "63" }).ShouldBe(63);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "1" }).ShouldBe(1);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "2" }).ShouldBe(2);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "3" }).ShouldBe(3);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "4" }).ShouldBe(4);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "8" }).ShouldBe(8);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "63" }).ShouldBe(63);
 
             // Should pick last value
-            MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "8", "4" }).ShouldBe(4);
+            MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "8", "4" }).ShouldBe(4);
         }
 
         [Fact]
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<CommandLineSwitchException>(() =>
             {
-                MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "-1" });
+                MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "-1" });
             }
            );
         }
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<CommandLineSwitchException>(() =>
             {
-                MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "0" });
+                MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "0" });
             }
            );
         }
@@ -552,7 +552,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<CommandLineSwitchException>(() =>
             {
                 // Too big
-                MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "foo" });
+                MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "foo" });
             }
            );
         }
@@ -562,7 +562,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<CommandLineSwitchException>(() =>
             {
-                MSBuildApp.ProcessMaxCPUCountSwitch(new string[] { "1025" });
+                MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "1025" });
             }
            );
         }
@@ -1238,7 +1238,7 @@ namespace Microsoft.Build.UnitTests
 
         private void RunPriorityBuildTest(ProcessPriorityClass expectedPrority, params string[] arguments)
         {
-            string[] aggregateArguments = arguments.Union(new string[] { " /nr:false /v:diag "}).ToArray();
+            string[] aggregateArguments = arguments.Union(new[] { " /nr:false /v:diag "}).ToArray();
 
             string contents = ObjectModelHelpers.CleanupFileContents(@"
 <Project DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
@@ -1267,11 +1267,11 @@ namespace Microsoft.Build.UnitTests
         /// Test the default file to build in cases involving at least one solution filter file.
         /// </summary>
         [Theory]
-        [InlineData(new string[] { "my.proj", "my.sln", "my.slnf" }, "my.sln")]
-        [InlineData(new string[] { "abc.proj", "bcd.csproj", "slnf.slnf", "other.slnf" }, "abc.proj")]
-        [InlineData(new string[] { "abc.sln", "slnf.slnf", "abc.slnf" }, "abc.sln")]
-        [InlineData(new string[] { "abc.csproj", "abc.slnf", "not.slnf" }, "abc.csproj")]
-        [InlineData(new string[] { "abc.slnf" }, "abc.slnf")]
+        [InlineData(new[] { "my.proj", "my.sln", "my.slnf" }, "my.sln")]
+        [InlineData(new[] { "abc.proj", "bcd.csproj", "slnf.slnf", "other.slnf" }, "abc.proj")]
+        [InlineData(new[] { "abc.sln", "slnf.slnf", "abc.slnf" }, "abc.sln")]
+        [InlineData(new[] { "abc.csproj", "abc.slnf", "not.slnf" }, "abc.csproj")]
+        [InlineData(new[] { "abc.slnf" }, "abc.slnf")]
         public void TestDefaultBuildWithSolutionFilter(string[] projects, string answer)
         {
             string[] extensionsToIgnore = Array.Empty<string>();
@@ -1288,8 +1288,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchOneProjNotFoundExtension()
         {
-            string[] projects = new string[] { "my.proj" };
-            string[] extensionsToIgnore = new string[] { ".phantomextension" };
+            string[] projects = new[] { "my.proj" };
+            string[] extensionsToIgnore = new[] { ".phantomextension" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
         }
@@ -1300,8 +1300,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestTwoIdenticalExtensionsToIgnore()
         {
-            string[] projects = new string[] { "my.proj" };
-            string[] extensionsToIgnore = new string[] { ".phantomextension", ".phantomextension" };
+            string[] projects = new[] { "my.proj" };
+            string[] extensionsToIgnore = new[] { ".phantomextension", ".phantomextension" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
         }
@@ -1312,7 +1312,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchNullandEmptyProjectsToIgnore()
         {
-            string[] projects = new string[] { "my.proj" };
+            string[] projects = new[] { "my.proj" };
             string[] extensionsToIgnore = null;
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
@@ -1329,8 +1329,8 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "my.proj" };
-                string[] extensionsToIgnore = new string[] { ".phantomextension", null };
+                string[] projects = new[] { "my.proj" };
+                string[] extensionsToIgnore = new[] { ".phantomextension", null };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
             }
@@ -1345,8 +1345,8 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "my.proj" };
-                string[] extensionsToIgnore = new string[] { ".phantomextension", string.Empty };
+                string[] projects = new[] { "my.proj" };
+                string[] extensionsToIgnore = new[] { ".phantomextension", string.Empty };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
             }
@@ -1360,8 +1360,8 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "my.proj" };
-                string[] extensionsToIgnore = new string[] { "phantomextension" };
+                string[] projects = new[] { "my.proj" };
+                string[] extensionsToIgnore = new[] { "phantomextension" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase);
             }
@@ -1375,8 +1375,8 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "my.proj" };
-                string[] extensionsToIgnore = new string[] { ".C:\\boocatmoo.a" };
+                string[] projects = new[] { "my.proj" };
+                string[] extensionsToIgnore = new[] { ".C:\\boocatmoo.a" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("my.proj", StringCompareShould.IgnoreCase); // "Expected my.proj to be only project found"
             }
@@ -1390,8 +1390,8 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "my.proj" };
-                string[] extensionsToIgnore = new string[] { ".proj*", ".nativeproj?" };
+                string[] projects = new[] { "my.proj" };
+                string[] extensionsToIgnore = new[] { ".proj*", ".nativeproj?" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
             }
@@ -1400,52 +1400,52 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitch()
         {
-            string[] projects = new string[] { "test.nativeproj", "test.vcproj" };
-            string[] extensionsToIgnore = new string[] { ".phantomextension", ".vcproj" };
+            string[] projects = new[] { "test.nativeproj", "test.vcproj" };
+            string[] extensionsToIgnore = new[] { ".phantomextension", ".vcproj" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.nativeproj", StringCompareShould.IgnoreCase); // "Expected test.nativeproj to be only project found"
 
-            projects = new string[] { "test.nativeproj", "test.vcproj", "test.proj" };
-            extensionsToIgnore = new string[] { ".phantomextension", ".vcproj" };
+            projects = new[] { "test.nativeproj", "test.vcproj", "test.proj" };
+            extensionsToIgnore = new[] { ".phantomextension", ".vcproj" };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj", StringCompareShould.IgnoreCase); // "Expected test.proj to be only project found"
 
-            projects = new string[] { "test.nativeproj", "test.vcproj" };
-            extensionsToIgnore = new string[] { ".vcproj" };
+            projects = new[] { "test.nativeproj", "test.vcproj" };
+            extensionsToIgnore = new[] { ".vcproj" };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.nativeproj", StringCompareShould.IgnoreCase); // "Expected test.nativeproj to be only project found"
 
-            projects = new string[] { "test.proj", "test.sln" };
-            extensionsToIgnore = new string[] { ".vcproj" };
+            projects = new[] { "test.proj", "test.sln" };
+            extensionsToIgnore = new[] { ".vcproj" };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
-            projects = new string[] { "test.proj", "test.sln", "test.proj~", "test.sln~" };
+            projects = new[] { "test.proj", "test.sln", "test.proj~", "test.sln~" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
-            projects = new string[] { "test.proj" };
+            projects = new[] { "test.proj" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj", StringCompareShould.IgnoreCase); // "Expected test.proj to be only project found"
 
-            projects = new string[] { "test.proj", "test.proj~" };
+            projects = new[] { "test.proj", "test.proj~" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj", StringCompareShould.IgnoreCase); // "Expected test.proj to be only project found"
 
-            projects = new string[] { "test.sln" };
+            projects = new[] { "test.sln" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
-            projects = new string[] { "test.sln", "test.sln~" };
+            projects = new[] { "test.sln", "test.sln~" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
-            projects = new string[] { "test.sln~", "test.sln" };
+            projects = new[] { "test.sln~", "test.sln" };
             extensionsToIgnore = new string[] { };
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
@@ -1457,7 +1457,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchReplicateBuildingDFLKG()
         {
-            string[] projects = new string[] { "test.proj", "test.sln", "Foo.vcproj" };
+            string[] projects = new[] { "test.proj", "test.sln", "Foo.vcproj" };
             string[] extensionsToIgnore = { ".sln", ".vcproj" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj"); // "Expected test.proj to be only project found"
@@ -1473,8 +1473,8 @@ namespace Microsoft.Build.UnitTests
             {
                 string[] projects;
                 string[] extensionsToIgnore = null;
-                projects = new string[] { "test.nativeproj", "test.vcproj" };
-                extensionsToIgnore = new string[] { ".nativeproj", ".vcproj" };
+                projects = new[] { "test.nativeproj", "test.vcproj" };
+                extensionsToIgnore = new[] { ".nativeproj", ".vcproj" };
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
             }
@@ -1488,7 +1488,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "test.proj", "Different.sln" };
+                string[] projects = new[] { "test.proj", "Different.sln" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
@@ -1503,7 +1503,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "test.proj", "Different.proj" };
+                string[] projects = new[] { "test.proj", "Different.proj" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
@@ -1518,7 +1518,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "test.nativeproj", "Different.nativeproj" };
+                string[] projects = new[] { "test.nativeproj", "Different.nativeproj" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
@@ -1533,7 +1533,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "test.sln", "Different.sln" };
+                string[] projects = new[] { "test.sln", "Different.sln" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
@@ -1548,7 +1548,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = new string[] { "test.nativeproj", "Different.csproj", "Another.proj" };
+                string[] projects = new[] { "test.nativeproj", "Different.csproj", "Another.proj" };
                 string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(new string[0] { }, extensionsToIgnore, projectHelper.GetFiles);
