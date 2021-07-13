@@ -65,7 +65,23 @@ namespace Dotnet_new3.IntegrationTests
         [InlineData("Class Library", "classlib", "C#", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "VB", "netstandard2.0")]
         [InlineData("Class Library", "classlib", "F#", "netstandard2.0")]
-        public void AllCommonProjectsCreateRestoreAndBuild(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null)
+
+        [InlineData("Class Library", "classlib", "C#", "net6.0", "10.0")]
+        [InlineData("Class Library", "classlib", "C#", "net6.0", "9.0", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Class Library", "classlib", "C#", "net6.0", "8.0", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Class Library", "classlib", "C#", "net6.0", "7.3", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Class Library", "classlib", "C#", "net6.0", "7.2", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Class Library", "classlib", "C#", "net6.0", "7.1", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Class Library", "classlib", "C#", "net6.0", "7", Skip = "https://github.com/dotnet/templating/issues/3449")]
+
+        [InlineData("Console Application", "console", "C#", "net6.0", "10.0")]
+        [InlineData("Console Application", "console", "C#", "net6.0", "9.0", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Console Application", "console", "C#", "net6.0", "8.0", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Console Application", "console", "C#", "net6.0", "7.3", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Console Application", "console", "C#", "net6.0", "7.2", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Console Application", "console", "C#", "net6.0", "7.1", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        [InlineData("Console Application", "console", "C#", "net6.0", "7", Skip = "https://github.com/dotnet/templating/issues/3449")]
+        public void AllCommonProjectsCreateRestoreAndBuild(string expectedTemplateName, string templateShortName, string? language = null, string? framework = null, string? langVersion = null)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();
             string workingDirName = Path.GetFileName(workingDir);
@@ -93,6 +109,11 @@ namespace Dotnet_new3.IntegrationTests
             {
                 args.Add("--framework");
                 args.Add(framework);
+            }
+            if (!string.IsNullOrWhiteSpace(langVersion))
+            {
+                args.Add("--langVersion");
+                args.Add(langVersion);
             }
 
             new DotnetNewCommand(_log, args.ToArray())
@@ -230,6 +251,9 @@ Restore succeeded\.");
         [InlineData("Nullable", null, "Console Application", "console", null, "net5.0")]
         [InlineData("Nullable", null, "Console Application", "console", null, "netcoreapp3.1")]
         [InlineData("Nullable", null, "Console Application", "console", null, "netcoreapp2.1")]
+        [InlineData("Nullable", "enable", "Console Application", "console", null, null, "9.0")]
+        [InlineData("Nullable", "enable", "Console Application", "console", null, null, "8.0")]
+        [InlineData("Nullable", "enable", "Console Application", "console", null, null, "7.3")]
 
         [InlineData("Nullable", null, "Console Application", "console", "F#", null)]
         [InlineData("CheckForOverflowUnderflow", null, "Console Application", "console", "F#", null)]
@@ -262,7 +286,7 @@ Restore succeeded\.");
         [InlineData("TargetFramework", "net6.0", "Class Library", "classlib", "VB", null)]
         [InlineData("Nullable", null, "Class Library", "classlib", "VB", "netstandard2.0")]
 
-        public void SetPropertiesByDefault(string propertyName, string? propertyValue, string expectedTemplateName, string templateShortName, string? language, string? framework)
+        public void SetPropertiesByDefault(string propertyName, string? propertyValue, string expectedTemplateName, string templateShortName, string? language, string? framework, string? langVersion = null)
         {
             string workingDir = TestUtils.CreateTemporaryFolder();
             List<string> args = new List<string>() { templateShortName, "--no-restore" };
@@ -275,6 +299,11 @@ Restore succeeded\.");
             {
                 args.Add("--framework");
                 args.Add(framework);
+            }
+            if (!string.IsNullOrWhiteSpace(langVersion))
+            {
+                args.Add("--langVersion");
+                args.Add(langVersion);
             }
 
             new DotnetNewCommand(_log, args.ToArray())
