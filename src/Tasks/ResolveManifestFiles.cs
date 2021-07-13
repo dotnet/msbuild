@@ -387,7 +387,7 @@ namespace Microsoft.Build.Tasks
                         // decides to publish the en-us resource assemblies for other locales also.
                         if (!LauncherBasedDeployment && satelliteRefAssemblyMap.ContainsItem(item))
                         {
-                            Debug.Assert(false, "Duplicate satellite assembly skipped in _managedAssemblies");
+                            Debug.Assert(false, $"Duplicate satellite assembly '{item.ItemSpec}' skipped in _managedAssemblies");
                             continue;
                         }
 
@@ -601,7 +601,7 @@ namespace Microsoft.Build.Tasks
                     item.SetMetadata("AssemblyType", "Satellite");
                     if (satelliteRefAssemblyMap.ContainsItem(item))
                     {
-                        Debug.Assert(false, "Duplicate satellite assembly skipped in _satelliteAssemblies");
+                        Debug.Assert(false, $"Duplicate satellite assembly '{item.ItemSpec}' skipped in _satelliteAssemblies");
                         continue;
                     }
                     satelliteMap.Add(item, true);
