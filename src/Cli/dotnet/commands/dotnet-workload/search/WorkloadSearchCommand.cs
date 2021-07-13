@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Workloads.Workload.Search
 {
@@ -38,7 +39,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
 
         public override int Execute()
         {
-            var avaliableWorkloads = _workloadResolver.GetAvaliableWorkloads();
+            IEnumerable<WorkloadDefinition> avaliableWorkloads = _workloadResolver.GetAvaliableWorkloads()
+                .OrderBy(workload => workload.Id);
 
             if (!string.IsNullOrEmpty(_workloadIdStub))
             {
