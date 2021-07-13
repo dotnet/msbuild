@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
@@ -87,6 +88,7 @@ namespace Microsoft.Build.Tasks
                     {
                         Directory.CreateDirectory(directoryPath);
                         string contentsAsString = buffer.ToString();
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
                         try
                         {
                             // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
@@ -107,7 +109,7 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                         }
-
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec);
 
                         System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                     }
