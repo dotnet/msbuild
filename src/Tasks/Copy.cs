@@ -441,7 +441,6 @@ namespace Microsoft.Build.Tasks
                         copyComplete = true;
                     }
                 }
-                MSBuildEventSource.Log.CopyUpToDateStop(destPath);
 
                 if (!copyComplete)
                 {
@@ -454,6 +453,10 @@ namespace Microsoft.Build.Tasks
                     {
                         success = false;
                     }
+                }
+                else
+                {
+                    MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec);
                 }
 
                 if (copyComplete)
@@ -543,7 +546,6 @@ namespace Microsoft.Build.Tasks
                                                 sourcePath,
                                                 SourceFiles[partition[partitionIndex - 1]].ItemSpec,
                                                 StringComparison.OrdinalIgnoreCase);
-                        MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec);
 
                         if (!copyComplete)
                         {
@@ -559,6 +561,10 @@ namespace Microsoft.Build.Tasks
                                 // Thread race to set outer variable but they race to set the same (false) value.
                                 success = false;
                             }
+                        }
+                        else
+                        {
+                            MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec)
                         }
 
                         if (copyComplete)
@@ -715,6 +721,7 @@ namespace Microsoft.Build.Tasks
                         "SkipUnchangedFiles",
                         "true"
                     );
+                    MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec);
                 }
                 // We only do the cheap check for identicalness here, we try the more expensive check
                 // of comparing the fullpaths of source and destination to see if they are identical,
@@ -724,7 +731,12 @@ namespace Microsoft.Build.Tasks
                              destinationFileState.Name,
                              StringComparison.OrdinalIgnoreCase))
                 {
+                    MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec);
                     success = DoCopyWithRetries(sourceFileState, destinationFileState, copyFile);
+                }
+                else
+                {
+                    MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec);
                 }
             }
             catch (OperationCanceledException)
