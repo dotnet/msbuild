@@ -7,9 +7,29 @@
         <target state="translated">Definice úlohy {0} je konkrétní vývojářská úloha, která ale nemá žádný popis.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ConflictingWorkloadDefinition">
+        <source>Workload definition '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</source>
+        <target state="new">Workload definition '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConflictingWorkloadPack">
+        <source>Workload pack '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</source>
+        <target state="new">Workload pack '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CyclicWorkloadRedirect">
+        <source>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</source>
+        <target state="new">Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateKeyAtOffset">
         <source>Duplicate key '{0}' at offset {1}</source>
         <target state="translated">Duplicitní klíč {0} u posunu {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateManifestID">
+        <source>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</source>
+        <target state="new">Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedBoolAtOffset">
@@ -35,6 +55,21 @@
       <trans-unit id="IncompleteDocument">
         <source>Document ended prematurely</source>
         <target state="translated">Dokument předčasně ukončen</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDependencyMissing">
+        <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
+        <target state="new">Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestDependencyVersionTooLow">
+        <source>Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</source>
+        <target state="new">Workload manifest dependency '{0}' version '{1}' is lower than version '{2}' required by manifest '{3}' [{4}]</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingBaseWorkload">
+        <source>Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</source>
+        <target state="new">Could not find workload '{0}' extended by workload '{1}' in manifest '{2}' [{3}]</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingOrInvalidManifestVersion">
@@ -77,9 +112,9 @@
         <target state="translated">Neznámý druh sady úloh {0} u posunu {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UnresolvedWorkloadRedirects">
-        <source>One or more workload redirects failed to resolve: {0}</source>
-        <target state="new">One or more workload redirects failed to resolve: {0}</target>
+      <trans-unit id="UnresolvedWorkloadRedirect">
+        <source>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</source>
+        <target state="new">Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</target>
         <note />
       </trans-unit>
     </body>

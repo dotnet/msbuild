@@ -10,7 +10,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     class WorkloadManifestFormatException: WorkloadManifestException
     {
         public WorkloadManifestFormatException() { }
-        public WorkloadManifestFormatException(string messageFormat, params object[] args) : base(string.Format (messageFormat, args)) { }
+        public WorkloadManifestFormatException(string messageFormat, params object?[] args) : base(messageFormat, args) { }
         public WorkloadManifestFormatException(string message) : base(message) { }
         public WorkloadManifestFormatException(string message, Exception inner) : base(message, inner) { }
         protected WorkloadManifestFormatException(SerializationInfo info, StreamingContext context) : base(info, context) { }
@@ -20,7 +20,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     class WorkloadManifestCompositionException: WorkloadManifestException
     {
         public WorkloadManifestCompositionException() { }
-        public WorkloadManifestCompositionException(string messageFormat, params object[] args) : base(string.Format (messageFormat, args)) { }
+        public WorkloadManifestCompositionException(string messageFormat, params object?[] args) : base(messageFormat, args) { }
         public WorkloadManifestCompositionException(string message) : base(message) { }
         public WorkloadManifestCompositionException(string message, Exception inner) : base(message, inner) { }
         protected WorkloadManifestCompositionException(SerializationInfo info, StreamingContext context) : base(info, context) { }
@@ -30,7 +30,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     abstract class WorkloadManifestException: Exception
     {
         protected WorkloadManifestException() { }
-        protected WorkloadManifestException(string messageFormat, params object[] args) : base(string.Format (messageFormat, args)) { }
+        protected WorkloadManifestException(string messageFormat, params object?[] args) : base(string.Format (messageFormat, args)) { }
         protected WorkloadManifestException(string message) : base(message) { }
         protected WorkloadManifestException(string message, Exception inner) : base(message, inner) { }
         protected WorkloadManifestException(SerializationInfo info, StreamingContext context) : base(info, context) { }

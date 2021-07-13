@@ -17,12 +17,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </remarks>
     public class WorkloadResolver : IWorkloadResolver
     {
-        private readonly Dictionary<string, WorkloadManifest> _manifests = new Dictionary<string, WorkloadManifest>(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<WorkloadId, (WorkloadDefinition workload, WorkloadManifest manifest)> _workloads = new Dictionary<WorkloadId, (WorkloadDefinition, WorkloadManifest)>();
-        private readonly Dictionary<WorkloadPackId, (WorkloadPack pack, WorkloadManifest manifest)> _packs = new Dictionary<WorkloadPackId, (WorkloadPack, WorkloadManifest)>();
+        private readonly Dictionary<string, WorkloadManifest> _manifests = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<WorkloadId, (WorkloadDefinition workload, WorkloadManifest manifest)> _workloads = new();
+        private readonly Dictionary<WorkloadPackId, (WorkloadPack pack, WorkloadManifest manifest)> _packs = new();
         private IWorkloadManifestProvider? _manifestProvider;
         private string[] _currentRuntimeIdentifiers;
-        private readonly string [] _dotnetRootPaths;
+        private readonly string[] _dotnetRootPaths;
 
         private Func<string, bool>? _fileExistOverride;
         private Func<string, bool>? _directoryExistOverride;
@@ -61,8 +61,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <summary>
         /// Creates a resolver by composing all the manifests from the provider.
         /// </summary>
-        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string [] dotnetRootPaths, string [] currentRuntimeIdentifiers)
-            : this (dotnetRootPaths, currentRuntimeIdentifiers)
+        private WorkloadResolver(IWorkloadManifestProvider manifestProvider, string[] dotnetRootPaths, string[] currentRuntimeIdentifiers)
+            : this(dotnetRootPaths, currentRuntimeIdentifiers)
         {
             _manifestProvider = manifestProvider;
 
@@ -99,7 +99,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream, informationalPath);
                     if (!_manifests.TryAdd(manifestId, manifest))
                     {
-                        throw new WorkloadManifestCompositionException($"Duplicate manifest '{manifestId}' from provider {manifestProvider}");
+                        var existingManifest = _manifests[manifestId];
+                        throw new WorkloadManifestCompositionException(Strings.DuplicateManifestID, manifestProvider.GetType().FullName, manifestId, informationalPath, existingManifest.InformationalPath);
                     }
                 }
             }
@@ -109,6 +110,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             _workloads.Clear();
             _packs.Clear();
+
+            Dictionary<WorkloadId, (WorkloadRedirect redirect, WorkloadManifest manifest)>? redirects = null;
 
             foreach (var manifest in _manifests.Values)
             {
@@ -120,55 +123,29 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                         {
                             if (FXVersion.Compare(dependency.Value, resolvedDependency.ParsedVersion) > 0)
                             {
-                                throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}' ({manifest.InformationalPath}): requires '{dependency.Key}' version at least {dependency.Value} but found {resolvedDependency.Version}");
+                                throw new WorkloadManifestCompositionException(Strings.ManifestDependencyVersionTooLow, dependency.Key, dependency.Value, resolvedDependency.Version, manifest.Id, manifest.InformationalPath);
                             }
                         }
                         else
                         {
-                            throw new WorkloadManifestCompositionException($"Inconsistency in workload manifest '{manifest.Id}' ({manifest.InformationalPath}): missing dependency '{dependency.Key}'");
-                        }
+                            throw new WorkloadManifestCompositionException(Strings.ManifestDependencyMissing, dependency.Key, manifest.Id, manifest.InformationalPath);
+                    }
                     }
                 }
 
-                HashSet<WorkloadRedirect>? redirects = null;
                 foreach (var workload in manifest.Workloads)
                 {
                     if (workload.Value is WorkloadRedirect redirect)
                     {
-                        (redirects ??= new HashSet<WorkloadRedirect>()).Add(redirect);
+                        (redirects ??= new()).Add(redirect.Id, (redirect, manifest));
                     }
                     else
                     {
                         if (!_workloads.TryAdd(workload.Key, ((WorkloadDefinition)workload.Value, manifest)))
                         {
                             WorkloadManifest conflictingManifest = _workloads[workload.Key].manifest;
-                            throw new WorkloadManifestCompositionException($"Workload '{workload.Key}' in manifest '{manifest.Id}' ({manifest.InformationalPath}) conflicts with manifest '{conflictingManifest.Id}' ({conflictingManifest.InformationalPath})");
+                            throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadDefinition, workload.Key, manifest.Id, manifest.InformationalPath, conflictingManifest.Id, conflictingManifest.InformationalPath);
                         }
-                    }
-                }
-
-                // resolve redirects upfront so they are transparent to the rest of the code
-                // the _workloads dictionary maps redirected ids directly to the replacement
-                if (redirects != null)
-                {
-                    // handle multi-levels redirects via multiple resolve passes, bottom-up
-                    while (redirects.RemoveWhere(redirect =>
-                    {
-                        if (_workloads.TryGetValue(redirect.ReplaceWith, out var replacement))
-                        {
-                            if (!_workloads.TryAdd(redirect.Id, replacement))
-                            {
-                                WorkloadManifest conflictingManifest = _workloads[redirect.Id].manifest;
-                                throw new WorkloadManifestCompositionException($"Workload '{redirect.Id}' in manifest '{manifest.Id}' ({manifest.InformationalPath}) conflicts with manifest '{conflictingManifest.Id}' ({conflictingManifest.InformationalPath})");
-                            }
-                            return true;
-                        }
-                        return false;
-                    }) > 0) { };
-
-                    if (redirects.Count > 0)
-                    {
-                        throw new WorkloadManifestCompositionException(Strings.UnresolvedWorkloadRedirects, string.Join("\", \"", redirects.Select(r => r.Id.ToString())));
                     }
                 }
 
@@ -177,7 +154,46 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     if (!_packs.TryAdd(pack.Key, (pack.Value, manifest)))
                     {
                         WorkloadManifest conflictingManifest = _packs[pack.Key].manifest;
-                        throw new WorkloadManifestCompositionException($"Workload pack '{pack.Key}' in manifest '{manifest.Id}' ({manifest.InformationalPath}) conflicts with manifest '{conflictingManifest.Id}' ({conflictingManifest.InformationalPath})");
+                        throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadPack, pack.Key, manifest.Id, manifest.InformationalPath, conflictingManifest.Id, conflictingManifest.InformationalPath);
+                    }
+                }
+            }
+
+            // resolve redirects upfront so they are transparent to the rest of the code
+            // the _workloads dictionary maps redirected ids directly to the replacement
+            if (redirects != null)
+            {
+                // handle multi-levels redirects via multiple resolve passes, bottom-up i.e. iteratively try
+                // to resolve unresolved redirects to resolved workloads/redirects until we stop making progress
+                var unresolvedRedirects = new HashSet<WorkloadId>(redirects.Keys);
+                while (unresolvedRedirects.RemoveWhere(redirectId =>
+                {
+                    (var redirect, var manifest) = redirects[redirectId];
+
+                    if (_workloads.TryGetValue(redirect.ReplaceWith, out var replacement))
+                    {
+                        if (!_workloads.TryAdd(redirect.Id, replacement))
+                        {
+                            WorkloadManifest conflictingManifest = _workloads[redirect.Id].manifest;
+                            throw new WorkloadManifestCompositionException(Strings.ConflictingWorkloadDefinition, redirect.Id, manifest.Id, manifest.InformationalPath, conflictingManifest.Id, conflictingManifest.InformationalPath);
+                        }
+                        return true;
+                    }
+                    return false;
+                }) > 0) { };
+
+                if (unresolvedRedirects.Count > 0)
+                {
+                    // if one or more of them doesn't resolve into another redirect, it's an actual unresolved redirect
+                    var unresolved = unresolvedRedirects.Select(ur => redirects[ur]).Where(ur => !redirects.ContainsKey(ur.redirect.ReplaceWith)).FirstOrDefault();
+                    if (unresolved is (WorkloadRedirect redirect, WorkloadManifest manifest))
+                    {
+                        throw new WorkloadManifestCompositionException(Strings.UnresolvedWorkloadRedirect, redirect.ReplaceWith, redirect.Id, manifest.Id, manifest.InformationalPath);
+                    }
+                    else
+                    {
+                        var cyclic = redirects[unresolvedRedirects.First()];
+                        throw new WorkloadManifestCompositionException(Strings.CyclicWorkloadRedirect, cyclic.redirect.Id, cyclic.manifest.Id, cyclic.manifest.InformationalPath);
                     }
                 }
             }
@@ -371,7 +387,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
                     if (_workloads.TryGetValue(baseWorkloadId) is not (WorkloadDefinition baseWorkload, WorkloadManifest baseWorkloadManifest))
                     {
-                        throw new WorkloadManifestCompositionException($"Could not find workload '{baseWorkloadId}' extended by workload '{workload.Id}' in manifest '{manifest.Id}' ({manifest.InformationalPath})");
+                        throw new WorkloadManifestCompositionException(Strings.MissingBaseWorkload, baseWorkloadId, workload.Id, manifest.Id, manifest.InformationalPath);
                     }
 
                     // the workload's ID may not match the value we looked up if it's a redirect
