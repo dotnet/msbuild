@@ -648,14 +648,14 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                _output.WriteLine(ex.ToString());
                 throw;
             }
             finally
             {
                 if (output != null)
                 {
-                    Console.WriteLine(output);
+                    _output.WriteLine(output);
                 }
 
                 try
@@ -795,7 +795,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private string _pathToArbitraryBogusFile = NativeMethodsShared.IsWindows // OK on 64 bit as well
+        private readonly string _pathToArbitraryBogusFile = NativeMethodsShared.IsWindows // OK on 64 bit as well
                                                         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe")
                                                         : "/bin/cat";
 
@@ -1241,7 +1241,7 @@ namespace Microsoft.Build.UnitTests
 
             string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: aggregateArguments);
 
-            string expected = string.Format(@"Task priority is '{0}'", expectedPrority);
+            string expected = $@"Task priority is '{expectedPrority}'";
             logContents.ShouldContain(expected, () => logContents);
         }
 
@@ -2211,10 +2211,8 @@ $@"<Project>
 
             RunnerUtilities.ExecMSBuild($"\"{binLogLocation}/output.binlog\" \"/bl:{binLogLocation}/replay.binlog;ProjectImports=ZipFile\"", out success, _output);
 
-            using (ZipArchive archive = ZipFile.OpenRead($"{binLogLocation}/replay.ProjectImports.zip"))
-            {
-                 archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
-            }
+            using ZipArchive archive = ZipFile.OpenRead($"{binLogLocation}/replay.ProjectImports.zip");
+            archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
         }
 
         [Fact]
