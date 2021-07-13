@@ -138,6 +138,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
             command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.ArchitectureOption(false));
+            command.AddOption(CommonOptions.OperatingSystemOption());
 
             return command;
         }

@@ -47,6 +47,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(InteractiveOption);
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.VerbosityOption());
+            command.AddOption(CommonOptions.ArchitectureOption());
+            command.AddOption(CommonOptions.OperatingSystemOption());
             command.TreatUnmatchedTokensAsErrors = false;
 
             return command;

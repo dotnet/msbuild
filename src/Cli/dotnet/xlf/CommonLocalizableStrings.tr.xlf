@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchitectureOptionDescription">
+        <source>The target architecture.</source>
+        <target state="new">The target architecture.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotResolveRuntimeIdentifier">
+        <source>Resolving the current runtime identifier failed.</source>
+        <target state="new">Resolving the current runtime identifier failed.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">Komutun durup kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasının tamamlanmasını) beklemesine izin verir .</target>
@@ -78,6 +88,11 @@ export PATH="$PATH:{0}"
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">`{0}` içinde birden fazla proje bulundu. Hangisinin kullanılacağını belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperatingSystemOptionDescription">
+        <source>The target operating system.</source>
+        <target state="new">The target operating system.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">

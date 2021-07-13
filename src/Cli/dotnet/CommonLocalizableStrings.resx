@@ -674,4 +674,13 @@ setx PATH "%PATH%;{0}"
   <data name="CommandPrereleaseOptionDescription" xml:space="preserve">
     <value>Allows prerelease packages to be installed.</value>
   </data>
+  <data name="ArchitectureOptionDescription" xml:space="preserve">
+    <value>The target architecture.</value>
+  </data>
+  <data name="OperatingSystemOptionDescription" xml:space="preserve">
+    <value>The target operating system.</value>
+  </data>
+  <data name="CannotResolveRuntimeIdentifier" xml:space="preserve">
+    <value>Resolving the current runtime identifier failed.</value>
+  </data>
 </root>
