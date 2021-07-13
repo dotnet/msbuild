@@ -396,7 +396,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
     <IntermediateRefAssembly Include="$(IntermediateOutputPath)refint\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
     <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
-    <CreateDirectory Include="$(IntermediateOutputPath)ref" />
+    <CreateDirectory Include="$(OutDir)ref" Condition=" '$(ProduceReferenceAssemblyInOutDir)' == 'true'" />
+    <CreateDirectory Include="$(IntermediateOutputPath)ref" Condition=" '$(ProduceReferenceAssemblyInOutDir)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
