@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System;
 using Xunit.Abstractions;
 using System.Runtime.InteropServices;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -55,25 +56,6 @@ namespace Microsoft.NET.Build.Tests
 
             var analyzers = command.GetValues();
 
-            List<string> nugetRoots = new List<string>()
-            {
-                TestContext.Current.NuGetCachePath,
-                Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "NuGetFallbackFolder")
-            };
-
-            string RelativeNuGetPath(string absoluteNuGetPath)
-            {
-                foreach (var nugetRoot in nugetRoots)
-                {
-                    if (absoluteNuGetPath.StartsWith(nugetRoot + Path.DirectorySeparatorChar))
-                    {
-                        return absoluteNuGetPath.Substring(nugetRoot.Length + 1)
-                                    .Replace(Path.DirectorySeparatorChar, '/');
-                    }
-                }
-                throw new InvalidDataException("Expected path to be under a NuGet root: " + absoluteNuGetPath);
-            }
-
             switch (language)
             {
                 case "C#":
@@ -103,6 +85,70 @@ namespace Microsoft.NET.Build.Tests
                 default:
                     throw new ArgumentOutOfRangeException(nameof(language));
             }
+        }
+
+        [Fact]
+        public void It_resolves_multitargeted_analyzers()
+        {
+            var testProject = new TestProject()
+            {
+                TargetFrameworks = "net6.0;net472"
+            };
+
+            //  Disable analyzers built in to the SDK so we can more easily test the ones coming from NuGet packages
+            testProject.AdditionalProperties["EnableNETAnalyzers"] = "false";
+            testProject.AdditionalProperties["DisableFrameworkReferenceAnalyzers"] = "false";
+
+            testProject.ProjectChanges.Add(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                var itemGroup = XElement.Parse(@"
+  <ItemGroup>
+    <PackageReference Include=""System.Text.Json"" Version=""4.7.0"" Condition="" '$(TargetFramework)' == 'net472' "" />
+    <PackageReference Include=""System.Text.Json"" Version=""6.0.0-preview.4.21253.7"" Condition="" '$(TargetFramework)' == 'net6.0' "" />
+  </ItemGroup>");
+
+                project.Root.Add(itemGroup);
+            });
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            List<string> GetAnalyzersForTargetFramework(string targetFramework)
+            {
+                var getValuesCommand = new GetValuesCommand(testAsset,
+                    valueName: "Analyzer",
+                    GetValuesCommand.ValueType.Item,
+                    targetFramework);
+
+                getValuesCommand.DependsOnTargets = "ResolveLockFileAnalyzers";
+
+                getValuesCommand.Execute("-p:TargetFramework=" + targetFramework).Should().Pass();
+
+                return getValuesCommand.GetValues().Select(RelativeNuGetPath).ToList();
+            }
+            
+            GetAnalyzersForTargetFramework("net6.0").Should().BeEquivalentTo("system.text.json/6.0.0-preview.4.21253.7/analyzers/dotnet/cs/System.Text.Json.SourceGeneration.dll");
+            GetAnalyzersForTargetFramework("net472").Should().BeEmpty();
+        }
+
+        static readonly List<string> nugetRoots = new List<string>()
+            {
+                TestContext.Current.NuGetCachePath,
+                Path.Combine(FileConstants.UserProfileFolder, ".dotnet", "NuGetFallbackFolder")
+            };
+
+        static string RelativeNuGetPath(string absoluteNuGetPath)
+        {
+            foreach (var nugetRoot in nugetRoots)
+            {
+                if (absoluteNuGetPath.StartsWith(nugetRoot + Path.DirectorySeparatorChar))
+                {
+                    return absoluteNuGetPath.Substring(nugetRoot.Length + 1)
+                                .Replace(Path.DirectorySeparatorChar, '/');
+                }
+            }
+            throw new InvalidDataException("Expected path to be under a NuGet root: " + absoluteNuGetPath);
         }
     }
 }

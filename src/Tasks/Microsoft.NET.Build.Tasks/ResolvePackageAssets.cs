@@ -14,6 +14,7 @@ using Microsoft.Build.Utilities;
 using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -824,7 +825,7 @@ namespace Microsoft.NET.Build.Tasks
 
             private void WriteAnalyzers()
             {
-                Dictionary<string, LockFileTargetLibrary> targetLibraries = null;
+                Dictionary<(string, NuGetVersion), LockFileTargetLibrary> targetLibraries = null;
 
                 foreach (var library in _lockFile.Libraries)
                 {
@@ -842,12 +843,10 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (targetLibraries == null)
                         {
-                            targetLibraries = _runtimeTarget
-                                .Libraries
-                                .ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+                            targetLibraries = _compileTimeTarget.Libraries.ToDictionary(l => (l.Name, l.Version));
                         }
 
-                        if (targetLibraries.TryGetValue(library.Name, out var targetLibrary))
+                        if (targetLibraries.TryGetValue((library.Name, library.Version), out var targetLibrary))
                         {
                             WriteItem(_packageResolver.ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
                         }
