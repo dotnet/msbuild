@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CompatibleFrameworkInPackageValidatorHeader" xml:space="preserve">
-    <value>Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</value>
-  </data>
-  <data name="CompatibleTfmValidatorHeader" xml:space="preserve">
-    <value>Public API surface area of compile time assemblies and runtime assemblies are not the same for all target frameworks and runtime identifiers. The following API are missing from some runtime assemblies:</value>
-  </data>
   <data name="ApiCompatibilityHeader" xml:space="preserve">
     <value>API compatibility errors between '{0}' (left) and '{1}' (right):</value>
   </data>
@@ -140,9 +134,6 @@
   </data>
   <data name="NoCompatibleRuntimeAsset" xml:space="preserve">
     <value>Target framework {0} does not have a compatible runtime asset in the package.</value>
-  </data>
-  <data name="BaselineVersionValidatorHeader" xml:space="preserve">
-    <value>Found breaking API changes between package versions. If these breaking changes are unintentional, revert them in the newer package version. Otherwise suppress this error.</value>
   </data>
   <data name="ApiCompatibilityBaselineHeader" xml:space="preserve">
     <value>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</value>

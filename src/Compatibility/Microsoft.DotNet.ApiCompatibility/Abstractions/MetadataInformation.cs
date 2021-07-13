@@ -14,12 +14,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         public readonly string AssemblyName;
         public readonly string TargetFramework;
         public readonly string AssemblyId;
+        public readonly string DisplayString;
 
-        public MetadataInformation(string name, string targetFramework, string assemblyId)
+        public MetadataInformation(string name, string targetFramework, string assemblyId, string displayString = null)
         {
             AssemblyName = name ?? string.Empty;
             TargetFramework = targetFramework ?? string.Empty;
             AssemblyId = assemblyId ?? string.Empty;
+            DisplayString = displayString ?? assemblyId;
         }
 
         public bool Equals(MetadataInformation other) =>

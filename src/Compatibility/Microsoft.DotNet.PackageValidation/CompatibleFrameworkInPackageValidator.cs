@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using NuGet.Client;
 using NuGet.ContentModel;
 using NuGet.Frameworks;
@@ -26,7 +27,8 @@ namespace Microsoft.DotNet.PackageValidation
         /// </summary>
         /// <param name="package">Nuget Package that needs to be validated.</param>
         public void Validate(Package package)
-        {       
+        {
+            _apiCompatRunner.InitializePaths(package.PackagePath, package.PackagePath);
             IEnumerable<ContentItem> compileAssets = package.CompileAssets.OrderByDescending(t => ((NuGetFramework)t.Properties["tfm"]).Version);
             ManagedCodeConventions conventions = new ManagedCodeConventions(null);
             Queue<ContentItem> compileAssetsQueue = new Queue<ContentItem>(compileAssets);
@@ -52,13 +54,8 @@ namespace Microsoft.DotNet.PackageValidation
 
                 if (compatibleFrameworkAsset != null)
                 {
-                    _apiCompatRunner.QueueApiCompat(package.PackagePath, 
-                        compatibleFrameworkAsset.Path,
-                        package.PackagePath,
-                        compileTimeAsset.Path,
-                        package.PackageId,
-                        string.Format(Resources.CompatibleFrameworkInPackageValidatorHeader, ((NuGetFramework)compatibleFrameworkAsset.Properties["tfm"]).ToString(), framework.ToString()),
-                        string.Format(Resources.ApiCompatibilityHeader, compatibleFrameworkAsset.Path, compileTimeAsset.Path));
+                    string header = string.Format(Resources.ApiCompatibilityHeader, compatibleFrameworkAsset.Path, compileTimeAsset.Path);
+                    _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, compatibleFrameworkAsset, compileTimeAsset, header);
                 }
             }
 

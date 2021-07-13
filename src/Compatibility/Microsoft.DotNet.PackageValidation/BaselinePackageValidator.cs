@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.ApiCompatibility;
 using Microsoft.DotNet.ApiCompatibility.Abstractions;
@@ -40,6 +39,9 @@ namespace Microsoft.DotNet.PackageValidation
         /// <param name="package">Nuget Package that needs to be validated.</param>
         public void Validate(Package package)
         {
+            if (_runApiCompat)
+                _apiCompatRunner.InitializePaths(_baselinePackage.PackagePath, package.PackagePath);
+
             foreach (ContentItem baselineCompileTimeAsset in _baselinePackage.RefAssets)
             {
                 NuGetFramework baselineTargetFramework = (NuGetFramework)baselineCompileTimeAsset.Properties["tfm"];
@@ -57,13 +59,8 @@ namespace Microsoft.DotNet.PackageValidation
                 }
                 else if (_runApiCompat)
                 {
-                    _apiCompatRunner.QueueApiCompat(_baselinePackage.PackagePath,
-                        baselineCompileTimeAsset.Path,
-                        package.PackagePath,
-                        latestCompileTimeAsset.Path,
-                        package.PackageId,
-                        Resources.BaselineVersionValidatorHeader,
-                        string.Format(Resources.ApiCompatibilityBaselineHeader, baselineCompileTimeAsset.Path, latestCompileTimeAsset.Path, _baselinePackage.Version, package.Version));
+                    string header = string.Format(Resources.ApiCompatibilityBaselineHeader, baselineCompileTimeAsset.Path, latestCompileTimeAsset.Path, _baselinePackage.Version, package.Version);
+                    _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, baselineCompileTimeAsset, latestCompileTimeAsset, header, isBaseline: true);
                 }
             }
 
@@ -86,13 +83,8 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (_runApiCompat)
                     {
-                        _apiCompatRunner.QueueApiCompat(_baselinePackage.PackagePath, 
-                            baselineRuntimeAsset.Path,
-                            package.PackagePath, 
-                            latestRuntimeAsset.Path,
-                            package.PackageId,
-                            Resources.BaselineVersionValidatorHeader,
-                            string.Format(Resources.ApiCompatibilityBaselineHeader, baselineRuntimeAsset.Path, latestRuntimeAsset.Path, _baselinePackage.Version, package.Version));
+                        string header = string.Format(Resources.ApiCompatibilityBaselineHeader, baselineRuntimeAsset.Path, latestRuntimeAsset.Path, _baselinePackage.Version, package.Version);
+                        _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, baselineRuntimeAsset, latestRuntimeAsset, header, isBaseline: true);
                     }
                 }
             }
@@ -118,17 +110,12 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (_runApiCompat)
                     {
-                        _apiCompatRunner.QueueApiCompat(_baselinePackage.PackagePath, 
-                            baselineRuntimeSpecificAsset.Path,
-                            package.PackagePath, 
-                            latestRuntimeSpecificAsset.Path,
-                            package.PackageId,
-                            Resources.BaselineVersionValidatorHeader,
-                            string.Format(Resources.BaselineVersionValidatorHeader, baselineRuntimeSpecificAsset.Path, latestRuntimeSpecificAsset.Path, _baselinePackage.Version, package.Version));
+                        string header = string.Format(Resources.ApiCompatibilityBaselineHeader, baselineRuntimeSpecificAsset.Path, latestRuntimeSpecificAsset.Path, _baselinePackage.Version, package.Version);
+                        _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, baselineRuntimeSpecificAsset, latestRuntimeSpecificAsset, header, isBaseline: true);
                     }
                 }
             }
-            
+
             _apiCompatRunner.RunApiCompat();
         }
     }

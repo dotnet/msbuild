@@ -134,11 +134,11 @@ namespace Microsoft.DotNet.ApiCompatibility
                 }
 
                 ElementContainer<IAssemblySymbol> element = right[i];
-                rightNames[i] = element.MetadataInformation.AssemblyId;
+                rightNames[i] = element.MetadataInformation.DisplayString;
                 mapper.AddElement(element.Element, ElementSide.Right, i);
             }
 
-            mapper.Settings = GetComparingSettingsCore(left.MetadataInformation.AssemblyId, rightNames);
+            mapper.Settings = GetComparingSettingsCore(left.MetadataInformation.DisplayString, rightNames);
 
             DifferenceVisitor visitor = new(rightCount: rightCount, noWarn: NoWarn, ignoredDifferences: IgnoredDifferences);
             visitor.Visit(mapper);
