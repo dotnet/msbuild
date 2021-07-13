@@ -3,12 +3,7 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;

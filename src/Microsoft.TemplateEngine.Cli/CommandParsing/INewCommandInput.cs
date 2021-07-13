@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
-
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     internal interface INewCommandInput

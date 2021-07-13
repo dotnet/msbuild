@@ -3,9 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;

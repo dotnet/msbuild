@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.IO;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;

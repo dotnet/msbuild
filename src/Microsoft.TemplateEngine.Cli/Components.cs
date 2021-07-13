@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Cli.TemplateSearch;

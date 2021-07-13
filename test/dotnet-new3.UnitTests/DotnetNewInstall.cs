@@ -3,10 +3,8 @@
 
 #nullable enable
 
-using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;

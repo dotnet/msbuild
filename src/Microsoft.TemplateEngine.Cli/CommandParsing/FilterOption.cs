@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System;
-
 namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     /// <summary>

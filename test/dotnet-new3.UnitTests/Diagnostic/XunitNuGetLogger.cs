@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.Threading.Tasks;
 using NuGet.Common;
 using Xunit.Abstractions;
 using Xunit.Sdk;

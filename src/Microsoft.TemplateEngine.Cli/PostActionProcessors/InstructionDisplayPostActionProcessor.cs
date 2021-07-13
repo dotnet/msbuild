@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System;
 using Microsoft.TemplateEngine.Abstractions;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors

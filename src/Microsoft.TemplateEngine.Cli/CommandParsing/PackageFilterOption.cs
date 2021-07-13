@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System;
 using Microsoft.TemplateSearch.Common;
 
 namespace Microsoft.TemplateEngine.Cli.CommandParsing

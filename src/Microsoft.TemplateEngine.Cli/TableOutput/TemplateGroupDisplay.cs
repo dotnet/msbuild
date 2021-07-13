@@ -3,9 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Utils;

@@ -3,10 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;

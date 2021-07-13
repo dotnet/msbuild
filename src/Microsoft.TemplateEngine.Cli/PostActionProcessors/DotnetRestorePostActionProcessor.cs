@@ -3,10 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
 

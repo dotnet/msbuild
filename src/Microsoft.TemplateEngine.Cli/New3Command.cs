@@ -3,13 +3,7 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
 using Microsoft.TemplateEngine.Cli.Alias;

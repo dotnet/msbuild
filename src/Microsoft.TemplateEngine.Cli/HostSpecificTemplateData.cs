@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli

@@ -3,9 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-
 namespace Microsoft.TemplateEngine.Cli.Alias
 {
     internal class AliasManipulationResult

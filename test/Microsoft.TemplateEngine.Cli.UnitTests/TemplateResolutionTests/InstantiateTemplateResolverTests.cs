@@ -3,10 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;
 using Microsoft.TemplateEngine.Cli.UnitTests.CliMocks;
 using Microsoft.TemplateEngine.Mocks;

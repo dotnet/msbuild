@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.Collections.Generic;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Utils;
 

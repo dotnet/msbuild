@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.IO;
 using System.Runtime.InteropServices;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;

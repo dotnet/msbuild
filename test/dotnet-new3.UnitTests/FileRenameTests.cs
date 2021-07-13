@@ -3,8 +3,6 @@
 
 #nullable enable
 
-using System.IO;
-using System.Linq;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.TemplateEngine.TestHelper;
 using Xunit;

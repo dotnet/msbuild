@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.TemplateFiltering;
 using Microsoft.TemplateEngine.Cli.TemplateResolution;

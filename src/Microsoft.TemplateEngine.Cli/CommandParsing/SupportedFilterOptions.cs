@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System;
 using Microsoft.TemplateEngine.Utils;
 using Microsoft.TemplateSearch.Common;
 

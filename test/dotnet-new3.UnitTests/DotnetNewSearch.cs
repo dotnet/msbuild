@@ -3,9 +3,6 @@
 
 #nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.NET.TestFramework.Assertions;
 using Xunit;
 using Xunit.Abstractions;
