@@ -144,11 +144,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
 
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
-        public void AssemblyKeyTokenMustBeCompatible()
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void AssemblyKeyTokenMustBeCompatible(bool strictMode)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("PublicKeyTokenValidation")
+                .CopyTestAsset("PublicKeyTokenValidation", allowCopyIfPresent: true)
                 .WithSource();
 
             BuildCommand buildCommand = new(testAsset);
@@ -161,15 +163,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
 
             // public key tokens must match
             ApiComparer differ = new();
+            differ.StrictMode = strictMode;
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbols, rightSymbols);
             Assert.Empty(differences);
         }
 
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
-        public void LeftAssemblyKeyTokenNull()
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LeftAssemblyKeyTokenNull(bool strictMode)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("PublicKeyTokenValidation")
+                .CopyTestAsset("PublicKeyTokenValidation", allowCopyIfPresent: true)
                 .WithSource();
 
             BuildCommand buildCommand = new(testAsset);
@@ -181,15 +187,28 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             IAssemblySymbol rightSymbols = new AssemblySymbolLoader().LoadAssembly(rightDllPath);
 
             ApiComparer differ = new();
+            differ.StrictMode = strictMode;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbols, rightSymbols);
-            Assert.Empty(differences);
+
+            if (strictMode)
+            {
+                Assert.Single(differences);
+                CompatDifference expected = new CompatDifference(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, "PublicKeyTokenValidation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+                Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
+            }
+            else
+            {
+                Assert.Empty(differences);
+            }
         }
 
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
-        public void RightAssemblyKeyTokenNull()
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RightAssemblyKeyTokenNull(bool strictMode)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("PublicKeyTokenValidation")
+                .CopyTestAsset("PublicKeyTokenValidation", allowCopyIfPresent: true)
                 .WithSource();
 
             BuildCommand buildCommand = new(testAsset);
@@ -201,6 +220,8 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             IAssemblySymbol rightSymbols = new AssemblySymbolLoader().LoadAssembly(rightDllPath);
 
             ApiComparer differ = new();
+            differ.StrictMode = strictMode;
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbols, rightSymbols);
             Assert.Single(differences);
 
@@ -208,11 +229,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
 
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
-        public void RetargetableFlagSet()
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void RetargetableFlagSet(bool strictMode)
         {
             var testAsset = _testAssetsManager
-                .CopyTestAsset("PublicKeyTokenValidation")
+                .CopyTestAsset("PublicKeyTokenValidation", allowCopyIfPresent: true)
                 .WithSource();
 
             BuildCommand buildCommand = new(testAsset);
@@ -226,33 +249,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             IAssemblySymbol rightSymbols = new AssemblySymbolLoader().LoadAssembly(rightDllPath);
 
             ApiComparer differ = new();
+            differ.StrictMode = strictMode;
+
             IEnumerable<CompatDifference> differences = differ.GetDifferences(leftSymbols, rightSymbols);
             Assert.Empty(differences);
-        }
-
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
-        public void LeftAssemblyKeyTokenNullStrictMode()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset("PublicKeyTokenValidation")
-                .WithSource();
-
-            BuildCommand buildCommand = new(testAsset);
-            buildCommand.Execute("-p:DisableSigningOnNetStandard2_0=true").Should().Pass();
-
-            string leftDllPath = Path.Combine(buildCommand.GetOutputDirectory("netstandard2.0").FullName, "PublicKeyTokenValidation.dll");
-            string rightDllPath = Path.Combine(buildCommand.GetOutputDirectory("net6.0").FullName, "PublicKeyTokenValidation.dll");
-            IAssemblySymbol leftSymbols = new AssemblySymbolLoader().LoadAssembly(leftDllPath);
-            IAssemblySymbol rightSymbols = new AssemblySymbolLoader().LoadAssembly(rightDllPath);
-
-            ApiComparer strictDiffer = new();
-            strictDiffer.StrictMode = true;
-
-            IEnumerable<CompatDifference> differences = strictDiffer.GetDifferences(leftSymbols, rightSymbols);
-            Assert.Single(differences);
-
-            CompatDifference expected = new CompatDifference(DiagnosticIds.AssemblyIdentityMustMatch, string.Empty, DifferenceType.Changed, "PublicKeyTokenValidation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
-            Assert.Equal(expected, differences.First(), CompatDifferenceComparer.Default);
         }
     }
 }

@@ -7,7 +7,7 @@ using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.PackageValidation
 {
-    internal static class Helpers
+    internal static class ApiCompatRunnerExtensions
     {
         public static void QueueApiCompatFromContentItem(this ApiCompatRunner apiCompatRunner, string packageId, ContentItem leftItem, ContentItem rightItem, string header, bool isBaseline = false)
         {

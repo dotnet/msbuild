@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     rightName,
                     rightIdentity));
             }
-            else if (Settings.StrictMode && !rightAssemblyPublicKeyToken.IsEmpty && !isRightRetargetable)
+            else if (Settings.StrictMode && !rightAssemblyPublicKeyToken.IsEmpty && !isRightRetargetable && !rightAssemblyPublicKeyToken.SequenceEqual(leftAssemblyPublicKeyToken))
             {
                 differences.Add(CreateIdentityDifference(
                     Resources.AssemblyPublicKeyTokenDoesNotMatch,
