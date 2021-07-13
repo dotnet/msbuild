@@ -22,7 +22,7 @@ using System.Reflection;
 
 namespace Microsoft.Build.UnitTests
 {
-    public class XMakeAppTests
+    public class XMakeAppTests : IDisposable
     {
 #if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
@@ -31,10 +31,12 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         private readonly ITestOutputHelper _output;
+        private readonly TestEnvironment _env;
 
         public XMakeAppTests(ITestOutputHelper output)
         {
             _output = output;
+            _env = UnitTests.TestEnvironment.Create(_output);
         }
 
         private const string AutoResponseFileName = "MSBuild.rsp";
@@ -878,38 +880,23 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryFoundImplicitly()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            string directory = _env.DefaultTestDirectory.Path;
             string projectPath = Path.Combine(directory, "my.proj");
             string rspPath = Path.Combine(directory, AutoResponseFileName);
 
-            string currentDirectory = Directory.GetCurrentDirectory();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            File.WriteAllText(projectPath, content);
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            string rspContent = "/p:A=1";
+            File.WriteAllText(rspPath, rspContent);
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            // Find the project in the current directory
+            _env.SetCurrentDirectory(directory);
 
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
+            string output = RunnerUtilities.ExecMSBuild(String.Empty, out var successfulExit);
+            successfulExit.ShouldBeTrue();
 
-                // Find the project in the current directory
-                Directory.SetCurrentDirectory(directory);
-
-                bool successfulExit;
-                string output = RunnerUtilities.ExecMSBuild(String.Empty, out successfulExit);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=1]");
-            }
-            finally
-            {
-                Directory.SetCurrentDirectory(currentDirectory);
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=1]");
         }
 
         /// <summary>
@@ -2443,6 +2430,11 @@ EndGlobal
 
                 return (success, output);
             }
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
         }
     }
 }
