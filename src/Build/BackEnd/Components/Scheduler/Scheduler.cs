@@ -178,7 +178,7 @@ namespace Microsoft.Build.BackEnd
         public Scheduler()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = Traits.Instance.DebugEngine
+            _debugDumpPath = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
                 ? DebugUtils.DebugDumpPath()
                 : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");

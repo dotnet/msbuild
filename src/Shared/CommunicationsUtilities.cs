@@ -560,7 +560,7 @@ namespace Microsoft.Build.Internal
 #if CLR2COMPATIBILITY
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
-                        Traits.Instance.DebugEngine
+                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
                             ? DebugUtils.DebugDumpPath()
                             : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #endif
