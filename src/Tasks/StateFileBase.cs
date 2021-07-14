@@ -82,7 +82,7 @@ namespace Microsoft.Build.Tasks
                         translator.Translate(ref version);
                         // If retVal is still null or the version is wrong, log a message not a warning. This could be a valid cache with the wrong version preventing correct deserialization.
                         // For the latter case, internals may be unexpectedly null.
-                        if (retVal == null || version != CurrentSerializationVersion)
+                        if (version != CurrentSerializationVersion)
                         {
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
                             return null;
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
                         
-                        if (!requiredReturnType.IsInstanceOfType(retVal))
+                        if (retVal == null || !requiredReturnType.IsInstanceOfType(retVal))
                         {
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,
                                 log.FormatResourceString("General.IncompatibleStateFileType"));
