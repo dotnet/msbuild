@@ -60,6 +60,45 @@
       "description": "If specified, skips the automatic restore of the project on create.",
       "defaultValue": "false",
       "displayName": "Skip restore"
+    },
+    "csharp10orLater": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "datatype": "bool",
+      "parameters": {
+        "pattern": "^(|10\\.0|10|preview|latest|default|latestMajor)$",
+        "source": "langVersion"
+      }
+    },
+    "csharp9orLater": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "datatype": "bool",
+      "parameters": {
+        "pattern": "^(|9|9\\.0|10\\.0|10|preview|latest|default|latestMajor)$",
+        "source": "langVersion"
+      }
+    },
+    "csharp8orLater": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "datatype": "bool",
+      "parameters": {
+        "pattern": "^(|8|8\\.0|9|9\\.0|10\\.0|10|preview|latest|default|latestMajor)$",
+        "source": "langVersion"
+      }
+    },
+    "csharpFeature_ImplicitUsings": {
+      "type": "computed",
+      "value": "csharp10orLater == \"true\""
+    },
+    "csharpFeature_Nullable": {
+      "type": "computed",
+      "value": "csharp8orLater == \"true\""
+    },
+    "csharpFeature_TopLevelProgram": {
+      "type": "computed",
+      "value": "csharp9orLater == \"true\""
     }
   },
   "primaryOutputs": [

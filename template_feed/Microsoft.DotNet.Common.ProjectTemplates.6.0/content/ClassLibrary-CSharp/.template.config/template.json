@@ -84,6 +84,36 @@
       "description": "If specified, skips the automatic restore of the project on create.",
       "defaultValue": "false",
       "displayName": "Skip restore"
+    },
+    "csharp10orLater": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "datatype": "bool",
+      "parameters": {
+        "pattern": "^(|10\\.0|10|preview|latest|default|latestMajor)$",
+        "source": "langVersion"
+      }
+    },
+    "csharp8orLater": {
+      "type": "generated",
+      "generator": "regexMatch",
+      "datatype": "bool",
+      "parameters": {
+        "pattern": "^(|8|8\\.0|9|9\\.0|10\\.0|10|preview|latest|default|latestMajor)$",
+        "source": "langVersion"
+      }
+    },
+    "csharpFeature_ImplicitUsings": {
+      "type": "computed",
+      "value": "Framework == \"net6.0\" && csharp10orLater == \"true\""
+    },
+    "csharpFeature_FileScopedNamespaces": {
+      "type": "computed",
+      "value": "(Framework == \"net6.0\" || langVersion != \"\") && csharp10orLater == \"true\""
+    },
+    "csharpFeature_Nullable": {
+      "type": "computed",
+      "value": "(Framework != \"netstandard2.0\" || langVersion != \"\") && csharp8orLater == \"true\""
     }
   },
   "primaryOutputs": [
