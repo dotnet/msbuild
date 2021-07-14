@@ -9,15 +9,15 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolUninstallCommandParser
     {
-        public static readonly Argument PackageIdArgument = ToolInstallCommandParser.PackageIdArgument;
+        public static readonly Argument<string> PackageIdArgument = ToolInstallCommandParser.PackageIdArgument;
 
-        public static readonly Option GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
 
-        public static readonly Option LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
 
-        public static readonly Option ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
 
-        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
+        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
 
         public static Command GetCommand()
         {

@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolRunCommandParser
     {
-        public static readonly Argument CommandNameArgument = new Argument<string>(LocalizableStrings.CommandNameArgumentName)
+        public static readonly Argument<string> CommandNameArgument = new Argument<string>(LocalizableStrings.CommandNameArgumentName)
         {
             Description = LocalizableStrings.CommandNameArgumentDescription
         };

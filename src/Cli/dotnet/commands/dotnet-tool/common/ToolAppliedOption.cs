@@ -13,19 +13,19 @@ namespace Microsoft.DotNet.Tools.Tool.Common
     internal class ToolAppliedOption
     {
         public static string[] GlobalOptionAliases = new string[] { "--global", "-g" };
-        public static Option GlobalOption(string description) => new Option<bool>(GlobalOptionAliases, description);
+        public static Option<bool> GlobalOption(string description) => new Option<bool>(GlobalOptionAliases, description);
 
         public static string LocalOptionAlias = "--local";
-        public static Option LocalOption(string description) => new Option<bool>(LocalOptionAlias, description);
+        public static Option<bool> LocalOption(string description) => new Option<bool>(LocalOptionAlias, description);
 
         public static string ToolPathOptionAlias = "--tool-path";
-        public static Option ToolPathOption(string description, string argumentName) => new Option<string>(ToolPathOptionAlias, description)
+        public static Option<string> ToolPathOption(string description, string argumentName) => new Option<string>(ToolPathOptionAlias, description)
         {
             ArgumentHelpName = argumentName
         };
 
         public static string ToolManifestOptionAlias = "--tool-manifest";
-        public static Option ToolManifestOption(string description, string argumentName) => new Option<string>(ToolManifestOptionAlias, description)
+        public static Option<string> ToolManifestOption(string description, string argumentName) => new Option<string>(ToolManifestOptionAlias, description)
         {
             ArgumentHelpName = argumentName,
             Arity = ArgumentArity.ZeroOrOne

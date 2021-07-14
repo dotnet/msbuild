@@ -152,7 +152,9 @@ Examples:
             {
                 if (string.IsNullOrEmpty(options.Project))
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     var projectOptionShort = parseResults.ValueForOption<string>("-p");
+#pragma warning restore CS0618 // Type or member is obsolete
                     if (!string.IsNullOrEmpty(projectOptionShort))
                     {
                         reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);

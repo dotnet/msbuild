@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Tools.Test
                 return;
             }
 
-            foreach (var env in parseResult.ValueForOption<IReadOnlyCollection<string>>(option))
+            foreach (var env in parseResult.ValueForOption<IEnumerable<string>>(option))
             {
                 var name = env;
                 var value = string.Empty;

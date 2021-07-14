@@ -11,36 +11,36 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class PublishCommandParser
     {
-        public static readonly Argument SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
+        public static readonly Argument<IEnumerable<string>> SlnOrProjectArgument = new Argument<IEnumerable<string>>(CommonLocalizableStrings.SolutionOrProjectArgumentName)
         {
             Description = CommonLocalizableStrings.SolutionOrProjectArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore
         };
 
-        public static readonly Option OuputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly Option<string> OuputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.OutputOption
         }.ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option ManifestOption = new ForwardedOption<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
+        public static readonly Option<IEnumerable<string>> ManifestOption = new ForwardedOption<IEnumerable<string>>("--manifest", LocalizableStrings.ManifestOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.ManifestOption
         }.ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Select(CommandDirectoryContext.GetFullPath))}")
         .AllowSingleArgPerToken();
 
-        public static readonly Option NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
+        public static readonly Option<bool> NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");
 
-        public static readonly Option SelfContainedOption = new ForwardedOption<bool>("--self-contained", LocalizableStrings.SelfContainedOptionDescription)
+        public static readonly Option<bool> SelfContainedOption = new ForwardedOption<bool>("--self-contained", LocalizableStrings.SelfContainedOptionDescription)
             .ForwardAsSingle(o =>  $"-property:SelfContained={o}");
 
-        public static readonly Option NoSelfContainedOption = new ForwardedOption<bool>("--no-self-contained", LocalizableStrings.NoSelfContainedOptionDescription)
+        public static readonly Option<bool> NoSelfContainedOption = new ForwardedOption<bool>("--no-self-contained", LocalizableStrings.NoSelfContainedOptionDescription)
             .ForwardAs("-property:SelfContained=false");
 
-        public static readonly Option NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
+        public static readonly Option<bool> NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
-        public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();
+        public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
 
         public static Command GetCommand()
         {

@@ -10,13 +10,13 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class RemoveProjectToProjectReferenceParser
     {
-        public static readonly Argument ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.ProjectPathArgumentName)
+        public static readonly Argument<IEnumerable<string>> ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.ProjectPathArgumentName)
         {
             Description = LocalizableStrings.ProjectPathArgumentDescription,
             Arity = ArgumentArity.OneOrMore,
         }.AddSuggestions(Suggest.ProjectReferencesFromProjectFile());
 
-        public static readonly Option FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
+        public static readonly Option<string> FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {
             ArgumentHelpName = CommonLocalizableStrings.CmdFramework
         };

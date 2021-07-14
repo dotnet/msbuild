@@ -8,36 +8,36 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadUpdateCommandParser
     {
-        public static readonly Option ConfigOption = WorkloadInstallCommandParser.ConfigOption;
+        public static readonly Option<string> ConfigOption = WorkloadInstallCommandParser.ConfigOption;
 
-        public static readonly Option SourceOption = WorkloadInstallCommandParser.SourceOption;
+        public static readonly Option<string[]> SourceOption = WorkloadInstallCommandParser.SourceOption;
 
-        public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
-        public static readonly Option VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
+        public static readonly Option<VerbosityOptions> VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
 
-        public static readonly Option IncludePreviewsOption = WorkloadInstallCommandParser.IncludePreviewOption;
+        public static readonly Option<bool> IncludePreviewsOption = WorkloadInstallCommandParser.IncludePreviewOption;
 
-        public static readonly Option DownloadToCacheOption = WorkloadInstallCommandParser.DownloadToCacheOption;
+        public static readonly Option<string> DownloadToCacheOption = WorkloadInstallCommandParser.DownloadToCacheOption;
 
-        public static readonly Option TempDirOption = WorkloadInstallCommandParser.TempDirOption;
+        public static readonly Option<string> TempDirOption = WorkloadInstallCommandParser.TempDirOption;
 
-        public static readonly Option PrintDownloadLinkOnlyOption =
+        public static readonly Option<bool> PrintDownloadLinkOnlyOption =
             WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption;
 
-        public static readonly Option FromCacheOption =
+        public static readonly Option<string> FromCacheOption =
             WorkloadInstallCommandParser.FromCacheOption;
 
-        public static readonly Option FromPreviousSdkOption = new Option<bool>("--from-previous-sdk", LocalizableStrings.FromPreviousSdkOptionDescription);
+        public static readonly Option<bool> FromPreviousSdkOption = new Option<bool>("--from-previous-sdk", LocalizableStrings.FromPreviousSdkOptionDescription);
 
-        public static readonly Option AdManifestOnlyOption = new Option<bool>("--advertising-manifests-only", LocalizableStrings.AdManifestOnlyOptionDescription);
+        public static readonly Option<bool> AdManifestOnlyOption = new Option<bool>("--advertising-manifests-only", LocalizableStrings.AdManifestOnlyOptionDescription);
 
-        public static readonly Option PrintRollbackOption = new Option<bool>("--print-rollback")
+        public static readonly Option<bool> PrintRollbackOption = new Option<bool>("--print-rollback")
         {
             IsHidden = true
         };
 
-        public static readonly Option FromRollbackFileOption = new Option<string>("--from-rollback-file", LocalizableStrings.FromRollbackDefinitionOptionDescription)
+        public static readonly Option<string> FromRollbackFileOption = new Option<string>("--from-rollback-file", LocalizableStrings.FromRollbackDefinitionOptionDescription)
         {
             IsHidden = true
         };

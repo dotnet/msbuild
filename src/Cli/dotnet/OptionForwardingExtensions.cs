@@ -20,9 +20,9 @@ namespace Microsoft.DotNet.Cli
         public static ForwardedOption<string[]> ForwardAsProperty(this ForwardedOption<string[]> option) => option
             .SetForwardingFunction((optionVals) => optionVals.SelectMany(optionVal => new string[] { $"{option.Aliases.FirstOrDefault()}:{optionVal.Replace("roperty:", string.Empty)}" }));
 
-        public static Option ForwardAsMany<T>(this ForwardedOption<T> option, Func<T, IEnumerable<string>> format) => option.SetForwardingFunction(format);
+        public static Option<T> ForwardAsMany<T>(this ForwardedOption<T> option, Func<T, IEnumerable<string>> format) => option.SetForwardingFunction(format);
 
-        public static Option ForwardAsManyArgumentsEachPrefixedByOption(this ForwardedOption<IEnumerable<string>> option, string alias) => option.ForwardAsMany(o => ForwardedArguments(alias, o));
+        public static Option<IEnumerable<string>> ForwardAsManyArgumentsEachPrefixedByOption(this ForwardedOption<IEnumerable<string>> option, string alias) => option.ForwardAsMany(o => ForwardedArguments(alias, o));
 
         public static IEnumerable<string> OptionValuesToBeForwarded(this ParseResult parseResult, Command command) =>
             command.Options
@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
                 .GetForwardingFunction()(parseResult)
             ?? Array.Empty<string>();
 
-        public static Option AllowSingleArgPerToken(this Option option)
+        public static Option<T> AllowSingleArgPerToken<T>(this Option<T> option)
         {
             option.AllowMultipleArgumentsPerToken = false;
             return option;

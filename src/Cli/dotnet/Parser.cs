@@ -56,18 +56,18 @@ namespace Microsoft.DotNet.Cli
         public static readonly Command InstallSuccessCommand = InternalReportinstallsuccessCommandParser.GetCommand();
 
         // Options
-        public static readonly Option DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
+        public static readonly Option<bool> DiagOption = new Option<bool>(new[] { "-d", "--diagnostics" });
 
-        public static readonly Option VersionOption = new Option<bool>("--version");
+        public static readonly Option<bool> VersionOption = new Option<bool>("--version");
 
-        public static readonly Option InfoOption = new Option<bool>("--info");
+        public static readonly Option<bool> InfoOption = new Option<bool>("--info");
 
-        public static readonly Option ListSdksOption = new Option<bool>("--list-sdks");
+        public static readonly Option<bool> ListSdksOption = new Option<bool>("--list-sdks");
 
-        public static readonly Option ListRuntimesOption = new Option<bool>("--list-runtimes");
+        public static readonly Option<bool> ListRuntimesOption = new Option<bool>("--list-runtimes");
 
         // Argument
-        public static readonly Argument DotnetSubCommand = new Argument<string>() { Arity = ArgumentArity.ExactlyOne, IsHidden = true };
+        public static readonly Argument<string> DotnetSubCommand = new Argument<string>() { Arity = ArgumentArity.ExactlyOne, IsHidden = true };
 
         private static Command ConfigureCommandLine(Command rootCommand, bool includeWorkloadCommands = false)
         {
@@ -161,7 +161,7 @@ namespace Microsoft.DotNet.Cli
 
         internal class DotnetHelpBuilder : HelpBuilder
         {
-            public DotnetHelpBuilder(IConsole console, int maxWidth = int.MaxValue) : base(console, maxWidth) { }
+            public DotnetHelpBuilder(IConsole console, int maxWidth = int.MaxValue) : base(console, Resources.Instance, maxWidth) { }
 
             public static Lazy<HelpBuilder> Instance = new Lazy<HelpBuilder>(() => {
                 int windowWidth;
