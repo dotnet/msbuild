@@ -1,0 +1,49 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+      - release/*.*
+
+variables:
+  - name: teamName
+    value: Roslyn-Project-System
+  - name: PB_PublishBlobFeedUrl
+    value: ''
+  - name: _DotNetPublishToBlobFeed
+    value: false
+  - name: _DotNetArtifactsCategory
+    value: .NETCore
+  - name: _DotNetValidationArtifactsCategory
+    value: .NETCore
+  - name: _PublishToAzure
+    value: false
+  - name: PostBuildSign
+    value: true
+
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+    - template: /eng/build.yml
+      parameters:
+        enableRichCodeNavigation: true
+        richCodeNavigationLanguage: 'csharp'
+        richCodeNavigationEnvironment: 'production'
+        agentOs: Windows_NT_FullFramework
+        pool:
+            name: NetCorePublic-Pool
+            queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+          helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
+        strategy:
+          matrix:
+            Build_Debug:
+              _BuildConfig: Debug
+              _PublishType: none
+              _SignType: test
+              _Test: -test
+            Build_Release:
+              _BuildConfig: Release
+              _PublishType: none
+              _SignType: test
+              _Test: -test
