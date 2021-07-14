@@ -11,12 +11,12 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Cleanup.Tests
 {
-    public class GivenDotnetCleanupIsInvoked
+    public class GivenDotnetFormatIsInvoked
     {
         [Fact]
         public void WithoutAnyAdditionalArguments()
         {
-            var app = new CleanupCommand().FromArgs(Array.Empty<string>());
+            var app = new FormatCommand().FromArgs(Array.Empty<string>());
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(new string[]{
                     "--fix-whitespace",
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         [InlineData("CA1803 CA1804 CA1805")]
         public void WithDiagnosticsOption(string diagnostics)
         {
-            var app = new CleanupCommand().FromArgs(new string[] { "--diagnostics", diagnostics });
+            var app = new FormatCommand().FromArgs(new string[] { "--diagnostics", diagnostics });
             var expectedArgs = new string[]
             {
                 "--fix-whitespace",
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         [InlineData("path/to/file/file.cs")]
         public void WithIncludeOption(string files)
         {
-            var app = new CleanupCommand().FromArgs(new string[] { "--include", files });
+            var app = new FormatCommand().FromArgs(new string[] { "--include", files });
             var expectedArgs = new string[]
             {
                 "--include",
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         [InlineData("path/to/file/file.cs")]
         public void WithExcludeOption(string files)
         {
-            var app = new CleanupCommand().FromArgs(new string[] { "--exclude", files });
+            var app = new FormatCommand().FromArgs(new string[] { "--exclude", files });
             var expectedArgs = new string[]
             {
                 "--exclude",
@@ -154,7 +154,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         {
             try
             {
-                var app = new CleanupCommand().FromArgs(arguments.Split(" "));
+                var app = new FormatCommand().FromArgs(arguments.Split(" "));
             }
             catch (HelpException helpException)
             {
@@ -164,7 +164,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
 
         private static void VerifyArgumentsWithDefault(string arguments, string expected)
         {
-            var app = new CleanupCommand().FromArgs(arguments.Split(" "));
+            var app = new FormatCommand().FromArgs(arguments.Split(" "));
             var expectedArgs = expected.Split(" ").ToList();
             expectedArgs.AddRange(
                 new string[]{
@@ -178,7 +178,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
 
         private static void VerifyArguments(string arguments, string expected)
         {
-            var app = new CleanupCommand().FromArgs(arguments.Split(" "));
+            var app = new FormatCommand().FromArgs(arguments.Split(" "));
             var expectedArgs = expected.Split(" ").ToList();
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());

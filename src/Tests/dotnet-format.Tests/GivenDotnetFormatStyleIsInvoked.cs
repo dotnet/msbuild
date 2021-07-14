@@ -11,16 +11,25 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Cleanup.Tests
 {
-    public class GivenDotnetCleanupFormattingIsInvoked
+    public class GivenDotnetFormatStyleIsInvoked
     {
         [Fact]
         public void WithoutAnyAdditionalArguments()
         {
-            var app = new CleanupFormattingCommand().FromArgs(Array.Empty<string>());
+            var app = new FormatStyleCommand().FromArgs(Array.Empty<string>());
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(new string[]{
-                    "--fix-whitespace",
+                    "--fix-style",
                     });
+        }
+
+        [Theory]
+        [InlineData("info", "--fix-style info")]
+        [InlineData("warn", "--fix-style warn")]
+        [InlineData("error", "--fix-style error")]
+        public void WithSeverityOption(string severity, string expected)
+        {
+            VerifyArguments($"--severity {severity}", expected);
         }
 
         [Fact]
@@ -36,12 +45,12 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         [InlineData("path/to/file/file.cs")]
         public void WithIncludeOption(string files)
         {
-            var app = new CleanupFormattingCommand().FromArgs(new string[] { "--include", files });
+            var app = new FormatStyleCommand().FromArgs(new string[] { "--include", files });
             var expectedArgs = new string[]
             {
                 "--include",
                 files,
-                "--fix-whitespace",
+                "--fix-style",
             };
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
@@ -54,12 +63,12 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         [InlineData("path/to/file/file.cs")]
         public void WithExcludeOption(string files)
         {
-            var app = new CleanupFormattingCommand().FromArgs(new string[] { "--exclude", files });
+            var app = new FormatStyleCommand().FromArgs(new string[] { "--exclude", files });
             var expectedArgs = new string[]
             {
                 "--exclude",
                 files,
-                "--fix-whitespace",
+                "--fix-style",
             };
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
@@ -121,7 +130,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         {
             try
             {
-                var app = new CleanupFormattingCommand().FromArgs(arguments.Split(" "));
+                var app = new FormatStyleCommand().FromArgs(arguments.Split(" "));
             }
             catch (HelpException helpException)
             {
@@ -131,12 +140,20 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
 
         private static void VerifyArgumentsWithDefault(string arguments, string expected)
         {
-            var app = new CleanupFormattingCommand().FromArgs(arguments.Split(" "));
+            var app = new FormatStyleCommand().FromArgs(arguments.Split(" "));
             var expectedArgs = expected.Split(" ").ToList();
             expectedArgs.AddRange(
                 new string[]{
-                    "--fix-whitespace",
+                    "--fix-style",
                     });
+            app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
+                .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
+        }
+
+        private static void VerifyArguments(string arguments, string expected)
+        {
+            var app = new FormatStyleCommand().FromArgs(arguments.Split(" "));
+            var expectedArgs = expected.Split(" ").ToList();
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
         }

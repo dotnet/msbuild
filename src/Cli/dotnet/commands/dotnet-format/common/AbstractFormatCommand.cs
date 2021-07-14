@@ -8,7 +8,7 @@ using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Cleanup
 {
-    public abstract class AbstractCleanupCommand
+    public abstract class AbstractFormatCommand
     {
         protected abstract string ParseFrom { get; }
         protected abstract List<string> AddArgs(ParseResult parseResult);

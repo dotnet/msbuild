@@ -9,19 +9,19 @@ using Microsoft.DotNet.Cli.Cleanup;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal class CleanupFormattingCommand : AbstractCleanupCommand
+    internal class FormatAnalyzersCommand : AbstractFormatCommand
     {
-        protected override string ParseFrom => "dotnet cleanup formatting";
+        protected override string ParseFrom => "dotnet format analyzers";
 
         protected override List<string> AddArgs(ParseResult parseResult)
         {
             var dotnetFormatArgs = new List<string>();
             dotnetFormatArgs.AddProjectOrSolutionDotnetFormatArgs(parseResult);
             dotnetFormatArgs.AddCommonDotnetFormatArgs(parseResult);
-            dotnetFormatArgs.AddFormattingDotnetFormatArgs(parseResult);
+            dotnetFormatArgs.AddAnalyzerDotnetFormatArgs(parseResult);
             return dotnetFormatArgs;
         }
 
-        public static int Run(string[] args) => new CleanupFormattingCommand().RunCommand(args);
+        public static int Run(string[] args) => new FormatAnalyzersCommand().RunCommand(args);
     }
 }

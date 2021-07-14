@@ -8,26 +8,30 @@ using System.Threading.Tasks;
 
 using Microsoft.DotNet.Cli.Cleanup;
 using LocalizableStrings = Microsoft.DotNet.Tools.Cleanup.LocalizableStrings;
-using static Microsoft.DotNet.Cli.Cleanup.CleanupCommandCommon;
+using static Microsoft.DotNet.Cli.Cleanup.FormatCommandCommon;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal static class CleanupFormattingCommandParser
+    internal static class FormatAnalyzersCommandParser
     {
+        private static readonly FormatAnalyzersHandler s_analyzerHandler = new();
 
-        private static readonly CleanupFormattingHandler s_formattingHandler = new();
         public static Command GetCommand()
         {
-            var command = new Command("formatting", LocalizableStrings.Run_whitespace_formatting);
+            var command = new Command("analyzers", LocalizableStrings.Run_3rd_party_analyzers__and_apply_fixes)
+            {
+                DiagnosticsOption,
+                SeverityOption,
+            };
             command.AddCommonOptions();
-            command.Handler = s_formattingHandler;
+            command.Handler = s_analyzerHandler;
             return command;
         }
 
-        class CleanupFormattingHandler : ICommandHandler
+        class FormatAnalyzersHandler : ICommandHandler
         {
             public Task<int> InvokeAsync(InvocationContext context)
-                => Task.FromResult(new CleanupFormattingCommand().FromArgs(context.ParseResult).Execute());
+                => Task.FromResult(new FormatAnalyzersCommand().FromArgs(context.ParseResult).Execute());
         }
     }
 }

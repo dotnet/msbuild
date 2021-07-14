@@ -8,21 +8,21 @@ using System.Threading.Tasks;
 
 using Microsoft.DotNet.Cli.Cleanup;
 using LocalizableStrings = Microsoft.DotNet.Tools.Cleanup.LocalizableStrings;
-using static Microsoft.DotNet.Cli.Cleanup.CleanupCommandCommon;
+using static Microsoft.DotNet.Cli.Cleanup.FormatCommandCommon;
 
 namespace Microsoft.DotNet.Cli
 {
-    internal static partial class CleanupCommandParser
+    internal static partial class FormatCommandParser
     {
-        private static readonly CleanupCommandDefaultHandler s_cleanupCommandHandler = new();
+        private static readonly FormatCommandDefaultHandler s_cleanupCommandHandler = new();
 
         public static Command GetCommand()
         {
-            var cleanupCommand = new Command("cleanup", LocalizableStrings.Cleans_up_code_formatting_to_match_editorconfig_settings)
+            var cleanupCommand = new Command("format", LocalizableStrings.Cleans_up_code_formatting_to_match_editorconfig_settings)
             {
-                CleanupFormattingCommandParser.GetCommand(),
-                CleanupStyleCommandParser.GetCommand(),
-                CleanupAnalyzersCommandParser.GetCommand(),
+                FormatWhitespaceCommandParser.GetCommand(),
+                FormatStyleCommandParser.GetCommand(),
+                FormatAnalyzersCommandParser.GetCommand(),
                 DiagnosticsOption,
                 SeverityOption,
             };
@@ -31,10 +31,10 @@ namespace Microsoft.DotNet.Cli
             return cleanupCommand;
         }
 
-        class CleanupCommandDefaultHandler : ICommandHandler
+        class FormatCommandDefaultHandler : ICommandHandler
         {
             public Task<int> InvokeAsync(InvocationContext context)
-                => Task.FromResult(new CleanupCommand().FromArgs(context.ParseResult).Execute());
+                => Task.FromResult(new FormatCommand().FromArgs(context.ParseResult).Execute());
         }
     }
 }

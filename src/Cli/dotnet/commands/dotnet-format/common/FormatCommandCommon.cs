@@ -11,7 +11,7 @@ using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Cli.Cleanup
 {
-    internal static class CleanupCommandCommon
+    internal static class FormatCommandCommon
     {
         private static string[] VerbosityLevels => new[] { "q", "quiet", "m", "minimal", "n", "normal", "d", "detailed", "diag", "diagnostic" };
         private static string[] SeverityLevels => new[] { "info", "warn", "error" };

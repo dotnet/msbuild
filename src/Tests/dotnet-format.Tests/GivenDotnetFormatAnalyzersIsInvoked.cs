@@ -11,22 +11,38 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.Cleanup.Tests
 {
-    public class GivenDotnetCleanupStyleIsInvoked
+    public class GivenDotnetFormatAnalyzerIsInvoked
     {
         [Fact]
         public void WithoutAnyAdditionalArguments()
         {
-            var app = new CleanupStyleCommand().FromArgs(Array.Empty<string>());
+            var app = new FormatAnalyzersCommand().FromArgs(Array.Empty<string>());
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(new string[]{
-                    "--fix-style",
+                    "--fix-analyzers"
                     });
         }
 
         [Theory]
-        [InlineData("info", "--fix-style info")]
-        [InlineData("warn", "--fix-style warn")]
-        [InlineData("error", "--fix-style error")]
+        [InlineData("CA1803")]
+        [InlineData("CA1803 CA1804 CA1805")]
+        public void WithDiagnosticsOption(string diagnostics)
+        {
+            var app = new FormatAnalyzersCommand().FromArgs(new string[] { "--diagnostics", diagnostics });
+            var expectedArgs = new string[]
+            {
+                "--fix-analyzers",
+                "--diagnostics",
+                diagnostics
+            };
+            app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
+                .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
+        }
+
+        [Theory]
+        [InlineData("info", "--fix-analyzers info")]
+        [InlineData("warn", "--fix-analyzers warn")]
+        [InlineData("error", "--fix-analyzers error")]
         public void WithSeverityOption(string severity, string expected)
         {
             VerifyArguments($"--severity {severity}", expected);
@@ -45,12 +61,12 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         [InlineData("path/to/file/file.cs")]
         public void WithIncludeOption(string files)
         {
-            var app = new CleanupStyleCommand().FromArgs(new string[] { "--include", files });
+            var app = new FormatAnalyzersCommand().FromArgs(new string[] { "--include", files });
             var expectedArgs = new string[]
             {
                 "--include",
                 files,
-                "--fix-style",
+                "--fix-analyzers",
             };
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
@@ -63,12 +79,12 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         [InlineData("path/to/file/file.cs")]
         public void WithExcludeOption(string files)
         {
-            var app = new CleanupStyleCommand().FromArgs(new string[] { "--exclude", files });
+            var app = new FormatAnalyzersCommand().FromArgs(new string[] { "--exclude", files });
             var expectedArgs = new string[]
             {
                 "--exclude",
                 files,
-                "--fix-style",
+                "--fix-analyzers",
             };
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
@@ -130,7 +146,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
         {
             try
             {
-                var app = new CleanupStyleCommand().FromArgs(arguments.Split(" "));
+                var app = new FormatAnalyzersCommand().FromArgs(arguments.Split(" "));
             }
             catch (HelpException helpException)
             {
@@ -140,11 +156,11 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
 
         private static void VerifyArgumentsWithDefault(string arguments, string expected)
         {
-            var app = new CleanupStyleCommand().FromArgs(arguments.Split(" "));
+            var app = new FormatAnalyzersCommand().FromArgs(arguments.Split(" "));
             var expectedArgs = expected.Split(" ").ToList();
             expectedArgs.AddRange(
                 new string[]{
-                    "--fix-style",
+                    "--fix-analyzers"
                     });
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
@@ -152,7 +168,7 @@ namespace Microsoft.DotNet.Cli.Cleanup.Tests
 
         private static void VerifyArguments(string arguments, string expected)
         {
-            var app = new CleanupStyleCommand().FromArgs(arguments.Split(" "));
+            var app = new FormatAnalyzersCommand().FromArgs(arguments.Split(" "));
             var expectedArgs = expected.Split(" ").ToList();
             app.Arugments.Skip(1).ToArray() // We skip the project/solution argument as its path will change
                 .ShouldAllBeEquivalentTo(expectedArgs.ToArray());
