@@ -82,7 +82,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </ItemGroup>
 
+  <!-- C# implicit imports -->
   <ItemGroup Condition=" '$(DisableImplicitNamespaceImports_DotNet)' != 'true'
+                      and '$(Language)' == 'C#'
                       and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                       and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
     <Import Include="System" />
@@ -94,4 +96,33 @@ Copyright (c) .NET Foundation. All rights reserved.
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
 
+  <!-- VB implicit imports -->
+  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true'
+                      and '$(Language)' == 'VB'
+                      and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <!-- These namespaces are present in 2.0 Framework assemblies -->
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <!-- These namespaces are introduced in 3.5 Framework assemblies -->
+    <Import Include="System.Linq" Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.5')"/>
+    <Import Include="System.Xml.Linq" Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '3.5')"/>
+    <!-- This namespace is introduced in 4.0 Framework assemblies -->
+    <Import Include="System.Threading.Tasks" Condition="('$(_TargetFrameworkVersionWithoutV)' != '') And ('$(_TargetFrameworkVersionWithoutV)' >= '4.0')"/>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true'
+                      and '$(Language)' == 'VB'
+                      and '$(_IsNETCoreOrNETStandard)' == 'true'">
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="System.Threading.Tasks" />
+  </ItemGroup>
 </Project>
