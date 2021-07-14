@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Command GetCommand()
         {
-            var cleanupCommand = new Command("format", LocalizableStrings.Cleans_up_code_formatting_to_match_editorconfig_settings)
+            var cleanupCommand = new Command("format", LocalizableStrings.Formats_code_to_match_editorconfig_settings)
             {
                 FormatWhitespaceCommandParser.GetCommand(),
                 FormatStyleCommandParser.GetCommand(),
