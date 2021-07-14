@@ -823,6 +823,22 @@ namespace Microsoft.NET.Build.Tasks
                 Position = savedPosition;
             }
 
+            class LibraryComparer : IEqualityComparer<(string, NuGetVersion)>
+            {
+                public bool Equals((string, NuGetVersion) l1, (string, NuGetVersion) l2)
+                {
+                    return StringComparer.OrdinalIgnoreCase.Equals(l1.Item1, l2.Item1)
+                        && l1.Item2.Equals(l2.Item2);
+                    
+                }
+                public int GetHashCode((string, NuGetVersion) library)
+                {
+                    return HashCode.Combine(
+                        StringComparer.OrdinalIgnoreCase.GetHashCode(library.Item1),
+                        library.Item2.GetHashCode());
+                }
+            }
+
             private void WriteAnalyzers()
             {
                 Dictionary<(string, NuGetVersion), LockFileTargetLibrary> targetLibraries = null;
@@ -843,7 +859,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (targetLibraries == null)
                         {
-                            targetLibraries = _compileTimeTarget.Libraries.ToDictionary(l => (l.Name, l.Version));
+                            targetLibraries = _compileTimeTarget.Libraries.ToDictionary(l => (l.Name, l.Version), new LibraryComparer());
                         }
 
                         if (targetLibraries.TryGetValue((library.Name, library.Version), out var targetLibrary))
