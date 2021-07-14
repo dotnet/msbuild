@@ -30,4 +30,5 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DefineTrace Condition=" '$(DefineTrace)' == '' ">true</DefineTrace>
   </PropertyGroup>
+
 </Project>
