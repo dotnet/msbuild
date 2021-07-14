@@ -615,34 +615,22 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         private bool IsWorkloadImplicitlyAbstract(WorkloadDefinition workload, WorkloadManifest manifest) => !GetPacksInWorkload(workload, manifest).Any();
 
-        public string GetManifestVersion(string manifestId)
+        public string GetManifestVersion(string manifestId) =>
+            (_manifests.TryGetValue(manifestId, out WorkloadManifest? value)? value : null)?.Version
+            ?? throw new Exception($"Manifest with id {manifestId} does not exist.");
+
+        public IEnumerable<ManifestInfo> GetInstalledManifests() => _manifests.Select(m => new ManifestInfo(m.Value.Id, m.Value.Version));
+
+        public class ManifestInfo
         {
-            (_, Stream manifestStream) = _manifestProvider.GetManifests().FirstOrDefault(manifest => manifest.manifestId.Contains(manifestId));
-
-            if (manifestStream == null)
+            public ManifestInfo(string id, string version)
             {
-                throw new Exception($"Manifest with id {manifestId} does not exist.");
+                Id = id;
+                Version = version;
             }
 
-            using (manifestStream)
-            {
-                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
-                return manifest.Version;
-            }
-        }
-
-        public IDictionary<string, string> GetInstalledManifests()
-        {
-            var manifests = new Dictionary<string, string>();
-            foreach ((string manifestId, Stream manifestStream) in _manifestProvider.GetManifests())
-            {
-                using (manifestStream)
-                {
-                    var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
-                    manifests.Add(manifestId, manifest.Version);
-                }
-            }
-            return manifests;
+            public string Id { get; }
+            public string Version { get; }
         }
     }
 

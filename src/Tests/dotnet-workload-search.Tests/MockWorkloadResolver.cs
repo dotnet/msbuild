@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public WorkloadResolver.PackInfo TryGetPackInfo(WorkloadPackId packId) => throw new NotImplementedException();
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId) => throw new NotImplementedException();
         public string GetManifestVersion(string manifestId) => throw new NotImplementedException();
-        public IDictionary<string, string> GetInstalledManifests() => throw new NotImplementedException();
+        public IEnumerable<WorkloadResolver.ManifestInfo> GetInstalledManifests() => throw new NotImplementedException();
         public IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider) => throw new NotImplementedException();
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         IEnumerable<WorkloadResolver.WorkloadInfo> GetAvailableWorkloads();
         bool IsWorkloadPlatformCompatible(WorkloadId workloadId);
         string GetManifestVersion(string manifestId);
-        IDictionary<string, string> GetInstalledManifests();
+        IEnumerable<WorkloadResolver.ManifestInfo> GetInstalledManifests();
 
         /// <summary>
         /// Resolve the pack for this resolver's SDK band.
