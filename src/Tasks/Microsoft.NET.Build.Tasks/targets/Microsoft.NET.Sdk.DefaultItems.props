@@ -82,18 +82,22 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </ItemGroup>
 
-  <!-- C# implicit imports -->
+  <!-- Implicit imports -->
   <ItemGroup Condition=" '$(DisableImplicitNamespaceImports_DotNet)' != 'true'
-                      and '$(Language)' == 'C#'
                       and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
                       and $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))">
-    <Import Include="System" />
-    <Import Include="System.Collections.Generic" />
+
+    <!-- These imports are already defined as VB implicit imports, so only add them for C# here -->
+    <Import Include="System" Condition="'$(Language)' == 'C#'" />
+    <Import Include="System.Collections.Generic" Condition="'$(Language)' == 'C#'" />
+    <Import Include="System.Linq" Condition="'$(Language)' == 'C#'" />
+    <Import Include="System.Threading.Tasks" Condition="'$(Language)' == 'C#'" />
+    
+    <!-- These imports were not included by default for VB projects prior to .NET 6, so they apply to both languages -->
     <Import Include="System.IO" />
-    <Import Include="System.Linq" />
     <Import Include="System.Net.Http" />
     <Import Include="System.Threading" />
-    <Import Include="System.Threading.Tasks" />
+
   </ItemGroup>
 
   <!-- VB implicit imports -->
