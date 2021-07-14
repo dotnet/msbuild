@@ -80,7 +80,7 @@ namespace Microsoft.Build.Tasks
 
                         byte version = 0;
                         translator.Translate(ref version);
-                        // If retVal is still null or the version is wrong, log a message not a warning. This could be a valid cache with the wrong version preventing correct deserialization.
+                        // If the version is wrong, log a message not a warning. This could be a valid cache with the wrong version preventing correct deserialization.
                         // For the latter case, internals may be unexpectedly null.
                         if (version != CurrentSerializationVersion)
                         {
