@@ -6,10 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using LocalizableStrings = Microsoft.DotNet.Tools.Cleanup.LocalizableStrings;
+using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
 using Microsoft.DotNet.Tools;
 
-namespace Microsoft.DotNet.Cli.Cleanup
+namespace Microsoft.DotNet.Cli.Format
 {
     internal static class FormatCommandCommon
     {

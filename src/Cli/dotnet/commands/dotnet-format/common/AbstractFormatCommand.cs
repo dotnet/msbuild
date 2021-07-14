@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli.Utils;
 
-namespace Microsoft.DotNet.Cli.Cleanup
+namespace Microsoft.DotNet.Cli.Format
 {
     public abstract class AbstractFormatCommand
     {

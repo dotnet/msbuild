@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 
-using Microsoft.DotNet.Cli.Cleanup;
+using Microsoft.DotNet.Cli.Format;
 
 namespace Microsoft.DotNet.Cli
 {

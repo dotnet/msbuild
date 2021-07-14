@@ -9,7 +9,7 @@ using FluentAssertions;
 using Xunit;
 
 
-namespace Microsoft.DotNet.Cli.Cleanup.Tests
+namespace Microsoft.DotNet.Cli.Format.Tests
 {
     public class GivenDotnetFormatStyleIsInvoked
     {
