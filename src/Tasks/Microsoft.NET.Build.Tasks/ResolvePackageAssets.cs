@@ -833,9 +833,16 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 public int GetHashCode((string, NuGetVersion) library)
                 {
+#if NET
                     return HashCode.Combine(
                         StringComparer.OrdinalIgnoreCase.GetHashCode(library.Item1),
                         library.Item2.GetHashCode());
+#else
+                    int hashCode = -1507694697;
+                    hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(library.Item1);
+                    hashCode = hashCode * -1521134295 + library.Item2.GetHashCode();
+                    return hashCode;
+#endif
                 }
             }
 
