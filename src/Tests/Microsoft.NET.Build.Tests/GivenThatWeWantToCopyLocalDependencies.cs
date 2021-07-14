@@ -55,6 +55,7 @@ namespace Microsoft.NET.Build.Tests
 
             var expectedFiles = new []
             {
+                $"{ProjectName}{Constants.ExeSuffix}",
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
@@ -67,7 +68,7 @@ namespace Microsoft.NET.Build.Tests
                 "runtimes/win7-x86/native/sqlite3.dll"
             };
 
-            outputDirectory.Should().OnlyHaveFiles(AssertionHelper.AppendApphostOnNonMacOS(ProjectName, expectedFiles));
+            outputDirectory.Should().OnlyHaveFiles(expectedFiles);
         }
 
         [Fact]
@@ -94,13 +95,14 @@ namespace Microsoft.NET.Build.Tests
             buildCommand.Execute().Should().Pass();
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
-            outputDirectory.Should().OnlyHaveFiles(AssertionHelper.AppendApphostOnNonMacOS(ProjectName, new[] {
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{ProjectName}{Constants.ExeSuffix}",
                 $"{ProjectName}.deps.json",
                 $"{ProjectName}.dll",
                 $"{ProjectName}.pdb",
                 $"{ProjectName}.runtimeconfig.dev.json",
                 $"{ProjectName}.runtimeconfig.json",
-            }));
+            });
         }
 
         [Fact]

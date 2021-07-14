@@ -21,6 +21,8 @@ namespace Microsoft.NET.TestFramework
 
         public string TestRoot => Path;
 
+        public readonly string Name;
+
         public ITestOutputHelper Log { get; }
 
         //  The TestProject from which this asset was created, if any
@@ -29,6 +31,7 @@ namespace Microsoft.NET.TestFramework
         internal TestAsset(string testDestination, string sdkVersion, ITestOutputHelper log) : base(testDestination, sdkVersion)
         {
             Log = log;
+            Name = new DirectoryInfo(testDestination).Name;
         }
 
         internal TestAsset(string testAssetRoot, string testDestination, string sdkVersion, ITestOutputHelper log) : base(testDestination, sdkVersion)
@@ -39,6 +42,7 @@ namespace Microsoft.NET.TestFramework
             }
 
             Log = log;
+            Name = new DirectoryInfo(testAssetRoot).Name;
             _testAssetRoot = testAssetRoot;
         }
 
