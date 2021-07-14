@@ -46,7 +46,7 @@ SDK commands:
   build             Build a .NET project.
   build-server      Interact with servers started by a build.
   clean             Clean build outputs of a .NET project.
-  cleanup           Apply style preferences to a project or solution.
+  format            Apply style preferences to a project or solution.
   help              Show command line help.
   list              List project references of a .NET project.
   msbuild           Run Microsoft Build Engine (MSBuild) commands.
