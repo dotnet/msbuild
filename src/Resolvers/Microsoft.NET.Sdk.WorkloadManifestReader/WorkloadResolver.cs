@@ -270,12 +270,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             out WorkloadPackId resolvedId,
             out bool isInstalled)
         {
-            resolvedId = ResolveId(pack) ?? default;
-            if (resolvedId is WorkloadPackId resolved)
+            if (ResolveId(pack) is WorkloadPackId resolved)
             {
+                resolvedId = resolved;
                 return GetPackPath(resolved, pack.Version, pack.Kind, out isInstalled);
             }
 
+            resolvedId = default;
             isInstalled = false;
             return null;
 
