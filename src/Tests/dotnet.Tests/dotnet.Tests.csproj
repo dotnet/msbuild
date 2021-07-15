@@ -25,6 +25,7 @@
     <Compile Include="..\dotnet-clean.Tests\**\*.cs" LinkBase="dotnet-clean" />
     <Compile Include="..\dotnet-sdk-check.Tests\**\*.cs" LinkBase="dotnet-sdk-check" />
     <Compile Include="..\dotnet-fsi.Tests\**\*.cs" LinkBase="dotnet-fsi" />
+    <Compile Include="..\dotnet-format.Tests\**\*.cs" LinkBase="dotnet-format" />
     <Compile Include="..\dotnet-help.Tests\**\*.cs" LinkBase="dotnet-help" />
     <Compile Include="..\dotnet-install-tool.Tests\**\*.cs" LinkBase="dotnet-install-tool" />
     <Compile Include="..\dotnet-list-package.Tests\**\*.cs" LinkBase="dotnet-list-package" />

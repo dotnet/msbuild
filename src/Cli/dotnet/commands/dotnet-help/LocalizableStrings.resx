@@ -294,7 +294,7 @@
   <data name="AdditionalTools" xml:space="preserve">
     <value>Additional commands from bundled tools:</value>
   </data>
-  <data name="CleanupDefinition" xml:space="preserve">
+  <data name="FormatDefinition" xml:space="preserve">
     <value>Apply style preferences to a project or solution.</value>
   </data>
 </root>

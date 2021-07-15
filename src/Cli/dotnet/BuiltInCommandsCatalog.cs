@@ -49,11 +49,11 @@ namespace Microsoft.DotNet.Cli
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-clean
                 DocLink = "https://aka.ms/dotnet-clean"
             },
-            ["cleanup"] = new BuiltInCommandMetadata
+            ["format"] = new BuiltInCommandMetadata
             {
-                Command = CleanupCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-cleanup
-                DocLink = "https://aka.ms/dotnet-cleanup"
+                Command = FormatCommand.Run,
+                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-format
+                DocLink = "https://aka.ms/dotnet-format"
             },
             ["fsi"] = new BuiltInCommandMetadata
             {
