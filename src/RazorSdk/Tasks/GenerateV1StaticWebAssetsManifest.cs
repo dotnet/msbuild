@@ -1,10 +1,11 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -13,7 +14,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.AspNetCore.Razor.Tasks
 {
-    public class GenerateStaticWebAssetsManifest : Task
+    public class GenerateV1StaticWebAssetsManifest : Task
     {
         private const string ContentRoot = "ContentRoot";
         private const string BasePath = "BasePath";
@@ -56,12 +57,40 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 Async = true
             };
 
-            using (var xmlWriter = GetXmlWriter(settings))
-            {
-                document.WriteTo(xmlWriter);
-            }
+            PersistManifest(document, settings);
 
             return !Log.HasLoggedErrors;
+        }
+
+        private void PersistManifest(XDocument document, XmlWriterSettings settings)
+        {
+            using var memory = new MemoryStream();
+            using var xmlWriter = XmlWriter.Create(memory, settings);
+            document.WriteTo(xmlWriter);
+            xmlWriter.Flush();
+            memory.Seek(0, SeekOrigin.Begin);
+            var data = memory.ToArray();
+
+            using var sha256 = SHA256.Create();
+            var currentHash = sha256.ComputeHash(data);
+
+            var fileExists = File.Exists(TargetManifestPath);
+            var existingManifestHash = fileExists ? sha256.ComputeHash(File.ReadAllBytes(TargetManifestPath)) : Array.Empty<byte>();
+
+            if (!fileExists)
+            {
+                Log.LogMessage($"Creating manifest because manifest file '{TargetManifestPath}' does not exist.");
+                File.WriteAllBytes(TargetManifestPath, data);
+            }
+            else if (!currentHash.SequenceEqual(existingManifestHash))
+            {
+                Log.LogMessage($"Updating manifest because manifest version '{Convert.ToBase64String(currentHash)}' is different from existing manifest hash '{Convert.ToBase64String(existingManifestHash)}'.");
+                File.WriteAllBytes(TargetManifestPath, data);
+            }
+            else
+            {
+                Log.LogMessage($"Skipping manifest updated because manifest version '{Convert.ToBase64String(currentHash)}' has not changed.");
+            }
         }
 
         private IEnumerable<XElement> CreateNodes()
@@ -95,12 +124,6 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             // Its important that we order the nodes here to produce a manifest deterministically.
             return nodes.OrderBy(e=>e.Attribute(BasePath).Value).ThenBy(e => e.Attribute(NodePath).Value);
-        }
-
-        private XmlWriter GetXmlWriter(XmlWriterSettings settings)
-        {
-            var fileStream = new FileStream(TargetManifestPath, FileMode.Create);
-            return XmlWriter.Create(fileStream, settings);
         }
 
         private bool ValidateArguments()

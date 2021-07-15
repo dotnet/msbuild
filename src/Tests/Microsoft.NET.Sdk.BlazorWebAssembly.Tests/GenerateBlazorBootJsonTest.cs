@@ -11,7 +11,7 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace Microsoft.NET.Sdk.BlazorWebAssembly.Test
+namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
     public class GenerateBlazorWebAssemblyBootJsonTest
     {
@@ -27,47 +27,69 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Test
                     CreateResourceTaskItem(
                         ("FileName", "My.Assembly1"),
                         ("Extension", ".dll"),
-                        ("FileHash", "abcdefghikjlmnopqrstuvwxyz")),
+                        ("FileHash", "abcdefghikjlmnopqrstuvwxyz"),
+                        ("RelativePath", "_framework/My.Assembly1.dll"),
+                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitValue", "runtime")),
 
                     CreateResourceTaskItem(
                         ("FileName", "My.Assembly2"),
                         ("Extension", ".dll"),
-                        ("FileHash", "012345678901234567890123456789")),
+                        ("FileHash", "012345678901234567890123456789"),
+                        ("RelativePath", "_framework/My.Assembly2.dll"),
+                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitValue", "runtime")),
 
                     CreateResourceTaskItem(
                         ("FileName", "SomePdb"),
                         ("Extension", ".pdb"),
-                        ("FileHash", "pdbhashpdbhashpdbhash")),
+                        ("FileHash", "pdbhashpdbhashpdbhash"),
+                        ("RelativePath", "_framework/SomePdb.pdb"),
+                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitValue", "symbol")),
 
                     CreateResourceTaskItem(
                         ("FileName", "My.Assembly1"),
                         ("Extension", ".pdb"),
-                        ("FileHash", "pdbdefghikjlmnopqrstuvwxyz")),
+                        ("FileHash", "pdbdefghikjlmnopqrstuvwxyz"),
+                        ("RelativePath", "_framework/My.Assembly1.pdb"),
+                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitValue", "symbol")),
 
                     CreateResourceTaskItem(
                         ("FileName", "some-runtime-file"),
+                        ("RelativePath", "some-runtime-file"),
                         ("FileHash", "runtimehashruntimehash"),
-                        ("AssetType", "native")),
+                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitValue", "native")),
 
                     CreateResourceTaskItem(
                         ("FileName", "satellite-assembly1"),
                         ("Extension", ".dll"),
                         ("FileHash", "hashsatelliteassembly1"),
-                        ("Culture", "en-GB")),
+                        ("RelativePath", "satellite-assembly1.dll"),
+                        ("AssetTraitName", "Culture"),
+                        ("AssetTraitValue", "en-GB")),
 
                     CreateResourceTaskItem(
                         ("FileName", "satellite-assembly2"),
                         ("Extension", ".dll"),
                         ("FileHash", "hashsatelliteassembly2"),
-                        ("Culture", "fr")),
+                        ("RelativePath", "satellite-assembly2.dll"),
+                        ("AssetTraitName", "Culture"),
+                        ("AssetTraitValue", "fr")),
 
                     CreateResourceTaskItem(
                         ("FileName", "satellite-assembly3"),
                         ("Extension", ".dll"),
                         ("FileHash", "hashsatelliteassembly3"),
-                        ("Culture", "en-GB")),
+                        ("RelativePath", "satellite-assembly3.dll"),
+                        ("AssetTraitName", "Culture"),
+                        ("AssetTraitValue", "en-GB")),
                 }
             };
+
+            taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
 
             using var stream = new MemoryStream();
 
@@ -113,6 +135,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Test
         {
             // Arrange
             var taskInstance = new GenerateBlazorWebAssemblyBootJson { CacheBootResources = flagValue };
+            taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
             using var stream = new MemoryStream();
 
             // Act
@@ -130,6 +153,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Test
         {
             // Arrange
             var taskInstance = new GenerateBlazorWebAssemblyBootJson { DebugBuild = flagValue };
+            taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
+            
             using var stream = new MemoryStream();
 
             // Act
@@ -147,6 +172,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Test
         {
             // Arrange
             var taskInstance = new GenerateBlazorWebAssemblyBootJson { LinkerEnabled = flagValue };
+            taskInstance.BuildEngine = Mock.Of<IBuildEngine>();
+
             using var stream = new MemoryStream();
 
             // Act

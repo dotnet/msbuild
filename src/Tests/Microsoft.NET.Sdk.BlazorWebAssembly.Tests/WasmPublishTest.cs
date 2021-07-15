@@ -213,7 +213,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 .Should().Pass();
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
-            publishCommand.Execute("/p:NoBuild=true").Should().Pass();
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/p:NoBuild=true", "/bl").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
@@ -492,7 +493,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
-            publishCommand.Execute().Should().Pass();
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl").Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
@@ -629,7 +631,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             File.Move(resxfileInProject, Path.Combine(testInstance.TestRoot, "blazorwasm", "Resource.ja.resx"));
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
-            publishCommand.Execute().Should().Pass();
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl").Should().Pass();
 
             var publishOutputDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
 
@@ -759,7 +762,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             buildCommand.Execute().Should().Pass();
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
-            publishCommand.Execute("/p:NoBuild=true").Should().Pass();
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/p:NoBuild=true", "/bl").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             // Make sure the main project exists
@@ -783,8 +787,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify static web assets from referenced projects are copied.
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js.br",
-                "wwwroot/_content/RazorClassLibrary/styles.css.br",
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
             });
 
             // Verify web.config
@@ -1000,10 +1004,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             File.Move(resxfileInProject, Path.Combine(testInstance.TestRoot, "blazorwasm", "Resource.ja.resx"));
 
             var buildCommand = new BuildCommand(testInstance, "blazorwasm");
-            buildCommand.Execute().Should().Pass();
+            buildCommand.WithWorkingDirectory(testInstance.TestRoot);
+            buildCommand.Execute("/bl:build-msbuild.binlog").Should().Pass();
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorwasm"));
-            publishCommand.Execute("/p:BuildProjectReferences=false").Should().Pass();
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/p:BuildProjectReferences=false", "/bl:publish-msbuild.binlog").Should().Pass();
 
             var publishDirectory = publishCommand.GetOutputDirectory(DefaultTfm);
             var blazorPublishDirectory = Path.Combine(publishDirectory.ToString(), "wwwroot");
@@ -1031,9 +1037,10 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
-            publishCommand.Execute("/p:RuntimeIdentifier=linux-x64").Should().Pass();
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/p:RuntimeIdentifier=linux-x64", "/bl").Should().Pass();
 
-            AssertRIDPublishOuput(publishCommand, testInstance);
+            AssertRIDPublishOuput(publishCommand, testInstance, hosted: true);
         }
 
         [Fact]
@@ -1044,12 +1051,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testInstance.TestRoot, "blazorhosted"));
-            publishCommand.Execute().Should().Pass();
+            publishCommand.WithWorkingDirectory(testInstance.TestRoot);
+            publishCommand.Execute("/bl").Should().Pass();
 
-            AssertRIDPublishOuput(publishCommand, testInstance);
+            AssertRIDPublishOuput(publishCommand, testInstance, hosted: true);
         }
 
-        private void AssertRIDPublishOuput(PublishCommand command, TestAsset testInstance)
+        private void AssertRIDPublishOuput(PublishCommand command, TestAsset testInstance, bool hosted = false)
         {
             var publishDirectory = command.GetOutputDirectory(DefaultTfm, "Debug", "linux-x64");
 
@@ -1086,20 +1094,24 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             // Verify static assets are in the publish directory
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/index.html.br"
+                "wwwroot/index.html"
             });
 
             // Verify static web assets from referenced projects are copied.
             publishDirectory.Should().HaveFiles(new[]
             {
-                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js.br",
-                "wwwroot/_content/RazorClassLibrary/styles.css.br",
+                "wwwroot/_content/RazorClassLibrary/wwwroot/exampleJsInterop.js",
+                "wwwroot/_content/RazorClassLibrary/styles.css",
             });
-            // Verify web.config
-            publishDirectory.Should().HaveFiles(new[]
+
+            if (!hosted)
             {
-                "web.config"
-            });
+                // Verify web.config
+                publishDirectory.Should().HaveFiles(new[]
+                {
+                    "web.config"
+                });
+            }
 
             VerifyBootManifestHashes(testInstance, Path.Combine(publishDirectory.ToString(), "wwwroot"));
 

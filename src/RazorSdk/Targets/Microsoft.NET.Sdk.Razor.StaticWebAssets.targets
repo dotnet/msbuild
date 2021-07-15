@@ -12,23 +12,43 @@ Copyright (c) .NET Foundation. All rights reserved.
 
 <Project ToolsVersion="14.0">
 
-  <!-- Targets that support static content scenarios in ASP.NET Core.
-       The main targets are:
-       * GenerateStaticWebAssetsManifest: Creates a manifest file to use in development with
-         the paths to all the references packages and projects content roots.
-       * ResolveStaticWebAssetsInputs: Collects all the static assets from different sources
-         * Current project.
-         * Referenced project.
-         * Referenced packages.
-       * GenerateStaticWebAssetsPackTargets: Includes the static web assets in the current project
-         under the 'staticwebassets' folder in the nuget package and generates and includes in the
-         package the appropriate .props files to support discovering the packaged static web assets.
-       * GetCurrentProjectStaticWebAssets: Called on each referenced project to retrieve the list of
-         static web assets in the project.
-  -->
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.DiscoverStaticWebAssets"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.ComputeStaticWebAssetsTargetPaths"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.GenerateStaticWebAssetsManifest"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.GenerateV1StaticWebAssetsManifest"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+    <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.ReadStaticWebAssetsManifestFile"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.ComputeReferencedProjectAssets"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.UpdatePackageStaticWebAssets"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.DefineStaticWebAssets"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
@@ -45,357 +65,633 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.StaticWebAssetsGeneratePackagePropsFile"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.CollectStaticWebAssetsToCopy"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    
+
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.MergeManifestProperties"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
+  <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.ComputePublishStaticWebAssetsList"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <!-- Static web assets define how web content needs to be served from web applications, class libraries and packages during
+       development and what and where web contents need to be served on the published application.
+
+       Static web assets deal with two concerns:
+       * How to map URLs for resources to files during development to serve files from disk as if they were part of the
+         wwwroot folder of the app.
+       * What files to copy to the publish output folder during the publish folder.
+
+       Static web assets will take over content items within the wwwroot folder of the application and handle all aspects of them.
+       During development they will define a JSON manifest that includes the following information:
+       * A version number.
+       * A hash for the contents of the manifest.
+       * The library package id.
+       * The asset base path for the library.
+       * Manifest mode.
+       * The list of related projects manifests with their hashes.
+       * The list of "discovery patterns"
+       * The list of generated static web assets during build/publish.
+
+       Each section identifies:
+       * The version number identifies the manifest format.
+       * The hash of the manifest is used for determining whether the contents of the manifest have changed.
+       * The library package id is used to differentiate assets served from other projects from assets served from the current project.
+       * The asset base path for the library is used to determine what base path to add when applying a discovery pattern to a path coming from another library.
+       * The manifest mode defines how assets coming from a given project must be treated during build and publish.
+       * The list of related projects manifests is used for determining whether the list of projects have changed since the manifest was generated or if a manifest was updated.
+       * The list of "discovery patterns" is useful to enable selective assets to be served at runtime after the manifest has been built. For example
+         you can use { Path: "<<Project>/Pages", "BasePath": "{_content/Something}" Pattern: "**.js" } pattern to indicate that only files with a js extension should be served from that folder, so if someone adds
+         an image or something like that, it won't be served. (This is important since it is not an asset by any rule and won't be part of the publish output folder).
+
+      We generate two sets of manifests, one build manifest and one publish manifest:
+      * The build manifest is generated during the build process and is used during development to serve assets as if they were part of the application.
+      * The publish manifest is generated during publish and captures all the transformations that happen during the publish process.
+
+      Assets can be defined during the build and publish phase, and can be "marked" as such at any stage. For example, you can have two files, one that is used during
+      development and one that is used on the published app that must be served from the same path. One example of this is `service-worker.js`
+
+      The build time manifest is constructed from the combination of the discovered assets in the project and the assets that come from referenced projects and packages.
+      The publish manifest uses the build manifest as a starting point, filtering out the files marked as build only and includes any transformation that happens to those files
+      during the build publish process.
+      * This enables transformations at publish time like `Linking`, `Bundling`, `Compresion` and other optimizations to take place during the publish step.
+      * Referenced projects also produce a publish manifest and their contents are merged with the current project manifest as part of the publish process.
+      * We still keep track of the original build manifest for referenced projects during the publish process to enable applications to discard the publish assets for referenced projects
+        if they choose to do so and to perform optimizations over the entire transitive closure of assets.
+        * For example, a library can produce a minified JS bundle to use during publish. The app can choose to instead of using multiple bundles, collect all the assets from the original build process and generate a single bundle.
+
+      We normally expect the build and publish asset manifest to be the same except when there are publish specific transformations.
+
+      On each manifiest we define the list of assets we generated/computed during the build/publish process and their properties. Those properties are:
+        * "Identity": The identity for the asset (Full path to the file).
+        * "SourceType": The type of asset ('Discovered', 'Computed', 'Project', 'Package')
+        * "ContentRoot": The original path where the asset is exposed in during development.
+        * "BasePath": The base path where the asset is exposed.
+        * "RelativePath": The relative path for the asset.
+        * "AssetKind": The asset kind ('Build', 'Publish' or 'All') This is inferred from CopyToOutputDirectory/CopyToPublishDirectory
+        * "AssetMode": The asset mode ('CurrentProject', 'Reference', 'All')
+        * "AssetRole": The asset role ('Primary', 'Related', 'Alternative')
+        * "RelatedAsset": The Identity of the asset this asset depends on.
+        * "AssetTraitName": The name of the trait or characteristic that differentiates this related or dependent asset from a primary asset.
+        * "AssetTraitValue": The value of the trait or characteristic that differentiates this related or dependent asset from a primary asset.
+        * "CopyToBuildDirectory": Same from Content (PreserveNewest, Always)
+        * "CopyToPublishDirectory": Same from Content (PreserveNewest, Always)
+        * "OriginalItemSpec": The original spec from where the item was defined
+
+      With regards to how assets are consumed in different scenarios (when they are part of the main project being built or are consumed as a reference) there are three posible options:
+      * All: Which means the asset must be used in all situations.
+      * Root: Which means the asset must only be considered when the main project is being built.
+      * Reference: Which means the asset must only be considered when the project is being consumed as a reference.
+
+      An example of this are the bundles that we produce for CSS isolation:
+      * One bundle `<<Project>>.styles.css` is a Root asset and must only be used when the asset is part of the root of the project.
+      * The other bundle `<<Project>>.lib.bundle.css` is a Reference asset and must only be used when the asset is being referenced by another project.
+
+      Along with these three modes of operations, projects also define how they operate during build and publish with regards to the files on the manifest. In this regards there are three options:
+      * Default: The project copies all the contents to the publish output folder during publish and does not do anything when being referenced from another project. When the project
+        is being referenced by another project, it will expect that project to take care of publishing the static web assets.
+      * Root: The asset must be considered "a root" for defining static web assets and while a referencing project will still manage the assets,
+        they need to be copied to the output folder as if they were being published as the root.
+      * Isolated: Its the same as Root with the difference that any referencing project doesn't know anything about static web assets and the project will wire-up handlers for copying the assets to
+        the right locations during publish.
+
+      Default is used by class libraries, since they don't copy their assets themselves but rely on a referencing project to copy them to the final publish output folder.
+      Root is used by projects like Blazor webassembly hosted where while the project is "referenced" by the hosting ASP.NET Core project, the assets should be considered as if they were
+      the root project, so for example, transitive assets are not copied and instead the Root assets were copied instead.
+      Isolated is used by projects like Blazor desktop to fold the static web assets into `GetCopyToPublishDirectoryItems` so that any project that references it, doesn't require any knowledge
+      of static web assets to work.
+
+      With regards to types of assets, there are four categories that describe static web assets:
+      * Discovered assets: These represents assets that were discovered from existing items in the project (Content, None, etc.)
+      * Computed assets: Represents assets that were generated as part of the build process and that need to be copied to their final locations during the build.
+      * Project: Represents assets that come from a referenced projects.
+        * Discovered and Computed assets are transformed into Project assets when manifests from referenced projects get merged.
+      * Package: These assets come from a referenced package.
+
+      With regards to asset roles, there are three roles that an asset can play:
+      * Primary asset: This value indicates that the asset represents a resource that will be addressable at the appropriate relative path.
+        The majority of assets will be part of this role.
+      * Related asset: This value indicates that the asset is related to another asset, while maintaining that both assets should be addressable at their own relative paths.
+      * Alternative asset: This value indicates that the asset is an alternative representation for the related asset. This can be for example, an asset that is pre-compressed
+        or an alternative format for the asset. The expectation is that an alternative asset is served from the same relative path as their related asset. Although its up to
+        the runtimes to decide if/how to implement that. At the static web asset level we just make sure we capture the information about the relationship.
+
+      For Related and Alternative assets the RelatedAsset property points to another asset that they depend on. This chain can be extended multiple levels to represent scenarios
+      where multiple representations of an asset are produced. Again, static web assets only captures this information, its up to MSBuild targets to decide what to do with it.
+
+      The AssetTraitName and AssetTraitValue define the discriminator between a related or alternative asset and their associated primary asset. In the case of globalization assemblies
+      this can capture the assembly culture, in the case of compressed asset it can capture the encoding and the specific encoding format.
+
+      General build/publish flow:
+      During a build for the project the following happens:
+        PrepareForRun ->
+          GenerateStaticWebAssetsManifest ->
+            ResolveStaticWebAssetsInputs ->
+              ResolveProjectStaticWebAssets;
+              ResolveReferencedProjectsStaticWebAssets;
+                Invokes 'GetStaticWebAssetManifestPath' to get the manifest from the last build of the referenced project.
+              (* ResolvePackageStaticWebAssets doesn't need a target, they get defined in the package props file)
+          GetCopyToOutputDirectoryItems ->
+            AddStaticWebAssetsManifest
+          CopyStaticWebAssetsToOutputFolder
+            MaterializeComputedStaticWebAssets
+
+      During the publish flow for the project the following happens:
+        ComputeFilesToPublish ->
+          StaticWebAssetsPrepareForPublish ->
+            GenerateStaticWebAssetsPublishManifest ->
+              ResolvePublishStaticWebAssets ->
+                LoadStaticWebAssetsBuildManifest;
+                ComputeReferencedProjectsPublishAssets;
+                  Invokes ComputeReferencedStaticWebAssetsPublishManifest on referenced projects and gets the list of publish assets.
+
+        // This target is only called by referencing projects, which helps us
+        ComputeReferencedStaticWebAssetsPublishManifest ->
+          GenerateStaticWebAssetsPublishManifest
+
+          CopyStaticWebAssetsToPublishDirectory ->
+            LoadStaticWebAssetsPublishManifest;
+
+        GetCopyToPublishDirectoryItems (only on self-contained mode) ->
+          AddStaticWebAssetsToTheListOfResolvedAssetsToPublish ->
+            GenerateStaticWebAssetsPublishManifest ->
+              ResolvePublishStaticWebAssets ->
+                LoadStaticWebAssetsBuildManifest;
+                ComputeReferencedProjectsPublishAssets;
+                  Invokes ComputeReferencedStaticWebAssetsPublishManifest on referenced projects and gets the list of publish assets.
+  -->
+
+  <!-- Dependency definitions -->
+
   <PropertyGroup>
-    <GenerateStaticWebAssetsManifestDependsOn>
-      ResolveStaticWebAssetsInputs;
-      $(GenerateStaticWebAssetsManifestDependsOn)
-      _CreateStaticWebAssetsInputsCacheFile;
-    </GenerateStaticWebAssetsManifestDependsOn>
 
-    <GetCurrentProjectStaticWebAssetsDependsOn>
-      ResolveCurrentProjectStaticWebAssetsInputs;
-      $(GetCurrentProjectStaticWebAssetsDependsOn)
-    </GetCurrentProjectStaticWebAssetsDependsOn>
+    <!-- For preview only, to ease in the new implementation -->
+    <_GenerateLegacyManifestFormat>true</_GenerateLegacyManifestFormat>
 
-    <PrepareForRunDependsOn>
-      GenerateStaticWebAssetsManifest;
-      $(PrepareForRunDependsOn);
-    </PrepareForRunDependsOn>
+    <PrepareForRunDependsOn>StaticWebAssetsPrepareForRun;$(PrepareForRunDependsOn)</PrepareForRunDependsOn>
 
-    <GetCopyToOutputDirectoryItemsDependsOn>
-      _IncludeGeneratedStaticWebAssetsManifest;
-      $(GetCopyToOutputDirectoryItemsDependsOn);
-    </GetCopyToOutputDirectoryItemsDependsOn>
+    <StaticWebAssetsPrepareForRunDependsOn>$(StaticWebAssetsPrepareForRunDependsOn);GenerateStaticWebAssetsManifest;CopyStaticWebAssetsToOutputFolder</StaticWebAssetsPrepareForRunDependsOn>
 
-    <ResolveCurrentProjectStaticWebAssetsInputsDependsOn>
-      ResolveStaticWebAssetsConfiguration;
-      $(ResolveCurrentProjectStaticWebAssetsInputsDependsOn)
-    </ResolveCurrentProjectStaticWebAssetsInputsDependsOn>
+    <GenerateStaticWebAssetsManifestDependsOn>$(GenerateStaticWebAssetsManifestDependsOn);ResolveStaticWebAssetsInputs</GenerateStaticWebAssetsManifestDependsOn>
 
-    <ResolveStaticWebAssetsInputsDependsOn>
-      ResolveCurrentProjectStaticWebAssetsInputs;
-      ResolveReferencedProjectsStaticWebAssets;
-      $(ResolveStaticWebAssetsInputsDependsOn)
-    </ResolveStaticWebAssetsInputsDependsOn>
+    <ResolveStaticWebAssetsInputsDependsOn>UpdateExistingPackageStaticWebAssets;ResolveProjectStaticWebAssets;ResolveReferencedProjectsStaticWebAssets;$(ResolveStaticWebAssetsInputsDependsOn)</ResolveStaticWebAssetsInputsDependsOn>
 
-    <ResolveReferencedProjectsStaticWebAssetsDependsOn>
-      PrepareProjectReferences;
-      $(ResolveReferencedProjectsStaticWebAssetsDependsOn)
-    </ResolveReferencedProjectsStaticWebAssetsDependsOn>
+    <GetCopyToOutputDirectoryItemsDependsOn>$(GetCopyToOutputDirectoryItemsDependsOn);AddStaticWebAssetsManifest</GetCopyToOutputDirectoryItemsDependsOn>
 
+    <CopyStaticWebAssetsToOutputFolderDependsOn>_RestoreStaticWebAssetsBuildAssets;$(CopyStaticWebAssetsToOutputFolderDependsOn)</CopyStaticWebAssetsToOutputFolderDependsOn>
+    
+    <!-- StaticWebAssetsPrepareForPublish -> ComputeFilesToPublish -->
+
+    <StaticWebAssetsPrepareForPublishDependsOn>$(StaticWebAssetsPrepareForPublishDependsOn);ResolveStaticWebAssetsConfiguration;GenerateStaticWebAssetsPublishManifest</StaticWebAssetsPrepareForPublishDependsOn>
+
+    <GenerateStaticWebAssetsPublishManifestDependsOn>ResolveStaticWebAssetsConfiguration;ResolvePublishStaticWebAssets;$(GenerateStaticWebAssetsPublishManifestDependsOn)</GenerateStaticWebAssetsPublishManifestDependsOn>
+
+    <ComputeReferencedStaticWebAssetsPublishManifestDependsOn>
+      $(ComputeReferencedStaticWebAssetsPublishManifestDependsOn);
+      GenerateStaticWebAssetsPublishManifest
+    </ComputeReferencedStaticWebAssetsPublishManifestDependsOn>
+
+    <ResolvePublishStaticWebAssetsDependsOn>LoadStaticWebAssetsBuildManifest;ComputeReferencedProjectsPublishAssets;$(ResolvePublishStaticWebAssetsDependsOn)</ResolvePublishStaticWebAssetsDependsOn>
+
+    <CopyStaticWebAssetsToPublishDirectoryDependsOn>StaticWebAssetsPrepareForPublish;LoadStaticWebAssetsPublishManifest;$(CopyStaticWebAssetsToPublishDirectoryDependsOn)</CopyStaticWebAssetsToPublishDirectoryDependsOn>
+
+    <!-- TMP: Pack -->
     <GenerateStaticWebAssetsPackTargetsDependsOn>
-      ResolveStaticWebAssetsInputs;
+      LoadStaticWebAssetsBuildManifest;
       $(GenerateStaticWebAssetsPackTargetsDependsOn);
-      _CreateStaticWebAssetsCustomPropsCacheFile;
     </GenerateStaticWebAssetsPackTargetsDependsOn>
 
     <TargetsForTfmSpecificContentInPackage>
+      ResolveStaticWebAssetsConfiguration;
       GenerateStaticWebAssetsPackTargets;
       $(TargetsForTfmSpecificContentInPackage)
     </TargetsForTfmSpecificContentInPackage>
 
-    <PackDependsOn>
-      _RemoveWebRootContentFromPackaging;
-      $(PackDependsOn)
-    </PackDependsOn>
-
   </PropertyGroup>
 
-  <PropertyGroup>
-    <_StaticWebAssetsIntermediateOutputPath>$(IntermediateOutputPath)staticwebassets\</_StaticWebAssetsIntermediateOutputPath>
+  <Target Name="ResolveStaticWebAssetsConfiguration">
+    <PropertyGroup>
+      <_StaticWebAssetsManifestBase>$(BaseIntermediateOutputPath)$(Configuration)\$(TargetFramework.ToLowerInvariant())\</_StaticWebAssetsManifestBase>
+      <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">_content/$(PackageId)</StaticWebAssetBasePath>
+      <StaticWebAssetProjectMode Condition="'$(StaticWebAssetProjectMode)' == ''">Default</StaticWebAssetProjectMode>
+      <StaticWebAssetBuildManifestPath>$(_StaticWebAssetsManifestBase)StaticWebAssets.build.json</StaticWebAssetBuildManifestPath>
+      <StaticWebAssetPublishManifestPath>$(_StaticWebAssetsManifestBase)StaticWebAssets.publish.json</StaticWebAssetPublishManifestPath>
 
-    <!-- Development manifest generation -->
-    <_GeneratedStaticWebAssetsInputsCacheFile>$(_StaticWebAssetsIntermediateOutputPath)$(TargetName).StaticWebAssets.Manifest.cache</_GeneratedStaticWebAssetsInputsCacheFile>
-    <_GeneratedStaticWebAssetsDevelopmentManifest>$(_StaticWebAssetsIntermediateOutputPath)$(TargetName).StaticWebAssets.xml</_GeneratedStaticWebAssetsDevelopmentManifest>
+      <_StaticWebAssetsIntermediateOutputPath>$(IntermediateOutputPath)staticwebassets\</_StaticWebAssetsIntermediateOutputPath>
 
-    <!-- Project packing generation -->
-    <_GeneratedStaticWebAssetsCustomPropsCacheFile>$(_StaticWebAssetsIntermediateOutputPath)$(TargetName).StaticWebAssets.Pack.cache</_GeneratedStaticWebAssetsCustomPropsCacheFile>
+      <!-- Temporary files -->
+      <_GeneratedStaticWebAssetsPropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.$(PackageId).Microsoft.AspNetCore.StaticWebAssets.props</_GeneratedStaticWebAssetsPropsFile>
+      <_GeneratedBuildPropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.build.$(PackageId).props</_GeneratedBuildPropsFile>
+      <_GeneratedBuildMultitargetingPropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.buildMultiTargeting.$(PackageId).props</_GeneratedBuildMultitargetingPropsFile>
+      <_GeneratedBuildTransitivePropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.buildTransitive.$(PackageId).props</_GeneratedBuildTransitivePropsFile>
 
-    <!-- Temporary files -->
-    <_GeneratedStaticWebAssetsPropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.$(PackageId).Microsoft.AspNetCore.StaticWebAssets.props</_GeneratedStaticWebAssetsPropsFile>
-    <_GeneratedBuildPropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.build.$(PackageId).props</_GeneratedBuildPropsFile>
-    <_GeneratedBuildMultitargetingPropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.buildMultiTargeting.$(PackageId).props</_GeneratedBuildMultitargetingPropsFile>
-    <_GeneratedBuildTransitivePropsFile>$(_StaticWebAssetsIntermediateOutputPath)msbuild.buildTransitive.$(PackageId).props</_GeneratedBuildTransitivePropsFile>
+      <!-- Package relative import paths -->
+      <_StaticWebAssetsPropsFileImportPath>Microsoft.AspNetCore.StaticWebAssets.props</_StaticWebAssetsPropsFileImportPath>
+      <_StaticWebAssetsGeneratedBuildPropsFileImportPath>..\build\$(PackageId).props</_StaticWebAssetsGeneratedBuildPropsFileImportPath>
+      <_StaticWebAssetsGeneratedBuildMultiTargetingPropsFileImportPath>..\buildMultiTargeting\$(PackageId).props</_StaticWebAssetsGeneratedBuildMultiTargetingPropsFileImportPath>
 
-    <!-- Package relative import paths -->
-    <_StaticWebAssetsPropsFileImportPath>Microsoft.AspNetCore.StaticWebAssets.props</_StaticWebAssetsPropsFileImportPath>
-    <_StaticWebAssetsGeneratedBuildPropsFileImportPath>..\build\$(PackageId).props</_StaticWebAssetsGeneratedBuildPropsFileImportPath>
-    <_StaticWebAssetsGeneratedBuildMultiTargetingPropsFileImportPath>..\buildMultiTargeting\$(PackageId).props</_StaticWebAssetsGeneratedBuildMultiTargetingPropsFileImportPath>
+      <_CurrentProjectHasStaticWebAssets Condition="'@(_CurrentProjectStaticWebAsset->Count())' != '0'">true</_CurrentProjectHasStaticWebAssets>
+        
+    </PropertyGroup>
 
-  </PropertyGroup>
-
-  <!-- Helper target invoked by other tasks below to ensure that the intermediate output path has the correct
-       shape for the intermediate output files that might be generated.
-  -->
-  <Target Name="_PrepareForStaticWebAssets">
     <MakeDir
       Directories="$(_StaticWebAssetsIntermediateOutputPath)"
       Condition="!Exists('$(_StaticWebAssetsIntermediateOutputPath)')" />
   </Target>
 
-  <Target Name="ResolveStaticWebAssetsConfiguration">
-    <PropertyGroup>
-      <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">_content/$(PackageId)</StaticWebAssetBasePath>
-    </PropertyGroup>
-  </Target>
+  <!-- Build -->
 
-  <!--
-    ============================================================
-                                        Static web assets development manifest generation targets
-
-    The main targets for generating a development manifest with information about the static web
-    assets found in referenced packages and projects.
-    ============================================================
-    -->
-
-  <Target
-    Name="_CreateStaticWebAssetsInputsCacheFile"
-    DependsOnTargets="ResolveStaticWebAssetsInputs;_PrepareForStaticWebAssets">
-
+  <Target Name="_RestoreStaticWebAssetsBuildAssets">
     <ItemGroup>
-      <!--
-      This is the list of inputs that will be used for generating the manifest used during development.
-      -->
-      <_ExternalStaticWebAsset
-        Include="%(StaticWebAsset.Identity)"
-        Condition="'%(SourceType)' != ''">
-          <BasePath>%(StaticWebAsset.BasePath)</BasePath>
-          <ContentRoot>%(StaticWebAsset.ContentRoot)</ContentRoot>
-          <SourceId>%(StaticWebAsset.SourceId)</SourceId>
-      </_ExternalStaticWebAsset>
+      <StaticWebAsset Remove="@(StaticWebAsset)" />
+      <StaticWebAssetManifest Remove="@(StaticWebAssetManifest)" />
+      <StaticWebAssetDiscoveryPattern Remove="@(StaticWebAssetDiscoveryPattern)" />
     </ItemGroup>
 
-    <!-- We need a transform here to make sure we hash the metadata -->
-    <Hash ItemsToHash="@(_ExternalStaticWebAsset->'%(Identity)%(SourceId)%(BasePath)%(ContentRoot)')">
-      <Output TaskParameter="HashResult" PropertyName="_StaticWebAssetsCacheHash" />
-    </Hash>
-
-    <WriteLinesToFile
-      Lines="$(_StaticWebAssetsCacheHash)"
-      File="$(_GeneratedStaticWebAssetsInputsCacheFile)"
-      Overwrite="True"
-      WriteOnlyWhenDifferent="True" />
+    <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetBuildManifestPath)">
+      <Output TaskParameter="Assets" ItemName="StaticWebAsset" />
+    </ReadStaticWebAssetsManifestFile>
 
     <ItemGroup>
-      <FileWrites Include="$(_GeneratedStaticWebAssetsInputsCacheFile)" />
+      <Content Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+      <None Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyStaticWebAssetsToOutputFolder" DependsOnTargets="$(CopyStaticWebAssetsToOutputFolderDependsOn)" />
+  
+  <Target Name="_SplitStaticWebAssetsByCopyOptions" AfterTargets="CopyStaticWebAssetsToOutputFolder">
+
+    <CollectStaticWebAssetsToCopy Assets="@(StaticWebAsset)" OutputPath="$(OutputPath)\wwwroot\">
+      <Output TaskParameter="AssetsToCopy" ItemName="_BuildStaticWebAssetsTargetPath" />
+    </CollectStaticWebAssetsToCopy>
+
+    <ItemGroup>
+      <_BuildStaticWebAssetsCopyAlways Include="@(_BuildStaticWebAssetsTargetPath)" Condition="'%(CopyToOutputDirectory)' == 'Always'" />
+      <_BuildStaticWebAssetsPreserveNewest Include="@(_BuildStaticWebAssetsTargetPath)" Condition="'%(CopyToOutputDirectory)' == 'PreserveNewest'" />
     </ItemGroup>
 
   </Target>
 
-  <!--
-    This target generates a manifest for development time that includes information
-    about the base path for the referenced package and project static web assets. The
-    manifest includes the content root and the base path for each of the referenced
-    packages and projects.
+  <Target 
+    Name="_BuildCopyStaticWebAssetsPreserveNewest"
+    Inputs="@(_BuildStaticWebAssetsPreserveNewest)"
+    Outputs="@(_BuildStaticWebAssetsPreserveNewest->'%(TargetPath)')"
+    AfterTargets="_SplitStaticWebAssetsByCopyOptions">
 
-    Ideally, each package/project contains a unique base path and a given content
-    root, but we don't check for duplicates on either of them.
-     -->
+    <Copy SourceFiles="@(_BuildStaticWebAssetsPreserveNewest)"
+      DestinationFiles="@(_BuildStaticWebAssetsPreserveNewest->'%(TargetPath)')"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
 
-  <Target
-    Name="GenerateStaticWebAssetsManifest"
-    Inputs="$(_GeneratedStaticWebAssetsInputsCacheFile)"
-    Outputs="$(_GeneratedStaticWebAssetsDevelopmentManifest)"
-    DependsOnTargets="$(GenerateStaticWebAssetsManifestDependsOn)">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
-    <ItemGroup>
-      <_WebRootFiles Include="@(ContentWithTargetPath)" Condition="$([System.String]::Copy('%(TargetPath)').Replace('\','/').StartsWith('wwwroot/'))" />
-      <_ReferencedStaticWebAssets Include="@(StaticWebAsset)" Condition="'%(SourceType)' != ''" />
-    </ItemGroup>
-
-    <ValidateStaticWebAssetsUniquePaths
-      StaticWebAssets="@(_ReferencedStaticWebAssets)"
-      WebRootFiles="@(_WebRootFiles)" />
-
-    <GenerateStaticWebAssetsManifest
-      Condition="'@(_ExternalStaticWebAsset->Count())' != '0'"
-      ContentRootDefinitions="@(_ExternalStaticWebAsset)"
-      TargetManifestPath="$(_GeneratedStaticWebAssetsDevelopmentManifest)" />
-
-    <ItemGroup Condition="'@(_ExternalStaticWebAsset->Count())' != '0'">
-      <FileWrites Include="$(_GeneratedStaticWebAssetsDevelopmentManifest)" />
-    </ItemGroup>
+    </Copy>
 
   </Target>
 
-  <Target Name="_IncludeGeneratedStaticWebAssetsManifest">
-      <!-- This is the list of inputs that will be used for generating the manifest used during development. -->
+  <Target 
+    Name="_BuildCopyStaticWebAssetsAlways"
+    AfterTargets="_SplitStaticWebAssetsByCopyOptions">
+
+    <Copy SourceFiles="@(_BuildStaticWebAssetsCopyAlways)"
+      DestinationFiles="@(_BuildStaticWebAssetsCopyAlways->'%(TargetPath)')"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
+
+  </Target>  
+
+  <Target Name="AddStaticWebAssetsManifest" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
     <ItemGroup>
       <ContentWithTargetPath
-        Include="$(_GeneratedStaticWebAssetsDevelopmentManifest)"
-        Condition="Exists('$(_GeneratedStaticWebAssetsDevelopmentManifest)')">
+        Include="$(StaticWebAssetBuildManifestPath)"
+        TargetPath="$(TargetName).staticwebassets.json"
+        CopyToOutputDirectory="PreserveNewest"
+        CopyToPublishDirectory="Never" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ContentWithTargetPath
+        Include="$(IntermediateOutputPath)$(TargetName).StaticWebAssets.xml"
+        Condition="Exists('$(IntermediateOutputPath)$(TargetName).StaticWebAssets.xml') and '$(_GenerateLegacyManifestFormat)' == 'true'">
         <Pack>false</Pack>
         <TargetPath>$(TargetName).StaticWebAssets.xml</TargetPath>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>Never</CopyToPublishDirectory>
       </ContentWithTargetPath>
     </ItemGroup>
+  </Target>
+
+  <Target Name="StaticWebAssetsPrepareForRun" DependsOnTargets="$(StaticWebAssetsPrepareForRunDependsOn)" />
+
+  <Target Name="GenerateStaticWebAssetsManifest" DependsOnTargets="$(GenerateStaticWebAssetsManifestDependsOn)">
+    <GenerateStaticWebAssetsManifest
+      Source="$(PackageId)"
+      BasePath="$(StaticWebAssetBasePath)"
+      Mode="$(StaticWebAssetProjectMode)"
+      ManifestType="Build"
+      RelatedManifests="@(StaticWebAssetManifest)"
+      DiscoveryPatterns="@(StaticWebAssetDiscoveryPattern)"
+      Assets="@(StaticWebAsset)"
+      ManifestPath="$(StaticWebAssetBuildManifestPath)">
+    </GenerateStaticWebAssetsManifest>
+
+    <ItemGroup Condition="'$(_GenerateLegacyManifestFormat)' == 'true'">
+      <_LegacyContentRootDefinition Include="@(StaticWebAsset)" Condition="'%(SourceType)' != 'Discovered'"></_LegacyContentRootDefinition>
+    </ItemGroup>
+
+    <GenerateV1StaticWebAssetsManifest
+      Condition="'$(_GenerateLegacyManifestFormat)' == 'true'"
+      ContentRootDefinitions="@(_LegacyContentRootDefinition)"
+      TargetManifestPath="$(IntermediateOutputPath)$(TargetName).StaticWebAssets.xml" />
+
+    <ItemGroup>
+      <FileWrites Include="$(IntermediateOutputPath)$(TargetName).StaticWebAssets.xml" Condition="'$(_GenerateLegacyManifestFormat)' == 'true'" />
+      <StaticWebAsset Remove="@(StaticWebAsset)" />
+      <StaticWebAssetManifest Remove="@(StaticWebAssetManifest)" />
+      <StaticWebAssetDiscoveryPattern Remove="@(StaticWebAssetDiscoveryPattern)" />
+      <FileWrites Include="$(StaticWebAssetBuildManifestPath)" />
+    </ItemGroup>
+    
+  </Target>
+
+  <Target Name="ResolveStaticWebAssetsInputs" DependsOnTargets="$(ResolveStaticWebAssetsInputsDependsOn)" />
+
+  <Target Name="ResolveProjectStaticWebAssets" Condition="'$(NoBuild)' != 'true'" BeforeTargets="AssignTargetPaths" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
+    <DiscoverStaticWebAssets
+      Candidates="@(Content)"
+      SourceId="$(PackageId)"
+      Pattern="wwwroot/**"
+      ContentRoot="$(MSBuildProjectDirectory)\wwwroot\"
+      BasePath="$(StaticWebAssetBasePath)"
+       >
+
+      <Output TaskParameter="DiscoveredStaticWebAssets" ItemName="StaticWebAsset" />
+    </DiscoverStaticWebAssets>
+
+    <ItemGroup>
+
+      <StaticWebAssetDiscoveryPattern Include="$(PackageId)\wwwroot">
+        <ContentRoot>$(MSBuildProjectDirectory)\wwwroot\</ContentRoot>
+        <BasePath>$(StaticWebAssetBasePath)</BasePath>
+        <Pattern>**</Pattern>
+      </StaticWebAssetDiscoveryPattern>
+
+      <Content Remove="@(StaticWebAsset)" />
+    </ItemGroup>
 
   </Target>
 
-  <!--
-    ============================================================
-                                        Static web assets discovery related targets
-
-    The main targets for discovering static web assets inside referenced packages, projects and
-    the current project.
-    ============================================================
-    -->
-
-  <!-- This target collects all the StaticWebAssets from different sources:
-       * The current project StaticWebAssets that come from wwwroot\** by default.
-       * Assets from referenced projects that get retrieved invoking an MSBuild target on
-         the referenced projects.
-       * Assets from the referenced packages. These will be implicitly included when nuget
-         restores the package and includes the package props file for the package.
-  -->
-
-    <!-- StaticWebAssets from the current project come from ResolveCurrentProjectStaticWebAssetsInputs which is a dependency of this target. -->
-    <!-- StaticWebAssets from referenced projects come from ResolveReferencedProjectsStaticWebAssets which is a dependency of this target. -->
-    <!-- StaticWebAssets from packages are already available, so we don't do anything. -->
-  <Target
-    Name="ResolveStaticWebAssetsInputs"
-    DependsOnTargets="$(ResolveStaticWebAssetsInputsDependsOn)" />
-
-  <!-- This is a helper task to compute the project references we need to invoke to retrieve
-       the static assets for a given application. We do it this way so that we can
-       pass additional build properties to compute the assets from the package when referenced
-       as a project. For example, Identity uses this hook to extend the project reference and
-       pass in the bootstrap version to use.
-  -->
-
-  <Target Name="ResolveReferencedProjectsStaticWebAssets" DependsOnTargets="$(ResolveReferencedProjectsStaticWebAssetsDependsOn)">
+  <Target Name="UpdateExistingPackageStaticWebAssets">
+    <UpdatePackageStaticWebAssets Assets="@(StaticWebAsset)">
+      <Output TaskParameter="UpdatedAssets" ItemName="_UpdatedPackageAssets" />
+      <Output TaskParameter="OriginalAssets" ItemName="_OriginalPackageAssets" />
+    </UpdatePackageStaticWebAssets>
 
     <ItemGroup>
-      <!-- It is explicitly ok to take a dependency on _MSBuildProjectReferenceExistent as it is
-        something many other products already take a dependency on. -->
-      <_StaticWebAssetsProjectReference Include="@(_MSBuildProjectReferenceExistent)" />
+      <StaticWebAsset Remove="@(_OriginalPackageAssets)"/>
+      <StaticWebAsset Include="@(_UpdatedPackageAssets)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Publish -->
+
+  <Target Name="StaticWebAssetsPrepareForPublish" 
+    BeforeTargets="ComputeFilesToPublish"
+    DependsOnTargets="$(StaticWebAssetsPrepareForPublishDependsOn)" />
+
+  <Target Name="GenerateStaticWebAssetsPublishManifest" DependsOnTargets="$(GenerateStaticWebAssetsPublishManifestDependsOn)">
+    <ComputePublishStaticWebAssetsList Assets="@(StaticWebAsset)">
+      <Output TaskParameter="PublishAssets" ItemName="_FinalPublishStaticWebAsset"/>
+    </ComputePublishStaticWebAssetsList>
+    <GenerateStaticWebAssetsManifest
+      Source="$(PackageId)"
+      BasePath="$(StaticWebAssetBasePath)"
+      Mode="$(StaticWebAssetProjectMode)"
+      ManifestType="Publish"
+      RelatedManifests="@(StaticWebAssetManifest)"
+      DiscoveryPatterns="@(StaticWebAssetDiscoveryPattern)"  
+      Assets="@(_FinalPublishStaticWebAsset)"
+      ManifestPath="$(StaticWebAssetPublishManifestPath)">
+    </GenerateStaticWebAssetsManifest>
+    <ItemGroup>
+      <StaticWebAsset Remove="@(StaticWebAsset)" />
+      <StaticWebAssetManifest Remove="@(StaticWebAssetManifest)" />
+      <StaticWebAssetDiscoveryPattern Remove="@(StaticWebAssetDiscoveryPattern)" />
+      <FileWrites Include="$(StaticWebAssetPublishManifestPath)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolvePublishStaticWebAssets" DependsOnTargets="$(ResolvePublishStaticWebAssetsDependsOn)" />
+  
+  <Target Name="LoadStaticWebAssetsBuildManifest" BeforeTargets="ComputeResolvedFilesToPublishList">
+    <!-- Before we load assets from the manifest we cleanup any potential existing asset that might be present by default
+         for example, assets from packages as a result of a publish (no-build) invocation. Those assets were already taken
+         into account when we built the build manifest that we are about to load for resuming the publish process. -->
+    <ItemGroup>
+      <StaticWebAsset Remove="@(StaticWebAsset)" />
+      <StaticWebAssetManifest Remove="@(StaticWebAssetManifest)" />
+      <StaticWebAssetDiscoveryPattern Remove="@(StaticWebAssetDiscoveryPattern)" />
+    </ItemGroup>
+
+    <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetBuildManifestPath)">
+      <Output TaskParameter="Assets" ItemName="StaticWebAsset" />
+      <Output TaskParameter="RelatedManifests" ItemName="StaticWebAssetManifest" />
+    </ReadStaticWebAssetsManifestFile>
+
+    <ItemGroup>
+      <Content Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+      <None Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+      <ResolvedFileToPublish Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+      <ResolvedFileToPublish Remove="@(StaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ComputeReferencedStaticWebAssetsPublishManifest"
+    DependsOnTargets="$(ComputeReferencedStaticWebAssetsPublishManifestDependsOn)"/>
+
+  <Target Name="ComputeReferencedProjectsPublishAssets" DependsOnTargets="LoadStaticWebAssetsBuildManifest">
+
+    <ItemGroup>
+      <_PublishStaticWebAssetManifest Include="@(StaticWebAssetManifest)" Condition="'%(ManifestType)' == 'Publish'" />
     </ItemGroup>
 
     <MSBuild
-      Condition="'@(_StaticWebAssetsProjectReference)' != '' and '%(_StaticWebAssetsProjectReference.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != ''"
-      Targets="GetCurrentProjectStaticWebAssets"
-      Properties="%(_StaticWebAssetsProjectReference.SetConfiguration); %(_StaticWebAssetsProjectReference.SetPlatform);  %(_StaticWebAssetsProjectReference.SetTargetFramework)"
-      RemoveProperties="%(_StaticWebAssetsProjectReference.GlobalPropertiesToRemove)"
-      Projects="@(_StaticWebAssetsProjectReference)"
+      Targets="%(_PublishStaticWebAssetManifest.PublishTarget)"
+      Properties="%(_PublishStaticWebAssetManifest.AdditionalPublishProperties)"
+      RemoveProperties="%(_PublishStaticWebAssetManifest.AdditionalPublishPropertiesToRemove)"
+      Projects="%(_PublishStaticWebAssetManifest.ProjectFile)"
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
-      SkipNonexistentTargets="true">
+      SkipNonexistentTargets="true" />
 
-      <Output TaskParameter="TargetOutputs" ItemName="_ReferencedProjectStaticWebAssets" />
-    </MSBuild>
+    <ComputeReferencedProjectAssets Manifests="@(StaticWebAssetManifest)" ExistingAssets="@(StaticWebAsset)" AssetKind="Publish">
+      <Output TaskParameter="StaticWebAssets" ItemName="StaticWebAsset" />
+    </ComputeReferencedProjectAssets>
+  </Target>
 
-    <ItemGroup>
-      <StaticWebAsset
-        Include="@(_ReferencedProjectStaticWebAssets)"
-        KeepMetadata="ContentRoot;BasePath;RelativePath;SourceId;SourceType;CopyToPublishDirectory" />
-    </ItemGroup>
+  <Target Name="CopyStaticWebAssetsToPublishDirectory" BeforeTargets="ComputeAndCopyFilesToPublishDirectory" DependsOnTargets="$(CopyStaticWebAssetsToPublishDirectoryDependsOn)">
+    <PropertyGroup>
+      <_StaticWebAssetsPublishPathPrefix>wwwroot</_StaticWebAssetsPublishPathPrefix>
+      <_StaticWebAssetsPublishPathPrefix Condition="'$(StaticWebAssetProjectMode)' != 'Default'">wwwroot/$(StaticWebAssetBasePath)</_StaticWebAssetsPublishPathPrefix>      
+    </PropertyGroup>
+    <ComputeStaticWebAssetsTargetPaths Assets="@(StaticWebAsset)" PathPrefix="$(_StaticWebAssetsPublishPathPrefix)">
+      <Output TaskParameter="AssetsWithTargetPath" ItemName="StaticWebAssetWithTargetPath" />
+    </ComputeStaticWebAssetsTargetPaths>
+
+    <Copy SourceFiles="@(StaticWebAssetWithTargetPath)"
+      DestinationFiles="@(StaticWebAssetWithTargetPath->'$(PublishDir)%(TargetPath)')"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      Retries="$(CopyRetryCount)"
+      RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
+      UseHardlinksIfPossible="$(CreateHardLinksForPublishFilesIfPossible)"
+      UseSymboliclinksIfPossible="$(CreateSymbolicLinksForPublishFilesIfPossible)">
+
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+
+    </Copy>
 
   </Target>
 
-  <Target Name="ResolveCurrentProjectStaticWebAssetsInputs" DependsOnTargets="$(ResolveCurrentProjectStaticWebAssetsInputsDependsOn)">
+  <Target Name="LoadStaticWebAssetsPublishManifest">
+    <ItemGroup>
+      <StaticWebAsset Remove="@(StaticWebAsset)" />
+      <StaticWebAssetManifest Remove="@(StaticWebAssetManifest)" />
+      <StaticWebAssetDiscoveryPattern Remove="@(StaticWebAssetDiscoveryPattern)" />
+    </ItemGroup>
+
+    <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetPublishManifestPath)">
+      <Output TaskParameter="Assets" ItemName="StaticWebAsset" />
+    </ReadStaticWebAssetsManifestFile>
+
+    <ItemGroup>
+      <Content Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+      <None Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+      <ResolvedFileToPublish Remove="@(StaticWebAsset->'%(OriginalItemSpec)')" />
+      <ResolvedFileToPublish Remove="@(StaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="AddStaticWebAssetsToTheListOfResolvedAssetsToPublish" BeforeTargets="GetCopyToPublishDirectoryItems" DependsOnTargets="ResolvePublishStaticWebAssets" Condition="'$(StaticWebAssetProjectMode)' == 'SelfContained'">
+    <ComputeStaticWebAssetsTargetPaths Assets="@(StaticWebAsset)" PathPrefix="wwwroot">
+      <Output TaskParameter="AssetsWithTargetPath" ItemName="StaticWebAssetWithTargetPath" />
+    </ComputeStaticWebAssetsTargetPaths>
+
+    <ItemGroup>
+      <AllPublishItemsFullPathWithTargetPath Include="@(StaticWebAssetWithTargetPath)">
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </AllPublishItemsFullPathWithTargetPath>
+    </ItemGroup>
+  </Target>
+
+    <!-- References -->
+
+    <Target Name="_CleanupReferencedProjectItemGroups" BeforeTargets="GetCopyToPublishDirectoryItems" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
+      <ReadStaticWebAssetsManifestFile ManifestPath="$(StaticWebAssetBuildManifestPath)">
+        <Output TaskParameter="Assets" ItemName="_CleanupStaticWebAsset" />
+      </ReadStaticWebAssetsManifestFile>
+        
       <ItemGroup>
+        <Content Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+        <ContentWithTargetPath Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+        <None Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+        <_NoneWithTargetPath Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+        <ResolvedFileToPublish Remove="@(_CleanupStaticWebAsset->'%(OriginalItemSpec)')" />
+      </ItemGroup>
+    </Target>
+  
 
-      <_ThisProjectStaticWebAsset
-        Include="@(Content)"
-        Condition="$([System.String]::Copy('%(Identity)').Replace('\','/').StartsWith('wwwroot/'))">
+    <Target Name="ResolveReferencedProjectsStaticWebAssets" DependsOnTargets="ResolveStaticWebAssetsConfiguration;PrepareProjectReferences">
+      <ItemGroup>
+        <!-- It is explicitly ok to take a dependency on _MSBuildProjectReferenceExistent as it is
+          something many other products already take a dependency on. -->
+        <_StaticWebAssetProjectReference Include="@(_MSBuildProjectReferenceExistent)" />
+      </ItemGroup>
 
-        <!-- Remove the wwwroot\ prefix -->
-        <RelativePath>$([System.String]::Copy('%(Identity)').Substring(8))</RelativePath>
+      <MSBuild
+        Condition="'@(_StaticWebAssetProjectReference)' != '' and '%(_StaticWebAssetProjectReference.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != ''"
+        Targets="GetStaticWebAssetManifestPath"
+        Properties="%(_StaticWebAssetProjectReference.SetConfiguration); %(_StaticWebAssetProjectReference.SetPlatform);  %(_StaticWebAssetProjectReference.SetTargetFramework)"
+        RemoveProperties="%(_StaticWebAssetProjectReference.GlobalPropertiesToRemove)"
+        Projects="@(_StaticWebAssetProjectReference)"
+        BuildInParallel="$(BuildInParallel)"
+        ContinueOnError="!$(BuildingProject)"
+        SkipNonexistentTargets="true">
 
-      </_ThisProjectStaticWebAsset>
+        <Output TaskParameter="TargetOutputs" ItemName="_ReferencedProjectsManifest" />
 
-      <StaticWebAsset Include="@(_ThisProjectStaticWebAsset->'%(FullPath)')" RemoveMetadata="ExcludeFromSingleFile">
-        <!-- (Package, Project, '' (CurrentProject)) -->
-        <SourceType></SourceType>
-        <!-- Identifier describing the source, the package id, the project name, empty for the current project.  -->
-        <SourceId>$(PackageId)</SourceId>
-        <!--
-          Full path to the content root for the item:
-          * For packages it corresponds to %userprofile%/.nuget/packages/<<PackageId>>/<<PackageVersion>>/razorContent
-          * For referenced projects it corresponds to <<FullProjectRefPath>>/wwwroot
-          * For the current projects it corresponds to $(MSBuildProjectDirectory)wwwroot\
-        -->
-        <ContentRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)\wwwroot\'))</ContentRoot>
-        <!-- Subsection (folder) from the url space where content for this library will be served. -->
-        <BasePath>$(StaticWebAssetBasePath)</BasePath>
-        <!-- Relative path from the content root for the file. At publish time, we combine the BasePath + Relative
-             path to determine the final path for the file.
-        -->
-        <RelativePath>%(RelativePath)</RelativePath>
+      </MSBuild>
 
-      </StaticWebAsset>
-    </ItemGroup>
+      <MergeManifestProperties 
+        CandidateManifests="@(_ReferencedProjectsManifest)"
+        ProjectReferences="@(_StaticWebAssetProjectReference)">
 
-  </Target>
+        <Output TaskParameter="Manifests" ItemName="StaticWebAssetManifest" />
+      </MergeManifestProperties>
 
-  <!--
-    Child target to retrieve content from referenced projects
-   -->
+      <ComputeReferencedProjectAssets Manifests="@(StaticWebAssetManifest)" ExistingAssets="@(StaticWebAsset)" AssetKind="Build">
+        <Output TaskParameter="StaticWebAssets" ItemName="StaticWebAsset" />
+        <Output TaskParameter="DiscoveryPatterns" ItemName="StaticWebAssetDiscoveryPattern" />
+      </ComputeReferencedProjectAssets>
 
-  <Target Name="GetCurrentProjectStaticWebAssets"
-    DependsOnTargets="$(GetCurrentProjectStaticWebAssetsDependsOn)"
-    Returns="@(_ThisProjectStaticWebAssets)">
+    </Target>
 
-    <ItemGroup>
-      <_ThisProjectStaticWebAssets
-        Include="@(StaticWebAsset)"
-        Condition="'%(StaticWebAsset.SourceType)' == ''">
-        <SourceType>Project</SourceType>
-      </_ThisProjectStaticWebAssets>
-    </ItemGroup>
+    <Target Name="GetStaticWebAssetManifestPath"
+      DependsOnTargets="ResolveStaticWebAssetsConfiguration"
+      Returns="@(_ThisProjectStaticWebAssetManifest)">
 
-  </Target>
+      <PropertyGroup>
+        <StaticWebAssetsPublishTarget Condition="'$(StaticWebAssetsPublishTarget)' == ''">ComputeReferencedStaticWebAssetsPublishManifest</StaticWebAssetsPublishTarget>
+      </PropertyGroup>
 
-  <!--
-    ============================================================
-                                        Static web assets packing related targets
+      <ItemGroup>
+        <_StaticWebAssetManifest Include="$(StaticWebAssetBuildManifestPath)">
+          <ManifestType>Build</ManifestType>
+          <Source>$(PackageId)</Source>
+          <ProjectFile>$(MSBuildProjectFullPath)</ProjectFile>
+        </_StaticWebAssetManifest>
+        <_StaticWebAssetManifest Include="$(StaticWebAssetPublishManifestPath)">
+          <ManifestType>Publish</ManifestType>
+          <Source>$(PackageId)</Source>
+          <ProjectFile>$(MSBuildProjectFullPath)</ProjectFile>
+          <PublishTarget>$(StaticWebAssetsPublishTarget)</PublishTarget>
+          <AdditionalPublishProperties>$(StaticWebAssetsAdditionalPublishProperties)</AdditionalPublishProperties>
+          <AdditionalPublishPropertiesToRemove>$(StaticWebAssetsAdditionalPublishPropertiesToRemove)</AdditionalPublishPropertiesToRemove>
+        </_StaticWebAssetManifest>
+      </ItemGroup>
 
-    The main targets to enable auto-packing of static web assets.
-    ============================================================
-    -->
+      <ConvertToAbsolutePath Paths="@(_StaticWebAssetManifest)">
+        <Output TaskParameter="AbsolutePaths" ItemName="_ThisProjectStaticWebAssetManifest" />
+      </ConvertToAbsolutePath>
 
-  <!-- We need to remove any content item under wwwroot right before packing to prevent it from getting included
-       in the package as content or contentFiles. Unfortunately marking it with pack=false doesn't work as it also
-       prevents the content from being packed even though we are including it explictily in
-       GenerateStaticWebAssetsPackTargets
-   -->
+    </Target>
+
+  <!-- Pack -->
+
   <Target Name="_RemoveWebRootContentFromPackaging" DependsOnTargets="ResolveStaticWebAssetsInputs">
     <ItemGroup>
       <Content
         Condition="'%(StaticWebAsset.SourceType)' == ''"
         Remove="@(StaticWebAsset->'wwwroot\%(RelativePath)')"  />
     </ItemGroup>
-  </Target>
-
-  <Target
-    Name="_CreateStaticWebAssetsCustomPropsCacheFile"
-    DependsOnTargets="_PrepareForStaticWebAssets">
-
-    <ItemGroup>
-      <!-- This is the list of inputs that will be used for generating the props file that will be packed with
-      the package.  -->
-      <_CurrentProjectStaticWebAsset
-        Include="@(StaticWebAsset)"
-        Condition="'%(SourceType)' == ''" />
-    </ItemGroup>
-
-    <Hash ItemsToHash="@(_CurrentProjectStaticWebAsset->'%(BasePath)%(SourceId)')">
-      <Output TaskParameter="HashResult" PropertyName="_StaticWebAssetsPropsFileHash" />
-    </Hash>
-
-    <WriteLinesToFile
-      Lines="$(_StaticWebAssetsPropsFileHash)"
-      File="$(_GeneratedStaticWebAssetsCustomPropsCacheFile)"
-      Overwrite="True"
-      WriteOnlyWhenDifferent="True" />
-
-    <ItemGroup>
-      <FileWrites Include="$(_GeneratedStaticWebAssetsCustomPropsCacheFile)" />
-    </ItemGroup>
-
   </Target>
 
   <!-- This target makes sure that all static web assets for the current project get included
@@ -417,9 +713,15 @@ Copyright (c) .NET Foundation. All rights reserved.
    -->
   <Target
     Name="GenerateStaticWebAssetsPackTargets"
-    DependsOnTargets="$(GenerateStaticWebAssetsPackTargetsDependsOn)"
-    Inputs="$(_GeneratedStaticWebAssetsCustomPropsCacheFile)"
-    Outputs="$(_GeneratedStaticWebAssetsPropsFile)">
+    Inputs="$(StaticWebAssetBuildManifestPath)"
+    Outputs="$(_GeneratedStaticWebAssetsPropsFile)"
+    DependsOnTargets="$(GenerateStaticWebAssetsPackTargetsDependsOn)">
+
+    <ItemGroup>
+      <_CurrentProjectStaticWebAsset Include="@(StaticWebAsset)" Condition="'%(SourceId)' == '$(PackageId)' and '%(AssetMode)' != 'CurrentProject'" />
+      <Content Remove="@(StaticWebAsset->'%(OriginalItemSpec)')"/>
+      <None Remove="@(StaticWebAsset->'%(OriginalItemSpec)')"/>
+    </ItemGroup>
 
     <PropertyGroup>
       <_CurrentProjectHasStaticWebAssets Condition="'@(_CurrentProjectStaticWebAsset->Count())' != '0'">true</_CurrentProjectHasStaticWebAssets>
@@ -504,49 +806,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <TfmSpecificPackageFile Include="%(_CurrentProjectStaticWebAsset.Identity)">
         <PackagePath>staticwebassets\%(_CurrentProjectStaticWebAsset.RelativePath)</PackagePath>
       </TfmSpecificPackageFile>
-    </ItemGroup>
-
-  </Target>
-
-
-  <!--
-    ============================================================
-                                        Static web assets publish related targets
-
-    The main targets for publishing static web assets coming from referenced projects
-    and packages.
-    ============================================================
-    -->
-
-    <!--
-    Called after ComputeResolvedFilesToPublishList but before CopyFilesToPublishDirectory - this target is called when
-    publishing the project to get a list of files to the output directory.
-  -->
-  <Target
-    Name="_StaticWebAssetsComputeFilesToPublish"
-    AfterTargets="ComputeResolvedFilesToPublishList"
-    DependsOnTargets="ResolveStaticWebAssetsInputs">
-
-    <ItemGroup>
-
-      <!-- Filter the static web assets foreign to the project and then add them to the list of resolved
-           files to publish.
-       -->
-      <_ExternalPublishStaticWebAsset
-        Include="%(StaticWebAsset.FullPath)"
-        Condition="'%(SourceType)' != '' AND '%(StaticWebAsset.CopyToPublishDirectory)' != 'Never'">
-
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        <RelativePath>$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)','$([MSBuild]::NormalizePath('wwwroot\%(BasePath)\%(RelativePath)'))'))</RelativePath>
-      </_ExternalPublishStaticWebAsset>
-
-      <!-- Remove any existing external static web asset that might have been added as part of the
-           regular publish pipeline. -->
-      <ResolvedFileToPublish Remove="@(_ExternalPublishStaticWebAsset)" />
-
-      <ResolvedFileToPublish Include="@(_ExternalPublishStaticWebAsset)">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </ResolvedFileToPublish>
     </ItemGroup>
 
   </Target>

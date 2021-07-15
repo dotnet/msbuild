@@ -19,6 +19,16 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         private const string ContentRoot = "ContentRoot";
         private const string BasePath = "BasePath";
         private const string RelativePath = "RelativePath";
+        private const string AssetKind = "AssetKind";
+        private const string AssetMode = "AssetMode";
+        private const string AssetRole = "AssetRole";
+        private const string RelatedAsset = "RelatedAsset";
+        private const string AssetTraitName = "AssetTraitName";
+        private const string AssetTraitValue = "AssetTraitValue";
+        private const string CopyToOutputDirectory = "CopyToOutputDirectory";
+        private const string CopyToPublishDirectory = "CopyToPublishDirectory";
+        private const string OriginalItemSpec = "OriginalItemSpec";
+
 
         [Required]
         public string TargetPropsFilePath { get; set; }
@@ -48,13 +58,23 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 .ThenBy(e => e.GetMetadata(RelativePath), StringComparer.OrdinalIgnoreCase);
             foreach(var element in orderedAssets)
             {
+                var fullPathExpression = @$"$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\staticwebassets\{Normalize(element.GetMetadata(RelativePath))}))";
                 itemGroup.Add(new XElement("StaticWebAsset",
-                    new XAttribute("Include", @$"$(MSBuildThisFileDirectory)..\staticwebassets\{Normalize(element.GetMetadata(RelativePath))}"),
+                    new XAttribute("Include", fullPathExpression),
                     new XElement(SourceType, "Package"),
                     new XElement(SourceId, element.GetMetadata(SourceId)),
                     new XElement(ContentRoot, @"$(MSBuildThisFileDirectory)..\staticwebassets\"),
                     new XElement(BasePath, element.GetMetadata(BasePath)),
-                    new XElement(RelativePath, element.GetMetadata(RelativePath))));
+                    new XElement(RelativePath, element.GetMetadata(RelativePath)),
+                    new XElement(AssetKind, element.GetMetadata(AssetKind)),
+                    new XElement(AssetMode, element.GetMetadata(AssetMode)),
+                    new XElement(AssetRole, element.GetMetadata(AssetRole)),
+                    new XElement(RelatedAsset, element.GetMetadata(RelatedAsset)),
+                    new XElement(AssetTraitName, element.GetMetadata(AssetTraitName)),
+                    new XElement(AssetTraitValue, element.GetMetadata(AssetTraitValue)),
+                    new XElement(CopyToOutputDirectory, element.GetMetadata(CopyToOutputDirectory)),
+                    new XElement(CopyToPublishDirectory, element.GetMetadata(CopyToPublishDirectory)),
+                    new XElement(OriginalItemSpec, fullPathExpression)));
             }
 
             var document = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
@@ -111,10 +131,22 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 }
 
                 if (!ValidateMetadataMatches(firstAsset, webAsset, SourceId) ||
-                    !ValidateMetadataMatches(firstAsset, webAsset, SourceType))
+                    !ValidateSourceType(webAsset))
                 {
                     return false;
                 }
+            }
+
+            return true;
+        }
+
+        private bool ValidateSourceType(ITaskItem candidate)
+        {
+            var candidateMetadata = candidate.GetMetadata(SourceType);
+            if (!(string.Equals("Discovered", candidateMetadata, StringComparison.Ordinal) || string.Equals("Computed", candidateMetadata, StringComparison.Ordinal)))
+            {
+                Log.LogError($"Static web asset '{candidate.ItemSpec}' has invalid source type '{candidateMetadata}'.");
+                return false;
             }
 
             return true;

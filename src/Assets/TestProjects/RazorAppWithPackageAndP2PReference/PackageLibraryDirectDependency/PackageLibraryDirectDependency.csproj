@@ -16,6 +16,7 @@
 
   <PropertyGroup>
     <!-- We don't want to run build server when not running as tests. -->
+    <UseStaticWebAssetsV1>false</UseStaticWebAssetsV1>
     <UseRazorBuildServer>false</UseRazorBuildServer>
   </PropertyGroup>
 

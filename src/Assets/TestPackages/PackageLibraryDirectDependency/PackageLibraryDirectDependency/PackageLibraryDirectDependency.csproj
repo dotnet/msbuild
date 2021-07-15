@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <UseStaticWebAssetsV1>false</UseStaticWebAssetsV1>    
     <TargetFramework>$(AspNetTestTfm)</TargetFramework>
     <Copyright>© Microsoft</Copyright>
     <Product>Razor Test</Product>

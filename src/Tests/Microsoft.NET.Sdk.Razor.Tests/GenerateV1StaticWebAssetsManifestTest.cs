@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.NET.Sdk.Razor.Test
 {
-    public class GenerateStaticWebAssetsManifestTest
+    public class GenerateV1StaticWebAssetsManifestTest
     {
         [Fact]
         public void ReturnsError_WhenBasePathIsMissing()
@@ -23,7 +23,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
             buildEngine.Setup(e => e.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(args => errorMessages.Add(args.Message));
 
-            var task = new GenerateStaticWebAssetsManifest
+            var task = new GenerateV1StaticWebAssetsManifest
             {
                 BuildEngine = buildEngine.Object,
                 ContentRootDefinitions = new TaskItem[]
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
             buildEngine.Setup(e => e.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
                 .Callback<BuildErrorEventArgs>(args => errorMessages.Add(args.Message));
 
-            var task = new GenerateStaticWebAssetsManifest
+            var task = new GenerateV1StaticWebAssetsManifest
             {
                 BuildEngine = buildEngine.Object,
                 ContentRootDefinitions = new TaskItem[]
@@ -86,7 +86,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
 
             var buildEngine = new Mock<IBuildEngine>();
 
-            var task = new GenerateStaticWebAssetsManifest
+            var task = new GenerateV1StaticWebAssetsManifest
             {
                 BuildEngine = buildEngine.Object,
                 ContentRootDefinitions = new TaskItem[]
@@ -137,7 +137,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
             {
                 var buildEngine = new Mock<IBuildEngine>();
 
-                var task = new GenerateStaticWebAssetsManifest
+                var task = new GenerateV1StaticWebAssetsManifest
                 {
                     BuildEngine = buildEngine.Object,
                     ContentRootDefinitions = new TaskItem[] { },
@@ -174,7 +174,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
             {
                 var buildEngine = new Mock<IBuildEngine>();
 
-                var task = new GenerateStaticWebAssetsManifest
+                var task = new GenerateV1StaticWebAssetsManifest
                 {
                     BuildEngine = buildEngine.Object,
                     ContentRootDefinitions = new TaskItem[]
@@ -219,7 +219,7 @@ namespace Microsoft.NET.Sdk.Razor.Test
             {
                 var buildEngine = new Mock<IBuildEngine>();
 
-                var task = new GenerateStaticWebAssetsManifest
+                var task = new GenerateV1StaticWebAssetsManifest
                 {
                     BuildEngine = buildEngine.Object,
                     ContentRootDefinitions = new TaskItem[]
