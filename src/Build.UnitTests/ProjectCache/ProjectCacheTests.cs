@@ -7,9 +7,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
@@ -235,10 +237,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         public class ConfigurableMockCache : ProjectCachePluginBase
         {
+            public Func<CacheContext, PluginLoggerBase, CancellationToken, Task>? BeginBuildImplementation { get; set; }
             public Func<BuildRequestData, PluginLoggerBase, CancellationToken, Task<CacheResult>>? GetCacheResultImplementation { get; set; }
+
             public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
             {
-                return Task.CompletedTask;
+                return BeginBuildImplementation != null
+                    ? BeginBuildImplementation(context, logger, cancellationToken)
+                    : Task.CompletedTask;
             }
 
             public override Task<CacheResult> GetCacheResultAsync(
@@ -538,6 +544,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 BuildManager.ProjectCacheItems.ShouldBeEmpty();
 
                 var graph = testData.CreateGraph(_env);
+                var projectPaths = graph.ProjectNodes.Select(n => n.ProjectInstance.FullPath).ToArray();
+
+                // VS sets this global property on every project it builds.
+                var solutionConfigurationGlobalProperty = CreateSolutionConfigurationProperty(projectPaths);
 
                 BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
 
@@ -549,7 +559,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     var buildResult = buildSession.BuildProjectFile(
                         node.ProjectInstance.FullPath,
                         globalProperties:
-                            new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}});
+                            new Dictionary<string, string>
+                            {
+                                { SolutionProjectGenerator.SolutionPathPropertyName, graph.GraphRoots.First().ProjectInstance.FullPath },
+                                { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty }
+                            });
 
                     buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
 
@@ -559,6 +573,16 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
                 buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
+                // Ensure MSBuild passes config / platform information set by VS.
+                foreach (var projectPath in projectPaths)
+                {
+                    var projectName = Path.GetFileNameWithoutExtension(projectPath);
+
+                    buildSession.Logger.FullLog.ShouldContain($"EntryPoint: {projectPath}");
+                    buildSession.Logger.FullLog.ShouldContain($"Configuration={projectName}Debug");
+                    buildSession.Logger.FullLog.ShouldContain($"Platform={projectName}x64");
+                }
+
                 AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
             }
             finally
@@ -566,6 +590,23 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
                 BuildManager.ProjectCacheItems.Clear();
             }
+        }
+
+        private static string CreateSolutionConfigurationProperty(string[] projectPaths)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("<SolutionConfiguration>");
+
+            foreach (var projectPath in projectPaths)
+            {
+                var projectName = Path.GetFileNameWithoutExtension(projectPath);
+                sb.AppendLine($"<ProjectConfiguration Project=\"{Guid.NewGuid()}\" AbsolutePath=\"{projectPath}\">{projectName}Debug|{projectName}x64</ProjectConfiguration>");
+            }
+
+            sb.AppendLine("</SolutionConfiguration>");
+
+            return sb.ToString();
         }
 
         [Fact]
@@ -963,7 +1004,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             using var buildSession = new Helpers.BuildManagerSession(_env);
 
             var graphResult = buildSession.BuildGraph(graph);
-
+            
             graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
             graphResult.Exception.Message.ShouldContain("A single project cache plugin must be specified but multiple where found:");
         }
@@ -992,7 +1033,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             using var buildSession = new Helpers.BuildManagerSession(_env);
 
             var graphResult = buildSession.BuildGraph(graph);
-
+            
             graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
             graphResult.Exception.Message.ShouldContain("When any static graph node defines a project cache, all nodes must define the same project cache.");
         }
@@ -1383,6 +1424,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // Even though the assembly cache is discovered, we'll be overriding it with a descriptor based cache.
                 BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
 
+                var solutionConfigurationGlobalProperty =
+                    CreateSolutionConfigurationProperty(graph.ProjectNodes.Select(n => n.ProjectInstance.FullPath).ToArray());
+
                 using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters
                 {
                     MaxNodeCount = NativeMethodsShared.GetLogicalCoreCount(),
@@ -1397,7 +1441,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     var buildResultTask = buildSession.BuildProjectFileAsync(
                         node.ProjectInstance.FullPath,
                         globalProperties:
-                        new Dictionary<string, string> { { "SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath } });
+                        new Dictionary<string, string>
+                        {
+                            { SolutionProjectGenerator.SolutionPathPropertyName, graph.GraphRoots.First().ProjectInstance.FullPath },
+                            { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty }
+                        });
 
                     buildResultTasks.Add(buildResultTask);
                 }

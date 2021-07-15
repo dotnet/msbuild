@@ -50,6 +50,11 @@ namespace Microsoft.Build.Construction
 #endif // FEATURE_ASPNET_COMPILER
 
         /// <summary>
+        /// Property set by VS when building projects. It's an XML containing the project configurations for ALL projects in the solution for the currently selected solution configuration.
+        /// </summary>
+        internal const string CurrentSolutionConfigurationContents = nameof(CurrentSolutionConfigurationContents);
+
+        /// <summary>
         /// The set of properties all projects in the solution should be built with
         /// </summary>
         private const string SolutionProperties = "BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)";
