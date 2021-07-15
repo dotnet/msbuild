@@ -28,6 +28,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
   <UsingTask
+    TaskName="Microsoft.AspNetCore.Razor.Tasks.GenerateStaticWebAssetsDevelopmentManifest"
+    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
+    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
+
+  <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.GenerateV1StaticWebAssetsManifest"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
@@ -283,6 +288,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">_content/$(PackageId)</StaticWebAssetBasePath>
       <StaticWebAssetProjectMode Condition="'$(StaticWebAssetProjectMode)' == ''">Default</StaticWebAssetProjectMode>
       <StaticWebAssetBuildManifestPath>$(_StaticWebAssetsManifestBase)StaticWebAssets.build.json</StaticWebAssetBuildManifestPath>
+      <StaticWebAssetDevelopmentManifestPath>$(_StaticWebAssetsManifestBase)StaticWebAssets.development.json</StaticWebAssetDevelopmentManifestPath>      
       <StaticWebAssetPublishManifestPath>$(_StaticWebAssetsManifestBase)StaticWebAssets.publish.json</StaticWebAssetPublishManifestPath>
 
       <_StaticWebAssetsIntermediateOutputPath>$(IntermediateOutputPath)staticwebassets\</_StaticWebAssetsIntermediateOutputPath>
@@ -382,8 +388,14 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="AddStaticWebAssetsManifest" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
     <ItemGroup>
       <ContentWithTargetPath
-        Include="$(StaticWebAssetBuildManifestPath)"
+        Include="$(StaticWebassetBuildManifestPath)"
         TargetPath="$(TargetName).staticwebassets.json"
+        CopyToOutputDirectory="PreserveNewest"
+        CopyToPublishDirectory="Never" />
+
+      <ContentWithTargetPath
+        Include="$(StaticWebAssetDevelopmentManifestPath)"
+        TargetPath="$(TargetName).staticwebassets.runtime.json"
         CopyToOutputDirectory="PreserveNewest"
         CopyToPublishDirectory="Never" />
     </ItemGroup>
@@ -413,6 +425,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       Assets="@(StaticWebAsset)"
       ManifestPath="$(StaticWebAssetBuildManifestPath)">
     </GenerateStaticWebAssetsManifest>
+
+    <GenerateStaticWebAssetsDevelopmentManifest
+      DiscoveryPatterns="@(StaticWebAssetDiscoveryPattern)"
+      Assets="@(StaticWebAsset)"
+      ManifestPath="$(StaticWebAssetDevelopmentManifestPath)">
+  </GenerateStaticWebAssetsDevelopmentManifest>
 
     <ItemGroup Condition="'$(_GenerateLegacyManifestFormat)' == 'true'">
       <_LegacyContentRootDefinition Include="@(StaticWebAsset)" Condition="'%(SourceType)' != 'Discovered'"></_LegacyContentRootDefinition>
