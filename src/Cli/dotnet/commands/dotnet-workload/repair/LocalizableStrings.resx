@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Install a workload.</value>
+    <value>Repair workload installations.</value>
   </data>
   <data name="WorkloadRepairFailed" xml:space="preserve">
     <value>Workload repair failed: {0}</value>

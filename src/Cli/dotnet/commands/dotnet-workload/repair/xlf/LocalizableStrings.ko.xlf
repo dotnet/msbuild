@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Install a workload.</source>
+        <source>Repair workload installations.</source>
         <target state="needs-review-translation">전역 또는 로컬 도구를 설치합니다. 로컬 도구는 매니페스트에 추가되고 복원됩니다.</target>
         <note />
       </trans-unit>
