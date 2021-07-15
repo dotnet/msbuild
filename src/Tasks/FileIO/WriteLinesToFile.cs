@@ -103,6 +103,7 @@ namespace Microsoft.Build.Tasks
                                         if (existingContents.Equals(contentsAsString))
                                         {
                                             Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
+                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
                                             return true;
                                         }
                                     }
@@ -112,7 +113,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                             }
-                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec);
+                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
                         System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);

@@ -431,9 +431,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(61, Keywords = Keywords.All)]
-        public void WriteLinesToFileUpToDateStop(string fileItemSpec)
+        public void WriteLinesToFileUpToDateStop(string fileItemSpec, bool wasUpToDate)
         {
-            WriteEvent(61, fileItemSpec);
+            WriteEvent(61, fileItemSpec, wasUpToDate);
         }
         #endregion
     }
