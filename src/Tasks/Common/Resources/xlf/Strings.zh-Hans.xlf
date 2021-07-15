@@ -37,6 +37,11 @@
         <target state="translated">NETSDK1072: 无法将“{0}”用作应用程序主机可执行文件，因为它不是 CUI (控制台)子系统的 Windows 可执行文件。</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
+      <trans-unit id="AppHostSigningFailed">
+        <source>NETSDK1177: Failed to sign apphost with error code {1}: {0}</source>
+        <target state="new">NETSDK1177: Failed to sign apphost with error code {1}: {0}</target>
+        <note>{StrBegin="NETSDK1177: "}</note>
+      </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
         <target state="translated">NETSDK1079: 当面向 .NET Core 3.0 或更高版本时，不支持 Microsoft.AspNetCore.All 包。应改为使用 Microsoft.AspNetCore.App 的 FrameworkReference，并且 Microsoft.NET.Sdk.Web 将隐式包含它。</target>

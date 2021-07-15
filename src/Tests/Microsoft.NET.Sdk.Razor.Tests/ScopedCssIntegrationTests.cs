@@ -265,7 +265,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.WithWorkingDirectory(projectDirectory.Path);
+            var buildResult = build.Execute("/bl");
+            buildResult.Should().Pass();
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
             publish.Execute("/p:NoBuild=true").Should().Pass();
@@ -301,14 +303,15 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
-            publish.Execute("/p:DisableScopedCssBundling=true").Should().Pass();
+            publish.WithWorkingDirectory(projectDirectory.TestRoot);
+            publish.Execute("/p:DisableScopedCssBundling=true", "/bl").Should().Pass();
 
             var publishOutputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
             new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "ComponentApp.styles.css")).Should().NotExist();
 
-            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "Components", "Pages", "Index.razor.rz.scp.css")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "Components", "Pages", "Index.razor.rz.scp.css")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().Exist();
         }
 
         [CoreMSBuildOnlyFact]

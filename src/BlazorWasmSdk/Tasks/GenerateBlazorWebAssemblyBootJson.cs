@@ -53,7 +53,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             }
             catch (Exception ex)
             {
-                Log.LogErrorFromException(ex);
+                Log.LogError(ex.ToString());
             }
 
             return !Log.HasLoggedErrors;
@@ -93,61 +93,94 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             //     - ContentHash (e.g., "3448f339acf512448")
             if (Resources != null)
             {
+                var remainingLazyLoadAssemblies = new List<ITaskItem>(LazyLoadedAssemblies ?? Array.Empty<ITaskItem>());
                 var resourceData = result.resources;
                 foreach (var resource in Resources)
                 {
                     ResourceHashesByNameDictionary resourceList;
 
                     var fileName = resource.GetMetadata("FileName");
-                    var extension = resource.GetMetadata("Extension");
-                    var resourceCulture = resource.GetMetadata("Culture");
-                    var assetType = resource.GetMetadata("AssetType");
-                    var resourceName = $"{fileName}{extension}";
+                    var assetTraitName = resource.GetMetadata("AssetTraitName");
+                    var assetTraitValue = resource.GetMetadata("AssetTraitValue");
+                    var resourceName = Path.GetFileName(resource.GetMetadata("RelativePath"));
 
-                    if (IsLazyLoadedAssembly(resourceName))
+                    if (TryGetLazyLoadedAssembly(resourceName, out var lazyLoad))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as a lazy loaded assembly.", resource.ItemSpec);
+                        remainingLazyLoadAssemblies.Remove(lazyLoad);
                         resourceData.lazyAssembly ??= new ResourceHashesByNameDictionary();
                         resourceList = resourceData.lazyAssembly;
                     }
-                    else if (!string.IsNullOrEmpty(resourceCulture))
+                    else if (string.Equals("Culture", assetTraitName))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as satellite assembly with culture '{1}'.", resource.ItemSpec, assetTraitValue);
                         resourceData.satelliteResources ??= new Dictionary<string, ResourceHashesByNameDictionary>(StringComparer.OrdinalIgnoreCase);
-                        resourceName = resourceCulture + "/" + resourceName;
+                        resourceName = assetTraitValue + "/" + resourceName;
 
-                        if (!resourceData.satelliteResources.TryGetValue(resourceCulture, out resourceList))
+                        if (!resourceData.satelliteResources.TryGetValue(assetTraitValue, out resourceList))
                         {
                             resourceList = new ResourceHashesByNameDictionary();
-                            resourceData.satelliteResources.Add(resourceCulture, resourceList);
+                            resourceData.satelliteResources.Add(assetTraitValue, resourceList);
                         }
                     }
-                    else if (string.Equals(extension, ".pdb", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals("symbol", assetTraitValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        resourceData.pdb ??= new ResourceHashesByNameDictionary();
-                        if (IsLazyLoadedAssembly($"{fileName}.dll"))
+                        if (TryGetLazyLoadedAssembly($"{fileName}.dll", out _))
                         {
+                            Log.LogMessage("Candidate '{0}' is defined as a lazy loaded symbols file.", resource.ItemSpec);
+                            resourceData.lazyAssembly ??= new ResourceHashesByNameDictionary();
                             resourceList = resourceData.lazyAssembly;
-                        } else {
+                        }
+                        else
+                        {
+                            Log.LogMessage("Candidate '{0}' is defined as symbols file.", resource.ItemSpec);
+                            resourceData.pdb ??= new ResourceHashesByNameDictionary();
                             resourceList = resourceData.pdb;
                         }
                     }
-                    else if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals("runtime", assetTraitValue, StringComparison.OrdinalIgnoreCase))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as an app assembly.", resource.ItemSpec);
                         resourceList = resourceData.assembly;
                     }
-                    else if (string.Equals(assetType, "native", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(assetTraitName, "BlazorWebAssemblyResource", StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(assetTraitValue, "native", StringComparison.OrdinalIgnoreCase))
                     {
+                        Log.LogMessage("Candidate '{0}' is defined as a native application resource.", resource.ItemSpec);
                         resourceList = resourceData.runtime;
                     }
                     else
                     {
+                        Log.LogMessage("Skipping resource '{0}' since it doesn't belong to a defined category.", resource.ItemSpec);
                         // This should include items such as XML doc files, which do not need to be recorded in the manifest.
                         continue;
                     }
 
                     if (!resourceList.ContainsKey(resourceName))
                     {
+                        Log.LogMessage("Added resource '{0}' to the manifest.", resource.ItemSpec);
                         resourceList.Add(resourceName, $"sha256-{resource.GetMetadata("FileHash")}");
                     }
+                }
+
+                if (remainingLazyLoadAssemblies.Count > 0)
+                {
+                    const string message = "Unable to find '{0}' to be lazy loaded later. Confirm that project or " +
+                        "package references are included and the reference is used in the project.";
+
+                    Log.LogError(
+                        subcategory: null,
+                        errorCode: "BLAZORSDK1001",
+                        helpKeyword: null,
+                        file: null,
+                        lineNumber: 0,
+                        columnNumber: 0,
+                        endLineNumber: 0,
+                        endColumnNumber: 0,
+                        message: message,
+                        string.Join(";", LazyLoadedAssemblies.Select(a => a.ItemSpec)));
+
+                    return;
                 }
             }
 
@@ -159,6 +192,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 }
             }
 
+            ListManifestContents(result);
+
             var serializer = new DataContractJsonSerializer(typeof(BootJsonData), new DataContractJsonSerializerSettings
             {
                 UseSimpleDictionaryFormat = true
@@ -168,9 +203,84 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
             serializer.WriteObject(writer, result);
         }
 
-        private bool IsLazyLoadedAssembly(string fileName)
+        private void ListManifestContents(BootJsonData result)
         {
-            return LazyLoadedAssemblies != null && LazyLoadedAssemblies.Any(a => a.ItemSpec == fileName);
+            if (result.resources.assembly == null || result.resources.assembly.Count == 0)
+            {
+                Log.LogMessage("No assemblies defined.");
+            }
+            else
+            {
+                foreach (var assembly in result.resources.assembly)
+                {
+                    Log.LogMessage("Assembly: '{0}' with hash '{1}'", assembly.Key, assembly.Value);
+                }
+            }
+
+            if (result.resources.lazyAssembly == null || result.resources.lazyAssembly.Count == 0)
+            {
+                Log.LogMessage("No lazy loaded assemblies defined.");
+            }
+            else
+            {
+                foreach (var lazyAssembly in result.resources.lazyAssembly)
+                {
+                    Log.LogMessage("Lazy loaded assembly: '{0}' with hash '{1}'", lazyAssembly.Key, lazyAssembly.Value);
+                }
+            }
+
+            if (result.resources.pdb == null || result.resources.pdb.Count == 0)
+            {
+                Log.LogMessage("No debug symbol files defined.");
+            }
+            else
+            {
+                foreach (var symbol in result.resources.pdb)
+                {
+                    Log.LogMessage("Lazy loaded assembly: '{0}' with hash '{1}'", symbol.Key, symbol.Value);
+                }
+            }
+
+            if (result.resources.runtime == null || result.resources.runtime.Count == 0)
+            {
+                Log.LogMessage("No runtime resources defined.");
+            }
+            else
+            {
+                foreach (var native in result.resources.runtime)
+                {
+                    Log.LogMessage("Runtime resource: '{0}' with hash '{1}'", native.Key, native.Value);
+                }
+            }
+
+            if (result.resources.satelliteResources == null || result.resources.satelliteResources.Count == 0)
+            {
+                Log.LogMessage("No satellite resources defined.");
+            }
+            else
+            {
+                foreach (var pair in result.resources.satelliteResources)
+                {
+                    var language = pair.Key;
+                    var resources = pair.Value;
+                    if (resources.Count == 0)
+                    {
+                        Log.LogMessage("No satellite resources defined for '{0}'.", language);
+                    }
+                    else
+                    {
+                        foreach (var assembly in resources)
+                        {
+                            Log.LogMessage("Satellite assembly: '{0}' with hash '{1}' for culture '{2}'", assembly.Key, assembly.Value, language);
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool TryGetLazyLoadedAssembly(string fileName, out ITaskItem lazyLoadedAssembly)
+        {
+            return (lazyLoadedAssembly = LazyLoadedAssemblies?.SingleOrDefault(a => a.ItemSpec == fileName)) != null;
         }
     }
 }

@@ -37,6 +37,11 @@
         <target state="translated">NETSDK1072: CUI(콘솔) 하위 시스템용 Windows 실행 파일이 아니므로 '{0}'을(를) 애플리케이션 호스트 실행 파일로 사용할 수 없습니다.</target>
         <note>{StrBegin="NETSDK1072: "}</note>
       </trans-unit>
+      <trans-unit id="AppHostSigningFailed">
+        <source>NETSDK1177: Failed to sign apphost with error code {1}: {0}</source>
+        <target state="new">NETSDK1177: Failed to sign apphost with error code {1}: {0}</target>
+        <note>{StrBegin="NETSDK1177: "}</note>
+      </trans-unit>
       <trans-unit id="AspNetCoreAllNotSupported">
         <source>NETSDK1079: The Microsoft.AspNetCore.All package is not supported when targeting .NET Core 3.0 or higher.  A FrameworkReference to Microsoft.AspNetCore.App should be used instead, and will be implicitly included by Microsoft.NET.Sdk.Web.</source>
         <target state="translated">NETSDK1079: .NET Core 3.0 이상을 대상으로 할 경우 Microsoft.AspNetCore.All 패키지가 지원되지 않습니다. Microsoft.AspNetCore.App에 대한 FrameworkReference가 대신 사용되어야 하며, Microsoft.NET.Sdk.Web에 의해 암시적으로 포함됩니다.</target>

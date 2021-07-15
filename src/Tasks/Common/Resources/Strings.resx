@@ -811,4 +811,8 @@ To install these workloads, run the following command: {1}</value>
     <value>NETSDK1176: Placeholder</value>
     <comment>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</comment>
   </data>
+  <data name="AppHostSigningFailed" xml:space="preserve">
+    <value>NETSDK1177: Failed to sign apphost with error code {1}: {0}</value>
+    <comment>{StrBegin="NETSDK1177: "}</comment>
+  </data>
 </root>

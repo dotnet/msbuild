@@ -58,7 +58,7 @@ namespace Microsoft.NET.Publish.Tests
                 "HelloWorld.runtimeconfig.json"
             };
 
-            if (shouldIncludeExecutable && !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (shouldIncludeExecutable)
             {
                 expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
             }
@@ -103,7 +103,7 @@ namespace Microsoft.NET.Publish.Tests
                 "HelloWorld.runtimeconfig.json"
             };
 
-            if (shouldIncludeExecutable && !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (shouldIncludeExecutable)
             {
                 expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
             }
@@ -155,7 +155,7 @@ namespace Microsoft.NET.Publish.Tests
                 expectedFiles.Add("System.Runtime.Serialization.Primitives.dll");
             }
 
-            if (shouldIncludeExecutable && !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (shouldIncludeExecutable)
             {
                 expectedFiles.Add("HelloWorld" + EnvironmentInfo.ExecutableExtension);
             }

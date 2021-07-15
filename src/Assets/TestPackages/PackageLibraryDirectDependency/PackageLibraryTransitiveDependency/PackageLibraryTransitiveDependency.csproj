@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <UseStaticWebAssetsV1>false</UseStaticWebAssetsV1>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Copyright>© Microsoft</Copyright>
     <Product>Razor Test</Product>
