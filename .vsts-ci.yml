@@ -37,6 +37,11 @@ stages:
 - stage: build
   displayName: Build
   jobs:
+  - job: Publish_Build_Configuration
+    steps:
+      - publish: $(Build.SourcesDirectory)\eng\BuildConfiguration
+        artifact: BuildConfiguration
+        displayName: Publish Build Config
   - template: /eng/build.yml
     parameters:
       agentOs: Windows_NT
