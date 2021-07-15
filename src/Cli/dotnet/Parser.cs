@@ -8,6 +8,8 @@ using System.CommandLine.Help;
 using System.CommandLine.Invocation;
 using System.CommandLine.IO;
 using System.Reflection;
+
+using Microsoft.DotNet.Cli.Format;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Help;
@@ -173,7 +175,12 @@ namespace Microsoft.DotNet.Cli
                 {
                     windowWidth = int.MaxValue;
                 }
-                return new DotnetHelpBuilder(new SystemConsole(), windowWidth);
+
+                DotnetHelpBuilder dotnetHelpBuilder = new DotnetHelpBuilder(new SystemConsole(), windowWidth);
+                dotnetHelpBuilder.Customize(FormatCommandCommon.DiagnosticsOption, defaultValue: Tools.Format.LocalizableStrings.whichever_ids_are_listed_in_the_editorconfig_file);
+                dotnetHelpBuilder.Customize(FormatCommandCommon.IncludeOption, defaultValue: Tools.Format.LocalizableStrings.all_files_in_the_solution_or_project);
+                dotnetHelpBuilder.Customize(FormatCommandCommon.ExcludeOption, defaultValue: Tools.Format.LocalizableStrings.none);
+                return dotnetHelpBuilder;
             });
 
             public override void Write(ICommand command)

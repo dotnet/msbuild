@@ -72,6 +72,21 @@
         <target state="new">Verify no formatting changes would be performed. Terminates with a non-zero exit code if any files would have been formatted.</target>
         <note />
       </trans-unit>
+      <trans-unit id="all_files_in_the_solution_or_project">
+        <source>all files in the solution or project</source>
+        <target state="new">all files in the solution or project</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="none">
+        <source>none</source>
+        <target state="new">none</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="whichever_ids_are_listed_in_the_editorconfig_file">
+        <source>whichever ids are listed in the editorconfig file</source>
+        <target state="new">whichever ids are listed in the editorconfig file</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

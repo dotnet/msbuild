@@ -120,6 +120,9 @@
   <data name="Accepts_a_file_path_which_if_provided_will_produce_a_json_report_in_the_given_directory" xml:space="preserve">
     <value>Accepts a file path, which if provided, will produce a json report in the given directory.</value>
   </data>
+  <data name="all_files_in_the_solution_or_project" xml:space="preserve">
+    <value>all files in the solution or project</value>
+  </data>
   <data name="A_list_of_relative_file_or_folder_paths_to_exclude_from_formatting" xml:space="preserve">
     <value>A list of relative file or folder paths to exclude from formatting.</value>
   </data>
@@ -141,6 +144,9 @@
   <data name="Log_all_project_or_solution_load_information_to_a_binary_log_file" xml:space="preserve">
     <value>Log all project or solution load information to a binary log file.</value>
   </data>
+  <data name="none" xml:space="preserve">
+    <value>none</value>
+  </data>
   <data name="Run_3rd_party_analyzers_ and_apply_fixes" xml:space="preserve">
     <value>Run 3rd party analyzers and apply fixes.</value>
   </data>
@@ -158,5 +164,8 @@
   </data>
   <data name="Verify_no_formatting_changes_would_be_performed_Terminates_with_a_non_zero_exit_code_if_any_files_would_have_been_formatted" xml:space="preserve">
     <value>Verify no formatting changes would be performed. Terminates with a non-zero exit code if any files would have been formatted.</value>
+  </data>
+  <data name="whichever_ids_are_listed_in_the_editorconfig_file" xml:space="preserve">
+    <value>whichever ids are listed in the editorconfig file</value>
   </data>
 </root>
