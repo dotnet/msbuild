@@ -5,10 +5,11 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
-
 using Microsoft.DotNet.Cli.Format;
-using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
+
 using static Microsoft.DotNet.Cli.Format.FormatCommandCommon;
+
+using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {

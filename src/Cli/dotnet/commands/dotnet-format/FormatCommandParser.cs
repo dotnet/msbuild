@@ -4,21 +4,21 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Threading.Tasks;
 
 using Microsoft.DotNet.Cli.Format;
 using LocalizableStrings = Microsoft.DotNet.Tools.Format.LocalizableStrings;
 using static Microsoft.DotNet.Cli.Format.FormatCommandCommon;
+using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli
 {
     internal static partial class FormatCommandParser
     {
-        private static readonly FormatCommandDefaultHandler s_cleanupCommandHandler = new();
+        private static readonly FormatCommandDefaultHandler s_formatCommandHandler = new();
 
         public static Command GetCommand()
         {
-            var cleanupCommand = new Command("format", LocalizableStrings.Formats_code_to_match_editorconfig_settings)
+            var formatCommand = new Command("format", LocalizableStrings.Formats_code_to_match_editorconfig_settings)
             {
                 FormatWhitespaceCommandParser.GetCommand(),
                 FormatStyleCommandParser.GetCommand(),
@@ -26,9 +26,9 @@ namespace Microsoft.DotNet.Cli
                 DiagnosticsOption,
                 SeverityOption,
             };
-            cleanupCommand.AddCommonOptions();
-            cleanupCommand.Handler = s_cleanupCommandHandler;
-            return cleanupCommand;
+            formatCommand.AddCommonOptions();
+            formatCommand.Handler = s_formatCommandHandler;
+            return formatCommand;
         }
 
         class FormatCommandDefaultHandler : ICommandHandler

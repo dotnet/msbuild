@@ -16,6 +16,7 @@ using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.New;
 using Microsoft.DotNet.Tools.NuGet;
+
 using Command = System.CommandLine.Command;
 using ICommand = System.CommandLine.ICommand;
 
