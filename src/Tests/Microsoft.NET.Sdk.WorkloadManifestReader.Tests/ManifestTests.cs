@@ -191,7 +191,7 @@ namespace ManifestReaderTests
             };
 
             var missingManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(missingManifestProvider, new[] { fakeRootPath }));
-            Assert.Contains("missing dependency", missingManifestEx.Message);
+            Assert.StartsWith("Did not find workload manifest dependency 'BBB' required by manifest 'AAA'", missingManifestEx.Message);
 
             var inconsistentManifestProvider = new InMemoryFakeManifestProvider
             {
@@ -202,7 +202,7 @@ namespace ManifestReaderTests
             };
 
             var inconsistentManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
-            Assert.Contains("Inconsistency in workload manifest", inconsistentManifestEx.Message);
+            Assert.StartsWith("Workload manifest dependency 'DDD' version '39.0.0' is lower than version '30.0.0' required by manifest 'BBB'", inconsistentManifestEx.Message);
         }
 
         [Fact]
