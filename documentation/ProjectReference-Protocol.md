@@ -128,16 +128,18 @@ As of version 17.0, MSBuild can now dynamically figure out what platform a `Proj
 ### What's new?
 Modified target: `GetTargetFrameworks`
 - Extracts `$(Platform)` information and determines whether the referred project is a `.vcxproj` or `.nativeproj`.
+
 New target: `_GetProjectReferencePlatformProperties`
 - Runs after `_GetProjectReferenceTargetFrameworkProperties`
 - Calls the new `GetCompatiblePlatform` task
-- Sets `SetPlatform` metadata as needed.
+- Sets or unsets `SetPlatform` metadata based on the `NearestPlatform` metadata from `GetCompatiblePlatform`.
+
 New task: `GetCompatiblePlatform`
-- Parameters: Parent's `$(Platform)`(for `.vcxproj` or `.nativeproj`) or `$(PlatformTarget)`(managed), referenced project's `$(Platforms)`, and an optional `$(PlatformLookupTable)`
-- Using the given information, sets the `SetPlatform` metadata as best it can or throws a warning and undefines `SetPlatform`.
+- Parameters: Parent's `$(Platform)`(for `.vcxproj` or `.nativeproj`) or `$(PlatformTarget)`(for managed projects), the `$(Platforms)` of the referenced project, and an optional `$(PlatformLookupTable)`
+- Using the given information, sets the `NearestPlatform` metadata as best it can or throws a warning.
 
 ### How To Opt In
-First, set the properties `EnableDynamicPlatformResolution` and `DisableTransitiveProjectReferences` to `true`, and  for **every project** in your solution. The easiest way to do this is by creating a `Directory.Build.props` file and placing it at the root of your project directory:
+First, set the properties `EnableDynamicPlatformResolution` and `DisableTransitiveProjectReferences` to `true` for **every project** in your solution. The easiest way to do this is by creating a `Directory.Build.props` file and placing it at the root of your project directory:
 
 ```xml
 <Project>
@@ -147,14 +149,15 @@ First, set the properties `EnableDynamicPlatformResolution` and `DisableTransiti
   </PropertyGroup>
 </Project>
 ```
+
  If only set in one project, the `SetPlatform` metadata will carry forward to every consecutive project reference.
 
  Next, every referenced project is required to define a `$(Platforms)` property. `$(Platforms)` is a semicolon-delimited list of platforms that project could build as. `<Platforms>x64;x86;AnyCPU</Platforms>`, for example.
 
- Lastly, you may have to define `PlatformLookupTable` as a semicolon-delimited list of mappings like so: `A=B;C=D`. Read below to see if your `ProjectReference` applies.
+ Lastly, projects that contain `ProjectReference` items may need to define a `$(PlatformLookupTable)` property. `$(PlatformLookupTable)` is a semicolon-delimited list of mappings between projects. `<PlatformLookupTable>win32=x86</PlatformLookupTable>`, for example. This is mostly relevant for references between managed and unmanaged projects.
 
  ### References between managed and unmanaged projects
- Some cases of `ProjectReference`s require more information to correctly determine what a referenced project should build as.
+ Some cases of `ProjectReference`s require a `$(PlatformLookupTable)` to correctly determine what a referenced project should build as.
 | Project Reference Type | `PlatformLookupTable` Required? | Notes |
 | :--  | :-: | :-: |
 | Unmanaged -> Unmanaged | No |  |
@@ -164,6 +167,6 @@ First, set the properties `EnableDynamicPlatformResolution` and `DisableTransiti
 
  Example:
  Project A: Unmanaged, building as `win32`, has a `ProjectReference` on Project B.
- Project B: Managed, has `$(Platforms)` defined as `x86;x64`.
+ Project B: Managed, has `$(Platforms)` defined as `x86;AnyCPU`.
 
- There's no way for A to know what B should build as without some sort of mapping. The `GetCompatiblePlatform` task **requires** the property `PlatformLookupTable` to be defined in this case. To resolve this scenario, Project A should define `PlatformLookupTable` as `win32=x86` or `win32=x64`. You can also define this on the `ProjectReference` item as metadata.
+ Because `win32` can map to multiple managed platforms, there's no way for A to know what B should build as without some sort of mapping. The `GetCompatiblePlatform` task **requires** the property `PlatformLookupTable` to be defined in this case. To resolve this scenario, Project A should define `PlatformLookupTable` as `win32=x86` or `win32=x64`. You can also define this on the `ProjectReference` item as metadata.
