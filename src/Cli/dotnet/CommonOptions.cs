@@ -9,6 +9,7 @@ using Microsoft.DotNet.Tools.Common;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -116,18 +117,33 @@ namespace Microsoft.DotNet.Cli
                 verbosity.Equals(VerbosityOptions.detailed);
         }
 
-        internal static IEnumerable<string> ResolveArchOptionToRuntimeIdentifier(string arg)
+        internal static IEnumerable<string> ResolveArchOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
         {
-            var currentRid = GetCurrentRuntimeId();
-            var os = currentRid.Substring(0, currentRid.LastIndexOf("-"));
-            return new string[] { $"-property:RuntimeIdentifier={os}-{arg}", "-property:SelfContained=true" };
+            if (parseResult.BothArchAndOsOptionsSpecified())
+            {
+                return Array.Empty<string>();
+            }
+
+            return ResolveRidShorthandOptions(null, arg);
         }
 
-        internal static IEnumerable<string> ResolveOsOptionToRuntimeIdentifier(string arg)
+        internal static IEnumerable<string> ResolveOsOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
+        {
+            if (parseResult.BothArchAndOsOptionsSpecified())
+            {
+                return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()));
+            }
+
+            return ResolveRidShorthandOptions(arg, null);
+        }
+
+        private static IEnumerable<string> ResolveRidShorthandOptions(string os, string arch)
         {
             var currentRid = GetCurrentRuntimeId();
-            var arch = currentRid.Substring(currentRid.LastIndexOf("-") + 1, currentRid.Length - currentRid.LastIndexOf("-") - 1);
-            return new string[] { $"-property:RuntimeIdentifier={arg}-{arch}", "-property:SelfContained=true" };
+            os = string.IsNullOrEmpty(os) ? GetOsFromRid(currentRid) : os;
+            arch = string.IsNullOrEmpty(arch) ? GetArchFromRid(currentRid) : arch;
+            var properties = new string[] { $"-property:RuntimeIdentifier={os}-{arch}" };
+            return properties;
         }
 
         private static string GetCurrentRuntimeId()
@@ -147,6 +163,10 @@ namespace Microsoft.DotNet.Cli
             }
             return currentRuntimeIdentifiers[0]; // First rid is the most specific (ex win-x64)
         }
+
+        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-"));
+
+        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-") + 1, rid.Length - rid.LastIndexOf("-") - 1);
     }
 
     public enum VerbosityOptions

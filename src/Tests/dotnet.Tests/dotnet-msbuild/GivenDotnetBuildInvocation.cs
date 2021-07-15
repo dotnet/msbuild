@@ -100,7 +100,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var expectedArch = Environment.Is64BitOperatingSystem ? "x64" : "x86";
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch} -property:SelfContained=true");
+                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch}");
             });
         }
 
@@ -113,7 +113,20 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var command = BuildCommand.FromArgs(new string[] { "--arch", "arch" }, msbuildPath);
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=win-arch -property:SelfContained=true");
+                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=win-arch");
+            });
+        }
+
+        [Fact]
+        public void OSAndArchOptionsCanBeCombined()
+        {
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                var msbuildPath = "<msbuildpath>";
+                var command = BuildCommand.FromArgs(new string[] { "--arch", "arch", "--os", "os" }, msbuildPath);
+                command.GetArgumentsToMSBuild()
+                    .Should()
+                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-arch");
             });
         }
     }

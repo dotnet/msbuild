@@ -85,5 +85,9 @@ namespace Microsoft.DotNet.Cli
                 return string.Empty;
             }
         }
+
+        public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
+            parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) && 
+            parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First());
     }
 }
