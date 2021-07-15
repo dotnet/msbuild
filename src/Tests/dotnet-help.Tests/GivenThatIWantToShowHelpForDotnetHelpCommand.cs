@@ -24,7 +24,7 @@ Arguments:
   <COMMAND_NAME>  The SDK command to launch online help for.
 
 Options:
-  -?, -h, --help  Show help and usage information";
+  -?, -h, --help  Show command line help.";
 
         public GivenThatIWantToShowHelpForDotnetHelpCommand(ITestOutputHelper log) : base(log)
         {
