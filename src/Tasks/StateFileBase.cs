@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
                 {
                     using (FileStream s = File.OpenRead(stateFile))
                     {
-                        var translator = BinaryTranslator.GetReadTranslator(s, buffer: null);
+                        using var translator = BinaryTranslator.GetReadTranslator(s, buffer: null);
                         byte version = 0;
                         translator.Translate(ref version);
                         var constructors = requiredReturnType.GetConstructors();

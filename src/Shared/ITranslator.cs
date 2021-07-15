@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd
     ///    that by ensuring a single Translate method on a given object can handle both reads and
     ///    writes without referencing any field more than once.
     /// </remarks>
-    internal interface ITranslator
+    internal interface ITranslator : IDisposable
     {
         /// <summary>
         /// Returns the current serialization mode.

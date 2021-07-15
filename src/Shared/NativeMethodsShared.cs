@@ -514,9 +514,6 @@ namespace Microsoft.Build.Shared
             //     https://github.com/dotnet/runtime/issues/29686
             // so always double-check it.
             if (IsWindows
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8)
-#endif
 #if NETFRAMEWORK
                 // .NET Framework calls Windows APIs that have a core count limit (32/64 depending on process bitness).
                 // So if we get a high core count on full framework, double-check it.

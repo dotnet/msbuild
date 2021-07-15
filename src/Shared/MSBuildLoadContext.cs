@@ -83,7 +83,7 @@ namespace Microsoft.Build.Shared
             //   into the default ALC (so it's shared with other uses).
 
             var assemblyNameInExecutableDirectory = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
-                assemblyName.Name!);
+                $"{assemblyName.Name}.dll");
 
             if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
             {
