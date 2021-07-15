@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
         private bool _canPublish;
         private Dictionary<string, ITaskItem> _runtimePackAssets;
         // map of satellite assemblies that are included in References
-        private SatelliteRefAssemblyMap satelliteRefAssemblyMap = new SatelliteRefAssemblyMap();
+        private SatelliteRefAssemblyMap _satelliteAssembliesPassedAsReferences = new SatelliteRefAssemblyMap();
         #endregion
 
         #region Properties
@@ -385,24 +385,23 @@ namespace Microsoft.Build.Tasks
                         // ClickOnce for .NET 4.X should not publish duplicate satellite assemblies.
                         // This will cause ClickOnce install to fail. This can happen if some package
                         // decides to publish the en-us resource assemblies for other locales also.
-                        if (!LauncherBasedDeployment && satelliteRefAssemblyMap.ContainsItem(item))
+                        if (!LauncherBasedDeployment && _satelliteAssembliesPassedAsReferences.ContainsItem(item))
                         {
-                            Debug.Assert(false, $"Duplicate satellite assembly '{item.ItemSpec}' skipped in _managedAssemblies");
                             continue;
                         }
 
-                        // If we get a resource assembly in managed references, determine whether to be publish it based on _targetCulture
+                        // Apply the culture publishing rules to include or exclude satellite assemblies
                         AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
                         if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                         {
                             CultureInfo satelliteCulture = GetItemCulture(item);
-                            if (!PublishFlags.IsSatelliteIncludedByDefault(satelliteCulture, _targetCulture, _includeAllSatellites))
+                            if (PublishFlags.IsSatelliteIncludedByDefault(satelliteCulture, _targetCulture, _includeAllSatellites))
                             {
-                                continue;
+                                _satelliteAssembliesPassedAsReferences.Add(item);
                             }
                             else
                             {
-                                satelliteRefAssemblyMap.Add(item);
+                                continue;
                             }
                         }
                         item.SetMetadata("AssemblyType", "Managed");
@@ -599,9 +598,8 @@ namespace Microsoft.Build.Tasks
                 foreach (ITaskItem item in _satelliteAssemblies)
                 {
                     item.SetMetadata("AssemblyType", "Satellite");
-                    if (satelliteRefAssemblyMap.ContainsItem(item))
+                    if (_satelliteAssembliesPassedAsReferences.ContainsItem(item))
                     {
-                        Debug.Assert(false, $"Duplicate satellite assembly '{item.ItemSpec}' skipped in _satelliteAssemblies");
                         continue;
                     }
                     satelliteMap.Add(item, true);
@@ -888,14 +886,13 @@ namespace Microsoft.Build.Tasks
         #region SatelliteRefAssemblyMap
         private class SatelliteRefAssemblyMap : IEnumerable
         {
-            private readonly Dictionary<string, MapEntry> _dictionary = new Dictionary<string, MapEntry>();
+            private readonly Dictionary<string, MapEntry> _dictionary = new Dictionary<string, MapEntry>(StringComparer.InvariantCultureIgnoreCase);
 
             public MapEntry this[string fusionName]
             {
                 get
                 {
-                    string key = fusionName.ToLowerInvariant();
-                    _dictionary.TryGetValue(key, out MapEntry entry);
+                    _dictionary.TryGetValue(fusionName, out MapEntry entry);
                     return entry;
                 }
             }
@@ -905,8 +902,7 @@ namespace Microsoft.Build.Tasks
                 AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
                 if (identity != null)
                 {
-                    string key = identity.ToString().ToLowerInvariant();
-                    return _dictionary.ContainsKey(key);
+                    return _dictionary.ContainsKey(identity.ToString());
                 }
                 return false;
             }
@@ -918,7 +914,7 @@ namespace Microsoft.Build.Tasks
                 if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                 {
                     // Use satellite assembly strong name signature as key
-                    string key = identity.ToString().ToLowerInvariant();
+                    string key = identity.ToString();
                     Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same key '{0}' detected", key));
                     if (!_dictionary.ContainsKey(key))
                     {
