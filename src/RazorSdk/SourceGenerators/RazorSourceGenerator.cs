@@ -31,9 +31,13 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                     (c1, c2) => c1 != null && c2 != null && c1.References != c2.References)
                 .Select((compilation, _) => compilation.References);
 
+            var sourceItemsByName = sourceItems.Collect()
+                .WithLambdaComparer((@new, old) => @new.SequenceEqual(old, new LambdaComparer<SourceGeneratorProjectItem>(
+                    (l, r) => string.Equals(l?.FilePath, r?.FilePath, System.StringComparison.OrdinalIgnoreCase))));
+
             var discoveryProjectEngine = references
                 .Combine(razorSourceGeneratorOptions)
-                .Combine(sourceItems.Collect())
+                .Combine(sourceItemsByName)
                 .Select((pair, _) =>
                 {
                     var ((references, razorSourceGeneratorOptions), projectItems) = pair;
