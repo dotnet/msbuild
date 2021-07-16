@@ -320,7 +320,8 @@ namespace Microsoft.Build.Shared
         private static string GetVsRootFromMSBuildAssembly(string msBuildAssembly)
         {
             return FileUtilities.GetFolderAbove(msBuildAssembly,
-                Regex.IsMatch(msBuildAssembly, $@"\\Bin\\Amd64\\MSBuild\.exe", RegexOptions.IgnoreCase)
+                Path.GetDirectoryName(msBuildAssembly)
+                  .EndsWith(@"\amd64", StringComparison.OrdinalIgnoreCase)
                     ? 5
                     : 4);
         }
