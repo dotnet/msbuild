@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
@@ -328,6 +329,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             {
                 var (_, configuration) = request;
                 var solutionPath = configuration.Project.GetPropertyValue(SolutionProjectGenerator.SolutionPathPropertyName);
+                var solutionConfigurationXml = configuration.Project.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents);
 
                 ErrorUtilities.VerifyThrow(
                     solutionPath != null && !string.IsNullOrWhiteSpace(solutionPath) && solutionPath != "*Undefined*",
@@ -337,17 +339,78 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     FileSystems.Default.FileExists(solutionPath),
                     $"Solution file does not exist: {solutionPath}");
 
+                ErrorUtilities.VerifyThrow(
+                    string.IsNullOrWhiteSpace(solutionConfigurationXml) is false,
+                    "Expected VS to set a xml with all the solution projects' configurations for the currently building solution configuration.");
+
+                // A solution supports multiple solution configurations (different values for Configuration and Platform).
+                // Each solution configuration generates a different static graph.
+                // Therefore, plugin implementations that rely on creating static graphs in their BeginBuild methods need access to the
+                // currently solution configuration used by VS.
+                //
+                // In this VS workaround, however, we do not have access to VS' solution configuration. The only information we have is a global property
+                // named "CurrentSolutionConfigurationContents" that VS sets on each built project. It does not contain the solution configuration itself, but
+                // instead it contains information on how the solution configuration maps to each project's configuration.
+                //
+                // So instead of using the solution file as the entry point, we parse this VS property and extract graph entry points from it, for every project
+                // mentioned in the "CurrentSolutionConfigurationContents" global property.
+                //
+                // Ideally, when the VS workaround is removed from MSBuild and moved into VS, VS should create ProjectGraphDescriptors with the solution path as
+                // the graph entrypoint file, and the VS solution configuration as the entry point's global properties.
+                var graphEntryPointsFromSolutionConfig = GenerateGraphEntryPointsFromSolutionConfigurationXml(
+                    solutionConfigurationXml,
+                    configuration.ProjectFullPath,
+                    configuration.Project.GlobalProperties);
+
                 await BeginBuildAsync(
                     ProjectCacheDescriptor.FromAssemblyPath(
                         _projectCacheDescriptor.PluginAssemblyPath!,
-                        new[]
-                        {
-                            new ProjectGraphEntryPoint(
-                                solutionPath,
-                                configuration.Project.GlobalProperties)
-                        },
+                        graphEntryPointsFromSolutionConfig,
                         projectGraph: null,
                         _projectCacheDescriptor.PluginSettings));
+            }
+
+            static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(
+                string solutionConfigurationXml,
+                string definingProjectPath,
+                IDictionary<string, string> definingProjectGlobalProperties
+            )
+            {
+                var doc = new XmlDocument();
+                doc.LoadXml(solutionConfigurationXml);
+
+                var root = doc.DocumentElement!;
+                var projectConfigurationNodes = root.GetElementsByTagName("ProjectConfiguration");
+
+                ErrorUtilities.VerifyThrow(projectConfigurationNodes.Count > 0, "Expected at least one project in solution");
+
+                var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurationNodes.Count);
+
+                foreach (XmlNode node in projectConfigurationNodes)
+                {
+                    ErrorUtilities.VerifyThrowInternalNull(node.Attributes, nameof(node.Attributes));
+
+                    var projectPathAttribute = node.Attributes!["AbsolutePath"];
+                    ErrorUtilities.VerifyThrow(projectPathAttribute is not null, "Expected VS to set the project path on each ProjectConfiguration element.");
+
+                    var projectPath = projectPathAttribute!.Value;
+                    ErrorUtilities.VerifyThrow(FileSystems.Default.FileExists(projectPath), "Expected the projects in the solution to exist.");
+
+                    var (configuration, platform) = SolutionFile.ParseConfigurationName(node.InnerText, definingProjectPath, 0, solutionConfigurationXml);
+
+                    // Take the defining project global properties and override the configuration and platform.
+                    // It's sufficient to only set Configuration and Platform.
+                    // But we send everything to maximize the plugins' potential to quickly workaround potential MSBuild issues while the MSBuild fixes flow into VS.
+                    var globalProperties = new Dictionary<string, string>(definingProjectGlobalProperties, StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["Configuration"] = configuration,
+                        ["Platform"] = platform
+                    };
+
+                    graphEntryPoints.Add(new ProjectGraphEntryPoint(projectPath, globalProperties));
+                }
+
+                return graphEntryPoints;
             }
 
             static bool MSBuildStringIsTrue(string msbuildString) =>
@@ -366,7 +429,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     return CacheResult.IndicateNonCacheHit(CacheResultType.CacheNotApplicable);
                 }
             }
-			
+
             ErrorUtilities.VerifyThrowInternalNull(buildRequest.ProjectInstance, nameof(buildRequest.ProjectInstance));
 
             var queryDescription = $"{buildRequest.ProjectFullPath}" +
