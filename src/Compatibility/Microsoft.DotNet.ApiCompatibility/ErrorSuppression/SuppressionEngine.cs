@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace Microsoft.DotNet.Compatibility.ErrorSuppression
@@ -139,7 +141,10 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 _readerWriterLock.EnterReadLock();
                 try
                 {
-                    _serializer.Serialize(writer, _validationSuppressions.ToArray());
+                    XmlTextWriter xmlWriter = new XmlTextWriter(writer, Encoding.UTF8);
+                    xmlWriter.Formatting = Formatting.Indented;
+                    xmlWriter.Indentation = 2;
+                    _serializer.Serialize(xmlWriter, _validationSuppressions.ToArray());
                     AfterWrittingSuppressionsCallback(writer);
                 }
                 finally

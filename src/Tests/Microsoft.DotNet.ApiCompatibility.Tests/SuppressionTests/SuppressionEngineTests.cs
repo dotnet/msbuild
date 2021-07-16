@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
             string filePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName(), "DummyFile.xml");
             engine.WriteSuppressionsToFile(filePath);
 
-            Assert.True(StringComparer.OrdinalIgnoreCase.Equals(engine.suppressionsFile.Trim(), output.Trim()));
+            Assert.Equal(engine.suppressionsFile.Trim(), output.Trim(), ignoreCase: true);
         }
 
         [Fact]
@@ -135,7 +135,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
     {
         private MemoryStream _stream;
         private StreamWriter _writer;
-        public readonly string suppressionsFile = @"<?xml version=""1.0""?>
+        public readonly string suppressionsFile = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <Suppressions xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
