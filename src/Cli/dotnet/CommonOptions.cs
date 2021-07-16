@@ -8,9 +8,6 @@ using System.IO;
 using Microsoft.DotNet.Tools.Common;
 using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
-using System.Linq;
-using Microsoft.Build.Evaluation;
-using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -50,7 +47,7 @@ namespace Microsoft.DotNet.Cli
                 description)
             {
                 ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
-            }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}")
+            }.ForwardAsMany(o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" })
             .AddSuggestions(Suggest.RunTimesFromProjectFile());
 
         public static Option CurrentRuntimeOption(string description) =>
@@ -102,13 +99,13 @@ namespace Microsoft.DotNet.Cli
             new ForwardedOption<bool>(
                 "--self-contained",
                 CommonLocalizableStrings.SelfContainedOptionDescription)
-            .ForwardAsSingle(o => $"-property:SelfContained={o}");
+            .ForwardAsMany(o => new string[] { $"-property:SelfContained={o}", "-property:_CommandLineDefinedSelfContained=true" });
 
         public static Option NoSelfContainedOption() =>
             new ForwardedOption<bool>(
                 "--no-self-contained",
                 CommonLocalizableStrings.FrameworkDependentOptionDescription)
-            .ForwardAs("-property:SelfContained=false");
+            .ForwardAsMany(o => new string[] { "-property:SelfContained=false", "-property:_CommandLineDefinedSelfContained=true" });
 
         public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
         {
@@ -123,26 +120,6 @@ namespace Microsoft.DotNet.Cli
             if (hasSelfContainedOption && hasNoSelfContainedOption)
             {
                 throw new GracefulException(CommonLocalizableStrings.SelfContainAndNoSelfContainedConflict);
-            }
-
-            if (!(hasSelfContainedOption || hasNoSelfContainedOption) && hasRuntimeOption)
-            {
-                projectArgs = projectArgs.Any() ? projectArgs : new string[] { Directory.GetCurrentDirectory() };
-                foreach (var project in projectArgs)
-                {
-                    try
-                    {
-                        var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), project, false);
-                        if (msbuildProj.IsTargetingNetCoreVersionOrAbove(NuGetFramework.Parse("net6.0")))
-                        {
-                            Reporter.Output.WriteLine(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime.Yellow());
-                        }
-                    }
-                    catch
-                    {
-                        // Project file is not valid, continue and msbuild will error
-                    }
-                }
             }
         }
     }

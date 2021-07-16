@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using System.Linq;
 using Microsoft.NET.TestFramework;
@@ -188,7 +187,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .HaveStdOutContaining(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime);
+               .HaveStdOutContaining("NETSDK1177");
         }
 
         [Fact]
@@ -204,7 +203,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .NotHaveStdOutContaining(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime);
+               .NotHaveStdOutContaining("NETSDK1177");
         }
 
         [Fact]
@@ -220,7 +219,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .NotHaveStdOutContaining(CommonLocalizableStrings.SelfContainedOptionShouldBeUsedWithRuntime);
+               .NotHaveStdOutContaining("NETSDK1177");
         }
     }
 }

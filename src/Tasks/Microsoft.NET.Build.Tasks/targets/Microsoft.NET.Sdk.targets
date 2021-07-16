@@ -1075,6 +1075,23 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
   ============================================================
+  Command Line Confirugation Validation
+  ============================================================
+  -->
+
+  <Target Name="ValidateCommandLineProperties"
+          AfterTargets="PreBuildEvent" >
+    
+    <NETSdkWarning Condition="'$(_CommandLineDefinedSelfContained)' != 'true' and
+                   '$(_CommandLineDefinedRuntimeIdentifier)' == 'true' and
+                   '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
+                   $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))"
+               ResourceName="SelfContainedOptionShouldBeUsedWithRuntime" />
+  
+  </Target>
+
+  <!--
+  ============================================================
                                          Project Capabilities
   ============================================================
   -->

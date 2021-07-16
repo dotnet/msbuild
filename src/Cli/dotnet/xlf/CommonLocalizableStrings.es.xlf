@@ -152,11 +152,6 @@ The default is 'true' if a runtime identifier is specified.</source>
 The default is 'true' if a runtime identifier is specified.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
-        <source>Warning: The  '--self-contained' or '--no-self-contained' option should be used with '-r|--runtime'.</source>
-        <target state="new">Warning: The  '--self-contained' or '--no-self-contained' option should be used with '-r|--runtime'.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Solution">
         <source>Solution</source>
         <target state="translated">Solución</target>

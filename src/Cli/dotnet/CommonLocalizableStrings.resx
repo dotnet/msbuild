@@ -684,7 +684,4 @@ The default is 'true' if a runtime identifier is specified.</value>
   <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
     <value>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</value>
   </data>
-  <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
-    <value>Warning: The  '--self-contained' or '--no-self-contained' option should be used with '-r|--runtime'.</value>
-  </data>
 </root>
