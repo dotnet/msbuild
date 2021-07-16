@@ -370,13 +370,13 @@ namespace Microsoft.NET.Build.Tests
             AssemblyInfo.Get(assemblyPath)["InternalsVisibleToAttribute"].Should().Be("Tests");
         }
 
-        private static string _cachedCurrentTFM = null;
+        private static string _cachedLatestTargetFramework = null;
 
-        private static string CurrentTFM
+        private static string LatestTargetFramework
         {
             get
             {
-                if (_cachedCurrentTFM == null)
+                if (_cachedLatestTargetFramework == null)
                 {
                     var logger = new StringTestLogger();
                     var testAssetsManager = new TestAssetsManager(logger);
@@ -386,17 +386,13 @@ namespace Microsoft.NET.Build.Tests
                         .WithWorkingDirectory(path)
                         .Execute("new", "console");
 
-                    string lines = File.ReadAllText(Path.Combine(path, "CurrentTFM.csproj"));
-                    string startTargetFrameworkText = @"<TargetFramework>";
-                    string endTargetFrameworkText = @"</TargetFramework>";
-                    int startIndex = lines.IndexOf(startTargetFrameworkText);
-                    startIndex += startTargetFrameworkText.Length;
-                    int endIndex = lines.IndexOf(endTargetFrameworkText);
-                    string tfm = lines.Substring(startIndex, endIndex - startIndex);
-                    _cachedCurrentTFM = tfm;
+                    string projectFile = Directory.GetFiles(Path.Combine(path, "LatestTargetFramework.csproj")).Single();
+                    XDocument projectXml = XDocument.Load(projectFile);
+                    XNamespace ns = projectXml.Root.Name.Namespace;
+                    _cachedLatestTargetFramework = projectXml.Root.Element(ns + "PropertyGroup").Element(ns + "TargetFramework").Value;
                 }
 
-                return _cachedCurrentTFM;
+                return _cachedLatestTargetFramework;
             }
         }
 
@@ -409,7 +405,7 @@ namespace Microsoft.NET.Build.Tests
         {
             if (targetFramework == "")
             {
-                targetFramework = CurrentTFM;
+                targetFramework = LatestTargetFramework;
             }
 
             var testAsset = _testAssetsManager
@@ -456,16 +452,16 @@ namespace Microsoft.NET.Build.Tests
 
             if (enablePreviewFeatures && generateRequiresPreviewFeaturesAttribute)
             {
-                if (targetFramework == "net5.0")
+                if (targetFramework == LatestTargetFramework)
+                {
+                    Assert.Equal("Preview", langVersion);
+                    Assert.True(contains);
+                }
+                else
                 {
                     // The assembly level attribute is generated only for the latest TFM for the given sdk
                     Assert.False(contains);
                     Assert.NotEqual("Preview", langVersion);
-                }
-                else
-                {
-                    Assert.Equal("Preview", langVersion);
-                    Assert.True(contains);
                 }
             }
 
