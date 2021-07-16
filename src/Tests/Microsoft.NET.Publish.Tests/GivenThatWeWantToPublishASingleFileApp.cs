@@ -281,8 +281,7 @@ namespace Microsoft.NET.Publish.Tests
         }
 
 
-        [RequiresMSBuildVersionTheory("17.0.0.32901",
-            Skip = "Failing on unextracted singlefile. Possibly related to https://github.com/dotnet/runtime/issues/45277.")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(true)]
         [InlineData(false)]
         public void It_supports_composite_r2r(bool extractAll)
