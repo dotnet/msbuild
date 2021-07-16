@@ -10,12 +10,12 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class StoreCommandParser
     {
-        public static readonly Argument Argument = new Argument<IEnumerable<string>>()
+        public static readonly Argument<IEnumerable<string>> Argument = new Argument<IEnumerable<string>>()
         {
             Arity = ArgumentArity.ZeroOrMore,
         };
 
-        public static readonly Option ManifestOption = new ForwardedOption<IEnumerable<string>>(new string[] { "-m", "--manifest" },
+        public static readonly Option<IEnumerable<string>> ManifestOption = new ForwardedOption<IEnumerable<string>>(new string[] { "-m", "--manifest" },
                     LocalizableStrings.ProjectManifestDescription)
         {
             ArgumentHelpName = LocalizableStrings.ProjectManifest
@@ -41,25 +41,25 @@ namespace Microsoft.DotNet.Cli
             }
         }).AllowSingleArgPerToken();
 
-        public static readonly Option FrameworkVersionOption = new ForwardedOption<string>("--framework-version", LocalizableStrings.FrameworkVersionOptionDescription)
+        public static readonly Option<string> FrameworkVersionOption = new ForwardedOption<string>("--framework-version", LocalizableStrings.FrameworkVersionOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.FrameworkVersionOption
         }.ForwardAsSingle(o => $"-property:RuntimeFrameworkVersion={o}");
 
-        public static readonly Option OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
+        public static readonly Option<string> OutputOption = new ForwardedOption<string>(new string[] { "-o", "--output" }, LocalizableStrings.OutputOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.OutputOption
         }.ForwardAsSingle(o => $"-property:ComposeDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option WorkingDirOption = new ForwardedOption<string>(new string[] { "-w", "--working-dir" }, LocalizableStrings.IntermediateWorkingDirOptionDescription)
+        public static readonly Option<string> WorkingDirOption = new ForwardedOption<string>(new string[] { "-w", "--working-dir" }, LocalizableStrings.IntermediateWorkingDirOptionDescription)
         {
             ArgumentHelpName = LocalizableStrings.IntermediateWorkingDirOption
         }.ForwardAsSingle(o => $"-property:ComposeWorkingDir={CommandDirectoryContext.GetFullPath(o)}");
 
-        public static readonly Option SkipOptimizationOption = new ForwardedOption<bool>("--skip-optimization", LocalizableStrings.SkipOptimizationOptionDescription)
+        public static readonly Option<bool> SkipOptimizationOption = new ForwardedOption<bool>("--skip-optimization", LocalizableStrings.SkipOptimizationOptionDescription)
             .ForwardAs("-property:SkipOptimization=true");
 
-        public static readonly Option SkipSymbolsOption = new ForwardedOption<bool>("--skip-symbols", LocalizableStrings.SkipSymbolsOptionDescription)
+        public static readonly Option<bool> SkipSymbolsOption = new ForwardedOption<bool>("--skip-symbols", LocalizableStrings.SkipSymbolsOptionDescription)
             .ForwardAs("-property:CreateProfilingSymbols=false");
 
         public static Command GetCommand()

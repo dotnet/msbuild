@@ -8,24 +8,24 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolSearchCommandParser
     {
-        public static readonly Argument SearchTermArgument = new Argument<string>(LocalizableStrings.SearchTermArgumentName)
+        public static readonly Argument<string> SearchTermArgument = new Argument<string>(LocalizableStrings.SearchTermArgumentName)
         {
             Description = LocalizableStrings.SearchTermDescription
         };
 
-        public static readonly Option DetailOption = new Option<bool>("--detail", LocalizableStrings.DetailDescription);
+        public static readonly Option<bool> DetailOption = new Option<bool>("--detail", LocalizableStrings.DetailDescription);
 
-        public static readonly Option SkipOption = new Option<string>("--skip", LocalizableStrings.SkipDescription)
+        public static readonly Option<string> SkipOption = new Option<string>("--skip", LocalizableStrings.SkipDescription)
         {
             ArgumentHelpName = LocalizableStrings.SkipArgumentName
         };
 
-        public static readonly Option TakeOption = new Option<string>($"--take", LocalizableStrings.TakeDescription)
+        public static readonly Option<string> TakeOption = new Option<string>($"--take", LocalizableStrings.TakeDescription)
         {
             ArgumentHelpName = LocalizableStrings.TakeArgumentName
         };
 
-        public static readonly Option PrereleaseOption = new Option<bool>($"--prerelease", LocalizableStrings.PrereleaseDescription);
+        public static readonly Option<bool> PrereleaseOption = new Option<bool>($"--prerelease", LocalizableStrings.PrereleaseDescription);
 
         public static Command GetCommand()
         {

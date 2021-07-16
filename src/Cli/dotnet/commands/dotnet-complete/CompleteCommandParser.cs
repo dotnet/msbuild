@@ -7,9 +7,9 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class CompleteCommandParser
     {
-        public static readonly Argument PathArgument = new Argument<string>("path");
+        public static readonly Argument<string> PathArgument = new Argument<string>("path");
 
-        public static readonly Option PositionOption = new Option<int>("--position")
+        public static readonly Option<int> PositionOption = new Option<int>("--position")
         {
             ArgumentHelpName = "command"
         };

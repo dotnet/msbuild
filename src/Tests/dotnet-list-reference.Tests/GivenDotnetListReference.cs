@@ -28,7 +28,7 @@ Arguments:
   <PROJECT>    The project file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -?, -h, --help    Show help and usage information";
+  -?, -h, --help    Show command line help.";
 
         private Func<string, string> ListCommandHelpText = (defaultVal) => $@"list:
   List references or packages of a .NET project.
@@ -40,7 +40,7 @@ Arguments:
   <PROJECT | SOLUTION>    The project or solution file to operate on. If a file is not specified, the command will search the current directory for one. [default: {PathUtility.EnsureTrailingSlash(defaultVal)}]
 
 Options:
-  -?, -h, --help    Show help and usage information
+  -?, -h, --help    Show command line help.
 
 Commands:
   package      List all package references of the project or solution.

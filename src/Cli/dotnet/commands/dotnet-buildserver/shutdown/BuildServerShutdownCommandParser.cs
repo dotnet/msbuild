@@ -8,9 +8,9 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ServerShutdownCommandParser
     {
-        public static readonly Option MSBuildOption = new Option<bool>("--msbuild", LocalizableStrings.MSBuildOptionDescription);
-        public static readonly Option VbcsOption = new Option<bool>("--vbcscompiler", LocalizableStrings.VBCSCompilerOptionDescription);
-        public static readonly Option RazorOption = new Option<bool>("--razor", LocalizableStrings.RazorOptionDescription);
+        public static readonly Option<bool> MSBuildOption = new Option<bool>("--msbuild", LocalizableStrings.MSBuildOptionDescription);
+        public static readonly Option<bool> VbcsOption = new Option<bool>("--vbcscompiler", LocalizableStrings.VBCSCompilerOptionDescription);
+        public static readonly Option<bool> RazorOption = new Option<bool>("--razor", LocalizableStrings.RazorOptionDescription);
 
         public static Command GetCommand()
         {

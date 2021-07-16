@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
       dotnet [options] sdk check
     
     Options:
-      -?, -h, --help    Show help and usage information";
+      -?, -h, --help    Show command line help.";
 
         public GivenDotnetSdkCheck(ITestOutputHelper log) : base(log)
         {

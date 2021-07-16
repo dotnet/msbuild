@@ -8,11 +8,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadRestoreCommandParser
     {
-        public static readonly Option ConfigOption = WorkloadInstallCommandParser.ConfigOption;
+        public static readonly Option<string> ConfigOption = WorkloadInstallCommandParser.ConfigOption;
 
-        public static readonly Option SourceOption = WorkloadInstallCommandParser.SourceOption;
+        public static readonly Option<string[]> SourceOption = WorkloadInstallCommandParser.SourceOption;
 
-        public static readonly Option VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
+        public static readonly Option<VerbosityOptions> VerbosityOption = WorkloadInstallCommandParser.VerbosityOption;
 
         public static Command GetCommand()
         {

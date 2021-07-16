@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Tools.Help
 {
     internal static class HelpCommandParser
     {
-        public static readonly Argument Argument = new Argument<string>(LocalizableStrings.CommandArgumentName)
+        public static readonly Argument<string> Argument = new Argument<string>(LocalizableStrings.CommandArgumentName)
         {
             Description = LocalizableStrings.CommandArgumentDescription,
             Arity = ArgumentArity.ZeroOrOne

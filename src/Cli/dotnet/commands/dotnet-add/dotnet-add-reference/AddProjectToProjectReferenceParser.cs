@@ -9,19 +9,19 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class AddProjectToProjectReferenceParser
     {
-        public static readonly Argument ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.ProjectPathArgumentName)
+        public static readonly Argument<IEnumerable<string>> ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.ProjectPathArgumentName)
         {
             Description = LocalizableStrings.ProjectPathArgumentDescription,
             Arity = ArgumentArity.OneOrMore
         };
 
-        public static readonly Option FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
+        public static readonly Option<string> FrameworkOption = new Option<string>(new string[] { "-f", "--framework" }, LocalizableStrings.CmdFrameworkDescription)
         {
             ArgumentHelpName = Tools.Add.PackageReference.LocalizableStrings.CmdFramework
                 
         }.AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
 
-        public static readonly Option InteractiveOption = CommonOptions.InteractiveOption();
+        public static readonly Option<bool> InteractiveOption = CommonOptions.InteractiveOption();
 
         public static Command GetCommand()
         {

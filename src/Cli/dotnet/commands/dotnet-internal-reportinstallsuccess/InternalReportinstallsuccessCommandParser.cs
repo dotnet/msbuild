@@ -7,7 +7,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class InternalReportinstallsuccessCommandParser
     {
-        public static readonly Argument Argument = new Argument<string>("internal-reportinstallsuccess-arg");
+        public static readonly Argument<string> Argument = new Argument<string>("internal-reportinstallsuccess-arg");
 
         public static Command GetCommand()
         {

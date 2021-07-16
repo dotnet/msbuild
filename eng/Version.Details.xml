@@ -235,6 +235,10 @@
       <Sha>1e2ab2307eb1c68a3c7de1603ee1a1406300afa5</Sha>
       <SourceBuild RepoName="roslyn-analyzers" ManagedOnly="true" />
     </Dependency>
+    <Dependency Name="System.CommandLine" Version="2.0.0-beta1.21361.1">
+      <Uri>https://github.com/dotnet/command-line-api</Uri>
+      <Sha>a2ea4b1defbbc344c9dba1288b19ecc90256aff3</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21365.11">

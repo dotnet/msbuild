@@ -9,15 +9,15 @@ namespace Microsoft.DotNet.Cli
     internal static class WorkloadListCommandParser
     {
         // arguments are a list of workload to be detected
-        public static readonly Option MachineReadableOption = new Option<bool>("--machine-readable") {IsHidden = true};
+        public static readonly Option<bool> MachineReadableOption = new Option<bool>("--machine-readable") {IsHidden = true};
 
-        public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
-        public static readonly Option VersionOption = WorkloadUpdateCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = WorkloadUpdateCommandParser.VersionOption;
 
-        public static readonly Option TempDirOption = WorkloadUpdateCommandParser.TempDirOption;
+        public static readonly Option<string> TempDirOption = WorkloadUpdateCommandParser.TempDirOption;
         
-        public static readonly Option IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption;
+        public static readonly Option<bool> IncludePreviewsOption = WorkloadUpdateCommandParser.IncludePreviewsOption;
 
         public static Command GetCommand()
         {

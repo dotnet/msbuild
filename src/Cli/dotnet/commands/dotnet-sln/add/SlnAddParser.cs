@@ -9,15 +9,15 @@ namespace Microsoft.DotNet.Cli
 {
     public static class SlnAddParser
     {
-        public static readonly Argument ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.AddProjectPathArgumentName)
+        public static readonly Argument<IEnumerable<string>> ProjectPathArgument = new Argument<IEnumerable<string>>(LocalizableStrings.AddProjectPathArgumentName)
         {
             Description = LocalizableStrings.AddProjectPathArgumentDescription,
             Arity = ArgumentArity.ZeroOrMore,
         };
 
-        public static readonly Option InRootOption = new Option<bool>("--in-root", LocalizableStrings.InRoot);
+        public static readonly Option<bool> InRootOption = new Option<bool>("--in-root", LocalizableStrings.InRoot);
 
-        public static readonly Option SolutionFolderOption = new Option<string>(new string[] { "-s", "--solution-folder" }, LocalizableStrings.AddProjectSolutionFolderArgumentDescription);
+        public static readonly Option<string> SolutionFolderOption = new Option<string>(new string[] { "-s", "--solution-folder" }, LocalizableStrings.AddProjectSolutionFolderArgumentDescription);
 
         public static Command GetCommand()
         {

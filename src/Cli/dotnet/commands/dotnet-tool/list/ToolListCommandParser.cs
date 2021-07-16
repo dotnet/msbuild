@@ -9,11 +9,11 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolListCommandParser
     {
-        public static readonly Option GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
+        public static readonly Option<bool> GlobalOption = ToolAppliedOption.GlobalOption(LocalizableStrings.GlobalOptionDescription);
 
-        public static readonly Option LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
+        public static readonly Option<bool> LocalOption = ToolAppliedOption.LocalOption(LocalizableStrings.LocalOptionDescription);
 
-        public static readonly Option ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
+        public static readonly Option<string> ToolPathOption = ToolAppliedOption.ToolPathOption(LocalizableStrings.ToolPathOptionDescription, LocalizableStrings.ToolPathOptionName);
 
         public static Command GetCommand()
         {

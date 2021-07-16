@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class SlnCommandParser
     {
-        public static readonly Argument SlnArgument = new Argument<string>(LocalizableStrings.SolutionArgumentName)
+        public static readonly Argument<string> SlnArgument = new Argument<string>(LocalizableStrings.SolutionArgumentName)
         {
             Description = LocalizableStrings.SolutionArgumentDescription,
             Arity = ArgumentArity.ExactlyOne
