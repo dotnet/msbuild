@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AssemblyPublicKeyTokenDoesNotMatch">
-        <source>{2} assembly token '{0}' does not match with {3} '{1}'.</source>
-        <target state="new">{2} assembly token '{0}' does not match with {3} '{1}'.</target>
+        <source>{2} assembly public key token '{0}' does not match with {3} '{1}'.</source>
+        <target state="new">{2} assembly public key token '{0}' does not match with {3} '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblySearchDirectoryDoesNotExist">

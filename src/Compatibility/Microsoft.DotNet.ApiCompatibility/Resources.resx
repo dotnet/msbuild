@@ -124,7 +124,7 @@
     <value>{2} assembly name '{0}' does not match with {3} assembly name '{1}'.</value>
   </data>
   <data name="AssemblyPublicKeyTokenDoesNotMatch" xml:space="preserve">
-    <value>{2} assembly token '{0}' does not match with {3} '{1}'.</value>
+    <value>{2} assembly public key token '{0}' does not match with {3} '{1}'.</value>
   </data>
   <data name="AssemblySearchDirectoryDoesNotExist" xml:space="preserve">
     <value>Provided assembly search directory '{0}' does not exist.</value>

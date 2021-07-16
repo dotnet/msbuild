@@ -63,9 +63,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 differences.Add(CreateIdentityDifference(Resources.AssembyVersionDoesNotMatch, leftAssemblyVersion.ToString(), rightAssemblyVersion.ToString(), leftName, rightName, leftIdentity));
             }
 
-            bool isLeftRetargetable = (left.Identity.Flags & AssemblyNameFlags.Retargetable) != 0;
-            bool isRightRetargetable = (right.Identity.Flags & AssemblyNameFlags.Retargetable) != 0;
-            if (!leftAssemblyPublicKeyToken.IsEmpty && !isLeftRetargetable && !leftAssemblyPublicKeyToken.SequenceEqual(rightAssemblyPublicKeyToken))
+            if (!leftAssemblyPublicKeyToken.IsEmpty && !leftIdentity.IsRetargetable && !leftAssemblyPublicKeyToken.SequenceEqual(rightAssemblyPublicKeyToken))
             {
                 differences.Add(CreateIdentityDifference(
                     Resources.AssemblyPublicKeyTokenDoesNotMatch,
@@ -75,7 +73,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                     rightName,
                     rightIdentity));
             }
-            else if (Settings.StrictMode && !rightAssemblyPublicKeyToken.IsEmpty && !isRightRetargetable && !rightAssemblyPublicKeyToken.SequenceEqual(leftAssemblyPublicKeyToken))
+            else if (Settings.StrictMode && !rightAssemblyPublicKeyToken.IsEmpty && !rightIdentity.IsRetargetable && !rightAssemblyPublicKeyToken.SequenceEqual(leftAssemblyPublicKeyToken))
             {
                 differences.Add(CreateIdentityDifference(
                     Resources.AssemblyPublicKeyTokenDoesNotMatch,
