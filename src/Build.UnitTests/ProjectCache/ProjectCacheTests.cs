@@ -475,7 +475,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Dispose();
 
@@ -510,7 +510,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             {
                 var buildResult = buildSession.BuildProjectFile(node.ProjectInstance.FullPath);
 
-                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                buildResult.ShouldHaveSucceeded();
 
                 nodesToBuildResults[node] = buildResult;
             }
@@ -565,7 +565,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                                 { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty }
                             });
 
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                    buildResult.ShouldHaveSucceeded();
 
                     nodesToBuildResults[node] = buildResult;
                 }
@@ -653,12 +653,12 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 foreach (var task in referenceBuildTasks)
                 {
                     var buildResult = task.Result;
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                    buildResult.ShouldHaveSucceeded();
                 }
 
                 buildSession
                     .BuildProjectFile(rootNode.ProjectInstance.FullPath, globalProperties: globalProperties)
-                    .OverallResult.ShouldBe(BuildResultCode.Success);
+                    .ShouldHaveSucceeded();
 
                 buildSession.Dispose();
 
@@ -723,7 +723,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Dispose();
 
@@ -868,7 +868,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var buildResult = buildSession.BuildProjectFile(project1.Path);
 
-            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            buildResult.ShouldHaveSucceeded();
 
             buildSession.Logger.ProjectStartedEvents.Count.ShouldBe(2);
 
@@ -900,7 +900,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Logger.FullLog.ShouldContain("Explicit entry-point based");
 
@@ -923,7 +923,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
 
             buildSession.Logger.FullLog.ShouldContain("Static graph based");
 
@@ -977,10 +977,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             mockCache.Requests.Count.ShouldBe(2);
 
-            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 2).Value.OverallResult.ShouldBe(BuildResultCode.Success);
-            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 1).Value.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 2).Value.ShouldHaveSucceeded();
+            buildResult.ResultsByNode.First(r => GetProjectNumber(r.Key) == 1).Value.ShouldHaveFailed();
 
-            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.ShouldHaveFailed();
 
             buildSession.Logger.FullLog.ShouldContain("Reference file [Invalid file] does not exist");
         }
@@ -1005,8 +1005,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
             
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-            graphResult.Exception.Message.ShouldContain("A single project cache plugin must be specified but multiple where found:");
+            graphResult.ShouldHaveFailed("A single project cache plugin must be specified but multiple where found:");
         }
 
         [Fact]
@@ -1034,8 +1033,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
             
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Failure);
-            graphResult.Exception.Message.ShouldContain("When any static graph node defines a project cache, all nodes must define the same project cache.");
+            graphResult.ShouldHaveFailed("When any static graph node defines a project cache, all nodes must define the same project cache.");
         }
 
         public static IEnumerable<object[]> CacheExceptionLocationsTestData
@@ -1117,11 +1115,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 // so the build submission should be successful.
                 if (errorLocations == ErrorLocations.EndBuildAsync)
                 {
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                    buildResult.ShouldHaveSucceeded();
                 }
                 else
                 {
-                    buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+                    buildResult.ShouldHaveFailed();
                 }
             }
             finally
@@ -1222,7 +1220,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 logger.FullLog.ShouldContain("Loading the following project cache plugin:");
 
                 // Static graph build initializes and tears down the cache plugin so all cache plugin exceptions should end up in the GraphBuildResult
-                buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+                buildResult.ShouldHaveFailed();
 
                 buildResult.Exception.ShouldBeOfType<ProjectCacheException>();
 
@@ -1293,14 +1291,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var logger = buildSession.Logger;
 
-            GraphBuildResult? buildResult = null;
+            GraphBuildResult buildResult = null!;
             Should.NotThrow(
                 () =>
                 {
                     buildResult = buildSession.BuildGraph(new ProjectGraph(project.Path));
                 });
 
-            buildResult!.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.ShouldHaveFailed();
             buildResult.Exception.InnerException!.ShouldNotBeNull();
             buildResult.Exception.InnerException!.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
 
@@ -1365,9 +1363,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             var task3 = BuildProjectFileAsync(3);
             var task4 = BuildProjectFileAsync(4);
 
-            task3.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task3.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(3);
-            task4.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task4.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(4);
 
             // task 2 hasn't been instructed to finish yet
@@ -1376,11 +1374,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             task2Completion.SetResult(true);
 
-            task2.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task2.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(2);
 
             var task1 = BuildProjectFileAsync(1);
-            task1.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+            task1.Result.ShouldHaveSucceeded();
             completedCacheRequests.ShouldContain(1);
 
             Task<BuildResult> BuildProjectFileAsync(int projectNumber)
@@ -1452,14 +1450,14 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 foreach (var buildResultTask in buildResultTasks)
                 {
-                    buildResultTask.Result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    buildResultTask.Result.ShouldHaveSucceeded();
                 }
 
                 buildSession.BuildProjectFile(
                         graph.GraphRoots.First().ProjectInstance.FullPath,
                         globalProperties:
                         new Dictionary<string, string> {{"SolutionPath", graph.GraphRoots.First().ProjectInstance.FullPath}})
-                    .OverallResult.ShouldBe(BuildResultCode.Success);
+                    .ShouldHaveSucceeded();
 
                 StringShouldContainSubstring(buildSession.Logger.FullLog, $"{AssemblyMockCache}: GetCacheResultAsync for", graph.ProjectNodes.Count);
 
@@ -1504,7 +1502,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var graphResult = buildSession.BuildGraph(graph);
 
-            graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            graphResult.ShouldHaveSucceeded();
             cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
         }
 
@@ -1590,7 +1588,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             foreach (var buildResult in buildTasks.Select(buildTask => buildTask.Result))
             {
                 buildResult.Exception.ShouldBeNull();
-                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                buildResult.ShouldHaveSucceeded();
             }
 
             buildSession.Logger.ProjectStartedEvents.Count.ShouldBe(2 * projectPaths.Length);

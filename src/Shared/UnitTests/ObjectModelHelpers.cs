@@ -155,6 +155,36 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        internal static void ShouldHaveSucceeded(this BuildResult result)
+        {
+            result.OverallResult.ShouldBe(BuildResultCode.Success, result.Exception is not null ? result.Exception.ToString() : string.Empty);
+        }
+
+        internal static void ShouldHaveSucceeded(this GraphBuildResult result)
+        {
+            result.OverallResult.ShouldBe(BuildResultCode.Success, result.Exception is not null ? result.Exception.ToString() : string.Empty);
+        }
+
+        internal static void ShouldHaveFailed(this BuildResult result, string exceptionMessageSubstring = null)
+        {
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            if (exceptionMessageSubstring != null)
+            {
+                result.Exception.Message.ShouldContain(exceptionMessageSubstring);
+            }
+        }
+
+        internal static void ShouldHaveFailed(this GraphBuildResult result, string exceptionMessageSubstring = null)
+        {
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            if (exceptionMessageSubstring != null)
+            {
+                result.Exception.Message.ShouldContain(exceptionMessageSubstring);
+            }
+        }
+
         internal static string NormalizeSlashes(string path)
         {
             return path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
