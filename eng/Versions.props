@@ -11,7 +11,7 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>6.0.100</VersionPrefix>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>rc</PreReleaseVersionLabel>
     <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
     <PreReleaseBrandingLabel>rc</PreReleaseBrandingLabel>
   </PropertyGroup>
