@@ -88,34 +88,6 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void FindOlderVisualStudioEnvironmentByEnvironmentVariable()
-        {
-            using (var env = new EmptyVSEnviroment("15.0"))
-            {
-                var msbuildBinDirectory = env.BuildDirectory;
-
-                var msBuildPath = Path.Combine(msbuildBinDirectory, MSBuildExeName);
-                var msBuildConfig = Path.Combine(msbuildBinDirectory, $"{MSBuildExeName}.config");
-                var vsMSBuildDirectory = Path.Combine(env.TempFolderRoot, "MSBuild");
-
-                env.WithEnvironment("MSBUILD_EXE_PATH", msBuildPath);
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
-
-                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
-                BuildEnvironmentHelper.Instance.MSBuildExtensionsPath.ShouldBe(vsMSBuildDirectory);
-                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.ShouldBe(msbuildBinDirectory);
-                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath.ShouldBe(msBuildPath);
-                BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile.ShouldBe(msBuildConfig);
-                // This code is not running inside the Visual Studio devenv.exe process
-                BuildEnvironmentHelper.Instance.RunningInVisualStudio.ShouldBeFalse();
-                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
-                BuildEnvironmentHelper.Instance.RunningTests.ShouldBeFalse();
-            }
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindBuildEnvironmentFromCommandLineVisualStudio()
         {
             using (var env = new EmptyVSEnviroment())
