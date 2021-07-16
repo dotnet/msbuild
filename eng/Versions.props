@@ -12,7 +12,8 @@
   <PropertyGroup>
     <VersionPrefix>6.0.100</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PreReleaseVersionIteration>8</PreReleaseVersionIteration>
+    <PreReleaseVersionIteration>1</PreReleaseVersionIteration>
+    <PreReleaseBrandingLabel>rc</PreReleaseBrandingLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
