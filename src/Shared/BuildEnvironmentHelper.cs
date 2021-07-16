@@ -125,7 +125,7 @@ namespace Microsoft.Build.Shared
 
             return msBuildExePath == null
                 ? null
-                : TryFromMSBuildAssemblyUnderVisualStudio(msBuildExePath, msBuildExePath, true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
+                : TryFromMSBuildAssemblyUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
         }
 
         private static BuildEnvironment TryFromVisualStudioProcess()
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Shared
             var msBuildDll = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.dll");
 
             // First check if we're in a VS installation
-            var environment = TryFromMSBuildAssemblyUnderVisualStudio(buildAssembly, msBuildExe);
+            var environment = TryFromMSBuildAssemblyUnderVisualStudio(buildAssembly);
             if (environment != null)
             {
                 return environment;
@@ -208,7 +208,7 @@ namespace Microsoft.Build.Shared
             return null;
         }
 
-        private static BuildEnvironment TryFromMSBuildAssemblyUnderVisualStudio(string msbuildAssembly, string msbuildExe, bool allowLegacyToolsVersion = false)
+        private static BuildEnvironment TryFromMSBuildAssemblyUnderVisualStudio(string msbuildAssembly, bool allowLegacyToolsVersion = false)
         {
             string msBuildPathPattern = allowLegacyToolsVersion
                 ? $@".*\\MSBuild\\({CurrentToolsVersion}|\d+\.0)\\Bin\\.*"
@@ -217,16 +217,13 @@ namespace Microsoft.Build.Shared
             if (NativeMethodsShared.IsWindows &&
                 Regex.IsMatch(msbuildAssembly, msBuildPathPattern, RegexOptions.IgnoreCase))
             {
-                // In a Visual Studio path we must have MSBuild.exe
-                if (FileSystems.Default.FileExists(msbuildExe))
-                {
-                    return new BuildEnvironment(
+                string visualStudioRoot = GetVsRootFromMSBuildAssembly(msbuildAssembly);
+                return new BuildEnvironment(
                         BuildEnvironmentMode.VisualStudio,
-                        msbuildExe,
+                        GetMSBuildExeFromVsRoot(visualStudioRoot),
                         runningTests: s_runningTests(),
                         runningInVisualStudio: false,
-                        visualStudioPath: GetVsRootFromMSBuildAssembly(msbuildExe));
-                }
+                        visualStudioPath: visualStudioRoot);
             }
 
             return null;
