@@ -37,17 +37,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return builder.ToString();
         }
 
-        private static void HandleDebugSwitch(bool waitForDebugger)
-        {
-            if (waitForDebugger)
-            {
-                while (!Debugger.IsAttached)
-                {
-                    Thread.Sleep(3000);
-                }
-            }
-        }
-
         private static RazorProjectEngine GetDiscoveryProjectEngine(StaticCompilationTagHelperFeature tagHelperFeature, IEnumerable<MetadataReference> references, IEnumerable<SourceGeneratorProjectItem> items, RazorSourceGenerationOptions razorSourceGeneratorOptions)
         {
             var fileSystem = new VirtualRazorProjectFileSystem();

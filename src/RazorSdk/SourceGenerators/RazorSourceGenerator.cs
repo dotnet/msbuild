@@ -124,7 +124,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
                 if (!razorSourceGeneratorOptions.SuppressRazorSourceGenerator)
                 {
-                    context.AddSource(GetIdentifierFromPath(projectItem.RelativePhysicalPath), csharpDocument.GeneratedCode);
+                    // Add a generated suffix so tools, such as coverlet, consider the file to be generated
+                    var hintName = GetIdentifierFromPath(projectItem.RelativePhysicalPath) + ".g.cs";
+                    context.AddSource(hintName, csharpDocument.GeneratedCode);
                 }
             });
         }
