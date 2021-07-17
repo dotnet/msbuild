@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
 
         public IEnumerable<WorkloadResolver.PackInfo> GetInstalledWorkloadPacksOfKind(WorkloadPackKind kind) => throw new NotImplementedException();
         public IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadId workloadId) => throw new NotImplementedException();
-        public ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packId) => throw new NotImplementedException();
+        public ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packId, out ISet<WorkloadPackId> unsatisfiablePacks) => throw new NotImplementedException();
         public void RefreshWorkloadManifests() => throw new NotImplementedException();
         public WorkloadResolver.PackInfo TryGetPackInfo(WorkloadPackId packId) => throw new NotImplementedException();
         public bool IsWorkloadPlatformCompatible(WorkloadId workloadId) => throw new NotImplementedException();

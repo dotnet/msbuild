@@ -451,17 +451,37 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         /// <remarks>
         /// Used by the MSBuild workload resolver to emit actionable errors
         /// </remarks>
-        public ISet<WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packIds)
+        public ISet<WorkloadInfo>? GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packIds, out ISet<WorkloadPackId> unsatisfiablePacks)
         {
             var requestedPacks = new HashSet<WorkloadPackId>(packIds);
             var availableWorkloads = GetAvailableWorkloadDefinitions();
-            var expandedWorkloads = availableWorkloads.Select(w => (w.workload.Id, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.workload, w.manifest).Select(p => p.packId))));
+
+            List<(WorkloadId Id, HashSet<WorkloadPackId> Packs)>? expandedWorkloads = availableWorkloads
+                .Select(w => (w.workload.Id, new HashSet<WorkloadPackId>(GetPacksInWorkload(w.workload, w.manifest).Select(p => p.packId))))
+                .ToList();
+
+            var unsatisfiable = requestedPacks
+                .Where(p => !expandedWorkloads.Any(w => w.Packs.Contains(p)))
+                .ToHashSet();
+
+            unsatisfiablePacks = unsatisfiable;
+
+            requestedPacks.ExceptWith(unsatisfiable);
+            if (requestedPacks.Count == 0)
+            {
+                return null;
+            }
+
+            expandedWorkloads = expandedWorkloads
+                .Where(w => w.Packs.Any(p => requestedPacks.Contains(p)))
+                .ToList();
+
             var finder = new WorkloadSuggestionFinder(GetInstalledPacks(), requestedPacks, expandedWorkloads);
 
-            return new HashSet<WorkloadInfo>
-            (
-                finder.GetBestSuggestion().Workloads.Select(s => new WorkloadInfo(s, _workloads[s].workload.Description))
-            );
+            return finder.GetBestSuggestion()
+                .Workloads
+                .Select(s => new WorkloadInfo(s, _workloads[s].workload.Description))
+                .ToHashSet();
         }
 
         /// <summary>
