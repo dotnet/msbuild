@@ -8,13 +8,13 @@
         <note />
       </trans-unit>
       <trans-unit id="ConflictingWorkloadDefinition">
-        <source>Workload definition '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</source>
-        <target state="new">Workload definition '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</target>
+        <source>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
+        <target state="new">Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingWorkloadPack">
-        <source>Workload pack '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</source>
-        <target state="new">Workload pack '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</target>
+        <source>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</source>
+        <target state="new">Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</target>
         <note />
       </trans-unit>
       <trans-unit id="CyclicWorkloadRedirect">

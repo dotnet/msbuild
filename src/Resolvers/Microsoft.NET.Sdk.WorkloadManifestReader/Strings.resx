@@ -166,10 +166,10 @@
     <value>Unresolved target '{0}' for workload redirect '{1}' in manifest '{2}' [{3}]</value>
   </data>
   <data name="ConflictingWorkloadDefinition" xml:space="preserve">
-    <value>Workload definition '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</value>
+    <value>Workload definition '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</value>
   </data>
   <data name="ConflictingWorkloadPack" xml:space="preserve">
-    <value>Workload pack '{0}' in manifest '{2}' [{3}] conflicts with manifest '{4}' [{5}]</value>
+    <value>Workload pack '{0}' in manifest '{1}' [{2}] conflicts with manifest '{3}' [{4}]</value>
   </data>
   <data name="DuplicateManifestID" xml:space="preserve">
     <value>Manifest provider {0} returned a duplicate manifest ID '{1}' [{2}] that conflicts with existing manifest [{3}]</value>
