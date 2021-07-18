@@ -15,7 +15,11 @@ namespace ManifestReaderTests
 
         public MockManifestProvider(params string[] manifestPaths)
         {
-            _manifests = Array.ConvertAll(manifestPaths, mp => (mp, mp));
+            _manifests = Array.ConvertAll(manifestPaths, mp =>
+            {
+                string manifestId = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(mp));
+                return (manifestId, mp);
+            });
         }
 
         public MockManifestProvider(params (string name, string path)[] manifests)
