@@ -23,6 +23,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
             {
                 CreateWorkloadInfo("mock-workload-1"),
                 CreateWorkloadInfo("mock-workload-2"),
+                CreateWorkloadInfo("mock-workload-3"),
                 CreateWorkloadInfo("fake-workload-1"),
                 CreateWorkloadInfo("fake-workload-2", "Fake description 2")
             };
