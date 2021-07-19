@@ -296,7 +296,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 
             updateCommand.Execute();
             _reporter.Lines.Count().Should().Be(3);
-            string.Join("", _reporter.Lines).Should().Contain("Sample.json");
+            string.Join("", _reporter.Lines).Should().Contain("SampleManifest");
         }
 
         internal (string, WorkloadUpdateCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
