@@ -93,10 +93,12 @@ namespace Microsoft.DotNet.Cli
         internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
         {
             return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
-                    parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
-                    CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
-                        parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
-                        parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()));
+                parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
+                parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
+                CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
+                    parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
+                    parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
+                null;
         }
     }
 }
