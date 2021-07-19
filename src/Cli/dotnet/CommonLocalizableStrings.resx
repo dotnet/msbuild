@@ -683,4 +683,10 @@ setx PATH "%PATH%;{0}"
   <data name="CannotResolveRuntimeIdentifier" xml:space="preserve">
     <value>Resolving the current runtime identifier failed.</value>
   </data>
+  <data name="CannotSpecifyBothRuntimeAndArchOptions" xml:space="preserve">
+    <value>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</value>
+  </data>
+  <data name="CannotSpecifyBothRuntimeAndOsOptions" xml:space="preserve">
+    <value>Specifying both the `-r|--runtime` and `-os` options is not supported.</value>
+  </data>
 </root>

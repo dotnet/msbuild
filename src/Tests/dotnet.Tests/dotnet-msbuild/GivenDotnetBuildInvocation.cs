@@ -4,10 +4,6 @@
 using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
 using Xunit;
-using Microsoft.DotNet.Cli.Utils;
-using System;
-using Microsoft.NET.TestFramework;
-using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -87,46 +83,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 command.GetArgumentsToMSBuild()
                     .Should()
                     .Be($"{ExpectedPrefix} -nologo -consoleloggerparameters:Summary{expectedAdditionalArgs}");
-            });
-        }
-
-        [Fact]
-        public void OsOptionIsCorrectlyResolved()
-        {
-            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
-            {
-                var msbuildPath = "<msbuildpath>";
-                var command = BuildCommand.FromArgs(new string[] { "--os", "os" }, msbuildPath);
-                var expectedArch = Environment.Is64BitOperatingSystem ? "x64" : "x86";
-                command.GetArgumentsToMSBuild()
-                    .Should()
-                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch}");
-            });
-        }
-
-        [WindowsOnlyFact]
-        public void ArchOptionIsCorrectlyResolved()
-        {
-            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
-            {
-                var msbuildPath = "<msbuildpath>";
-                var command = BuildCommand.FromArgs(new string[] { "--arch", "arch" }, msbuildPath);
-                command.GetArgumentsToMSBuild()
-                    .Should()
-                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=win-arch");
-            });
-        }
-
-        [Fact]
-        public void OSAndArchOptionsCanBeCombined()
-        {
-            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
-            {
-                var msbuildPath = "<msbuildpath>";
-                var command = BuildCommand.FromArgs(new string[] { "--arch", "arch", "--os", "os" }, msbuildPath);
-                command.GetArgumentsToMSBuild()
-                    .Should()
-                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-arch");
             });
         }
     }

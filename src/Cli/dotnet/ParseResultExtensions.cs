@@ -89,5 +89,14 @@ namespace Microsoft.DotNet.Cli
         public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
             parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) && 
             parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First());
+
+        internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
+        {
+            return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
+                    parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
+                    CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
+                        parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
+                        parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()));
+        }
     }
 }

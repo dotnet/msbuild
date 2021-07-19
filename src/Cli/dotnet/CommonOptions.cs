@@ -119,8 +119,14 @@ namespace Microsoft.DotNet.Cli
 
         internal static IEnumerable<string> ResolveArchOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
         {
+            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            {
+                throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndArchOptions);
+            }
+
             if (parseResult.BothArchAndOsOptionsSpecified())
             {
+                // ResolveOsOptionToRuntimeIdentifier handles resolving the RID when both arch and os are specified
                 return Array.Empty<string>();
             }
 
@@ -129,6 +135,11 @@ namespace Microsoft.DotNet.Cli
 
         internal static IEnumerable<string> ResolveOsOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
         {
+            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            {
+                throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndOsOptions);
+            }
+
             if (parseResult.BothArchAndOsOptionsSpecified())
             {
                 return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()));
@@ -139,11 +150,16 @@ namespace Microsoft.DotNet.Cli
 
         private static IEnumerable<string> ResolveRidShorthandOptions(string os, string arch)
         {
+            var properties = new string[] { $"-property:RuntimeIdentifier={ResolveRidShorthandOptionsToRuntimeIdentifier(os, arch)}" };
+            return properties;
+        }
+
+        internal static string ResolveRidShorthandOptionsToRuntimeIdentifier(string os, string arch)
+        {
             var currentRid = GetCurrentRuntimeId();
             os = string.IsNullOrEmpty(os) ? GetOsFromRid(currentRid) : os;
             arch = string.IsNullOrEmpty(arch) ? GetArchFromRid(currentRid) : arch;
-            var properties = new string[] { $"-property:RuntimeIdentifier={os}-{arch}" };
-            return properties;
+            return $"{os}-{arch}";
         }
 
         private static string GetCurrentRuntimeId()

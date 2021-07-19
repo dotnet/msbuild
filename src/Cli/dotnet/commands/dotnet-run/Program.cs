@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Run
             var command = new RunCommand(
                 configuration: parseResult.ValueForOption<string>(RunCommandParser.ConfigurationOption),
                 framework: parseResult.ValueForOption<string>(RunCommandParser.FrameworkOption),
-                runtime: parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption),
+                runtime: parseResult.GetCommandLineRuntimeIdentifier(),
                 noBuild: parseResult.HasOption(RunCommandParser.NoBuildOption),
                 project: project,
                 launchProfile: parseResult.ValueForOption<string>(RunCommandParser.LaunchProfileOption),

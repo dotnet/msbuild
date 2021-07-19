@@ -12,6 +12,16 @@
         <target state="new">Resolving the current runtime identifier failed.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
+        <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
+        <target state="new">Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
+        <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
+        <target state="new">Specifying both the `-r|--runtime` and `-os` options is not supported.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
