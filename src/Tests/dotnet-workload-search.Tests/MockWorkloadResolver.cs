@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public ISet<WorkloadResolver.WorkloadInfo> GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packId, out ISet<WorkloadPackId> unsatisfiablePacks) => throw new NotImplementedException();
         public void RefreshWorkloadManifests() => throw new NotImplementedException();
         public WorkloadResolver.PackInfo TryGetPackInfo(WorkloadPackId packId) => throw new NotImplementedException();
-        public bool IsWorkloadPlatformCompatible(WorkloadId workloadId) => throw new NotImplementedException();
+        public bool IsPlatformIncompatibleWorkload(WorkloadId workloadId) => throw new NotImplementedException();
         public string GetManifestVersion(string manifestId) => throw new NotImplementedException();
         public IEnumerable<WorkloadResolver.ManifestInfo> GetInstalledManifests() => throw new NotImplementedException();
         public IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider) => throw new NotImplementedException();

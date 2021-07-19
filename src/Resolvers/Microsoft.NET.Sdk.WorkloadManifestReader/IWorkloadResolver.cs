@@ -11,7 +11,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         IEnumerable<WorkloadPackId> GetPacksInWorkload(WorkloadId workloadId);
         ISet<WorkloadResolver.WorkloadInfo>? GetWorkloadSuggestionForMissingPacks(IList<WorkloadPackId> packId, out ISet<WorkloadPackId> unsatisfiablePacks);
         IEnumerable<WorkloadResolver.WorkloadInfo> GetAvailableWorkloads();
-        bool IsWorkloadPlatformCompatible(WorkloadId workloadId);
+        bool IsPlatformIncompatibleWorkload(WorkloadId workloadId);
         string GetManifestVersion(string manifestId);
         IEnumerable<WorkloadResolver.ManifestInfo> GetInstalledManifests();
 

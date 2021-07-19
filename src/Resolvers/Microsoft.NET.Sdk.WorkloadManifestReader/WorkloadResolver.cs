@@ -621,13 +621,14 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return new WorkloadInfo(workload.Id, workload.Description);
         }
 
-        public bool IsWorkloadPlatformCompatible(WorkloadId workloadId)
+        public bool IsPlatformIncompatibleWorkload(WorkloadId workloadId)
         {
             if (_workloads.TryGetValue(workloadId) is not (WorkloadDefinition workload, WorkloadManifest manifest))
             {
-                throw new ArgumentException($"Workload '{workloadId}' not found", nameof(workloadId));
+                //  Not a recognized workload
+                return false;
             }
-            return IsWorkloadPlatformCompatible(workload, manifest);
+            return !IsWorkloadPlatformCompatible(workload, manifest);
         }
 
         private bool IsWorkloadPlatformCompatible(WorkloadDefinition workload, WorkloadManifest manifest)
