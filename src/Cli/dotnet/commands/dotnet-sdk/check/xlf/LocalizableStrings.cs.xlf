@@ -37,7 +37,7 @@
         <target state="new">Try out the newest .NET SDK features with .NET {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NewPatchAvaliableMessage">
+      <trans-unit id="NewPatchAvailableMessage">
         <source>Patch {0} is available.</source>
         <target state="new">Patch {0} is available.</target>
         <note />

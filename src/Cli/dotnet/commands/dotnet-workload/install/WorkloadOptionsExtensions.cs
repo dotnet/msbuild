@@ -33,9 +33,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 }
                 try
                 {
-                    foreach ((string manifestId, Stream manifestStream) in manifests)
+                    foreach ((string manifestId, string informationalPath, Func<Stream> openManifestStream) in manifests)
                     {
-                        using (manifestStream)
+                        using (var manifestStream = openManifestStream())
                         {
                             var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId, manifestStream);
                         }

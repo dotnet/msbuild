@@ -255,7 +255,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
                 else
                 {
-                    // For the remaining profiles, don't include them in package download but add them to unavaliable if necessary.
+                    // For the remaining profiles, don't include them in package download but add them to unavailable if necessary.
                     runtimePackForRuntimeIDProcessing = knownFrameworkReference.ToKnownRuntimePack();
                     includeInPackageDownload = false;
                 }

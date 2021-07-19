@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Search for avaliable workloads.</source>
+        <source>Search for available workloads.</source>
         <target state="needs-review-translation">Перечисление средств, установленных глобально или локально.</target>
         <note />
       </trans-unit>

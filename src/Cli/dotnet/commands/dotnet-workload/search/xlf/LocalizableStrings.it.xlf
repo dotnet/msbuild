@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Search for avaliable workloads.</source>
+        <source>Search for available workloads.</source>
         <target state="needs-review-translation">Elenca gli strumenti installati a livello globale o locale.</target>
         <note />
       </trans-unit>
