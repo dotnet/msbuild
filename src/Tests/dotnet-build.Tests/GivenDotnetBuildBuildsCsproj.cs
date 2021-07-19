@@ -195,6 +195,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         {
             var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
                 .WithSource()
+                .WithTargetFrameworkOrFrameworks("net6.0", false)
                 .Restore(Log);
 
             new DotnetBuildCommand(Log)

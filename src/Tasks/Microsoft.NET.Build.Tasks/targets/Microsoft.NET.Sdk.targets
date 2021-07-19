@@ -1080,7 +1080,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
 
   <Target Name="ValidateCommandLineProperties"
-          AfterTargets="PreBuildEvent" >
+          AfterTargets="_CheckForInvalidConfigurationAndPlatform" >
     
     <NETSdkWarning Condition="'$(_CommandLineDefinedSelfContained)' != 'true' and
                    '$(_CommandLineDefinedRuntimeIdentifier)' == 'true' and
