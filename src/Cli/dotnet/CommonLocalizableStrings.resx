@@ -682,6 +682,6 @@ The default is 'true' if a runtime identifier is specified.</value>
     <value>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</value>
   </data>
   <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
-    <value>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</value>
+    <value>The '--self-contained' and '--no-self-contained' options cannot be used together.</value>
   </data>
 </root>

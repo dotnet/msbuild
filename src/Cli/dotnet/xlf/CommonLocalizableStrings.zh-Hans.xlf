@@ -141,8 +141,8 @@ EOF
         <note />
       </trans-unit>
       <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="new">The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</target>
+        <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
+        <target state="new">The '--self-contained' and '--no-self-contained' options cannot be used together.</target>
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">

@@ -187,7 +187,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .HaveStdOutContaining("NETSDK1177");
+               .HaveStdOutContaining("NETSDK1179");
         }
 
         [Fact]
@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .NotHaveStdOutContaining("NETSDK1177");
+               .NotHaveStdOutContaining("NETSDK1179");
         }
 
         [Fact]
@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                .Should()
                .Pass()
                .And
-               .NotHaveStdOutContaining("NETSDK1177");
+               .NotHaveStdOutContaining("NETSDK1179");
         }
     }
 }
