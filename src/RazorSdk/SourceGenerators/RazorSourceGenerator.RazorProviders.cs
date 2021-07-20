@@ -40,11 +40,11 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             
             var razorSourceGenerationOptions = new RazorSourceGenerationOptions()
             {
+                Configuration = razorConfiguration,
                 WaitForDebugger = waitForDebugger == "true",
                 SuppressRazorSourceGenerator = suppressRazorSourceGenerator == "true",
                 GenerateMetadataSourceChecksumAttributes = generateMetadataSourceChecksumAttributes == "true",
                 RootNamespace = rootNamespace ?? "ASP",
-                Configuration = razorConfiguration,
                 CSharpLanguageVersion = ((CSharpParseOptions)parseOptions).LanguageVersion,
             };
 

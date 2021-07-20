@@ -2,12 +2,13 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
-    internal class RazorSourceGenerationOptions
+    internal class RazorSourceGenerationOptions : IEquatable<RazorSourceGenerationOptions>
     {
         public string RootNamespace { get; set; } = "ASP";
 
@@ -40,6 +41,19 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
         /// <summary>
         /// Gets the CSharp language version currently used by the compilation.
         /// </summary>
-        public LanguageVersion CSharpLanguageVersion { get; set; } = LanguageVersion.Preview;
+        public LanguageVersion CSharpLanguageVersion { get; set; } = LanguageVersion.CSharp10;
+
+        public bool Equals(RazorSourceGenerationOptions other)
+        {
+            return RootNamespace == other.RootNamespace &&
+                Configuration == other.Configuration &&
+                GenerateMetadataSourceChecksumAttributes == other.GenerateMetadataSourceChecksumAttributes &&
+                SuppressRazorSourceGenerator == other.SuppressRazorSourceGenerator &&
+                CSharpLanguageVersion == other.CSharpLanguageVersion;
+        }
+
+        public override bool Equals(object obj) => obj is RazorSourceGenerationOptions other && Equals(other);
+
+        public override int GetHashCode() => Configuration.GetHashCode();
     }
 }
