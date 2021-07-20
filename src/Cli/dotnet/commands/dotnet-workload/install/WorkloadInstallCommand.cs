@@ -56,7 +56,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string dotnetDir = null,
             string userHome = null,
             string tempDirPath = null,
-            string version = null)
+            string version = null,
+            IReadOnlyCollection<string> workloadIds = null)
             : base(parseResult)
         {
             _reporter = reporter ?? Reporter.Output;
@@ -65,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _printDownloadLinkOnly = parseResult.ValueForOption<bool>(WorkloadInstallCommandParser.PrintDownloadLinkOnlyOption);
             _fromCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.FromCacheOption);
             _downloadToCacheOption = parseResult.ValueForOption<string>(WorkloadInstallCommandParser.DownloadToCacheOption);
-            _workloadIds = parseResult.ValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
+            _workloadIds = workloadIds ?? parseResult.ValueForArgument<IEnumerable<string>>(WorkloadInstallCommandParser.WorkloadIdArgument).ToList().AsReadOnly();
             _verbosity = parseResult.ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption);
             _dotnetPath = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             _sdkVersion = WorkloadOptionsExtensions.GetValidatedSdkVersion(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.VersionOption), version, _dotnetPath);

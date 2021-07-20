@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
         public GivenDotnetWorkloadRepair(ITestOutputHelper log) : base(log)
         {
             _reporter = new BufferedReporter();
-            _parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload repair");
+            _parseResult = Parser.Instance.Parse("dotnet workload repair");
             _manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
             var installingWorkload = "xamarin-android";
 
             // Install a workload
-            var installParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
                 workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             installCommand.Execute();
@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.Workload.Repair.Tests
             var installingWorkload = "xamarin-android";
 
             // Install a workload
-            var installParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
                 workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             installCommand.Execute();

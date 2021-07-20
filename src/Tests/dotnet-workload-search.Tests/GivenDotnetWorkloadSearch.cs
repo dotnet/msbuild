@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public void GivenNoWorkloadsAreInstalledSearchIsEmpty()
         {
             _reporter.Clear();
-            var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search");
+            var parseResult = Parser.Instance.Parse("dotnet workload search");
             var workloadResolver = new MockWorkloadResolver(Enumerable.Empty<WorkloadResolver.WorkloadInfo>());
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public void GivenNoStubIsProvidedSearchShowsAllWorkloads()
         {
             _reporter.Clear();
-            var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search");
+            var parseResult = Parser.Instance.Parse("dotnet workload search");
             var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public void GivenDetailedVerbositySearchShowsAllColumns()
         {
             _reporter.Clear();
-            var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search -v d");
+            var parseResult = Parser.Instance.Parse("dotnet workload search -v d");
             var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public void GivenStubIsProvidedSearchShowsAllMatchingWorkloads()
         {
             _reporter.Clear();
-            var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search mock");
+            var parseResult = Parser.Instance.Parse("dotnet workload search mock");
             var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public void GivenSearchResultsAreOrdered()
         {
             _reporter.Clear();
-            var parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload search");
+            var parseResult = Parser.Instance.Parse("dotnet workload search");
             var workloadResolver = new MockWorkloadResolver(_availableWorkloads);
             var command = new WorkloadSearchCommand(parseResult, _reporter, workloadResolver, "6.0.100");
             command.Execute();
