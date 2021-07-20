@@ -14,12 +14,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
     {
         [Theory]
         [MemberData(nameof(AddedAbstractMemberIsReportedData))]
-        public void AddedAbstractMemberIsReported(string leftSyntax, string rightSyntax)
+        public void AddedAbstractMemberIsReported(string leftSyntax, string rightSyntax, bool includeInternals)
         {
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
 
             ApiComparer differ = new();
+            differ.IncludeInternalSymbols = includeInternals;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
 
             CompatDifference[] expected = new[]
@@ -267,9 +268,9 @@ namespace CompatTests
     public abstract string SecondAbstract();
   }
 }
-"
+",
+                false
             };
-
             yield return new object[]
             {
                 @"
@@ -292,7 +293,33 @@ namespace CompatTests
     public abstract string SecondAbstract();
   }
 }
-"
+",
+                false
+            };
+            yield return new object[]
+            {
+                @"
+namespace CompatTests
+{
+  public abstract class First
+  {
+    internal First() { }
+    public abstract void FirstAbstract();
+  }
+}
+",
+                @"
+namespace CompatTests
+{
+  public abstract class First
+  {
+    internal First() { }
+    public abstract void FirstAbstract();
+    public abstract string SecondAbstract();
+  }
+}
+",
+                true
             };
         }
         public static IEnumerable<object[]> AddedAbstractMemberNoVisibleConstructorData()

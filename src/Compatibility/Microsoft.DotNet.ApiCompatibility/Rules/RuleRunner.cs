@@ -18,10 +18,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         internal const string DEFAULT_LEFT_NAME = "left";
         internal const string DEFAULT_RIGHT_NAME = "right";
 
-        internal RuleRunner(string leftName, string[] rightNames, bool strictMode)
+        internal RuleRunner(string leftName, string[] rightNames, bool strictMode, IEqualityComparer<ISymbol> symbolComparer, bool includeInternalSymbols)
         {
             _context = new RuleRunnerContext();
-            _settings = new RuleSettings(strictMode);
+            _settings = new RuleSettings(strictMode, symbolComparer, includeInternalSymbols);
             _leftName = leftName;
             _rightNames = rightNames;
             InitializeRules();

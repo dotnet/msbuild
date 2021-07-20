@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         {
             foreach (IMethodSymbol constructor in type.Constructors)
             {
-                if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly())
+                if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(Settings.IncludeInternalSymbols))
                     return true;
             }
 

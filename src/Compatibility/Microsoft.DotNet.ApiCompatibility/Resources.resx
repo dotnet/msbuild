@@ -195,4 +195,10 @@
   <data name="CannotAddMemberToInterface" xml:space="preserve">
     <value>Cannot add interface member '{0}' to {1} because it does not exist on {2}</value>
   </data>
+  <data name="CannotRemoveBaseInterface" xml:space="preserve">
+    <value>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</value>
+  </data>
+  <data name="CannotRemoveBaseType" xml:space="preserve">
+    <value>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</value>
+  </data>
 </root>

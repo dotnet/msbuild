@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.ApiCompatibility
             if (GetComparingSettings != null)
                 return GetComparingSettings(leftName, rightNames);
 
-            return new ComparingSettings(filter: new SymbolAccessibilityBasedFilter(IncludeInternalSymbols), strictMode: StrictMode, leftName: leftName, rightNames: rightNames);
+            return new ComparingSettings(includeInternalSymbols: IncludeInternalSymbols, strictMode: StrictMode, leftName: leftName, rightNames: rightNames);
         }
     }
 }

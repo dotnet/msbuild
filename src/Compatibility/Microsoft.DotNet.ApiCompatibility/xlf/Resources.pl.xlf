@@ -47,6 +47,16 @@
         <target state="new">Cannot add interface member '{0}' to {1} because it does not exist on {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotRemoveBaseInterface">
+        <source>Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</source>
+        <target state="new">Type '{0}' does not implement interface '{1}' on {2} but it does on {3}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotRemoveBaseType">
+        <source>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</source>
+        <target state="new">Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CouldNotResolveReference">
         <source>Could not resolve reference '{0}' in any of the provided search directories.</source>
         <target state="new">Could not resolve reference '{0}' in any of the provided search directories.</target>

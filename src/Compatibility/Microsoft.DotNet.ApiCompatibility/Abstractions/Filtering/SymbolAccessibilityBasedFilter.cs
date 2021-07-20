@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         }
 
         public bool Include(ISymbol symbol) =>
-            symbol.IsVisibleOutsideOfAssembly() ||
-            (_includeInternalSymbols && symbol.DeclaredAccessibility != Accessibility.Private);
+            symbol.IsVisibleOutsideOfAssembly(_includeInternalSymbols);
     }
 }
