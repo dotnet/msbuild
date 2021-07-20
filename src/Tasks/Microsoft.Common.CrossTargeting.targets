@@ -21,7 +21,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore')"/>
 
   <Import Project="$(CustomBeforeMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonCrossTargetingTargets)')"/>
-  
+
   <Target Name="GetTargetFrameworks"
           DependsOnTargets="GetTargetFrameworksWithPlatformFromInnerBuilds"
           Returns="@(_ThisProjectBuildMetadata)">

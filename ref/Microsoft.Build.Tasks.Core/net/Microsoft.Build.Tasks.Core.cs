@@ -611,6 +611,16 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public partial class GetCompatiblePlatform : Microsoft.Build.Tasks.TaskExtension
+    {
+        public GetCompatiblePlatform() { }
+        public Microsoft.Build.Framework.ITaskItem[] AnnotatedProjects { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] AssignedProjectsWithPlatform { get { throw null; } set { } }
+        public string ParentProjectPlatform { get { throw null; } set { } }
+        public string PlatformLookupTable { get { throw null; } set { } }
+        public override bool Execute() { throw null; }
+    }
     public sealed partial class GetFileHash : Microsoft.Build.Tasks.TaskExtension
     {
         public GetFileHash() { }

@@ -1,4 +1,8 @@
-﻿using Microsoft.Build.UnitTests;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -14,16 +18,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             _output = output;
         }
-
-        /*
-         * What tests do we need for the task?
-         * Proper Cases:
-         * - Based on mapping
-         * - Based on same plat
-         * - AnyCPU default
-         * Failure Cases:
-         * - Warn when no compat found
-         */
 
         [Fact]
         public void ResolvesViaPlatformLookupTable_Task()
@@ -108,6 +102,27 @@ namespace Microsoft.Build.Tasks.UnitTests
             task.Execute();
             // When the task logs a warning, it does not set NearestPlatform
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+        }
+
+        /// <summary>
+        /// Invalid format on PlatformLookupTable results in an exception being thrown.
+        /// </summary>
+        [Fact]
+        public void FailsOnInvalidFormatLookupTable ()
+        {
+            MockLogger log = new MockLogger(_output);
+            TaskItem childProj = new TaskItem("foo.bar");
+            childProj.SetMetadata("PlatformOptions", "x64");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                ParentProjectPlatform = "x86",
+                PlatformLookupTable = "AnyCPU=;A=B", // invalid format
+                AnnotatedProjects = new TaskItem[] { childProj },
+            };
+
+            Should.Throw<InternalErrorException>(() => task.Execute());
         }
     }
 }
