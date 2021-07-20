@@ -111,7 +111,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     TemplateInformationCoordinator.GetInputParametersString(SupportedFilters, commandInput, appliedParameterMatches)));
             Reporter.Output.WriteLine();
 
-            IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(sourceResult, commandInput.Language, defaultLanguage);
+            IReadOnlyCollection<SearchResultTableRow> data = GetSearchResultsForDisplay(sourceResult, commandInput.Language, defaultLanguage, environmentSettings.Environment);
 
             HelpFormatter<SearchResultTableRow> formatter =
                 HelpFormatter
@@ -135,13 +135,21 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             Reporter.Output.WriteLine(formatter.Layout());
         }
 
-        private static IReadOnlyCollection<SearchResultTableRow> GetSearchResultsForDisplay(TemplateSourceSearchResult sourceResult, string language, string? defaultLanguage)
+        private static IReadOnlyCollection<SearchResultTableRow> GetSearchResultsForDisplay(
+            TemplateSourceSearchResult sourceResult,
+            string language,
+            string? defaultLanguage,
+            IEnvironment environment)
         {
             List<SearchResultTableRow> templateGroupsForDisplay = new List<SearchResultTableRow>();
 
             foreach (TemplatePackSearchResult packSearchResult in sourceResult.PacksWithMatches.Values)
             {
-                var templateGroupsForPack = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(packSearchResult.TemplateMatches.Select(mi => mi.Info), language, defaultLanguage);
+                var templateGroupsForPack = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
+                    packSearchResult.TemplateMatches.Select(mi => mi.Info),
+                    language,
+                    defaultLanguage,
+                    environment);
                 templateGroupsForDisplay.AddRange(templateGroupsForPack.Select(t => new SearchResultTableRow(t, packSearchResult.PackInfo.Name, packSearchResult.PackInfo.TotalDownloads)));
             }
 

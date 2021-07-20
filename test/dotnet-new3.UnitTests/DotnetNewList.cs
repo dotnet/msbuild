@@ -537,5 +537,23 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.HaveStdErrContaining("5 template(s) partially matched, but failed on language='unknown'.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
         }
+
+        [Fact]
+        public void TemplateGroupingTest()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDir = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("TemplateGrouping", _log, workingDir, home);
+
+            new DotnetNewCommand(_log, "--list", "--columns-all")
+                .WithCustomHive(home)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("These templates matched your input:")
+                .And.HaveStdOutMatching("Basic FSharp +template-grouping +\\[C#],F# +item +Author1 +Test Asset +\\r?\\n +Q# +item,project +Author2 +Test Asset");
+        }
+
     }
 }

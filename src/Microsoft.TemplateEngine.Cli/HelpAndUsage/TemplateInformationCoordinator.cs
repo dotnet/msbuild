@@ -125,7 +125,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             INewCommandInput commandInput,
             bool useErrorOutput = false)
         {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templateGroups, commandInput.Language, _defaultLanguage);
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
+                templateGroups,
+                commandInput.Language,
+                _defaultLanguage,
+                _engineEnvironmentSettings.Environment);
             DisplayTemplateList(groupsForDisplay, commandInput, useErrorOutput);
         }
 
@@ -146,7 +150,11 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             INewCommandInput commandInput,
             bool useErrorOutput = false)
         {
-            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(templates, commandInput.Language, _defaultLanguage);
+            IReadOnlyCollection<TemplateGroupTableRow> groupsForDisplay = TemplateGroupDisplay.GetTemplateGroupsForListDisplay(
+                templates,
+                commandInput.Language,
+                _defaultLanguage,
+                _engineEnvironmentSettings.Environment);
             DisplayTemplateList(groupsForDisplay, commandInput, useErrorOutput);
         }
 

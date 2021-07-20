@@ -38,8 +38,9 @@ namespace Dotnet_new3.IntegrationTests
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -116,8 +117,8 @@ Examples:
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Type", "Tags", "Package", "Downloads" });
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -142,8 +143,8 @@ Examples:
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Tags" }, "Common"), "'Tags' column does not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Tags"), "'Tags' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -167,8 +168,8 @@ Examples:
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Tags", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Tags" }, "Common"), "'Tags' column does not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Tags"), "'Tags' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -194,8 +195,8 @@ Examples:
 
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Author"), "'Author' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -220,8 +221,8 @@ Examples:
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
             Assert.True(SomeRowsContain(tableOutput, new[] { "Author" }, "Microsoft"), "'Author' column does not contain any rows with 'Microsoft'");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Author"), "'Author' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -248,8 +249,8 @@ Examples:
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Language" }, "Q#"), "'Language' column does not contain criteria");
 
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Language"), "'Language' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -274,8 +275,8 @@ Examples:
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Language" }, "F#"), "'Language' column does not contain criteria");
 
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Language"), "'Language' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -302,8 +303,8 @@ Examples:
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsEqual(tableOutput, new[] { "Type" }, "item"), "'Type' column does not contain criteria");
 
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Type"), "'Type' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -328,8 +329,8 @@ Examples:
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Type", "Package", "Downloads" });
             Assert.True(AllRowsEqual(tableOutput, new[] { "Type" }, "item"), "'Type' column does not contain criteria");
 
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Type"), "'Type' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
@@ -356,8 +357,8 @@ Examples:
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Package" }, "core"), "'Package' column does not contain criteria");
 
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -380,8 +381,8 @@ Examples:
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Package" }, "core"), "'Package' column does not contain criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -437,8 +438,8 @@ Examples:
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
@@ -458,8 +459,8 @@ Examples:
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
@@ -478,8 +479,8 @@ Examples:
                 .And.HaveStdOutContaining("   dotnet new3 --install <PACKAGE_ID>");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -503,8 +504,8 @@ Examples:
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
@@ -523,8 +524,8 @@ Examples:
                 .And.HaveStdOutContaining("   dotnet new3 --install <PACKAGE_ID>");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -548,8 +549,8 @@ Examples:
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
@@ -568,8 +569,8 @@ Examples:
                 .And.HaveStdOutContaining("   dotnet new3 --install <PACKAGE_ID>");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -593,8 +594,8 @@ Examples:
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "con"), "'Template Name' or 'Short Name' columns do not contain the criteria");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
 
@@ -613,8 +614,8 @@ Examples:
                 .And.HaveStdOutContaining("   dotnet new3 --install <PACKAGE_ID>");
 
             tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
-            Assert.True(AllRowsAreNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
+            Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
             Assert.True(AllRowsAreNotEmpty(tableOutput, "Package"), "'Package' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Downloads"), "'Downloads' column contains empty values");
         }
@@ -653,6 +654,20 @@ Examples:
                 }
                 // template name can be shortened so the name criteria might be truncated.
                 if (columnsNames.Contains("Template Name") && tableOutput[i][tableOutput[0].IndexOf("Template Name")].EndsWith("..."))
+                {
+                    continue;
+                }
+
+                // if columns are template name and/or short name and they are empty - skip, grouping in done
+                bool criteriaA = columnsNames.Contains("Template Name")
+                    && string.IsNullOrWhiteSpace(tableOutput[i][tableOutput[0].IndexOf("Template Name")])
+                    || !columnsNames.Contains("Short Name");
+                bool criteriaB = columnsNames.Contains("Short Name")
+                  && string.IsNullOrWhiteSpace(tableOutput[i][tableOutput[0].IndexOf("Short Name")])
+                  || !columnsNames.Contains("Short Name");
+                bool criteriaC = columnsNames.Contains("Short Name") || columnsNames.Contains("Template Name");
+
+                if (criteriaA && criteriaB && criteriaC)
                 {
                     continue;
                 }

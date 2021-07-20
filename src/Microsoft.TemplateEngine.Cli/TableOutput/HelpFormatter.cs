@@ -57,7 +57,6 @@ namespace Microsoft.TemplateEngine.Cli
         internal string Layout()
         {
             Dictionary<int, int> columnWidthLookup = new Dictionary<int, int>();
-            Dictionary<int, int> rowHeightForRow = new Dictionary<int, int>();
             List<TextWrapper[]> grid = new List<TextWrapper[]>();
 
             TextWrapper[] header = new TextWrapper[_columns.Count];
@@ -68,8 +67,6 @@ namespace Microsoft.TemplateEngine.Cli
                 headerLines = Math.Max(headerLines, header[i].LineCount);
                 columnWidthLookup[i] = header[i].MaxWidth;
             }
-
-            int lineNumber = 0;
 
             foreach (T rowDataItem in _rowDataItems)
             {
@@ -83,7 +80,6 @@ namespace Microsoft.TemplateEngine.Cli
                     rowHeight = Math.Max(rowHeight, row[i].LineCount);
                 }
 
-                rowHeightForRow[lineNumber++] = rowHeight;
                 grid.Add(row);
             }
 
@@ -157,7 +153,7 @@ namespace Microsoft.TemplateEngine.Cli
             int currentRowIndex = 0;
             foreach (TextWrapper[] rowToRender in rows)
             {
-                for (int lineWithinRow = 0; lineWithinRow < rowHeightForRow[currentRowIndex]; ++lineWithinRow)
+                for (int lineWithinRow = 0; lineWithinRow < rowToRender.Max(row => row.LineCount); ++lineWithinRow)
                 {
                     // Render all columns except last column
                     for (int columnIndex = 0; columnIndex < _columns.Count - 1; ++columnIndex)
