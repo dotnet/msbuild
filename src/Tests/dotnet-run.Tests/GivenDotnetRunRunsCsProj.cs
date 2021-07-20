@@ -270,6 +270,23 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         }
 
         [Fact]
+        public void ItCanPassOptionArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--", "-d", "-a")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:-d;-a");
+        }
+
+        [Fact]
         public void ItGivesAnErrorWhenAttemptingToUseALaunchProfileThatDoesNotExistWhenThereIsNoLaunchSettingsFile()
         {
             var testAppName = "MSBuildTestApp";
