@@ -344,17 +344,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             }
         }
 
-        public IEnumerable<(string, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             var installedPacksDir = Path.Combine(_workloadMetadataDir, _installedPacksDir, "v1");
             if (!Directory.Exists(installedPacksDir))
             {
-                return Enumerable.Empty<(string, string)>();
+                return Enumerable.Empty<(WorkloadPackId, string)>();
             }
             return Directory.GetDirectories(installedPacksDir)
                 .Where(packIdDir => HasFeatureBandMarkerFile(packIdDir, sdkFeatureBand))
                 .SelectMany(packIdPath => Directory.GetDirectories(packIdPath))
-                .Select(packVersionPath => (Path.GetFileName(Path.GetDirectoryName(packVersionPath)), Path.GetFileName(packVersionPath)));
+                .Select(packVersionPath => (new WorkloadPackId(Path.GetFileName(Path.GetDirectoryName(packVersionPath))), Path.GetFileName(packVersionPath)));
         }
 
         public void Shutdown()
@@ -376,7 +376,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var installedWorkloads = _installationRecordRepository.GetInstalledWorkloads(sdkFeatureBand);
             return installedWorkloads
-                .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload.ToString()))
+                .SelectMany(workload => _workloadResolver.GetPacksInWorkload(workload))
                 .Select(pack => _workloadResolver.TryGetPackInfo(pack))
                 .Where(pack => pack != null)
                 .Select(packInfo => GetPackInstallRecordPath(packInfo, sdkFeatureBand));
@@ -387,7 +387,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             // Expected path: <DOTNET ROOT>/metadata/workloads/installedpacks/v1/<Pack ID>/<Pack Version>/
             var idRecordPath = Path.GetDirectoryName(packRecordDir);
             var packId = Path.GetFileName(idRecordPath);
-            var packInfo = _workloadResolver.TryGetPackInfo(packId);
+            var packInfo = _workloadResolver.TryGetPackInfo(new WorkloadPackId(packId));
             if (packInfo != null && packInfo.Version.Equals(Path.GetFileName(packRecordDir)))
             {
                 return packInfo;

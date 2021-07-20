@@ -33,10 +33,10 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 
             table.PrintRows(_sdkInfo.OrderBy(sdk => sdk.Version), l => _reporter.WriteLine(l));
 
-            if (NewFeatureBandAvaliable())
+            if (NewFeatureBandAvailable())
             {
                 _reporter.WriteLine();
-                _reporter.WriteLine(string.Format(LocalizableStrings.NewFeatureBandMessage, NewestFeatureBandAvaliable()));
+                _reporter.WriteLine(string.Format(LocalizableStrings.NewFeatureBandMessage, NewestFeatureBandAvailable()));
             }
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             }
             else if (NewerSdkPatchExists(sdk))
             {
-                return string.Format(LocalizableStrings.NewPatchAvaliableMessage, NewestSdkPatchVersion(sdk));
+                return string.Format(LocalizableStrings.NewPatchAvailableMessage, NewestSdkPatchVersion(sdk));
             }
             else
             {
@@ -86,12 +86,12 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             }
         }
 
-        private bool NewFeatureBandAvaliable()
+        private bool NewFeatureBandAvailable()
         {
-            return NewestFeatureBandAvaliable() > _sdkInfo.Select(sdk => sdk.Version).Max();
+            return NewestFeatureBandAvailable() > _sdkInfo.Select(sdk => sdk.Version).Max();
         }
 
-        private ReleaseVersion NewestFeatureBandAvaliable()
+        private ReleaseVersion NewestFeatureBandAvailable()
         {
             return _productCollection.OrderByDescending(product => product.ProductVersion).First().LatestSdkVersion;
         }

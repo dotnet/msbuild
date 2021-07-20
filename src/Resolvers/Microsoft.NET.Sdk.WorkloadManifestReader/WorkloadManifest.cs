@@ -12,11 +12,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     /// </summary>
     public class WorkloadManifest
     {
-        internal WorkloadManifest(string id, FXVersion version, string? description, Dictionary<WorkloadId, WorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs, Dictionary<string, FXVersion>? dependsOnManifests)
+        internal WorkloadManifest(string id, FXVersion version, string? description, string? informationalPath,  Dictionary<WorkloadId, BaseWorkloadDefinition> workloads, Dictionary<WorkloadPackId, WorkloadPack> packs, Dictionary<string, FXVersion>? dependsOnManifests)
         {
             Id = id;
             ParsedVersion = version;
             Description = description;
+            InformationalPath = informationalPath;
             Workloads = workloads;
             Packs = packs;
             DependsOnManifests = dependsOnManifests;
@@ -44,7 +45,13 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public string? Description { get; }
 
-        public Dictionary<WorkloadId, WorkloadDefinition> Workloads { get; }
+        /// <summary>
+        /// A path that indicates where the manifest was loaded from, for diagnostic purposes only.
+        /// Not guaranteed to be set or to be a valid filesystem path.
+        /// </summary>
+        public string? InformationalPath { get; }
+
+        public Dictionary<WorkloadId, BaseWorkloadDefinition> Workloads { get; }
         public Dictionary<WorkloadPackId, WorkloadPack> Packs { get; }
     }
 }

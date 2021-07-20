@@ -2,30 +2,35 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using FluentAssertions;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+
+using FluentAssertions;
+
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.NET.TestFramework;
+
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework;
-using System.Linq;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace ManifestReaderTests
 {
 
     public class SdkDirectoryWorkloadManifestProviderTests : SdkTest
     {
-        private string _testDirectory;
-        private string _manifestDirectory;
-        private string _fakeDotnetRootDirectory;
+        private string? _testDirectory;
+        private string? _manifestDirectory;
+        private string? _fakeDotnetRootDirectory;
 
         public SdkDirectoryWorkloadManifestProviderTests(ITestOutputHelper logger) : base(logger)
         {
         }
 
-        void Initialize([CallerMemberName] string testName = null, string identifier = null)
+        [MemberNotNull("_testDirectory", "_manifestDirectory", "_fakeDotnetRootDirectory")]
+        void Initialize([CallerMemberName] string? testName = null, string? identifier = null)
         {
             _testDirectory = _testAssetsManager.CreateTestDirectory(testName, identifier).Path;
             _fakeDotnetRootDirectory = Path.Combine(_testDirectory, "dotnet");
@@ -90,7 +95,11 @@ namespace ManifestReaderTests
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.105");
 
-            Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().ToList();
+            Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().Select(m => {
+                using (m.openManifestStream()) { }
+                return true;
+            }).ToList();
+
             a.ShouldThrow<FileNotFoundException>();
         }
 
@@ -240,7 +249,7 @@ namespace ManifestReaderTests
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
-            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.manifestStream).ReadToEnd());
+            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.openManifestStream()).ReadToEnd());
         }
 
         private class EnvironmentMock
@@ -252,9 +261,9 @@ namespace ManifestReaderTests
                 _mockedEnvironmentVariables[variable] = value;
             }
 
-            public string GetEnvironmentVariable(string variable)
+            public string? GetEnvironmentVariable(string variable)
             {
-                if (_mockedEnvironmentVariables.TryGetValue(variable, out string value))
+                if (_mockedEnvironmentVariables.TryGetValue(variable, out string? value))
                 {
                     return value;
                 }
@@ -263,3 +272,24 @@ namespace ManifestReaderTests
         }
     }
 }
+
+#if NETFRAMEWORK
+namespace System.Diagnostics.CodeAnalysis
+{
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
+    sealed class MemberNotNullAttribute : Attribute
+    {
+        public MemberNotNullAttribute(params string[] members)
+        {
+            Members = members;
+        }
+
+        public MemberNotNullAttribute(string member)
+        {
+            Members = new[] { member };
+        }
+
+        public string[] Members { get; }
+    }
+}
+#endif

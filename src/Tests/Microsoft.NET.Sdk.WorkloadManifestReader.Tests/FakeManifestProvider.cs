@@ -3,6 +3,7 @@
 
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -20,17 +21,17 @@ namespace ManifestReaderTests
             _filePaths = filePaths;
         }
 
-        public IEnumerable<string> GetManifestDirectories() => throw new System.NotImplementedException();
+        public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
 
-        public IEnumerable<(string manifestId, Stream manifestStream)> GetManifests()
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)> GetManifests()
         {
             foreach (var filePath in _filePaths)
             {
-                yield return (Path.GetFileNameWithoutExtension(filePath), new FileStream(filePath, FileMode.Open, FileAccess.Read));
+                yield return (Path.GetFileNameWithoutExtension(filePath), filePath,() => new FileStream(filePath, FileMode.Open, FileAccess.Read));
             }
         }
 
-        public string GetSdkFeatureBand() => throw new System.NotImplementedException();
+        public string GetSdkFeatureBand() => throw new NotImplementedException();
     }
 
     internal class InMemoryFakeManifestProvider : IWorkloadManifestProvider, IEnumerable<(string id, string content)>
@@ -38,13 +39,14 @@ namespace ManifestReaderTests
         readonly List<(string id, byte[] content)> _manifests = new List<(string, byte[])>();
 
         public void Add(string id, string content) => _manifests.Add((id, Encoding.UTF8.GetBytes(content)));
-        public IEnumerable<string> GetManifestDirectories() => throw new System.NotImplementedException();
+        public IEnumerable<string> GetManifestDirectories() => throw new NotImplementedException();
 
-        public IEnumerable<(string manifestId, Stream manifestStream)> GetManifests() => _manifests.Select(m => (m.id, (Stream)new MemoryStream(m.content)));
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)> GetManifests()
+            => _manifests.Select(m => (m.id, (string?)null, (Func<Stream>)(() => new MemoryStream(m.content))));
 
         // these are just so the collection initializer works
-        public IEnumerator<(string id, string content)> GetEnumerator() => throw new System.NotImplementedException();
-        IEnumerator IEnumerable.GetEnumerator() => throw new System.NotImplementedException();
-        public string GetSdkFeatureBand() => throw new System.NotImplementedException();
+        public IEnumerator<(string id, string content)> GetEnumerator() => throw new NotImplementedException();
+        IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
+        public string GetSdkFeatureBand() => throw new NotImplementedException();
     }
 }

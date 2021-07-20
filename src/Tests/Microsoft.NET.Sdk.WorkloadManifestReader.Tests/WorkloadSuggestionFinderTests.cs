@@ -34,9 +34,14 @@ namespace ManifestReaderTests
 
             FakeFileSystemChecksSoThesePackagesAppearInstalled(resolver, "Xamarin.Android.Sdk", "Xamarin.Android.BuildTools");
 
-            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Mono.Android.Sdk" });
-            suggestions.Count().Should().Be(1);
-            suggestions.First().Id.Should().Be("xamarin-android-build");
+            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(
+                new[] { "Mono.Android.Sdk" }.Select(s => new WorkloadPackId(s)).ToList(),
+                out var unsatisfiable);
+
+            unsatisfiable.Count().Should().Be(0);
+            suggestions.Should().NotBeNull();
+            suggestions!.Count().Should().Be(1);
+            suggestions!.First().Id.ToString().Should().Be("xamarin-android-build");
         }
 
         [Fact]
@@ -53,10 +58,15 @@ namespace ManifestReaderTests
                 "Xamarin.Android.Runtime",
                 "Mono.Android.Sdk");
 
-            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Mono.Android.Runtime.x86", "Mono.Android.Runtime.Armv7a" });
-            suggestions.Count().Should().Be(2);
-            suggestions.Should().Contain(s => s.Id == "xamarin-android-build-armv7a");
-            suggestions.Should().Contain(s => s.Id == "xamarin-android-build-x86");
+            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(
+                new[] { "Mono.Android.Runtime.x86", "Mono.Android.Runtime.Armv7a" }.Select(s => new WorkloadPackId(s)).ToList(),
+                out var unsatisfiable);
+
+            unsatisfiable.Count().Should().Be(0);
+            suggestions.Should().NotBeNull();
+            suggestions!.Count().Should().Be(2);
+            suggestions!.Should().Contain(s => s.Id == "xamarin-android-build-armv7a");
+            suggestions!.Should().Contain(s => s.Id == "xamarin-android-build-x86");
         }
 
         [Fact]
@@ -73,9 +83,14 @@ namespace ManifestReaderTests
                 "Xamarin.Android.Runtime",
                 "Mono.Android.Sdk");
 
-            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(new[] { "Xamarin.Android.Templates", "Xamarin.Android.LLVM.Aot.armv7a" });
-            suggestions.Count().Should().Be(1);
-            suggestions.First().Id.Should().Be("xamarin-android-complete");
+            var suggestions = resolver.GetWorkloadSuggestionForMissingPacks(
+                new[] { "Xamarin.Android.Templates", "Xamarin.Android.LLVM.Aot.armv7a" }.Select(s => new WorkloadPackId(s)).ToList(),
+                out var unsatisfiable);
+
+            unsatisfiable.Count().Should().Be(0);
+            suggestions.Should().NotBeNull();
+            suggestions!.Count().Should().Be(1);
+            suggestions!.First().Id.ToString().Should().Be("xamarin-android-complete");
         }
 
         [Fact]
@@ -197,12 +212,12 @@ namespace ManifestReaderTests
                 fileName =>
                 {
                     var versionDir = Path.GetDirectoryName(fileName);
-                    var idDir = Path.GetDirectoryName(versionDir);
+                    var idDir = Path.GetDirectoryName(versionDir)!;
                     return installedPacks.Contains(Path.GetFileName(idDir));
                 },
                 dirName =>
                 {
-                    var idDir = Path.GetDirectoryName(dirName);
+                    var idDir = Path.GetDirectoryName(dirName)!;
                     return installedPacks.Contains(Path.GetFileName(idDir));
                 });
         }

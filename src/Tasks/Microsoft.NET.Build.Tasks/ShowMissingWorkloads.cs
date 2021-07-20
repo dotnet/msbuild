@@ -34,24 +34,35 @@ namespace Microsoft.NET.Build.Tasks
                 var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion);
                 var workloadResolver = WorkloadResolver.Create(workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion);
 
-                var suggestedWorkloads = workloadResolver.GetWorkloadSuggestionForMissingPacks(MissingWorkloadPacks.Select(item => item.ItemSpec).ToList());
+                var suggestedWorkloads = workloadResolver.GetWorkloadSuggestionForMissingPacks(
+                    MissingWorkloadPacks.Select(item => new WorkloadPackId (item.ItemSpec)).ToList(),
+                    out ISet<WorkloadPackId> unsatisfiablePacks
+                );
 
                 if (GenerateErrorsForMissingWorkloads)
                 {
-                    var suggestedInstallCommand = "dotnet workload install " + string.Join(" ", suggestedWorkloads.Select(w => w.Id));
-
-                    var errorMessage = string.Format(CultureInfo.CurrentCulture,
-                        Strings.WorkloadNotInstalled, string.Join(" ", suggestedWorkloads.Select(w => w.Id)), suggestedInstallCommand);
-
-                    Log.LogError(errorMessage);
+                    if (suggestedWorkloads is not null)
+                    {
+                        var suggestedInstallCommand = "dotnet workload install " + string.Join(" ", suggestedWorkloads.Select(w => w.Id));
+                        var errorMessage = string.Format(CultureInfo.CurrentCulture,
+                            Strings.WorkloadNotInstalled, string.Join(" ", suggestedWorkloads.Select(w => w.Id)), suggestedInstallCommand);
+                        Log.LogError(errorMessage);
+                    }
+                    else
+                    {
+                        Log.LogError(Strings.WorkloadNotAvailable, string.Join(" ", unsatisfiablePacks));
+                    }
                 }
 
-                SuggestedWorkloads = suggestedWorkloads.Select(suggestedWorkload =>
+                if (suggestedWorkloads is not null)
                 {
-                    var taskItem = new TaskItem(suggestedWorkload.Id);
-                    taskItem.SetMetadata("VisualStudioComponentId", ToSafeId(suggestedWorkload.Id));
-                    return taskItem;
-                }).ToArray();
+                    SuggestedWorkloads = suggestedWorkloads.Select(suggestedWorkload =>
+                    {
+                        var taskItem = new TaskItem(suggestedWorkload.Id);
+                        taskItem.SetMetadata("VisualStudioComponentId", ToSafeId(suggestedWorkload.Id));
+                        return taskItem;
+                    }).ToArray();
+                }
             }
         }
 

@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             }
             else if (_printRollbackDefinitionOnly)
             {
-                var manifests = _workloadResolver.GetInstalledManifests();
+                var manifests = _workloadResolver.GetInstalledManifests().ToDictionary(m => m.Id, m => m.Version, StringComparer.OrdinalIgnoreCase);
 
                 _reporter.WriteLine("==workloadRollbackDefinitionJsonOutputStart==");
                 _reporter.WriteLine(JsonSerializer.Serialize(manifests));
@@ -340,7 +340,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         {
             var currentFeatureBand = new SdkFeatureBand(_sdkVersion);
             var workloads = GetUpdatableWorkloads();
-            var updatedPacks = workloads.SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+            var updatedPacks = workloads.SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
                 .Distinct()
                 .Select(packId => _workloadResolver.TryGetPackInfo(packId))
                 .Where(pack => pack != null);
