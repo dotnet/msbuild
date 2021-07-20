@@ -456,7 +456,7 @@ namespace Dotnet_new3.IntegrationTests
                 Assert.NotNull(reactPackageLockJsonEntry);
                 using var sourceStream = new StreamReader(reactPackageLockJsonEntry!.Open());
                 var sourceText = sourceStream.ReadToEnd();
-                //sourceText = sourceText.Replace("company.webapplication1", "angular");
+                sourceText = sourceText.Replace("company.webapplication1", "angular");
                 Assert.Equal(sourceText, targetText);
             }
         }
