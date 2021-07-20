@@ -157,26 +157,23 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT")))
                     {
-                        lock (_locker)
+                        // QA tests run too fast for the timestamp check to work. This environment variable is for their
+                        // use: it checks the file content as well as the timestamp. That's better than completely disabling
+                        // the cache as we get test coverage of the rest of the cache code.
+                        XmlDocument document = new XmlDocument();
+                        document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
+
+                        using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath, projectRootElement.ProjectRootElementCache.LoadProjectsReadOnly))
                         {
-                            // QA tests run too fast for the timestamp check to work. This environment variable is for their
-                            // use: it checks the file content as well as the timestamp. That's better than completely disabling
-                            // the cache as we get test coverage of the rest of the cache code.
-                            XmlDocument document = new XmlDocument();
-                            document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
+                            document.Load(xtr.Reader);
+                        }
 
-                            using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath, projectRootElement.ProjectRootElementCache.LoadProjectsReadOnly))
-                            {
-                                document.Load(xtr.Reader);
-                            }
+                        string diskContent = document.OuterXml;
+                        string cacheContent = projectRootElement.XmlDocument.OuterXml;
 
-                            string diskContent = document.OuterXml;
-                            string cacheContent = projectRootElement.XmlDocument.OuterXml;
-
-                            if (diskContent != cacheContent)
-                            {
-                                return true;
-                            }
+                        if (diskContent != cacheContent)
+                        {
+                            return true;
                         }
                     }
                 }
