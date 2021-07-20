@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         {
             _reporter = new BufferedReporter();
             _manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "Sample.json");
-            _parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update" });
+            _parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update" });
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             var installingWorkload = "xamarin-android";
 
             // Install a workload
-            var installParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", installingWorkload });
             var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
                 workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             installCommand.Execute();
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
                 new string[] { dotnetRoot });
 
             // Update workload
-            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update" });
+            var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update" });
             var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
             workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             updateCommand.Execute();
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
             File.Create(Path.Combine(dotnetRoot, "metadata", "workloads", sdkFeatureVersion, "InstalledWorkloads", installingWorkload));
 
             // Update workload (without installing any workloads to this feature band)
-            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--from-previous-sdk" });
+            var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-previous-sdk" });
             var updateCommand = new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: nugetDownloader,
             workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
             updateCommand.Execute();
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = Path.Combine(_testAssetsManager.CreateTestDirectory(identifier: "cachePath").Path, "mockCachePath");
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--download-to-cache", cachePath });
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--download-to-cache", cachePath });
             (_, var command, var installer, _, var manifestUpdater, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
 
             command.Execute();
@@ -214,7 +214,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
             var cachePath = "mockCachePath";
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--from-cache", cachePath });
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--from-cache", cachePath });
             (_, var command, var installer, _, _, var nugetDownloader) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds);
 
             command.Execute();
@@ -230,7 +230,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         public void GivenWorkloadUpdateItPrintsDownloadUrls()
         {
             var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android") };
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--print-download-link-only" });
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--print-download-link-only" });
             (_, var command, _, _, _, _) = GetTestInstallers(parseResult, installedWorkloads: mockWorkloadIds, includeInstalledPacks: true);
 
             command.Execute();
@@ -247,8 +247,8 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--sdk-version", "7.0.100" });
-            
+            var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--sdk-version", "7.0.100" });
+
             var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot));
             exceptionThrown.Message.Should().Contain("No manifests exist");
         }
@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         {
             var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
             var dotnetRoot = Path.Combine(testDirectory, "dotnet");
-            var updateParseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--sdk-version", "7.0.100" });
+            var updateParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--sdk-version", "7.0.100" });
 
             // Write manifest of "new" format that we don't recognize
             Directory.CreateDirectory(Path.Combine(dotnetRoot, "sdk-manifests", "7.0.100", "mock.workload"));
@@ -279,7 +279,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         [Fact]
         public void GivenOnlyUpdateAdManifestItSucceeds()
         {
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--advertising-manifests-only" });
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--advertising-manifests-only" });
             (_, var command, _, _, var manifestUpdater, _) = GetTestInstallers(parseResult);
 
             command.Execute();
@@ -289,7 +289,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
         [Fact]
         public void GivenPrintRollbackDefinitionItIncludesAllInstalledManifests()
         {
-            var parseResult = Parser.GetWorkloadsInstance.Parse(new string[] { "dotnet", "workload", "update", "--print-rollback" });
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "update", "--print-rollback" });
             (_, var updateCommand, _, _, _, _) = GetTestInstallers(parseResult);
 
             updateCommand.Execute();

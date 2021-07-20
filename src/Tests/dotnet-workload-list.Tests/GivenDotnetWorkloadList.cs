@@ -23,8 +23,8 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
         public GivenDotnetWorkloadList(ITestOutputHelper log) : base(log)
         {
             _reporter = new BufferedReporter();
-            _machineReadableParseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload list --machine-readable");
-            _parseResult = Parser.GetWorkloadsInstance.Parse("dotnet workload list");
+            _machineReadableParseResult = Parser.Instance.Parse("dotnet workload list --machine-readable");
+            _parseResult = Parser.Instance.Parse("dotnet workload list");
         }
 
         [Fact]
