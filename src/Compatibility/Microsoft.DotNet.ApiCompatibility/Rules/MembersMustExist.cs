@@ -92,6 +92,10 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
 
         private bool FindMatchingOnBaseType(IMethodSymbol method, ITypeSymbol containingType)
         {
+            // Constructors cannot be promoted
+            if (method.MethodKind == MethodKind.Constructor)
+                return false;
+
             if (containingType != null)
             {
                 foreach (ITypeSymbol type in containingType.GetAllBaseTypes())

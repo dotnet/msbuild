@@ -35,22 +35,11 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 // We need to make sure left containing type is not sealed, as unsealing a type is not a breaking change.
                 // So if in this version of left and right, right is unsealing the type, abstract members can be added.
                 // checking for member additions on interfaces is checked on its own rule.
-                if (leftContainingType.TypeKind != TypeKind.Interface && !leftContainingType.IsSealed && HasVisibleConstructor(leftContainingType as INamedTypeSymbol))
+                if (leftContainingType.TypeKind != TypeKind.Interface && !leftContainingType.IsEffectivelySealed(Settings.IncludeInternalSymbols))
                 {
                     differences.Add(new CompatDifference(DiagnosticIds.CannotAddAbstractMember, string.Format(Resources.CannotAddAbstractMember, right.ToDisplayString(), rightName, leftName), DifferenceType.Added, right));
                 }
             }
-        }
-
-        private bool HasVisibleConstructor(INamedTypeSymbol type)
-        {
-            foreach (IMethodSymbol constructor in type.Constructors)
-            {
-                if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(Settings.IncludeInternalSymbols))
-                    return true;
-            }
-
-            return false;
         }
     }
 }

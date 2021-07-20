@@ -16,5 +16,6 @@ namespace Microsoft.DotNet.ApiCompatibility
         public const string CannotAddMemberToInterface = "CP0006";
         public const string CannotRemoveBaseType = "CP0007";
         public const string CannotRemoveBaseInterface = "CP0008";
+        public const string CannotSealType = "CP0009";
     }
 }

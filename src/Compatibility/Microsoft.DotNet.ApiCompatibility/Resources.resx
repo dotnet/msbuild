@@ -201,4 +201,10 @@
   <data name="CannotRemoveBaseType" xml:space="preserve">
     <value>Type '{0}' does not inherit from base type '{1}' on {2} but it does on {3}</value>
   </data>
+  <data name="TypeIsActuallySealed" xml:space="preserve">
+    <value>Type '{0}' has the sealed modifier on {1} but not on {2}</value>
+  </data>
+  <data name="TypeIsEffectivelySealed" xml:space="preserve">
+    <value>Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</value>
+  </data>
 </root>

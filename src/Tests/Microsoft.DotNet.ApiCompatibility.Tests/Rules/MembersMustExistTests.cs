@@ -483,5 +483,43 @@ namespace CompatTests
 
             AssertExtensions.MultiRightEmptyDifferences(expectedLeftMetadata, rightSyntaxes.Length, differences);
         }
+
+
+
+        [Fact]
+        public void ParameterlessConstructorRemovalIsReported()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public sealed class First
+  {
+  }
+}
+";
+
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    private First() { }
+  }
+}
+";
+
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+
+            ApiComparer differ = new();
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            CompatDifference[] expected = new[]
+            {
+            new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.#ctor")
+            };
+
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
+        }
     }
 }

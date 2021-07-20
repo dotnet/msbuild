@@ -137,6 +137,16 @@
         <target state="new">Type '{0}' exists on {2} but not on {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="TypeIsActuallySealed">
+        <source>Type '{0}' has the sealed modifier on {1} but not on {2}</source>
+        <target state="new">Type '{0}' has the sealed modifier on {1} but not on {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TypeIsEffectivelySealed">
+        <source>Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</source>
+        <target state="new">Type '{0}' is sealed because it has no visible constructor on {1} but it does on {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VisitorRightCountShouldMatchMappersSetSize">
         <source>The provided right count when creating the visitor should match the right set size specified for the mappers.</source>
         <target state="new">The provided right count when creating the visitor should match the right set size specified for the mappers.</target>

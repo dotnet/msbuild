@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Extensions
@@ -44,6 +45,23 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
                 foreach (ITypeSymbol baseType in type.BaseType.GetAllBaseTypes())
                     yield return baseType;
             }
+        }
+
+        internal static bool IsEffectivelySealed(this ITypeSymbol type, bool includeInternals) =>
+            type.IsSealed || !HasVisibleConstructor(type, includeInternals);
+
+        private static bool HasVisibleConstructor(ITypeSymbol type, bool includeInternals)
+        {
+            if (type is INamedTypeSymbol namedType)
+            {
+                foreach (IMethodSymbol constructor in namedType.Constructors)
+                {
+                    if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(includeInternals))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         internal static IEnumerable<ITypeSymbol> GetAllBaseInterfaces(this ITypeSymbol type)
