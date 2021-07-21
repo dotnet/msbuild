@@ -124,6 +124,8 @@ namespace Microsoft.Build.Tasks
     {
         public Copy() { }
         [Microsoft.Build.Framework.OutputAttribute]
+        public bool CopiedAtLeastOneFile { get { throw null; } }
+        [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] CopiedFiles { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] DestinationFiles { get { throw null; } set { } }

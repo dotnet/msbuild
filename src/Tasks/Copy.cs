@@ -139,6 +139,9 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] CopiedFiles { get; private set; }
 
+        [Output]
+        public bool CopiedAtLeastOneFile { get; private set; }
+
         /// <summary>
         /// Whether to overwrite files in the destination
         /// that have the read-only attribute set.
@@ -297,6 +300,7 @@ namespace Microsoft.Build.Tasks
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+                CopiedAtLeastOneFile = true;
             }
 
             destinationFileState.Reset();

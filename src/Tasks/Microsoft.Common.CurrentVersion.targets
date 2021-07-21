@@ -4696,6 +4696,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWritesShareable"/>
       <Output TaskParameter="CopiedFiles" ItemName="ReferencesCopiedInThisBuild"/>
+      <Output TaskParameter="CopiedAtLeastOneFile" PropertyName="CopiedAtLeastOneFile"/>
 
     </Copy>
 
@@ -4705,7 +4706,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          input to projects that reference this one. -->
     <Touch Files="@(CopyUpToDateMarker)"
            AlwaysCreate="true"
-           Condition="'@(ReferencesCopiedInThisBuild)' != ''">
+           Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(CopiedAtLeastOneFile)' == 'true'">
         <Output TaskParameter="TouchedFiles" ItemName="FileWrites" />
     </Touch>
 
