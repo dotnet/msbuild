@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Common;
 using NuGet.Packaging;
@@ -94,6 +95,13 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         public bool IsExecutableIsFirstPartySignedWithoutValidation(FilePath executable)
         {
+            var environmentProvider = new EnvironmentProvider();
+            var forceCheck = environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TEST_FORCE_SIGN_CHECK", false);
+            if (forceCheck)
+            {
+                return true;
+            }
+
             try
             {
                 X509Certificate signedFile = X509Certificate2.CreateFromSignedFile(executable.Value);
