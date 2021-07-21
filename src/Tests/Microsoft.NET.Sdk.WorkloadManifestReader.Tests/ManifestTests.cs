@@ -58,7 +58,7 @@ namespace ManifestReaderTests
             var buildToolsPack = resolver.GetInstalledWorkloadPacksOfKind(WorkloadPackKind.Sdk).FirstOrDefault(pack => pack.Id == "Xamarin.Android.BuildTools");
 
             buildToolsPack.Should().NotBeNull();
-            buildToolsPack.Id.Should().Be("Xamarin.Android.BuildTools");
+            buildToolsPack!.Id.ToString().Should().Be("Xamarin.Android.BuildTools");
             buildToolsPack.Version.Should().Be("8.4.7");
             buildToolsPack.Path.Should().Be(Path.Combine(fakeRootPath, "packs", "Xamarin.Android.BuildTools.Win64Host", "8.4.7"));
         }
@@ -123,12 +123,12 @@ namespace ManifestReaderTests
             var manifestProvider = new FakeManifestProvider(ManifestPath);
             var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
 
-            var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");
+            var pack = resolver.TryGetPackInfo(new WorkloadPackId("Xamarin.Android.Sdk"));
             pack.Should().NotBeNull();
 
             string expectedPath = additionalExists ? additionalPackPath : defaultPackPath;
 
-            pack.Path.Should().Be(expectedPath);
+            pack!.Path.Should().Be(expectedPath);
         }
 
         [Fact]
@@ -145,10 +145,10 @@ namespace ManifestReaderTests
             var manifestProvider = new FakeManifestProvider(ManifestPath);
             var resolver = WorkloadResolver.CreateForTests(manifestProvider, new[] { additionalRoot, dotnetRoot });
 
-            var pack = resolver.TryGetPackInfo("Xamarin.Android.Sdk");
+            var pack = resolver.TryGetPackInfo(new WorkloadPackId("Xamarin.Android.Sdk"));
             pack.Should().NotBeNull();
 
-            pack.Path.Should().Be(defaultPackPath);
+            pack!.Path.Should().Be(defaultPackPath);
         }
 
         [Fact]
@@ -190,8 +190,8 @@ namespace ManifestReaderTests
                 {  "AAA", MakeManifest("20.0.0", ("BBB", "5.0.0"), ("CCC", "63.0.0"), ("DDD", "25.0.0")) }
             };
 
-            var missingManifestEx = Assert.Throws<Exception>(() => WorkloadResolver.CreateForTests(missingManifestProvider, new[] { fakeRootPath }));
-            Assert.Contains("missing dependency", missingManifestEx.Message);
+            var missingManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(missingManifestProvider, new[] { fakeRootPath }));
+            Assert.StartsWith("Did not find workload manifest dependency 'BBB' required by manifest 'AAA'", missingManifestEx.Message);
 
             var inconsistentManifestProvider = new InMemoryFakeManifestProvider
             {
@@ -201,8 +201,8 @@ namespace ManifestReaderTests
                 {  "DDD", MakeManifest("30.0.0") },
             };
 
-            var inconsistentManifestEx = Assert.Throws<Exception>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
-            Assert.Contains("Inconsistency in workload manifest", inconsistentManifestEx.Message);
+            var inconsistentManifestEx = Assert.Throws<WorkloadManifestCompositionException>(() => WorkloadResolver.CreateForTests(inconsistentManifestProvider, new[] { fakeRootPath }));
+            Assert.StartsWith("Workload manifest dependency 'DDD' version '39.0.0' is lower than version '30.0.0' required by manifest 'BBB'", inconsistentManifestEx.Message);
         }
 
         [Fact]

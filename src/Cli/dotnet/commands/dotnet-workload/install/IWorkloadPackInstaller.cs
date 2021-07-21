@@ -5,6 +5,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using System.Collections.Generic;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -20,6 +21,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void GarbageCollectInstalledWorkloadPacks();
 
-        IEnumerable<(string Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
+        IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
     }
 }

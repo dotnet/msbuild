@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Search for avaliable workloads.</source>
+        <source>Search for available workloads.</source>
         <target state="needs-review-translation">전역으로 또는 로컬로 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>

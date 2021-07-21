@@ -90,7 +90,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             CachePath = cachePath.Value;
         }
 
-        public IEnumerable<(string, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             return InstalledPacks.Select(pack => (pack.Id, pack.Version));
         }

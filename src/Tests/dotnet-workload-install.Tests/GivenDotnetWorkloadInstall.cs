@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.CachePath.Should().BeNull();
             installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
             installer.InstalledPacks.Count.Should().Be(8);
-            installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
+            installer.InstalledPacks.Where(pack => pack.Id.ToString().Contains("Android")).Count().Should().Be(8);
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var exceptionThrown = Assert.Throws<Exception>(() => installManager.InstallWorkloads(mockWorkloadIds, true));
             exceptionThrown.Message.Should().Be("Failing workload: xamarin-android-build");
             var expectedPacks = mockWorkloadIds
-                .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                .SelectMany(workloadId => workloadResolver.GetPacksInWorkload(workloadId))
                 .Distinct()
                 .Select(packId => workloadResolver.TryGetPackInfo(packId))
                 .Where(pack => pack != null);
@@ -194,7 +194,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.CachePath.Should().Contain(cachePath);
             installer.InstallationRecordRepository.WorkloadInstallRecord.Should().BeEquivalentTo(mockWorkloadIds);
             installer.InstalledPacks.Count.Should().Be(8);
-            installer.InstalledPacks.Where(pack => pack.Id.Contains("Android")).Count().Should().Be(8);
+            installer.InstalledPacks.Where(pack => pack.Id.ToString().Contains("Android")).Count().Should().Be(8);
             nugetDownloader.DownloadCallParams.Count().Should().Be(0);
         }
 
