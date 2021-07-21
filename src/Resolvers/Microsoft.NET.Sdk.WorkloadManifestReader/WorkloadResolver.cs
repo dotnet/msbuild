@@ -561,6 +561,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return overlayResolver;
         }
 
+        public string GetSdkFeatureBand()
+        {
+            return _manifestProvider?.GetSdkFeatureBand() ?? string.Empty;
+        }
+
         public class PackInfo
         {
             public PackInfo(WorkloadPackId id, string version, WorkloadPackKind kind, string path, string resolvedPackageId)

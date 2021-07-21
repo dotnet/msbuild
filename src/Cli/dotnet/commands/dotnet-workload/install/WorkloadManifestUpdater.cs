@@ -23,7 +23,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     internal class WorkloadManifestUpdater : IWorkloadManifestUpdater
     {
         private readonly IReporter _reporter;
-        private readonly IWorkloadManifestProvider _workloadManifestProvider;
         private readonly IWorkloadResolver _workloadResolver;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly SdkFeatureBand _sdkFeatureBand;
@@ -33,7 +32,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         Func<string, string> _getEnvironmentVariable;
 
         public WorkloadManifestUpdater(IReporter reporter,
-            IWorkloadManifestProvider workloadManifestProvider,
             IWorkloadResolver workloadResolver,
             INuGetPackageDownloader nugetPackageDownloader,
             string userHome,
@@ -42,12 +40,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             Func<string, string> getEnvironmentVariable = null)
         {
             _reporter = reporter;
-            _workloadManifestProvider = workloadManifestProvider;
             _workloadResolver = workloadResolver;
             _userHome = userHome;
             _tempDirPath = tempDirPath;
             _nugetPackageDownloader = nugetPackageDownloader;
-            _sdkFeatureBand = new SdkFeatureBand(_workloadManifestProvider.GetSdkFeatureBand());
+            _sdkFeatureBand = new SdkFeatureBand(_workloadResolver.GetSdkFeatureBand());
             _packageSourceLocation = packageSourceLocation;
             _getEnvironmentVariable = getEnvironmentVariable ?? Environment.GetEnvironmentVariable;
         }
@@ -76,7 +73,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                               reporter);
                 var userHome = CliFolderPathCalculator.DotnetHomePath;
 
-                var manifestUpdater = new WorkloadManifestUpdater(reporter, workloadManifestProvider, workloadResolver, nugetPackageDownloader, userHome, tempPackagesDir.Value);
+                var manifestUpdater = new WorkloadManifestUpdater(reporter, workloadResolver, nugetPackageDownloader, userHome, tempPackagesDir.Value);
                 await manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync();
             }
             catch (Exception)
@@ -208,15 +205,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private IEnumerable<ManifestId> GetInstalledManifestIds()
         {
-            var manifestDirs = _workloadManifestProvider.GetManifestDirectories();
-
-            var manifests = new List<ManifestId>();
-            foreach (var manifestDir in manifestDirs)
-            {
-                var manifestId = Path.GetFileName(manifestDir);
-                manifests.Add(new ManifestId(manifestId));
-            }
-            return manifests;
+            return _workloadResolver.GetInstalledManifests().Select(manifest => new ManifestId(manifest.Id));
         }
 
         private async Task UpdateAdvertisingManifestAsync(ManifestId manifestId, bool includePreviews, DirectoryPath? offlineCache = null)
@@ -315,24 +304,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private ManifestVersion GetInstalledManifestVersion(ManifestId manifestId)
         {
-            var manifestDir = _workloadManifestProvider.GetManifestDirectories()
-                .FirstOrDefault(dir => Path.GetFileName(dir).ToLowerInvariant().Equals(manifestId.ToString()));
-            if (manifestDir == null)
+
+            var manifest = _workloadResolver.GetInstalledManifests()
+                .FirstOrDefault(manifest => manifest.Id.ToLowerInvariant().Equals(manifestId.ToString()));
+            if (manifest == null)
             {
                 throw new Exception(string.Format(LocalizableStrings.ManifestDoesNotExist, manifestId.ToString()));
             }
-
-            var manifestPath = Path.Combine(manifestDir, "WorkloadManifest.json");
-            if (!File.Exists(manifestPath))
-            {
-                throw new Exception(string.Format(LocalizableStrings.ManifestDoesNotExist, manifestId.ToString()));
-            }
-
-            using (FileStream fsSource = new FileStream(manifestPath, FileMode.Open, FileAccess.Read))
-            {
-                var manifest = WorkloadManifestReader.ReadWorkloadManifest(manifestId.ToString(), fsSource);
-                return new ManifestVersion(manifest.Version);
-            }
+            return new ManifestVersion(manifest.Version);
         }
 
         private bool AdManifestSentinalIsDueForUpdate()

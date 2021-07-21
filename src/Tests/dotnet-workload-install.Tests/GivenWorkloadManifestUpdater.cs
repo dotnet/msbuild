@@ -138,8 +138,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .ToArray();
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir);
 
             var manifestUpdates = manifestUpdater.CalculateManifestUpdates().Select( m => (m.manifestId, m.existingVersion,m .newVersion));
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
@@ -175,8 +175,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
                 .ToArray();
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir);
 
             var manifestUpdates = manifestUpdater.CalculateManifestRollbacks(rollbackDefPath);
             manifestUpdates.Should().BeEquivalentTo(expectedManifestUpdates);
@@ -218,7 +218,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir);
 
             var exceptionThrown = Assert.Throws<Exception>(() => manifestUpdater.CalculateManifestRollbacks(rollbackDefPath));
             exceptionThrown.Message.Should().Contain(rollbackDefPath);
@@ -259,7 +259,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
             var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir);
 
             var exceptionThrown = Assert.Throws<Exception>(() => manifestUpdater.CalculateManifestRollbacks(rollbackDefPath));
             exceptionThrown.Message.Should().Contain(rollbackDefPath);
@@ -288,8 +288,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
             var workloadManifestProvider = new MockManifestProvider(new string[] { Path.Combine(installedManifestDir, manifestId, _manifestFileName) });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot);
-            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(Array.Empty<string>()), new string[] { dotnetRoot });
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir);
+            var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, new string[] { dotnetRoot });
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir);
             manifestUpdater.UpdateAdvertisingManifestsAsync(false, new DirectoryPath(offlineCache)).Wait();
 
             // We should have chosen the higher version manifest package to install/ extract
@@ -321,7 +321,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var workloadManifestProvider = new MockManifestProvider(manifestDirs);
             var workloadResolver = WorkloadResolver.CreateForTests(workloadManifestProvider, new string[] { dotnetRoot });
             var nugetDownloader = new MockNuGetPackageDownloader(dotnetRoot, manifestDownload: true);
-            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadManifestProvider, workloadResolver, nugetDownloader, testDir, testDir, getEnvironmentVariable: getEnvironmentVariable);
+            var manifestUpdater = new WorkloadManifestUpdater(_reporter, workloadResolver, nugetDownloader, testDir, testDir, getEnvironmentVariable: getEnvironmentVariable);
 
             return (manifestUpdater, nugetDownloader, testDir);
         }
