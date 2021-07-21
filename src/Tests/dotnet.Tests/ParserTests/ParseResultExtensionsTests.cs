@@ -43,6 +43,7 @@ namespace Microsoft.DotNet.Tests.ParserTests
         [InlineData(new string[] { "dotnet", "add", "package", "-h" }, new string[] { "package", "-h" })]
         [InlineData(new string[] { "add", "package", "-h" }, new string[] { "package", "-h" })]
         [InlineData(new string[] { "dotnet", "-d", "help" }, new string[] { })]
+        [InlineData(new string[] { "dotnet", "run", "--", "-d" }, new string[] { "--", "-d" })]
         public void GetSubArgumentsRemovesTopLevelCommands(string[] input, string[] expected)
         {
             input.GetSubArguments()

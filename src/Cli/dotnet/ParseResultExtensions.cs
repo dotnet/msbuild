@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.Linq;
 using static Microsoft.DotNet.Cli.Parser;
@@ -57,13 +58,18 @@ namespace Microsoft.DotNet.Cli
         public static string[] GetSubArguments(this string[] args)
         {
             var subargs = args.ToList();
+
+            // Don't remove any arguments that are being passed to the app in dotnet run
+            var runArgs = subargs.Contains("--") ? subargs.GetRange(subargs.IndexOf("--"), subargs.Count() - subargs.IndexOf("--")) : new List<string>();
+            subargs = subargs.Contains("--") ? subargs.GetRange(0, subargs.IndexOf("--")) : subargs;
+
             subargs.RemoveAll(arg => DiagOption.Aliases.Contains(arg));
             if (subargs[0].Equals("dotnet"))
             {
                 subargs.RemoveAt(0);
             }
             subargs.RemoveAt(0); // remove top level command (ex build or publish)
-            return subargs.ToArray();
+            return subargs.Concat(runArgs).ToArray();
         }
 
         private static string GetSymbolResultValue(ParseResult parseResult, SymbolResult symbolResult)
