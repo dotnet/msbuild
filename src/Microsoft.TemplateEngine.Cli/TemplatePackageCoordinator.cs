@@ -371,8 +371,14 @@ namespace Microsoft.TemplateEngine.Cli
             New3CommandStatus result = New3CommandStatus.Success;
             IReadOnlyList<IManagedTemplatePackage> templatePackages = await _templatePackageManager.GetManagedTemplatePackagesAsync(false, cancellationToken).ConfigureAwait(false);
 
+            List<string> parsedIdentifiers = new List<string>();
+            foreach (string entry in commandInput.ToUninstallList)
+            {
+                parsedIdentifiers.AddRange(InstallRequestPathResolution.ExpandMaskedPath(entry, _engineEnvironmentSettings));
+            }
+
             var packagesToUninstall = new Dictionary<IManagedTemplatePackageProvider, List<IManagedTemplatePackage>>();
-            foreach (string templatePackageIdentifier in commandInput.ToUninstallList)
+            foreach (string templatePackageIdentifier in parsedIdentifiers)
             {
                 bool templatePackageIdentified = false;
 

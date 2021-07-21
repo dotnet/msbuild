@@ -443,15 +443,12 @@ namespace Dotnet_new3.IntegrationTests
         public void CanExpandWhenInstall()
         {
             var home = TestUtils.CreateTemporaryFolder("Home");
-            string codebase = typeof(Program).GetTypeInfo().Assembly.Location;
-            string dir = Path.GetDirectoryName(codebase) ?? throw new System.Exception("Invalid assembly location");
-            string testTemplateLocation = Path.Combine(dir, "..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
+            string testTemplateLocation = Path.Combine("..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
             string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
             string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";
 
             new DotnetNewCommand(_log, "-i", pattern)
                 .WithCustomHive(home)
-                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
                 .Execute()
                 .Should().ExitWith(0)
                 .And.NotHaveStdErr()

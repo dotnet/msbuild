@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.Reflection;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
@@ -312,6 +313,97 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdErrContaining("   Microsoft.DotNet.Common.ProjectTemplates.3.1::5.0.0 (contains 2 templates)")
                 .And.HaveStdErrContaining("To uninstall the template package use:")
                 .And.HaveStdErrContaining("   dotnet new3 --uninstall Microsoft.DotNet.Common.ProjectTemplates.");
+        }
+
+        [Fact]
+        public void CanExpandWhenUninstall()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            string testTemplateLocation = Path.Combine("..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
+            string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
+            string pattern = testTemplateLocation + Path.DirectorySeparatorChar + "*";
+
+            new DotnetNewCommand(_log, "-i", pattern)
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The following template packages will be installed:")
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "ConfigurationKitchenSink"))
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateResolution"))
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateWithSourceName"))
+                .And.HaveStdOutContaining($"Success: {Path.Combine(testTemplateLocationAbsolute, "ConfigurationKitchenSink")} installed the following templates:")
+                .And.HaveStdOutContaining($"Success: {Path.Combine(testTemplateLocationAbsolute, "TemplateResolution")} installed the following templates:")
+                .And.HaveStdOutContaining($"Success: {Path.Combine(testTemplateLocationAbsolute, "TemplateWithSourceName")} installed the following templates:")
+                .And.HaveStdOutContaining("basic")
+                .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
+
+            new DotnetNewCommand(_log, "-u")
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.NotHaveStdOutContaining("(No Items)")
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "ConfigurationKitchenSink"))
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateResolution"))
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateWithSourceName"));
+
+            new DotnetNewCommand(_log, "-u", pattern)
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "ConfigurationKitchenSink"))
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateResolution"))
+                .And.HaveStdOutContaining(Path.Combine(testTemplateLocationAbsolute, "TemplateWithSourceName"));
+
+            new DotnetNewCommand(_log, "-u")
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.HaveStdOutContaining("(No Items)");
+        }
+
+        [Fact]
+        public void CanResolveRelativePathOnUninstall()
+        {
+            var home = TestUtils.CreateTemporaryFolder("Home");
+            string testTemplateLocation = Path.Combine("..", "..", "..", "..", "..", "test", "Microsoft.TemplateEngine.TestTemplates", "test_templates");
+            string testTemplateLocationAbsolute = Path.GetFullPath(testTemplateLocation);
+            string pattern = testTemplateLocation;
+
+            new DotnetNewCommand(_log, "-i", pattern)
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The following template packages will be installed:")
+                .And.HaveStdOutContaining("ConfigurationKitchenSink")
+                .And.HaveStdOutContaining("TemplateWithSourceName")
+                .And.HaveStdOutContaining($"Success: {testTemplateLocationAbsolute} installed the following templates:")
+                .And.HaveStdOutContaining("basic")
+                .And.HaveStdOutContaining("TestAssets.ConfigurationKitchenSink");
+
+            new DotnetNewCommand(_log, "-u")
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.NotHaveStdOutContaining("(No Items)")
+                .And.HaveStdOutContaining(testTemplateLocationAbsolute);
+
+            new DotnetNewCommand(_log, "-u", pattern)
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining(testTemplateLocationAbsolute);
+
+            new DotnetNewCommand(_log, "-u")
+                .WithCustomHive(home).WithoutBuiltInTemplates()
+                .Execute()
+                .Should().ExitWith(0)
+                .And.HaveStdOutContaining("(No Items)");
         }
     }
 }
