@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             });
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("build")]
         [InlineData("publish")]
         [InlineData("test")]
@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 .Pass();
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("build")]
         [InlineData("publish")]
         [InlineData("test")]

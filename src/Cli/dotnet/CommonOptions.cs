@@ -165,7 +165,8 @@ namespace Microsoft.DotNet.Cli
         private static string GetCurrentRuntimeId()
         {
             var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
-            dotnetRootPath = dotnetRootPath.Contains("dotnet") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            // When running under test the path does not always contain "dotnet" and Product.Version is empty.
+            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
             var ridFileName = "NETCoreSdkRuntimeIdentifierChain.txt";
             string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) ?
                 Path.Combine(Directory.GetDirectories(Path.Combine(dotnetRootPath, "sdk"))[0], ridFileName) :
