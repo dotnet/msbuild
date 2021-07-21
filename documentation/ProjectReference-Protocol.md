@@ -169,4 +169,10 @@ First, set the properties `EnableDynamicPlatformResolution` and `DisableTransiti
  Project A: Unmanaged, building as `win32`, has a `ProjectReference` on Project B.
  Project B: Managed, has `$(Platforms)` defined as `x86;AnyCPU`.
 
- Because `win32` can map to multiple managed platforms, there's no way for A to know what B should build as without some sort of mapping. The `GetCompatiblePlatform` task **requires** the property `PlatformLookupTable` to be defined in this case. To resolve this scenario, Project A should define `PlatformLookupTable` as `win32=x86` or `win32=x64`. You can also define this on the `ProjectReference` item as metadata.
+ Because `win32` can map to multiple managed platforms, there's no way for A to know what B should build as without some sort of mapping. The `GetCompatiblePlatform` task **requires** the property `PlatformLookupTable` to be defined in this case. To resolve this scenario, Project A should define `PlatformLookupTable` as `win32=x86` or `win32=AnyCPU`. You can also define this on the `ProjectReference` item as metadata.
+
+```xml
+<ItemGroup>
+  <ProjectReference Include="B.csproj" PlatformLookupTable="Win32=AnyCPU">
+</ItemGroup>
+```
