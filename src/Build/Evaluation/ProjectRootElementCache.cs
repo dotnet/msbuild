@@ -237,27 +237,22 @@ namespace Microsoft.Build.Evaluation
             }
 
             bool projectRootElementIsInvalid = IsInvalidEntry(projectFile, projectRootElement);
-            bool fromCacheOnly = openProjectRootElement == null;
-
-            lock (_locker)
+            if (projectRootElementIsInvalid)
             {
-                if (projectRootElementIsInvalid)
-                {
-                    DebugTraceCache("Not satisfied from cache: ", projectFile);
-                    ForgetEntryIfExists(projectRootElement);
-                }
+                DebugTraceCache("Not satisfied from cache: ", projectFile);
+                ForgetEntryIfExists(projectRootElement);
+            }
 
-                if (fromCacheOnly)
+            if (openProjectRootElement == null)
+            {
+                if (projectRootElement == null || projectRootElementIsInvalid)
                 {
-                    if (projectRootElement == null || projectRootElementIsInvalid)
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        DebugTraceCache("Satisfied from XML cache: ", projectFile);
-                        return projectRootElement;
-                    }
+                    return null;
+                }
+                else
+                {
+                    DebugTraceCache("Satisfied from XML cache: ", projectFile);
+                    return projectRootElement;
                 }
             }
 
@@ -268,25 +263,21 @@ namespace Microsoft.Build.Evaluation
                 // Decided also not to lock this section with the key specific locker to avoid the overhead and code overcomplication, as
                 // it is not likely that two threads would use Get function for the same project simulteniously and it is not a big deal if in some cases we load the same project twice.
 
-                ProjectRootElement newProjectRootElement = openProjectRootElement(projectFile, this);
-                ErrorUtilities.VerifyThrowInternalNull(newProjectRootElement, "projectRootElement");
-                ErrorUtilities.VerifyThrow(newProjectRootElement.FullPath == projectFile, "Got project back with incorrect path");
+                projectRootElement = openProjectRootElement(projectFile, this);
+                ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
+                ErrorUtilities.VerifyThrow(projectRootElement.FullPath == projectFile, "Got project back with incorrect path");
 
                 // An implicit load will never reset the explicit flag.
                 if (isExplicitlyLoaded)
                 {
-                    newProjectRootElement?.MarkAsExplicitlyLoaded();
+                    projectRootElement?.MarkAsExplicitlyLoaded();
                 }
 
-                lock (_locker)
-                {
-                    // Update cache element.
-                    // It is unlikely, but it might be that while without the lock, the projectRootElement in cache was updated by another thread.
-                    // And here its entry will be replaced with newProjectRootElement. This is fine:
-                    // if newProjectRootElement is out of date (so, it changed since the time we loaded it), it will be updated the next time some thread calls Get function.
-                    AddEntry(newProjectRootElement);
-                    projectRootElement = newProjectRootElement;
-                }
+                // Update cache element.
+                // It is unlikely, but it might be that while without the lock, the projectRootElement in cache was updated by another thread.
+                // And here its entry will be replaced with the loaded projectRootElement. This is fine:
+                // if loaded projectRootElement is out of date (so, it changed since the time we loaded it), it will be updated the next time some thread calls Get function.
+                AddEntry(projectRootElement);
             }
             else
             {
@@ -566,14 +557,14 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Completely remove an entry from this cache if it exists.
         /// </summary>
-        /// <remarks>
-        /// Must be called within the cache lock.
-        /// </remarks>
         private void ForgetEntryIfExists(ProjectRootElement projectRootElement)
         {
-            if (_weakCache.TryGetValue(projectRootElement.FullPath, out var cached) && cached == projectRootElement)
+            lock (_locker)
             {
-                ForgetEntry(projectRootElement);
+                if (_weakCache.TryGetValue(projectRootElement.FullPath, out var cached) && cached == projectRootElement)
+                {
+                    ForgetEntry(projectRootElement);
+                }
             }
         }
 
