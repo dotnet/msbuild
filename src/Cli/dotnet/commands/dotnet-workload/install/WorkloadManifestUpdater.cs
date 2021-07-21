@@ -132,6 +132,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return manifestUpdates;
         }
 
+        public IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads)
+        {
+            try
+            {
+                var overlayProvider = new TempDirectoryWorkloadManifestProvider(Path.Combine(_userHome, ".dotnet", "sdk-advertising", _sdkFeatureBand.ToString()), _sdkFeatureBand.ToString());
+                var advertisingManifestResolver = _workloadResolver.CreateOverlayResolver(overlayProvider);
+                return _workloadResolver.GetUpdatedWorkloads(advertisingManifestResolver, installedWorkloads);
+            }
+            catch
+            {
+                return Array.Empty<WorkloadId>();
+            }
+        }
+
         public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestRollbacks(string rollbackDefinitionFilePath)
         {
             var currentManifestIds = GetInstalledManifestIds();

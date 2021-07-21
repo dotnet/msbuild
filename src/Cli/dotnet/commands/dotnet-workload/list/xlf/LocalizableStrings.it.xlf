@@ -12,6 +12,11 @@
         <target state="new">Workload Id</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="new">Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

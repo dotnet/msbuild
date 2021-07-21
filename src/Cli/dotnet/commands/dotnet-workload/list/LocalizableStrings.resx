@@ -123,4 +123,7 @@
   <data name="WorkloadIdColumn" xml:space="preserve">
     <value>Workload Id</value>
   </data>
+  <data name="WorkloadUpdatesAvailable" xml:space="preserve">
+    <value>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</value>
+  </data>
 </root>
