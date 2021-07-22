@@ -801,7 +801,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
         <source>Display all installed templates with:</source>
-        <target state="needs-review-translation">インストールされているテンプレートを次の方法で表示します:</target>
+        <target state="translated">インストールされているすべてのテンプレートを次の方法で表示します:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
@@ -816,7 +816,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
         <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="new">To see help for other template languages ({0}), use --language option:</target>
+        <target state="translated">その他のテンプレート言語 ({0}) のヘルプを表示するには、--言語オプションを使用します:</target>
         <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">

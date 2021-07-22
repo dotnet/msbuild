@@ -801,7 +801,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
         <source>Display all installed templates with:</source>
-        <target state="needs-review-translation">顯示安裝的範本，使用:</target>
+        <target state="translated">顯示所有安裝的範本，使用:</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
@@ -816,7 +816,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
         <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="needs-review-translation">若要查看其他範本語言的說明 ({0})，請使用 --language 選項:</target>
+        <target state="translated">若要查看其他範本語言的說明 ({0})，請使用 --language 選項:</target>
         <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">

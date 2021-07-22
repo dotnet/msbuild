@@ -801,7 +801,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_ListTemplatesHint">
         <source>Display all installed templates with:</source>
-        <target state="needs-review-translation">다음을 사용하여 설치된 템플릿을 표시합니다.</target>
+        <target state="translated">설치된 모든 템플릿을 다음을 사용하여 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_DotnetNew_SearchTemplatesHint">
@@ -816,7 +816,7 @@ The supported columns are: language, tags, author, type.</source>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
         <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="new">To see help for other template languages ({0}), use --language option:</target>
+        <target state="translated">다른 템플릿 언어({0})에 대한 도움말을 보려면 언어 옵션을 사용하세요.</target>
         <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">
