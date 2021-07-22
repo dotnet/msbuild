@@ -68,13 +68,14 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 {
                     return true;
                 }
-                else
+                else if (error.DiagnosticId == null || error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    // See if the error is globally suppressed by checking if the same diagnosticid and target are entered
-                    // without any left and right.
-                    return (error.DiagnosticId == null || error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase)) &&
-                            _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Target = error.Target });
+                    // See if the error is globally suppressed by checking if the same diagnosticid and target or with the same left and right
+                    return _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Target = error.Target, IsBaselineSuppression = error.IsBaselineSuppression}) ||
+                           _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Left = error.Left, Right = error.Right, IsBaselineSuppression = error.IsBaselineSuppression });
                 }
+
+                return false;
             }
             finally
             {

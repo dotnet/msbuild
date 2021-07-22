@@ -84,11 +84,21 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
         {
             SuppressionEngine engine = SuppressionEngine.Create();
             // Engine has a suppression with no left and no right. This should be treated global for any left and any right.
-            engine.AddSuppression("CP0001", "T:A.B");
+            engine.AddSuppression("CP0001", "T:A.B", isBaselineSuppression: true);
+            engine.AddSuppression("CP0001", "T:A.C");
+            // Engine has a suppression with no target. Should be treated globally for any target with that left and right.
+            engine.AddSuppression("CP0003", null, left: "ref/net6.0/myleft.dll", right: "lib/net6.0/myright.dll", isBaselineSuppression: false);
 
-            Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll"));
-            Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", false));
-            Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", true));
+            Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: true));
+            Assert.False(engine.IsErrorSuppressed("CP0001", "T:A.B", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: false));
+
+            Assert.True(engine.IsErrorSuppressed("CP0001", "T:A.C", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: false));
+            Assert.False(engine.IsErrorSuppressed("CP0001", "T:A.C", "ref/net6.0/myLib.dll", "lib/net6.0/myLib.dll", isBaselineSuppression: true));
+
+            Assert.True(engine.IsErrorSuppressed("CP0003", "T:A.B", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll"));
+            Assert.True(engine.IsErrorSuppressed("CP0003", "T:A.C", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll"));
+            Assert.True(engine.IsErrorSuppressed("CP0003", "T:A.D", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll"));
+            Assert.False(engine.IsErrorSuppressed("CP0003", "T:A.D", "ref/net6.0/myLeft.dll", "lib/net6.0/myRight.dll", isBaselineSuppression: true));
         }
 
         [Fact]
