@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Runtime.Serialization;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Framework
 {
@@ -125,9 +125,9 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// The thread that raised event.  
+        /// The thread that raised event. This has been deprecated as of 17.0.
         /// </summary>
-        public int ThreadId => threadId;
+        public int ThreadId => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0) ? 0 : threadId;
 
         /// <summary>
         /// Text of event.
