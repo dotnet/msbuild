@@ -76,6 +76,14 @@ namespace Microsoft.Build.Evaluation
         private static bool s_debugLogCacheActivity;
 
         /// <summary>
+        /// Whether the cache should check file content for cache entry invalidation.
+        /// </summary>
+        /// <remarks>
+        /// Value shall be true only in case of testing. Outside QA tests it shall be false.
+        /// </remarks>
+        private static bool s_сheckFileContent;
+
+        /// <summary>
         /// The map of weakly-held ProjectRootElement's
         /// </summary>
         /// <remarks>
@@ -116,6 +124,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
+            s_сheckFileContent = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
         }
 
         /// <summary>
@@ -155,7 +164,7 @@ namespace Microsoft.Build.Evaluation
                         // it may not be a problem.
                         return true;
                     }
-                    else if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT")))
+                    else if (s_сheckFileContent)
                     {
                         // QA tests run too fast for the timestamp check to work. This environment variable is for their
                         // use: it checks the file content as well as the timestamp. That's better than completely disabling
@@ -270,7 +279,7 @@ namespace Microsoft.Build.Evaluation
                 // An implicit load will never reset the explicit flag.
                 if (isExplicitlyLoaded)
                 {
-                    projectRootElement?.MarkAsExplicitlyLoaded();
+                    projectRootElement.MarkAsExplicitlyLoaded();
                 }
 
                 // Update cache element.
