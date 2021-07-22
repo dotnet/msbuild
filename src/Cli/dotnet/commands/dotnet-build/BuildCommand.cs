@@ -33,9 +33,7 @@ namespace Microsoft.DotNet.Tools.Build
             parseResult.ShowHelpOrErrorIfAppropriate();
 
             CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(BuildCommandParser.SelfContainedOption),
-                parseResult.HasOption(BuildCommandParser.NoSelfContainedOption),
-                parseResult.HasOption(BuildCommandParser.RuntimeOption),
-                parseResult.ValueForArgument<IEnumerable<string>>(BuildCommandParser.SlnOrProjectArgument) ?? Array.Empty<string>());
+                parseResult.HasOption(BuildCommandParser.NoSelfContainedOption));
 
             msbuildArgs.Add($"-consoleloggerparameters:Summary");
 

@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Cli
                 verbosity.Equals(VerbosityOptions.detailed);
         }
 
-        public static void ValidateSelfContainedOptions(bool hasSelfContainedOption, bool hasNoSelfContainedOption, bool hasRuntimeOption, IEnumerable<string> projectArgs)
+        public static void ValidateSelfContainedOptions(bool hasSelfContainedOption, bool hasNoSelfContainedOption)
         {
             if (hasSelfContainedOption && hasNoSelfContainedOption)
             {
