@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "RC/wjqNleOFSEOIHG3GIiXXDP5mxGxOOvj4osP\u002BxZ/Q=",
+  "Hash": "AtYxUofbxenQNFVhzD2LLdELeWHpp5IUmN1IldupYWA=",
   "Source": "blazorhosted",
   "BasePath": "_content/blazorhosted",
   "Mode": "Default",
@@ -14,7 +14,7 @@
       "PublishTarget": "",
       "AdditionalPublishProperties": ";",
       "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "IDc30eJznRQLjGed/Nt90A7yk7nmxZ\u002B9iiGfJDOvuik="
+      "Hash": "FpWb9hZHb7Yxz2gyGKoKIfV0eR6EMGtGeFyO3l35AyQ="
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
@@ -24,7 +24,7 @@
       "PublishTarget": "ComputeFilesToPublish",
       "AdditionalPublishProperties": ";BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true;_PublishingBlazorWasmProject=true;",
       "AdditionalPublishPropertiesToRemove": ";NoBuild;RuntimeIdentifier;WebPublishProfileFile",
-      "Hash": "hHcJXC4CDkacK2c9hO1J8xZgWgtqDb6omjM2fyQFTiw="
+      "Hash": "T44C1aGEDvEUIrnR7aZjst33WUL1Pms\u002B0/y0uo4CCu0="
     },
     {
       "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\netstandard2.1\\StaticWebAssets.build.json",
@@ -220,7 +220,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\{_framework/RazorClassLibrary.pdb.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/RazorClassLibrary.pdb.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -234,10 +234,10 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\{_framework\\{_framework/RazorClassLibrary.pdb.gz}"
+      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/RazorClassLibrary.pdb.gz]]"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\{_framework/blazor.webassembly.js.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/blazor.webassembly.js.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -254,7 +254,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazor.webassembly.js"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\{_framework/blazorwasm.pdb.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/blazorwasm.pdb.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -268,10 +268,27 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\{_framework\\{_framework/blazorwasm.pdb.gz}"
+      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/blazorwasm.pdb.gz]]"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\{_framework/dotnet.wasm.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.js.gz]]",
+      "SourceId": "blazorwasm",
+      "SourceType": "Project",
+      "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js.gz",
+      "AssetKind": "Publish",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "RelatedAsset": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/dotnet.${RuntimeVersion}.js.gz]]"
+    },
+    {
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.wasm.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -285,10 +302,10 @@
       "AssetTraitValue": "gzip",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\{_framework\\{_framework/dotnet.wasm.gz}"
+      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework\\[[_framework/dotnet.wasm.gz]]"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Authorization.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Authorization.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -305,7 +322,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Authorization.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Authorization.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Authorization.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -322,7 +339,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Authorization.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.Forms.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.Forms.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -339,7 +356,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.Forms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.Forms.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.Forms.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -356,7 +373,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.Forms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.Web.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.Web.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -373,7 +390,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.Web.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.Web.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -390,7 +407,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.WebAssembly.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.WebAssembly.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -407,7 +424,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.WebAssembly.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.WebAssembly.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.WebAssembly.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -424,7 +441,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.WebAssembly.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -441,7 +458,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Components.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Components.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -458,7 +475,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Components.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Metadata.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Metadata.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -475,7 +492,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Metadata.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.AspNetCore.Metadata.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.AspNetCore.Metadata.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -492,7 +509,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.AspNetCore.Metadata.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.Abstractions.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.Abstractions.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -509,7 +526,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -526,7 +543,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.Binder.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.Binder.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -543,7 +560,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.Binder.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.Binder.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.Binder.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -560,7 +577,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.Binder.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.FileExtensions.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.FileExtensions.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -577,7 +594,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.FileExtensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.FileExtensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.FileExtensions.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -594,7 +611,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.FileExtensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.Json.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.Json.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -611,7 +628,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.Json.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.Json.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -628,7 +645,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -645,7 +662,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Configuration.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Configuration.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -662,7 +679,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Configuration.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.DependencyInjection.Abstractions.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.DependencyInjection.Abstractions.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -679,7 +696,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -696,7 +713,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.DependencyInjection.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.DependencyInjection.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -713,7 +730,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.DependencyInjection.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.DependencyInjection.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.DependencyInjection.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -730,7 +747,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.DependencyInjection.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.FileProviders.Abstractions.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.FileProviders.Abstractions.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -747,7 +764,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.FileProviders.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.FileProviders.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.FileProviders.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -764,7 +781,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.FileProviders.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.FileProviders.Physical.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.FileProviders.Physical.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -781,7 +798,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.FileProviders.Physical.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.FileProviders.Physical.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.FileProviders.Physical.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -798,7 +815,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.FileProviders.Physical.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.FileSystemGlobbing.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.FileSystemGlobbing.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -815,7 +832,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.FileSystemGlobbing.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.FileSystemGlobbing.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.FileSystemGlobbing.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -832,7 +849,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.FileSystemGlobbing.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Logging.Abstractions.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Logging.Abstractions.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -849,7 +866,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Logging.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Logging.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Logging.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -866,7 +883,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Logging.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Logging.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Logging.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -883,7 +900,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Logging.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Logging.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Logging.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -900,7 +917,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Logging.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Options.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Options.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -917,7 +934,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Options.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Options.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Options.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -934,7 +951,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Options.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Primitives.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Primitives.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -951,7 +968,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.Extensions.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.Extensions.Primitives.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -968,7 +985,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.Extensions.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.JSInterop.WebAssembly.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.JSInterop.WebAssembly.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -985,7 +1002,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.JSInterop.WebAssembly.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.JSInterop.WebAssembly.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.JSInterop.WebAssembly.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1002,7 +1019,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.JSInterop.WebAssembly.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.JSInterop.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.JSInterop.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1019,7 +1036,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.JSInterop.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/Microsoft.JSInterop.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/Microsoft.JSInterop.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1036,7 +1053,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\Microsoft.JSInterop.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/RazorClassLibrary.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/RazorClassLibrary.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1053,7 +1070,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\RazorClassLibrary.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/RazorClassLibrary.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/RazorClassLibrary.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1070,7 +1087,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\RazorClassLibrary.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Buffers.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Buffers.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1087,7 +1104,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Buffers.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Buffers.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Buffers.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1104,7 +1121,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Buffers.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.Concurrent.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.Concurrent.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1121,7 +1138,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.Concurrent.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.Concurrent.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.Concurrent.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1138,7 +1155,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.Concurrent.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.NonGeneric.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.NonGeneric.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1155,7 +1172,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.NonGeneric.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.NonGeneric.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.NonGeneric.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1172,7 +1189,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.NonGeneric.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.Specialized.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.Specialized.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1189,7 +1206,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.Specialized.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.Specialized.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.Specialized.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1206,7 +1223,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.Specialized.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1223,7 +1240,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Collections.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Collections.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1240,7 +1257,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Collections.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.Annotations.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.Annotations.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1257,7 +1274,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.Annotations.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.Annotations.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.Annotations.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1274,7 +1291,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.Annotations.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.Primitives.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.Primitives.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1291,7 +1308,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.Primitives.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1308,7 +1325,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.TypeConverter.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.TypeConverter.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1325,7 +1342,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.TypeConverter.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.TypeConverter.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.TypeConverter.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1342,7 +1359,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.TypeConverter.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1359,7 +1376,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ComponentModel.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ComponentModel.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1376,7 +1393,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ComponentModel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Console.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Console.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1393,7 +1410,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Console.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Console.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Console.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1410,7 +1427,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Console.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Diagnostics.Debug.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Diagnostics.Debug.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1427,7 +1444,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Diagnostics.Debug.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Diagnostics.Debug.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Diagnostics.Debug.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1444,7 +1461,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Diagnostics.Debug.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Diagnostics.DiagnosticSource.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Diagnostics.DiagnosticSource.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1461,7 +1478,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Diagnostics.DiagnosticSource.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Diagnostics.DiagnosticSource.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Diagnostics.DiagnosticSource.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1478,7 +1495,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Diagnostics.DiagnosticSource.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Diagnostics.Tracing.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Diagnostics.Tracing.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1495,7 +1512,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Diagnostics.Tracing.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Diagnostics.Tracing.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Diagnostics.Tracing.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1512,7 +1529,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Diagnostics.Tracing.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.IO.FileSystem.Watcher.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.IO.FileSystem.Watcher.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1529,7 +1546,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.IO.FileSystem.Watcher.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.IO.FileSystem.Watcher.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.IO.FileSystem.Watcher.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1546,7 +1563,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.IO.FileSystem.Watcher.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.IO.Pipelines.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.IO.Pipelines.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1563,7 +1580,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.IO.Pipelines.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.IO.Pipelines.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.IO.Pipelines.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1580,7 +1597,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.IO.Pipelines.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Linq.Expressions.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Linq.Expressions.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1597,7 +1614,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Linq.Expressions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Linq.Expressions.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Linq.Expressions.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1614,7 +1631,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Linq.Expressions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Linq.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Linq.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1631,7 +1648,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Linq.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Linq.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Linq.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1648,7 +1665,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Linq.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Memory.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Memory.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1665,7 +1682,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Memory.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Memory.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Memory.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1682,7 +1699,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Memory.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Net.Http.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Net.Http.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1699,7 +1716,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Net.Http.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Net.Http.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Net.Http.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1716,7 +1733,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Net.Http.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ObjectModel.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ObjectModel.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1733,7 +1750,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ObjectModel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.ObjectModel.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.ObjectModel.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1750,7 +1767,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.ObjectModel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Private.CoreLib.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Private.CoreLib.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1767,7 +1784,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Private.CoreLib.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Private.CoreLib.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Private.CoreLib.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1784,7 +1801,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Private.CoreLib.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Private.Runtime.InteropServices.JavaScript.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Private.Runtime.InteropServices.JavaScript.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1801,7 +1818,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Private.Runtime.InteropServices.JavaScript.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Private.Runtime.InteropServices.JavaScript.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Private.Runtime.InteropServices.JavaScript.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1818,7 +1835,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Private.Runtime.InteropServices.JavaScript.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Private.Uri.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Private.Uri.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1835,7 +1852,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Private.Uri.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Private.Uri.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Private.Uri.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1852,7 +1869,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Private.Uri.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Reflection.Emit.ILGeneration.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Reflection.Emit.ILGeneration.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1869,7 +1886,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Reflection.Emit.ILGeneration.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Reflection.Emit.ILGeneration.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Reflection.Emit.ILGeneration.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1886,7 +1903,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Reflection.Emit.ILGeneration.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Reflection.Emit.Lightweight.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Reflection.Emit.Lightweight.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1903,7 +1920,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Reflection.Emit.Lightweight.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Reflection.Emit.Lightweight.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Reflection.Emit.Lightweight.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1920,7 +1937,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Reflection.Emit.Lightweight.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Reflection.Primitives.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Reflection.Primitives.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1937,7 +1954,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Reflection.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Reflection.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Reflection.Primitives.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1954,7 +1971,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Reflection.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Resources.ResourceManager.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Resources.ResourceManager.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1971,7 +1988,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Resources.ResourceManager.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Resources.ResourceManager.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Resources.ResourceManager.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -1988,7 +2005,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Resources.ResourceManager.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.CompilerServices.Unsafe.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.CompilerServices.Unsafe.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2005,7 +2022,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.CompilerServices.Unsafe.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.CompilerServices.Unsafe.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.CompilerServices.Unsafe.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2022,7 +2039,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.CompilerServices.Unsafe.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.Extensions.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.Extensions.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2039,7 +2056,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.Extensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.Extensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.Extensions.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2056,7 +2073,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.Extensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.InteropServices.RuntimeInformation.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.InteropServices.RuntimeInformation.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2073,7 +2090,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.InteropServices.RuntimeInformation.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.InteropServices.RuntimeInformation.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.InteropServices.RuntimeInformation.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2090,7 +2107,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.InteropServices.RuntimeInformation.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.Loader.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.Loader.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2107,7 +2124,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.Loader.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.Loader.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.Loader.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2124,7 +2141,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.Loader.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2141,7 +2158,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Runtime.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Runtime.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2158,7 +2175,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Runtime.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Security.Claims.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Security.Claims.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2175,7 +2192,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Security.Claims.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Security.Claims.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Security.Claims.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2192,7 +2209,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Security.Claims.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Security.Cryptography.Algorithms.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Security.Cryptography.Algorithms.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2209,7 +2226,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Security.Cryptography.Algorithms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Security.Cryptography.Algorithms.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Security.Cryptography.Algorithms.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2226,7 +2243,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Security.Cryptography.Algorithms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Security.Cryptography.Primitives.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Security.Cryptography.Primitives.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2243,7 +2260,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Security.Cryptography.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Security.Cryptography.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Security.Cryptography.Primitives.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2260,7 +2277,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Security.Cryptography.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Text.Encodings.Web.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Text.Encodings.Web.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2277,7 +2294,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Text.Encodings.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Text.Encodings.Web.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Text.Encodings.Web.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2294,7 +2311,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Text.Encodings.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Text.Json.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Text.Json.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2311,7 +2328,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Text.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Text.Json.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Text.Json.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2328,7 +2345,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Text.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Threading.Tasks.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Threading.Tasks.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2345,7 +2362,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Threading.Tasks.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Threading.Tasks.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Threading.Tasks.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2362,7 +2379,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Threading.Tasks.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Threading.ThreadPool.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Threading.ThreadPool.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2379,7 +2396,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Threading.ThreadPool.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Threading.ThreadPool.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Threading.ThreadPool.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2396,7 +2413,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Threading.ThreadPool.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Threading.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Threading.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2413,7 +2430,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Threading.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.Threading.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.Threading.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2430,7 +2447,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.Threading.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2447,7 +2464,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/System.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/System.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2464,7 +2481,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\System.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/blazor.boot.json.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/blazor.boot.json.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2481,7 +2498,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor.publish.boot.json"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/blazor.boot.json.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/blazor.boot.json.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2498,7 +2515,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor.publish.boot.json"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/blazor.webassembly.js.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/blazor.webassembly.js.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -2515,7 +2532,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazor.webassembly.js"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/blazorwasm.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/blazorwasm.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2532,7 +2549,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\blazorwasm.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/blazorwasm.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/blazorwasm.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2549,7 +2566,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\blazorwasm.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/dotnet.6.0.0-preview.7.21363.9.js.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.${RuntimeVersion}.js.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2566,24 +2583,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/dotnet.6.0.0-preview.7.21363.9.js.gz}",
-      "SourceId": "blazorwasm",
-      "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js.gz",
-      "AssetKind": "Publish",
-      "AssetMode": "All",
-      "AssetRole": "Alternative",
-      "RelatedAsset": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
-      "AssetTraitName": "Content-Encoding",
-      "AssetTraitValue": "gzip",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js"
-    },
-    {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/dotnet.timezones.blat.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.timezones.blat.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2600,7 +2600,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.timezones.blat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/dotnet.timezones.blat.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.timezones.blat.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2617,7 +2617,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.timezones.blat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/dotnet.wasm.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/dotnet.wasm.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2634,7 +2634,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.wasm"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt.dat.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt.dat.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2651,7 +2651,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt.dat.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt.dat.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2668,7 +2668,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt_CJK.dat.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt_CJK.dat.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2685,7 +2685,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_CJK.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt_CJK.dat.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt_CJK.dat.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2702,7 +2702,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_CJK.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt_EFIGS.dat.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt_EFIGS.dat.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2719,7 +2719,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_EFIGS.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt_EFIGS.dat.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt_EFIGS.dat.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2736,7 +2736,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_EFIGS.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt_no_CJK.dat.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt_no_CJK.dat.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2753,7 +2753,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_no_CJK.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/icudt_no_CJK.dat.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/icudt_no_CJK.dat.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2770,7 +2770,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_no_CJK.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/netstandard.dll.br}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/netstandard.dll.br]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",
@@ -2787,7 +2787,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\linked\\netstandard.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\{_framework/netstandard.dll.gz}",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\compress\\[[_framework/netstandard.dll.gz]]",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\publish\\wwwroot\\",

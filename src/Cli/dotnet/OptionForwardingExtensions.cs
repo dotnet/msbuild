@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.Cli
 {
     public static class OptionForwardingExtensions
     {
-        public static ForwardedOption<T> Forward<T>(this ForwardedOption<T> option) => option.SetForwardingFunction((o) => new string[] { option.Name });
+        public static ForwardedOption<T> Forward<T>(this ForwardedOption<T> option) => option.SetForwardingFunction((T o) => new string[] { option.Name });
 
-        public static ForwardedOption<T> ForwardAs<T>(this ForwardedOption<T> option, string value) => option.SetForwardingFunction((o) => new string[] { value });
+        public static ForwardedOption<T> ForwardAs<T>(this ForwardedOption<T> option, string value) => option.SetForwardingFunction((T o) => new string[] { value });
 
         public static ForwardedOption<T> ForwardAsSingle<T>(this ForwardedOption<T> option, Func<T, string> format) => option.SetForwardingFunction(format);
 
@@ -78,6 +78,12 @@ namespace Microsoft.DotNet.Cli
         public ForwardedOption<T> SetForwardingFunction(Func<T, string> format)
         {
             ForwardingFunction = GetForwardingFunction((o) => new string[] { format(o) });
+            return this;
+        }
+
+        public ForwardedOption<T> SetForwardingFunction(Func<T, ParseResult, IEnumerable<string>> func)
+        {
+            ForwardingFunction = (ParseResult parseResult) => parseResult.HasOption(Aliases.First()) ? func(parseResult.ValueForOption<T>(Aliases.First()), parseResult) : Array.Empty<string>();
             return this;
         }
 

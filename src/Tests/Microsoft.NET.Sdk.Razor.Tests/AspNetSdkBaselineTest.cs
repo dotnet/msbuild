@@ -398,35 +398,17 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var assetsByIdentity = manifest.Assets.ToDictionary(a => a.Identity);
             foreach (var asset in manifest.Assets)
             {
-                asset.Identity = asset.Identity.Replace(projectRoot, "${ProjectRoot}");
-                asset.Identity = asset.Identity
-                    .Replace(restorePath, "${RestorePath}")
-                    .Replace(RuntimeVersion, "${RuntimeVersion}")
-                    .Replace(DefaultPackageVersion, "${PackageVersion}")
-                    .Replace(Path.DirectorySeparatorChar, '\\');
-                asset.Identity = PathTemplatizer(asset, asset.Identity, null) ?? asset.Identity;
-
-                asset.RelativePath = asset.RelativePath.Replace(RuntimeVersion, "${RuntimeVersion}");
-
-                asset.ContentRoot = asset.ContentRoot.Replace(projectRoot, "${ProjectRoot}");
-                asset.ContentRoot = asset.ContentRoot
-                    .Replace(restorePath, "${RestorePath}")
-                    .Replace(RuntimeVersion, "${RuntimeVersion}")
-                    .Replace(DefaultPackageVersion, "${PackageVersion}")
-                    .Replace(Path.DirectorySeparatorChar, '\\');
+                TemplatizeAsset(projectRoot, restorePath, asset);
 
                 if (!string.IsNullOrEmpty(asset.RelatedAsset))
                 {
                     var relatedAsset = string.IsNullOrEmpty(asset.RelatedAsset) || !assetsByIdentity.TryGetValue(asset.RelatedAsset, out var related) ?
                         null : related;
-
-                    asset.RelatedAsset = asset.RelatedAsset.Replace(projectRoot, "${ProjectRoot}");
-                    asset.RelatedAsset = asset.RelatedAsset
-                        .Replace(restorePath, "${RestorePath}")
-                        .Replace(RuntimeVersion, "${RuntimeVersion}")
-                        .Replace(DefaultPackageVersion, "${PackageVersion}")
-                        .Replace(Path.DirectorySeparatorChar, '\\');
-
+                    if (relatedAsset != null)
+                    {
+                        TemplatizeAsset(projectRoot, restorePath, relatedAsset);
+                    }
+                    TemplatizeAsset(projectRoot, restorePath, asset);
                     asset.RelatedAsset = PathTemplatizer(asset, asset.RelatedAsset, relatedAsset) ?? asset.RelatedAsset;
                 }
 
@@ -462,6 +444,33 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             Array.Sort(manifest.Assets, (l, r) => StringComparer.Ordinal.Compare(l.Identity, r.Identity));
             Array.Sort(manifest.RelatedManifests, (l, r) => StringComparer.Ordinal.Compare(l.Identity, r.Identity));
             return JsonSerializer.Serialize(manifest, BaselineSerializationOptions);
+
+            void TemplatizeAsset(string projectRoot, string restorePath, StaticWebAsset asset)
+            {
+                asset.Identity = asset.Identity.Replace(projectRoot, "${ProjectRoot}");
+                asset.Identity = asset.Identity
+                    .Replace(restorePath, "${RestorePath}")
+                    .Replace(RuntimeVersion, "${RuntimeVersion}")
+                    .Replace(DefaultPackageVersion, "${PackageVersion}")
+                    .Replace(Path.DirectorySeparatorChar, '\\');
+                asset.Identity = PathTemplatizer(asset, asset.Identity, null) ?? asset.Identity;
+
+                asset.RelativePath = asset.RelativePath.Replace(RuntimeVersion, "${RuntimeVersion}");
+
+                asset.ContentRoot = asset.ContentRoot.Replace(projectRoot, "${ProjectRoot}");
+                asset.ContentRoot = asset.ContentRoot
+                    .Replace(restorePath, "${RestorePath}")
+                    .Replace(RuntimeVersion, "${RuntimeVersion}")
+                    .Replace(DefaultPackageVersion, "${PackageVersion}")
+                    .Replace(Path.DirectorySeparatorChar, '\\');
+
+                asset.RelatedAsset = asset.RelatedAsset.Replace(projectRoot, "${ProjectRoot}");
+                asset.RelatedAsset = asset.RelatedAsset
+                    .Replace(restorePath, "${RestorePath}")
+                    .Replace(RuntimeVersion, "${RuntimeVersion}")
+                    .Replace(DefaultPackageVersion, "${PackageVersion}")
+                    .Replace(Path.DirectorySeparatorChar, '\\');
+            }
         }
 
         private record ComparableManifest(string Identity, string Source, string Type);

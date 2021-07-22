@@ -2,7 +2,7 @@
   "${OutputPath}\\wwwroot\\AppWithPackageAndP2PReference.styles.css",
   "${OutputPath}\\wwwroot\\_content\\AnotherClassLib\\css\\site.css",
   "${OutputPath}\\wwwroot\\_content\\AnotherClassLib\\js\\project-direct-dep.js",
-  "${OutputPath}\\wwwroot\\_content\\ClassLibrary\\ClassLibrary.styles.css",
+  "${OutputPath}\\wwwroot\\_content\\ClassLibrary\\ClassLibrary.bundle.scp.css",
   "${OutputPath}\\wwwroot\\_content\\ClassLibrary\\js\\project-transitive-dep.js",
   "${OutputPath}\\wwwroot\\_content\\ClassLibrary\\js\\project-transitive-dep.v4.js",
   "${OutputPath}\\wwwroot\\_content\\PackageLibraryDirectDependency\\PackageLibraryDirectDependency.bundle.scp.css",

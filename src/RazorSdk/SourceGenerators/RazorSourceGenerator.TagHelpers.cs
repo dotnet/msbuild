@@ -24,7 +24,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return descriptors;
         }
 
-        private IReadOnlyList<TagHelperDescriptor> GetTagHelpersFromCompilation(Compilation compilation, StaticCompilationTagHelperFeature tagHelperFeature, SyntaxTree syntaxTrees)
+        private static IReadOnlyList<TagHelperDescriptor> GetTagHelpersFromCompilation(Compilation compilation, StaticCompilationTagHelperFeature tagHelperFeature, SyntaxTree syntaxTrees)
         {
             var compilationWithDeclarations = compilation.AddSyntaxTrees(syntaxTrees);
 

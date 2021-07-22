@@ -84,7 +84,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Should()
                     .Be($"{ExpectedPrefix} -nologo -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
-
         }
     }
 }

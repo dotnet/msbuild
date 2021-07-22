@@ -332,6 +332,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
+  <Target Name="_EnsureContentRootFolders" AfterTargets="_RestoreStaticWebAssetsBuildAssets">
+    <ItemGroup>
+      <_StaticWebAssetContentRootFolder Include="@(StaticWebAsset->'%(ContentRoot)')" Condition="'%(SourceType)' == 'Computed'" />
+    </ItemGroup>
+    <MakeDir Directories="@(_StaticWebAssetContentRootFolder)" />
+  </Target>
+
   <Target Name="CopyStaticWebAssetsToOutputFolder" DependsOnTargets="$(CopyStaticWebAssetsToOutputFolderDependsOn)" />
   
   <Target Name="_SplitStaticWebAssetsByCopyOptions" AfterTargets="CopyStaticWebAssetsToOutputFolder">
@@ -429,6 +436,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <GenerateStaticWebAssetsDevelopmentManifest
       DiscoveryPatterns="@(StaticWebAssetDiscoveryPattern)"
       Assets="@(StaticWebAsset)"
+      BasePath="$(StaticWebAssetBasePath)"
       ManifestPath="$(StaticWebAssetDevelopmentManifestPath)">
   </GenerateStaticWebAssetsDevelopmentManifest>
 
@@ -467,7 +475,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
 
-      <StaticWebAssetDiscoveryPattern Include="$(PackageId)\wwwroot">
+      <StaticWebAssetDiscoveryPattern Include="$(PackageId)\wwwroot" Condition="Exists('$(MSBuildProjectDirectory)\wwwroot')">
         <ContentRoot>$(MSBuildProjectDirectory)\wwwroot\</ContentRoot>
         <BasePath>$(StaticWebAssetBasePath)</BasePath>
         <Pattern>**</Pattern>

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "kSW3uP8pxm7QPY0l7u66pqij5w/Uph4fcmV0ve7456c=",
+  "Hash": "zkD3yIJXM4CiQHBxhQY5KJxb1wexqplJjrG6ThYBSGI=",
   "Source": "AppWithPackageAndP2PReference",
   "BasePath": "_content/AppWithPackageAndP2PReference",
   "Mode": "Default",
@@ -14,7 +14,7 @@
       "PublishTarget": "",
       "AdditionalPublishProperties": ";",
       "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "BSxZLv4CvmxCZ68OFP6I7SehaB2Py\u002B5aTD4BZiGZo14="
+      "Hash": "6vpHxK8k4BCgG8KWkpp2WrcA08BDAJWUztVzFCc\u002BRok="
     },
     {
       "Identity": "${ProjectRoot}\\AnotherClassLib\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
@@ -52,12 +52,6 @@
       "Name": "AnotherClassLib\\wwwroot",
       "ContentRoot": "${ProjectRoot}\\AnotherClassLib\\wwwroot\\",
       "BasePath": "_content/AnotherClassLib",
-      "Pattern": "**"
-    },
-    {
-      "Name": "AppWithPackageAndP2PReference\\wwwroot",
-      "ContentRoot": "${ProjectRoot}\\AppWithPackageAndP2PReference\\wwwroot\\",
-      "BasePath": "_content/AppWithPackageAndP2PReference",
       "Pattern": "**"
     },
     {
@@ -120,21 +114,21 @@
       "OriginalItemSpec": "${ProjectRoot}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\bundle\\ClassLibrary.styles.css",
+      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css",
       "SourceId": "ClassLibrary",
       "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\bundle\\",
+      "ContentRoot": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\",
       "BasePath": "_content/ClassLibrary",
-      "RelativePath": "ClassLibrary.styles.css",
+      "RelativePath": "ClassLibrary.bundle.scp.css",
       "AssetKind": "All",
-      "AssetMode": "CurrentProject",
+      "AssetMode": "Reference",
       "AssetRole": "Primary",
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
-      "AssetTraitValue": "ApplicationBundle",
+      "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\bundle\\ClassLibrary.styles.css"
+      "OriginalItemSpec": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ClassLibrary.bundle.scp.css"
     },
     {
       "Identity": "${ProjectRoot}\\ClassLibrary\\wwwroot\\js\\project-transitive-dep.js",
