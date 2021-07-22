@@ -23,15 +23,15 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void ResolvesViaPlatformLookupTable()
         {
             // PlatformLookupTable always takes priority. It is typically user-defined.
-            TaskItem childProj = new TaskItem("foo.bar");
-            childProj.SetMetadata("PlatformOptions", "x64;x86;AnyCPU");
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "x64;x86;AnyCPU");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "win32",
                 PlatformLookupTable = "win32=x64",
-                AnnotatedProjects = new TaskItem[] { childProj }
+                AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
             task.Execute();
@@ -44,18 +44,18 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             // A child's PlatformLookupTable takes priority over the current project's table.
             // This allows overrides on a per-ProjectItem basis.
-            TaskItem childProj = new TaskItem("foo.bar");
-            childProj.SetMetadata("PlatformOptions", "x64;x86;AnyCPU");
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "x64;x86;AnyCPU");
 
             // childproj will be assigned x86 because its table takes priority
-            childProj.SetMetadata("PlatformLookupTable", "win32=x86");
+            projectReference.SetMetadata("PlatformLookupTable", "win32=x86");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "win32",
                 PlatformLookupTable = "win32=x64",
-                AnnotatedProjects = new TaskItem[] { childProj }
+                AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
             task.Execute();
@@ -69,15 +69,15 @@ namespace Microsoft.Build.Tasks.UnitTests
             // No valid mapping via the lookup table, should default to AnyCPU when possible because
             // it is inherently compatible with any platform.
 
-            TaskItem childProj = new TaskItem("foo.bar");
-            childProj.SetMetadata("PlatformOptions", "x86;AnyCPU");
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "x86;AnyCPU");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=x64", 
-                AnnotatedProjects = new TaskItem[] { childProj }
+                AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
             task.Execute();
@@ -90,15 +90,15 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             // No valid mapping via the lookup table, child project can't default to AnyCPU,
             // child project can match with parent project so match them.
-            TaskItem childProj = new TaskItem("foo.bar");
-            childProj.SetMetadata("PlatformOptions", "x86;x64");
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "x86;x64");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=x64",
-                AnnotatedProjects = new TaskItem[] { childProj }
+                AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
             task.Execute();
@@ -109,18 +109,17 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void FailsToResolve()
         {
-            MockLogger log = new MockLogger(_output);
             // No valid mapping via the lookup table, child project can't default to AnyCPU,
             // child can't match with parent, log a warning.
-            TaskItem childProj = new TaskItem("foo.bar");
-            childProj.SetMetadata("PlatformOptions", "x64");
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "x64");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=x64",
-                AnnotatedProjects = new TaskItem[] { childProj },
+                AnnotatedProjects = new TaskItem[] { projectReference },
             };
             
             task.Execute();
@@ -134,16 +133,36 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void FailsOnInvalidFormatLookupTable()
         {
-            MockLogger log = new MockLogger(_output);
-            TaskItem childProj = new TaskItem("foo.bar");
-            childProj.SetMetadata("PlatformOptions", "x64");
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "x64");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=;A=B", // invalid format
-                AnnotatedProjects = new TaskItem[] { childProj },
+                AnnotatedProjects = new TaskItem[] { projectReference },
+            };
+
+            Should.Throw<InternalErrorException>(() => task.Execute());
+        }
+
+        /// <summary>
+        /// Invalid format on PlatformLookupTable from the projectreference results in an exception being thrown.
+        /// </summary>
+        [Fact]
+        public void FailsOnInvalidFormatProjectReferenceLookupTable()
+        {
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "x64");
+            projectReference.SetMetadata("PlatformLookupTable", "a=;b=d");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = "x86",
+                PlatformLookupTable = "AnyCPU=x;A=B", // invalid format
+                AnnotatedProjects = new TaskItem[] { projectReference },
             };
 
             Should.Throw<InternalErrorException>(() => task.Execute());
