@@ -300,13 +300,10 @@ namespace Microsoft.Build.Tasks
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
-                CopiedAtLeastOneFile = true;
             }
-            else
-            {
-                // Properly linked files will be considered successfully copied files.
-                CopiedAtLeastOneFile = true;
-            }
+
+            // Files were successfully copied or linked. Those are equivalent here.
+           CopiedAtLeastOneFile = true;
 
             destinationFileState.Reset();
 
