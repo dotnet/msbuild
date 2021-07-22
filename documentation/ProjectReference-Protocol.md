@@ -154,7 +154,7 @@ First, set the properties `EnableDynamicPlatformResolution` and `DisableTransiti
 
  Next, every referenced project is required to define a `$(Platforms)` property. `$(Platforms)` is a semicolon-delimited list of platforms that project could build as. `<Platforms>x64;x86;AnyCPU</Platforms>`, for example.
 
- Lastly, projects that contain `ProjectReference` items may need to define a `$(PlatformLookupTable)` property. `$(PlatformLookupTable)` is a semicolon-delimited list of mappings between projects. `<PlatformLookupTable>win32=x86</PlatformLookupTable>`, for example. This is mostly relevant for references between managed and unmanaged projects.
+ Lastly, projects that contain `ProjectReference` items may need to define a `$(PlatformLookupTable)` property. `$(PlatformLookupTable)` is a semicolon-delimited list of mappings between projects. `<PlatformLookupTable>win32=x86</PlatformLookupTable>`, for example. This means that if the current project is building for `Win32`, it should build referenced projects using `x86` as the `Platform`. This is mostly relevant for references between managed and unmanaged projects.
 
  ### References between managed and unmanaged projects
  Some cases of `ProjectReference`s require a `$(PlatformLookupTable)` to correctly determine what a referenced project should build as.
