@@ -6,6 +6,10 @@ using Microsoft.DotNet.Tools;
 using System.CommandLine;
 using System.IO;
 using Microsoft.DotNet.Tools.Common;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
+using System.CommandLine.Parsing;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -35,7 +39,7 @@ namespace Microsoft.DotNet.Cli
                 description)
             {
                 ArgumentHelpName = CommonLocalizableStrings.FrameworkArgumentName
-                    
+
             }.ForwardAsSingle(o => $"-property:TargetFramework={o}")
             .AddSuggestions(Suggest.TargetFrameworksFromProjectFile());
 
@@ -91,6 +95,18 @@ namespace Microsoft.DotNet.Cli
                 "--interactive",
                 CommonLocalizableStrings.CommandInteractiveOptionDescription);
 
+        public static Option ArchitectureOption(bool includeShortVersion = true) =>
+            new ForwardedOption<string>(
+                includeShortVersion ? new string[] { "--arch", "-a" } : new string[] { "--arch" },
+                CommonLocalizableStrings.ArchitectureOptionDescription)
+            .SetForwardingFunction(ResolveArchOptionToRuntimeIdentifier);
+
+        public static Option OperatingSystemOption() =>
+            new ForwardedOption<string>(
+                "--os",
+                CommonLocalizableStrings.OperatingSystemOptionDescription)
+            .SetForwardingFunction(ResolveOsOptionToRuntimeIdentifier);
+
         public static Option DebugOption() => new Option<bool>("--debug");
 
         public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
@@ -100,6 +116,74 @@ namespace Microsoft.DotNet.Cli
                 verbosity.Equals(VerbosityOptions.d) ||
                 verbosity.Equals(VerbosityOptions.detailed);
         }
+
+        internal static IEnumerable<string> ResolveArchOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
+        {
+            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            {
+                throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndArchOptions);
+            }
+
+            if (parseResult.BothArchAndOsOptionsSpecified())
+            {
+                // ResolveOsOptionToRuntimeIdentifier handles resolving the RID when both arch and os are specified
+                return Array.Empty<string>();
+            }
+
+            return ResolveRidShorthandOptions(null, arg);
+        }
+
+        internal static IEnumerable<string> ResolveOsOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
+        {
+            if (parseResult.HasOption(RuntimeOption(string.Empty).Aliases.First()))
+            {
+                throw new GracefulException(CommonLocalizableStrings.CannotSpecifyBothRuntimeAndOsOptions);
+            }
+
+            if (parseResult.BothArchAndOsOptionsSpecified())
+            {
+                return ResolveRidShorthandOptions(arg, parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First()));
+            }
+
+            return ResolveRidShorthandOptions(arg, null);
+        }
+
+        private static IEnumerable<string> ResolveRidShorthandOptions(string os, string arch)
+        {
+            var properties = new string[] { $"-property:RuntimeIdentifier={ResolveRidShorthandOptionsToRuntimeIdentifier(os, arch)}" };
+            return properties;
+        }
+
+        internal static string ResolveRidShorthandOptionsToRuntimeIdentifier(string os, string arch)
+        {
+            var currentRid = GetCurrentRuntimeId();
+            os = string.IsNullOrEmpty(os) ? GetOsFromRid(currentRid) : os;
+            arch = string.IsNullOrEmpty(arch) ? GetArchFromRid(currentRid) : arch;
+            return $"{os}-{arch}";
+        }
+
+        private static string GetCurrentRuntimeId()
+        {
+            var dotnetRootPath = Path.GetDirectoryName(Environment.ProcessPath);
+            // When running under test the path does not always contain "dotnet" and Product.Version is empty.
+            dotnetRootPath = Path.GetFileName(dotnetRootPath).Contains("dotnet") ? dotnetRootPath : Path.Combine(dotnetRootPath, "dotnet");
+            var ridFileName = "NETCoreSdkRuntimeIdentifierChain.txt";
+            string runtimeIdentifierChainPath = string.IsNullOrEmpty(Product.Version) ?
+                Path.Combine(Directory.GetDirectories(Path.Combine(dotnetRootPath, "sdk"))[0], ridFileName) :
+                Path.Combine(dotnetRootPath, "sdk", Product.Version, ridFileName);
+            string[] currentRuntimeIdentifiers = File.Exists(runtimeIdentifierChainPath) ?
+                File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray() :
+                new string[] { };
+            if (currentRuntimeIdentifiers == null || !currentRuntimeIdentifiers.Any() || !currentRuntimeIdentifiers[0].Contains("-"))
+            {
+                throw new GracefulException(CommonLocalizableStrings.CannotResolveRuntimeIdentifier);
+            }
+            return currentRuntimeIdentifiers[0]; // First rid is the most specific (ex win-x64)
+        }
+
+        private static string GetOsFromRid(string rid) => rid.Substring(0, rid.LastIndexOf("-"));
+
+        private static string GetArchFromRid(string rid) => rid.Substring(rid.LastIndexOf("-") + 1, rid.Length - rid.LastIndexOf("-") - 1);
     }
 
     public enum VerbosityOptions

@@ -49,6 +49,8 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoIncrementalOption);
             command.AddOption(NoDependenciesOption);
             command.AddOption(NoLogoOption);
+            command.AddOption(CommonOptions.ArchitectureOption());
+            command.AddOption(CommonOptions.OperatingSystemOption());
 
             return command;
         }
