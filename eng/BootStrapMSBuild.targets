@@ -203,5 +203,9 @@
 
     <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
           DestinationFolder="$(BootstrapDestination)" />
+
+    <!-- Disable workload resolver until we can figure out whether it can work in the bootstrap
+         https://github.com/dotnet/msbuild/issues/6566 -->
+    <Touch Files="$(BootstrapDestination)\DisableWorkloadResolver.sentinel" AlwaysCreate="true" />
   </Target>
 </Project>
