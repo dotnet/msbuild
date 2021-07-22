@@ -30,7 +30,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 return null;
             }
 
-            return Path.Combine(Path.GetDirectoryName(asset.Identity), "{" + asset.RelativePath + "}");
+            if (originalValue.Contains("[["))
+            {
+                return null;
+            }
+
+            return Path.Combine(Path.GetDirectoryName(asset.Identity), "[[" + asset.RelativePath + "]]");
         }
 
         protected override string EmbeddedResourcePrefix => string.Join('.', "Microsoft.NET.Sdk.BlazorWebAssembly.Tests", "StaticWebAssetsBaselines");

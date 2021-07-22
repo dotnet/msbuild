@@ -385,6 +385,7 @@
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.pdb",
   "${OutputPath}\\wwwroot\\_framework\\blazorwasm.pdb.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js",
+  "${OutputPath}\\wwwroot\\_framework\\dotnet.${RuntimeVersion}.js.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.timezones.blat.gz",
   "${OutputPath}\\wwwroot\\_framework\\dotnet.wasm",
@@ -402,5 +403,6 @@
   "${OutputPath}\\wwwroot\\_framework\\netstandard.dll",
   "${OutputPath}\\wwwroot\\_framework\\netstandard.dll.gz",
   "${OutputPath}\\wwwroot\\custom-service-worker-assets.js",
-  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.${RuntimeVersion}.js"
+  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.${RuntimeVersion}.js",
+  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.${RuntimeVersion}.js.gz"
 ]
