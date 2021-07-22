@@ -438,7 +438,7 @@ namespace Dotnet_new3.IntegrationTests
             string workingDirectory = TestUtils.CreateTemporaryFolder();
             string home = TestUtils.CreateTemporaryFolder("Home");
             using var packageManager = new PackageManager();
-            string packageLocation = await packageManager.GetNuGetPackage("Microsoft.DotNet.Web.Spa.ProjectTemplates.6.0").ConfigureAwait(false);
+            string packageLocation = await packageManager.GetNuGetPackage("Microsoft.DotNet.Web.Spa.ProjectTemplates.6.0", version: "6.0.0-preview.6.21355.2").ConfigureAwait(false);
             Helpers.InstallNuGetTemplate(packageLocation, _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "angular", "-o", "angular")

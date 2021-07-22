@@ -34,7 +34,7 @@ namespace Microsoft.TemplateEngine.TestHelper
             return PackNuGetPackage(projectToPack);
         }
 
-        public async Task<string> GetNuGetPackage(string templatePackName, NuGetVersion? minimumVersion = null, ILogger? logger = null)
+        public async Task<string> GetNuGetPackage(string templatePackName, string? version = null, NuGetVersion? minimumVersion = null, ILogger? logger = null)
         {
             logger = logger ?? NullLogger.Instance;
             NuGetHelper nuGetHelper = new NuGetHelper(_packageLocation, logger);
@@ -55,6 +55,7 @@ namespace Microsoft.TemplateEngine.TestHelper
                         logger.LogDebug($"[NuGet Package Manager][attempt: {retry + 1}] Downloading package {templatePackName}, minimum version: {minimumVersion?.ToNormalizedString()}");
                         string downloadedPackage = await nuGetHelper.DownloadPackageAsync(
                             templatePackName,
+                            version: version,
                             additionalSources: new [] { NuGetOrgFeed },
                             minimumVersion: minimumVersion).ConfigureAwait(false);
                         _installedPackages[templatePackName] = downloadedPackage;
