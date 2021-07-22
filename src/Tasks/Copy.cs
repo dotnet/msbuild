@@ -302,6 +302,11 @@ namespace Microsoft.Build.Tasks
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
                 CopiedAtLeastOneFile = true;
             }
+            else
+            {
+                // Properly linked files will be considered successfully copied files.
+                CopiedAtLeastOneFile = true;
+            }
 
             destinationFileState.Reset();
 
