@@ -25,9 +25,9 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] AnnotatedProjects { get; set; }
 
         /// <summary>
-        /// The platform the parent is building as. 
+        /// The platform the current project is building as. 
         /// </summary>
-        public string ParentProjectPlatform { get; set; }
+        public string CurrentProjectPlatform { get; set; }
 
         /// <summary>
         /// Optional parameter that defines translations from parent platforms to
@@ -44,19 +44,11 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            Dictionary<string, string> translationTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            if (!string.IsNullOrEmpty(PlatformLookupTable))
+            Dictionary<string, string> translationTable = ExtractLookupTable(PlatformLookupTable);
+
+            if (translationTable != null)
             {
-                foreach (string s in PlatformLookupTable.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    string[] keyVal = s.Split(MSBuildConstants.EqualsChar, StringSplitOptions.RemoveEmptyEntries);
-
-                    ErrorUtilities.VerifyThrow(keyVal.Length > 1, "PlatformLookupTable must be of the form A=B;C=D");
-
-                    translationTable[keyVal[0]] = keyVal[1];
-                }
-                
-                Log.LogMessage($"Translation Table: {string.Join(";", translationTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
+                Log.LogMessage($"Current Project's Translation Table: {string.Join(";", translationTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
             }
 
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
@@ -64,26 +56,47 @@ namespace Microsoft.Build.Tasks
             {
                 AssignedProjectsWithPlatform[i] = new TaskItem(AnnotatedProjects[i]);
 
-                if (string.IsNullOrEmpty(AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions")))
+                string childPlatformOptions = AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions");
+
+                if (string.IsNullOrEmpty(childPlatformOptions))
                 {
                     Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", AssignedProjectsWithPlatform[i].ItemSpec);
                     continue;
                 }
 
+                // Pull platformlookuptable metadata from the referenced project. This allows custom
+                // translations on a per-ProjectReference basis.
+                Dictionary<string, string> childPlatformLookupTable = ExtractLookupTable(AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable"));
+
+                if (childPlatformLookupTable != null)
+                {
+                    Log.LogMessage($"Referenced Project's Translation Table: {string.Join(";", childPlatformLookupTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
+                }
+
                 HashSet<string> childPlatforms = new HashSet<string>();
-                foreach (string s in AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions").Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
+                foreach (string s in childPlatformOptions.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
                 {
                     childPlatforms.Add(s);
                 }
 
                 string buildChildProjectAs = "";
 
-                // Translation table takes priority
-                if (translationTable.ContainsKey(ParentProjectPlatform) &&
-                          childPlatforms.Contains(translationTable[ParentProjectPlatform]))
+                // If the referenced project has a translation table, it came from the ProjectReference item's metadata.
+                // Prioritize that over the current project's translation table.
+                if (childPlatformLookupTable != null &&
+                        childPlatformLookupTable.ContainsKey(CurrentProjectPlatform) &&
+                        childPlatforms.Contains(childPlatformLookupTable[CurrentProjectPlatform]))
                 {
-                    buildChildProjectAs = translationTable[ParentProjectPlatform];
-                    Log.LogMessage($"Found '{ParentProjectPlatform}={buildChildProjectAs}' in the given translation table.");
+                    buildChildProjectAs = childPlatformLookupTable[CurrentProjectPlatform];
+                    Log.LogMessage($"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the referenced project's translation table.");
+                }
+                // Current project's translation table follows
+                else if (translationTable != null &&
+                        translationTable.ContainsKey(CurrentProjectPlatform) &&
+                        childPlatforms.Contains(translationTable[CurrentProjectPlatform]))
+                {
+                    buildChildProjectAs = translationTable[CurrentProjectPlatform];
+                    Log.LogMessage($"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the current project's translation table.");
                 }
                 // AnyCPU if possible
                 else if (childPlatforms.Contains("AnyCPU"))
@@ -92,14 +105,14 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessage($"Defaulting to AnyCPU.");
                 }
                 // Prefer matching platforms
-                else if (childPlatforms.Contains(ParentProjectPlatform))
+                else if (childPlatforms.Contains(CurrentProjectPlatform))
                 {
-                    buildChildProjectAs = ParentProjectPlatform;
+                    buildChildProjectAs = CurrentProjectPlatform;
                     Log.LogMessage($"Child and parent have the same platform.");
                 }
                 else
                 {
-                    // Keep it empty, log a warning. Common.CurrentVersion.targets will undefine 
+                    // Keep NearestPlatform empty, log a warning. Common.CurrentVersion.targets will undefine 
                     // Platform/PlatformTarget when this is the case.
                     Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", AssignedProjectsWithPlatform[i].ItemSpec);
                 }
@@ -109,6 +122,27 @@ namespace Microsoft.Build.Tasks
             }
 
             return !Log.HasLoggedErrors;
+        }
+
+        private Dictionary<string, string> ExtractLookupTable(string stringTable)
+        {
+            if (string.IsNullOrEmpty(stringTable))
+            {
+                return null;
+            }
+
+            Dictionary<string, string> table = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string s in stringTable.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string[] keyVal = s.Split(MSBuildConstants.EqualsChar, StringSplitOptions.RemoveEmptyEntries);
+
+                ErrorUtilities.VerifyThrow(keyVal.Length > 1, "PlatformLookupTable must be of the form A=B;C=D");
+
+                table[keyVal[0]] = keyVal[1];
+            }
+
+            return table;
         }
     }
 }

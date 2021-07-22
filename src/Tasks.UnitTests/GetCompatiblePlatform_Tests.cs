@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
-                ParentProjectPlatform = "win32",
+                CurrentProjectPlatform = "win32",
                 PlatformLookupTable = "win32=x64",
                 AnnotatedProjects = new TaskItem[] { childProj }
             };
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
-                ParentProjectPlatform = "x86",
+                CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=x64", 
                 AnnotatedProjects = new TaskItem[] { childProj }
             };
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
-                ParentProjectPlatform = "x86",
+                CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=x64",
                 AnnotatedProjects = new TaskItem[] { childProj }
             };
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
-                ParentProjectPlatform = "x86",
+                CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=x64",
                 AnnotatedProjects = new TaskItem[] { childProj },
             };
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
-                ParentProjectPlatform = "x86",
+                CurrentProjectPlatform = "x86",
                 PlatformLookupTable = "AnyCPU=;A=B", // invalid format
                 AnnotatedProjects = new TaskItem[] { childProj },
             };
