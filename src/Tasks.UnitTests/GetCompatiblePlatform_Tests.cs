@@ -20,7 +20,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void ResolvesViaPlatformLookupTable_Task()
+        public void ResolvesViaPlatformLookupTable()
         {
             // PlatformLookupTable always takes priority. It is typically user-defined.
             TaskItem childProj = new TaskItem("foo.bar");
@@ -40,7 +40,31 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void ResolvesViaAnyCPUDefault_Task()
+        public void ResolvesViaChildsPlatformLookupTable()
+        {
+            // A child's PlatformLookupTable takes priority over the current project's table.
+            // This allows overrides on a per-ProjectItem basis.
+            TaskItem childProj = new TaskItem("foo.bar");
+            childProj.SetMetadata("PlatformOptions", "x64;x86;AnyCPU");
+
+            // childproj will be assigned x86 because its table takes priority
+            childProj.SetMetadata("PlatformLookupTable", "win32=x86");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = "win32",
+                PlatformLookupTable = "win32=x64",
+                AnnotatedProjects = new TaskItem[] { childProj }
+            };
+
+            task.Execute();
+
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("x86");
+        }
+
+        [Fact]
+        public void ResolvesViaAnyCPUDefault()
         {
             // No valid mapping via the lookup table, should default to AnyCPU when possible because
             // it is inherently compatible with any platform.
@@ -62,7 +86,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void ResolvesViaSamePlatform_Task()
+        public void ResolvesViaSamePlatform()
         {
             // No valid mapping via the lookup table, child project can't default to AnyCPU,
             // child project can match with parent project so match them.
@@ -83,7 +107,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void FailsToResolve_Task()
+        public void FailsToResolve()
         {
             MockLogger log = new MockLogger(_output);
             // No valid mapping via the lookup table, child project can't default to AnyCPU,
@@ -108,7 +132,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Invalid format on PlatformLookupTable results in an exception being thrown.
         /// </summary>
         [Fact]
-        public void FailsOnInvalidFormatLookupTable ()
+        public void FailsOnInvalidFormatLookupTable()
         {
             MockLogger log = new MockLogger(_output);
             TaskItem childProj = new TaskItem("foo.bar");
