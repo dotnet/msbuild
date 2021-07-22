@@ -295,5 +295,42 @@ namespace Microsoft.NET.Build.Tests
                 .Pass();
 
         }
+
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
+        [InlineData("xunit")]
+        [InlineData("mstest")]
+        public void ExeProjectCanReferenceTestProject(string testTemplateName)
+        {
+            var testConsoleProject = new TestProject("ConsoleApp")
+            {
+                IsExe = true,
+                TargetFrameworks = "net6.0",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            var testAsset = _testAssetsManager.CreateTestProject(testConsoleProject, identifier: testTemplateName);
+
+            var testProjectDirectory = Path.Combine(testAsset.TestRoot, "TestProject");
+            Directory.CreateDirectory(testProjectDirectory);
+
+            new DotnetCommand(Log, "new", testTemplateName)
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            string consoleProjectDirectory = Path.Combine(testAsset.Path, testConsoleProject.Name);
+
+            new DotnetCommand(Log, "add", "reference", ".." + Path.DirectorySeparatorChar + "TestProject")
+                .WithWorkingDirectory(consoleProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+
+            new BuildCommand(Log, consoleProjectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
+        }
     }
 }
