@@ -127,6 +127,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The thread that raised event. This has been deprecated as of 17.0.
         /// </summary>
+        [Obsolete("This doesn't see to have been used in the past. Marking it obsolete in 17.0 ahead of removing it.")]
         public int ThreadId => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0) ? 0 : threadId;
 
         /// <summary>
