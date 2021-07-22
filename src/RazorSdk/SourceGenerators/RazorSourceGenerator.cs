@@ -36,11 +36,13 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
                 var path = file.FilePath;
                 if (path.EndsWith(".razor"))
                 {
-                    return Path.GetFileNameWithoutExtension(path) == "_Imports";
+                    var fileName = Path.GetFileNameWithoutExtension(path);
+                    return string.Equals(fileName, "_Imports", StringComparison.OrdinalIgnoreCase);
                 }
                 else if (path.EndsWith(".cshtml"))
                 {
-                    return Path.GetFileNameWithoutExtension(path) == "_ViewImports";
+                    var fileName = Path.GetFileNameWithoutExtension(path);
+                    return string.Equals(fileName, "_ViewImports", StringComparison.OrdinalIgnoreCase);
                 }
 
                 return false;
