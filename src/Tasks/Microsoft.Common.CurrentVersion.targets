@@ -1664,7 +1664,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          that can't multiplatform.  -->
     <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
       <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
-      <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
         <SetPlatform Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
