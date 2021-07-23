@@ -138,6 +138,7 @@
     <MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>6.0.0-rc.1.21373.2</MicrosoftAspNetCoreMvcRazorExtensionsPackageVersion>
     <MicrosoftAspNetCoreRazorLanguageVersion>6.0.0-rc.1.21373.2</MicrosoftAspNetCoreRazorLanguageVersion>
     <MicrosoftCodeAnalysisRazorVersion>6.0.0-rc.1.21373.2</MicrosoftCodeAnalysisRazorVersion>
+    <MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>6.0.0-rc.1.21373.2</MicrosoftAspNetCoreRazorInternalSourceGeneratorTransportPackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/wpf -->

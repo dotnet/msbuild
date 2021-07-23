@@ -62,9 +62,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     Import targets from RazorSDK if referenced
     Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.BeforeCommon.targets
-    Sdks\Microsoft.NET.Sdk.Razor\build\netstandard2.0\Microsoft.NET.Sdk.Razor.BeforeCommon.targets
+    Sdks\Microsoft.NET.Sdk.Razor\targets\Microsoft.NET.Sdk.Razor.BeforeCommon.targets
   -->
-  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.NET.Sdk.Razor\build\netstandard2.0\Microsoft.NET.Sdk.Razor.BeforeCommon.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true'" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Microsoft.NET.Sdk.Razor\targets\Microsoft.NET.Sdk.Razor.BeforeCommon.targets" Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true'" />
 
   <!-- Import workload targets -->
   <Import Project="Microsoft.NET.Sdk.ImportWorkloads.targets" Condition="'$(MSBuildEnableWorkloadResolver)' == 'true'" />

@@ -28,7 +28,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <!-- Paths to tools, tasks, and extensions are calculated relative to the RazorSdkDirectoryRoot. This can be modified to test a local build. -->
-    <RazorSdkDirectoryRoot Condition="'$(RazorSdkDirectoryRoot)'==''">$(MSBuildThisFileDirectory)..\..\</RazorSdkDirectoryRoot>
+    <RazorSdkDirectoryRoot Condition="'$(RazorSdkDirectoryRoot)'==''">$(MSBuildThisFileDirectory)..\</RazorSdkDirectoryRoot>
     <RazorSdkBuildTasksDirectoryRoot Condition="'$(RazorSdkBuildTasksDirectoryRoot)'==''">$(RazorSdkDirectoryRoot)tasks\</RazorSdkBuildTasksDirectoryRoot>
     <_RazorSdkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net6.0</_RazorSdkTasksTFM>
     <_RazorSdkTasksTFM Condition=" '$(_RazorSdkTasksTFM)' == ''">net472</_RazorSdkTasksTFM>

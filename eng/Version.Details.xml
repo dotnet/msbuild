@@ -206,6 +206,10 @@
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>a5bc6d480828133171f17b1a7308225187c88636</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.AspNetCore.Razor.Internal.SourceGenerator.Transport" Version="6.0.0-rc.1.21373.2">
+      <Uri>https://github.com/dotnet/aspnetcore</Uri>
+      <Sha>a5bc6d480828133171f17b1a7308225187c88636</Sha>
+    </Dependency>
     <Dependency Name="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0-rc.1.21373.2">
       <Uri>https://github.com/dotnet/aspnetcore</Uri>
       <Sha>a5bc6d480828133171f17b1a7308225187c88636</Sha>
