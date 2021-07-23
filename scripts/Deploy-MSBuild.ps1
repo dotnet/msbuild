@@ -60,19 +60,6 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.Utilities.Core.dll"
     FileToCopy "$bootstrapBinDirectory\Microsoft.NET.StringTools.dll"
 
-    FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Buffers.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
-    FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"
-
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.resources.dll" "en"
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Tasks.Core.resources.dll" "en"
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Utilities.Core.resources.dll" "en"
@@ -107,6 +94,7 @@ if ($runtime -eq "Desktop") {
         FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
         FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
 
+        FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.ServiceModel.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.WinFx.targets"
@@ -114,6 +102,18 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\Microsoft.Xaml.targets"
         FileToCopy "$bootstrapBinDirectory\Workflow.targets"
         FileToCopy "$bootstrapBinDirectory\Workflow.VisualBasic.targets"
+
+        FileToCopy "$bootstrapBinDirectory\System.Buffers.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
+        FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"    
     )
 } else {
     $runtimeSpecificFiles = @(
