@@ -214,6 +214,89 @@ namespace Dotnet_new3.IntegrationTests
             }
         }
 
+        [Fact]
+        public void RunScript_DoNotRedirect()
+        {
+            string templateLocation = "PostActions/RunScript/DoNotRedirect";
+            string templateName = "TestAssets.PostActions.RunScript.DoNotRedirect";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                .And.HaveStdOutContaining("This line goes to stdout")
+                .And.HaveStdErrContaining("This line goes to stderr")
+                .And.NotHaveStdOutContaining("Run 'chmod +x *.sh'")
+                .And.NotHaveStdOutContaining("Manual instructions: Run 'setup.cmd'")
+                .And.NotHaveStdOutContaining("Manual instructions: Run 'setup.sh'");
+        }
+
+        [Fact]
+        public void RunScript_Redirect()
+        {
+            string templateLocation = "PostActions/RunScript/Redirect";
+            string templateName = "TestAssets.PostActions.RunScript.Redirect";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                .And.NotHaveStdOutContaining("This line goes to stdout")
+                .And.NotHaveStdOutContaining("Run 'chmod +x *.sh'")
+                .And.NotHaveStdOutContaining("Manual instructions: Run 'setup.cmd'")
+                .And.NotHaveStdOutContaining("Manual instructions: Run 'setup.sh'");
+        }
+
+        [Fact]
+        public void RunScript_RedirectOnError()
+        {
+            string templateLocation = "PostActions/RunScript/RedirectOnError";
+            string templateName = "TestAssets.PostActions.RunScript.RedirectOnError";
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate(templateLocation, _log, workingDirectory, home);
+
+            var commandResult = new DotnetNewCommand(_log, templateName, "--allow-scripts", "yes")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute();
+
+            commandResult
+                .Should()
+                .Fail()
+                .And.HaveStdOutContaining($"The template \"{templateName}\" was created successfully.")
+                .And.HaveStdErrContaining("Command failed")
+                .And.HaveStdErrContaining("This line goes to stdout")
+                .And.HaveStdErrContaining("This line goes to stderr")
+                .And.NotHaveStdErrContaining("Run 'chmod +x *.sh'");
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                commandResult.Should().HaveStdErrContaining("Manual instructions: Run 'setup.cmd'");
+            }
+            else
+            {
+                commandResult.Should().HaveStdErrContaining("Manual instructions: Run 'setup.sh'");
+            }
+        }
+
         [Theory]
         [InlineData("PostActions/AddReference/Basic", "TestAssets.PostActions.AddReference.Basic")]
         [InlineData("PostActions/AddReference/BasicWithFiles", "TestAssets.PostActions.AddReference.BasicWithFiles")]

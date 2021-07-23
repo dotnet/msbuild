@@ -377,10 +377,8 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <note />
       </trans-unit>
       <trans-unit id="CommandOutput">
-        <source>Output from command:
-{0}</source>
-        <target state="translated">Komuttan çıkış:
-{0}</target>
+        <source>Output from command:</source>
+        <target state="new">Output from command:</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
@@ -496,6 +494,11 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <source>Details: {0}</source>
         <target state="translated">Ayrıntılar: {0}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Generic_Empty">
+        <source>(empty)</source>
+        <target state="new">(empty)</target>
+        <note>shown when there is no data to show</note>
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
         <source>Example:</source>

@@ -377,10 +377,8 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <note />
       </trans-unit>
       <trans-unit id="CommandOutput">
-        <source>Output from command:
-{0}</source>
-        <target state="translated">Výstup příkazu:
-{0}</target>
+        <source>Output from command:</source>
+        <target state="new">Output from command:</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
@@ -496,6 +494,11 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <source>Details: {0}</source>
         <target state="translated">Podrobnosti: {0}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Generic_Empty">
+        <source>(empty)</source>
+        <target state="new">(empty)</target>
+        <note>shown when there is no data to show</note>
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
         <source>Example:</source>

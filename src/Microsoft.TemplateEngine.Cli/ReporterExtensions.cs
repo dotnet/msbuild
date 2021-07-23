@@ -3,6 +3,8 @@
 
 #nullable enable
 
+using System.Diagnostics;
+
 namespace Microsoft.TemplateEngine.Cli
 {
     internal static class ReporterExtensions
@@ -19,6 +21,53 @@ namespace Microsoft.TemplateEngine.Cli
         internal static void WriteCommand(this Reporter reporter, string command, int indentLevel = 0)
         {
             reporter.WriteLine(command.Indent(indentLevel + 1));
+        }
+
+        /// <summary>
+        /// Writes formatted command output from <paramref name="process"/>.
+        /// </summary>
+        internal static void WriteCommandOutput(this Reporter reporter, Dotnet.Result process)
+        {
+            reporter.WriteLine(LocalizableStrings.CommandOutput);
+            reporter.WriteStdOut(process.StdOut);
+            reporter.WriteStdErr(process.StdErr);
+        }
+
+        /// <summary>
+        /// Writes formatted command output from <paramref name="process"/>.
+        /// </summary>
+        internal static void WriteCommandOutput(this Reporter reporter, Process process)
+        {
+            if (process.StartInfo.RedirectStandardOutput || process.StartInfo.RedirectStandardError)
+            {
+                reporter.WriteLine(LocalizableStrings.CommandOutput);
+            }
+            if (process.StartInfo.RedirectStandardOutput)
+            {
+                reporter.WriteStdOut(process.StandardOutput.ReadToEnd());
+            }
+            if (process.StartInfo.RedirectStandardError)
+            {
+                reporter.WriteStdErr(process.StandardError.ReadToEnd());
+            }
+        }
+
+        /// <summary>
+        /// Writes string <paramref name="output"/> formatted as standard output.
+        /// </summary>
+        internal static void WriteStdOut(this Reporter reporter, string output)
+        {
+            reporter.WriteLine("StdOut:");
+            reporter.WriteLine(string.IsNullOrWhiteSpace(output) ? LocalizableStrings.Generic_Empty : output);
+        }
+
+        /// <summary>
+        /// Writes string <paramref name="output"/> formatted as standard error.
+        /// </summary>
+        internal static void WriteStdErr(this Reporter reporter, string output)
+        {
+            reporter.WriteLine("StdErr:");
+            reporter.WriteLine(string.IsNullOrWhiteSpace(output) ? LocalizableStrings.Generic_Empty : output);
         }
 
         /// <summary>

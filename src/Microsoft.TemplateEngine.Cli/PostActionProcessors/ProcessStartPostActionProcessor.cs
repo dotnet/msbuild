@@ -32,6 +32,14 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             {
                 redirectStandardOutput = false;
             }
+            bool redirectStandardError = true;
+            // By default, standard error is redirected.
+            // Only redirect when the configuration says "redirectStandardError = false"
+            if (actionConfig.Args.TryGetValue("redirectStandardError", out string? redirectStandardErrorString)
+                    && string.Equals(redirectStandardErrorString, "false", StringComparison.OrdinalIgnoreCase))
+            {
+                redirectStandardError = false;
+            }
 
             try
             {
@@ -40,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 Process? commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
                 {
-                    RedirectStandardError = true,
+                    RedirectStandardError = redirectStandardError,
                     RedirectStandardOutput = redirectStandardOutput,
                     UseShellExecute = false,
                     CreateNoWindow = false,
@@ -60,9 +68,8 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 if (commandResult.ExitCode != 0)
                 {
-                    string error = commandResult.StandardError.ReadToEnd();
                     Reporter.Error.WriteLine(LocalizableStrings.CommandFailed);
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CommandOutput, error));
+                    Reporter.Error.WriteCommandOutput(commandResult);
                     Reporter.Error.WriteLine(string.Empty);
                     return false;
                 }
@@ -75,7 +82,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             catch (Exception ex)
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CommandFailed);
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.CommandOutput, ex.Message));
+                Reporter.Error.WriteLine(ex.Message);
                 Reporter.Error.WriteLine(string.Empty);
                 Reporter.Verbose.WriteLine(string.Format(LocalizableStrings.Generic_Details, ex.ToString()));
                 return false;

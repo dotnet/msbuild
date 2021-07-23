@@ -156,7 +156,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 if (commandResult.ExitCode != 0)
                 {
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.AddRefPostActionFailed, referenceToAdd, projectFile));
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
+                    Reporter.Error.WriteCommandOutput(commandResult);
                     Reporter.Error.WriteLine(string.Empty);
                     return false;
                 }
