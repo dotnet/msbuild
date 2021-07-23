@@ -488,7 +488,7 @@ namespace Microsoft.Build.Execution
             ILoggingService InitializeLoggingService()
             {
                 ILoggingService loggingService = CreateLoggingService(
-                    (_buildParameters.Loggers ?? Enumerable.Empty<ILogger>()).Concat(GetDebuggingLoggers()),
+                    AppendDebuggingLoggers(_buildParameters.Loggers),
                     _buildParameters.ForwardingLoggers,
                     _buildParameters.WarningsAsErrors,
                     _buildParameters.WarningsAsMessages);
@@ -521,19 +521,19 @@ namespace Microsoft.Build.Execution
             }
 
             // VS builds discard many msbuild events so attach a binlogger to capture them all.
-            IEnumerable<ILogger> GetDebuggingLoggers()
+            IEnumerable<ILogger> AppendDebuggingLoggers(IEnumerable<ILogger> loggers)
             {
                 if (CurrentProcessMatchesDebugName() is false ||
                     Traits.Instance.DebugEngine is false)
                 {
-                    return Enumerable.Empty<ILogger>();
+                    return loggers;
                 }
 
-                var binlogPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_BuildManager_{_hostName}_{GetHashCode()}.binlog");
+                var binlogPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_BuildManager_{_hostName}.binlog");
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
-                return new []{ logger };
+                return (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[] { logger });
             }
 
             void InitializeCaches()
