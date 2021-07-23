@@ -31,16 +31,16 @@ namespace Microsoft.DotNet.Cli
         public static readonly Option NoBuildOption = new ForwardedOption<bool>("--no-build", LocalizableStrings.NoBuildOptionDescription)
             .ForwardAs("-property:NoBuild=true");
 
-        public static readonly Option SelfContainedOption = new ForwardedOption<bool>("--self-contained", LocalizableStrings.SelfContainedOptionDescription)
-            .ForwardAsSingle(o =>  $"-property:SelfContained={o}");
-
-        public static readonly Option NoSelfContainedOption = new ForwardedOption<bool>("--no-self-contained", LocalizableStrings.NoSelfContainedOptionDescription)
-            .ForwardAs("-property:SelfContained=false");
-
         public static readonly Option NoLogoOption = new ForwardedOption<bool>("--nologo", LocalizableStrings.CmdNoLogo)
             .ForwardAs("-nologo");
 
         public static readonly Option NoRestoreOption = CommonOptions.NoRestoreOption();
+
+        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption();
+
+        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
+
+        public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
 
         public static Command GetCommand()
         {
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoSelfContainedOption);
             command.AddOption(NoLogoOption);
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
-            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(RuntimeOption);
             command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
             command.AddOption(CommonOptions.VersionSuffixOption());
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());

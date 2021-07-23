@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.Cli
                 description)
             {
                 ArgumentHelpName = CommonLocalizableStrings.RuntimeIdentifierArgumentName
-            }.ForwardAsSingle(o => $"-property:RuntimeIdentifier={o}")
+            }.ForwardAsMany(o => new string[] { $"-property:RuntimeIdentifier={o}", "-property:_CommandLineDefinedRuntimeIdentifier=true" })
             .AddSuggestions(Suggest.RunTimesFromProjectFile());
 
         public static Option CurrentRuntimeOption(string description) =>
@@ -109,12 +109,32 @@ namespace Microsoft.DotNet.Cli
 
         public static Option DebugOption() => new Option<bool>("--debug");
 
+        public static Option SelfContainedOption() =>
+            new ForwardedOption<bool>(
+                "--self-contained",
+                CommonLocalizableStrings.SelfContainedOptionDescription)
+            .ForwardAsMany(o => new string[] { $"-property:SelfContained={o}", "-property:_CommandLineDefinedSelfContained=true" });
+
+        public static Option NoSelfContainedOption() =>
+            new ForwardedOption<bool>(
+                "--no-self-contained",
+                CommonLocalizableStrings.FrameworkDependentOptionDescription)
+            .ForwardAsMany(o => new string[] { "-property:SelfContained=false", "-property:_CommandLineDefinedSelfContained=true" });
+
         public static bool VerbosityIsDetailedOrDiagnostic(this VerbosityOptions verbosity)
         {
             return verbosity.Equals(VerbosityOptions.diag) ||
                 verbosity.Equals(VerbosityOptions.diagnostic) ||
                 verbosity.Equals(VerbosityOptions.d) ||
                 verbosity.Equals(VerbosityOptions.detailed);
+        }
+
+        public static void ValidateSelfContainedOptions(bool hasSelfContainedOption, bool hasNoSelfContainedOption)
+        {
+            if (hasSelfContainedOption && hasNoSelfContainedOption)
+            {
+                throw new GracefulException(CommonLocalizableStrings.SelfContainAndNoSelfContainedConflict);
+            }
         }
 
         internal static IEnumerable<string> ResolveArchOptionToRuntimeIdentifier(string arg, ParseResult parseResult)
