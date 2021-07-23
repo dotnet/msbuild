@@ -232,12 +232,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 ".a" => "extension is .a is not supported.",
                 ".c" => "extension is .c is not supported.",
                 ".h" => "extension is .h is not supported.",
+                ".xml" => "it is a documentation file",
                 ".rsp" => "extension is .rsp is not supported.",
                 ".props" => "extension is .props is not supported.",
                 ".blat" when !timezoneSupport => "timezone support is not enabled.",
                 ".dat" when invariantGlobalization && fileName.StartsWith("icudt") => "invariant globalization is enabled",
-                ".js" when fileName == "dotnet" => "dotnet js is already processed by Blazor",
-                ".js" when assetType == "native" => "dotnet js is already processed by Blazor",
+                ".json" when fileName == "emcc-props" => $"{fileName}{extension} is not used by Blazor",
+                ".js" when fileName == "dotnet" => "dotnet.js is already processed by Blazor",
+                ".js" when assetType == "native" => $"{fileName}{extension} is not used by Blazor",
                 ".pdb" when !copySymbols => "copying symbols is disabled",
                 _ => null
             };

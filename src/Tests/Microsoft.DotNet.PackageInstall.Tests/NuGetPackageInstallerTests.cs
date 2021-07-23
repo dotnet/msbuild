@@ -19,6 +19,9 @@ using Microsoft.NET.TestFramework.Utilities;
 using NuGet.Packaging;
 using NuGet.Packaging.Signing;
 using Xunit.Abstractions;
+using System.Security.Cryptography.X509Certificates;
+using System.Linq;
+using System.Threading;
 
 namespace Microsoft.DotNet.PackageInstall.Tests
 {
@@ -250,11 +253,23 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         // https://aka.ms/netsdkinternal-certificate-rotate
         public void ItShouldHaveUpdateToDateCertificateSha()
         {
+            var samplePackage = DownloadSamplePackage(new PackageId("Microsoft.iOS.Ref"));
+
+            var firstPartyNuGetPackageSigningVerifier = new FirstPartyNuGetPackageSigningVerifier();
+            string shaFromPackage = GetShaFromSamplePackage(samplePackage);
+
+            firstPartyNuGetPackageSigningVerifier._firstPartyCertificateThumbprints.Contains(shaFromPackage).Should()
+                .BeTrue(
+                    $"Add {shaFromPackage} to the _firstPartyCertificateThumbprints of FirstPartyNuGetPackageSigningVerifier class. More info https://aka.ms/netsdkinternal-certificate-rotate");
+        }
+
+        private string DownloadSamplePackage(PackageId packageId)
+        {
             NuGetPackageDownloader nuGetPackageDownloader = new NuGetPackageDownloader(_tempDirectory, null,
                 new MockFirstPartyNuGetPackageSigningVerifier(),
                 _logger, restoreActionConfig: new RestoreActionConfig(NoCache: true));
 
-            var samplePackage = ExponentialRetry.ExecuteWithRetry<string>(
+            return ExponentialRetry.ExecuteWithRetry<string>(
                     action: DownloadMostRecentSamplePackageFromPublicFeed,
                     shouldStopRetry: result => result != null,
                     maxRetryCount: 3,
@@ -269,7 +284,7 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     return nuGetPackageDownloader.DownloadPackageAsync(
                             new PackageId("Microsoft.iOS.Ref"), null, includePreview: true,
                             packageSourceLocation: new PackageSourceLocation(
-                                sourceFeedOverrides: new[] {"https://api.nuget.org/v3/index.json"})).GetAwaiter()
+                                sourceFeedOverrides: new[] { "https://api.nuget.org/v3/index.json" })).GetAwaiter()
                         .GetResult();
                 }
                 catch (Exception)
@@ -277,26 +292,29 @@ namespace Microsoft.DotNet.PackageInstall.Tests
                     return null;
                 }
             }
+        }
 
-            var firstPartyNuGetPackageSigningVerifier = new FirstPartyNuGetPackageSigningVerifier();
-            string shaFromPackage = GetShaFromSamplePackage(samplePackage);
+        [WindowsOnlyFact]
+        public void GivenFirstPartyPackageItShouldReturnTrue()
+        {
+            var iosSamplePackage = DownloadSamplePackage(new PackageId("Microsoft.iOS.Ref"));
+            var androidSamplePackage = DownloadSamplePackage(new PackageId("Microsoft.Android.Ref"));
 
-            firstPartyNuGetPackageSigningVerifier._firstPartyCertificateThumbprints.Contains(shaFromPackage).Should()
-                .BeTrue(
-                    $"Add {shaFromPackage} to the _firstPartyCertificateThumbprints of FirstPartyNuGetPackageSigningVerifier class. More info https://aka.ms/netsdkinternal-certificate-rotate");
+            var package = new FirstPartyNuGetPackageSigningVerifier();
+            package.IsFirstParty(new FilePath(iosSamplePackage)).Should().BeTrue();
+            package.IsFirstParty(new FilePath(androidSamplePackage)).Should().BeTrue();
         }
 
         private string GetShaFromSamplePackage(string samplePackage)
         {
-            var packageReader = new PackageArchiveReader(samplePackage);
-            Directory.CreateDirectory(_tempDirectory.Value);
-            FilePath targetFilePath = _tempDirectory.WithFile(Path.GetRandomFileName());
-            packageReader.ExtractFile(".signature.p7s", targetFilePath.Value, _logger);
-            using var fs = new FileStream(targetFilePath.Value, FileMode.Open);
-            PrimarySignature primarySignature = PrimarySignature.Load(fs);
-            IX509CertificateChain certificateChain = SignatureUtility.GetCertificateChain(primarySignature);
-            var shaFromPackage = certificateChain[0].GetCertHashString(HashAlgorithmName.SHA256);
-            return shaFromPackage;
+            using (var packageReader = new PackageArchiveReader(samplePackage))
+            {
+                PrimarySignature primarySignature = packageReader.GetPrimarySignatureAsync(CancellationToken.None).GetAwaiter().GetResult();
+                using (IX509CertificateChain certificateChain = SignatureUtility.GetCertificateChain(primarySignature))
+                {
+                    return certificateChain.First().GetCertHashString(HashAlgorithmName.SHA256);
+                }
+            }
         }
 
         private static DirectoryPath GetUniqueTempProjectPathEachTest()

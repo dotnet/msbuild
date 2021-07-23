@@ -22,11 +22,6 @@
         <target state="translated">Cílová architektura pro publikování. Cílová architektura musí být zadaná v souboru projektu.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="translated">Publikujte svoji aplikaci jako aplikaci závislou na architektuře bez modulu runtime .NET. Aby bylo možné vaši aplikaci spustit, musí být nainstalovaný podporovaný modul runtime .NET.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -62,18 +57,6 @@ Ve výchozím nastavení je publikována aplikace závislá na architektuře.</t
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">Konfigurace pro publikování. Výchozí možností pro většinu projektů je Debug.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">Možnosti --self-contained a --no-self-contained jsou vzájemně konfliktní. Zadejte pouze jednu z nich.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publikujte se svou aplikací modul runtime pro .NET, aby ho nebylo nutné instalovat na cílovém počítači.
-Pokud se zadá identifikátor modulu runtime, výchozí hodnota je true.</target>
         <note />
       </trans-unit>
     </body>

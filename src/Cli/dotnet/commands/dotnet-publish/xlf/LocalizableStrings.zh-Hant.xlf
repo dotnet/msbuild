@@ -22,11 +22,6 @@
         <target state="translated">要為其進行發佈的目標架構。該架構必須在專案檔中指定。</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="translated">將您的應用程式發佈為不含 .NET 執行階段的架構相依應用程式。必須安裝支援的 .NET 執行階段才能執行您的應用程式。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -62,18 +57,6 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">要為其進行發佈的組態。大部分的專案預設為「偵錯」。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">'--self-contained' 與 '--no-self-contained' 選項互相衝突。請僅指定其中一個選項。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">將 .NET 執行階段發佈於您的應用程式中，以便目標電腦不必安裝執行階段。
-如有指定執行階段識別碼，則預設為 'true'。</target>
         <note />
       </trans-unit>
     </body>

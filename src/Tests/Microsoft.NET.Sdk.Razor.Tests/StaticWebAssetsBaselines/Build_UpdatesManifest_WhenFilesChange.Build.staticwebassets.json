@@ -1,19 +1,12 @@
 {
   "Version": 1,
-  "Hash": "vMyFyu7162k0nqLcGGUifadr9xhidMPHSwaAMeMm7Mg=",
+  "Hash": "aiswDsj8wTIe9IOTdGarMogZoYp\u002BjlrSUzNoruAKyn0=",
   "Source": "ComponentApp",
   "BasePath": "_content/ComponentApp",
   "Mode": "Default",
   "ManifestType": "Build",
   "RelatedManifests": [],
-  "DiscoveryPatterns": [
-    {
-      "Name": "ComponentApp\\wwwroot",
-      "ContentRoot": "${ProjectRoot}\\wwwroot\\",
-      "BasePath": "_content/ComponentApp",
-      "Pattern": "**"
-    }
-  ],
+  "DiscoveryPatterns": [],
   "Assets": [
     {
       "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\scopedcss\\bundle\\ComponentApp.styles.css",

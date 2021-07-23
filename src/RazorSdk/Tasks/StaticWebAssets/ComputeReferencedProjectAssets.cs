@@ -133,7 +133,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     switch (manifest.Mode)
                     {
                         case StaticWebAssetsManifest.ManifestModes.Default:
-                            if (asset.IsForReferencedProjectsOnly())
+                            if (asset.IsForCurrentProjectOnly())
                             {
                                 continue;
                             }

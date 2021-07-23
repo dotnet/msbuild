@@ -811,7 +811,7 @@ To install these workloads, run the following command: {1}</value>
     <value>NETSDK1176: Placeholder</value>
     <comment>{StrBegin="NETSDK1176: "} - This string is not used here, but is a placeholder for the error code, which is used by the "dotnet run" command.</comment>
   </data>
-  <data name="AppHostSigningFailed" xml:space="preserve">
+    <data name="AppHostSigningFailed" xml:space="preserve">
     <value>NETSDK1177: Failed to sign apphost with error code {1}: {0}</value>
     <comment>{StrBegin="NETSDK1177: "}</comment>
   </data>
@@ -819,5 +819,9 @@ To install these workloads, run the following command: {1}</value>
     <value>NETSDK1178: The project depends on the following workload packs that do not exist in any of the workloads available in this installation: {0}
 You may need to build the project on another operating system or architecture, or update the .NET SDK.</value>
     <comment>{StrBegin="NETSDK1178: "}</comment>
+  </data>
+    <data name="SelfContainedOptionShouldBeUsedWithRuntime" xml:space="preserve">
+    <value>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</value>
+    <comment>{StrBegin="NETSDK1179: "}</comment>
   </data>
 </root>

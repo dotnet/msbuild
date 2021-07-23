@@ -735,6 +735,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1150: 引用的项目“{0}”是非自包含可执行文件。自包含的可执行文件不能引用非自包含的可执行文件。</target>
         <note>{StrBegin="NETSDK1150: "}</note>
       </trans-unit>
+      <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
+        <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
+        <target state="new">NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</target>
+        <note>{StrBegin="NETSDK1179: "}</note>
+      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: "AdditionalProbingPaths" 被指定给 GenerateRuntimeConfigurationFiles，但被跳过，因为 "RuntimeConfigDevPath" 为空。</target>

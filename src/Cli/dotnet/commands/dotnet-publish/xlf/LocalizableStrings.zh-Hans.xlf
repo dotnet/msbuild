@@ -22,11 +22,6 @@
         <target state="translated">要发布的目标框架。必须在项目文件中指定目标框架。</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="translated">在没有 .NET 运行时的情况下将应用程序发布为依赖框架的应用程序。必须安装受支持的 .NET 运行时才能运行该应用程序。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -62,18 +57,6 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">要发布的配置。大多数项目的默认值是 "Debug"。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">"--self-contained" 和 "--no-self-contained" 选项彼此冲突。请仅指定其中一个选项。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">随应用程序一起发布 .NET 运行时，这样就不需要在目标计算机上安装运行时。
-如果指定了运行时标识符，则默认值为 "true"。</target>
         <note />
       </trans-unit>
     </body>
