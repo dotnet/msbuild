@@ -56,15 +56,20 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {
-            fileName = Path.Combine(DebugDumpPath(), fileName);
+            var extension = Path.GetExtension(fileName);
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+
+            var debugRoot = DebugDumpPath();
+            var fullPath = Path.Combine(debugRoot, fileName);
 
             var counter = 0;
-            while (File.Exists(fileName))
+            while (File.Exists(fullPath))
             {
-                fileName = $"{counter++}_{fileName}";
+                fileName = $"{fileNameWithoutExtension}_{counter++}{extension}";
+                fullPath = Path.Combine(debugRoot, fileName);
             }
 
-            return fileName;
+            return fullPath;
         }
     }
 }
