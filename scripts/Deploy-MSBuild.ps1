@@ -11,18 +11,18 @@ Param(
 Set-StrictMode -Version "Latest"
 $ErrorActionPreference = "Stop"
 
-function Copy-WithBackup ($origin, $destinationSuffix = "") {
-    $directoryPart = [IO.Path]::Combine($destination, $destinationSuffix, $origin.IntermediaryDirectories)
+function Copy-WithBackup ($origin, $destinationSubFolder = "") {
+    $directoryPart = [IO.Path]::Combine($destination, $destinationSubFolder, $origin.IntermediaryDirectories)
     $destinationPath = Join-Path -Path $directoryPart (Split-Path $origin.SourceFile -leaf)
 
-    $backupFolderWithSuffix = [IO.Path]::Combine($BackupFolder, $destinationSuffix)
+    $backupInto = [IO.Path]::Combine($BackupFolder, $destinationSubFolder)
 
     if (Test-Path $destinationPath -PathType Leaf) {
         # Back up previous copy of the file
-        if (!(Test-Path $backupFolderWithSuffix)) {
-            [system.io.directory]::CreateDirectory($backupFolderWithSuffix)
+        if (!(Test-Path $backupInto)) {
+            [system.io.directory]::CreateDirectory($backupInto)
         }
-        Copy-Item $destinationPath $backupFolderWithSuffix -ErrorAction Stop
+        Copy-Item $destinationPath $backupInto -ErrorAction Stop
     }
 
     if (!(Test-Path $directoryPart)) {
