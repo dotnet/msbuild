@@ -11,13 +11,18 @@ Param(
 Set-StrictMode -Version "Latest"
 $ErrorActionPreference = "Stop"
 
-function Copy-WithBackup ($origin) {
-    $directoryPart = Join-Path -Path $destination $origin.IntermediaryDirectories
+function Copy-WithBackup ($origin, $destinationSuffix = "") {
+    $directoryPart = [IO.Path]::Combine($destination, $destinationSuffix, $origin.IntermediaryDirectories)
     $destinationPath = Join-Path -Path $directoryPart (Split-Path $origin.SourceFile -leaf)
+
+    $backupFolderWithSuffix = [IO.Path]::Combine($BackupFolder, $destinationSuffix)
 
     if (Test-Path $destinationPath -PathType Leaf) {
         # Back up previous copy of the file
-        Copy-Item $destinationPath $BackupFolder -ErrorAction Stop
+        if (!(Test-Path $backupFolderWithSuffix)) {
+            [system.io.directory]::CreateDirectory($backupFolderWithSuffix)
+        }
+        Copy-Item $destinationPath $backupFolderWithSuffix -ErrorAction Stop
     }
 
     if (!(Test-Path $directoryPart)) {
@@ -88,13 +93,8 @@ $filesToCopyToBin = @(
 
 if ($runtime -eq "Desktop") {
     $runtimeSpecificFiles = @(
-        FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
-        FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
         FileToCopy "artifacts\bin\Microsoft.Build.Conversion\$configuration\$targetFramework\Microsoft.Build.Conversion.Core.dll"
         FileToCopy "artifacts\bin\Microsoft.Build.Engine\$configuration\$targetFramework\Microsoft.Build.Engine.dll"
-
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
 
         FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"
@@ -123,10 +123,40 @@ if ($runtime -eq "Desktop") {
     )
 }
 
+if ($runtime -eq "Desktop") {
+    $adm64Source = "artifacts\bin\MSBuild\x64\$configuration\$targetFramework";    
+    $x86files = @(
+        FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
+        FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
+    )
+    $amd64files = @(
+        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe"
+        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe.config"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.pdb"
+    )
+}
+
 $filesToCopyToBin += $runtimeSpecificFiles
 
 foreach ($file in $filesToCopyToBin) {
     Copy-WithBackup $file
+}
+
+if ($runtime -eq "Desktop") {
+    foreach ($file in $x86files) {
+        Copy-WithBackup $file
+    }
+
+    foreach ($file in $filesToCopyToBin) {
+        Copy-WithBackup $file "amd64"
+    }
+
+    foreach ($file in $amd64files) {
+        Copy-WithBackup $file "amd64"
+    }
 }
 
 Write-Host -ForegroundColor Green "Copy succeeded"
