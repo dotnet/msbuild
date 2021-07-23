@@ -327,6 +327,12 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     result.AppendLine("--perfmap");
                     result.AppendLine($"--perfmap-path:{Path.GetDirectoryName(_outputPDBImage)}");
+                    
+                    string perfmapFormatVersion = Crossgen2Tool.GetMetadata(MetadataKeys.PerfmapFormatVersion);
+                    if (!string.IsNullOrEmpty(perfmapFormatVersion))
+                    {
+                        result.AppendLine($"--perfmap-format-version:{perfmapFormatVersion}");
+                    }
                 }
             }
 
