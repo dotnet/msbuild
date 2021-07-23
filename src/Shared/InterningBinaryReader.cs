@@ -7,6 +7,10 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 
+#if !NET35
+using System.Buffers;
+#endif
+
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 using Microsoft.NET.StringTools;
@@ -146,15 +150,25 @@ namespace Microsoft.Build
                         charsRead = _decoder.GetChars(rawBuffer, rawPosition, n, charBuffer, 0);
                         return Strings.WeakIntern(charBuffer.AsSpan(0, charsRead));
                     }
-
+#if !NET35
+                    resultBuffer ??= ArrayPool<char>.Shared.Rent(stringLength); // Actual string length in chars may be smaller.
+#else
+                    // Since .NET35 is used only in rare cases of .NET 3.5 TaskHost process we decided left it as is
                     resultBuffer ??= new char[stringLength]; // Actual string length in chars may be smaller.
+#endif
                     charsRead += _decoder.GetChars(rawBuffer, rawPosition, n, resultBuffer, charsRead);
 
                     currPos += n;
                 }
                 while (currPos < stringLength);
 
-                return Strings.WeakIntern(resultBuffer.AsSpan(0, charsRead));
+                var retval = Strings.WeakIntern(resultBuffer.AsSpan(0, charsRead));
+#if !NET35
+                // It is required that resultBuffer is always not null
+                // and rented by ArrayPool so we can simply return it to back to the Pool
+                ArrayPool<char>.Shared.Return(resultBuffer);
+#endif
+                return retval;
             }
             catch (Exception e)
             {
@@ -188,7 +202,7 @@ namespace Microsoft.Build
             return new Buffer();
         }
 
-        #region IDisposable pattern
+#region IDisposable pattern
 
         /// <summary>
         /// Returns our buffer to the pool if we were not passed one by the caller.
@@ -204,7 +218,7 @@ namespace Microsoft.Build
             base.Dispose(disposing);
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Create a BinaryReader. It will either be an interning reader or standard binary reader
