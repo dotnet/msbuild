@@ -82,6 +82,8 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.CrossTargeting.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.CurrentVersion.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.targets"
+
+    FileToCopy "$bootstrapBinDirectory\Microsoft.Common.tasks"
 )
 
 if ($runtime -eq "Desktop") {
