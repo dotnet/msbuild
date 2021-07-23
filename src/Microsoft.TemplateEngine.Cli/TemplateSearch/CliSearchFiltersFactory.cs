@@ -40,12 +40,12 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         private Func<TemplatePackageSearchData, bool> AlreadyInstalledFilter =>
             (templatePackageSearchData) =>
             {
-                if (!_existingTemplatePackageFilterData!.TryGetValue(templatePackageSearchData.PackageInfo.Name, out string? existingPackVersion))
+                if (!_existingTemplatePackageFilterData!.TryGetValue(templatePackageSearchData.Name, out string? existingPackVersion))
                 {
                     // no existing install of this pack - don't filter it
                     return true;
                 }
-                return existingPackVersion != templatePackageSearchData.PackageInfo.Version;
+                return existingPackVersion != templatePackageSearchData.Version;
             };
 
         internal static Func<TemplatePackageSearchData, IReadOnlyList<ITemplateInfo>> GetMatchingTemplatesFilter (INewCommandInput commandInput)
@@ -54,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             {
                 InMemoryHostSpecificDataLoader hostDataLoader = new InMemoryHostSpecificDataLoader(templatePackageSearchData);
                 IEnumerable<TemplateSearchData> templates = templatePackageSearchData.Templates.Where(template => IsNotHiddenBySearchFile(template));
-                IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(templates.Select(t => t.TemplateInfo));
+                IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(templates);
                 IEnumerable<Func<TemplateGroup, MatchInfo?>> groupFilters = new[]
                 {
                     CliFilters.NameTemplateGroupFilter(commandInput.SearchNameCriteria)
@@ -88,7 +88,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 && CliTemplateSearchCoordinator.SupportedFilters
                         .OfType<PackageFilterOption>()
                         .Select(filter => filter.PackageMatchFilter)
-                        .All(packFilter => packFilter(commandInput)(templatePackageSearchData.PackageInfo));
+                        .All(packFilter => packFilter(commandInput)(templatePackageSearchData));
             };
         }
 
@@ -104,7 +104,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                     if (templateData.AdditionalData.TryGetValue(CliTemplateSearchCoordinatorFactory.CliHostDataName, out object? hostDataRaw)
                         && hostDataRaw is HostSpecificTemplateData hostData)
                     {
-                        hostSpecificData[templateData.TemplateInfo.Identity] = hostData;
+                        hostSpecificData[((ITemplateInfo)templateData).Identity] = hostData;
                     }
                 }
                 _hostSpecificData = hostSpecificData;
