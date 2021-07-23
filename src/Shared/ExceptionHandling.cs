@@ -46,6 +46,7 @@ namespace Microsoft.Build.Shared
         private static string GetDebugDumpPath()
         {
             string debugPath =
+// Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
 #if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
