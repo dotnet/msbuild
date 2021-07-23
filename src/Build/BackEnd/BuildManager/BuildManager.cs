@@ -523,7 +523,7 @@ namespace Microsoft.Build.Execution
             // VS builds discard many msbuild events so attach a binlogger to capture them all.
             IEnumerable<ILogger> AppendDebuggingLoggers(IEnumerable<ILogger> loggers)
             {
-                if (CurrentProcessMatchesDebugName() is false ||
+                if (DebugUtils.ShouldDebugCurrentProcess is false ||
                     Traits.Instance.DebugEngine is false)
                 {
                     return loggers;
@@ -586,7 +586,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            if (!CurrentProcessMatchesDebugName())
+            if (!DebugUtils.ShouldDebugCurrentProcess)
             {
                 return;
             }
@@ -605,15 +605,6 @@ namespace Microsoft.Build.Execution
                     Console.ReadLine();
                     break;
             }
-        }
-
-        private static bool CurrentProcessMatchesDebugName()
-        {
-            var processNameToBreakInto = Environment.GetEnvironmentVariable("MSBuildDebugBuildManagerOnStartProcessName");
-            var thisProcessMatchesName = string.IsNullOrWhiteSpace(processNameToBreakInto) ||
-                                         Process.GetCurrentProcess().ProcessName.Contains(processNameToBreakInto);
-
-            return thisProcessMatchesName;
         }
 
         private void InitializeProjectCacheService(
