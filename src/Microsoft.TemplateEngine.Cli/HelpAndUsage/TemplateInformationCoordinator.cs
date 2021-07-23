@@ -326,6 +326,8 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             INewCommandInput commandInput,
             CancellationToken cancellationToken)
         {
+            IEnumerable<ITemplateInfo> curatedTemplates = await GetCuratedListAsync(commandInput, cancellationToken).ConfigureAwait(false);
+
             Reporter.Output.WriteLine(string.Format(
                 LocalizableStrings.TemplateInformationCoordinator_DotnetNew_Description,
                 commandInput.New3CommandExample()));
@@ -334,7 +336,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine(string.Format(
               LocalizableStrings.TemplateInformationCoordinator_DotnetNew_TemplatesHeader,
               commandInput.New3CommandExample()));
-            await ShowCuratedListAsync(commandInput, cancellationToken).ConfigureAwait(false);
+            DisplayTemplateList(curatedTemplates, commandInput);
 
             Reporter.Output.WriteLine(LocalizableStrings.TemplateInformationCoordinator_DotnetNew_ExampleHeader);
             Reporter.Output.WriteCommand(commandInput.InstantiateTemplateExample("console"));
@@ -420,7 +422,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
         /// <summary>
         /// Displays curated list of templates for dotnet new command.
         /// </summary>
-        private async Task ShowCuratedListAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
+        private async Task<IEnumerable<ITemplateInfo>> GetCuratedListAsync(INewCommandInput commandInput, CancellationToken cancellationToken)
         {
             string[] curatedGroupIdentityList = new[]
             {
@@ -433,8 +435,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             };
 
             IReadOnlyList<ITemplateInfo> templates = await _templatePackageManager.GetTemplatesAsync(cancellationToken).ConfigureAwait(false);
-            IEnumerable<ITemplateInfo> filteredTemplates = templates.Where(t => curatedGroupIdentityList.Contains(t.GroupIdentity, StringComparer.OrdinalIgnoreCase));
-            DisplayTemplateList(filteredTemplates, commandInput);
+            return templates.Where(t => curatedGroupIdentityList.Contains(t.GroupIdentity, StringComparer.OrdinalIgnoreCase));
         }
 
         /// <summary>
