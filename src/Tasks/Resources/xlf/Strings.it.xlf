@@ -1326,6 +1326,11 @@
         <target state="translated">MSB3441: non è possibile ottenere il nome dell'assembly per "{0}". {1}</target>
         <note>{StrBegin="MSB3441: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.InvalidLookupTableFormat">
+        <source>MSB3983: The PlatformLookupTable '{0}' is in an invalid format and won't be used. The format should be 'A=B;C=D'.</source>
+        <target state="new">MSB3983: The PlatformLookupTable '{0}' is in an invalid format and won't be used. The format should be 'A=B;C=D'.</target>
+        <note>{StrBegin="MSB3983: "}</note>
+      </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoCompatiblePlatformFound">
         <source>MSB3981: Could not determine what '{0}' should be built as. The project will be built normally.</source>
         <target state="new">MSB3981: Could not determine what '{0}' should be built as. The project will be built normally.</target>

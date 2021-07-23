@@ -2905,6 +2905,10 @@
     <value>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' metadata set. It will be built without a specified platform.</value>
     <comment>{StrBegin="MSB3982: "}</comment>
   </data>
+  <data name="GetCompatiblePlatform.InvalidLookupTableFormat">
+    <value>MSB3983: The PlatformLookupTable '{0}' is in an invalid format and won't be used. The format should be 'A=B;C=D'.</value>
+    <comment>{StrBegin="MSB3983: "}</comment>
+  </data>
 
   <!--
         The tasks message bucket is: MSB3001 - MSB3999

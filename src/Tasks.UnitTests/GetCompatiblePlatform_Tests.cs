@@ -121,10 +121,33 @@ namespace Microsoft.Build.Tasks.UnitTests
                 PlatformLookupTable = "AnyCPU=x64",
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
-            
+
             task.Execute();
             // When the task logs a warning, it does not set NearestPlatform
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+            ((MockEngine)task.BuildEngine).AssertLogContains("MSB3981");
+        }
+
+        [Fact]
+        public void FailsWhenProjectReferenceHasNoPlatformOptions()
+        {
+            // Task should log a warning when a ProjectReference has no options to build as.
+            // It will continue and have no NearestPlatform metadata.
+            TaskItem projectReference = new TaskItem("foo.bar");
+            projectReference.SetMetadata("PlatformOptions", "");
+
+            GetCompatiblePlatform task = new GetCompatiblePlatform()
+            {
+                BuildEngine = new MockEngine(_output),
+                CurrentProjectPlatform = "x86",
+                PlatformLookupTable = "AnyCPU=x64",
+                AnnotatedProjects = new TaskItem[] { projectReference },
+            };
+
+            task.Execute();
+            // When the task logs a warning, it does not set NearestPlatform
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+            ((MockEngine)task.BuildEngine).AssertLogContains("MSB3982");
         }
 
         /// <summary>
@@ -139,12 +162,17 @@ namespace Microsoft.Build.Tasks.UnitTests
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
-                CurrentProjectPlatform = "x86",
+                CurrentProjectPlatform = "AnyCPU",
                 PlatformLookupTable = "AnyCPU=;A=B", // invalid format
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
 
-            Should.Throw<InternalErrorException>(() => task.Execute());
+            task.Execute();
+            // When the platformlookuptable is in an invalid format, it is discarded.
+            // There shouldn't have been a translation found from AnyCPU to anything.
+            // Meaning the projectreference would not have NearestPlatform set.
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+            ((MockEngine)task.BuildEngine).AssertLogContains("MSB3983");
         }
 
         /// <summary>
@@ -154,18 +182,23 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void FailsOnInvalidFormatProjectReferenceLookupTable()
         {
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x64");
-            projectReference.SetMetadata("PlatformLookupTable", "a=;b=d");
+            projectReference.SetMetadata("PlatformOptions", "x64;x86");
+            projectReference.SetMetadata("PlatformLookupTable", "x86=x;b=d");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
-                CurrentProjectPlatform = "x86",
-                PlatformLookupTable = "AnyCPU=x;A=B", // invalid format
+                CurrentProjectPlatform = "AnyCPU",
+                PlatformLookupTable = "AnyCPU=x86;A=B", // invalid format
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
+            
+            task.Execute();
 
-            Should.Throw<InternalErrorException>(() => task.Execute());
+            // A ProjectReference PlatformLookupTable should take priority, but is thrown away when
+            // it has an invalid format. The current project's PLT should be the next priority.
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("x86");
+            ((MockEngine)task.BuildEngine).AssertLogContains("MSB3983");
         }
     }
 }

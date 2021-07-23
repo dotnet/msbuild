@@ -137,7 +137,12 @@ namespace Microsoft.Build.Tasks
             {
                 string[] keyVal = s.Split(MSBuildConstants.EqualsChar, StringSplitOptions.RemoveEmptyEntries);
 
-                ErrorUtilities.VerifyThrow(keyVal.Length > 1, "PlatformLookupTable must be of the form A=B;C=D");
+                // Invalid table, don't use it.
+                if (keyVal.Length <= 1)
+                {
+                    Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.InvalidLookupTableFormat", stringTable);
+                    return null;
+                }
 
                 table[keyVal[0]] = keyVal[1];
             }
