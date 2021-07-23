@@ -366,6 +366,7 @@ namespace Microsoft.TemplateEngine.Cli
             if (reinitFlag)
             {
                 EnvironmentSettings.Host.FileSystem.DirectoryDelete(EnvironmentSettings.Paths.HostVersionSettingsDir, true);
+                EnvironmentSettings.Host.FileSystem.CreateDirectory(EnvironmentSettings.Paths.HostVersionSettingsDir);
             }
 
             if (commandInput.HasDebuggingFlag("--debug:showconfig"))
