@@ -246,10 +246,11 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 .WithSource();
 
             var pack = new MSBuildCommand(Log, "Pack", projectDirectory.Path);
-            var result = pack.Execute();
+            pack.WithWorkingDirectory(projectDirectory.TestRoot);
+            var result = pack.Execute("/bl");
 
-            var intermediateOutputPath = pack.GetIntermediateDirectory("netstandard2.0", "Debug").ToString();
-            var outputPath = pack.GetOutputDirectory("netstandard2.0", "Debug").ToString();
+            var intermediateOutputPath = pack.GetIntermediateDirectory("net6.0", "Debug").ToString();
+            var outputPath = pack.GetOutputDirectory("net6.0", "Debug").ToString();
 
             new FileInfo(Path.Combine(outputPath, "PackageLibraryTransitiveDependency.dll")).Should().Exist();
 

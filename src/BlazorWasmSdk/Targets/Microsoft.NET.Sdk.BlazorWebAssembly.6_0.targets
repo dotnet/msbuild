@@ -127,6 +127,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup Condition="'@(_DotNetJsItem->Count())' != '0'">
       <ReferenceCopyLocalPaths Remove="@(_DotNetJsItem)" />
       <_DotnetJsStaticWebAsset Include="@(_DotnetJsStaticWebAssetCandidate->'%(ContentRoot)_framework\dotnet.js')" />
+      <_BlazorStaticWebAsset Include="@(_DotnetJsStaticWebAsset)" />
     </ItemGroup>
   </Target>
 
@@ -314,7 +315,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="_AddBlazorWasmStaticWebAssets" DependsOnTargets="_ResolveBlazorWasmOutputs">
     <ItemGroup>
       <StaticWebAsset Include="@(_BlazorStaticWebAsset)" />
-      <StaticWebAsset Include="@(_DotnetJsStaticWebAsset)" />
       <StaticWebAsset Include="@(_BlazorGzipStaticWebAsset)" />
       <StaticWebAsset Include="@(_BuildBlazorBootJsonStaticWebAsset)" />
     </ItemGroup>    

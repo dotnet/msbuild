@@ -86,9 +86,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             for (var j = 0; j < ProjectReferences.Length; j++)
             {
                 var projectReference = ProjectReferences[j];
+                var referenceMetadata = projectReference.GetMetadata("MSBuildSourceProjectFile");
+                // All project references should define MSBuildSourceProjectFile but in the ASP.NET Core some special (malformed) references do not.
+                // We can be more lenient here and fallback to the project reference ItemSpec if not present.
+                referenceMetadata = !string.IsNullOrEmpty(referenceMetadata) ? referenceMetadata : projectReference.ItemSpec;
                 var matchPath = string.Equals(
                     Path.GetFullPath(manifest.GetMetadata("ProjectFile")),
-                    Path.GetFullPath(projectReference.GetMetadata("MSBuildSourceProjectFile")),
+                    Path.GetFullPath(referenceMetadata),
                     StringComparison.Ordinal);
 
                 if (matchPath)
