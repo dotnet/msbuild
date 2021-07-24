@@ -51,7 +51,7 @@ namespace Microsoft.Build.Shared
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
                 ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                    ? DebugUtils.DebugDumpPath()
+                    ? DebugUtils.DebugPath
                     : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #endif
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -15,6 +16,25 @@ namespace Microsoft.Build.Shared.Debugging
             CentralNode,
             OutOfProcNode,
             OutOfProcTaskHostNode
+        }
+
+        static DebugUtils()
+        {
+            string environmentDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            var debugDirectory = environmentDebugPath ?? Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
+
+            if (Traits.Instance.DebugEngine)
+            {
+                FileUtilities.EnsureDirectoryExists(debugDirectory);
+
+                // Out of proc nodes do not know the startup directory so set the environment variable for them.
+                if (string.IsNullOrWhiteSpace(environmentDebugPath))
+                {
+                    Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugDirectory);
+                }
+            }
+
+            DebugPath = debugDirectory;
         }
 
         private static readonly Lazy<NodeMode> ProcessNodeMode = new(
@@ -57,27 +77,20 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
 
-        public static string DebugDumpPath()
-        {
-            var debugDirectory = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH") ?? Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
-            FileUtilities.EnsureDirectoryExists(debugDirectory);
-
-            return debugDirectory;
-        }
+        public static string DebugPath { get; }
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {
             var extension = Path.GetExtension(fileName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
 
-            var debugRoot = DebugDumpPath();
-            var fullPath = Path.Combine(debugRoot, fileName);
+            var fullPath = Path.Combine(DebugPath, fileName);
 
             var counter = 0;
             while (File.Exists(fullPath))
             {
                 fileName = $"{fileNameWithoutExtension}_{counter++}{extension}";
-                fullPath = Path.Combine(debugRoot, fileName);
+                fullPath = Path.Combine(DebugPath, fileName);
             }
 
             return fullPath;

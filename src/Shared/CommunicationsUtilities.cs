@@ -179,6 +179,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
+#if !CLR2COMPATIBILITY
+            // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
+            // Need to ensure that constructor is called before this method returns in order to capture its env var write.
+            // Otherwise the env var is not captured and thus gets deleted when RequiestBuilder resets the environment based on the cached results of this method.
+            ErrorUtilities.VerifyThrowInternalNull(DebugUtils.DebugPath, nameof(DebugUtils.DebugPath));
+#endif
+
             Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
             if (NativeMethodsShared.IsWindows)
@@ -561,7 +568,7 @@ namespace Microsoft.Build.Internal
                         Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
                         ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                            ? DebugUtils.DebugDumpPath()
+                            ? DebugUtils.DebugPath
                             : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #endif
 
