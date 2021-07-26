@@ -7,6 +7,10 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 
+#if !CLR2COMPATIBILITY
+using System.Buffers;
+#endif
+
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 using Microsoft.NET.StringTools;
@@ -71,6 +75,7 @@ namespace Microsoft.Build
         /// </summary>
         override public String ReadString()
         {
+            char[] resultBuffer = null;
             try
             {
                 MemoryStream memoryStream = this.BaseStream as MemoryStream;
@@ -94,7 +99,6 @@ namespace Microsoft.Build
                 }
 
                 char[] charBuffer = _buffer.CharBuffer;
-                char[] resultBuffer = null;
                 do
                 {
                     readLength = ((stringLength - currPos) > MaxCharsBuffer) ? MaxCharsBuffer : (stringLength - currPos);
@@ -146,21 +150,37 @@ namespace Microsoft.Build
                         charsRead = _decoder.GetChars(rawBuffer, rawPosition, n, charBuffer, 0);
                         return Strings.WeakIntern(charBuffer.AsSpan(0, charsRead));
                     }
-
+#if !CLR2COMPATIBILITY
+                    resultBuffer ??= ArrayPool<char>.Shared.Rent(stringLength); // Actual string length in chars may be smaller.
+#else
+                    // Since NET35 is only used in rare TaskHost processes, we decided to leave it as-is.
                     resultBuffer ??= new char[stringLength]; // Actual string length in chars may be smaller.
+#endif
                     charsRead += _decoder.GetChars(rawBuffer, rawPosition, n, resultBuffer, charsRead);
 
                     currPos += n;
                 }
                 while (currPos < stringLength);
 
-                return Strings.WeakIntern(resultBuffer.AsSpan(0, charsRead));
+                var retval = Strings.WeakIntern(resultBuffer.AsSpan(0, charsRead));
+
+                return retval;
             }
             catch (Exception e)
             {
                 Debug.Assert(false, e.ToString());
                 throw;
             }
+#if !CLR2COMPATIBILITY
+            finally
+            {
+                // resultBuffer shall always be either Rented or null
+                if (resultBuffer != null)
+                {
+                    ArrayPool<char>.Shared.Return(resultBuffer);
+                }
+            }
+#endif
         }
 
         /// <summary>
@@ -188,7 +208,7 @@ namespace Microsoft.Build
             return new Buffer();
         }
 
-        #region IDisposable pattern
+#region IDisposable pattern
 
         /// <summary>
         /// Returns our buffer to the pool if we were not passed one by the caller.
@@ -204,7 +224,7 @@ namespace Microsoft.Build
             base.Dispose(disposing);
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Create a BinaryReader. It will either be an interning reader or standard binary reader
