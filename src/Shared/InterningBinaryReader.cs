@@ -75,6 +75,7 @@ namespace Microsoft.Build
         /// </summary>
         override public String ReadString()
         {
+            char[] resultBuffer = null;
             try
             {
                 MemoryStream memoryStream = this.BaseStream as MemoryStream;
@@ -98,7 +99,6 @@ namespace Microsoft.Build
                 }
 
                 char[] charBuffer = _buffer.CharBuffer;
-                char[] resultBuffer = null;
                 do
                 {
                     readLength = ((stringLength - currPos) > MaxCharsBuffer) ? MaxCharsBuffer : (stringLength - currPos);
@@ -163,11 +163,7 @@ namespace Microsoft.Build
                 while (currPos < stringLength);
 
                 var retval = Strings.WeakIntern(resultBuffer.AsSpan(0, charsRead));
-#if !CLR2COMPATIBILITY
-                // It is required that resultBuffer is always not null
-                // and rented by ArrayPool so we can simply return it to back to the Pool
-                ArrayPool<char>.Shared.Return(resultBuffer);
-#endif
+
                 return retval;
             }
             catch (Exception e)
@@ -175,6 +171,16 @@ namespace Microsoft.Build
                 Debug.Assert(false, e.ToString());
                 throw;
             }
+#if !CLR2COMPATIBILITY
+            finally
+            {
+                // resultBuffer shall always be either Rented or null
+                if (resultBuffer != null)
+                {
+                    ArrayPool<char>.Shared.Return(resultBuffer);
+                }
+            }
+#endif
         }
 
         /// <summary>
