@@ -34,7 +34,7 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftNetCompilersToolsetVersion>4.0.0-2.21320.2</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.0.0-preview.2.129</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>6.0.0-preview.3.158</NuGetBuildTasksVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
