@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] CopiedFiles { get; private set; }
 
         [Output]
-        public bool CopiedAtLeastOneFile { get; private set; }
+        public bool WroteAtLeastOneFile { get; private set; }
 
         /// <summary>
         /// Whether to overwrite files in the destination
@@ -301,9 +301,9 @@ namespace Microsoft.Build.Tasks
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
             }
-
+            
             // Files were successfully copied or linked. Those are equivalent here.
-           CopiedAtLeastOneFile = true;
+            WroteAtLeastOneFile = true;
 
             destinationFileState.Reset();
 

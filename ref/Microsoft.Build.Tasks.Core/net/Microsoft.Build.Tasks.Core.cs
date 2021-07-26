@@ -194,8 +194,6 @@ namespace Microsoft.Build.Tasks
     {
         public Copy() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public bool CopiedAtLeastOneFile { get { throw null; } }
-        [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] CopiedFiles { get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] DestinationFiles { get { throw null; } set { } }
@@ -209,6 +207,8 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] SourceFiles { get { throw null; } set { } }
         public bool UseHardlinksIfPossible { get { throw null; } set { } }
         public bool UseSymboliclinksIfPossible { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public bool WroteAtLeastOneFile { get { throw null; } }
         public void Cancel() { }
         public override bool Execute() { throw null; }
     }
