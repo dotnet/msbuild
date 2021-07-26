@@ -124,7 +124,6 @@ if ($runtime -eq "Desktop") {
 }
 
 if ($runtime -eq "Desktop") {
-    $adm64Source = "artifacts\bin\MSBuild\x64\$configuration\$targetFramework";    
     $x86files = @(
         FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
         FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
