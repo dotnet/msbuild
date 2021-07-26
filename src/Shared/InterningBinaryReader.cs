@@ -153,7 +153,7 @@ namespace Microsoft.Build
 #if !NET35
                     resultBuffer ??= ArrayPool<char>.Shared.Rent(stringLength); // Actual string length in chars may be smaller.
 #else
-                    // Since .NET35 is used only in rare cases of .NET 3.5 TaskHost process we decided left it as is
+                    // Since NET35 is only used in rare TaskHost processes, we decided to leave it as-is.
                     resultBuffer ??= new char[stringLength]; // Actual string length in chars may be smaller.
 #endif
                     charsRead += _decoder.GetChars(rawBuffer, rawPosition, n, resultBuffer, charsRead);
@@ -164,8 +164,7 @@ namespace Microsoft.Build
 
                 var retval = Strings.WeakIntern(resultBuffer.AsSpan(0, charsRead));
 #if !NET35
-                // It is required that resultBuffer is always not null
-                // and rented by ArrayPool so we can simply return it to back to the Pool
+                // resultBuffer is never null, so we can simply return it to the Pool
                 ArrayPool<char>.Shared.Return(resultBuffer);
 #endif
                 return retval;
