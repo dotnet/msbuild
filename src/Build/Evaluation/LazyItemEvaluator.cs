@@ -152,7 +152,7 @@ namespace Microsoft.Build.Evaluation
         private class MemoizedOperation : IItemOperation
         {
             public LazyItemOperation Operation { get; }
-            private Dictionary<ISet<string>, ImmutableList<ItemData>> _cache;
+            private Dictionary<ISet<string>, OrderedItemDataCollection> _cache;
 
             private bool _isReferenced;
 #if DEBUG
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Evaluation
                 Operation = operation;
             }
 
-            public void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
 #if DEBUG
                 CheckInvariant();
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Evaluation
             }
 #endif
 
-            public bool TryGetFromCache(ISet<string> globsToIgnore, out ImmutableList<ItemData> items)
+            public bool TryGetFromCache(ISet<string> globsToIgnore, out OrderedItemDataCollection items)
             {
                 if (_cache != null)
                 {
@@ -219,14 +219,296 @@ namespace Microsoft.Build.Evaluation
                 _isReferenced = true;
             }
 
-            private void AddItemsToCache(ImmutableHashSet<string> globsToIgnore, ImmutableList<ItemData> items)
+            private void AddItemsToCache(ImmutableHashSet<string> globsToIgnore, OrderedItemDataCollection items)
             {
                 if (_cache == null)
                 {
-                    _cache = new Dictionary<ISet<string>, ImmutableList<ItemData>>();
+                    _cache = new Dictionary<ISet<string>, OrderedItemDataCollection>();
                 }
 
                 _cache[globsToIgnore] = items;
+            }
+        }
+
+        /// <summary>
+        /// A collection of ItemData that maintains insertion order and internally optimizes some access patterns, e.g. bulk removal
+        /// based on normalized item values.
+        /// </summary>
+        internal sealed class OrderedItemDataCollection
+        {
+            #region Inner types
+
+            /// <summary>
+            /// An efficient multi-value wrapper holding one or more versioned items.
+            /// </summary>
+            internal struct DictionaryValue : IEnumerable<I>
+            {
+                /// <summary>
+                /// The version of the containing collection at the time this value was last changed.
+                /// </summary>
+                private int _version;
+
+                /// <summary>
+                /// Holds one value or a list of values.
+                /// </summary>
+                private object _value;
+
+                public DictionaryValue(int version, I item)
+                {
+                    _version = version;
+                    _value = item;
+                }
+
+                public void Add(int version, I item)
+                {
+                    if (_value is List<I> list)
+                    {
+                        if (version != _version)
+                        {
+                            list = new List<I>(list);
+                        }
+                        list.Add(item);
+                    }
+                    else
+                    {
+                        list = new List<I>
+                        {
+                            (I)_value,
+                            item
+                        };
+                    }
+                    _version = version;
+                    _value = list;
+                }
+
+                public IEnumerator<I> GetEnumerator()
+                {
+                    if (_value is I item)
+                    {
+                        yield return item;
+                    }
+                    else if (_value is IEnumerable<I> enumerable)
+                    {
+                        foreach (I enumerableItem in enumerable)
+                        {
+                            yield return enumerableItem;
+                        }
+                    }
+                }
+
+                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+            }
+
+            /// <summary>
+            /// A mutable and enumerable version of <see cref="OrderedItemDataCollection"/>.
+            /// </summary>
+            internal sealed class Builder : IEnumerable<ItemData>
+            {
+                /// <summary>
+                /// The current version of the collection.
+                /// </summary>
+                private int _version;
+
+                /// <summary>
+                /// The list of items in the collection. Defines the enumeration order.
+                /// </summary>
+                private ImmutableList<ItemData>.Builder _listBuilder;
+
+                /// <summary>
+                /// A dictionary of items keyed by their normalized value.
+                /// </summary>
+                private ImmutableDictionary<string, DictionaryValue>.Builder _dictionaryBuilder;
+
+                internal Builder(int version, ImmutableList<ItemData>.Builder listBuilder, ImmutableDictionary<string, DictionaryValue>.Builder dictionaryBuilder)
+                {
+                    _version = version;
+                    _listBuilder = listBuilder;
+                    _dictionaryBuilder = dictionaryBuilder;
+                }
+
+                #region IEnumerable implementation
+
+                public IEnumerator<ItemData> GetEnumerator() => _listBuilder.GetEnumerator();
+
+                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _listBuilder.GetEnumerator();
+
+                #endregion
+
+                public int Count => _listBuilder.Count;
+
+                public ItemData this[int index]
+                {
+                    get { return _listBuilder[index]; }
+                    set
+                    {
+                        _listBuilder[index] = value;
+                        // This is a rare operation, don't bother updating the dictionary for now. It will be recreated as needed.
+                        _dictionaryBuilder = null;
+                    }
+                }
+
+                public void Add(ItemData data)
+                {
+                    _listBuilder.Add(data);
+                    if (_dictionaryBuilder != null)
+                    {
+                        AddToDictionary(data.Item);
+                    }
+                }
+
+                public void Clear()
+                {
+                    _listBuilder.Clear();
+                    _dictionaryBuilder?.Clear();
+                }
+
+                public void RemoveAll(ICollection<I> itemsToRemove)
+                {
+                    _listBuilder.RemoveAll(item => itemsToRemove.Contains(item.Item));
+                    // This is a rare operation, don't bother updating the dictionary for now. It will be recreated as needed.
+                    _dictionaryBuilder = null;
+                }
+
+                /// <summary>
+                /// Removes items from the collection that match the given ItemSpec.
+                /// </summary>
+                /// <remarks>
+                /// If <see cref="_dictionaryBuilder"/> does not exist yet, it is created in this method to avoid the cost of comparing each item
+                /// being removed with each item already in the collection. The dictionary is kept in sync with the <see cref="_listBuilder"/>
+                /// as long as practical. If an operation would result in too much of such work, the dictionary is simply dropped and recreated
+                /// later if/when needed.
+                /// </remarks>
+                public void RemoveMatchingItems(ItemSpec<P, I> itemSpec)
+                {
+                    HashSet<I> items = null;
+                    var dictionaryBuilder = GetOrCreateDictionaryBuilder();
+                    foreach (var fragment in itemSpec.Fragments)
+                    {
+                        IEnumerable<string> referencedItems = fragment.GetReferencedItems();
+                        if (referencedItems != null)
+                        {
+                            // The fragment can enumerate its referenced items, we can do dictionary lookups.
+                            foreach (var spec in referencedItems)
+                            {
+                                string key = FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory);
+                                if (dictionaryBuilder.TryGetValue(key, out var multiValue))
+                                {
+                                    items ??= new HashSet<I>();
+                                    foreach (I item in multiValue)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    dictionaryBuilder.Remove(key);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // The fragment cannot enumerate its referenced items. Iterate over the dictionary and test each item.
+                            List<string> keysToRemove = null;
+                            foreach (var kvp in dictionaryBuilder)
+                            {
+                                if (fragment.IsMatchNormalized(kvp.Key))
+                                {
+                                    items ??= new HashSet<I>();
+                                    foreach (I item in kvp.Value)
+                                    {
+                                        items.Add(item);
+                                    }
+                                    keysToRemove ??= new List<string>();
+                                    keysToRemove.Add(kvp.Key);
+                                }
+                            }
+
+                            if (keysToRemove != null)
+                            {
+                                foreach (string key in keysToRemove)
+                                {
+                                    dictionaryBuilder.Remove(key);
+                                }
+                            }
+                        }
+                    }
+
+                    // Finish by removing items from the list.
+                    if (items != null)
+                    {
+                        _listBuilder.RemoveAll(item => items.Contains(item.Item));
+                    }
+                }
+
+                /// <summary>
+                /// Creates an immutable view of this collection.
+                /// </summary>
+                public OrderedItemDataCollection ToImmutable()
+                {
+                    return new OrderedItemDataCollection(_version, _listBuilder.ToImmutable(), _dictionaryBuilder?.ToImmutable());
+                }
+
+                private IDictionary<string, DictionaryValue> GetOrCreateDictionaryBuilder()
+                {
+                    if (_dictionaryBuilder == null)
+                    {
+                        _dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, DictionaryValue>(StringComparer.OrdinalIgnoreCase);
+                        foreach (ItemData item in _listBuilder)
+                        {
+                            AddToDictionary(item.Item);
+                        }
+                    }
+                    return _dictionaryBuilder;
+                }
+
+                private void AddToDictionary(I item)
+                {
+                    string key = FileUtilities.NormalizePathForComparisonNoThrow(item.EvaluatedInclude, item.ProjectDirectory);
+
+                    if (!_dictionaryBuilder.TryGetValue(key, out var dictionaryValue))
+                    {
+                        dictionaryValue = new DictionaryValue(_version, item);
+                    }
+                    dictionaryValue.Add(_version, item);
+                    _dictionaryBuilder[key] = dictionaryValue;
+                }
+            }
+
+            #endregion
+
+            /// <summary>
+            /// The current version of the collection.
+            /// </summary>
+            private int _version;
+
+            /// <summary>
+            /// The list of items in the collection. Defines the enumeration order.
+            /// </summary>
+            private ImmutableList<ItemData> _list;
+
+            /// <summary>
+            /// A dictionary of items keyed by their normalized value.
+            /// </summary>
+            private ImmutableDictionary<string, DictionaryValue> _dictionary;
+
+            private OrderedItemDataCollection(int version, ImmutableList<ItemData> list, ImmutableDictionary<string, DictionaryValue> dictionary)
+            {
+                _version = version;
+                _list = list;
+                _dictionary = dictionary;
+            }
+
+            /// <summary>
+            /// Creates a new mutable collection.
+            /// </summary>
+            public static Builder CreateBuilder()
+            {
+                return new Builder(0, ImmutableList.CreateBuilder<ItemData>(), null);
+            }
+
+            /// <summary>
+            /// Creates a mutable view of this collection. Changes made to the returned builder are not reflected in this collection.
+            /// </summary>
+            public Builder ToBuilder()
+            {
+                return new Builder(_version + 1, _list.ToBuilder(), _dictionary?.ToBuilder());
             }
         }
 
@@ -253,7 +535,7 @@ namespace Microsoft.Build.Evaluation
                 return items.ToImmutable();
             }
 
-            public ImmutableList<ItemData>.Builder GetItemData(ImmutableHashSet<string> globsToIgnore)
+            public OrderedItemDataCollection.Builder GetItemData(ImmutableHashSet<string> globsToIgnore)
             {
                 // Cache results only on the LazyItemOperations whose results are required by an external caller (via GetItems). This means:
                 //   - Callers of GetItems who have announced ahead of time that they would reference an operation (via MarkAsReferenced())
@@ -275,7 +557,7 @@ namespace Microsoft.Build.Evaluation
                 // does not mutate: one can add operations on top, but the base never changes, and (ii) the globsToIgnore passed to the tail is the concatenation between
                 // the globsToIgnore received as an arg, and the globsToIgnore produced by the head (if the head is a Remove operation)
 
-                ImmutableList<ItemData> items;
+                OrderedItemDataCollection items;
                 if (_memoizedOperation.TryGetFromCache(globsToIgnore, out items))
                 {
                     return items.ToBuilder();
@@ -299,12 +581,12 @@ namespace Microsoft.Build.Evaluation
             /// is to optimize the case in which as series of UpdateOperations, each of which affects a single ItemSpec, are applied to all
             /// items in the list, leading to a quadratic-time operation.
             /// </summary>
-            private static ImmutableList<ItemData>.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
+            private static OrderedItemDataCollection.Builder ComputeItems(LazyItemList lazyItemList, ImmutableHashSet<string> globsToIgnore)
             {
                 // Stack of operations up to the first one that's cached (exclusive)
                 Stack<LazyItemList> itemListStack = new Stack<LazyItemList>();
 
-                ImmutableList<ItemData>.Builder items = null;
+                OrderedItemDataCollection.Builder items = null;
 
                 // Keep a separate stack of lists of globs to ignore that only gets modified for Remove operations
                 Stack<ImmutableHashSet<string>> globsToIgnoreStack = null;
@@ -313,7 +595,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? globsToIgnore;
 
-                    ImmutableList<ItemData> itemsFromCache;
+                    OrderedItemDataCollection itemsFromCache;
                     if (currentList._memoizedOperation.TryGetFromCache(globsToIgnoreFromFutureOperations, out itemsFromCache))
                     {
                         // the base items on top of which to apply the uncached operations are the items of the first operation that is cached
@@ -341,7 +623,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (items == null)
                 {
-                    items = ImmutableList.CreateBuilder<ItemData>();
+                    items = OrderedItemDataCollection.CreateBuilder();
                 }
 
                 ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack == null ? globsToIgnore : globsToIgnoreStack.Peek();
@@ -419,7 +701,7 @@ namespace Microsoft.Build.Evaluation
                 return items;
             }
 
-            private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, ImmutableList<ItemData>.Builder items)
+            private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, OrderedItemDataCollection.Builder items)
             {
 #if DEBUG
                 ErrorUtilities.VerifyThrow(itemsWithNoWildcards.All(fragment => !MSBuildConstants.CharactersForExpansion.Any(fragment.Key.Contains)), $"{nameof(itemsWithNoWildcards)} should not contain any text fragments with wildcards.");

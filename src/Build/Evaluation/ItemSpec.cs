@@ -85,6 +85,11 @@ namespace Microsoft.Build.Evaluation
                 return ReferencedItems.Any(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
             }
 
+            public override IEnumerable<string> GetReferencedItems()
+            {
+                return ReferencedItems.Select(v => v.ItemAsValueFragment.TextFragment);
+            }
+
             public override IMSBuildGlob ToMSBuildGlob()
             {
                 return MsBuildGlob;
@@ -415,6 +420,16 @@ namespace Microsoft.Build.Evaluation
             return FileMatcher.IsMatch(itemToMatch);
         }
 
+        public virtual bool IsMatchNormalized(string normalizedItemToMatch)
+        {
+            return FileMatcher.IsMatchNormalized(normalizedItemToMatch);
+        }
+
+        public virtual IEnumerable<string> GetReferencedItems()
+        {
+            yield return TextFragment;
+        }
+
         public virtual IMSBuildGlob ToMSBuildGlob()
         {
             return MsBuildGlob;
@@ -444,6 +459,12 @@ namespace Microsoft.Build.Evaluation
         public GlobFragment(string textFragment, string projectDirectory)
             : base(textFragment, projectDirectory)
         {
+        }
+
+        public override IEnumerable<string> GetReferencedItems()
+        {
+            // This fragment cannot efficiently enumerate its referenced items.
+            return null;
         }
 
         /// <summary>

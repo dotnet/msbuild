@@ -2095,6 +2095,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Fact]
+        public void RemoveAllMatchingItems()
+        {
+            IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
+                "<i Include='a;b' />" +
+                "<i Include='a;b' />" +
+                "<i Remove='b;c' />"
+                );
+
+            Assert.Equal(2, items.Count);
+            Assert.Equal(@"a;a", string.Join(";", items.Select(i => i.EvaluatedInclude)));
+        }
+
+        [Fact]
         public void RemoveGlob()
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
