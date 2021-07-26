@@ -7,7 +7,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 
-#if !NET35
+#if !CLR2COMPATIBILITY
 using System.Buffers;
 #endif
 
@@ -150,7 +150,7 @@ namespace Microsoft.Build
                         charsRead = _decoder.GetChars(rawBuffer, rawPosition, n, charBuffer, 0);
                         return Strings.WeakIntern(charBuffer.AsSpan(0, charsRead));
                     }
-#if !NET35
+#if !CLR2COMPATIBILITY
                     resultBuffer ??= ArrayPool<char>.Shared.Rent(stringLength); // Actual string length in chars may be smaller.
 #else
                     // Since .NET35 is used only in rare cases of .NET 3.5 TaskHost process we decided left it as is
@@ -163,7 +163,7 @@ namespace Microsoft.Build
                 while (currPos < stringLength);
 
                 var retval = Strings.WeakIntern(resultBuffer.AsSpan(0, charsRead));
-#if !NET35
+#if !CLR2COMPATIBILITY
                 // It is required that resultBuffer is always not null
                 // and rented by ArrayPool so we can simply return it to back to the Pool
                 ArrayPool<char>.Shared.Return(resultBuffer);
