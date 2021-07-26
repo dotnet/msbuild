@@ -24,7 +24,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             // PlatformLookupTable always takes priority. It is typically user-defined.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x64;x86;AnyCPU");
+            projectReference.SetMetadata("Platforms", "x64;x86;AnyCPU");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // A child's PlatformLookupTable takes priority over the current project's table.
             // This allows overrides on a per-ProjectItem basis.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x64;x86;AnyCPU");
+            projectReference.SetMetadata("Platforms", "x64;x86;AnyCPU");
 
             // childproj will be assigned x86 because its table takes priority
             projectReference.SetMetadata("PlatformLookupTable", "win32=x86");
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // it is inherently compatible with any platform.
 
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x86;AnyCPU");
+            projectReference.SetMetadata("Platforms", "x86;AnyCPU");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // No valid mapping via the lookup table, child project can't default to AnyCPU,
             // child project can match with parent project so match them.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x86;x64");
+            projectReference.SetMetadata("Platforms", "x86;x64");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -112,7 +112,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // No valid mapping via the lookup table, child project can't default to AnyCPU,
             // child can't match with parent, log a warning.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x64");
+            projectReference.SetMetadata("Platforms", "x64");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Task should log a warning when a ProjectReference has no options to build as.
             // It will continue and have no NearestPlatform metadata.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "");
+            projectReference.SetMetadata("Platforms", "");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void FailsOnInvalidFormatLookupTable()
         {
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x64");
+            projectReference.SetMetadata("Platforms", "x64");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -182,8 +182,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void FailsOnInvalidFormatProjectReferenceLookupTable()
         {
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("PlatformOptions", "x64;x86");
-            projectReference.SetMetadata("PlatformLookupTable", "x86=x;b=d");
+            projectReference.SetMetadata("Platforms", "x64;x86");
+            projectReference.SetMetadata("PlatformLookupTable", "x86=;b=d");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 PlatformLookupTable = "AnyCPU=x86;A=B", // invalid format
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
-            
+
             task.Execute();
 
             // A ProjectReference PlatformLookupTable should take priority, but is thrown away when

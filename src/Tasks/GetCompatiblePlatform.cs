@@ -56,7 +56,7 @@ namespace Microsoft.Build.Tasks
             {
                 AssignedProjectsWithPlatform[i] = new TaskItem(AnnotatedProjects[i]);
 
-                string childPlatformOptions = AssignedProjectsWithPlatform[i].GetMetadata("PlatformOptions");
+                string childPlatformOptions = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
 
                 if (string.IsNullOrEmpty(childPlatformOptions))
                 {
