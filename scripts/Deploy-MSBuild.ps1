@@ -11,13 +11,18 @@ Param(
 Set-StrictMode -Version "Latest"
 $ErrorActionPreference = "Stop"
 
-function Copy-WithBackup ($origin) {
-    $directoryPart = Join-Path -Path $destination $origin.IntermediaryDirectories
+function Copy-WithBackup ($origin, $destinationSubFolder = "") {
+    $directoryPart = [IO.Path]::Combine($destination, $destinationSubFolder, $origin.IntermediaryDirectories)
     $destinationPath = Join-Path -Path $directoryPart (Split-Path $origin.SourceFile -leaf)
+
+    $backupInto = [IO.Path]::Combine($BackupFolder, $destinationSubFolder)
 
     if (Test-Path $destinationPath -PathType Leaf) {
         # Back up previous copy of the file
-        Copy-Item $destinationPath $BackupFolder -ErrorAction Stop
+        if (!(Test-Path $backupInto)) {
+            [system.io.directory]::CreateDirectory($backupInto)
+        }
+        Copy-Item $destinationPath $backupInto -ErrorAction Stop
     }
 
     if (!(Test-Path $directoryPart)) {
@@ -60,19 +65,6 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.Utilities.Core.dll"
     FileToCopy "$bootstrapBinDirectory\Microsoft.NET.StringTools.dll"
 
-    FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Buffers.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
-    FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
-    FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"
-
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.resources.dll" "en"
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Tasks.Core.resources.dll" "en"
     FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Utilities.Core.resources.dll" "en"
@@ -95,18 +87,16 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.CrossTargeting.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.CurrentVersion.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.VisualBasic.targets"
+
+    FileToCopy "$bootstrapBinDirectory\Microsoft.Common.tasks"
 )
 
 if ($runtime -eq "Desktop") {
     $runtimeSpecificFiles = @(
-        FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
-        FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
         FileToCopy "artifacts\bin\Microsoft.Build.Conversion\$configuration\$targetFramework\Microsoft.Build.Conversion.Core.dll"
         FileToCopy "artifacts\bin\Microsoft.Build.Engine\$configuration\$targetFramework\Microsoft.Build.Engine.dll"
 
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
-
+        FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.ServiceModel.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.WinFx.targets"
@@ -114,6 +104,18 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\Microsoft.Xaml.targets"
         FileToCopy "$bootstrapBinDirectory\Workflow.targets"
         FileToCopy "$bootstrapBinDirectory\Workflow.VisualBasic.targets"
+
+        FileToCopy "$bootstrapBinDirectory\System.Buffers.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
+        FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"    
     )
 } else {
     $runtimeSpecificFiles = @(
@@ -121,10 +123,39 @@ if ($runtime -eq "Desktop") {
     )
 }
 
+if ($runtime -eq "Desktop") {
+    $x86files = @(
+        FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
+        FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
+    )
+    $amd64files = @(
+        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe"
+        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe.config"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.pdb"
+    )
+}
+
 $filesToCopyToBin += $runtimeSpecificFiles
 
 foreach ($file in $filesToCopyToBin) {
     Copy-WithBackup $file
+}
+
+if ($runtime -eq "Desktop") {
+    foreach ($file in $x86files) {
+        Copy-WithBackup $file
+    }
+
+    foreach ($file in $filesToCopyToBin) {
+        Copy-WithBackup $file "amd64"
+    }
+
+    foreach ($file in $amd64files) {
+        Copy-WithBackup $file "amd64"
+    }
 }
 
 Write-Host -ForegroundColor Green "Copy succeeded"
