@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "NuGet Config",
+  "name": "NuGet 配置",
   "description": "用于配置位置 NuGet 的文件将搜索包",
   "postActions/open-file/description": "在编辑器中打开 nuget.config"
 }

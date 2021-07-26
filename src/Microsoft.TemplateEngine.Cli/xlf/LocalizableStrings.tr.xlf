@@ -819,7 +819,7 @@ Desteklenen sütunlar şunlardır: dil, etiketler, yazar ve tür.</target>
       </trans-unit>
       <trans-unit id="TemplateInformationCoordinator_TemplateHelp_Info_HelpForOtherLanguagesHint">
         <source>To see help for other template languages ({0}), use --language option:</source>
-        <target state="translated">Diğer şablon dilleri ({0}) ile ilgili yardıma bakmak için -- dil seçeneğini kullanın:</target>
+        <target state="translated">Diğer şablon dilleri ({0}) ile ilgili yardıma bakmak için --language seçeneğini kullanın:</target>
         <note>{0} is comma-separated list of supported programming languages by template. --language should not be translated.</note>
       </trans-unit>
       <trans-unit id="TemplatePackageCoordinator_Error_PackageForTemplateNotFound">

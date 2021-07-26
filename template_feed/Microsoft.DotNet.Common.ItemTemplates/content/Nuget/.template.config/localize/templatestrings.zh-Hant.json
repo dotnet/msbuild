@@ -1,6 +1,6 @@
 ﻿{
   "author": "Microsoft",
-  "name": "NuGet Config",
+  "name": "NuGet 組態",
   "description": "用於設定檔案位置 NuGet 將會搜尋套件",
   "postActions/open-file/description": "在編輯器中開啟 nuget.config"
 }
