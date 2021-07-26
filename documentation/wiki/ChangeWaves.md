@@ -32,6 +32,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Don't compile globbing regexes on .NET Framework](https://github.com/dotnet/msbuild/pull/6632)
 - [Default to transitively copying content items](https://github.com/dotnet/msbuild/pull/6622)
 - [Reference assemblies are now no longer placed in the `bin` directory by default](https://github.com/dotnet/msbuild/pull/6560)
+- [Improve debugging experience: add global switch MSBuildDebugEngine; Inject binary logger from BuildManager; print static graph as .dot file](https://github.com/dotnet/msbuild/pull/6639)
 
 ## Change Waves No Longer In Rotation
 ### 16.8
