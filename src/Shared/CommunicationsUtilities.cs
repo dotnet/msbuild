@@ -13,7 +13,11 @@ using System.Threading;
 
 using Microsoft.Build.Shared;
 using System.Reflection;
+using Microsoft.Build.Utilities;
 
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Shared.Debugging;
+#endif
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
@@ -131,7 +135,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Whether to trace communications
         /// </summary>
-        private static bool s_trace = String.Equals(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"), "1", StringComparison.Ordinal);
+        private static bool s_trace = Traits.Instance.DebugNodeCommunication;
 
         /// <summary>
         /// Place to dump trace
@@ -175,6 +179,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
+#if !CLR2COMPATIBILITY
+            // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
+            // Need to ensure that constructor is called before this method returns in order to capture its env var write.
+            // Otherwise the env var is not captured and thus gets deleted when RequiestBuilder resets the environment based on the cached results of this method.
+            ErrorUtilities.VerifyThrowInternalNull(DebugUtils.DebugPath, nameof(DebugUtils.DebugPath));
+#endif
+
             Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
             if (NativeMethodsShared.IsWindows)
@@ -552,7 +563,14 @@ namespace Microsoft.Build.Internal
             {
                 if (s_debugDumpPath == null)
                 {
-                    s_debugDumpPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                    s_debugDumpPath =
+#if CLR2COMPATIBILITY
+                        Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+#else
+                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
+                            ? DebugUtils.DebugPath
+                            : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+#endif
 
                     if (String.IsNullOrEmpty(s_debugDumpPath))
                     {
