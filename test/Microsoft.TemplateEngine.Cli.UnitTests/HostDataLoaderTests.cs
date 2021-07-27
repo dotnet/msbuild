@@ -124,5 +124,99 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             Assert.Equal(HostSpecificTemplateData.Default, data);
         }
 
+        [Fact]
+        public void CanSerializeData()
+        {
+            var usageExamples = new[] { "example1" };
+            var symbolInfo = new Dictionary<string, IReadOnlyDictionary<string, string>>()
+            {
+                {
+                    "param1",
+                    new Dictionary<string, string>()
+                    {
+                        { "isHidden", "false" },
+                        { "longName", "longParam1" },
+                        { "shortName", "shortParam1" }
+                    }
+                },
+                {
+                    "param2",
+                    new Dictionary<string, string>()
+                    {
+                        { "isHidden", "false" },
+                        { "longName", "" },
+                        { "shortName", "shortParam2" }
+                    }
+                },
+                {
+                    "param3",
+                    new Dictionary<string, string>()
+                    {
+                        { "isHidden", "true" }
+                    }
+                }
+            };
+            var data = new HostSpecificTemplateData(symbolInfo, usageExamples, isHidden: true);
+            var serialized = JObject.FromObject(data);
+
+            Assert.NotNull(serialized);
+            Assert.Equal(3, serialized.Children().Count());
+
+            Assert.Single<JProperty>(serialized.Properties(), p => p.Name == "UsageExamples");
+            Assert.Single<JProperty>(serialized.Properties(), p => p.Name == "SymbolInfo");
+            Assert.Single<JProperty>(serialized.Properties(), p => p.Name == "IsHidden");
+        }
+
+        [Fact]
+        public void CanSerializeData_SkipsEmpty()
+        {
+            var usageExamples = Array.Empty<string>();
+            var symbolInfo = new Dictionary<string, IReadOnlyDictionary<string, string>>()
+            {
+                {
+                    "param1",
+                    new Dictionary<string, string>()
+                    {
+                        { "isHidden", "false" },
+                        { "longName", "longParam1" },
+                        { "shortName", "shortParam1" }
+                    }
+                },
+                {
+                    "param2",
+                    new Dictionary<string, string>()
+                    {
+                        { "isHidden", "false" },
+                        { "longName", "" },
+                        { "shortName", "shortParam2" }
+                    }
+                },
+                {
+                    "param3",
+                    new Dictionary<string, string>()
+                    {
+                        { "isHidden", "true" }
+                    }
+                }
+            };
+            var data = new HostSpecificTemplateData(symbolInfo, usageExamples, isHidden: false);
+            var serialized = JObject.FromObject(data);
+
+            Assert.NotNull(serialized);
+            Assert.Equal(1, serialized.Children().Count());
+
+            Assert.Single<JProperty>(serialized.Properties(), p => p.Name == "SymbolInfo");
+
+            var symbolInfoArray = serialized.Properties().Single().Value as JObject;
+            Assert.NotNull(symbolInfoArray);
+            //empty values should stay when deserializing symbol info
+            Assert.Equal(3, ((JObject)symbolInfoArray!["param1"]).Properties().Count());
+            Assert.Equal("", symbolInfoArray!["param2"]["longName"]);
+            Assert.Equal(3, ((JObject)symbolInfoArray!["param2"]).Properties().Count());
+            Assert.Equal(1, ((JObject)symbolInfoArray!["param3"]).Properties().Count());
+
+            Assert.DoesNotContain(serialized.Properties(), p => p.Name == "IsHidden");
+            Assert.DoesNotContain(serialized.Properties(), p => p.Name == "UsageExamples");
+        }
     }
 }

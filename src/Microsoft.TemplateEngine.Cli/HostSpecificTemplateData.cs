@@ -56,12 +56,17 @@ namespace Microsoft.TemplateEngine.Cli
 
         }
 
-        internal HostSpecificTemplateData(IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> symbolInfo)
+        internal HostSpecificTemplateData(
+            IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> symbolInfo,
+            IEnumerable<string>? usageExamples = null,
+            bool isHidden = false)
         {
             SymbolInfo = symbolInfo;
+            UsageExamples = usageExamples?.ToArray() ?? Array.Empty<string>();
+            IsHidden = isHidden;
         }
 
-        public List<string>? UsageExamples { get; }
+        public IReadOnlyList<string> UsageExamples { get; } = Array.Empty<string>();
 
         public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> SymbolInfo { get; }
 
