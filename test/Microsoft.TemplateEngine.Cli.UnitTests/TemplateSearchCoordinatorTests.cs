@@ -28,13 +28,11 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             _environmentSettingsHelper = environmentSettingsHelper;
         }
 
-        private const string DefaultLanguage = "C#";
+        private static readonly ITemplatePackageInfo _packOneInfo = new MockTemplatePackageInfo("PackOne", "1.0.0");
 
-        private static readonly PackInfo _packOneInfo = new PackInfo("PackOne", "1.0.0");
+        private static readonly ITemplatePackageInfo _packTwoInfo = new MockTemplatePackageInfo("PackTwo", "1.6.0");
 
-        private static readonly PackInfo _packTwoInfo = new PackInfo("PackTwo", "1.6.0");
-
-        private static readonly PackInfo _packThreeInfo = new PackInfo("PackThree", "2.1");
+        private static readonly ITemplatePackageInfo _packThreeInfo = new MockTemplatePackageInfo("PackThree", "2.1");
 
         private static readonly ITemplateInfo _fooOneTemplate =
             new MockTemplateInfo("foo1", name: "MockFooTemplateOne", identity: "Mock.Foo.1", groupIdentity: "Mock.Foo", author: "TestAuthor")
@@ -450,20 +448,20 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
             {
                 new TemplateIdentificationEntry(_fooOneTemplate.Identity, _fooOneTemplate.GroupIdentity)
             };
-            packToTemplateMap[_packOneInfo.Name] = new PackToTemplateEntry(_packOneInfo.Version, packOneTemplateInfo);
+            packToTemplateMap[_packOneInfo.Name] = new PackToTemplateEntry(_packOneInfo.Version ?? "", packOneTemplateInfo);
 
             List<TemplateIdentificationEntry> packTwoTemplateInfo = new List<TemplateIdentificationEntry>()
             {
                 new TemplateIdentificationEntry(_fooTwoTemplate.Identity, _fooTwoTemplate.GroupIdentity)
             };
-            packToTemplateMap[_packTwoInfo.Name] = new PackToTemplateEntry(_packTwoInfo.Version, packTwoTemplateInfo);
+            packToTemplateMap[_packTwoInfo.Name] = new PackToTemplateEntry(_packTwoInfo.Version ?? "", packTwoTemplateInfo);
 
             List<TemplateIdentificationEntry> packThreeTemplateInfo = new List<TemplateIdentificationEntry>()
             {
                 new TemplateIdentificationEntry(_barCSharpTemplate.Identity, _barCSharpTemplate.GroupIdentity),
                 new TemplateIdentificationEntry(_barFSharpTemplate.Identity, _barFSharpTemplate.GroupIdentity)
             };
-            packToTemplateMap[_packThreeInfo.Name] = new PackToTemplateEntry(_packThreeInfo.Version, packThreeTemplateInfo);
+            packToTemplateMap[_packThreeInfo.Name] = new PackToTemplateEntry(_packThreeInfo.Version ?? "", packThreeTemplateInfo);
 
             Dictionary<string, object> additionalData = new Dictionary<string, object>();
 
