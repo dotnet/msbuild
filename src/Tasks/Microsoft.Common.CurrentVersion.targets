@@ -1651,7 +1651,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
       <_ProjectReferencePlatformPossibilities Condition="'$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj' and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
         <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
-        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">AnyCPU=Win32;x86=Win32</PlatformLookupTable>
+        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">x86=Win32</PlatformLookupTable>
       </_ProjectReferencePlatformPossibilities>
 
       <!-- If we're looking at a managed project from a cpp project, map native to managed platforms. -->
