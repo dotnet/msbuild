@@ -19,7 +19,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 {
     public class WasmBuildIntegrationTest : BlazorWasmBaselineTests
     {
-        public WasmBuildIntegrationTest(ITestOutputHelper log) : base(log, true) {}
+        public WasmBuildIntegrationTest(ITestOutputHelper log) : base(log, GenerateBaselines) {}
 
         [Fact]
         public void BuildMinimal_Works()

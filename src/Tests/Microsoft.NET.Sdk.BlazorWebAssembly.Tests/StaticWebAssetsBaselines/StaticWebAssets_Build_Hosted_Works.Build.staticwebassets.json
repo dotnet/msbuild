@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "xbUnAY5zF\u002BMBIX2/i1pYJBVwWBEldgSOndKkuu\u002BEanI=",
+  "Hash": "BWkrcG/r6KSiYL6T4pV61wtbjNyPJZAUV0Cs0GaVJSA=",
   "Source": "blazorhosted",
   "BasePath": "_content/blazorhosted",
   "Mode": "Default",
@@ -14,7 +14,7 @@
       "PublishTarget": "",
       "AdditionalPublishProperties": ";",
       "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "KDwukm3csPWhxR6MTj1JFF9SgwXlG/w//5tMf7FNcYA="
+      "Hash": "VJKHBp8fH6Yxe/qYQkGKpnUqh5p/nTfqCxkSqQISuYk="
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
@@ -27,7 +27,7 @@
       "Hash": ""
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\netstandard2.1\\StaticWebAssets.build.json",
+      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\net6.0\\StaticWebAssets.build.json",
       "Source": "RazorClassLibrary",
       "ManifestType": "Build",
       "ProjectFile": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
@@ -37,7 +37,7 @@
       "Hash": "pJpaxjmCd9XQZQAtkBELpZEWCsUfS9IMlEuzdelbmgI="
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\netstandard2.1\\StaticWebAssets.publish.json",
+      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
       "Source": "RazorClassLibrary",
       "ManifestType": "Publish",
       "ProjectFile": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
@@ -553,7 +553,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\bin\\Debug\\netstandard2.1\\RazorClassLibrary.dll"
+      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\bin\\Debug\\net6.0\\RazorClassLibrary.dll"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\RazorClassLibrary.pdb",
@@ -570,7 +570,7 @@
       "AssetTraitValue": "symbol",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\bin\\Debug\\netstandard2.1\\RazorClassLibrary.pdb"
+      "OriginalItemSpec": "${ProjectRoot}\\razorclasslibrary\\bin\\Debug\\net6.0\\RazorClassLibrary.pdb"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.AppContext.dll",
@@ -3495,23 +3495,6 @@
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\lib\\net6.0\\netstandard.dll"
-    },
-    {
-      "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\serviceworkers\\my-service-worker.js",
-      "SourceId": "blazorwasm",
-      "SourceType": "Project",
-      "ContentRoot": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\",
-      "BasePath": "/",
-      "RelativePath": "serviceworkers/my-service-worker.js",
-      "AssetKind": "Build",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "BlazorServiceWorker",
-      "AssetTraitValue": "ServiceWorkerJs",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "wwwroot\\serviceworkers\\my-service-worker.js"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
@@ -6982,13 +6965,13 @@
       "OriginalItemSpec": "obj\\Debug\\net6.0\\custom-service-worker-assets.js.build"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\serviceworkers\\my-prod-service-worker.js",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\my-prod-service-worker.js",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\",
       "BasePath": "/",
       "RelativePath": "serviceworkers/my-service-worker.js",
-      "AssetKind": "All",
+      "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",
@@ -6997,6 +6980,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\serviceworkers\\my-prod-service-worker.js"
+    },
+    {
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\my-service-worker.js",
+      "SourceId": "blazorwasm",
+      "SourceType": "Project",
+      "ContentRoot": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\",
+      "BasePath": "/",
+      "RelativePath": "serviceworkers/my-service-worker.js",
+      "AssetKind": "Build",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "BlazorServiceWorker",
+      "AssetTraitValue": "ServiceWorkerJs",
+      "CopyToOutputDirectory": "PreserveNewest",
+      "CopyToPublishDirectory": "Never",
+      "OriginalItemSpec": "wwwroot\\serviceworkers\\my-service-worker.js"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\wwwroot\\Fake-License.txt",

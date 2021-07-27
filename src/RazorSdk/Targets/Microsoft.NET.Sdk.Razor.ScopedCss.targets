@@ -50,37 +50,39 @@ Integration with static web assets:
 <UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.RewriteCss" AssemblyFile="$(RazorSdkBuildTasksAssembly)" />
 <UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.ConcatenateCssFiles" AssemblyFile="$(RazorSdkBuildTasksAssembly)" />
 
-<PropertyGroup>
+<PropertyGroup Condition="'$(DisableScopedCssBundling)' != 'true'">
 
-  <PrepareForRunDependsOn>
-    _PrepareForScopedCss;
-    $(PrepareForRunDependsOn)
-  </PrepareForRunDependsOn>
-
-  <_PrepareForScopedCssDependsOn Condition="'$(DisableScopedCssBundling)' != 'true'">
-    _ResolveBundlingConfiguration;
-    BundleScopedCssFiles;
-    $(_PrepareForScopedCssDependsOn)
-  </_PrepareForScopedCssDependsOn>
-
-  <!-- Order between this definition and the above one is important to make sure we don't create a circular reference loop. -->
-  <_PrepareForScopedCssDependsOn>
-    _GenerateScopedCssFiles;
-    $(_PrepareForScopedCssDependsOn)
-  </_PrepareForScopedCssDependsOn>
-
-  <ResolveStaticWebAssetsInputsDependsOn Condition="'$(DisableScopedCssBundling)' == 'true'">
-    $(ResolveStaticWebAssetsInputsDependsOn);
-    UpdateLegacyPackageScopedCssBundles;
-    _AddGeneratedScopedCssFiles;
-  </ResolveStaticWebAssetsInputsDependsOn>
-  
-  <ResolveStaticWebAssetsInputsDependsOn Condition="'$(DisableScopedCssBundling)' != 'true'">
+  <ResolveStaticWebAssetsInputsDependsOn>
     $(ResolveStaticWebAssetsInputsDependsOn);
     UpdateLegacyPackageScopedCssBundles;
     _AddScopedCssBundles;
   </ResolveStaticWebAssetsInputsDependsOn>
 
+  <CopyStaticWebAssetsToOutputFolderDependsOn>
+    $(CopyStaticWebAssetsToOutputFolderDependsOn);
+    _ResolveBundlingConfiguration;
+    _GenerateScopedCssFiles;
+    BundleScopedCssFiles;
+  </CopyStaticWebAssetsToOutputFolderDependsOn>
+
+</PropertyGroup>
+
+<PropertyGroup Condition="'$(DisableScopedCssBundling)' == 'true'">
+
+  <ResolveStaticWebAssetsInputsDependsOn>
+    $(ResolveStaticWebAssetsInputsDependsOn);
+    UpdateLegacyPackageScopedCssBundles;
+    _AddGeneratedScopedCssFiles;
+  </ResolveStaticWebAssetsInputsDependsOn>
+
+  <CopyStaticWebAssetsToOutputFolderDependsOn>
+    _GenerateScopedCssFiles;
+    $(CopyStaticWebAssetsToOutputFolderDependsOn);
+  </CopyStaticWebAssetsToOutputFolderDependsOn>
+
+</PropertyGroup>
+
+<PropertyGroup>
   <!-- We are going to use .rz.scp.css as the extension to mark scoped css files that come from packages or that have been pre-procesed by
        referenced class libraries. This way, we can use that information to adjust the build pipeline without having to rely on external
        sources like an additional itemgroup or metadata.
@@ -204,6 +206,7 @@ Integration with static web assets:
 
 <Target Name="_ResolveBundlingConfiguration" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
   <PropertyGroup>
+    <_ScopedCssIntermediatePath>$([System.IO.Path]::GetFullPath($(IntermediateOutputPath)scopedcss\))</_ScopedCssIntermediatePath>
     <!-- This bundle represents the bundle for the entire application dependency graph which includes the application scoped css files and all the scoped css files from
          projects and packages that this app references -->
     <_ScopedCssBundleContentRoot>$(_ScopedCssIntermediatePath)bundle\</_ScopedCssBundleContentRoot>

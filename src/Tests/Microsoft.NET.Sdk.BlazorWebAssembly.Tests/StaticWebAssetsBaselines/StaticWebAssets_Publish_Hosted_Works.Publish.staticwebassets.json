@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "AtYxUofbxenQNFVhzD2LLdELeWHpp5IUmN1IldupYWA=",
+  "Hash": "G0PSop0ko5iR2MCyrDo46auZlCwUZ1/SrgbPuHNdu0Q=",
   "Source": "blazorhosted",
   "BasePath": "_content/blazorhosted",
   "Mode": "Default",
@@ -14,7 +14,7 @@
       "PublishTarget": "",
       "AdditionalPublishProperties": ";",
       "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "FpWb9hZHb7Yxz2gyGKoKIfV0eR6EMGtGeFyO3l35AyQ="
+      "Hash": "GKUMxZnYlQsIBvz\u002BEGiSXKRH5fngxMGuhbr98uxjmso="
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
@@ -24,10 +24,10 @@
       "PublishTarget": "ComputeFilesToPublish",
       "AdditionalPublishProperties": ";BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true;_PublishingBlazorWasmProject=true;",
       "AdditionalPublishPropertiesToRemove": ";NoBuild;RuntimeIdentifier;WebPublishProfileFile",
-      "Hash": "T44C1aGEDvEUIrnR7aZjst33WUL1Pms\u002B0/y0uo4CCu0="
+      "Hash": "M5dmWIQferZL8zhrY9XUijL7m5ltGycO\u002BOJFESkhNmg="
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\netstandard2.1\\StaticWebAssets.build.json",
+      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\net6.0\\StaticWebAssets.build.json",
       "Source": "RazorClassLibrary",
       "ManifestType": "Build",
       "ProjectFile": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
@@ -37,7 +37,7 @@
       "Hash": "L2ink3gUhKALyI93SzAC8wnudkBUopb8CmEN1tsnfHs="
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\netstandard2.1\\StaticWebAssets.publish.json",
+      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
       "Source": "RazorClassLibrary",
       "ManifestType": "Publish",
       "ProjectFile": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
@@ -3960,13 +3960,13 @@
       "OriginalItemSpec": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\scopedcss\\bundle\\blazorwasm.styles.css"
     },
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\serviceworkers\\my-prod-service-worker.js",
+      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\my-prod-service-worker.js",
       "SourceId": "blazorwasm",
       "SourceType": "Project",
       "ContentRoot": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\",
       "BasePath": "/",
       "RelativePath": "serviceworkers/my-service-worker.js",
-      "AssetKind": "All",
+      "AssetKind": "Publish",
       "AssetMode": "All",
       "AssetRole": "Primary",
       "RelatedAsset": "",

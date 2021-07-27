@@ -403,6 +403,8 @@
   "${OutputPath}\\wwwroot\\_framework\\netstandard.dll",
   "${OutputPath}\\wwwroot\\_framework\\netstandard.dll.gz",
   "${OutputPath}\\wwwroot\\custom-service-worker-assets.js",
+  "${OutputPath}\\wwwroot\\serviceworkers\\my-service-worker.js",
   "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.${RuntimeVersion}.js",
-  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.${RuntimeVersion}.js.gz"
+  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.${RuntimeVersion}.js.gz",
+  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\serviceworkers\\my-service-worker.js"
 ]

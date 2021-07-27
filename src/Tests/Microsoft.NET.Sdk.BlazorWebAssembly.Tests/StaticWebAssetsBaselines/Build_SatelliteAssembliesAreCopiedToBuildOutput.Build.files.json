@@ -705,6 +705,7 @@
   "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/zh-Hant/Microsoft.CodeAnalysis.CSharp.resources.dll.gz]]",
   "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\build-gz\\[[_framework/zh-Hant/Microsoft.CodeAnalysis.resources.dll.gz]]",
   "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\custom-service-worker-assets.js.build",
-  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\serviceworkers\\my-prod-service-worker.js",
+  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\my-service-worker.js",
+  "${ProjectPath}\\blazorwasm\\obj\\Debug\\net6.0\\service-worker\\serviceworkers\\my-service-worker.js",
   "${ProjectPath}\\blazorwasm\\wwwroot\\js\\LinkedScript.js"
 ]

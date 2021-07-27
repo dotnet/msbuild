@@ -35,10 +35,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(CustomBeforeBlazorWebAssemblySdkTargets)" Condition="'$(CustomBeforeBlazorWebAssemblySdkTargets)' != '' and Exists('$(CustomBeforeBlazorWebAssemblySdkTargets)')"/>
 
   <PropertyGroup>
-    <_UseBlazor50Targets Condition="('$(UseStaticWebAssetsV1)' == '' Or '$(UseStaticWebAssetsV1)' == 'true') And '$(_TargetingNET60OrLater)' == 'true'">false</_UseBlazor50Targets>
-    <_UseBlazor50Targets Condition="'$(UseStaticWebAssetsV1)' == 'false'">false</_UseBlazor50Targets>
-    <_UseBlazor50Targets Condition="'$(_UseBlazor50Targets)' == ''">true</_UseBlazor50Targets>
-    <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == '' And '$(_UseBlazor50Targets)' != 'true'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.6_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
+    <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == '' And '$(UseStaticWebAssetsV2)' == 'true'">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.6_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
     <_BlazorWebAssemblyVersionedTargetsFile Condition="'$(_BlazorWebAssemblyVersionedTargetsFile)' == ''">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.5_0.targets</_BlazorWebAssemblyVersionedTargetsFile>
   </PropertyGroup>
 
