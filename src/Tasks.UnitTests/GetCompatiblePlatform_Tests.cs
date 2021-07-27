@@ -90,12 +90,13 @@ namespace Microsoft.Build.Tasks.UnitTests
             // matches the parent's platform, it takes priority over AnyCPU default.
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", "x86;x64;AnyCPU");
+            projectReference.SetMetadata("PlatformLookupTable", "x86=AnyCPU"); // matching platform takes priority over lookup tables
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
                 BuildEngine = new MockEngine(_output),
                 CurrentProjectPlatform = "x86",
-                PlatformLookupTable = "AnyCPU=x64",
+                PlatformLookupTable = "x86=AnyCPU",
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 

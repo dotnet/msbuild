@@ -81,9 +81,15 @@ namespace Microsoft.Build.Tasks
 
                 string buildChildProjectAs = "";
 
+                // Prefer matching platforms
+                if (childPlatforms.Contains(CurrentProjectPlatform))
+                {
+                    buildChildProjectAs = CurrentProjectPlatform;
+                    Log.LogMessage($"Child and parent have the same platform.");
+                }
                 // If the referenced project has a translation table, it came from the ProjectReference item's metadata.
                 // Prioritize that over the current project's translation table.
-                if (childPlatformLookupTable != null &&
+                else if (childPlatformLookupTable != null &&
                         childPlatformLookupTable.ContainsKey(CurrentProjectPlatform) &&
                         childPlatforms.Contains(childPlatformLookupTable[CurrentProjectPlatform]))
                 {
@@ -97,12 +103,6 @@ namespace Microsoft.Build.Tasks
                 {
                     buildChildProjectAs = translationTable[CurrentProjectPlatform];
                     Log.LogMessage($"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the current project's translation table.");
-                }
-                // Prefer matching platforms
-                else if (childPlatforms.Contains(CurrentProjectPlatform))
-                {
-                    buildChildProjectAs = CurrentProjectPlatform;
-                    Log.LogMessage($"Child and parent have the same platform.");
                 }
                 // AnyCPU if possible
                 else if (childPlatforms.Contains("AnyCPU"))
