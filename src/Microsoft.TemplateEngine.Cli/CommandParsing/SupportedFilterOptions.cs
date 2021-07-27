@@ -65,7 +65,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 isFilterSet: command => !string.IsNullOrWhiteSpace(command.PackageFilter),
                 matchFilter: PackageMatchFilter);
 
-        private static Func<IPackageInfo, bool> PackageMatchFilter(INewCommandInput command)
+        private static Func<ITemplatePackageInfo, bool> PackageMatchFilter(INewCommandInput command)
         {
             return (pack) =>
             {

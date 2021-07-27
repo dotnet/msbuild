@@ -16,7 +16,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             string name,
             Func<INewCommandInput, string> filterValue,
             Func<INewCommandInput, bool> isFilterSet,
-            Func<INewCommandInput, Func<IPackageInfo, bool>> matchFilter) : base(name, filterValue, isFilterSet)
+            Func<INewCommandInput, Func<ITemplatePackageInfo, bool>> matchFilter) : base(name, filterValue, isFilterSet)
         {
             PackageMatchFilter = matchFilter ?? throw new ArgumentNullException(nameof(matchFilter));
         }
@@ -25,6 +25,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         /// A predicate that returns the package match filter for the filter option
         /// Package match filter should if package is a match based on filter value.
         /// </summary>
-        internal Func<INewCommandInput, Func<IPackageInfo, bool>> PackageMatchFilter { get; set; }
+        internal Func<INewCommandInput, Func<ITemplatePackageInfo, bool>> PackageMatchFilter { get; set; }
     }
 }

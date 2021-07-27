@@ -117,7 +117,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         }
 
         private static void DisplayResultsForPack(
-            IReadOnlyList<(IPackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
+            IReadOnlyList<(ITemplatePackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
             IEngineEnvironmentSettings environmentSettings,
             INewCommandInput commandInput,
             string? defaultLanguage)
@@ -154,7 +154,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         }
 
         private static IReadOnlyCollection<SearchResultTableRow> GetSearchResultsForDisplay(
-            IReadOnlyList<(IPackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
+            IReadOnlyList<(ITemplatePackageInfo PackageInfo, IReadOnlyList<ITemplateInfo> MatchedTemplates)> results,
             string language,
             string? defaultLanguage,
             IEnvironment environment)
