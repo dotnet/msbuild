@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
 
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("x64");
         }
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
 
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("x86");
         }
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
 
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("AnyCPU");
         }
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference }
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
 
             task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("x86");
         }
@@ -121,9 +121,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
             // When the task logs a warning, it does not set NearestPlatform
-            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
             ((MockEngine)task.BuildEngine).AssertLogContains("MSB3981");
         }
 
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Task should log a warning when a ProjectReference has no options to build as.
             // It will continue and have no NearestPlatform metadata.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("Platforms", "");
+            projectReference.SetMetadata("Platforms", string.Empty);
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -143,9 +143,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
             // When the task logs a warning, it does not set NearestPlatform
-            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
             ((MockEngine)task.BuildEngine).AssertLogContains("MSB3982");
         }
 
@@ -166,11 +166,11 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
             // When the platformlookuptable is in an invalid format, it is discarded.
             // There shouldn't have been a translation found from AnyCPU to anything.
             // Meaning the projectreference would not have NearestPlatform set.
-            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe("");
+            task.AssignedProjectsWithPlatform[0].GetMetadata("NearestPlatform").ShouldBe(string.Empty);
             ((MockEngine)task.BuildEngine).AssertLogContains("MSB3983");
         }
 
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 AnnotatedProjects = new TaskItem[] { projectReference },
             };
 
-            task.Execute();
+            task.Execute().ShouldBeTrue();
 
             // A ProjectReference PlatformLookupTable should take priority, but is thrown away when
             // it has an invalid format. The current project's PLT should be the next priority.

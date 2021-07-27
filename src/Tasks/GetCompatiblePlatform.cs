@@ -7,7 +7,6 @@ using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Microsoft.Build.Tasks
 {
@@ -79,7 +78,7 @@ namespace Microsoft.Build.Tasks
                     childPlatforms.Add(s);
                 }
 
-                string buildChildProjectAs = "";
+                string buildChildProjectAs = string.Empty;
 
                 // Prefer matching platforms
                 if (childPlatforms.Contains(CurrentProjectPlatform))
@@ -138,7 +137,7 @@ namespace Microsoft.Build.Tasks
                 string[] keyVal = s.Split(MSBuildConstants.EqualsChar, StringSplitOptions.RemoveEmptyEntries);
 
                 // Invalid table, don't use it.
-                if (keyVal.Length <= 1)
+                if (keyVal.Length <= 1 || keyVal.Length > 2)
                 {
                     Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.InvalidLookupTableFormat", stringTable);
                     return null;
