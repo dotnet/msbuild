@@ -1619,6 +1619,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <PlatformTarget Condition="'$(EnableDynamicPlatformResolution)' == 'true' and '$(PlatformTarget)' == ''
                                 and '$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj'">$(Platform)</PlatformTarget>
+
+    <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
   </PropertyGroup>
 
   <Target Name="_GetProjectReferencePlatformProperties"
@@ -1644,11 +1646,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ParentPlatform Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">$(Platform)</ParentPlatform>
     </PropertyGroup>
 
-    <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
+    <!-- Assign default PlatformLookupTables when doing Managed <-> Unmanaged hops -->
     <ItemGroup>
+      <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
       <_ProjectReferencePlatformPossibilities Condition="'$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj' and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
         <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
-        <PlatformLookupTable Condition="$(PlatformLookupTable) == ''">AnyCPU=Win32;x86=Win32</PlatformLookupTable>
+        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">AnyCPU=Win32;x86=Win32</PlatformLookupTable>
+      </_ProjectReferencePlatformPossibilities>
+
+      <!-- If we're looking at a managed project from a cpp project, map native to managed platforms. -->
+      <_ProjectReferencePlatformPossibilities Condition="('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj') and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' != 'true'">
+        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">Win32=x86</PlatformLookupTable>
       </_ProjectReferencePlatformPossibilities>
     </ItemGroup>
 
