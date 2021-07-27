@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -66,11 +65,10 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void ResolvesViaAnyCPUDefault()
         {
-            // No valid mapping via the lookup table, should default to AnyCPU when possible because
-            // it is inherently compatible with any platform.
-
+            // No valid mapping via the lookup table, should default to AnyCPU when the parent
+            // and child's platforms don't match.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("Platforms", "x86;AnyCPU");
+            projectReference.SetMetadata("Platforms", "x64;AnyCPU");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -88,10 +86,10 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void ResolvesViaSamePlatform()
         {
-            // No valid mapping via the lookup table, child project can't default to AnyCPU,
-            // child project can match with parent project so match them.
+            // No valid mapping via the lookup table. If the child's platform
+            // matches the parent's platform, it takes priority over AnyCPU default.
             TaskItem projectReference = new TaskItem("foo.bar");
-            projectReference.SetMetadata("Platforms", "x86;x64");
+            projectReference.SetMetadata("Platforms", "x86;x64;AnyCPU");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
             {
@@ -129,7 +127,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void FailsWhenProjectReferenceHasNoPlatformOptions()
+        public void WarnsWhenProjectReferenceHasNoPlatformOptions()
         {
             // Task should log a warning when a ProjectReference has no options to build as.
             // It will continue and have no NearestPlatform metadata.
@@ -154,7 +152,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Invalid format on PlatformLookupTable results in an exception being thrown.
         /// </summary>
         [Fact]
-        public void FailsOnInvalidFormatLookupTable()
+        public void WarnsOnInvalidFormatLookupTable()
         {
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", "x64");
@@ -179,7 +177,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Invalid format on PlatformLookupTable from the projectreference results in an exception being thrown.
         /// </summary>
         [Fact]
-        public void FailsOnInvalidFormatProjectReferenceLookupTable()
+        public void WarnsOnInvalidFormatProjectReferenceLookupTable()
         {
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", "x64;x86");

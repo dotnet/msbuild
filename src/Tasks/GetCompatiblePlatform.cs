@@ -98,17 +98,17 @@ namespace Microsoft.Build.Tasks
                     buildChildProjectAs = translationTable[CurrentProjectPlatform];
                     Log.LogMessage($"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the current project's translation table.");
                 }
-                // AnyCPU if possible
-                else if (childPlatforms.Contains("AnyCPU"))
-                {
-                    buildChildProjectAs = "AnyCPU";
-                    Log.LogMessage($"Defaulting to AnyCPU.");
-                }
                 // Prefer matching platforms
                 else if (childPlatforms.Contains(CurrentProjectPlatform))
                 {
                     buildChildProjectAs = CurrentProjectPlatform;
                     Log.LogMessage($"Child and parent have the same platform.");
+                }
+                // AnyCPU if possible
+                else if (childPlatforms.Contains("AnyCPU"))
+                {
+                    buildChildProjectAs = "AnyCPU";
+                    Log.LogMessage($"Defaulting to AnyCPU.");
                 }
                 else
                 {
