@@ -137,6 +137,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.EndsWith('arm64')) and
                                   $(DefaultAppHostRuntimeIdentifier.StartsWith('osx')) and
                                   $([MSBuild]::VersionLessThan('$(_TargetFrameworkVersionWithoutV)', '6.0'))">$(DefaultAppHostRuntimeIdentifier.Replace("arm64", "x64"))</DefaultAppHostRuntimeIdentifier>
+    <!-- If we are running on win-arm64 and the TFM is < 5.0, we have to use a x64 apphost since there are no win-arm64 apphosts previous to .NET 5.0. -->
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.EndsWith('arm64')) and
+                                  $(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and
+                                  $([MSBuild]::VersionLessThan('$(_TargetFrameworkVersionWithoutV)', '5.0'))">$(DefaultAppHostRuntimeIdentifier.Replace("arm64", "x64"))</DefaultAppHostRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"
