@@ -27,10 +27,10 @@ namespace MockCacheFromAssembly
             foreach (var ep in context.GraphEntryPoints ?? Enumerable.Empty<ProjectGraphEntryPoint>())
             {
                 var globalPropertyString = ep.GlobalProperties is not null
-                    ? string.Join(", ", ep.GlobalProperties.Select(gp => $"{gp.Key}={gp.Value}"))
+                    ? string.Join("\n\t", ep.GlobalProperties.Select(gp => $"{gp.Key}:{gp.Value}"))
                     : string.Empty;
 
-                logger.LogMessage($"EntryPoint: {ep.ProjectFile} ({globalPropertyString})");
+                logger.LogMessage($"EntryPoint: {ep.ProjectFile} \n(\n\t{globalPropertyString}\n)");
             }
 
             ErrorFrom(nameof(BeginBuildAsync), logger);

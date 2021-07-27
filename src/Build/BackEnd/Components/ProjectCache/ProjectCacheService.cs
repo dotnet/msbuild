@@ -359,8 +359,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 // the graph entrypoint file, and the VS solution configuration as the entry point's global properties.
                 var graphEntryPointsFromSolutionConfig = GenerateGraphEntryPointsFromSolutionConfigurationXml(
                     solutionConfigurationXml,
-                    configuration.ProjectFullPath,
-                    configuration.Project.GlobalProperties);
+                    configuration.Project);
 
                 await BeginBuildAsync(
                     ProjectCacheDescriptor.FromAssemblyPath(
@@ -372,8 +371,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(
                 string solutionConfigurationXml,
-                string definingProjectPath,
-                IDictionary<string, string> definingProjectGlobalProperties
+                ProjectInstance project
             )
             {
                 var doc = new XmlDocument();
@@ -384,6 +382,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 ErrorUtilities.VerifyThrow(projectConfigurationNodes.Count > 0, "Expected at least one project in solution");
 
+                var definingProjectPath = project.FullPath;
+                var definingProjectGlobalProperties = project.GlobalProperties;
                 var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurationNodes.Count);
 
                 foreach (XmlNode node in projectConfigurationNodes)
@@ -407,10 +407,24 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         ["Platform"] = platform
                     };
 
+                    RemoveProjectSpecificGlobalProperties(globalProperties, project);
+
                     graphEntryPoints.Add(new ProjectGraphEntryPoint(projectPath, globalProperties));
                 }
 
                 return graphEntryPoints;
+
+                void RemoveProjectSpecificGlobalProperties(Dictionary<string, string> globalProperties, ProjectInstance project)
+                {
+                    // Remove the inner build property from the graph entry point global properties.
+                    // If the inner build property is set (TargetFramework), it will propagate down the project graph and force all nodes to that innerbuild value, which is incorrect.
+                    var innerBuildPropertyName = ProjectInterpretation.GetInnerBuildPropertyName(project);
+
+                    if (!string.IsNullOrWhiteSpace(innerBuildPropertyName) && globalProperties.ContainsKey(innerBuildPropertyName))
+                    {
+                        globalProperties.Remove(innerBuildPropertyName);
+                    }
+                }
             }
 
             static bool MSBuildStringIsTrue(string msbuildString) =>

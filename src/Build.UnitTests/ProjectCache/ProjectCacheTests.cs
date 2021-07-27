@@ -562,7 +562,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                             new Dictionary<string, string>
                             {
                                 { SolutionProjectGenerator.SolutionPathPropertyName, graph.GraphRoots.First().ProjectInstance.FullPath },
-                                { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty }
+                                { SolutionProjectGenerator.CurrentSolutionConfigurationContents, solutionConfigurationGlobalProperty },
+                                { PropertyNames.InnerBuildProperty, "TheInnerBuildProperty"},
+                                { "TheInnerBuildProperty", "FooBar"},
                             });
 
                     buildResult.ShouldHaveSucceeded();
@@ -573,14 +575,18 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
                 buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
-                // Ensure MSBuild passes config / platform information set by VS.
                 foreach (var projectPath in projectPaths)
                 {
                     var projectName = Path.GetFileNameWithoutExtension(projectPath);
 
+                    // Ensure MSBuild passes config / platform information set by VS.
                     buildSession.Logger.FullLog.ShouldContain($"EntryPoint: {projectPath}");
-                    buildSession.Logger.FullLog.ShouldContain($"Configuration={projectName}Debug");
-                    buildSession.Logger.FullLog.ShouldContain($"Platform={projectName}x64");
+                    buildSession.Logger.FullLog.ShouldContain($"Configuration:{projectName}Debug");
+                    buildSession.Logger.FullLog.ShouldContain($"Platform:{projectName}x64");
+
+                    // Ensure MSBuild removes the inner build property if present.
+                    buildSession.Logger.FullLog.ShouldContain($"{PropertyNames.InnerBuildProperty}:TheInnerBuildProperty");
+                    buildSession.Logger.FullLog.ShouldNotContain("TheInnerBuildProperty:FooBar");
                 }
 
                 AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
