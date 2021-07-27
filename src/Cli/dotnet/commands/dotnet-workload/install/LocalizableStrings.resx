@@ -294,4 +294,7 @@
   <data name="NoTrustWithParentPID" xml:space="preserve">
     <value>Failed to establish a trust relationship with parent process ({0}).</value>
   </data>
+  <data name="WorkloadUpdatesAvailable" xml:space="preserve">
+    <value>Workload updates are available. Run `dotnet workload list` for more information.</value>
+  </data>
 </root>

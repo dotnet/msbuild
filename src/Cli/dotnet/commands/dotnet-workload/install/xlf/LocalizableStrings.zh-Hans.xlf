@@ -287,6 +287,11 @@
         <target state="new">PATH</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Workload updates are available. Run `dotnet workload list` for more information.</source>
+        <target state="new">Workload updates are available. Run `dotnet workload list` for more information.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WritingPackInstallRecordMessage">
         <source>Writing workload pack installation record for {0} version {1}...</source>
         <target state="new">Writing workload pack installation record for {0} version {1}...</target>

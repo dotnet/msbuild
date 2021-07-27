@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                           restoreActionConfig: _parseResult.ToRestoreActionConfig());
             workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath);
+                workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _workloadRecordRepo);
         }
 
         public override int Execute()
