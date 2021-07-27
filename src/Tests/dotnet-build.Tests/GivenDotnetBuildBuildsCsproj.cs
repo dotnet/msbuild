@@ -4,13 +4,13 @@
 using System;
 using System.IO;
 using FluentAssertions;
-using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 using System.Linq;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Xunit.Abstractions;
+using Microsoft.DotNet.Tools;
 
 namespace Microsoft.DotNet.Cli.Build.Tests
 {
@@ -171,6 +171,56 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             {
                 cmd.Should().NotHaveStdOutContaining("Copyright (C) Microsoft Corporation. All rights reserved.");
             }
+        }
+
+        [Fact]
+        public void It_warns_on_rid_without_self_contained_options()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFrameworkOrFrameworks("net6.0", false)
+                .Restore(Log);
+
+            new DotnetBuildCommand(Log)
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute("-r", "win-x64")
+               .Should()
+               .Pass()
+               .And
+               .HaveStdOutContaining("NETSDK1179");
+        }
+
+        [Fact]
+        public void It_does_not_warn_on_rid_with_self_contained_options()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+                .WithSource()
+                .WithTargetFrameworkOrFrameworks("net6.0", false)
+                .Restore(Log);
+
+            new DotnetBuildCommand(Log)
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute("-r", "win-x64", "--self-contained")
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining("NETSDK1179");
+        }
+
+        [Fact]
+        public void It_does_not_warn_on_rid_with_self_contained_options_prior_to_net6()
+        {
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+                .WithSource()
+                .Restore(Log);
+
+            new DotnetBuildCommand(Log)
+               .WithWorkingDirectory(testInstance.Path)
+               .Execute("-r", "win-x64")
+               .Should()
+               .Pass()
+               .And
+               .NotHaveStdOutContaining("NETSDK1179");
         }
     }
 }

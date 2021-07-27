@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../CommonLocalizableStrings.resx">
     <body>
+      <trans-unit id="ArchitectureOptionDescription">
+        <source>The target architecture.</source>
+        <target state="new">The target architecture.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotResolveRuntimeIdentifier">
+        <source>Resolving the current runtime identifier failed.</source>
+        <target state="new">Resolving the current runtime identifier failed.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndArchOptions">
+        <source>Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</source>
+        <target state="new">Specifying both the `-r|--runtime` and `-a|--arch` options is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotSpecifyBothRuntimeAndOsOptions">
+        <source>Specifying both the `-r|--runtime` and `-os` options is not supported.</source>
+        <target state="new">Specifying both the `-r|--runtime` and `-os` options is not supported.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommandInteractiveOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
         <target state="translated">允许命令停止和等待用户输入或操作(例如，用以完成身份验证)。</target>
@@ -75,9 +95,19 @@ EOF
 </target>
         <note />
       </trans-unit>
+      <trans-unit id="FrameworkDependentOptionDescription">
+        <source>Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</source>
+        <target state="new">Publish your application as a framework dependent application. A compatible .NET runtime must be installed on the target machine to run your application.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Specify which one to use.</source>
         <target state="translated">在“{0}”中找到多个项目。请指定使用哪一个。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OperatingSystemOptionDescription">
+        <source>The target operating system.</source>
+        <target state="new">The target operating system.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -133,6 +163,18 @@ EOF
       <trans-unit id="Package">
         <source>Package</source>
         <target state="translated">打包</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainAndNoSelfContainedConflict">
+        <source>The '--self-contained' and '--no-self-contained' options cannot be used together.</source>
+        <target state="new">The '--self-contained' and '--no-self-contained' options cannot be used together.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="new">Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</target>
         <note />
       </trans-unit>
       <trans-unit id="Solution">

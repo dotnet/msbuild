@@ -735,6 +735,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="translated">NETSDK1150: odkazovaný projekt „{0}“ je spustitelný soubor, který není samostatně obsažený.  Na spustitelný soubor, který není samostatně obsažený, nelze odkazovat pomocí samostatně obsaženého spustitelného souboru.</target>
         <note>{StrBegin="NETSDK1150: "}</note>
       </trans-unit>
+      <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
+        <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
+        <target state="new">NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</target>
+        <note>{StrBegin="NETSDK1179: "}</note>
+      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: Cesty AdditionalProbingPaths byly zadány pro GenerateRuntimeConfigurationFiles, ale vynechávají se, protože RuntimeConfigDevPath je prázdné.</target>

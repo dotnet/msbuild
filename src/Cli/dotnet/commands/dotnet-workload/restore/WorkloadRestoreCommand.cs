@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Restore
                     loggers: new ILogger[]
                     {
                         new ConsoleLogger(_result
-                            .ValueForOption(WorkloadInstallCommandParser.VerbosityOption)
+                            .ValueForOption<VerbosityOptions>(WorkloadInstallCommandParser.VerbosityOption)
                             .ToLoggerVerbosity())
                     },
                     remoteLoggers: Enumerable.Empty<ForwardingLoggerRecord>(),
