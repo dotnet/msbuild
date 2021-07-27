@@ -13,7 +13,6 @@ Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.ParametersToAlwaysShow.get
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.ShortNameOverrides.get -> System.Collections.Generic.Dictionary<string!, string!>!
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.SymbolInfo.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyDictionary<string!, string!>!>!
 Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.UsageExamples.get -> System.Collections.Generic.List<string!>?
-Microsoft.TemplateEngine.Cli.HostSpecificTemplateData.UsageExamples.set -> void
 Microsoft.TemplateEngine.Cli.IHostSpecificDataLoader
 Microsoft.TemplateEngine.Cli.IHostSpecificDataLoader.ReadHostSpecificTemplateData(Microsoft.TemplateEngine.Abstractions.ITemplateInfo! templateInfo) -> Microsoft.TemplateEngine.Cli.HostSpecificTemplateData!
 Microsoft.TemplateEngine.Cli.ITelemetryLogger

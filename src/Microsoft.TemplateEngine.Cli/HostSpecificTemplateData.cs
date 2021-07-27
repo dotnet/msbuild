@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli
 {
+    [JsonConverter(typeof(HostSpecificTemplateData.HostSpecificTemplateDataJsonConverter))]
     public class HostSpecificTemplateData
     {
         private const string IsHiddenKey = "isHidden";
@@ -60,16 +61,12 @@ namespace Microsoft.TemplateEngine.Cli
             SymbolInfo = symbolInfo;
         }
 
-        [JsonProperty]
-        public List<string>? UsageExamples { get; set; }
+        public List<string>? UsageExamples { get; }
 
-        [JsonProperty]
         public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> SymbolInfo { get; }
 
-        [JsonProperty]
         public bool IsHidden { get; }
 
-        [JsonIgnore]
         public HashSet<string> HiddenParameterNames
         {
             get
@@ -89,7 +86,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        [JsonIgnore]
         public HashSet<string> ParametersToAlwaysShow
         {
             get
@@ -109,7 +105,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        [JsonIgnore]
         public Dictionary<string, string> LongNameOverrides
         {
             get
@@ -128,7 +123,6 @@ namespace Microsoft.TemplateEngine.Cli
             }
         }
 
-        [JsonIgnore]
         public Dictionary<string, string> ShortNameOverrides
         {
             get
@@ -158,6 +152,41 @@ namespace Microsoft.TemplateEngine.Cli
             }
 
             return parameterName;
+        }
+
+        private class HostSpecificTemplateDataJsonConverter : JsonConverter<HostSpecificTemplateData>
+        {
+            public override HostSpecificTemplateData ReadJson(JsonReader reader, Type objectType, HostSpecificTemplateData existingValue, bool hasExistingValue, JsonSerializer serializer) => throw new NotImplementedException();
+
+            public override void WriteJson(JsonWriter writer, HostSpecificTemplateData value, JsonSerializer serializer)
+            {
+                writer.WriteStartObject();
+                if (value.IsHidden)
+                {
+                    writer.WritePropertyName(nameof(IsHidden));
+                    writer.WriteValue(value.IsHidden);
+                }
+                if (value.SymbolInfo.Any())
+                {
+                    writer.WritePropertyName(nameof(SymbolInfo));
+                    serializer.Serialize(writer, value.SymbolInfo);
+                }
+
+                if (value.UsageExamples != null && value.UsageExamples.Any(e => !string.IsNullOrWhiteSpace(e)))
+                {
+                    writer.WritePropertyName(nameof(UsageExamples));
+                    writer.WriteStartArray();
+                    foreach (string example in value.UsageExamples)
+                    {
+                        if (!string.IsNullOrWhiteSpace(example))
+                        {
+                            writer.WriteValue(example);
+                        }
+                    }
+                    writer.WriteEndArray();
+                }
+                writer.WriteEndObject();
+            }
         }
     }
 }
