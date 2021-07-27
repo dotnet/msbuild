@@ -207,6 +207,8 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] SourceFiles { get { throw null; } set { } }
         public bool UseHardlinksIfPossible { get { throw null; } set { } }
         public bool UseSymboliclinksIfPossible { get { throw null; } set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public bool WroteAtLeastOneFile { get { throw null; } }
         public void Cancel() { }
         public override bool Execute() { throw null; }
     }
