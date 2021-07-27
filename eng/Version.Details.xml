@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21304.1">
+    <Dependency Name="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.2">
+        <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
+        <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21369.3">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>85a65ea1fca1d0867f699fed44d191358270bf6a</Sha>
+      <Sha>e97027cf100d2b532adce387e5cb93a373de93c9</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="6.0.0-preview.3.158">
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>93159e30255273caf3528ddc53b55405a9c911af</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.0-2.21320.2">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.0-3.21369.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>acc39bc99b84648f84d8775519a858a63dd739be</Sha>
+      <Sha>ea623578b108856d3416af28af61060ed3d695e8</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.21369.3">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>e97027cf100d2b532adce387e5cb93a373de93c9</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

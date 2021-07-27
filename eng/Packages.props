@@ -10,6 +10,7 @@
     <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.DotNet.GenAPI" Version="2.1.0-prerelease-02404-02" />
+    <PackageReference Update="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
     <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
@@ -44,6 +45,7 @@
 
   <ItemGroup>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="$(MicrosoftCodeAnalysisBannedApiAnalyzersVersion)" />
   </ItemGroup>
 
 </Project>
