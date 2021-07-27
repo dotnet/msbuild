@@ -378,7 +378,7 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       </trans-unit>
       <trans-unit id="CommandOutput">
         <source>Output from command:</source>
-        <target state="new">Output from command:</target>
+        <target state="translated">Output del comando:</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
@@ -497,7 +497,7 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
       </trans-unit>
       <trans-unit id="Generic_Empty">
         <source>(empty)</source>
-        <target state="new">(empty)</target>
+        <target state="translated">(vuoto)</target>
         <note>shown when there is no data to show</note>
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">

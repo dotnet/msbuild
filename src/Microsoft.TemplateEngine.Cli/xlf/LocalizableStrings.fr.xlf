@@ -378,7 +378,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="CommandOutput">
         <source>Output from command:</source>
-        <target state="new">Output from command:</target>
+        <target state="translated">Sortie de la commande :</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandSucceeded">
@@ -497,7 +497,7 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
       </trans-unit>
       <trans-unit id="Generic_Empty">
         <source>(empty)</source>
-        <target state="new">(empty)</target>
+        <target state="translated">(vide)</target>
         <note>shown when there is no data to show</note>
       </trans-unit>
       <trans-unit id="Generic_ExampleHeader">
