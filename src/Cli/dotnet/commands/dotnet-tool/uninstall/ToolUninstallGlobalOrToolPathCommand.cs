@@ -15,7 +15,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null, string appHostSourceDirectory = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) CreateToolPackageStoresAndUninstaller(DirectoryPath? nonGlobalLocation = null);
     internal class ToolUninstallGlobalOrToolPathCommand : CommandBase
     {

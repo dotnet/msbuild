@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 已成功安裝工具 '{1}' ('{2}' 版)。</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="new">The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">安裝工具，並將其新增至本機工具資訊清單 (預設)。</target>

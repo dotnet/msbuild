@@ -6,18 +6,23 @@ using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Common;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using NuGet.Common;
+using NuGet.Frameworks;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null, string appHostSourceDirectory = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
 		DirectoryPath? nonGlobalLocation = null,
 		IEnumerable<string> forwardRestoreArguments = null);
@@ -38,14 +43,18 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly bool _global;
         private readonly string _verbosity;
         private readonly string _toolPath;
+        private readonly string _architectureOption;
         private IEnumerable<string> _forwardRestoreArguments;
+        private readonly DirectoryPath _tempDir;
+        private readonly INuGetPackageDownloader _nugetPackageDownloader;
 
         public ToolInstallGlobalOrToolPathCommand(
             ParseResult parseResult,
             CreateToolPackageStoresAndInstaller createToolPackageStoreAndInstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IEnvironmentPathInstruction environmentPathInstruction = null,
-            IReporter reporter = null)
+            IReporter reporter = null,
+            INuGetPackageDownloader nugetPackageDownloader = null)
             : base(parseResult)
         {
             _packageId = new PackageId(parseResult.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
@@ -56,6 +65,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _global = parseResult.ValueForOption<bool>(ToolAppliedOption.GlobalOptionAliases.First());
             _verbosity = Enum.GetName(parseResult.ValueForOption<VerbosityOptions>(ToolInstallCommandParser.VerbosityOption));
             _toolPath = parseResult.ValueForOption<string>(ToolAppliedOption.ToolPathOptionAlias);
+            _architectureOption = parseResult.ValueForOption<string>(ToolInstallCommandParser.ArchitectureOption);
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
 			_forwardRestoreArguments = parseResult.OptionValuesToBeForwarded(ToolInstallCommandParser.GetCommand());
@@ -63,6 +73,8 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
+            _tempDir = new DirectoryPath(Path.Combine(Path.GetTempPath(), "dotnet-tool-install"));
+            _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(_tempDir, verboseLogger: new NullLogger());
 
             _reporter = (reporter ?? Reporter.Output);
             _errorReporter = (reporter ?? Reporter.Error);
@@ -93,9 +105,11 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 toolPath = new DirectoryPath(_toolPath);
             }
 
+            string appHostSourceDirectory = ResolveAppHostSourceDirectoryAsync(_architectureOption, _framework).Result;
+
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageInstaller toolPackageInstaller) =
                 _createToolPackageStoresAndInstaller(toolPath, _forwardRestoreArguments);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
+            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath, appHostSourceDirectory);
 
             // Prevent installation if any version of the package is installed
             if (toolPackageStoreQuery.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
@@ -156,6 +170,40 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                     verboseMessages: new[] {ex.ToString()},
                     isUserError: false);
             }
+        }
+
+        private async Task<string> ResolveAppHostSourceDirectoryAsync(string archOption, string targetFramework)
+        {
+            string rid;
+            var validRids = new string[] { "win-x64", "win-arm64", "osx-x64", "osx-arm64" };
+            if (string.IsNullOrEmpty(archOption))
+            {
+                if (!string.IsNullOrEmpty(targetFramework) && new NuGetFramework(targetFramework).Version < new Version("6.0")
+                    && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()) && !RuntimeInformation.ProcessArchitecture.Equals(Architecture.X64))
+                {
+                    rid = OperatingSystem.IsWindows() ? "win-x64" : "osx-x64";
+                }
+                else
+                {
+                    // Use the default app host
+                    return null;
+                }
+            }
+            else
+            {
+                rid = CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(null, archOption);
+            }
+
+            if (!validRids.Contains(rid))
+            {
+                throw new GracefulException(string.Format(LocalizableStrings.InvalidRuntimeIdentifier, rid, string.Join(" ", validRids)));
+            }
+
+            var packageId = new PackageId($"microsoft.netcore.app.host.{rid}");
+            var packagePath = await _nugetPackageDownloader.DownloadPackageAsync(packageId);
+            var content = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, _tempDir);
+
+            return Path.Combine(_tempDir.Value, "runtimes", rid, "native");
         }
     }
 }

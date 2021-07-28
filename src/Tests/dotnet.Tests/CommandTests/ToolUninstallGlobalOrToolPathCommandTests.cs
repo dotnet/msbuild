@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             var toolUninstallGlobalOrToolPathCommand = new ToolUninstallGlobalOrToolPathCommand(
                 result,
                 CreateToolPackageStoreAndUninstaller,
-                (_) => new ShellShimRepository(
+                (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
@@ -245,7 +245,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             return new ToolInstallGlobalOrToolPathCommand(
                 result,
                 (location, forwardArguments) => (store, store, packageInstallerMock),
-                (_) => new ShellShimRepository(
+                (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
@@ -270,7 +270,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             return new ToolUninstallGlobalOrToolPathCommand(
                 result,
                 createToolPackageStoreAndUninstaller,
-                (_) => new ShellShimRepository(
+                (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),

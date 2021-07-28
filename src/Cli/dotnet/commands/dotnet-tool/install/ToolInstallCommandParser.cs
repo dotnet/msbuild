@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.Common;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 
@@ -37,6 +38,9 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
+        // Don't use the common options version as we don't want this to be a forwarded option
+        public static readonly Option<string> ArchitectureOption = new Option<string>(new string[] { "--arch", "-a" }, CommonLocalizableStrings.ArchitectureOptionDescription);
+
         public static Command GetCommand()
         {
             var command = new Command("install", LocalizableStrings.CommandDescription);
@@ -55,6 +59,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.InteractiveRestoreOption);
             command.AddOption(VerbosityOption);
+            command.AddOption(ArchitectureOption);
 
             return command;
         }
