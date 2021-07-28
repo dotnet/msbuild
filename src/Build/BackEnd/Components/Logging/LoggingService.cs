@@ -310,6 +310,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public event LoggingExceptionDelegate OnLoggingThreadException;
 
+        /// <summary>
+        /// Raised when a ProjectStarted event is about to be sent to the loggers.
+        /// </summary>
+        public event ProjectStartedEventHandler OnProjectStarted;
+
+        /// <summary>
+        /// Raised when a ProjectFinished event has just been sent to the loggers.
+        /// </summary>
+        public event ProjectFinishedEventHandler OnProjectFinished;
+
         #endregion
 
         #region Properties
@@ -1433,6 +1443,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void RouteBuildEvent(KeyValuePair<int, BuildEventArgs> nodeEvent)
         {
+            TryRaiseProjectStartedEvent(nodeEvent.Value);
+
             // Get the sink which will handle the build event, then send the event to that sink
             IBuildEventSink sink;
             bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out sink);
@@ -1441,6 +1453,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Sinks in the eventSinkDictionary are expected to not be null.
                 sink.Consume(nodeEvent.Value, nodeEvent.Key);
             }
+
+            TryRaiseProjectFinishedEvent(nodeEvent.Value);
         }
 
         /// <summary>
@@ -1449,6 +1463,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="eventArg">Build event that needs to be routed to the correct filter or sink.</param>
         private void RouteBuildEvent(BuildEventArgs eventArg)
         {
+            TryRaiseProjectStartedEvent(eventArg);
+
             // The event has not been through a filter yet. All events must go through a filter before they make it to a logger
             if (_filterEventSource != null)   // Loggers may not be registered
             {
@@ -1498,6 +1514,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                 }
             }
+
+            TryRaiseProjectFinishedEvent(eventArg);
         }
 
         /// <summary>
@@ -1550,6 +1568,40 @@ namespace Microsoft.Build.BackEnd.Logging
         private void RaiseLoggingExceptionEvent(Exception ex)
         {
             OnLoggingThreadException?.Invoke(ex);
+        }
+
+        /// <summary>
+        /// Raise the project started event, if necessary.
+        /// </summary>
+        private void TryRaiseProjectStartedEvent(BuildEventArgs args)
+        {
+            ProjectStartedEventHandler eventHandler = OnProjectStarted;
+
+            if (eventHandler != null)
+            {
+                ProjectStartedEventArgs startedEventArgs = args as ProjectStartedEventArgs;
+                if (startedEventArgs != null)
+                {
+                    eventHandler(this, startedEventArgs);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Raise the project finished event, if necessary.
+        /// </summary>
+        private void TryRaiseProjectFinishedEvent(BuildEventArgs args)
+        {
+            ProjectFinishedEventHandler eventHandler = OnProjectFinished;
+
+            if (eventHandler != null)
+            {
+                ProjectFinishedEventArgs finishedEventArgs = args as ProjectFinishedEventArgs;
+                if (finishedEventArgs != null)
+                {
+                    eventHandler(this, finishedEventArgs);
+                }
+            }
         }
 
         /// <summary>

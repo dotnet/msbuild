@@ -193,11 +193,26 @@ namespace Microsoft.Build.Execution
         private readonly BuildComponentFactoryCollection _componentFactories;
 
         /// <summary>
+        /// Mapping of submission IDs to their first project started events.
+        /// </summary>
+        private readonly Dictionary<int, BuildEventArgs> _projectStartedEvents;
+
+        /// <summary>
         /// Whether a cache has been provided by a project instance, meaning
         /// we've acquired at least one build submission that included a project instance.
         /// Once that has happened, we use the provided one, rather than our default.
         /// </summary>
         private bool _acquiredProjectRootElementCacheFromProjectInstance;
+
+        /// <summary>
+        /// The project started event handler
+        /// </summary>
+        private readonly ProjectStartedEventHandler _projectStartedEventHandler;
+
+        /// <summary>
+        /// The project finished event handler
+        /// </summary>
+        private readonly ProjectFinishedEventHandler _projectFinishedEventHandler;
 
         /// <summary>
         /// The logging exception event handler
@@ -269,7 +284,10 @@ namespace Microsoft.Build.Execution
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            _projectStartedEvents = new Dictionary<int, BuildEventArgs>();
 
+            _projectStartedEventHandler = OnProjectStarted;
+            _projectFinishedEventHandler = OnProjectFinished;
             _loggingThreadExceptionEventHandler = OnThreadException;
             _legacyThreadingData = new LegacyThreadingData();
             _instantiationTimeUtc = DateTime.UtcNow;
@@ -833,6 +851,31 @@ namespace Microsoft.Build.Execution
                 }
 
                 projectCacheShutdown?.Wait();
+
+#if DEBUG
+                if (_projectStartedEvents.Count != 0)
+                {
+                    bool allMismatchedProjectStartedEventsDueToLoggerErrors = true;
+
+                    foreach (KeyValuePair<int, BuildEventArgs> projectStartedEvent in _projectStartedEvents)
+                    {
+                        BuildResult result = _resultsCache.GetResultsForConfiguration(projectStartedEvent.Value.BuildEventContext.ProjectInstanceId);
+
+                        // It's valid to have a mismatched project started event IFF that particular
+                        // project had some sort of unhandled exception.  If there is no result, we
+                        // can't tell for sure one way or the other, so err on the side of throwing
+                        // the assert, but if there is a result, make sure that it actually has an
+                        // exception attached.
+                        if (result?.Exception == null)
+                        {
+                            allMismatchedProjectStartedEventsDueToLoggerErrors = false;
+                            break;
+                        }
+                    }
+
+                    Debug.Assert(allMismatchedProjectStartedEventsDueToLoggerErrors, "There was a mismatched project started event not caused by an exception result");
+                }
+#endif
 
                 if (_buildParameters.DiscardBuildResults)
                 {
@@ -2087,6 +2130,7 @@ namespace Microsoft.Build.Execution
             _acquiredProjectRootElementCacheFromProjectInstance = false;
 
             _unnamedProjectInstanceToNames.Clear();
+            _projectStartedEvents.Clear();
             _nodeIdToKnownConfigurations.Clear();
             _nextUnnamedProjectId = 1;
 
@@ -2766,6 +2810,42 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Raised when a project finished logging message has been processed.
+        /// </summary>
+        private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
+        {
+            lock (_syncLock)
+            {
+                if (_projectStartedEvents.TryGetValue(e.BuildEventContext.SubmissionId, out var originalArgs))
+                {
+                    if (originalArgs.BuildEventContext.Equals(e.BuildEventContext))
+                    {
+                        _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
+                        if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
+                        {
+                            submission.CompleteLogging(false);
+                            CheckSubmissionCompletenessAndRemove(submission);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Raised when a project started logging message is about to be processed.
+        /// </summary>
+        private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
+        {
+            lock (_syncLock)
+            {
+                if (!_projectStartedEvents.ContainsKey(e.BuildEventContext.SubmissionId))
+                {
+                    _projectStartedEvents[e.BuildEventContext.SubmissionId] = e;
+                }
+            }
+        }
+
+        /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
         private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsAsMessages)
@@ -2786,6 +2866,8 @@ namespace Microsoft.Build.Execution
 
             _threadException = null;
             loggingService.OnLoggingThreadException += _loggingThreadExceptionEventHandler;
+            loggingService.OnProjectStarted += _projectStartedEventHandler;
+            loggingService.OnProjectFinished += _projectFinishedEventHandler;
             loggingService.WarningsAsErrors = warningsAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
@@ -2871,6 +2953,8 @@ namespace Microsoft.Build.Execution
                 if (loggingService != null)
                 {
                     loggingService.OnLoggingThreadException -= _loggingThreadExceptionEventHandler;
+                    loggingService.OnProjectFinished -= _projectFinishedEventHandler;
+                    loggingService.OnProjectStarted -= _projectStartedEventHandler;
                     _componentFactories.ShutdownComponent(BuildComponentType.LoggingService);
                 }
             }

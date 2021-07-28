@@ -37,6 +37,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         event LoggingExceptionDelegate OnLoggingThreadException;
 
+        /// <summary>
+        /// Raised when a ProjectStarted event is about to be sent to the loggers.
+        /// </summary>
+        event ProjectStartedEventHandler OnProjectStarted;
+
+        /// <summary>
+        /// Raised when a ProjectFinished event has just been sent to the loggers.
+        /// </summary>
+        event ProjectFinishedEventHandler OnProjectFinished;
+
         #endregion
 
         #region Properties
