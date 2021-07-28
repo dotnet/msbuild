@@ -35,16 +35,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public event LoggingExceptionDelegate OnLoggingThreadException;
 
         /// <summary>
-        /// The event to raise when ProjectStarted is processed.
-        /// </summary>
-        public event ProjectStartedEventHandler OnProjectStarted;
-
-        /// <summary>
-        /// The event to raise when ProjectFinished is processed
-        /// </summary>
-        public event ProjectFinishedEventHandler OnProjectFinished;
-
-        /// <summary>
         /// Enumerator over all registered loggers.
         /// </summary>
         public ICollection<ILogger> Loggers
@@ -60,8 +50,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             get
             {
                 OnLoggingThreadException(null);
-                OnProjectStarted(null, null);
-                OnProjectFinished(null, null);
                 throw new NotImplementedException();
             }
         }
