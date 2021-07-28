@@ -35,7 +35,7 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\Tasks\Common\Resources\Strings.resx" LinkBase="Resources" GenerateSource="True" Namespace="Microsoft.NET.Build.Tasks" />
     <None Include="..\..\Tasks\Common\Resources\xlf\**\*" LinkBase="Resources\xlf" />
-    <PackageReference Include="XliffTasks" Version="$(XliffTasksVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
+    <PackageReference Include="Microsoft.DotNet.XliffTasks" Version="$(MicrosoftDotNetXliffTasksVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
   </ItemGroup>
 

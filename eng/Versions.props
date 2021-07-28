@@ -152,6 +152,10 @@
     <!-- Dependencies from https://github.com/microsoft/MSBuildLocator -->
     <MicrosoftBuildLocatorPackageVersion>1.4.1</MicrosoftBuildLocatorPackageVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- Dependencies from https://github.com/dotnet/xliff-tasks -->
+    <MicrosoftDotNetXliffTasksVersion>1.0.0-beta.21376.1</MicrosoftDotNetXliffTasksVersion>
+  </PropertyGroup>
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
