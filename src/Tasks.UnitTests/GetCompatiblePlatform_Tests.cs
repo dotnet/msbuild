@@ -39,14 +39,14 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void ResolvesViaChildsPlatformLookupTable()
+        public void ResolvesViaProjectReferencesPlatformLookupTable()
         {
-            // A child's PlatformLookupTable takes priority over the current project's table.
+            // A ProjectReference's PlatformLookupTable takes priority over the current project's table.
             // This allows overrides on a per-ProjectItem basis.
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", "x64;x86;AnyCPU");
 
-            // childproj will be assigned x86 because its table takes priority
+            // ProjectReference will be assigned x86 because its table takes priority
             projectReference.SetMetadata("PlatformLookupTable", "win32=x86");
 
             GetCompatiblePlatform task = new GetCompatiblePlatform()
