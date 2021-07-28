@@ -29,8 +29,8 @@ namespace Microsoft.Build.Tasks
         public string CurrentProjectPlatform { get; set; }
 
         /// <summary>
-        /// Optional parameter that defines translations from parent platforms to
-        /// what the ProjectReference should build as.
+        /// Optional parameter that defines translations from current project platforms
+        /// to what the ProjectReference should build as.
         /// Win32=x86, for example.
         /// </summary>
         public string PlatformLookupTable { get; set; }
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks
                 if (childPlatforms.Contains(CurrentProjectPlatform))
                 {
                     buildChildProjectAs = CurrentProjectPlatform;
-                    Log.LogMessage(MessageImportance.Low, $"Child and parent have the same platform.");
+                    Log.LogMessage(MessageImportance.Low, $"ProjectReference and current project have the same platform.");
                 }
                 // Prioritize PlatformLookupTable **metadata** attached to the ProjectReference item
                 // before the current project's table. We do this to allow per-ProjectReference fine tuning.

@@ -65,8 +65,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void ResolvesViaAnyCPUDefault()
         {
-            // No valid mapping via the lookup table, should default to AnyCPU when the parent
-            // and child's platforms don't match.
+            // No valid mapping via the lookup table, should default to AnyCPU when the current project
+            // and ProjectReference platforms don't match.
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", "x64;AnyCPU");
 
@@ -86,8 +86,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void ResolvesViaSamePlatform()
         {
-            // No valid mapping via the lookup table. If the child's platform
-            // matches the parent's platform, it takes priority over AnyCPU default.
+            // No valid mapping via the lookup table. If the ProjectReference's platform
+            // matches the current project's platform, it takes priority over AnyCPU default.
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", "x86;x64;AnyCPU");
             projectReference.SetMetadata("PlatformLookupTable", "x86=AnyCPU"); // matching platform takes priority over lookup tables
@@ -108,8 +108,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void FailsToResolve()
         {
-            // No valid mapping via the lookup table, child project can't default to AnyCPU,
-            // child can't match with parent, log a warning.
+            // No valid mapping via the lookup table, ProjectReference can't default to AnyCPU,
+            // it also can't match with current project, log a warning.
             TaskItem projectReference = new TaskItem("foo.bar");
             projectReference.SetMetadata("Platforms", "x64");
 

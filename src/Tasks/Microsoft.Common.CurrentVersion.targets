@@ -1644,8 +1644,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Managed Platform "source of truth" is $(PlatformTarget). For cpp it's $(Platform) -->
     <PropertyGroup>
-      <ParentPlatform>$(PlatformTarget)</ParentPlatform>
-      <ParentPlatform Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">$(Platform)</ParentPlatform>
+      <CurrentPlatform>$(PlatformTarget)</CurrentPlatform>
+      <CurrentPlatform Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">$(Platform)</CurrentPlatform>
     </PropertyGroup>
 
     <!-- Assign default PlatformLookupTables when doing Managed <-> Unmanaged hops -->
@@ -1663,7 +1663,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <GetCompatiblePlatform AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
-                           CurrentProjectPlatform="$(ParentPlatform)"
+                           CurrentProjectPlatform="$(CurrentPlatform)"
                            PlatformLookupTable="$(PlatformLookupTable)"
                            Condition="'@(_ProjectReferencePlatformPossibilities)' != ''">
       <Output ItemName="_ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
