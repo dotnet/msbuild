@@ -309,7 +309,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [InlineData("publish")]
         public void GivenWorkloadsAreOutOfDateUpdatesAreAdvertisedOnRestoringCommands(string commandName)
         {
-            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld")
+            var testInstance = _testAssetsManager.CopyTestAsset("HelloWorld", identifier: commandName)
                 .WithSource()
                 .Restore(Log);
 
