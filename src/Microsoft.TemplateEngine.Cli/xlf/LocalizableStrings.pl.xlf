@@ -267,8 +267,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
-        <source>Search failed: no template name is specified.</source>
-        <target state="translated">Wyszukiwanie nie powiodło się: nie określono nazwy szablonu.</target>
+        <source>Search failed: not enough information specified for search.</source>
+        <target state="needs-review-translation">Wyszukiwanie nie powiodło się: nie określono nazwy szablonu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -292,8 +292,8 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
-        <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="translated">Aby wyszukać szablonu, określ nazwę szablonu lub użyj jednego z obsługiwanych filtrów: {0}.</target>
+        <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
+        <target state="needs-review-translation">Aby wyszukać szablonu, określ nazwę szablonu lub użyj jednego z obsługiwanych filtrów: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">

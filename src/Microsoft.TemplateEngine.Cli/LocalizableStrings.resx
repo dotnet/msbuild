@@ -734,10 +734,10 @@ The supported columns are: language, tags, author, type.</value>
     <value>Common templates are:</value>
   </data>
   <data name="CliTemplateSearchCoordinator_Error_NoTemplateName" xml:space="preserve">
-    <value>Search failed: no template name is specified.</value>
+    <value>Search failed: not enough information specified for search.</value>
   </data>
   <data name="CliTemplateSearchCoordinator_Info_SearchHelp" xml:space="preserve">
-    <value>To search for the template, specify template name or use one of supported filters: {0}.</value>
+    <value>To search for templates, specify partial template name or use one of supported filters: {0}.</value>
   </data>
   <data name="Generic_ExampleHeader" xml:space="preserve">
     <value>Example:</value>

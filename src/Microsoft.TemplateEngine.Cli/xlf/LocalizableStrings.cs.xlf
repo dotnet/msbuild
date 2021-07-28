@@ -267,8 +267,8 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
-        <source>Search failed: no template name is specified.</source>
-        <target state="translated">Hledání selhalo: není zadaný název šablony.</target>
+        <source>Search failed: not enough information specified for search.</source>
+        <target state="needs-review-translation">Hledání selhalo: není zadaný název šablony.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -292,8 +292,8 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
-        <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="translated">Pokud chcete šablonu vyhledat, zadejte název šablony nebo použijte jeden z podporovaných filtrů: {0}.</target>
+        <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
+        <target state="needs-review-translation">Pokud chcete šablonu vyhledat, zadejte název šablony nebo použijte jeden z podporovaných filtrů: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">

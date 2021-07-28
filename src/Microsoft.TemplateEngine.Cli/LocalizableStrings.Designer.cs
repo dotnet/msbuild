@@ -19,7 +19,7 @@ namespace Microsoft.TemplateEngine.Cli {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class LocalizableStrings {
@@ -518,7 +518,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search failed: no template name is specified..
+        ///   Looks up a localized string similar to Search failed: not enough information specified for search..
         /// </summary>
         internal static string CliTemplateSearchCoordinator_Error_NoTemplateName {
             get {
@@ -563,7 +563,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To search for the template, specify template name or use one of supported filters: {0}..
+        ///   Looks up a localized string similar to To search for templates, specify partial template name or use one of supported filters: {0}..
         /// </summary>
         internal static string CliTemplateSearchCoordinator_Info_SearchHelp {
             get {

@@ -54,8 +54,8 @@ namespace Dotnet_new3.IntegrationTests
                 .Should().Fail()
                 .And.NotHaveStdOut()
                 .And.HaveStdErrContaining(
-@"Search failed: no template name is specified.
-To search for the template, specify template name or use one of supported filters: 'author', 'baseline', 'language', 'type', 'tag', 'package'.
+@"Search failed: not enough information specified for search.
+To search for templates, specify partial template name or use one of supported filters: 'author', 'baseline', 'language', 'type', 'tag', 'package'.
 Examples:
    dotnet new3 <TEMPLATE_NAME> --search
    dotnet new3 --search --author Microsoft

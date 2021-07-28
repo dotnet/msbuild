@@ -267,8 +267,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
-        <source>Search failed: no template name is specified.</source>
-        <target state="translated">검색 실패: 템플릿 이름이 지정되지 않았습니다.</target>
+        <source>Search failed: not enough information specified for search.</source>
+        <target state="needs-review-translation">검색 실패: 템플릿 이름이 지정되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -292,8 +292,8 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
-        <source>To search for the template, specify template name or use one of supported filters: {0}.</source>
-        <target state="translated">템플릿을 검색하려면 템플릿 이름을 지정하거나 지원되는 필터 중 하나를 사용하세요. {0}.</target>
+        <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
+        <target state="needs-review-translation">템플릿을 검색하려면 템플릿 이름을 지정하거나 지원되는 필터 중 하나를 사용하세요. {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
