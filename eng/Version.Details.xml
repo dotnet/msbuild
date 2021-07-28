@@ -5,9 +5,9 @@
       <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
       <Sha />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21376.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21377.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>e6abc186425e675e0f201acc1c33e183a0e51c86</Sha>
+      <Sha>cab4a3c50fd042677ea17cfc5171b4ce8b29930f</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="6.0.0-preview.1.107">
@@ -18,9 +18,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>ea623578b108856d3416af28af61060ed3d695e8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.21376.4">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="6.0.0-beta.21377.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>e6abc186425e675e0f201acc1c33e183a0e51c86</Sha>
+      <Sha>cab4a3c50fd042677ea17cfc5171b4ce8b29930f</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
