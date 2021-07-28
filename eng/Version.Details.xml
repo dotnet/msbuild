@@ -274,6 +274,7 @@
     <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21376.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/xliff-tasks</Uri>
       <Sha>397ff033b467003d51619f9ac3928e02a4d4178f</Sha>
+      <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
