@@ -65,7 +65,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 return New3CommandStatus.NotFound;
             }
 
-            string? packageIdToShow = null;
             foreach (SearchResult result in searchResults)
             {
                 if (!result.Success)
@@ -79,15 +78,6 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 if (result.SearchHits.Any())
                 {
                     DisplayResultsForPack(result.SearchHits, environmentSettings, commandInput, defaultLanguage);
-
-                    if (string.IsNullOrWhiteSpace(packageIdToShow))
-                    {
-                        var firstMicrosoftAuthoredPack = result.SearchHits.FirstOrDefault(p => p.MatchedTemplates.Any(t => string.Equals(t.Author, "Microsoft")));
-                        if (firstMicrosoftAuthoredPack != default)
-                        {
-                            packageIdToShow = firstMicrosoftAuthoredPack.PackageInfo.Name;
-                        }
-                    }
                 }
                 else
                 {
@@ -103,17 +93,35 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             Reporter.Output.WriteLine();
             if (searchResults.Where(r => r.Success).SelectMany(r => r.SearchHits).Any())
             {
+                string packageIdToShow = EvaluatePackageToShow(searchResults);
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_InstallHelp, commandInput.CommandName));
                 Reporter.Output.WriteCommand(commandInput.InstallCommandExample());
-                if (string.IsNullOrWhiteSpace(packageIdToShow))
-                {
-                    packageIdToShow = searchResults.Where(r => r.Success).First().SearchHits[0].PackageInfo.Name;
-                }
                 Reporter.Output.WriteLine(LocalizableStrings.Generic_ExampleHeader);
                 Reporter.Output.WriteCommand(commandInput.InstallCommandExample(packageID: packageIdToShow));
                 return New3CommandStatus.Success;
             }
             return New3CommandStatus.NotFound;
+        }
+
+        private static string EvaluatePackageToShow(IReadOnlyList<SearchResult> searchResults)
+        {
+            var microsoftAuthoredPackages = searchResults
+                .SelectMany(r => r.SearchHits)
+                .Where(hit => hit.PackageInfo.Name.StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase)
+                                && hit.MatchedTemplates.Any(t => t.Author == "Microsoft"))
+                .OrderByDescending(hit => hit.PackageInfo.TotalDownloads);
+
+            if (microsoftAuthoredPackages.Any())
+            {
+                return microsoftAuthoredPackages.First().PackageInfo.Name;
+            }
+            else
+            {
+                return searchResults
+                        .SelectMany(r => r.SearchHits)
+                        .OrderByDescending(hit => hit.PackageInfo.TotalDownloads)
+                        .First().PackageInfo.Name;
+            }
         }
 
         private static void DisplayResultsForPack(

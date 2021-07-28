@@ -92,7 +92,7 @@ Examples:
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Language", "Package", "Downloads" });
             Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "azure"), "'Template Name' or 'Short Name' columns do not contain the criteria");
 
-            var microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft");
+            var microsoftPackages = tableOutput.Where(row => row[2] == "Microsoft" && row[4].StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase));
             var installationCommands = microsoftPackages.Select(package => $"dotnet new3 --install {package[4]}");
 
             Func<string, bool> containsOneOfInstallationCommands = (output) => installationCommands.Any(command => output.Contains(command));

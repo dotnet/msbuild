@@ -415,10 +415,12 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
         {
             using EnvironmentSettingsHelper environmentSettingsHelper = new EnvironmentSettingsHelper();
             var environmentSettings = environmentSettingsHelper.CreateEnvironment(virtualize: true);
-            var sourceFileProvider = new BlobStoreSourceFileProvider(environmentSettings);
-            var metadataFileName = Path.Combine(TestUtils.CreateTemporaryFolder(), "NuGetTemplateSearchInfo.json");
-            await sourceFileProvider.GetSearchFileAsync(metadataFileName, default).ConfigureAwait(false);
-            string content = File.ReadAllText(metadataFileName);
+            var sourceFileProvider = new NuGetMetadataSearchProvider(
+                A.Fake<ITemplateSearchProviderFactory>(),
+                environmentSettings,
+                new Dictionary<string, Func<object, object>>());
+            await sourceFileProvider.GetSearchFileAsync(default).ConfigureAwait(false);
+            string content = environmentSettings.Host.FileSystem.ReadAllText(Path.Combine(environmentSettings.Paths.HostVersionSettingsDir, "nugetTemplateSearchInfo.json"));
             var jObj = JObject.Parse(content);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.True(LegacySearchCacheReader.TryReadDiscoveryMetadata(
