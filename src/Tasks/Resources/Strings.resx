@@ -2909,7 +2909,21 @@
     <value>MSB3983: The PlatformLookupTable '{0}' is in an invalid format and won't be used. The format should be 'A=B;C=D'.</value>
     <comment>{StrBegin="MSB3983: "}</comment>
   </data>
-
+  <data name="GetCompatiblePlatform.LookupTableParsed">
+    <value>Parsed lookup table:'{0}'.</value>
+  </data>
+    <data name="GetCompatiblePlatform.FoundMappingInTable">
+    <value>Found mapping '{0}'='{1}' in given lookup table: '{2}'.</value>
+  </data>
+  <data name="GetCompatiblePlatform.DisplayChosenPlatform">
+    <value>Project '{0}' will build with platform: '{1}'.</value>
+  </data>
+  <data name="GetCompatiblePlatform.SamePlatform">
+    <value>ProjectReference and current project have the same platform.</value>
+  </data>
+  <data name="GetCompatiblePlatform.AnyCPUDefault">
+    <value>Choosing AnyCPU by default.</value>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 

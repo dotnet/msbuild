@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
         public string CurrentProjectPlatform { get; set; }
 
         /// <summary>
-        /// Optional parameter that defines translations from current project platforms
+        /// Optional parameter that defines mappings from current project platforms
         /// to what the ProjectReference should build as.
         /// Win32=x86, for example.
         /// </summary>
@@ -43,37 +43,28 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            Dictionary<string, string> translationTable = ExtractLookupTable(PlatformLookupTable);
-
-            if (translationTable != null)
-            {
-                Log.LogMessage(MessageImportance.Low, $"Current Project's Translation Table: {string.Join(";", translationTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
-            }
+            Dictionary<string, string> currentProjectLookupTable = ExtractLookupTable(PlatformLookupTable);
 
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
             for (int i = 0; i < AnnotatedProjects.Length; i++)
             {
                 AssignedProjectsWithPlatform[i] = new TaskItem(AnnotatedProjects[i]);
 
-                string projectReferenceOptions = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
+                string projectReferencePlatformMetadata = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
 
-                if (string.IsNullOrEmpty(projectReferenceOptions))
+                if (string.IsNullOrEmpty(projectReferencePlatformMetadata))
                 {
                     Log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", AssignedProjectsWithPlatform[i].ItemSpec);
                     continue;
                 }
 
+                string projectReferenceLookupTableMetadata = AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable");
                 // Pull platformlookuptable metadata from the referenced project. This allows custom
-                // translations on a per-ProjectReference basis.
-                Dictionary<string, string> projectReferenceLookupTable = ExtractLookupTable(AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable"));
-
-                if (projectReferenceLookupTable != null)
-                {
-                    Log.LogMessage(MessageImportance.Low, $"Referenced Project's Translation Table: {string.Join(";", projectReferenceLookupTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
-                }
+                // mappings on a per-ProjectReference basis.
+                Dictionary<string, string> projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata);
 
                 HashSet<string> projectReferencePlatforms = new HashSet<string>();
-                foreach (string s in projectReferenceOptions.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
+                foreach (string s in projectReferencePlatformMetadata.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
                 {
                     projectReferencePlatforms.Add(s);
                 }
@@ -84,7 +75,7 @@ namespace Microsoft.Build.Tasks
                 if (projectReferencePlatforms.Contains(CurrentProjectPlatform))
                 {
                     buildProjectReferenceAs = CurrentProjectPlatform;
-                    Log.LogMessage(MessageImportance.Low, $"ProjectReference and current project have the same platform.");
+                    Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.SamePlatform");
                 }
                 // Prioritize PlatformLookupTable **metadata** attached to the ProjectReference item
                 // before the current project's table. We do this to allow per-ProjectReference fine tuning.
@@ -93,21 +84,21 @@ namespace Microsoft.Build.Tasks
                         projectReferencePlatforms.Contains(projectReferenceLookupTable[CurrentProjectPlatform]))
                 {
                     buildProjectReferenceAs = projectReferenceLookupTable[CurrentProjectPlatform];
-                    Log.LogMessage(MessageImportance.Low, $"Found '{CurrentProjectPlatform}={buildProjectReferenceAs}' in the referenced project's translation table.");
+                    Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", CurrentProjectPlatform, buildProjectReferenceAs, projectReferenceLookupTableMetadata);
                 }
                 // Current project's translation table follows
-                else if (translationTable != null &&
-                        translationTable.ContainsKey(CurrentProjectPlatform) &&
-                        projectReferencePlatforms.Contains(translationTable[CurrentProjectPlatform]))
+                else if (currentProjectLookupTable != null &&
+                        currentProjectLookupTable.ContainsKey(CurrentProjectPlatform) &&
+                        projectReferencePlatforms.Contains(currentProjectLookupTable[CurrentProjectPlatform]))
                 {
-                    buildProjectReferenceAs = translationTable[CurrentProjectPlatform];
-                    Log.LogMessage(MessageImportance.Low, $"Found '{CurrentProjectPlatform}={buildProjectReferenceAs}' in the current project's translation table.");
+                    buildProjectReferenceAs = currentProjectLookupTable[CurrentProjectPlatform];
+                    Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", CurrentProjectPlatform, buildProjectReferenceAs, PlatformLookupTable);
                 }
                 // AnyCPU if possible
                 else if (projectReferencePlatforms.Contains("AnyCPU"))
                 {
                     buildProjectReferenceAs = "AnyCPU";
-                    Log.LogMessage(MessageImportance.Low, $"Defaulting to AnyCPU.");
+                    Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.AnyCPUDefault");
                 }
                 else
                 {
@@ -117,7 +108,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildProjectReferenceAs);
-                Log.LogMessage(MessageImportance.Low, $"Project '{AssignedProjectsWithPlatform[i].ItemSpec}' will build with Platform: '{buildProjectReferenceAs}'");
+                Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.DisplayChosenPlatform", AssignedProjectsWithPlatform[i].ItemSpec, buildProjectReferenceAs);
             }
 
             return !Log.HasLoggedErrors;
@@ -145,6 +136,8 @@ namespace Microsoft.Build.Tasks
 
                 table[keyVal[0]] = keyVal[1];
             }
+
+            Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.LookupTableParsed", stringTable);
 
             return table;
         }
