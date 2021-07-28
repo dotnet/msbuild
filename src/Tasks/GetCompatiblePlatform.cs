@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.Build.Tasks
 {
@@ -21,11 +21,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// All ProjectReference items.
         /// </summary>
+        [Required]
         public ITaskItem[] AnnotatedProjects { get; set; }
 
         /// <summary>
         /// The platform the current project is building as. 
         /// </summary>
+        [Required]
         public string CurrentProjectPlatform { get; set; }
 
         /// <summary>
@@ -39,11 +41,18 @@ namespace Microsoft.Build.Tasks
         /// The resulting items with NearestPlatform metadata set.
         /// </summary>
         [Output]
-        public ITaskItem[] AssignedProjectsWithPlatform { get; set; }
+        public ITaskItem[]? AssignedProjectsWithPlatform { get; set; }
+
+        public GetCompatiblePlatform()
+        {
+            AnnotatedProjects = new ITaskItem[0];
+            CurrentProjectPlatform = string.Empty;
+            PlatformLookupTable = string.Empty;
+        }
 
         public override bool Execute()
         {
-            Dictionary<string, string> currentProjectLookupTable = ExtractLookupTable(PlatformLookupTable);
+            Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(PlatformLookupTable);
 
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
             for (int i = 0; i < AnnotatedProjects.Length; i++)
@@ -61,7 +70,7 @@ namespace Microsoft.Build.Tasks
                 string projectReferenceLookupTableMetadata = AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable");
                 // Pull platformlookuptable metadata from the referenced project. This allows custom
                 // mappings on a per-ProjectReference basis.
-                Dictionary<string, string> projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata);
+                Dictionary<string, string>? projectReferenceLookupTable = ExtractLookupTable(projectReferenceLookupTableMetadata);
 
                 HashSet<string> projectReferencePlatforms = new HashSet<string>();
                 foreach (string s in projectReferencePlatformMetadata.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
@@ -114,7 +123,7 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors;
         }
 
-        private Dictionary<string, string> ExtractLookupTable(string stringTable)
+        private Dictionary<string, string>? ExtractLookupTable(string stringTable)
         {
             if (string.IsNullOrEmpty(stringTable))
             {
