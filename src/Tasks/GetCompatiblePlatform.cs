@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (string s in stringTable.Trim().Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
-                string[] keyVal = s.Trim().Split(MSBuildConstants.EqualsChar, StringSplitOptions.RemoveEmptyEntries);
+                string[] keyVal = s.Trim().Split(MSBuildConstants.EqualsChar);
 
                 // Invalid table, don't use it.
                 if (keyVal.Length <= 1 || keyVal.Length > 2)
