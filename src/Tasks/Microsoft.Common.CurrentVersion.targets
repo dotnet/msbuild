@@ -1607,10 +1607,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================
                                         _GetProjectReferencePlatformProperties
 
-    If a project is opted in via $(EnableDynamicPlatformResolution), this target builds the GetPlatforms
-    target of all existing references to get a list of all possible platforms of the referenced projects. 
-    Calls the GetCompatiblePlatform task to determine the most compatible platform for each project.
-    This prevents overbuilding a project when 'AnyCPU' is available, for example.
+    If a project is opted in via $(EnableDynamicPlatformResolution), this target calls the 
+    GetCompatiblePlatform task on all ProjectReference items to determine the most compatible 
+    platform for each project. It then sets SetPlatform metadata on each ProjectReference.
+    This prevents overbuilding a project when 'AnyCPU' is available.
 
     ======================================================================================
   -->
@@ -1623,6 +1623,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
   </PropertyGroup>
 
+  <!-- This target skips VS builds because they already supply Platform and
+       Configuration information. -->
   <Target Name="_GetProjectReferencePlatformProperties"
           Condition="'$(EnableDynamicPlatformResolution)' == 'true'
                      and '$(BuildingInsideVisualStudio)' != 'true'

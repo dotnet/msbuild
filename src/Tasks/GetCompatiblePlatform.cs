@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks
 
             if (translationTable != null)
             {
-                Log.LogMessage($"Current Project's Translation Table: {string.Join(";", translationTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
+                Log.LogMessage(MessageImportance.Low, $"Current Project's Translation Table: {string.Join(";", translationTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
             }
 
             AssignedProjectsWithPlatform = new ITaskItem[AnnotatedProjects.Length];
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Tasks
 
                 if (childPlatformLookupTable != null)
                 {
-                    Log.LogMessage($"Referenced Project's Translation Table: {string.Join(";", childPlatformLookupTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
+                    Log.LogMessage(MessageImportance.Low, $"Referenced Project's Translation Table: {string.Join(";", childPlatformLookupTable.Select(kvp => $"{kvp.Key}={kvp.Value}"))}");
                 }
 
                 HashSet<string> childPlatforms = new HashSet<string>();
@@ -84,16 +84,16 @@ namespace Microsoft.Build.Tasks
                 if (childPlatforms.Contains(CurrentProjectPlatform))
                 {
                     buildChildProjectAs = CurrentProjectPlatform;
-                    Log.LogMessage($"Child and parent have the same platform.");
+                    Log.LogMessage(MessageImportance.Low, $"Child and parent have the same platform.");
                 }
-                // If the referenced project has a translation table, it came from the ProjectReference item's metadata.
-                // Prioritize that over the current project's translation table.
+                // Prioritize PlatformLookupTable **metadata** attached to the ProjectReference item
+                // before the current project's table. We do this to allow per-ProjectReference fine tuning.
                 else if (childPlatformLookupTable != null &&
                         childPlatformLookupTable.ContainsKey(CurrentProjectPlatform) &&
                         childPlatforms.Contains(childPlatformLookupTable[CurrentProjectPlatform]))
                 {
                     buildChildProjectAs = childPlatformLookupTable[CurrentProjectPlatform];
-                    Log.LogMessage($"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the referenced project's translation table.");
+                    Log.LogMessage(MessageImportance.Low, $"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the referenced project's translation table.");
                 }
                 // Current project's translation table follows
                 else if (translationTable != null &&
@@ -101,13 +101,13 @@ namespace Microsoft.Build.Tasks
                         childPlatforms.Contains(translationTable[CurrentProjectPlatform]))
                 {
                     buildChildProjectAs = translationTable[CurrentProjectPlatform];
-                    Log.LogMessage($"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the current project's translation table.");
+                    Log.LogMessage(MessageImportance.Low, $"Found '{CurrentProjectPlatform}={buildChildProjectAs}' in the current project's translation table.");
                 }
                 // AnyCPU if possible
                 else if (childPlatforms.Contains("AnyCPU"))
                 {
                     buildChildProjectAs = "AnyCPU";
-                    Log.LogMessage($"Defaulting to AnyCPU.");
+                    Log.LogMessage(MessageImportance.Low, $"Defaulting to AnyCPU.");
                 }
                 else
                 {
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildChildProjectAs);
-                Log.LogMessage($"Project '{AssignedProjectsWithPlatform[i].ItemSpec}' will build with Platform: '{buildChildProjectAs}'");
+                Log.LogMessage(MessageImportance.Low, $"Project '{AssignedProjectsWithPlatform[i].ItemSpec}' will build with Platform: '{buildChildProjectAs}'");
             }
 
             return !Log.HasLoggedErrors;
