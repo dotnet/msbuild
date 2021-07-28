@@ -17,7 +17,6 @@ namespace Microsoft.Extensions.HotReload
         {
             var initial = new UpdatePayload
             {
-                ChangedFile = "Some-file",
                 Deltas = new[]
                 {
                     new UpdateDelta
@@ -49,7 +48,6 @@ namespace Microsoft.Extensions.HotReload
         {
             var initial = new UpdatePayload
             {
-                ChangedFile = "Some-file",
                 Deltas = new[]
                 {
                     new UpdateDelta
@@ -83,7 +81,6 @@ namespace Microsoft.Extensions.HotReload
         {
             var initial = new UpdatePayload
             {
-                ChangedFile = "Some-file",
                 Deltas = new[]
                 {
                     new UpdateDelta
@@ -106,7 +103,6 @@ namespace Microsoft.Extensions.HotReload
 
         private static void AssertEqual(UpdatePayload initial, UpdatePayload read)
         {
-            Assert.Equal(initial.ChangedFile, read.ChangedFile);
             Assert.Equal(initial.Deltas.Count, read.Deltas.Count);
 
             for (var i = 0; i < initial.Deltas.Count; i++)

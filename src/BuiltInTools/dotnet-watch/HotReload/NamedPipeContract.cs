@@ -14,14 +14,12 @@ namespace Microsoft.Extensions.HotReload
     {
         private static readonly byte Version = 1;
 
-        public string ChangedFile { get; init; }
         public IReadOnlyList<UpdateDelta> Deltas { get; init; }
 
         public async ValueTask WriteAsync(Stream stream, CancellationToken cancellationToken)
         {
             await using var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
             binaryWriter.Write(Version);
-            binaryWriter.Write(ChangedFile);
             binaryWriter.Write(Deltas.Count);
 
             for (var i = 0; i < Deltas.Count; i++)
@@ -65,7 +63,6 @@ namespace Microsoft.Extensions.HotReload
                 throw new NotSupportedException($"Unsupported version {version}.");
             }
 
-            var changedFile = binaryReader.ReadString();
             var count = binaryReader.ReadInt32();
 
             var deltas = new UpdateDelta[count];
@@ -84,7 +81,6 @@ namespace Microsoft.Extensions.HotReload
 
             return new UpdatePayload
             {
-                ChangedFile = changedFile,
                 Deltas = deltas,
             };
 
@@ -97,7 +93,7 @@ namespace Microsoft.Extensions.HotReload
                 var read = 0;
                 while (read < numBytes)
                 {
-                    read += await binaryReader.BaseStream.ReadAsync(bytes.AsMemory(read));
+                    read += await binaryReader.BaseStream.ReadAsync(bytes.AsMemory(read), cancellationToken);
                 }
 
                 return bytes;

@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
         }
 
-        public async ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
+        public async ValueTask<bool> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
         {
             if (context.BrowserRefreshServer is null)
             {
