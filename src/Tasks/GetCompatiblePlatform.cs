@@ -132,9 +132,9 @@ namespace Microsoft.Build.Tasks
 
             Dictionary<string, string> table = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (string s in stringTable.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
+            foreach (string s in stringTable.Trim().Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
-                string[] keyVal = s.Split(MSBuildConstants.EqualsChar, StringSplitOptions.RemoveEmptyEntries);
+                string[] keyVal = s.Trim().Split(MSBuildConstants.EqualsChar, StringSplitOptions.RemoveEmptyEntries);
 
                 // Invalid table, don't use it.
                 if (keyVal.Length <= 1 || keyVal.Length > 2)
