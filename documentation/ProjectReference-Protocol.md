@@ -57,8 +57,8 @@ If implementing a project with an “outer” (determine what properties to pass
   * It returns an item with the following metadata:
     * `TargetFrameworks` indicating what TargetFrameworks are available in the project
     * `TargetFrameworkMonikers` and `TargetPlatformMonikers` indicating what framework / platform the `TargetFrameworks` map to.  This is to support implicitly setting the target platform version (for example inferring that `net5.0-windows` means the same as `net5.0-windows7.0`) as well as treating the `TargetFramework` values [as aliases](https://github.com/NuGet/Home/issues/5154)
-    * Boolean metadata for `HasSingleTargetFramework` and `IsRidAgnostic` and `IsVcxOrNativeProj`.
-    * `Platforms` indicating what `Platforms` are available for the project to build as.
+    * Boolean metadata for `HasSingleTargetFramework` and `IsRidAgnostic` .
+    * `Platforms` indicating what platforms are available for the project to build as, and boolean metadata `IsVcxOrNativeProj` (used for [SetPlatform Negotiation](#setplatform-negotiation))
   * The `GetReferenceNearestTargetFrameworkTask` (provided by NuGet) is responsible for selecting the best matching `TargetFramework` of the referenced project
   * This target is _optional_. If not present, the reference will be built with no additional properties.
   * **New** in MSBuild 15.5.  (`TargetFrameworkMonikers` and `TargetPlatformMonikers` metadata is new in MSBuild 16.8)
@@ -85,7 +85,6 @@ If implementing a project with an “outer” (determine what properties to pass
   * As of 15.7, this is _optional_. If a project does not contain a `GetCopyToOutputDirectoryItems` target, projects that reference it will not copy any of its outputs to their own output folders, but the build can succeed.
 * `Clean` should delete all outputs of the project.
   * It is not called during a normal build, only during "Clean" and "Rebuild".
-
 ## Other protocol requirements
 
 As with all MSBuild logic, targets can be added to do other work with `ProjectReference`s.
@@ -123,20 +122,17 @@ These properties will then be gathered via the `GetTargetFrameworks` call.  They
 The `NearestTargetFramework` metadata will be the target framework which was selected as the best one to use for the reference (via `GetReferenceNearestTargetFrameworkTask`).  This can be used to select which set of properties were used in the target framework that was active for the reference.
 
 ## SetPlatform Negotiation
-As of version 17.0, MSBuild can now dynamically figure out what platform a `ProjectReference` should build as. 
+As of version 17.0, MSBuild can now dynamically figure out what platform a `ProjectReference` should build as. This includes a new target and task to determine what the `SetPlatform` metadata should be, or whether to undefine the platform.
 
-### What's new?
-Modified target: `GetTargetFrameworks`
-- Extracts `$(Platform)` information and determines whether the referred project is a `.vcxproj` or `.nativeproj`.
+* `_GetProjectReferenceTargetFrameworkProperties` target performs the majority of the work for assigning `SetPlatform` metadata to project references.
+  * Calls the `GetCompatiblePlatform` task, which is responsible for negotiating between the current project's platform and the platforms of the `ProjectReference` to assign a `NearestPlatform` metadata to the item.
+  * Sets or undefines `SetPlatform` based on the `NearestPlatform` assignment from `GetCompatiblePlatform`
+  * This target explicitly runs after `_GetProjectReferenceTargetFrameworkProperties` because it needs to use the `IsVcxOrNativeProj` and `Platforms` properties returned by the `GetTargetFrameworks` call.
 
-New target: `_GetProjectReferencePlatformProperties`
-- Runs after `_GetProjectReferenceTargetFrameworkProperties`
-- Calls the new `GetCompatiblePlatform` task
-- Sets or unsets `SetPlatform` metadata based on the `NearestPlatform` metadata from `GetCompatiblePlatform`.
+### Impact on the build
+In addition to the above task and target, `.vcxproj` and `.nativeproj` projects will receive an extra MSBuild call to the `GetTargetFrameworks` target. Previously, TargetFramework negotiation skipped over these projects because they could not multi-target in the first place. Because SetPlatform negotiation needs information given from the `GetTargetFrameworks` target, it is required that the `_GetProjectReferenceTargetFrameworkProperties` target calls the MSBuild task on the ProjectReference.
 
-New task: `GetCompatiblePlatform`
-- Parameters: Parent's `$(Platform)`(for `.vcxproj` or `.nativeproj`) or `$(PlatformTarget)`(for managed projects), the `$(Platforms)` of the referenced project, and an optional `$(PlatformLookupTable)`
-- Using the given information, sets the `NearestPlatform` metadata as best it can or throws a warning.
+This means most projects will see an evaluation with no global properties defined, unless set by the user.
 
 ### How To Opt In
 First, set the properties `EnableDynamicPlatformResolution` and `DisableTransitiveProjectReferences` to `true` for **every project** in your solution. The easiest way to do this is by creating a `Directory.Build.props` file and placing it at the root of your project directory:
@@ -150,29 +146,38 @@ First, set the properties `EnableDynamicPlatformResolution` and `DisableTransiti
 </Project>
 ```
 
- If only set in one project, the `SetPlatform` metadata will carry forward to every consecutive project reference.
+If only set in one project, the `SetPlatform` metadata will carry forward to every consecutive project reference.
 
- Next, every referenced project is required to define a `$(Platforms)` property. `$(Platforms)` is a semicolon-delimited list of platforms that project could build as. `<Platforms>x64;x86;AnyCPU</Platforms>`, for example.
+Next, every referenced project is required to define a `Platforms` property, where `Platforms` is a semicolon-delimited list of platforms that project could build as. For `.vcxproj` or `.nativeproj` projects, `Platforms` is constructed from the `ProjectConfiguration` items that already exist in the project. For managed SDK projects, the default is `AnyCPU`. Managed non-SDK projects need to define this manually.
 
- Lastly, projects that contain `ProjectReference` items may need to define a `$(PlatformLookupTable)` property. `$(PlatformLookupTable)` is a semicolon-delimited list of mappings between projects. `<PlatformLookupTable>win32=x86</PlatformLookupTable>`, for example. This means that if the current project is building for `Win32`, it should build referenced projects using `x86` as the `Platform`. This is mostly relevant for references between managed and unmanaged projects.
+Lastly, a `PlatformLookupTable` may need to be defined for more complex scenarios. A `PlatformLookupTable` is a semicolon-delimited list of mappings between platforms. `<PlatformLookupTable>Win32=x86</PlatformLookupTable>`, for example. This means that when the current project is building as `Win32`, it will attempt to build the referenced project as x86. This property is **required** when a managed AnyCPU project references an unmanaged project because `AnyCPU` does not directly map to an architecture-specific platform. You can define the table in two ways:
 
- ### References between managed and unmanaged projects
- Some cases of `ProjectReference`s require a `$(PlatformLookupTable)` to correctly determine what a referenced project should build as.
+1. A standard property within the current project, in a Directory.Build.props/targets
+2. Metadata on the `ProjectReference` item. This option takes priority over the first to allow customizations per `ProjectReference`.
+
+### References between managed and unmanaged projects
+Some cases of `ProjectReference`s require a `$(PlatformLookupTable)` to correctly determine what a referenced project should build as. References between managed and unmanaged projects also get a default lookup table that can be opted out of by setting the property `UseDefaultPlatformLookupTables` to false. See the table below for details.
+
+Note: Defining a `PlatformLookupTable` overrides the default mapping.
 | Project Reference Type | `PlatformLookupTable` Required? | Notes |
 | :--  | :-: | :-: |
 | Unmanaged -> Unmanaged | No |  |
 | Managed -> Managed | No |  |
-| Unmanaged -> Managed | **Yes** |  |
-| Managed -> Unmanaged | Optional | Uses default mapping: `AnyCPU=Win32;x86=Win32` |
+| Unmanaged -> Managed | Optional | Uses default mapping: `Win32=x86` |
+| Managed -> Unmanaged | **Yes** when the project is AnyCPU | Uses default mapping: `x86=Win32` |
 
- Example:
- Project A: Unmanaged, building as `win32`, has a `ProjectReference` on Project B.
- Project B: Managed, has `$(Platforms)` defined as `x86;AnyCPU`.
+Example:
+Project A: Managed, building as `AnyCPU`, has a `ProjectReference` on Project B.
+Project B: Unmanaged, has `$(Platforms)` constructed from its `Platform` metadata from its `ProjectConfiguration` items, defined as `x86;Win32`.
 
- Because `win32` can map to multiple managed platforms, there's no way for A to know what B should build as without some sort of mapping. The `GetCompatiblePlatform` task **requires** the property `PlatformLookupTable` to be defined in this case. To resolve this scenario, Project A should define `PlatformLookupTable` as `win32=x86` or `win32=AnyCPU`. You can also define this on the `ProjectReference` item as metadata.
+Because `AnyCPU` does not map to anything architecture-specific, a custom mapping must be defined. Project A can either:
+1. Define `PlatformLookupTable` in its project or a Directory.Build.props as `AnyCPU=x86` or `AnyCPU=Win32`.
+2. Define `PlatformLookupTable` as metadata on the `ProjectReference` item, which would take priority over a lookup table defined elsewhere.
+     *  When only one mapping is valid, you could also directly define `SetPlatform` metadata as `Platform=foo` (for unmanaged) or `PlatformTarget=bar` (for managed). This would skip over most negotiation logic.
 
+Example of project A defining a lookup table directly on the `ProjectReference`:
 ```xml
 <ItemGroup>
-  <ProjectReference Include="B.csproj" PlatformLookupTable="Win32=AnyCPU">
+  <ProjectReference Include="B.csproj" PlatformLookupTable="AnyCPU=Win32">
 </ItemGroup>
 ```
