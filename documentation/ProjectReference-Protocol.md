@@ -57,7 +57,7 @@ If implementing a project with an “outer” (determine what properties to pass
   * It returns an item with the following metadata:
     * `TargetFrameworks` indicating what TargetFrameworks are available in the project
     * `TargetFrameworkMonikers` and `TargetPlatformMonikers` indicating what framework / platform the `TargetFrameworks` map to.  This is to support implicitly setting the target platform version (for example inferring that `net5.0-windows` means the same as `net5.0-windows7.0`) as well as treating the `TargetFramework` values [as aliases](https://github.com/NuGet/Home/issues/5154)
-    * Boolean metadata for `HasSingleTargetFramework` and `IsRidAgnostic` .
+    * Boolean metadata for `HasSingleTargetFramework` and `IsRidAgnostic`.
     * `Platforms` indicating what platforms are available for the project to build as, and boolean metadata `IsVcxOrNativeProj` (used for [SetPlatform Negotiation](#setplatform-negotiation))
   * The `GetReferenceNearestTargetFrameworkTask` (provided by NuGet) is responsible for selecting the best matching `TargetFramework` of the referenced project
   * This target is _optional_. If not present, the reference will be built with no additional properties.
@@ -122,13 +122,14 @@ These properties will then be gathered via the `GetTargetFrameworks` call.  They
 The `NearestTargetFramework` metadata will be the target framework which was selected as the best one to use for the reference (via `GetReferenceNearestTargetFrameworkTask`).  This can be used to select which set of properties were used in the target framework that was active for the reference.
 
 ## SetPlatform Negotiation
-As of version 17.0, MSBuild can now dynamically figure out what platform a `ProjectReference` should build as. This includes a new target and task to determine what the `SetPlatform` metadata should be, or whether to undefine the platform.
+As of version 17.0, MSBuild can now dynamically figure out what platform a `ProjectReference` should build as. This includes a new target and task to determine what the `SetPlatform` metadata should be, or whether to undefine the platform so the referenced project builds with its default platform.
 
 * `_GetProjectReferenceTargetFrameworkProperties` target performs the majority of the work for assigning `SetPlatform` metadata to project references.
-  * Calls the `GetCompatiblePlatform` task, which is responsible for negotiating between the current project's platform and the platforms of the `ProjectReference` to assign a `NearestPlatform` metadata to the item.
+  * Calls the `GetCompatiblePlatform` task, which is responsible for negotiating between the current project's platform and the platforms of the referenced project to assign a `NearestPlatform` metadata to the item.
   * Sets or undefines `SetPlatform` based on the `NearestPlatform` assignment from `GetCompatiblePlatform`
   * This target explicitly runs after `_GetProjectReferenceTargetFrameworkProperties` because it needs to use the `IsVcxOrNativeProj` and `Platforms` properties returned by the `GetTargetFrameworks` call.
 
+Note: If a `ProjectReference` has `SetPlatform` metadata defined already, the negotiation logic is skipped over.
 ### Impact on the build
 In addition to the above task and target, `.vcxproj` and `.nativeproj` projects will receive an extra MSBuild call to the `GetTargetFrameworks` target. Previously, TargetFramework negotiation skipped over these projects because they could not multi-target in the first place. Because SetPlatform negotiation needs information given from the `GetTargetFrameworks` target, it is required that the `_GetProjectReferenceTargetFrameworkProperties` target calls the MSBuild task on the ProjectReference.
 
@@ -168,10 +169,10 @@ Note: Defining a `PlatformLookupTable` overrides the default mapping.
 
 Example:
 Project A: Managed, building as `AnyCPU`, has a `ProjectReference` on Project B.
-Project B: Unmanaged, has `$(Platforms)` constructed from its `Platform` metadata from its `ProjectConfiguration` items, defined as `x86;Win32`.
+Project B: Unmanaged, has `$(Platforms)` constructed from its `Platform` metadata from its `ProjectConfiguration` items, defined as `x64;Win32`.
 
 Because `AnyCPU` does not map to anything architecture-specific, a custom mapping must be defined. Project A can either:
-1. Define `PlatformLookupTable` in its project or a Directory.Build.props as `AnyCPU=x86` or `AnyCPU=Win32`.
+1. Define `PlatformLookupTable` in its project or a Directory.Build.props as `AnyCPU=x64` or `AnyCPU=Win32`.
 2. Define `PlatformLookupTable` as metadata on the `ProjectReference` item, which would take priority over a lookup table defined elsewhere.
      *  When only one mapping is valid, you could also directly define `SetPlatform` metadata as `Platform=foo` (for unmanaged) or `PlatformTarget=bar` (for managed). This would skip over most negotiation logic.
 
