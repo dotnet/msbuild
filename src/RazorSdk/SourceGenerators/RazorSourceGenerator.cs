@@ -24,7 +24,7 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var razorSourceGeneratorOptions = razorSourceGeneratorOptionsWithDiagnostics.ReportDiagnostics(context);
 
             var sourceItemsWithDiagnostics = context.AdditionalTextsProvider
-                .Where(static (file) => file.Path.EndsWith(".razor") || file.Path.EndsWith(".cshtml"))
+                .Where(static (file) => file.Path.EndsWith(".razor", StringComparison.Ordinal) || file.Path.EndsWith(".cshtml", StringComparison.Ordinal))
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Select(ComputeProjectItems);
 
@@ -34,12 +34,12 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             var importFiles = sourceItems.Where(static file =>
             {
                 var path = file.FilePath;
-                if (path.EndsWith(".razor"))
+                if (path.EndsWith(".razor", StringComparison.Ordinal))
                 {
                     var fileName = Path.GetFileNameWithoutExtension(path);
                     return string.Equals(fileName, "_Imports", StringComparison.OrdinalIgnoreCase);
                 }
-                else if (path.EndsWith(".cshtml"))
+                else if (path.EndsWith(".cshtml", StringComparison.Ordinal))
                 {
                     var fileName = Path.GetFileNameWithoutExtension(path);
                     return string.Equals(fileName, "_ViewImports", StringComparison.OrdinalIgnoreCase);
