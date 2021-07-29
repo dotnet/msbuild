@@ -1149,7 +1149,7 @@ namespace Microsoft.Build.Execution
             }
             catch (ProjectCacheException ex)
             {
-                ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having ");
+                ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having BuildRequestConfiguration");
                 CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
@@ -1169,7 +1169,7 @@ namespace Microsoft.Build.Execution
             Debug.Assert(!Monitor.IsEntered(_syncLock));
             if (shuttingDown)
             {
-                ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having ");
+                ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having BuildRequestConfiguration");
                 // We were already canceled!
                 CompleteSubmissionWithException(submission, resolvedConfiguration, new BuildAbortedException());
             }
