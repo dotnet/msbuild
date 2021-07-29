@@ -1159,12 +1159,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WaitForThreadToProcessEvents()
         {
-            // This method may be called in the shutdown submission callback, this callback may be called after the logging service has 
-            // shutdown and nulled out the events we were going to wait on.
-            if (_logMode == LoggerMode.Asynchronous && _loggingQueue != null)
+            lock (_lockObject)
             {
-                TerminateLoggingEventQueue();
-                CreateLoggingEventQueue();
+                // This method may be called in the shutdown submission callback, this callback may be called after the logging service has 
+                // shutdown and nulled out the events we were going to wait on.
+                if (_logMode == LoggerMode.Asynchronous && _loggingQueue != null)
+                {
+                    TerminateLoggingEventQueue();
+                    CreateLoggingEventQueue();
+                }
             }
         }
 
