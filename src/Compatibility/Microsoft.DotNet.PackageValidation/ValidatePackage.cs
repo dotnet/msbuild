@@ -1,6 +1,9 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.NET.Build.Tasks;
 using NuGet.RuntimeModel;
@@ -11,6 +14,9 @@ namespace Microsoft.DotNet.PackageValidation
     {
         [Required]
         public string PackageTargetPath { get; set; }
+
+        [Required]
+        public string RoslynAssembliesPath { get; set; }
 
         public string RuntimeGraph { get; set; }
 
@@ -29,6 +35,19 @@ namespace Microsoft.DotNet.PackageValidation
         public bool GenerateCompatibilitySuppressionFile { get; set; }
 
         public string CompatibilitySuppressionFilePath { get; set; }
+
+        public override bool Execute()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += ResolverForRoslyn;
+            try
+            {
+                return base.Execute();
+            }
+            finally
+            {
+                AppDomain.CurrentDomain.AssemblyResolve -= ResolverForRoslyn;
+            }
+        }
 
         protected override void ExecuteCore()
         {
@@ -54,6 +73,22 @@ namespace Microsoft.DotNet.PackageValidation
             {
                 logger.GenerateSuppressionsFile(CompatibilitySuppressionFilePath);
             }
+        }
+
+        private Assembly ResolverForRoslyn(object sender, ResolveEventArgs args)
+        {
+            AssemblyName name = new(args.Name);
+            if (name.Name == "Microsoft.CodeAnalysis" || name.Name == "Microsoft.CodeAnalysis.CSharp")
+            {
+                Assembly asm = Assembly.LoadFrom(Path.Combine(RoslynAssembliesPath, $"{name.Name}.dll"));
+                Version version = asm.GetName().Version;
+                if (version < name.Version)
+                {
+                    throw new Exception(string.Format(Resources.UpdateSdkVersion, version, name.Version));
+                }
+                return asm;
+            }
+            return null;
         }
     }
 }

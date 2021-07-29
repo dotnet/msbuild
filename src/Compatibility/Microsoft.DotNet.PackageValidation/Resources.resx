@@ -153,4 +153,7 @@
   <data name="Baseline" xml:space="preserve">
     <value>[Baseline]</value>
   </data>
+  <data name="UpdateSdkVersion" xml:space="preserve">
+    <value> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</value>
+  </data>
 </root>
