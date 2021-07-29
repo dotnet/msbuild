@@ -32,6 +32,16 @@
         <target state="translated">无法将属性“{0}”的值转换为字符串。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="new">Only one project can be specified at a time using the `-p` option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="new">Properties to be passed to MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
         <target state="translated">正在生成...</target>

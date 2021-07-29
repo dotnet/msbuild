@@ -32,6 +32,16 @@
         <target state="translated">プロパティ '{0}' の値を文字列に変換できませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OnlyOneProjectAllowed">
+        <source>Only one project can be specified at a time using the `-p` option.</source>
+        <target state="new">Only one project can be specified at a time using the `-p` option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PropertyOptionDescription">
+        <source>Properties to be passed to MSBuild.</source>
+        <target state="new">Properties to be passed to MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="RunCommandBuilding">
         <source>Building...</source>
         <target state="translated">ビルドしています...</target>

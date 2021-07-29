@@ -3,11 +3,14 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -206,6 +209,54 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World!")
                          .And.HaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
+        }
+
+        [Fact]
+        public void ItErrorsWhenMultipleProjectsAreSpecified()
+        {
+            new DotnetCommand(Log, "run")
+                .Execute($"-p", "project1", "-p", "project2")
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(LocalizableStrings.OnlyOneProjectAllowed);
+        }
+
+        [Theory]
+        [InlineData("--property:prop1=true", "Prop1: true, Prop2: ")]
+        [InlineData("--property prop1=true", "Prop1: true, Prop2: ")]
+        [InlineData("-p:prop1=true", "Prop1: true, Prop2: ")]
+        [InlineData("-p prop1=true", "Prop1: true, Prop2: ")]
+        [InlineData("-p prop1=true -p prop2=false", "Prop1: true, Prop2: false")]
+        public void ItAcceptsPropertyOption(string optionArgs, string expectedPropertyOutput)
+        {
+            var testProject = new TestProject()
+            {
+                Name = "PropertyOption",
+                IsExe = true,
+                TargetFrameworks = "net6.0",
+            };
+            var testInstance = _testAssetsManager.CreateTestProject(testProject, identifier: optionArgs)
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    var ns = project.Root.Name.Namespace;
+                    var target = new XElement(ns + "Target",
+                            new XAttribute("Name", "PrintProperties"),
+                            new XAttribute("AfterTargets", "Build"));
+                    project.Root.Add(target);
+                    target.Add(new XElement(ns + "Message",
+                        new XAttribute("Importance", "High"),
+                        new XAttribute("Text", "Prop1: $(prop1), Prop2: $(prop2)")));
+                });
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(Path.Combine(testInstance.Path, testProject.Name))
+                .Execute(optionArgs.Split(" ").Concat(new string[] { "-v", "d" }))
+                .Should().Pass()
+                         .And.HaveStdOutContaining("Build succeeded")
+                         .And.HaveStdOutContaining(expectedPropertyOutput)
+                         .And.HaveStdOutContaining("Hello World!")
+                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
         [Fact]

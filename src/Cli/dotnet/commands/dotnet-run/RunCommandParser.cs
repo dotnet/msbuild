@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.CommandLine;
+using System.Linq;
 using LocalizableStrings = Microsoft.DotNet.Tools.Run.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -17,10 +18,10 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> ProjectOption = new Option<string>("--project", LocalizableStrings.CommandOptionProjectDescription);
 
-        public static readonly Option<string> ProjectOptionShort = new Option<string>("-p", LocalizableStrings.CommandOptionProjectDescription)
-        {
-            IsHidden = true
-        };
+        public static readonly Option<IEnumerable<string>> PropertyOption =
+            new ForwardedOption<IEnumerable<string>>(new string[] { "--property", "-p" }, LocalizableStrings.PropertyOptionDescription)
+                .SetForwardingFunction((values, parseResult) => 
+                    parseResult.UsingRunCommandShorthandProjectOption() ? new string[] { string.Empty } : values.Select(value => $"-p:{value}"));
 
         public static readonly Option<string> LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription);
 
@@ -40,7 +41,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FrameworkOption);
             command.AddOption(RuntimeOption);
             command.AddOption(ProjectOption);
-            command.AddOption(ProjectOptionShort);
+            command.AddOption(PropertyOption);
             command.AddOption(LaunchProfileOption);
             command.AddOption(NoLaunchProfileOption);
             command.AddOption(NoBuildOption);

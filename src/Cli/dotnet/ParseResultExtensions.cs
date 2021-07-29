@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Cli
@@ -105,6 +106,23 @@ namespace Microsoft.DotNet.Cli
                     parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
                     parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
                 null;
+        }
+
+        public static bool UsingRunCommandShorthandProjectOption(this ParseResult parseResult)
+        {
+            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.ValueForOption(RunCommandParser.PropertyOption).Any())
+            {
+                var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+                if (properties.Any(property => !property.Contains("=")))
+                {
+                    if (properties.Count() != 1)
+                    {
+                        throw new GracefulException(Tools.Run.LocalizableStrings.OnlyOneProjectAllowed);
+                    }
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
