@@ -555,5 +555,54 @@ Worker Service                                worker         [C#],F#     Common/
                 .And.HaveStdOutMatching("Basic FSharp +template-grouping +\\[C#],F# +item +Author1 +Test Asset +\\r?\\n +Q# +item,project +Author2 +Test Asset");
         }
 
+        [Theory]
+        [InlineData("c --list", "--list c")]
+        [InlineData("c --list --language F#", "--list c --language F#")]
+        [InlineData("c --list --columns-all", "--list c --columns-all")]
+        public void CanFallbackToListOption(string command1, string command2)
+        {
+            var commandResult1 = new DotnetNewCommand(_log, command1.Split())
+             .WithCustomHive(_sharedHome.HomeDirectory)
+             .Execute();
+
+            var commandResult2 = new DotnetNewCommand(_log, command2.Split())
+               .WithCustomHive(_sharedHome.HomeDirectory)
+               .Execute();
+
+            Assert.Equal(commandResult1.StdOut, commandResult2.StdOut);
+        }
+
+        [Theory]
+        [InlineData("--list foo --columns-all bar", "bar", "foo")]
+        [InlineData("--list foo bar", "bar", "foo")]
+        [InlineData("foo --list bar", "bar", "foo", true)]
+        [InlineData("foo --list bar --language F#", "bar", "foo", true)]
+        [InlineData("foo --list --columns-all bar", "bar", "foo")]
+        [InlineData("foo --list --columns-all --framework net6.0 bar", "bar", "foo|--framework|net6.0")]
+        [InlineData("foo --list --columns-all -other-param --framework net6.0 bar", "bar", "foo|--framework|net6.0|-other-param")]
+        public void CannotShowListOnParseError(string command, string invalidArguments, string validArguments, bool invalidSyntax = false)
+        {
+            var commandResult = new DotnetNewCommand(_log, command.Split())
+             .WithCustomHive(_sharedHome.HomeDirectory)
+             .Execute();
+
+            if (invalidSyntax)
+            {
+                commandResult.Should().Fail().And.HaveStdErrContaining("Invalid command syntax: use 'dotnet new3 --list [PARTIAL_NAME] [FILTER_OPTIONS]' instead.");
+                return;
+            }
+
+            commandResult.Should().Fail()
+                .And.HaveStdErrContaining("Error: Invalid option(s):");
+            foreach (string arg in invalidArguments.Split('|'))
+            {
+                commandResult.Should().HaveStdErrContaining(arg);
+            }
+
+            foreach (string arg in validArguments.Split('|'))
+            {
+                commandResult.Should().NotHaveStdErrContaining(arg);
+            }
+        }
     }
 }

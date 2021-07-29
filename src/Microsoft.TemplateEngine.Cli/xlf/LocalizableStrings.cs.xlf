@@ -550,6 +550,11 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Další informace – spusťte:</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSyntax">
+        <source>Invalid command syntax: use '{0}' instead.</source>
+        <target state="new">Invalid command syntax: use '{0}' instead.</target>
+        <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
+      </trans-unit>
       <trans-unit id="LanguageParameter">
         <source>Filters templates based on language and specifies the language of the template to create.</source>
         <target state="translated">Filtruje šablony podle jazyka a určuje jazyk šablony, která se má vytvořit.</target>

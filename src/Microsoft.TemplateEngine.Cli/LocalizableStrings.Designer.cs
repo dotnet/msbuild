@@ -1024,6 +1024,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid command syntax: use &apos;{0}&apos; instead..
+        /// </summary>
+        internal static string InvalidSyntax {
+            get {
+                return ResourceManager.GetString("InvalidSyntax", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Filters templates based on language and specifies the language of the template to create..
         /// </summary>
         internal static string LanguageParameter {

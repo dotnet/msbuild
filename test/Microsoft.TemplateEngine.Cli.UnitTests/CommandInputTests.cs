@@ -43,7 +43,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests
 
             var parameters = TemplateCommandInput.GetTemplateParametersFromCommand(commandInput);
             Assert.Equal(1, parameters.Count);
-            Assert.Equal("paramValue1,paramValue2", parameters["--param"]);
+            Assert.Equal("paramValue1", parameters["--param"]);
         }
 
         [Fact]

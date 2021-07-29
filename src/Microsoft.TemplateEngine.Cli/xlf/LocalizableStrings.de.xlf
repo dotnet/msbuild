@@ -550,6 +550,11 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <target state="translated">Für weitere Informationen, führen Sie Folgendes aus:</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSyntax">
+        <source>Invalid command syntax: use '{0}' instead.</source>
+        <target state="new">Invalid command syntax: use '{0}' instead.</target>
+        <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
+      </trans-unit>
       <trans-unit id="LanguageParameter">
         <source>Filters templates based on language and specifies the language of the template to create.</source>
         <target state="translated">Filtert Vorlagen basierend auf der Sprache und gibt die Sprache der zu erstellenden Vorlage an.</target>

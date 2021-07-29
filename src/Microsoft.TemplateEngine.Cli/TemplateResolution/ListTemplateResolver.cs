@@ -41,10 +41,9 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         internal override async Task<TemplateResolutionResult> ResolveTemplatesAsync(INewCommandInput commandInput, string? defaultLanguage, CancellationToken cancellationToken)
         {
             IEnumerable<TemplateGroup> templateGroups = await GetTemplateGroupsAsync(cancellationToken).ConfigureAwait(false);
-
             IEnumerable<Func<TemplateGroup, MatchInfo?>> groupFilters = new[]
             {
-                CliFilters.NameTemplateGroupFilter(commandInput.TemplateName)
+                CliFilters.NameTemplateGroupFilter(commandInput.ListNameCriteria)
             };
 
             IEnumerable<Func<ITemplateInfo, MatchInfo?>> templateFilters =

@@ -101,14 +101,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public bool HasColumnsParseError => Columns.Any(column => !SupportedFilterableColumnNames.Contains(column));
 
-        public bool HasParseError
-        {
-            get
-            {
-                return CommandParseResult.Errors.Any() || HasColumnsParseError;
-            }
-        }
-
         public string HelpText
         {
             get
@@ -144,20 +136,9 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string PackageFilter => CommandParseResult.GetArgumentValueAtPath(new[] { CommandName, "package" });
 
-        public IReadOnlyList<string> RemainingParameters
-        {
-            get
-            {
-                HashSet<string> remainingParameters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (string param in CommandParseResult.UnmatchedTokens)
-                {
-                    remainingParameters.Add(param);
-                }
-                return remainingParameters.ToArray();
-            }
-        }
+        public IReadOnlyList<string> RemainingParameters => CommandParseResult.UnmatchedTokens.ToList();
 
-        public bool SearchOnline => CommandParseResult.HasAppliedOption(new[] { CommandName, "search" });
+        public bool IsSearchFlagSpecified => CommandParseResult.HasAppliedOption(new[] { CommandName, "search" });
 
         public string ShowAliasesAliasName => CommandParseResult.GetArgumentValueAtPath(new[] { CommandName, "show-alias" });
 
@@ -188,7 +169,105 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public string TypeFilter => CommandParseResult.GetArgumentValueAtPath(new[] { CommandName, "type" });
 
+        public string? SearchNameCriteria
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(TemplateName))
+                {
+                    return TemplateName;
+                }
+                return CommandParseResult.GetArgumentValueAtPath(new[] { CommandName, "search" });
+            }
+        }
+
+        public string? ListNameCriteria
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(TemplateName))
+                {
+                    return TemplateName;
+                }
+                return CommandParseResult.GetArgumentValueAtPath(new[] { CommandName, "list" });
+            }
+        }
+
         protected ParseResult CommandParseResult { get; private set; }
+
+        public bool ValidateParseError()
+        {
+            bool hasError = false;
+            string? listOptionValueRaw = CommandParseResult.GetArgumentValueAtPath(new[] { CommandName, "list" });
+            string? searchOptionValueRaw = CommandParseResult.GetArgumentValueAtPath(new[] { CommandName, "search" });
+
+            if (IsListFlagSpecified
+                && !string.IsNullOrWhiteSpace(TemplateName)
+                && !string.IsNullOrWhiteSpace(listOptionValueRaw))
+            {
+                hasError = true;
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidSyntax, $"dotnet {CommandName} --list [PARTIAL_NAME] [FILTER_OPTIONS]"));
+            }
+            if (IsSearchFlagSpecified
+                  && !string.IsNullOrWhiteSpace(TemplateName)
+                  && !string.IsNullOrWhiteSpace(searchOptionValueRaw))
+            {
+                hasError = true;
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidSyntax, $"dotnet {CommandName} --search [PARTIAL_NAME] [FILTER_OPTIONS]"));
+            }
+
+            if (HasColumnsParseError)
+            {
+                hasError = true;
+                Reporter.Error.WriteLine(ColumnsParseError.Bold().Red());
+            }
+
+            IEnumerable<string> invalidParameters = RemainingParameters;
+            // template options are allowed for --list, --search or when template name is specified.
+            // in base parse they are treated as non-parsed arguments, so validation should fail only when invalid combination of parameters is specified.
+            if (IsSearchFlagSpecified || IsListFlagSpecified || !string.IsNullOrWhiteSpace(TemplateName))
+            {
+                invalidParameters = GetInvalidTemplateOptionsFromRemainingParameters();
+            }
+
+            // TODO: get a meaningful error message from the parser
+            if (invalidParameters.Any())
+            {
+                hasError = true;
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidCommandOptions.Bold().Red());
+                foreach (string flag in invalidParameters)
+                {
+                    Reporter.Error.WriteLine($"  {flag}".Bold().Red());
+                }
+            }
+
+            //if other error, use command parser errors (not localized)
+            if (!hasError && Errors.Any())
+            {
+                hasError = true;
+                Reporter.Error.WriteLine(LocalizableStrings.InvalidCommandOptions.Bold().Red());
+                foreach (string error in Errors)
+                {
+                    Reporter.Error.WriteLine($"  {error}".Bold().Red());
+                }
+                Reporter.Error.WriteLine();
+            }
+
+            if (hasError)
+            {
+                if (IsHelpFlagSpecified)
+                {
+                    Reporter.Output.WriteLine(HelpText);
+                    Reporter.Output.WriteLine();
+                }
+                else
+                {
+                    Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
+                    Reporter.Error.WriteCommand(this.HelpCommandExample());
+                }
+            }
+            return !hasError;
+        }
 
         public bool HasDebuggingFlag(string flag)
         {
@@ -215,7 +294,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
             if (string.IsNullOrWhiteSpace(commandInput.TemplateName))
             {
-                command = CommandParserSupport.CreateNewCommandForNoTemplateName(commandName);
+                bool treatUnmatchedTokensAsErrors = !(commandInput.IsListFlagSpecified || commandInput.IsSearchFlagSpecified);
+                command = CommandParserSupport.CreateNewCommandForNoTemplateName(commandName, treatUnmatchedTokensAsErrors);
                 commandInput = ParseArgs(commandName, argList, command);
             }
             commandInput.ExpandedExtraArgsFiles = expansionDone;
@@ -271,6 +351,32 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             }
 
             return modifiedArgs;
+        }
+
+        private IEnumerable<string> GetInvalidTemplateOptionsFromRemainingParameters()
+        {
+            int i = 0;
+            while (i < RemainingParameters.Count)
+            {
+                if (RemainingParameters[i].StartsWith("-"))
+                {
+                    int j = i + 1;
+                    while (j < RemainingParameters.Count && !RemainingParameters[j].StartsWith("-"))
+                    {
+                        if (j > i + 1)
+                        {
+                            yield return RemainingParameters[j];
+                        }
+                        j++;
+                    }
+                    i = j;
+                }
+                else
+                {
+                    yield return RemainingParameters[i];
+                    i++;
+                }
+            }
         }
     }
 }

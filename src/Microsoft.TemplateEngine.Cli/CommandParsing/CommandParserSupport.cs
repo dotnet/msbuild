@@ -9,6 +9,18 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 {
     internal static class CommandParserSupport
     {
+        private static readonly ArgumentsRule ArgumentCannotStartWithDashRule = new ArgumentsRule(option =>
+        {
+            foreach (var argument in option.Arguments)
+            {
+                if (argument.StartsWith("-"))
+                {
+                    return "The argument value cannot start with '-'";
+                }
+            }
+            return null;
+        });
+
         private static HashSet<string> _argsForBuiltInCommands;
 
         internal static HashSet<string> ArgsForBuiltInCommands
@@ -34,7 +46,13 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 return new[]
                 {
                     Create.Option("-h|--help", LocalizableStrings.DisplaysHelp, Accept.NoArguments()),
-                    Create.Option("-l|--list", LocalizableStrings.ListsTemplates, Accept.NoArguments()),
+                    Create.Option(
+                        "-l|--list",
+                        LocalizableStrings.ListsTemplates,
+                        Accept
+                            .ZeroOrOneArgument()
+                            .And(ArgumentCannotStartWithDashRule)
+                            .With(LocalizableStrings.ListsTemplates, "PARTIAL_NAME")),
                     Create.Option("-n|--name", LocalizableStrings.NameOfOutput, Accept.ExactlyOneArgument()),
                     Create.Option("-o|--output", LocalizableStrings.OutputPath, Accept.ExactlyOneArgument()),
                     Create.Option("-i|--install", LocalizableStrings.InstallHelp, Accept.OneOrMoreArguments()),
@@ -44,14 +62,16 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                     Create.Option("--type", LocalizableStrings.ShowsFilteredTemplates, Accept.ExactlyOneArgument()),
                     Create.Option("--dry-run", LocalizableStrings.DryRunDescription, Accept.NoArguments()),
                     Create.Option("--force", LocalizableStrings.ForcesTemplateCreation, Accept.NoArguments()),
-                    Create.Option(
-                        "-lang|--language",
-                        LocalizableStrings.LanguageParameter,
-                        // don't give this a default, otherwise 'new -lang' is valid and assigns the default. User should have to explicitly give the value.
-                        Accept.ExactlyOneArgument().WithSuggestionsFrom("C#", "F#")),
+                    Create.Option("-lang|--language", LocalizableStrings.LanguageParameter, Accept.ExactlyOneArgument()),
                     Create.Option("--update-check", LocalizableStrings.UpdateCheckCommandHelp, Accept.NoArguments()),
                     Create.Option("--update-apply", LocalizableStrings.UpdateApplyCommandHelp, Accept.NoArguments()),
-                    Create.Option("--search", LocalizableStrings.OptionDescriptionSearch, Accept.NoArguments()),
+                    Create.Option(
+                        "--search",
+                        LocalizableStrings.OptionDescriptionSearch,
+                        Accept
+                            .ZeroOrOneArgument()
+                            .And(ArgumentCannotStartWithDashRule)
+                            .With(LocalizableStrings.OptionDescriptionSearch, "PARTIAL_NAME")),
                     Create.Option("--author", LocalizableStrings.OptionDescriptionAuthorFilter, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionAuthorFilter, "AUTHOR")),
                     Create.Option("--package", LocalizableStrings.OptionDescriptionPackageFilter, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionPackageFilter, "PACKAGE")),
                     Create.Option("--columns", LocalizableStrings.OptionDescriptionColumns, Accept.ExactlyOneArgument().With(LocalizableStrings.OptionDescriptionColumns, "COLUMNS_LIST")),
@@ -103,7 +123,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         // Final parser for when there is no template name provided.
         // Unmatched args are errors.
-        internal static Command CreateNewCommandForNoTemplateName(string commandName)
+        internal static Command CreateNewCommandForNoTemplateName(string commandName, bool treatUnmatchedTokensAsErrors = true)
         {
             Option[] combinedArgs = ArrayExtensions.CombineArrays(NewCommandVisibleArgs, NewCommandHiddenArgs, DebuggingCommandArgs);
 
@@ -111,7 +131,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 commandName,
                 LocalizableStrings.CommandDescription,
                 Accept.NoArguments(),
-                treatUnmatchedTokensAsErrors: true,
+                treatUnmatchedTokensAsErrors: treatUnmatchedTokensAsErrors,
                 combinedArgs);
         }
 

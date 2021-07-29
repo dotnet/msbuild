@@ -114,7 +114,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             }
         }
 
-        public bool SearchOnline { get; }
+        public bool IsSearchFlagSpecified { get; }
 
         public string ShowAliasesAliasName { get; } = string.Empty;
 
@@ -134,7 +134,7 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
         {
             get
             {
-                List<string> tokens = new List<string>();
+                List<string> tokens = new List<string>() { CommandName };
                 if (!string.IsNullOrWhiteSpace(TemplateName))
                 {
                     tokens.Add(TemplateName);
@@ -167,6 +167,14 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public IEnumerable<string> Errors => throw new NotImplementedException();
 
+        public string? SearchNameCriteria => string.IsNullOrWhiteSpace(TemplateName)
+            ? GetCommandOption("--search")
+            : TemplateName;
+
+        public string? ListNameCriteria => string.IsNullOrWhiteSpace(TemplateName)
+            ? GetCommandOption("--list")
+            : TemplateName;
+
         public MockNewCommandInput WithTemplateOption(string optionName, string? optionValue = null)
         {
             if (!optionName.StartsWith('-'))
@@ -194,6 +202,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
             _commandOptions[optionName] = optionValue;
             return this;
         }
+
+        public bool ValidateParseError() => throw new NotImplementedException();
 
         public bool HasDebuggingFlag(string flag)
         {

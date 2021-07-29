@@ -43,7 +43,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateResolution
         /// </summary>
         /// <param name="name">the name to match with template group name or short name.</param>
         /// <returns></returns>
-        internal static Func<TemplateGroup, MatchInfo?> NameTemplateGroupFilter(string name)
+        internal static Func<TemplateGroup, MatchInfo?> NameTemplateGroupFilter(string? name)
         {
             return (templateGroup) =>
             {

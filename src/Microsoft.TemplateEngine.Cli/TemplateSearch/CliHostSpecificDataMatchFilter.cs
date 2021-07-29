@@ -48,7 +48,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
             IEnumerable<TemplateGroup> templateGroups = TemplateGroup.FromTemplateList(templates);
             IEnumerable<Func<TemplateGroup, MatchInfo?>> groupFilters = new[]
             {
-                CliFilters.NameTemplateGroupFilter(_commandInput.TemplateName)
+                CliFilters.NameTemplateGroupFilter(_commandInput.SearchNameCriteria)
             };
 
             IEnumerable<Func<ITemplateInfo, MatchInfo?>> templateFilters =

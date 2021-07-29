@@ -19,7 +19,7 @@ namespace Dotnet_new3.IntegrationTests
 
 Options:
   -h, --help                     Displays help for this command.
-  -l, --list                     Lists templates containing the specified template name. If no name is specified, lists all templates.
+  -l, --list <PARTIAL_NAME>      Lists templates containing the specified template name. If no name is specified, lists all templates.
   -n, --name                     The name for the output being created. If no name is specified, the name of the output directory is used.
   -o, --output                   Location to place the generated output.
   -i, --install                  Installs a source or a template package.
@@ -32,7 +32,7 @@ Options:
   -lang, --language              Filters templates based on language and specifies the language of the template to create.
   --update-check                 Check the currently installed template packages for updates.
   --update-apply                 Check the currently installed template packages for update, and install the updates.
-  --search                       Searches for the templates on NuGet.org.
+  --search <PARTIAL_NAME>        Searches for the templates on NuGet.org.
   --author <AUTHOR>              Filters the templates based on the template author. Applicable only with --search or --list | -l option.
   --package <PACKAGE>            Filters the templates based on NuGet package ID. Applies to --search.
   --columns <COLUMNS_LIST>       Comma separated list of columns to display in --list and --search output.

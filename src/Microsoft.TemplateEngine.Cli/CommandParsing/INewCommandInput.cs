@@ -33,8 +33,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         bool HasColumnsParseError { get; }
 
-        bool HasParseError { get; }
-
         string HelpText { get; }
 
         IReadOnlyList<string>? InstallNuGetSourceList { get; }
@@ -50,6 +48,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         bool IsListFlagSpecified { get; }
 
         bool IsQuietFlagSpecified { get; }
+
+        bool IsSearchFlagSpecified { get; }
 
         bool IsShowAllFlagSpecified { get; }
 
@@ -68,8 +68,6 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         IReadOnlyList<string> RemainingParameters { get; }
 
-        bool SearchOnline { get; }
-
         string ShowAliasesAliasName { get; }
 
         bool ShowAliasesSpecified { get; }
@@ -87,6 +85,12 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
         IReadOnlyList<string>? ToUninstallList { get; }
 
         string TypeFilter { get; }
+
+        string? SearchNameCriteria { get; }
+
+        string? ListNameCriteria { get; }
+
+        bool ValidateParseError();
 
         bool HasDebuggingFlag(string flag);
     }

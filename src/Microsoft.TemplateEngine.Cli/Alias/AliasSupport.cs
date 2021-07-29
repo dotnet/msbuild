@@ -6,7 +6,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
-using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 
 namespace Microsoft.TemplateEngine.Cli.Alias
 {
@@ -22,8 +21,7 @@ namespace Microsoft.TemplateEngine.Cli.Alias
 
         internal static (New3CommandStatus, INewCommandInput?) CoordinateAliasExpansion(
             INewCommandInput commandInput,
-            AliasRegistry aliasRegistry,
-            TemplateInformationCoordinator templateInformationCoordinator)
+            AliasRegistry aliasRegistry)
         {
             (AliasExpansionStatus aliasExpansionStatus, INewCommandInput? expandedCommandInput) = AliasSupport.TryExpandAliases(commandInput, aliasRegistry);
             if (aliasExpansionStatus == AliasExpansionStatus.ExpansionError)
@@ -35,10 +33,10 @@ namespace Microsoft.TemplateEngine.Cli.Alias
             {
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.AliasCommandAfterExpansion, string.Join(" ", expandedCommandInput.Tokens)));
 
-                if (commandInput.HasParseError)
+                if (!expandedCommandInput.ValidateParseError())
                 {
-                    Reporter.Output.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
-                    return (templateInformationCoordinator.HandleParseError(expandedCommandInput), null);
+                    Reporter.Error.WriteLine(LocalizableStrings.AliasExpandedCommandParseError);
+                    return (New3CommandStatus.InvalidParamValues, null);
                 }
             }
 

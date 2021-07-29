@@ -642,6 +642,56 @@ Examples:
               .And.HaveStdErrContaining("No templates found matching: 'con', language='C#', --unknown.");
         }
 
+        [Theory]
+        [InlineData("zoop --search", "--search zoop")]
+        [InlineData("zoop --search --language F#", "--search zoop --language F#")]
+        [InlineData("zoop --search --columns-all", "--search zoop --columns-all")]
+        public void CanFallbackToSearchOption(string command1, string command2)
+        {
+            var commandResult1 = new DotnetNewCommand(_log, command1.Split())
+             .WithCustomHive(_sharedHome.HomeDirectory)
+             .Execute();
+
+            var commandResult2 = new DotnetNewCommand(_log, command2.Split())
+               .WithCustomHive(_sharedHome.HomeDirectory)
+               .Execute();
+
+            Assert.Equal(commandResult1.StdOut, commandResult2.StdOut);
+        }
+
+        [Theory]
+        [InlineData("--search foo --columns-all bar", "bar", "foo")]
+        [InlineData("--search foo bar", "bar", "foo")]
+        [InlineData("foo --search bar", "bar", "foo", true)]
+        [InlineData("foo --search bar --language F#", "bar", "foo", true)]
+        [InlineData("foo --search --columns-all bar", "bar", "foo")]
+        [InlineData("foo --search --columns-all --framework net6.0 bar", "bar", "foo|--framework|net6.0")]
+        [InlineData("foo --search --columns-all -other-param --framework net6.0 bar", "bar", "foo|--framework|net6.0|-other-param")]
+        public void CannotSearchOnParseError(string command, string invalidArguments, string validArguments, bool invalidSyntax = false)
+        {
+            var commandResult = new DotnetNewCommand(_log, command.Split())
+             .WithCustomHive(_sharedHome.HomeDirectory)
+             .Execute();
+
+            if (invalidSyntax)
+            {
+                commandResult.Should().Fail().And.HaveStdErrContaining("Invalid command syntax: use 'dotnet new3 --search [PARTIAL_NAME] [FILTER_OPTIONS]' instead.");
+                return;
+            }
+
+            commandResult.Should().Fail()
+                .And.HaveStdErrContaining("Error: Invalid option(s):");
+            foreach (string arg in invalidArguments.Split('|'))
+            {
+                commandResult.Should().HaveStdErrContaining(arg);
+            }
+
+            foreach (string arg in validArguments.Split('|'))
+            {
+                commandResult.Should().NotHaveStdErrContaining(arg);
+            }
+        }
+
         private static bool AllRowsContain(List<List<string>> tableOutput, string[] columnsNames, string value)
         {
             var columnIndexes = columnsNames.Select(columnName => tableOutput[0].IndexOf(columnName));

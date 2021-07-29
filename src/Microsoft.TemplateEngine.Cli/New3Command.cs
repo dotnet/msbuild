@@ -219,12 +219,6 @@ namespace Microsoft.TemplateEngine.Cli
                 return await _templateInformationCoordinator.DisplayTemplateGroupListAsync(commandInput, default).ConfigureAwait(false);
             }
 
-            if (commandInput.RemainingParameters.Any())
-            {
-                _templateInformationCoordinator.HandleParseError(commandInput);
-                return New3CommandStatus.InvalidParamValues;
-            }
-
             // dotnet new -h case
             if (commandInput.IsHelpFlagSpecified)
             {
@@ -268,13 +262,9 @@ namespace Microsoft.TemplateEngine.Cli
                 throw new ArgumentNullException(nameof(commandInput));
             }
 
-            // this check is checking the initial parse result
-            // the parse error occurs when no argument (template name) is specified and there are unparsed tokens
-            // unparsed tokens may be present in case template parameters are given
-            // for list and search unparsed tokens (template specific parameters) are supported and will be parsed later
-            if (!commandInput.IsListFlagSpecified && !commandInput.SearchOnline && commandInput.HasParseError)
+            if (!commandInput.ValidateParseError())
             {
-                return _templateInformationCoordinator.HandleParseError(commandInput);
+                return New3CommandStatus.InvalidParamValues;
             }
 
             if (commandInput.IsHelpFlagSpecified)
@@ -294,11 +284,10 @@ namespace Microsoft.TemplateEngine.Cli
                 Reporter.Output.WriteLine(string.Format(LocalizableStrings.ExtraArgsCommandAfterExpansion, string.Join(" ", commandInput.Tokens)));
             }
 
-            if (string.IsNullOrEmpty(commandInput.Alias))
             {
                 // The --alias param is for creating / updating / deleting aliases.
                 // If it's not present, try expanding aliases now.
-                (New3CommandStatus aliasExpansionResult, INewCommandInput? expandedCommandInput) = AliasSupport.CoordinateAliasExpansion(commandInput, _aliasRegistry, _templateInformationCoordinator);
+                (New3CommandStatus aliasExpansionResult, INewCommandInput? expandedCommandInput) = AliasSupport.CoordinateAliasExpansion(commandInput, _aliasRegistry);
 
                 if (aliasExpansionResult != New3CommandStatus.Success || expandedCommandInput == null)
                 {
@@ -341,7 +330,7 @@ namespace Microsoft.TemplateEngine.Cli
                     return await packageCoordinator.ProcessAsync(commandInput).ConfigureAwait(false);
                 }
 
-                if (commandInput.SearchOnline)
+                if (commandInput.IsSearchFlagSpecified)
                 {
                     return await CliTemplateSearchCoordinator.SearchForTemplateMatchesAsync(EnvironmentSettings, _templatePackageManager, commandInput, _defaultLanguage).ConfigureAwait(false);
                 }

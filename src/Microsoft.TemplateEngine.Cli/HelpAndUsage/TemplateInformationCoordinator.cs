@@ -169,51 +169,6 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             Reporter.Output.WriteLine();
         }
 
-        internal New3CommandStatus HandleParseError(INewCommandInput commandInput)
-        {
-            if (!commandInput.HasParseError)
-            {
-                throw new ArgumentException($"{nameof(commandInput.HasParseError)} should be {true}");
-            }
-
-            // TODO: get a meaningful error message from the parser
-            if (commandInput.RemainingParameters.Any())
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.InvalidCommandOptions.Bold().Red());
-                foreach (string flag in commandInput.RemainingParameters)
-                {
-                    Reporter.Error.WriteLine($"  {flag}".Bold().Red());
-                }
-            }
-            if (commandInput.HasColumnsParseError)
-            {
-                Reporter.Error.WriteLine(commandInput.ColumnsParseError.Bold().Red());
-            }
-
-            //if other error, use command parser errors (not localized)
-            if (!commandInput.RemainingParameters.Any() && !commandInput.HasColumnsParseError)
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.InvalidCommandOptions.Bold().Red());
-                foreach (string error in commandInput.Errors)
-                {
-                    Reporter.Error.WriteLine($"  {error}".Bold().Red());
-                }
-                Reporter.Error.WriteLine();
-            }
-
-            if (commandInput.IsHelpFlagSpecified)
-            {
-                // this code path doesn't go through the full help & usage stack, so needs it's own call to ShowUsageHelp().
-                ShowUsageHelp(commandInput);
-            }
-            else
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters);
-                Reporter.Error.WriteCommand(commandInput.HelpCommandExample());
-            }
-            return New3CommandStatus.InvalidParamValues;
-        }
-
         /// <summary>
         /// Handles help display for the template (dotnet new3 template-name --help).
         /// </summary>
@@ -266,6 +221,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
             ListTemplateResolver resolver = new ListTemplateResolver(_templatePackageManager, _hostSpecificDataLoader);
             TemplateResolutionResult resolutionResult = await resolver.ResolveTemplatesAsync(commandInput, _defaultLanguage, cancellationToken).ConfigureAwait(false);
 
@@ -544,9 +500,18 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                    .Select(param => string.IsNullOrWhiteSpace(param.Value) ? param.Key : $"{param.Key}='{param.Value}'") ?? Array.Empty<string>();
 
             StringBuilder inputParameters = new StringBuilder();
-            if (!string.IsNullOrWhiteSpace(commandInput.TemplateName))
+            string? mainCriteria = commandInput.TemplateName;
+            if (commandInput.IsListFlagSpecified)
             {
-                inputParameters.Append($"'{commandInput.TemplateName}'");
+                mainCriteria = commandInput.ListNameCriteria;
+            }
+            else if (commandInput.IsSearchFlagSpecified)
+            {
+                mainCriteria = commandInput.SearchNameCriteria;
+            }
+            if (!string.IsNullOrWhiteSpace(mainCriteria))
+            {
+                inputParameters.Append($"'{mainCriteria}'");
                 if (appliedFilters.Any() || appliedTemplateParameters.Any())
                 {
                     inputParameters.Append(separator);

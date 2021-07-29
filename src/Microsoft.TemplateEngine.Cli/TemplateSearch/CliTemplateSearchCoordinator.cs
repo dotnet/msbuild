@@ -43,7 +43,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
         {
             if (!ValidateCommandInput(commandInput))
             {
-                return New3CommandStatus.Cancelled;
+                return New3CommandStatus.InvalidParamValues;
             }
 
             Reporter.Output.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchInProgress);
@@ -158,7 +158,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
 
         private static bool ValidateCommandInput(INewCommandInput commandInput)
         {
-            if (string.IsNullOrWhiteSpace(commandInput.TemplateName) && SupportedFilters.All(filter => !filter.IsFilterSet(commandInput)) && !commandInput.RemainingParameters.Any())
+            if (string.IsNullOrWhiteSpace(commandInput.SearchNameCriteria) && SupportedFilters.All(filter => !filter.IsFilterSet(commandInput)) && !commandInput.RemainingParameters.Any())
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_NoTemplateName.Red().Bold());
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.CliTemplateSearchCoordinator_Info_SearchHelp, string.Join(", ", SupportedFilters.Select(f => $"'{f.Name}'"))));
@@ -169,7 +169,7 @@ namespace Microsoft.TemplateEngine.Cli.TemplateSearch
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(commandInput.TemplateName) && commandInput.TemplateName.Length < 2)
+            if (!string.IsNullOrWhiteSpace(commandInput.SearchNameCriteria) && commandInput.SearchNameCriteria.Length < 2)
             {
                 Reporter.Error.WriteLine(LocalizableStrings.CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort.Bold().Red());
                 return false;

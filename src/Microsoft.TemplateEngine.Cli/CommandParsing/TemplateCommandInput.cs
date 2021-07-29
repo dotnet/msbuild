@@ -101,11 +101,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                 IEnumerable<string> tokens;
                 if (string.IsNullOrWhiteSpace(commandInput.TemplateName))
                 {
-                    tokens = commandInput.Tokens;
+                    tokens = commandInput.Tokens.Skip(1); //skip command name
                 }
                 else
                 {
-                    tokens = commandInput.Tokens.Skip(1);
+                    tokens = commandInput.Tokens.Skip(2); //skip command name and template name
                 }
                 return ParseArgs(
                     commandInput.CommandName,
@@ -135,7 +135,7 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
                         arguments.Add(commandInput.RemainingParameters[i + 1]);
                         i++;
                     }
-                    templateParameters[optionName] = arguments.Any() ? string.Join(",", arguments) : null;
+                    templateParameters[optionName] = arguments.Any() ? arguments[0] : null;
                     i++;
                 }
                 else

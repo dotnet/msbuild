@@ -550,6 +550,11 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">Для получения дополнительных сведений запустите:</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidSyntax">
+        <source>Invalid command syntax: use '{0}' instead.</source>
+        <target state="new">Invalid command syntax: use '{0}' instead.</target>
+        <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
+      </trans-unit>
       <trans-unit id="LanguageParameter">
         <source>Filters templates based on language and specifies the language of the template to create.</source>
         <target state="translated">Фильтрует шаблоны на основе языка и указывает язык создаваемого шаблона.</target>
