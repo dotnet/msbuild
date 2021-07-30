@@ -233,7 +233,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(rootPath)
                 .Execute("--no-restore")
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World");
+                         .And.HaveStdOutContaining("Hello, World");
         }
 
         [Fact]
