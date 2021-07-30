@@ -2,11 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using System.Xml.Linq;
 
 namespace Microsoft.Build.Tasks
@@ -36,9 +32,9 @@ namespace Microsoft.Build.Tasks
         {
             if (PropertiesAndValues != null)
             {
-                XElement root = new XElement(RootElementName);
+                XElement root = new("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName)));
 
-                foreach (var item in PropertiesAndValues)
+                foreach (ITaskItem item in PropertiesAndValues)
                 {
                     root.Add(new XElement(item.ItemSpec, item.GetMetadata("Value")));
                 }

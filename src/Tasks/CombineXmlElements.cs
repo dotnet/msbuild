@@ -2,11 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using System.Xml.Linq;
 
 namespace Microsoft.Build.Tasks
@@ -24,7 +20,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The XML elements to include as children of the root element
         /// </summary>
-        public ITaskItem [] XmlElements { get; set; }
+        public ITaskItem[] XmlElements { get; set; }
 
         /// <summary>
         /// The generated XML
@@ -36,7 +32,7 @@ namespace Microsoft.Build.Tasks
         {
             if (XmlElements != null)
             {
-                XElement root = new XElement(RootElementName);
+                XElement root = new XElement("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName)));
 
                 foreach (var item in XmlElements)
                 {
