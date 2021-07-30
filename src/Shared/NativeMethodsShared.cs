@@ -632,6 +632,8 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        // CA1416 warns about code that can only run on Windows, but we verified we're running on Windows before this.
+        // This is the most reasonable way to resolve this part because other ways would require ifdef'ing on NET472.
 #pragma warning disable CA1416
         private static bool IsLongPathsEnabledRegistry()
         {
