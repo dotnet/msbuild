@@ -271,9 +271,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>6d3518520ae041fb4c6c1c54d5abf0975a38a450</Sha>
     </Dependency>
-    <Dependency Name="XliffTasks" Version="1.0.0-beta.21367.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21377.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
       <Uri>https://github.com/dotnet/xliff-tasks</Uri>
-      <Sha>346cb8673bc0dba67d9bf7bb3a868d921a8211f7</Sha>
+      <Sha>c836bdfc6daba62f1794ca095ee1b97960971fcf</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
   </ToolsetDependencies>
