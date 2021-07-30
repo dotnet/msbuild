@@ -740,6 +740,11 @@ The following are names of parameters or literal values and should not be transl
         <target state="new">NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</target>
         <note>{StrBegin="NETSDK1179: "}</note>
       </trans-unit>
+      <trans-unit id="SingleFileWin7Incompatible">
+        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
+        <target state="new">NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</target>
+        <note>{StrBegin="NETSDK1180: "}</note>
+      </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
         <target state="translated">NETSDK1048: Os 'AdditionalProbingPaths' foram especificados para os GenerateRuntimeConfigurationFiles, mas estão sendo ignorados porque 'RuntimeConfigDevPath' está vazio.</target>
