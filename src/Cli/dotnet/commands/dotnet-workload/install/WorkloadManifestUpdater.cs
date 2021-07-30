@@ -117,42 +117,35 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             var installedWorkloads = _workloadRecordRepo.GetInstalledWorkloads(_sdkFeatureBand);
             var updatableWorkloads = GetUpdatableWorkloadsToAdvertise(installedWorkloads);
             var filePath = GetAdvertisingWorkloadsFilePath();
-            if (updatableWorkloads.Any())
+            var jsonContent = JsonSerializer.Serialize(updatableWorkloads.Select(workload => workload.ToString()).ToArray());
+            if (Directory.Exists(Path.GetDirectoryName(filePath)))
             {
-                var jsonContent = JsonSerializer.Serialize(updatableWorkloads.Select(workload => workload.ToString()).ToArray());
-                if (Directory.Exists(Path.GetDirectoryName(filePath)))
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                }
-                File.WriteAllText(filePath, jsonContent);
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             }
-            else if(File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
+            File.WriteAllText(filePath, jsonContent);
         }
 
         public static void AdvertiseWorkloadUpdates()
         {
             try
             {
-                var manifestUpdater = WorkloadManifestUpdater.GetInstance();
-                manifestUpdater.AdvertiseWorkloadUpdatesWhenRequired();
+                var backgroundUpdatesDisabled = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE"), out var disableEnvVar) && disableEnvVar;
+                var adUpdatesFile = Path.Combine(CliFolderPathCalculator.DotnetHomePath, ".dotnet", ".workloadAdvertisingUpdates");
+                if (!backgroundUpdatesDisabled && File.Exists(adUpdatesFile))
+                {
+                    var updatableWorkloads = JsonSerializer.Deserialize<string[]>(File.ReadAllText(adUpdatesFile));
+                    if (updatableWorkloads != null && updatableWorkloads.Any())
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine(LocalizableStrings.WorkloadUpdatesAvailable);
+                    }
+                }
             }
             catch (Exception)
             {
                 // Never surface errors
             }
-        }
-
-        public void AdvertiseWorkloadUpdatesWhenRequired()
-        {
-            if (!BackgroundUpdatesAreDisabled() && File.Exists(GetAdvertisingWorkloadsFilePath()))
-            {
-                Console.WriteLine();
-                Console.WriteLine(LocalizableStrings.WorkloadUpdatesAvailable);
-            }
-        }
+}
 
         public IEnumerable<(
             ManifestId manifestId,
