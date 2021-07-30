@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" Version="15.7.179" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
     <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningPackageVersion)" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
   </ItemGroup>
