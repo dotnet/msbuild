@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Extensions
@@ -45,5 +46,42 @@ namespace Microsoft.DotNet.ApiCompatibility.Extensions
                     yield return baseType;
             }
         }
+
+        internal static bool IsEffectivelySealed(this ITypeSymbol type, bool includeInternals) =>
+            type.IsSealed || !HasVisibleConstructor(type, includeInternals);
+
+        private static bool HasVisibleConstructor(ITypeSymbol type, bool includeInternals)
+        {
+            if (type is INamedTypeSymbol namedType)
+            {
+                foreach (IMethodSymbol constructor in namedType.Constructors)
+                {
+                    if (!constructor.IsStatic && constructor.IsVisibleOutsideOfAssembly(includeInternals))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        internal static IEnumerable<ITypeSymbol> GetAllBaseInterfaces(this ITypeSymbol type)
+        {
+            foreach (ITypeSymbol @interface in type.Interfaces)
+            {
+                yield return @interface;
+                foreach (ITypeSymbol baseInterface in @interface.GetAllBaseInterfaces())
+                    yield return baseInterface;
+            }
+
+            foreach (ITypeSymbol baseType in type.GetAllBaseTypes())
+                foreach (ITypeSymbol baseInterface in baseType.GetAllBaseInterfaces())
+                    yield return baseInterface;
+        }
+
+        internal static bool IsVisibleOutsideOfAssembly(this ISymbol symbol, bool includeInternals) =>
+            symbol.DeclaredAccessibility == Accessibility.Public ||
+            symbol.DeclaredAccessibility == Accessibility.Protected ||
+            symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal ||
+            (includeInternals && symbol.DeclaredAccessibility != Accessibility.Private);
     }
 }

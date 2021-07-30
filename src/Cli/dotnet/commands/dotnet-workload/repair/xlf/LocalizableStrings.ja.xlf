@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Install a workload.</source>
+        <source>Repair workload installations.</source>
         <target state="needs-review-translation">グローバルまたはローカルのツールをインストールします。ローカル ツールはマニフェストに追加され、復元されます。</target>
         <note />
       </trans-unit>

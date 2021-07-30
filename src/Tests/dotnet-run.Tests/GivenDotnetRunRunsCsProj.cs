@@ -3,11 +3,14 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -208,6 +211,19 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
+        [Theory]
+        [InlineData("-p project1 -p project2")]
+        [InlineData("--project project1 -p project2")]
+        public void ItErrorsWhenMultipleProjectsAreSpecified(string args)
+        {
+            new DotnetCommand(Log, "run")
+                .Execute(args.Split(" "))
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(LocalizableStrings.OnlyOneProjectAllowed);
+        }
+
         [Fact]
         public void ItRunsAppWhenRestoringToSpecificPackageDirectory()
         {
@@ -233,7 +249,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .WithWorkingDirectory(rootPath)
                 .Execute("--no-restore")
                 .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World");
+                         .And.HaveStdOutContaining("Hello, World");
         }
 
         [Fact]
@@ -267,6 +283,23 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should()
                 .Pass()
                 .And.HaveStdOutContaining("echo args:foo;bar;baz");
+        }
+
+        [Fact]
+        public void ItCanPassOptionArgumentsToSubjectAppByDoubleDash()
+        {
+            const string testAppName = "MSBuildTestApp";
+            var testInstance = _testAssetsManager.CopyTestAsset(testAppName)
+                .WithSource();
+
+            var testProjectDirectory = testInstance.Path;
+
+            new DotnetCommand(Log, "run")
+                .WithWorkingDirectory(testProjectDirectory)
+                .Execute("--", "-d", "-a")
+                .Should()
+                .Pass()
+                .And.HaveStdOutContaining("echo args:-d;-a");
         }
 
         [Fact]

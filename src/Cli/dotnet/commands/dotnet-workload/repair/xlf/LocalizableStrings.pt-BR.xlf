@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Install a workload.</source>
+        <source>Repair workload installations.</source>
         <target state="needs-review-translation">Instale a ferramentas local ou global. Ferramentas locais são adicionadas ao manifesto e restauradas.</target>
         <note />
       </trans-unit>

@@ -11,9 +11,7 @@
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
   </PropertyGroup>
 
-  <!-- This is currently imported in Directory.Build.targets -->
-  <!--<Import Project="targets\BuildToolsetTasks.targets" />-->
-  
+  <Import Project="targets\BuildToolsetTasks.targets" />
   <Import Project="targets\GetRuntimeInformation.targets" />
   <Import Project="targets\Version.targets" />
   <Import Project="targets\BundledSdks.targets" />
@@ -24,6 +22,7 @@
   <Import Project="targets\MSBuildExtensions.targets" />
 
   <ItemGroup>
+    <PackageReference Include="dotnet-format" Version="$(DotnetFormatVersion)" GeneratePathProperty="true" ExcludeAssets="All" />
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="NuGet.Build.Tasks.Console" Version="$(NuGetBuildTasksConsolePackageVersion)" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(MicrosoftBuildNuGetSdkResolverPackageVersion)" />

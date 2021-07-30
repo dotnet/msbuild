@@ -8,16 +8,16 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadSearchCommandParser
     {
-        public static readonly Argument WorkloadIdStubArgument =
+        public static readonly Argument<string> WorkloadIdStubArgument =
             new Argument<string>(LocalizableStrings.WorkloadIdStubArgumentName)
             {
                 Arity = ArgumentArity.ZeroOrOne,
                 Description = LocalizableStrings.WorkloadIdStubArgumentDescription
             };
 
-        public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
-        public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
         public static Command GetCommand()
         {

@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Cli
@@ -26,7 +28,8 @@ namespace Microsoft.DotNet.Cli
                 {
                     throw new CommandParsingException(
                         message: string.Join(Environment.NewLine,
-                                             parseResult.Errors.Select(e => e.Message)));
+                                             parseResult.Errors.Select(e => e.Message)), 
+                        parseResult: parseResult);
                 }
             }
             else if (parseResult.HasOption("--help"))
@@ -56,13 +59,18 @@ namespace Microsoft.DotNet.Cli
         public static string[] GetSubArguments(this string[] args)
         {
             var subargs = args.ToList();
+
+            // Don't remove any arguments that are being passed to the app in dotnet run
+            var runArgs = subargs.Contains("--") ? subargs.GetRange(subargs.IndexOf("--"), subargs.Count() - subargs.IndexOf("--")) : new List<string>();
+            subargs = subargs.Contains("--") ? subargs.GetRange(0, subargs.IndexOf("--")) : subargs;
+
             subargs.RemoveAll(arg => DiagOption.Aliases.Contains(arg));
             if (subargs[0].Equals("dotnet"))
             {
                 subargs.RemoveAt(0);
             }
             subargs.RemoveAt(0); // remove top level command (ex build or publish)
-            return subargs.ToArray();
+            return subargs.Concat(runArgs).ToArray();
         }
 
         private static string GetSymbolResultValue(ParseResult parseResult, SymbolResult symbolResult)
@@ -83,6 +91,50 @@ namespace Microsoft.DotNet.Cli
             {
                 return string.Empty;
             }
+        }
+
+        public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
+            parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) && 
+            parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First());
+
+        internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
+        {
+            return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
+                parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
+                parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
+                CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
+                    parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
+                    parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
+                null;
+        }
+
+        public static bool UsingRunCommandShorthandProjectOption(this ParseResult parseResult)
+        {
+            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.ValueForOption(RunCommandParser.PropertyOption).Any())
+            {
+                var projVals = parseResult.GetRunCommandShorthandProjectValues();
+                if (projVals.Any())
+                {
+                    if (projVals.Count() != 1 || parseResult.HasOption(RunCommandParser.ProjectOption))
+                    {
+                        throw new GracefulException(Tools.Run.LocalizableStrings.OnlyOneProjectAllowed);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandProjectValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => !property.Contains("="));
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandPropertyValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => property.Contains("="));
         }
     }
 }

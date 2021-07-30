@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.NugetSearch
             Prerelease = prerelease;
         }
 
-        private static int? GetParsedResultAsInt(ParseResult parseResult, Option alias)
+        private static int? GetParsedResultAsInt(ParseResult parseResult, Option<string> alias)
         {
             var valueFromParser = parseResult.ValueForOption<string>(alias);
             if (string.IsNullOrWhiteSpace(valueFromParser))

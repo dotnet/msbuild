@@ -22,8 +22,6 @@ namespace Microsoft.DotNet.Watcher.Internal
             _fileWatcher = new FileWatcher(reporter);
         }
 
-        public bool WatchForNewFiles { get; init; }
-
         public async Task<FileItem?> GetChangedFileAsync(CancellationToken cancellationToken, Action startedWatching)
         {
             foreach (var file in _fileSet)
@@ -39,10 +37,6 @@ namespace Microsoft.DotNet.Watcher.Internal
                 if (_fileSet.TryGetValue(path, out var fileItem))
                 {
                     tcs.TrySetResult(fileItem);
-                }
-                else if (WatchForNewFiles && newFile)
-                {
-                    tcs.TrySetResult(new FileItem { FilePath = path, IsNewFile = newFile });
                 }
             }
 

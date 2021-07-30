@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string dotnetDir = null, 
             string tempDirPath = null,
             PackageSourceLocation packageSourceLocation = null,
-            RestoreActionConfig restoreActionConfig = null)
+            RestoreActionConfig restoreActionConfig = null, 
+            bool elevationRequired = true)
         {
             var installType = GetWorkloadInstallType(sdkFeatureBand, string.IsNullOrWhiteSpace(dotnetDir) 
                 ? Path.GetDirectoryName(Environment.ProcessPath)
@@ -35,10 +36,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     throw new InvalidOperationException(LocalizableStrings.OSDoesNotSupportMsi);
                 }
 
-                return new NetSdkMsiInstaller();
+                return NetSdkMsiInstallerClient.Create(sdkFeatureBand, workloadResolver,
+                    nugetPackageDownloader, verbosity, packageSourceLocation, reporter);
             }
 
-            if (!CanWriteToDotnetRoot(dotnetDir))
+            if (elevationRequired && !CanWriteToDotnetRoot(dotnetDir))
             {
                 throw new GracefulException(LocalizableStrings.InadequatePermissions);
             }

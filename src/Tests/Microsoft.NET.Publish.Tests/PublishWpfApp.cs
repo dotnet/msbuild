@@ -18,7 +18,7 @@ namespace Microsoft.NET.Publish.Tests
         {
         }
 
-        [WindowsOnlyRequiresMSBuildVersionFact("16.8.0")]
+        [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_publishes_and_runs_self_contained_wpf_app()
         {
             var testDir = _testAssetsManager.CreateTestDirectory();

@@ -6,6 +6,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Tools;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -149,12 +150,13 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var testAppName = "MSBuildTestApp";
             var outputDirectory = PublishApp(testAppName, rid: null, args: args);
 
-            outputDirectory.Should().OnlyHaveFiles(AssertionHelper.AppendApphostOnNonMacOS(testAppName, new[] {
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{testAppName}{Constants.ExeSuffix}",
                 $"{testAppName}.dll",
                 $"{testAppName}.pdb",
                 $"{testAppName}.deps.json",
                 $"{testAppName}.runtimeconfig.json",
-            }));
+            });
 
             new DotnetCommand(Log)
                 .Execute(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
@@ -180,7 +182,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute(args.Split())
                 .Should().Fail()
-                    .And.HaveStdErrContaining(LocalizableStrings.SelfContainAndNoSelfContainedConflict);
+                    .And.HaveStdErrContaining(CommonLocalizableStrings.SelfContainAndNoSelfContainedConflict);
         }
 
         private DirectoryInfo PublishApp(string testAppName, string rid, string args = null, [CallerMemberName] string callingMethod = "")

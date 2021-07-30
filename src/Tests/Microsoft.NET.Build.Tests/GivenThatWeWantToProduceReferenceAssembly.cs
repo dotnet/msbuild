@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
             TestProject testProject = new TestProject()
             {
                 Name = "ProduceRefAssembly",
-                IsExe = true, 
+                IsExe = true,
                 TargetFrameworks = targetFramework
             };
 

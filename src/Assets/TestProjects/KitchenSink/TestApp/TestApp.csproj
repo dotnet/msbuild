@@ -9,16 +9,20 @@
   <!-- Host configuration properties
        Keep this list in the same order as the configProperties in GivenThatWeWantToPublishAProjectWithAllFeatures. -->
   <PropertyGroup>
+    <VerifyDependencyInjectionOpenGenericServiceTrimmability>true</VerifyDependencyInjectionOpenGenericServiceTrimmability>
+    <_AggressiveAttributeTrimming>true</_AggressiveAttributeTrimming>
     <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
     <DebuggerSupport>true</DebuggerSupport>
     <EventSourceSupport>false</EventSourceSupport>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <PredefinedCulturesOnly>true</PredefinedCulturesOnly>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
     <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
     <UseNativeHttpHandler>true</UseNativeHttpHandler>
     <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <NullabilityInfoContextSupport>false</NullabilityInfoContextSupport>
     <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
@@ -59,7 +63,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
-    
+
     <None Include="NoneCopyOutputAlways.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -74,7 +78,7 @@
     <ProjectReference Include="../TestLibrary/TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <!-- 
+    <!--
       The TestLibrary has a hard dependency on Newtonsoft.Json.
       The TestApp has a PrivateAssets=All dependency on Microsoft.Extensions.DependencyModel.
       Microsoft.Extensions.DependencyModel depends on Newtonsoft.Json.

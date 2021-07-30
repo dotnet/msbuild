@@ -132,7 +132,7 @@
   <data name="BundleUpToDateMessage" xml:space="preserve">
     <value>Up to date.</value>
   </data>
-  <data name="NewPatchAvaliableMessage" xml:space="preserve">
+  <data name="NewPatchAvailableMessage" xml:space="preserve">
     <value>Patch {0} is available.</value>
   </data>
   <data name="OutOfSupportMessage" xml:space="preserve">

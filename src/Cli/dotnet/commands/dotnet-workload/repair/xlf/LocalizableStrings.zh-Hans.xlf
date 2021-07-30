@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="zh-HANS" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Install a workload.</source>
+        <source>Repair workload installations.</source>
         <target state="needs-review-translation">安装全局或本地工具。本地工具将被添加到清单并还原。</target>
         <note />
       </trans-unit>

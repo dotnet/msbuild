@@ -14,6 +14,7 @@ using Microsoft.Build.Utilities;
 using NuGet.Common;
 using NuGet.Frameworks;
 using NuGet.ProjectModel;
+using NuGet.Versioning;
 
 namespace Microsoft.NET.Build.Tasks
 {
@@ -822,9 +823,32 @@ namespace Microsoft.NET.Build.Tasks
                 Position = savedPosition;
             }
 
+            class LibraryComparer : IEqualityComparer<(string, NuGetVersion)>
+            {
+                public bool Equals((string, NuGetVersion) l1, (string, NuGetVersion) l2)
+                {
+                    return StringComparer.OrdinalIgnoreCase.Equals(l1.Item1, l2.Item1)
+                        && l1.Item2.Equals(l2.Item2);
+                    
+                }
+                public int GetHashCode((string, NuGetVersion) library)
+                {
+#if NET
+                    return HashCode.Combine(
+                        StringComparer.OrdinalIgnoreCase.GetHashCode(library.Item1),
+                        library.Item2.GetHashCode());
+#else
+                    int hashCode = -1507694697;
+                    hashCode = hashCode * -1521134295 + StringComparer.OrdinalIgnoreCase.GetHashCode(library.Item1);
+                    hashCode = hashCode * -1521134295 + library.Item2.GetHashCode();
+                    return hashCode;
+#endif
+                }
+            }
+
             private void WriteAnalyzers()
             {
-                Dictionary<string, LockFileTargetLibrary> targetLibraries = null;
+                Dictionary<(string, NuGetVersion), LockFileTargetLibrary> targetLibraries = null;
 
                 foreach (var library in _lockFile.Libraries)
                 {
@@ -842,12 +866,10 @@ namespace Microsoft.NET.Build.Tasks
 
                         if (targetLibraries == null)
                         {
-                            targetLibraries = _runtimeTarget
-                                .Libraries
-                                .ToDictionary(l => l.Name, StringComparer.OrdinalIgnoreCase);
+                            targetLibraries = _compileTimeTarget.Libraries.ToDictionary(l => (l.Name, l.Version), new LibraryComparer());
                         }
 
-                        if (targetLibraries.TryGetValue(library.Name, out var targetLibrary))
+                        if (targetLibraries.TryGetValue((library.Name, library.Version), out var targetLibrary))
                         {
                             WriteItem(_packageResolver.ResolvePackageAssetPath(targetLibrary, file), targetLibrary);
                         }

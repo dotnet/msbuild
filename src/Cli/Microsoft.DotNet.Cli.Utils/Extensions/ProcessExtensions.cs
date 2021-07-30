@@ -37,5 +37,19 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return enumerator.MoveNext() ? Convert.ToInt32(enumerator.Current.GetPropertyValue("ParentProcessId")) : -1;
         }
+
+        /// <summary>
+        /// Returns the command line of this process by querying the Win32_Process class.
+        /// </summary>
+        /// <param name="process">The process component.</param>
+        /// <returns>The command line of the process or <see langword="null"/> if it could not be retrieved.</returns>
+        public static string GetCommandLine(this Process process)
+        {
+            ManagementObjectSearcher searcher = new($"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{process.Id}'");
+            using ManagementObjectCollection result = searcher.Get();
+            ManagementObjectCollection.ManagementObjectEnumerator enumerator = result.GetEnumerator();
+
+            return enumerator.MoveNext() ? Convert.ToString(enumerator.Current.GetPropertyValue("CommandLine")) : null;
+        }
     }
 }

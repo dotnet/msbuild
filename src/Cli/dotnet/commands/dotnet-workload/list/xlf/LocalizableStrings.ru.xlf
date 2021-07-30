@@ -8,8 +8,18 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdColumn">
-        <source>Workload Id</source>
-        <target state="new">Workload Id</target>
+        <source>Installed Workload Ids</source>
+        <target state="new">Installed Workload Ids</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadListFooter">
+        <source>Use `dotnet workload search` to find additional workloads to install.</source>
+        <target state="new">Use `dotnet workload search` to find additional workloads to install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkloadUpdatesAvailable">
+        <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
+        <target state="new">Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>
         <note />
       </trans-unit>
     </body>

@@ -8,7 +8,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadCommandParser
     {
-        public static Command GetCommand(bool includeAllCommands)
+        public static Command GetCommand()
         {
             var command = new Command("workload", LocalizableStrings.CommandDescription);
 
@@ -18,10 +18,8 @@ namespace Microsoft.DotNet.Cli
             command.AddCommand(WorkloadSearchCommandParser.GetCommand());
             command.AddCommand(WorkloadUninstallCommandParser.GetCommand());
             command.AddCommand(WorkloadRepairCommandParser.GetCommand());
-            if (includeAllCommands)
-            {
-                command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
-            }
+            command.AddCommand(WorkloadRestoreCommandParser.GetCommand());
+            command.AddCommand(WorkloadElevateCommandParser.GetCommand());
 
             return command;
         }

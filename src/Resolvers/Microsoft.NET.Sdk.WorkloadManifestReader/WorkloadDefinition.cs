@@ -5,13 +5,23 @@ using System.Collections.Generic;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
-    public class WorkloadDefinition
+    public abstract class BaseWorkloadDefinition
+    {
+        public BaseWorkloadDefinition (WorkloadId id)
+        {
+            Id = id;
+        }
+
+        public WorkloadId Id { get; }
+    }
+
+    public class WorkloadDefinition : BaseWorkloadDefinition
     {
         public WorkloadDefinition(
             WorkloadId id, bool isAbstract, string? description, WorkloadDefinitionKind kind, List<WorkloadId>? extends,
-            List<WorkloadPackId>? packs, List<string>? platforms)
+            List<WorkloadPackId>? packs, List<string>? platforms
+            ) : base (id)
         {
-            Id = id;
             IsAbstract = isAbstract;
             Description = description;
             Kind = kind;
@@ -20,7 +30,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             Platforms = platforms;
         }
 
-        public WorkloadId Id { get; }
         public bool IsAbstract { get; }
         public string? Description { get; }
         public WorkloadDefinitionKind Kind { get; }
@@ -33,5 +42,15 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
     {
         Dev,
         Build
+    }
+
+    public class WorkloadRedirect : BaseWorkloadDefinition
+    {
+        public WorkloadRedirect(WorkloadId id, WorkloadId replaceWith) : base (id)
+        {
+            ReplaceWith = replaceWith;
+        }
+
+        public WorkloadId ReplaceWith { get; }
     }
 }

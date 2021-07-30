@@ -9,13 +9,13 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class ToolRestoreCommandParser
     {
-        public static readonly Option ConfigOption = ToolInstallCommandParser.ConfigOption;
+        public static readonly Option<string> ConfigOption = ToolInstallCommandParser.ConfigOption;
 
-        public static readonly Option AddSourceOption = ToolInstallCommandParser.AddSourceOption;
+        public static readonly Option<string[]> AddSourceOption = ToolInstallCommandParser.AddSourceOption;
 
-        public static readonly Option ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
+        public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
 
-        public static readonly Option VerbosityOption = ToolInstallCommandParser.VerbosityOption;
+        public static readonly Option<VerbosityOptions> VerbosityOption = ToolInstallCommandParser.VerbosityOption;
 
         public static Command GetCommand()
         {

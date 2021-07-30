@@ -25,6 +25,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public bool FailingRollback;
         private readonly string FailingPack;
 
+        public int ExitCode => 0;
+
         public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, IList<PackInfo> installedPacks = null)
         {
             InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload, installedWorkloads);
@@ -41,6 +43,11 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             {
                 throw new Exception($"Failing pack: {packInfo.Id}");
             }
+        }
+
+        public void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        {
+            InstallWorkloadPack(packInfo, sdkFeatureBand, offlineCache);
         }
 
         public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
@@ -83,12 +90,17 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             CachePath = cachePath.Value;
         }
 
-        public IEnumerable<(string, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
+        public IEnumerable<(WorkloadPackId, string)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand)
         {
             return InstalledPacks.Select(pack => (pack.Id, pack.Version));
         }
 
         public IWorkloadInstaller GetWorkloadInstaller() => throw new NotImplementedException();
+
+        public void Shutdown()
+        {
+
+        }
     }
 
     internal class MockInstallationRecordRepository : IWorkloadInstallationRecordRepository

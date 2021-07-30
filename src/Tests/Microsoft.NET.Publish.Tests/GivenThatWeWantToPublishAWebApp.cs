@@ -45,16 +45,14 @@ namespace Microsoft.NET.Publish.Tests
                 .Pass();
 
             var publishDirectory =
-                command.GetOutputDirectory(targetFramework: "netcoreapp2.0", configuration: "Release");
+                command.GetOutputDirectory(targetFramework: "net5.0", configuration: "Release");
 
             publishDirectory.Should().NotHaveSubDirectories();
-            publishDirectory.Should().OnlyHaveFiles(new[] {
+            publishDirectory.Should().HaveFiles(new[] {
                 "web.config",
                 "web.deps.json",
                 "web.dll",
                 "web.pdb",
-                "web.PrecompiledViews.dll",
-                "web.PrecompiledViews.pdb",
                 "web.runtimeconfig.json",
             });
         }

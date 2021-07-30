@@ -10,6 +10,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using System.Linq;
 using Microsoft.DotNet.Workloads.Workload.Install;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.Workloads.Workload.Search
 {
@@ -38,23 +39,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Search
 
         public override int Execute()
         {
-            var avaliableWorkloads = _workloadResolver.GetAvaliableWorkloads();
+            IEnumerable<WorkloadResolver.WorkloadInfo> availableWorkloads = _workloadResolver.GetAvailableWorkloads()
+                .OrderBy(workload => workload.Id);
 
             if (!string.IsNullOrEmpty(_workloadIdStub))
             {
-                avaliableWorkloads = avaliableWorkloads.Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase));
+                availableWorkloads = availableWorkloads.Where(workload => workload.Id.ToString().Contains(_workloadIdStub, StringComparison.OrdinalIgnoreCase));
             }
 
-            var table = new PrintableTable<WorkloadDefinition>();
+            var table = new PrintableTable<WorkloadResolver.WorkloadInfo>();
             table.AddColumn(LocalizableStrings.WorkloadIdColumnName, workload => workload.Id.ToString());
             table.AddColumn(LocalizableStrings.DescriptionColumnName, workload => workload.Description);
-            if (_verbosity.VerbosityIsDetailedOrDiagnostic())
-            {
-                table.AddColumn(LocalizableStrings.PlatformColumnName, workload => workload.Platforms == null ? string.Empty : string.Join(" ", workload.Platforms));
-            }
 
             _reporter.WriteLine();
-            table.PrintRows(avaliableWorkloads, l => _reporter.WriteLine(l));
+            table.PrintRows(availableWorkloads, l => _reporter.WriteLine(l));
             _reporter.WriteLine();
 
             return 0;

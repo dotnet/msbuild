@@ -208,7 +208,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="ResolvePackageAssets"
-          Condition=" '$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')"
+          Condition="('$(DesignTimeBuild)' != 'true' Or Exists('$(ProjectAssetsFile)')) And '$(SkipResolvePackageAssets)' != 'true'"
           DependsOnTargets="ProcessFrameworkReferences;_DefaultMicrosoftNETPlatformLibrary;_ComputePackageReferencePublish">
 
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'

@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
 
   <PropertyGroup>
     <RazorSdkRoot>$(RepoRoot)\src\RazorSdk\</RazorSdkRoot>
@@ -38,15 +38,15 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="System.Reflection.Metadata"
-      Version="$(SystemReflectionMetadataVersion)"
-      Condition="'$(TargetFramework)'=='net472'" />
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition="'$(TargetFramework)'=='net472'" />
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" Condition="'$(TargetFramework)'=='net472'" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftExtensionsFileSystemGlobbingPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <AdditionalContent Include="$(RazorSdkRoot)Targets\**\*.*">
       <Pack>true</Pack>
-      <PackagePath>build\netstandard2.0</PackagePath>
+      <PackagePath>targets</PackagePath>
     </AdditionalContent>
     <AdditionalContent Include="$(RazorSdkRoot)Sdk\**\*.*">
       <Pack>true</Pack>
@@ -80,6 +80,18 @@
     </Compile>
   </ItemGroup>
 
+  <Target Name="CopyFileSystemGlobbing" BeforeTargets="PrepareAdditionalFilesToLayout" AfterTargets="ResolveReferences" Condition="'$(TargetFramework)' == '$(SdkTargetFramework)'">
+    <ItemGroup>
+      <_FileSystemGlobbing Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.Extensions.FileSystemGlobbing'" />
+      <_FileSystemGlobbingContent Include ="@(_FileSystemGlobbing)" TargetPath="tasks\$(SdkTargetFramework)\%(_FileSystemGlobbing.Filename)%(_FileSystemGlobbing.Extension)" />
+      <AdditionalContent Include="@(_FileSystemGlobbing)" PackagePath="tasks\$(SdkTargetFramework)" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_FileSystemGlobbingContent)" DestinationFiles="@(_FileSystemGlobbingContent->'$(PackageLayoutOutputPath)%(TargetPath)')">
+      <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
+    </Copy>
+  </Target>
+
   <Target Name="PrepareAdditionalFilesToLayout" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
       <LayoutFile Include="@(AdditionalContent)" Condition="'%(AdditionalContent.PackagePath)' != '' and '%(AdditionalContent.PackagePath)' != 'Icon.png'">
@@ -89,11 +101,10 @@
   </Target>
 
   <Target Name="CopyAdditionalFilesToLayout"
-          Condition="'$(TargetFramework)' == ''"
           DependsOnTargets="PrepareAdditionalFilesToLayout"
           AfterTargets="Build" Inputs="@(LayoutFile)"
-          Outputs="@(LayoutFile-&gt;'$(PackageLayoutOutputPath)%(TargetPath)')">
-    <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile-&gt;'$(PackageLayoutOutputPath)%(TargetPath)')">
+          Outputs="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
+    <Copy SourceFiles="@(LayoutFile)" DestinationFiles="@(LayoutFile->'$(PackageLayoutOutputPath)%(TargetPath)')">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
     </Copy>
   </Target>

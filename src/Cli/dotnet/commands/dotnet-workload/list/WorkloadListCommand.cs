@@ -33,7 +33,6 @@ namespace Microsoft.DotNet.Workloads.Workload.List
         private readonly string _tempDirPath;
         private readonly string _userHome;
         private readonly VerbosityOptions _verbosity;
-        private readonly SdkDirectoryWorkloadManifestProvider _workloadManifestProvider;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly IWorkloadInstallationRecordRepository _workloadRecordRepo;
 
@@ -46,7 +45,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
             string userHome = null,
             string tempDirPath = null,
             INuGetPackageDownloader nugetPackageDownloader = null,
-            IWorkloadManifestUpdater workloadManifestUpdater = null
+            IWorkloadManifestUpdater workloadManifestUpdater = null,
+            IWorkloadResolver workloadResolver = null
         ) : base(result)
         {
             _reporter = reporter ?? Reporter.Output;
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                ? Path.GetTempPath()
                                : result.ValueForOption<string>(WorkloadListCommandParser.TempDirOption));
             _targetSdkVersion = result.ValueForOption<string>(WorkloadListCommandParser.VersionOption);
-            _workloadManifestProvider =
+            var workloadManifestProvider =
                 new SdkDirectoryWorkloadManifestProvider(_dotnetPath,
                     string.IsNullOrWhiteSpace(_targetSdkVersion)
                         ? currentSdkReleaseVersion.ToString()
@@ -79,9 +79,9 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                                           new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, nullLogger),
                                           verboseLogger: nullLogger,
                                           restoreActionConfig: _parseResult.ToRestoreActionConfig());
-            var workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
+            workloadResolver ??= WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, currentSdkReleaseVersion.ToString());
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter,
-                _workloadManifestProvider, workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath);
+                workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _workloadRecordRepo);
         }
 
         public override int Execute()
@@ -116,6 +116,15 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 table.PrintRows(installedList, l => _reporter.WriteLine(l));
 
                 _reporter.WriteLine();
+                _reporter.WriteLine(LocalizableStrings.WorkloadListFooter);
+                _reporter.WriteLine();
+
+                var updatableWorkloads = _workloadManifestUpdater.GetUpdatableWorkloadsToAdvertise(installedList).Select(workloadId => workloadId.ToString());
+                if (updatableWorkloads.Any())
+                {
+                    _reporter.WriteLine(string.Format(LocalizableStrings.WorkloadUpdatesAvailable, string.Join(" ", updatableWorkloads)));
+                    _reporter.WriteLine();
+                }
             }
 
             return 0;

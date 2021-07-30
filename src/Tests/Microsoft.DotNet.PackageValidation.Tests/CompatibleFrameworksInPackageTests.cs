@@ -46,7 +46,7 @@ namespace PackageValidationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
-            new CompatibleFrameworkInPackageValidator(string.Empty, null, _log).Validate(package);
+            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
             // TODO: add asserts for assembly and header metadata.
             string assemblyName = $"{asset.TestProject.Name}.dll";
@@ -84,7 +84,7 @@ namespace PackageValidationTests
             var result = packCommand.Execute();
             Assert.Equal(string.Empty, result.StdErr);
             Package package = NupkgParser.CreatePackage(packCommand.GetNuGetPackage(), null);
-            new CompatibleFrameworkInPackageValidator(string.Empty, null, _log).Validate(package);
+            new CompatibleFrameworkInPackageValidator(string.Empty, null, false, _log).Validate(package);
             Assert.NotEmpty(_log.errors);
 
             string assemblyName = $"{asset.TestProject.Name}.dll";

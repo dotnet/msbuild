@@ -7,6 +7,7 @@ using System.CommandLine.Parsing;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.Workloads.Workload.Elevate;
 using Microsoft.DotNet.Workloads.Workload.Install;
 using Microsoft.DotNet.Workloads.Workload.List;
 using Microsoft.DotNet.Workloads.Workload.Repair;
@@ -47,6 +48,9 @@ namespace Microsoft.DotNet.Workloads.Workload
                     ParseResult),
                 ["repair"] =
                 appliedOption => new WorkloadRepairCommand(
+                    ParseResult),
+                ["elevate"] =
+                appliedOption => new WorkloadElevateCommand(
                     ParseResult)
             };
 

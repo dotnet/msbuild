@@ -84,19 +84,20 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
             for (var i = 0; i < FilesToCompress.Length; i++)
             {
-                var input = FilesToCompress[i];
-                var inputFullPath = input.GetMetadata("FullPath");
-                var relativePath = input.GetMetadata("RelativePath");
+                var file = FilesToCompress[i];
+                var inputFullPath = file.GetMetadata("FullPath");
+                var relativePath = file.GetMetadata("RelativePath");
                 var outputRelativePath = Path.Combine(OutputDirectory, CalculateTargetPath(inputFullPath, ".br"));
                 var outputFullPath = Path.GetFullPath(outputRelativePath);
 
-                var outputItem = new TaskItem(outputRelativePath);
+                var outputItem = new TaskItem(outputRelativePath, file.CloneCustomMetadata());
                 outputItem.SetMetadata("RelativePath", relativePath + ".br");
+                outputItem.SetMetadata("OriginalItemSpec", file.ItemSpec);
                 CompressedFiles[i] = outputItem;
 
                 if (SkipIfOutputIsNewer && File.Exists(outputFullPath) && File.GetLastWriteTimeUtc(inputFullPath) < File.GetLastWriteTimeUtc(outputFullPath))
                 {
-                    Log.LogMessage(MessageImportance.Low, $"Skipping compression for '{input.ItemSpec}' because '{outputRelativePath}' is newer than '{input.ItemSpec}'.");
+                    Log.LogMessage(MessageImportance.Low, $"Skipping compression for '{file.ItemSpec}' because '{outputRelativePath}' is newer than '{file.ItemSpec}'.");
                     continue;
                 }
 

@@ -26,11 +26,11 @@ namespace Microsoft.DotNet.PackageValidation
         private readonly ApiCompatRunner _apiCompatRunner;
         private readonly IPackageLogger _log;
 
-        public CompatibleTfmValidator(string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, IPackageLogger log)
+        public CompatibleTfmValidator(string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, bool enableStrictMode, IPackageLogger log)
         {
             _runApiCompat = runApiCompat;
             _log = log;
-            _apiCompatRunner = new(noWarn, ignoredDifferences, _log);
+            _apiCompatRunner = new(noWarn, ignoredDifferences, enableStrictMode, _log);
             _diagnosticBag = new(noWarn?.Split(';')?.Where(t => s_diagList.Contains(t)), ignoredDifferences);
         }
 
@@ -41,6 +41,9 @@ namespace Microsoft.DotNet.PackageValidation
         /// <param name="package">Nuget Package that needs to be validated.</param>
         public void Validate(Package package)
         {
+            if (_runApiCompat)
+                _apiCompatRunner.InitializePaths(package.PackagePath, package.PackagePath);
+
             HashSet<NuGetFramework> compatibleTargetFrameworks = new();
             foreach (NuGetFramework item in package.FrameworksInPackage)
             {
@@ -84,13 +87,8 @@ namespace Microsoft.DotNet.PackageValidation
                 {
                     if (_runApiCompat)
                     {
-                        _apiCompatRunner.QueueApiCompat(package.PackagePath, 
-                            compileTimeAsset.Path,
-                            package.PackagePath,
-                            runtimeAsset.Path,
-                            package.PackageId,
-                            Resources.CompatibleTfmValidatorHeader,
-                            string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path));
+                        string header = string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path);
+                        _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, compileTimeAsset, runtimeAsset, header);
                     }
                 }
  
@@ -113,13 +111,8 @@ namespace Microsoft.DotNet.PackageValidation
                     {
                         if (_runApiCompat)
                         {
-                            _apiCompatRunner.QueueApiCompat(package.PackagePath, 
-                                compileTimeAsset.Path,
-                                package.PackagePath, 
-                                runtimeAsset.Path,
-                                package.PackageId,
-                                Resources.CompatibleTfmValidatorHeader,
-                                string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path));
+                            string header = string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path);
+                            _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, compileTimeAsset, runtimeAsset, header);
                         }
                     }
                 }

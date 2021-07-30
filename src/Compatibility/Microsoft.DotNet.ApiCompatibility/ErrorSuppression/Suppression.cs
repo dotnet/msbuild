@@ -3,6 +3,7 @@
 
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace Microsoft.DotNet.Compatibility.ErrorSuppression
@@ -54,6 +55,14 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 => string.IsNullOrEmpty(first?.Trim()) && string.IsNullOrEmpty(second?.Trim()) || StringComparer.InvariantCultureIgnoreCase.Equals(first?.Trim(), second?.Trim());
         }
 
-        public override int GetHashCode() => HashCode.Combine(DiagnosticId?.ToLowerInvariant(), Target?.ToLowerInvariant(), Left?.ToLowerInvariant(), Right?.ToLowerInvariant(), IsBaselineSuppression);
+        public override int GetHashCode()
+        {
+            int hashCode = 1447485498;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(DiagnosticId?.ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Target?.ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Left?.ToLowerInvariant() ?? string.Empty);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Right?.ToLowerInvariant() ?? string.Empty);
+            return hashCode;
+        }
     }
 }

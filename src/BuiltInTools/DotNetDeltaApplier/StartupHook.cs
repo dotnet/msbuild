@@ -65,7 +65,7 @@ internal sealed class StartupHook
 
     private static string GetApplyUpdateCapabilities()
     {
-        var method = typeof(System.Reflection.Metadata.AssemblyExtensions).GetMethod("GetApplyUpdateCapabilities", BindingFlags.NonPublic | BindingFlags.Static);
+        var method = typeof(System.Reflection.Metadata.MetadataUpdater).GetMethod("GetCapabilities", BindingFlags.NonPublic | BindingFlags.Static, Type.EmptyTypes);
         if (method is null)
         {
             return string.Empty;

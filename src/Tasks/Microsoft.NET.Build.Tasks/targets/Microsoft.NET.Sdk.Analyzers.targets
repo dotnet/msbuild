@@ -35,8 +35,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- EffectiveAnalysisLevel is used to differentiate from user specified strings (such as 'none')
          and an implied numerical option (such as '4')-->
     <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'none' or '$(AnalysisLevelPrefix)' == 'none'">4.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">5.0</EffectiveAnalysisLevel>
-    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">6.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'latest' or '$(AnalysisLevelPrefix)' == 'latest'">6.0</EffectiveAnalysisLevel>
+    <EffectiveAnalysisLevel Condition="'$(AnalysisLevel)' == 'preview' or '$(AnalysisLevelPrefix)' == 'preview'">7.0</EffectiveAnalysisLevel>
 
     <!-- Set EffectiveAnalysisLevel to the value of AnalysisLevel if it is a version number -->
     <EffectiveAnalysisLevel Condition="'$(EffectiveAnalysisLevel)' == '' And
@@ -62,6 +62,13 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Compiler warning level, defaulted to 4. We promote it to 5 if the user has set analysis level to 5 or higher
          NOTE: at this time only the C# compiler supports warning waves -->
     <WarningLevel Condition="'$(Language)' == 'C#'">5</WarningLevel>
+  </PropertyGroup>
+  
+  <!-- Set the default WarningLevel based on EffectiveAnalysisLevel
+       For .NET 6 we want the Warning level to be 6 -->
+  <PropertyGroup Condition="'$(EffectiveAnalysisLevel)' != '' And
+                             $([MSBuild]::VersionGreaterThanOrEquals($(EffectiveAnalysisLevel), '6.0'))">
+    <WarningLevel Condition="'$(Language)' == 'C#'">6</WarningLevel>
   </PropertyGroup>
 
   <PropertyGroup>

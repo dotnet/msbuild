@@ -48,18 +48,18 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         /// </summary>
         /// <param name="mapper">The <see cref="MemberMapper"/> to evaluate.</param>
         /// <param name="differences">The list of <see cref="CompatDifference"/> to add differences to.</param>
-        private void RunOnMemberSymbol(ISymbol left, ISymbol right, string leftName, string rightName, IList<CompatDifference> differences)
+        private void RunOnMemberSymbol(ISymbol left, ISymbol right, ITypeSymbol leftContainingType, ITypeSymbol rightContainingType, string leftName, string rightName, IList<CompatDifference> differences)
         {
             if (left != null && right == null)
             {
-                if (ShouldReportMissingMember(left))
+                if (ShouldReportMissingMember(left, rightContainingType))
                 {
                     differences.Add(CreateDifference(left, DiagnosticIds.MemberMustExist, DifferenceType.Removed, Resources.MemberExistsOnLeft, leftName, rightName));
                 }
             }
             else if (Settings.StrictMode && left == null && right != null)
             {
-                if (ShouldReportMissingMember(right))
+                if (ShouldReportMissingMember(right, leftContainingType))
                 {
                     differences.Add(CreateDifference(right, DiagnosticIds.MemberMustExist, DifferenceType.Added, Resources.MemberExistsOnRight, leftName, rightName));
                 }
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
         private CompatDifference CreateDifference(ISymbol symbol, string id, DifferenceType type, string format, string leftName, string rightName) =>
             new(id, string.Format(format, symbol.ToDisplayString(), leftName, rightName), type, symbol);
 
-        private bool ShouldReportMissingMember(ISymbol symbol)
+        private bool ShouldReportMissingMember(ISymbol symbol, ITypeSymbol containingType)
         {
             // Events and properties are handled via their accessors.
             if (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
@@ -82,22 +82,29 @@ namespace Microsoft.DotNet.ApiCompatibility.Rules
                 if (method.MethodKind == MethodKind.ExplicitInterfaceImplementation)
                     return false;
 
-                // If method is an override or hides a base type definition removing it from the comparing side is compatible.
-                if (method.IsOverride || FindMatchingOnBaseType(method))
+                // If method is an override or is promoted to the base type should not be reported.
+                if (method.IsOverride || FindMatchingOnBaseType(method, containingType))
                     return false;
             }
 
             return true;
         }
 
-        private bool FindMatchingOnBaseType(IMethodSymbol method)
+        private bool FindMatchingOnBaseType(IMethodSymbol method, ITypeSymbol containingType)
         {
-            foreach (ITypeSymbol type in method.ContainingType.GetAllBaseTypes())
+            // Constructors cannot be promoted
+            if (method.MethodKind == MethodKind.Constructor)
+                return false;
+
+            if (containingType != null)
             {
-                foreach (ISymbol symbol in type.GetMembers())
+                foreach (ITypeSymbol type in containingType.GetAllBaseTypes())
                 {
-                    if (symbol is IMethodSymbol candidate && IsMatchingMethod(method, candidate))
-                        return true;
+                    foreach (ISymbol symbol in type.GetMembers())
+                    {
+                        if (symbol is IMethodSymbol candidate && IsMatchingMethod(method, candidate))
+                            return true;
+                    }
                 }
             }
 

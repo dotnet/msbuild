@@ -4,13 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <!--We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
+    <!-- We need to compare ISymbols in a special way (by name) and roslyn symbol comparers take more heuristics into consideration.-->
     <NoWarn>RS1024;$(NoWarn)</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
+    <!-- We pin the versions of the assets that ship with the SDK in order to be able to run on older SDKs. 
+    Currently we support .NET 6 Preview5 or later. -->
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.0-1.21304.5" />
   </ItemGroup>
 
   <ItemGroup>

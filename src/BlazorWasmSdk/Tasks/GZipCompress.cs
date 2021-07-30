@@ -34,12 +34,14 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 var file = FilesToCompress[i];
                 var inputFullPath = file.GetMetadata("FullPath");
                 var relativePath = file.GetMetadata("RelativePath");
+
                 var outputRelativePath = Path.Combine(
                     OutputDirectory,
                     BrotliCompress.CalculateTargetPath(inputFullPath, ".gz"));
 
-                var outputItem = new TaskItem(outputRelativePath);
+                var outputItem = new TaskItem(outputRelativePath, file.CloneCustomMetadata());
                 outputItem.SetMetadata("RelativePath", relativePath + ".gz");
+                outputItem.SetMetadata("OriginalItemSpec", file.ItemSpec);
                 CompressedFiles[i] = outputItem;
 
                 if (File.Exists(outputRelativePath) && File.GetLastWriteTimeUtc(inputFullPath) < File.GetLastWriteTimeUtc(outputRelativePath))

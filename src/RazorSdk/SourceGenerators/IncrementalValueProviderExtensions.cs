@@ -10,15 +10,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 {
     internal static class IncrementalValuesProviderExtensions
     {
-        internal static IncrementalValuesProvider<T> WithLambdaComparer<T>(this IncrementalValuesProvider<T> source, Func<T?, T?, bool> equal)
+        internal static IncrementalValueProvider<T> WithLambdaComparer<T>(this IncrementalValueProvider<T> source, Func<T, T, bool> equal, Func<T, int> getHashCode)
         {
-            var comparer = new LambdaComparer<T>(equal);
-            return source.WithComparer(comparer);
-        }
-
-        internal static IncrementalValueProvider<T> WithLambdaComparer<T>(this IncrementalValueProvider<T> source, Func<T?, T?, bool> equal)
-        {
-            var comparer = new LambdaComparer<T>(equal);
+            var comparer = new LambdaComparer<T>(equal, getHashCode);
             return source.WithComparer(comparer);
         }
 
@@ -53,15 +47,17 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
     internal class LambdaComparer<T> : IEqualityComparer<T>
     {
-        private readonly Func<T?, T?, bool> _equal;
+        private readonly Func<T, T, bool> _equal;
+        private readonly Func<T, int> _getHashCode;
 
-        public LambdaComparer(Func<T?, T?, bool> equal)
+        public LambdaComparer(Func<T, T, bool> equal, Func<T, int> getHashCode)
         {
             _equal = equal;
+            _getHashCode = getHashCode;
         }
 
-        public bool Equals(T? x, T? y) => _equal(x, y);
+        public bool Equals(T x, T y) => _equal(x, y);
 
-        public int GetHashCode(T obj) =>  EqualityComparer<T>.Default.GetHashCode(obj);
+        public int GetHashCode(T obj) => _getHashCode(obj);
     }
 }

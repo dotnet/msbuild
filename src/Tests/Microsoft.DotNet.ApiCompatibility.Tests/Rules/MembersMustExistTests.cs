@@ -18,15 +18,15 @@ namespace CompatTests
 {
   public class First
   {
-    public string Parameterless() { }
+    public void Parameterless() { }
     public void ShouldReportMethod(string a, string b) { }
     public string ShouldReportMissingProperty { get; }
-    public string this[int index] { get; }
+    public string this[int index] { get => string.Empty; }
     public event EventHandler ShouldReportMissingEvent;
     public int ReportMissingField = 0;
   }
 
-  public delegate void EventHandler(object sender EventArgs e);
+  public delegate void EventHandler(object sender, System.EventArgs e);
 }
 ";
 
@@ -35,9 +35,9 @@ namespace CompatTests
 {
   public class First
   {
-    public string Parameterless() { }
+    public void Parameterless() { }
   }
-  public delegate void EventHandler(object sender EventArgs e);
+  public delegate void EventHandler(object sender, System.EventArgs e);
 }
 ";
 
@@ -68,16 +68,16 @@ namespace CompatTests
   public class FirstBase
   {
     public void MyMethod() { }
-    public string MyMethodWithParams(string a, int b, FirstBase c) { }
-    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) { }
-    public virtual string MyVirtualMethod() { }
+    public string MyMethodWithParams(string a, int b, FirstBase c) => string.Empty;
+    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) => throw null;
+    public virtual string MyVirtualMethod() => string.Empty;
   }
   public class Second : FirstBase
   {
     public new void MyMethod() { }
-    public new string MyMethodWithParams(string a, int b, FirstBase c) { }
-    public new T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) { }
-    public override string MyVirtualMethod() { }
+    public new string MyMethodWithParams(string a, int b, FirstBase c) => string.Empty;
+    public new T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) => throw null;
+    public override string MyVirtualMethod() => string.Empty;
   }
 }
 ";
@@ -88,9 +88,9 @@ namespace CompatTests
   public class FirstBase
   {
     public void MyMethod() { }
-    public string MyMethodWithParams(string a, int b, FirstBase c) { }
-    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) { }
-    public virtual string MyVirtualMethod() { }
+    public string MyMethodWithParams(string a, int b, FirstBase c) => string.Empty;
+    public T MyGenericMethod<T, T2, T3>(string name, T2 a, T3 b) => throw null;
+    public virtual string MyVirtualMethod() => string.Empty;
   }
   public class Second : FirstBase { }
 }
@@ -143,11 +143,11 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, string b) { }
-    public string MultipleOverrides(string a, int b, string c) { }
-    public string MultipleOverrides(string a, int b, int c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => a;
+    public string MultipleOverrides(string a, string b) => b;
+    public string MultipleOverrides(string a, int b, string c) => c;
+    public string MultipleOverrides(string a, int b, int c) => a;
   }
 }
 ";
@@ -157,9 +157,9 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, int b, int c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => a;
+    public string MultipleOverrides(string a, int b, int c) => a;
   }
 }
 ";
@@ -188,11 +188,11 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, string b) { }
-    public string MultipleOverrides(string a, int b, string c) { }
-    internal string MultipleOverrides(string a, int b, int c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => a;
+    public string MultipleOverrides(string a, string b) => b;
+    public string MultipleOverrides(string a, int b, string c) => c;
+    internal string MultipleOverrides(string a, int b, int c) => a;
     internal int InternalProperty { get; set; }
   }
 }
@@ -203,17 +203,17 @@ namespace CompatTests
 {
   public class First
   {
-    public string MultipleOverrides() { }
-    public string MultipleOverrides(string a) { }
-    public string MultipleOverrides(string a, string b) { }
-    public string MultipleOverrides(string a, int b, string c) { }
+    public string MultipleOverrides() => string.Empty;
+    public string MultipleOverrides(string a) => a;
+    public string MultipleOverrides(string a, string b) => b;
+    public string MultipleOverrides(string a, int b, string c) => c;
     internal int InternalProperty { get; }
   }
 }
 ";
 
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax, assemblyName: "DifferentName");
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new();
             differ.IncludeInternalSymbols = includeInternals;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -256,7 +256,7 @@ namespace CompatTests
   }
 }
 ";
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable: true, includeDefaultReferences: true);
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable: true);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -304,8 +304,8 @@ namespace CompatTests
 {
   public class First
   {
-    public string MyMethod(string? a) => throw null;
-    public void MyOutMethod(out string a) => throw null;
+    public string MyMethod(string? a) => throw null!;
+    public void MyOutMethod(out string a) => throw null!;
     public void MyRefMethod(ref string a) { }
   }
 }
@@ -316,11 +316,11 @@ namespace CompatTests
 {
   public class First
   {
-    public void OneMethod => { }
+    public void OneMethod() { }
   }
 }
 ";
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable: true, includeDefaultReferences: true);
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax, enableNullable: true);
             IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
             ApiComparer differ = new();
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -482,6 +482,44 @@ namespace CompatTests
                 differ.GetDifferences(left, right);
 
             AssertExtensions.MultiRightEmptyDifferences(expectedLeftMetadata, rightSyntaxes.Length, differences);
+        }
+
+
+
+        [Fact]
+        public void ParameterlessConstructorRemovalIsReported()
+        {
+            string leftSyntax = @"
+namespace CompatTests
+{
+  public sealed class First
+  {
+  }
+}
+";
+
+            string rightSyntax = @"
+namespace CompatTests
+{
+  public class First
+  {
+    private First() { }
+  }
+}
+";
+
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntax(rightSyntax);
+
+            ApiComparer differ = new();
+            IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
+
+            CompatDifference[] expected = new[]
+            {
+            new CompatDifference(DiagnosticIds.MemberMustExist, string.Empty, DifferenceType.Removed, "M:CompatTests.First.#ctor")
+            };
+
+            Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
         }
     }
 }

@@ -2,30 +2,35 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using FluentAssertions;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+
+using FluentAssertions;
+
+using Microsoft.NET.Sdk.WorkloadManifestReader;
+using Microsoft.NET.TestFramework;
+
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.NET.TestFramework;
-using System.Linq;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace ManifestReaderTests
 {
 
     public class SdkDirectoryWorkloadManifestProviderTests : SdkTest
     {
-        private string _testDirectory;
-        private string _manifestDirectory;
-        private string _fakeDotnetRootDirectory;
+        private string? _testDirectory;
+        private string? _manifestDirectory;
+        private string? _fakeDotnetRootDirectory;
 
         public SdkDirectoryWorkloadManifestProviderTests(ITestOutputHelper logger) : base(logger)
         {
         }
 
-        void Initialize([CallerMemberName] string testName = null, string identifier = null)
+        [MemberNotNull("_testDirectory", "_manifestDirectory", "_fakeDotnetRootDirectory")]
+        void Initialize([CallerMemberName] string? testName = null, string? identifier = null)
         {
             _testDirectory = _testAssetsManager.CreateTestDirectory(testName, identifier).Path;
             _fakeDotnetRootDirectory = Path.Combine(_testDirectory, "dotnet");
@@ -90,7 +95,11 @@ namespace ManifestReaderTests
             var sdkDirectoryWorkloadManifestProvider
                 = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.105");
 
-            Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().ToList();
+            Action a = () => sdkDirectoryWorkloadManifestProvider.GetManifests().Select(m => {
+                using (m.openManifestStream()) { }
+                return true;
+            }).ToList();
+
             a.ShouldThrow<FileNotFoundException>();
         }
 
@@ -99,6 +108,8 @@ namespace ManifestReaderTests
         {
             Initialize();
 
+            string sdkVersion = "5.0.100";
+
             var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
             Directory.CreateDirectory(additionalManifestDirectory);
 
@@ -106,8 +117,8 @@ namespace ManifestReaderTests
             environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
 
             //  Manifest in test hook directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "AndroidContent");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestDirectory, "iOS"));
@@ -115,7 +126,7 @@ namespace ManifestReaderTests
 
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -127,6 +138,8 @@ namespace ManifestReaderTests
         {
             Initialize();
 
+            string sdkVersion = "5.0.100";
+
             var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
             Directory.CreateDirectory(additionalManifestDirectory);
 
@@ -134,15 +147,15 @@ namespace ManifestReaderTests
             environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
 
             //  Manifest in test hook directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory, sdkVersion, "Android", "WorkloadManifest.json"), "OverridingAndroidContent");
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));
             File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "OverriddenAndroidContent");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -154,6 +167,8 @@ namespace ManifestReaderTests
         public void ItSupportsMultipleTestHookFolders()
         {
             Initialize();
+
+            string sdkVersion = "5.0.100";
 
             var additionalManifestDirectory1 = Path.Combine(_testDirectory, "AdditionalManifests1");
             Directory.CreateDirectory(additionalManifestDirectory1);
@@ -172,18 +187,18 @@ namespace ManifestReaderTests
             File.WriteAllText(Path.Combine(_manifestDirectory, "Android", "WorkloadManifest.json"), "DefaultAndroidContent");
 
             //  Manifests in first additional directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory1, "Android", "WorkloadManifest.json"), "AndroidContent1");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory1, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent1");
 
             //  Manifests in second additional directory
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Android"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Android", "WorkloadManifest.json"), "AndroidContent2");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Android", "WorkloadManifest.json"), "AndroidContent2");
 
-            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, "Test"));
-            File.WriteAllText(Path.Combine(additionalManifestDirectory2, "Test", "WorkloadManifest.json"), "TestContent2");
+            Directory.CreateDirectory(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test"));
+            File.WriteAllText(Path.Combine(additionalManifestDirectory2, sdkVersion, "Test", "WorkloadManifest.json"), "TestContent2");
 
             var sdkDirectoryWorkloadManifestProvider
-                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: "5.0.100", environmentMock.GetEnvironmentVariable);
+                = new SdkDirectoryWorkloadManifestProvider(sdkRootPath: _fakeDotnetRootDirectory, sdkVersion: sdkVersion, environmentMock.GetEnvironmentVariable);
 
             GetManifestContents(sdkDirectoryWorkloadManifestProvider)
                 .Should()
@@ -234,7 +249,7 @@ namespace ManifestReaderTests
 
         private IEnumerable<string> GetManifestContents(SdkDirectoryWorkloadManifestProvider manifestProvider)
         {
-            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.manifestStream).ReadToEnd());
+            return manifestProvider.GetManifests().Select(manifest => new StreamReader(manifest.openManifestStream()).ReadToEnd());
         }
 
         private class EnvironmentMock
@@ -246,9 +261,9 @@ namespace ManifestReaderTests
                 _mockedEnvironmentVariables[variable] = value;
             }
 
-            public string GetEnvironmentVariable(string variable)
+            public string? GetEnvironmentVariable(string variable)
             {
-                if (_mockedEnvironmentVariables.TryGetValue(variable, out string value))
+                if (_mockedEnvironmentVariables.TryGetValue(variable, out string? value))
                 {
                     return value;
                 }
@@ -257,3 +272,24 @@ namespace ManifestReaderTests
         }
     }
 }
+
+#if NETFRAMEWORK
+namespace System.Diagnostics.CodeAnalysis
+{
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
+    sealed class MemberNotNullAttribute : Attribute
+    {
+        public MemberNotNullAttribute(params string[] members)
+        {
+            Members = members;
+        }
+
+        public MemberNotNullAttribute(string member)
+        {
+            Members = new[] { member };
+        }
+
+        public string[] Members { get; }
+    }
+}
+#endif

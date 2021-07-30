@@ -15,7 +15,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) CreateToolPackageStoresAndUninstaller(DirectoryPath? nonGlobalLocation = null);
     internal class ToolUninstallGlobalOrToolPathCommand : CommandBase
     {
@@ -60,7 +60,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageUninstaller toolPackageUninstaller)
                 = _createToolPackageStoresAndUninstaller(toolDirectoryPath);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolDirectoryPath);
+            var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
+            IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolDirectoryPath);
 
             var packageId = new PackageId(_parseResult.ValueForArgument<string>(ToolInstallCommandParser.PackageIdArgument));
             IToolPackage package = null;

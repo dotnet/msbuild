@@ -28,7 +28,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <!-- Paths to tools, tasks, and extensions are calculated relative to the RazorSdkDirectoryRoot. This can be modified to test a local build. -->
-    <RazorSdkDirectoryRoot Condition="'$(RazorSdkDirectoryRoot)'==''">$(MSBuildThisFileDirectory)..\..\</RazorSdkDirectoryRoot>
+    <RazorSdkDirectoryRoot Condition="'$(RazorSdkDirectoryRoot)'==''">$(MSBuildThisFileDirectory)..\</RazorSdkDirectoryRoot>
     <RazorSdkBuildTasksDirectoryRoot Condition="'$(RazorSdkBuildTasksDirectoryRoot)'==''">$(RazorSdkDirectoryRoot)tasks\</RazorSdkBuildTasksDirectoryRoot>
     <_RazorSdkTasksTFM Condition=" '$(MSBuildRuntimeType)' == 'Core'">net6.0</_RazorSdkTasksTFM>
     <_RazorSdkTasksTFM Condition=" '$(_RazorSdkTasksTFM)' == ''">net472</_RazorSdkTasksTFM>
@@ -52,7 +52,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <UseRazorSourceGenerator Condition="'$(UseRazorSourceGenerator)' == '' ">true</UseRazorSourceGenerator>
         <!-- Required to support incremental source generator -->
         <LangVersion Condition="'$(UseRazorSourceGenerator)' != '' ">preview</LangVersion>
-        <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">5.0</RazorLangVersion>
+        <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">6.0</RazorLangVersion>
       </PropertyGroup>
     </When>
     <When Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '5.0')) ">
@@ -68,6 +68,16 @@ Copyright (c) .NET Foundation. All rights reserved.
         <_TargetingNETCoreApp30OrLater>true</_TargetingNETCoreApp30OrLater>
         <UseRazorSourceGenerator>false</UseRazorSourceGenerator>
         <RazorLangVersion Condition="'$(RazorLangVersion)' == '' ">3.0</RazorLangVersion>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '2.1')) ">
+      <PropertyGroup>
+        <_TargetingNETStandard21OrLater>true</_TargetingNETStandard21OrLater>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard' AND $([MSBuild]::VersionGreaterThanOrEquals('$(TargetFrameworkVersion)', '2.0')) ">
+      <PropertyGroup>
+        <_TargetingNETStandard20OrLater>true</_TargetingNETStandard20OrLater>
       </PropertyGroup>
     </When>
   </Choose>
@@ -87,9 +97,11 @@ Copyright (c) .NET Foundation. All rights reserved.
         ('$(RazorLangVersion)' != '' AND '$(RazorLangVersion)' >= '3.0')">true</_Targeting30OrNewerRazorLangVersion>
 
     <!-- Controls whether or not the static web assets feature is enabled. By default is enabled for netcoreapp3.0
-         applications and RazorLangVersion 3 or above. -->
+        applications and RazorLangVersion 3 or above. -->
     <StaticWebAssetsEnabled Condition="'$(StaticWebAssetsEnabled)' == ''">$(_Targeting30OrNewerRazorLangVersion)</StaticWebAssetsEnabled>
 
+    <UseStaticWebAssetsV2>$(_TargetingNET60OrLater)</UseStaticWebAssetsV2>
+     
     <!-- Controls whether or not the scoped css feature is enabled. By default is enabled for net6.0 applications and RazorLangVersion 5 or above -->
     <ScopedCssEnabled Condition="'$(ScopedCssEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_Targeting30OrNewerRazorLangVersion)</ScopedCssEnabled>
   </PropertyGroup>
@@ -367,23 +379,20 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- Determine what compiler and versions of the language to target. For 2.x targeting projects, these are carried by packages referenced by the project. Use this -->
 
-  <!-- Use the 2.x compiler if we're building an application that references Microsoft.AspNetCore.Razor.Design. -->
-  <Import Project="$(RazorCodeGenerationTargetsPath)"
-    Condition="'$(IsRazorCompilerReferenced)' == 'true' AND '$(RazorCodeGenerationTargetsPath)' != '' AND Exists('$(RazorCodeGenerationTargetsPath)')" />
-
   <!-- When targeting 3.x and later projects, we have to infer configuration by inspecting the project. -->
   <Import Project="Microsoft.NET.Sdk.Razor.Configuration.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'" />
 
-  <!-- For projects targeting 3.x and later, use the compiler that ships in the SDK -->
-  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(UseRazorSourceGenerator)' != 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" Condition="'$(UseRazorSourceGenerator)' != 'true'" />
 
   <Import Project="Microsoft.NET.Sdk.Razor.Component.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(UseRazorSourceGenerator)' != 'true'" />
 
   <Import Project="Microsoft.NET.Sdk.Razor.SourceGenerators.targets" Condition="'$(UseRazorSourceGenerator)' == 'true'" />
 
-  <Import Project="Microsoft.NET.Sdk.Razor.ScopedCss.targets" Condition="'$(ScopedCssEnabled)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.StaticWebAssets.5_0.targets" Condition="'$(UseStaticWebAssetsV2)' != 'true' And '$(StaticWebAssetsEnabled)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.StaticWebAssets.targets" Condition="'$(UseStaticWebAssetsV2)' == 'true' And '$(StaticWebAssetsEnabled)' == 'true'" />
 
-  <Import Project="Microsoft.NET.Sdk.Razor.StaticWebAssets.targets" Condition="'$(StaticWebAssetsEnabled)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.ScopedCss.5_0.targets" Condition="'$(UseStaticWebAssetsV2)' != 'true' And '$(ScopedCssEnabled)' == 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.ScopedCss.targets" Condition="'$(UseStaticWebAssetsV2)' == 'true' And '$(ScopedCssEnabled)' == 'true'" />
 
   <Import Project="Microsoft.NET.Sdk.Razor.GenerateAssemblyInfo.targets" />
 

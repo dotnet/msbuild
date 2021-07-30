@@ -17,16 +17,6 @@
         <target state="new">[Baseline]</target>
         <note />
       </trans-unit>
-      <trans-unit id="CompatibleFrameworkInPackageValidatorHeader">
-        <source>Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</source>
-        <target state="new">Assembly API surface area of {0} should be compatible with assembly surface area of {1}. This ensures that it is possible to compile against {0} and then run on the {1} framework.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CompatibleTfmValidatorHeader">
-        <source>Public API surface area of compile time assemblies and runtime assemblies are not the same for all target frameworks and runtime identifiers. The following API are missing from some runtime assemblies:</source>
-        <target state="new">Public API surface area of compile time assemblies and runtime assemblies are not the same for all target frameworks and runtime identifiers. The following API are missing from some runtime assemblies:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="EmptyPackagePath">
         <source>Package path is empty. Please provide a valid package path.</source>
         <target state="new">Package path is empty. Please provide a valid package path.</target>
@@ -62,14 +52,14 @@
         <target state="new">Target framework {0} does not have a compatible runtime asset in the package.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BaselineVersionValidatorHeader">
-        <source>Found breaking API changes between package versions. If these breaking changes are unintentional, revert them in the newer package version. Otherwise suppress this error.</source>
-        <target state="new">Found breaking API changes between package versions. If these breaking changes are unintentional, revert them in the newer package version. Otherwise suppress this error.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NonExistentPackagePath">
         <source>Package '{0}' not found. Please provide a valid package path.</source>
         <target state="new">Package '{0}' not found. Please provide a valid package path.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSdkVersion">
+        <source> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</source>
+        <target state="new"> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</target>
         <note />
       </trans-unit>
       <trans-unit id="WroteSuppressions">

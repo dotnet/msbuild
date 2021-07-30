@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="zh-HANT" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Search for avaliable workloads.</source>
+        <source>Search for available workloads.</source>
         <target state="needs-review-translation">列出已安裝在全域或本機的工具。</target>
         <note />
       </trans-unit>

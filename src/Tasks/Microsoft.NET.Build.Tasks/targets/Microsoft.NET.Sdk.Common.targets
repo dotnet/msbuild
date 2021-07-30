@@ -21,7 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MicrosoftNETBuildTasksAssembly>$(MicrosoftNETBuildTasksDirectory)Microsoft.NET.Build.Tasks.dll</MicrosoftNETBuildTasksAssembly>
 
     <!--
-          Hardcoded list of known implicit packges that are added to project from default SDK targets implicitly.
+          Hardcoded list of known implicit packages that are added to project from default SDK targets implicitly.
           Should be re-visited when multiple TFM support is added to Dependencies logic.
     -->
     <DefaultImplicitPackages>Microsoft.NETCore.App;NETStandard.Library</DefaultImplicitPackages>
@@ -48,7 +48,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeIdentifiers Condition=" '$(PackAsTool)' == 'true' ">$(RuntimeIdentifiers);$(PackAsToolShimRuntimeIdentifiers)</RuntimeIdentifiers>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(EnablePreviewFeatures)' == 'true' And '$(LangVersion)' == ''">
+  <PropertyGroup Condition="'$(EnablePreviewFeatures)' == 'true' And '$(IsNetCoreAppTargetingLatestTFM)' == 'true'">
     <LangVersion>Preview</LangVersion>
   </PropertyGroup>
 

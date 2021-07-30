@@ -17,7 +17,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <UsingTask TaskName="ShowMissingWorkloads" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
-  <Target Name="GetSuggestedWorkloads" Returns="@(SuggestedWorkload)">
+  <Target Name="GetSuggestedWorkloads"
+          Returns="@(SuggestedWorkload)"
+          Condition="@(MissingWorkloadPack) != ''">
     <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"
                           NetCoreRoot="$(NetCoreRoot)"
                           NETCoreSdkVersion="$(NETCoreSdkVersion)"
@@ -25,14 +27,33 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Output TaskParameter="SuggestedWorkloads" ItemName="SuggestedWorkload" />
     </ShowMissingWorkloads>
   </Target>
-  
+
   <Target Name="_CheckForMissingWorkload"
         BeforeTargets="_CheckForInvalidConfigurationAndPlatform;_CheckForUnsupportedTargetPlatformIdentifier"
         Condition="'@(MissingWorkloadPack)' != ''">
-    
+
     <ShowMissingWorkloads MissingWorkloadPacks="@(MissingWorkloadPack)"
                           NetCoreRoot="$(NetCoreRoot)"
                           NETCoreSdkVersion="$(NETCoreSdkVersion)"
                           GenerateErrorsForMissingWorkloads="true"/>
+  </Target>
+
+  <!--  This target is not part of the build. Only used by dotnet workload restore command. Global property "SkipResolvePackageAssets"
+        need to be set to "true" to avoid requiring restore (which would likely fail if the required workloads aren't already installed).-->
+  <Target Name="_GetRequiredWorkloads" DependsOnTargets="GetSuggestedWorkloads;PrepareProjectReferences" Returns="@(_ResolvedSuggestedWorkload)">
+    <MSBuild
+      Projects="@(_MSBuildProjectReferenceExistent)"
+      Targets="_GetRequiredWorkloads"
+      BuildInParallel="$(BuildInParallel)"
+      Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
+      RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences);TargetFramework;TargetFrameworks">
+      <Output TaskParameter="TargetOutputs" ItemName="SuggestedWorkloadFromReference"/>
+    </MSBuild>
+
+    <ItemGroup>
+      <_ResolvedSuggestedWorkload Include="@(SuggestedWorkload)"/>
+      <_ResolvedSuggestedWorkload Include="@(SuggestedWorkloadFromReference)"/>
+    </ItemGroup>
+
   </Target>
 </Project>

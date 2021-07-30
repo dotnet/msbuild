@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
                 {
                     Directory.CreateDirectory(pathDir);
                 }
-                File.Create(path);
+                File.Create(path).Close();
             }
         }
 
@@ -67,8 +67,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Install.InstallRecord
             var path = Path.Combine(_workloadMetadataDir, featureBand.ToString(), _installedWorkloadDir, workloadId.ToString());
             if (File.Exists(path))
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
                 File.Delete(path);
             }
         }

@@ -90,11 +90,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Uninstall
             }
             catch (Exception e)
             {
+                _workloadInstaller.Shutdown();
                 // Don't show entire stack trace
                 throw new GracefulException(string.Format(LocalizableStrings.WorkloadUninstallFailed, e.Message), e);
             }
 
-            return 0;
+            return _workloadInstaller.ExitCode;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -8,16 +10,18 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.ExternalAccess.Watch.Api;
+using Microsoft.Extensions.HotReload;
 using Microsoft.Extensions.Tools.Internal;
 
 namespace Microsoft.DotNet.Watcher.Tools
 {
     internal class BlazorWebAssemblyDeltaApplier : IDeltaApplier
     {
-        private static Task<ImmutableArray<string>> _cachedCapabilties;
+        private static Task<ImmutableArray<string>>? _cachedCapabilties;
         private readonly IReporter _reporter;
         private int _sequenceId;
 
@@ -65,12 +69,13 @@ namespace Microsoft.DotNet.Watcher.Tools
                     }
 
                     var values = Encoding.UTF8.GetString(buffer.AsSpan(0, response.Value.Count));
+
                     // Capabilitiies are expressed a space-separated string.
                     // e.g. https://github.com/dotnet/runtime/blob/14343bdc281102bf6fffa1ecdd920221d46761bc/src/coreclr/System.Private.CoreLib/src/System/Reflection/Metadata/AssemblyExtensions.cs#L87
                     var result = values.Split(' ').ToImmutableArray();
                     return result;
                 }
-                catch (TaskCanceledException)
+                catch (TimeoutException)
                 {
                 }
                 finally
@@ -82,7 +87,7 @@ namespace Microsoft.DotNet.Watcher.Tools
             }
         }
 
-        public async ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
+        public async ValueTask<bool> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
         {
             if (context.BrowserRefreshServer is null)
             {
@@ -90,20 +95,16 @@ namespace Microsoft.DotNet.Watcher.Tools
                 return false;
             }
 
-            var payload = new UpdatePayload
+            var deltas = solutionUpdate.Select(c => new UpdateDelta
             {
-                Deltas = solutionUpdate.Select(c => new UpdateDelta
-                {
-                    SequenceId = _sequenceId++,
-                    ModuleId = c.ModuleId,
-                    MetadataDelta = c.MetadataDelta.ToArray(),
-                    ILDelta = c.ILDelta.ToArray(),
-                    UpdatedTypes = c.UpdatedTypes.ToArray(),
-                }),
-            };
+                SequenceId = _sequenceId++,
+                ModuleId = c.ModuleId,
+                MetadataDelta = c.MetadataDelta.ToArray(),
+                ILDelta = c.ILDelta.ToArray(),
+                UpdatedTypes = c.UpdatedTypes.ToArray(),
+            });
 
-            await context.BrowserRefreshServer.SendJsonSerlialized(payload, cancellationToken);
-
+            await context.BrowserRefreshServer.SendJsonWithSecret(sharedSecret => new UpdatePayload { SharedSecret = sharedSecret, Deltas = deltas }, cancellationToken);
             return await VerifyDeltaApplied(context, cancellationToken).WaitAsync(VerifyDeltaTimeout, cancellationToken);
         }
 
@@ -132,7 +133,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 // to loop before we decide that applying deltas failed.
                 for (var i = 0; i < 100; i++)
                 {
-                    var result = await context.BrowserRefreshServer.ReceiveAsync(_receiveBuffer, cancellationToken);
+                    var result = await context.BrowserRefreshServer!.ReceiveAsync(_receiveBuffer, cancellationToken);
                     if (result is null)
                     {
                         // A null result indicates no clients are connected. No deltas could have been applied in this state.
@@ -171,12 +172,14 @@ namespace Microsoft.DotNet.Watcher.Tools
         private readonly struct UpdatePayload
         {
             public string Type => "BlazorHotReloadDeltav1";
+            public string SharedSecret { get; init; }
             public IEnumerable<UpdateDelta> Deltas { get; init; }
         }
 
         private readonly struct UpdateDelta
         {
             public int SequenceId { get; init; }
+            public string ServerId { get; init; }
             public Guid ModuleId { get; init; }
             public byte[] MetadataDelta { get; init; }
             public byte[] ILDelta { get; init; }

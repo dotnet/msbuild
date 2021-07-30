@@ -54,6 +54,8 @@
     <PackageReference Include="Microsoft.NET.HostModel" Version="$(MicrosoftNETHostModelVersion)" />
     <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelVersion)" />
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="$(NuGetBuildTasksPackageVersion)" ExcludeAssets="All" />
+    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.PackageValidation\Microsoft.DotNet.PackageValidation.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\Compatibility\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" OutputItemType="ReferenceCopyLocalPaths" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 

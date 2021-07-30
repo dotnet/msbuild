@@ -2,14 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading;
 using Microsoft.AspNetCore.Mvc.Razor.Extensions;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Razor;
 
 namespace Microsoft.NET.Sdk.Razor.SourceGenerators
@@ -37,18 +33,9 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return builder.ToString();
         }
 
-        private static void HandleDebugSwitch(bool waitForDebugger)
-        {
-            if (waitForDebugger)
-            {
-                while (!Debugger.IsAttached)
-                {
-                    Thread.Sleep(3000);
-                }
-            }
-        }
-
-        private static RazorProjectEngine GetDiscoveryProjectEngine(StaticCompilationTagHelperFeature tagHelperFeature, IEnumerable<MetadataReference> references, IEnumerable<SourceGeneratorProjectItem> items, RazorSourceGenerationOptions razorSourceGeneratorOptions)
+        private static RazorProjectEngine GetDeclarationProjectEngine(
+            IEnumerable<SourceGeneratorProjectItem> items,
+            RazorSourceGenerationOptions razorSourceGeneratorOptions)
         {
             var fileSystem = new VirtualRazorProjectFileSystem();
             foreach (var item in items)
@@ -67,11 +54,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
 
                 b.SetRootNamespace(razorSourceGeneratorOptions.RootNamespace);
 
-                b.Features.Add(new DefaultMetadataReferenceFeature { References = references.ToList() });
-
-                b.Features.Add(tagHelperFeature);
-                b.Features.Add(new DefaultTagHelperDescriptorProvider());
-
                 CompilerFeatures.Register(b);
                 RazorExtensions.Register(b);
 
@@ -81,12 +63,34 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             return discoveryProjectEngine;
         }
 
-        private static RazorProjectEngine GetGenerationProjectEngine(IReadOnlyList<TagHelperDescriptor> tagHelpers, IEnumerable<SourceGeneratorProjectItem> items, RazorSourceGenerationOptions razorSourceGeneratorOptions)
+        private static RazorProjectEngine GetDiscoveryProjectEngine(
+            IReadOnlyList<MetadataReference> references,
+            StaticCompilationTagHelperFeature tagHelperFeature)
+        {
+            var discoveryProjectEngine = RazorProjectEngine.Create(RazorConfiguration.Default, new VirtualRazorProjectFileSystem(), b =>
+            {
+                b.Features.Add(new DefaultMetadataReferenceFeature { References = references });
+                b.Features.Add(tagHelperFeature);
+                b.Features.Add(new DefaultTagHelperDescriptorProvider());
+
+                CompilerFeatures.Register(b);
+                RazorExtensions.Register(b);
+            });
+
+            return discoveryProjectEngine;
+        }
+
+        private static RazorProjectEngine GetGenerationProjectEngine(
+            IReadOnlyList<TagHelperDescriptor> tagHelpers,
+            SourceGeneratorProjectItem item,
+            IEnumerable<SourceGeneratorProjectItem> imports,
+            RazorSourceGenerationOptions razorSourceGeneratorOptions)
         {
             var fileSystem = new VirtualRazorProjectFileSystem();
-            foreach (var item in items)
+            fileSystem.Add(item);
+            foreach (var import in imports)
             {
-                fileSystem.Add(item);
+                fileSystem.Add(import);
             }
 
             var projectEngine = RazorProjectEngine.Create(razorSourceGeneratorOptions.Configuration, fileSystem, b =>
@@ -109,20 +113,6 @@ namespace Microsoft.NET.Sdk.Razor.SourceGenerators
             });
 
             return projectEngine;
-        }
-
-        private static TFeature? GetFeature<TFeature>(RazorProjectEngine engine)
-        {
-            var count = engine.EngineFeatures.Count;
-            for (var i = 0; i < count; i++)
-            {
-                if (engine.EngineFeatures[i] is TFeature feature)
-                {
-                    return feature;
-                }
-            }
-
-            return default;
         }
     }
 }

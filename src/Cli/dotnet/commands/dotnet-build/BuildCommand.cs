@@ -7,7 +7,6 @@ using Microsoft.DotNet.Cli;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.CommandLine.Parsing;
 using System;
-using System.Linq;
 
 namespace Microsoft.DotNet.Tools.Build
 {
@@ -32,6 +31,9 @@ namespace Microsoft.DotNet.Tools.Build
             var parseResult = parser.ParseFrom("dotnet build", args);
 
             parseResult.ShowHelpOrErrorIfAppropriate();
+
+            CommonOptions.ValidateSelfContainedOptions(parseResult.HasOption(BuildCommandParser.SelfContainedOption),
+                parseResult.HasOption(BuildCommandParser.NoSelfContainedOption));
 
             msbuildArgs.Add($"-consoleloggerparameters:Summary");
 

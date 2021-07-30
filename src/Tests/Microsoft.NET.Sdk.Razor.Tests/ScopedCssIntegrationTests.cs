@@ -1,26 +1,24 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using FluentAssertions;
+using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Utilities;
-using Moq;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
-    public class ScopedCssIntegrationTest : AspNetSdkTest
+    public class ScopedCssIntegrationTest : AspNetSdkBaselineTest
     {
-        public ScopedCssIntegrationTest(ITestOutputHelper log) : base(log) { }
+        public ScopedCssIntegrationTest(ITestOutputHelper log) : base(log, GenerateBaselines) { }
 
         [Fact]
         public void Build_NoOps_WhenScopedCssIsDisabled()
@@ -102,8 +100,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var scoped = Path.Combine(intermediateOutputPath, "scopedcss", "Styles", "Pages", "Counter.rz.scp.css");
             new FileInfo(scoped).Should().Exist();
             new FileInfo(scoped).Should().Contain("b-overriden");
-            var generated = Path.Combine(intermediateOutputPath, "generated", "Microsoft.NET.Sdk.Razor.SourceGenerators", "Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator", "Components_Pages_Counter_razor.cs");	
-            new FileInfo(generated).Should().Exist();	
+            var generated = Path.Combine(intermediateOutputPath, "generated", "Microsoft.NET.Sdk.Razor.SourceGenerators", "Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator", "Components_Pages_Counter_razor.g.cs");
+            new FileInfo(generated).Should().Exist();
             new FileInfo(generated).Should().Contain("b-overriden");
             new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "Components", "Pages", "Index.razor.rz.scp.css")).Should().NotExist();
         }
@@ -265,7 +263,9 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var build = new BuildCommand(projectDirectory);
-            build.Execute().Should().Pass();
+            build.WithWorkingDirectory(projectDirectory.Path);
+            var buildResult = build.Execute("/bl");
+            buildResult.Should().Pass();
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
             publish.Execute("/p:NoBuild=true").Should().Pass();
@@ -301,14 +301,15 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
-            publish.Execute("/p:DisableScopedCssBundling=true").Should().Pass();
+            publish.WithWorkingDirectory(projectDirectory.TestRoot);
+            publish.Execute("/p:DisableScopedCssBundling=true", "/bl").Should().Pass();
 
             var publishOutputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
             new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "ComponentApp.styles.css")).Should().NotExist();
 
-            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "Components", "Pages", "Index.razor.rz.scp.css")).Should().Exist();
-            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "_content", "ComponentApp", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "Components", "Pages", "Index.razor.rz.scp.css")).Should().Exist();
+            new FileInfo(Path.Combine(publishOutputPath, "wwwroot", "Components", "Pages", "Counter.razor.rz.scp.css")).Should().Exist();
         }
 
         [CoreMSBuildOnlyFact]
@@ -327,8 +328,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             new FileInfo(generatedBundle).Should().Exist();
             var generatedProjectBundle = Path.Combine(intermediateOutputPath, "scopedcss", "projectbundle", "ComponentApp.bundle.scp.css");
             new FileInfo(generatedProjectBundle).Should().Exist();
-            var generatedCounter = Path.Combine(intermediateOutputPath, "generated", "Microsoft.NET.Sdk.Razor.SourceGenerators", "Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator", "Components_Pages_Counter_razor.cs");	
-            new FileInfo(generatedCounter).Should().Exist();	
+            var generatedCounter = Path.Combine(intermediateOutputPath, "generated", "Microsoft.NET.Sdk.Razor.SourceGenerators", "Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator", "Components_Pages_Counter_razor.g.cs");
+            new FileInfo(generatedCounter).Should().Exist();
 
             var componentThumbprint = FileThumbPrint.Create(generatedCounter);
             var bundleThumbprint = FileThumbPrint.Create(generatedBundle);
@@ -402,6 +403,38 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                     Assert.Equal(thumbprintLookup[file], thumbprint);
                 }
             }
+        }
+
+        [Fact]
+        public void BuildProjectWithReferences_CorrectlyBundlesScopedCssFiles()
+        {
+            var testAsset = "RazorAppWithPackageAndP2PReference";
+            ProjectDirectory = CreateAspNetSdkTestAsset(testAsset);
+
+            var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
+            build.WithWorkingDirectory(ProjectDirectory.TestRoot);
+            build.Execute("/bl").Should().Pass();
+
+            var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
+            var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
+
+            // GenerateStaticWebAssetsManifest should copy the file to the output folder.
+            var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.json");
+            new FileInfo(finalPath).Should().Exist();
+            AssertManifest(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                LoadBuildManifest());
+
+            AssertBuildAssets(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                outputPath,
+                intermediateOutputPath);
+
+            var appBundle = new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "AppWithPackageAndP2PReference.styles.css"));
+            appBundle.Should().Exist();
+
+            appBundle.Should().Contain("_content/ClassLibrary/ClassLibrary.bundle.scp.css");
+            appBundle.Should().Contain("_content/PackageLibraryDirectDependency/PackageLibraryDirectDependency.bundle.scp.css");
         }
     }
 }

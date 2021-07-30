@@ -25,7 +25,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
         private readonly VerbosityOptions _verbosity;
         private readonly IInstaller _workloadInstaller;
         private IWorkloadResolver _workloadResolver;
-        private IWorkloadManifestProvider _workloadManifestProvider;
         private readonly ReleaseVersion _sdkVersion;
         private readonly string _dotnetPath;
 
@@ -50,8 +49,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
-            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :
@@ -94,8 +93,12 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 // Don't show entire stack trace
                 throw new GracefulException(string.Format(LocalizableStrings.WorkloadRepairFailed, e.Message), e);
             }
+            finally
+            {
+                _workloadInstaller.Shutdown();
+            }
 
-            return 0;
+            return _workloadInstaller.ExitCode;
         }
 
         private void ReinstallWorkloadsBasedOnCurrentManifests(IEnumerable<WorkloadId> workloadIds, SdkFeatureBand sdkFeatureBand)
@@ -105,14 +108,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
                 var installer = _workloadInstaller.GetPackInstaller();
 
                 var packsToInstall = workloadIds
-                    .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId.ToString()))
+                    .SelectMany(workloadId => _workloadResolver.GetPacksInWorkload(workloadId))
                     .Distinct()
                     .Select(packId => _workloadResolver.TryGetPackInfo(packId))
                     .Where(pack => pack != null);
 
                 foreach (var packId in packsToInstall)
                 {
-                    installer.InstallWorkloadPack(packId, sdkFeatureBand);
+                    installer.RepairWorkloadPack(packId, sdkFeatureBand);
                 }
             }
             else

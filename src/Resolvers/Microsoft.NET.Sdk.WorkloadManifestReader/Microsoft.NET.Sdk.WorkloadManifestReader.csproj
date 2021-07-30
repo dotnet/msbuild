@@ -8,7 +8,6 @@
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
 
-    <LangVersion>8.0</LangVersion>
     <Nullable>Enable</Nullable>
     <IsPackable>true</IsPackable>
 

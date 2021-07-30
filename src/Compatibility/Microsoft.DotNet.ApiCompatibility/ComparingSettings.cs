@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <summary>
         /// The factory to get the <see cref="IRuleRunner"/>.
         /// </summary>
-        public IRuleRunnerFactory RuleRunnerFactory { get; }
+        public RuleRunnerFactory RuleRunnerFactory { get; }
 
         /// <summary>
         /// The metadata filter to use when creating the <see cref="ElementMapper{T}"/>.
@@ -35,11 +35,11 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// <param name="ruleRunnerFactory">The factory to create a <see cref="IRuleRunner"/></param>
         /// <param name="filter">The symbol filter.</param>
         /// <param name="equalityComparer">The comparer to map metadata.</param>
-        public ComparingSettings(IRuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool strictMode = false, string leftName = null, string[] rightNames = null)
+        public ComparingSettings(RuleRunnerFactory ruleRunnerFactory = null, ISymbolFilter filter = null, IEqualityComparer<ISymbol> equalityComparer = null, bool includeInternalSymbols = false, bool strictMode = false, string leftName = null, string[] rightNames = null)
         {
-            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(leftName, rightNames, strictMode: strictMode);
-            Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: false);
+            Filter = filter ?? new SymbolAccessibilityBasedFilter(includeInternalSymbols: includeInternalSymbols);
             EqualityComparer = equalityComparer ?? new DefaultSymbolsEqualityComparer();
+            RuleRunnerFactory = ruleRunnerFactory ?? new RuleRunnerFactory(leftName, rightNames, EqualityComparer, includeInternalSymbols, strictMode);
         }
     }
 }

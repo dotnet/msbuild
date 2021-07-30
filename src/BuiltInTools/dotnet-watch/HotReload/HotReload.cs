@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Watcher.Internal;
@@ -27,12 +28,23 @@ namespace Microsoft.DotNet.Watcher.Tools
             await _compilationHandler.InitializeAsync(dotNetWatchContext, cancellationToken);
         }
 
-        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
+        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem[] files, CancellationToken cancellationToken)
         {
             HotReloadEventSource.Log.HotReloadStart(HotReloadEventSource.StartType.Main);
-            var fileHandlerResult = await _staticFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
-                await _scopedCssFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
-                await _compilationHandler.TryHandleFileChange(context, file, cancellationToken);
+
+            var fileHandlerResult = false;
+            for (var i = files.Length - 1; i >= 0; i--)
+            {
+                var file = files[i];
+                if (await _staticFileHandler.TryHandleFileChange(context, file, cancellationToken) ||
+                    await _scopedCssFileHandler.TryHandleFileChange(context, file, cancellationToken))
+                {
+                    fileHandlerResult = true;
+                }
+            }
+
+            fileHandlerResult |= await _compilationHandler.TryHandleFileChange(context, files, cancellationToken);
+
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.Main);
             return fileHandlerResult;
         }

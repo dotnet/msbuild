@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
         {
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void InvalidPackage()
         {
             var testAsset = _testAssetsManager
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Assert.Contains("error CP0002: Member 'PackageValidationTestProject.Program.SomeAPINotIn6_0()' exists on lib/netstandard2.0/PackageValidationTestProject.dll but not on lib/net6.0/PackageValidationTestProject.dll", result.StdOut);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ValidatePackageTargetRunsSuccessfully()
         {
             var testAsset = _testAssetsManager
@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Assert.Equal(0, result.ExitCode);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ValidatePackageTargetRunsSuccessfullyWithBaselineCheck()
         {
             var testAsset = _testAssetsManager
@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Assert.Equal(0, result.ExitCode);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ValidatePackageTargetRunsSuccessfullyWithBaselineVersion()
         {
             var testAsset = _testAssetsManager
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Assert.Equal(0, result.ExitCode);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ValidatePackageTargetFailsWithBaselineVersion()
         {
             var testAsset = _testAssetsManager
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.PackageValidation.Tests
             Assert.Contains("error CP0002: Member 'PackageValidationTestProject.Program.SomeApiNotInLatestVersion()' exists on [Baseline] lib/netstandard2.0/PackageValidationTestProject.dll but not on lib/netstandard2.0/PackageValidationTestProject.dll", result.StdOut);
         }
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void ValidatePackageTargetWithIncorrectBaselinePackagePath()
         {
             var testAsset = _testAssetsManager

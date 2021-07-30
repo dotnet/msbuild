@@ -152,7 +152,9 @@ Examples:
             {
                 if (string.IsNullOrEmpty(options.Project))
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     var projectOptionShort = parseResults.ValueForOption<string>("-p");
+#pragma warning restore CS0618 // Type or member is obsolete
                     if (!string.IsNullOrEmpty(projectOptionShort))
                     {
                         reporter.Warn(Resources.Warning_ProjectAbbreviationDeprecated);
@@ -287,9 +289,10 @@ Examples:
                 DefaultLaunchSettingsProfile = defaultProfile,
             };
 
-            if (!options.NoHotReload && isDefaultRunCommand && TryReadProject(projectFile, out var projectGraph) && IsHotReloadSupported(projectGraph))
+            context.ProjectGraph = TryReadProject(projectFile);
+
+            if (!options.NoHotReload && isDefaultRunCommand && context.ProjectGraph is not null && IsHotReloadSupported(context.ProjectGraph))
             {
-                context.ProjectGraph = projectGraph;
                 _reporter.Verbose($"Project supports hot reload and was configured to run with the default run-command. Watching with hot-reload");
 
                 // Use hot-reload based watching if
@@ -312,20 +315,19 @@ Examples:
             return 0;
         }
 
-        private bool TryReadProject(string project, out ProjectGraph projectInstance)
+        private ProjectGraph TryReadProject(string project)
         {
-            projectInstance = default;
             try
             {
-                projectInstance = new ProjectGraph(project);
-                return true;
+                return new ProjectGraph(project);
             }
             catch (Exception ex)
             {
                 _reporter.Verbose("Reading the project instance failed.");
                 _reporter.Verbose(ex.ToString());
-                return false;
             }
+
+            return null;
         }
 
         private static bool IsHotReloadSupported(ProjectGraph projectGraph)

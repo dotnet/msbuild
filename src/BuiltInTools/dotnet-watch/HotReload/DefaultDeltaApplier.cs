@@ -74,7 +74,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public Task<ImmutableArray<string>> GetApplyUpdateCapabilitiesAsync(DotNetWatchContext context, CancellationToken cancellationToken)
             => _capabilities ?? Task.FromResult(ImmutableArray<string>.Empty);
 
-        public async ValueTask<bool> Apply(DotNetWatchContext context, string changedFile, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
+        public async ValueTask<bool> Apply(DotNetWatchContext context, ImmutableArray<WatchHotReloadService.Update> solutionUpdate, CancellationToken cancellationToken)
         {
             if (_connectionTask is null || !_connectionTask.IsCompletedSuccessfully || _pipe is null || !_pipe.IsConnected)
             {
@@ -85,7 +85,6 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             var payload = new UpdatePayload
             {
-                ChangedFile = changedFile,
                 Deltas = ImmutableArray.CreateRange(solutionUpdate, c => new UpdateDelta
                 {
                     ModuleId = c.ModuleId,

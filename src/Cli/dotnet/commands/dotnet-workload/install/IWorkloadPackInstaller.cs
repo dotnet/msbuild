@@ -5,6 +5,7 @@ using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using System.Collections.Generic;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -12,12 +13,14 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
     {
         void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
+        void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
+
         void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand);
 
         void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath offlineCache, bool includePreviews);
 
         void GarbageCollectInstalledWorkloadPacks();
 
-        IEnumerable<(string Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
+        IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
     }
 }

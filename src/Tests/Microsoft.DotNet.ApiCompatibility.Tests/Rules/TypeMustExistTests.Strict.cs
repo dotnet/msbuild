@@ -30,8 +30,10 @@ namespace CompatTests
 {
   public class First { }
   public class Second { }
-  public record MyRecord(string a, string b);
   public struct MyStruct { }
+#if !NETFRAMEWORK
+  public record MyRecord(string a, string b);
+#endif
 }
 ";
 
@@ -46,8 +48,10 @@ namespace CompatTests
             CompatDifference[] expected = new[]
             {
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.Second"),
-                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.MyRecord"),
                 new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.MyStruct"),
+#if !NETFRAMEWORK
+                new CompatDifference(DiagnosticIds.TypeMustExist, string.Empty, DifferenceType.Added, "T:CompatTests.MyRecord"),
+#endif
             };
 
             Assert.Equal(expected, differences, CompatDifferenceComparer.Default);
@@ -70,14 +74,14 @@ namespace CompatTests
 ";
 
             string rightSyntax = @"
-[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(CompatTests.ForwardedTestType))];
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(CompatTests.ForwardedTestType))]
 namespace CompatTests
 {
   public class First { }
 }
 ";
             IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntax(leftSyntax);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntaxWithReferences(rightSyntax, new[] { forwardedTypeSyntax }, includeDefaultReferences: true);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntaxWithReferences(rightSyntax, new[] { forwardedTypeSyntax });
             ApiComparer differ = new();
             differ.StrictMode = true;
             IEnumerable<CompatDifference> differences = differ.GetDifferences(left, right);
@@ -107,8 +111,8 @@ namespace CompatTests
 }
 ";
             IEnumerable<string> references = new[] { forwardedTypeSyntax };
-            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references, includeDefaultReferences: true);
-            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references, includeDefaultReferences: true);
+            IAssemblySymbol left = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references);
+            IAssemblySymbol right = SymbolFactory.GetAssemblyFromSyntaxWithReferences(syntax, references);
             ApiComparer differ = new();
             differ.StrictMode = true;
             Assert.Empty(differ.GetDifferences(new[] { left }, new[] { right }));
@@ -148,7 +152,9 @@ namespace CompatTests
             string leftSyntax = @"
 namespace CompatTests
 {
+#if !NETFRAMEWORK
   public record First(string a, string b);
+#endif
 }
 ";
 
@@ -156,7 +162,9 @@ namespace CompatTests
 
 namespace CompatTests
 {
+#if !NETFRAMEWORK
   public record First(string a, string b);
+#endif
   public class Second { }
   public class Third { }
   public class Fourth { }
@@ -411,7 +419,7 @@ namespace CompatTests
             IEnumerable<string> references = new[] { forwardedTypeSyntax };
             ElementContainer<IAssemblySymbol> left =
                 new(SymbolFactory.GetAssemblyFromSyntax(leftSyntax), new MetadataInformation(string.Empty, string.Empty, "ref"));
-            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references, includeDefaultReferences: true);
+            IList<ElementContainer<IAssemblySymbol>> right = SymbolFactory.GetElementContainersFromSyntaxes(rightSyntaxes, references);
 
             ApiComparer differ = new();
             differ.StrictMode = true;

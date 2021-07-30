@@ -8,13 +8,13 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class WorkloadRepairCommandParser
     {
-        public static readonly Option ConfigOption = WorkloadInstallCommandParser.ConfigOption;
+        public static readonly Option<string> ConfigOption = WorkloadInstallCommandParser.ConfigOption;
 
-        public static readonly Option SourceOption = WorkloadInstallCommandParser.SourceOption;
+        public static readonly Option<string[]> SourceOption = WorkloadInstallCommandParser.SourceOption;
 
-        public static readonly Option VersionOption = WorkloadInstallCommandParser.VersionOption;
+        public static readonly Option<string> VersionOption = WorkloadInstallCommandParser.VersionOption;
 
-        public static readonly Option VerbosityOption = CommonOptions.VerbosityOption();
+        public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
         public static Command GetCommand()
         {

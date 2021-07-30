@@ -38,6 +38,7 @@ sdk-options:
   build             {LocalizableStrings.BuildDefinition}
   build-server      {LocalizableStrings.BuildServerDefinition}
   clean             {LocalizableStrings.CleanDefinition}
+  format            {LocalizableStrings.FormatDefinition}
   help              {LocalizableStrings.HelpDefinition}
   list              {LocalizableStrings.ListDefinition}
   msbuild           {LocalizableStrings.MsBuildDefinition}

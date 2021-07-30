@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
       dotnet [options] sdk check
     
     Options:
-      -?, -h, --help    Show help and usage information";
+      -?, -h, --help    Show command line help.";
 
         public GivenDotnetSdkCheck(ITestOutputHelper log) : base(log)
         {
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
         [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { }, new string[] { "2.1.302", "2.1.811", "3.1.404" })]
         [InlineData(new string[] { }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "2.1.23", "3.1.10" })]
         [InlineData(new string[] { "1.1.10", "2.1.300", "2.1.810", "3.1.400" }, new string[] { "1.1.10", "2.1.20", "3.1.0" }, new string[] { "2.1.302", "2.1.811", "3.1.404", "2.1.23", "3.1.10" })]
-        public void WhenANewPatchIsAvaliableItIsAdvertised(string[] sdkVersions, string[] runtimeVersions, string[] latestPatchVersions)
+        public void WhenANewPatchIsAvailableItIsAdvertised(string[] sdkVersions, string[] runtimeVersions, string[] latestPatchVersions)
         {
             var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "sdk", "check" });
             var bundles = GetFakeEnvironmentInfo(sdkVersions, runtimeVersions);
@@ -117,7 +117,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
             new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), new MockProductCollectionProvider(fakeReleasesPath), _reporter).Execute();
 
             var commandResult = string.Join(' ', _reporter.Lines);
-            var expectedLines = latestPatchVersions.Select(version => string.Format(LocalizableStrings.NewPatchAvaliableMessage, version));
+            var expectedLines = latestPatchVersions.Select(version => string.Format(LocalizableStrings.NewPatchAvailableMessage, version));
             foreach (var line in expectedLines)
             {
                 commandResult

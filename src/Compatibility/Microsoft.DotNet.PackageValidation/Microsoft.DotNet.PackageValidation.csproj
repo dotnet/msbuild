@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <IsShippingPackage>true</IsShippingPackage>
     <StrongNameKeyId>Open</StrongNameKeyId>
@@ -15,6 +15,7 @@
     <Compile Include="..\..\Tasks\Common\**\*.cs" LinkBase="Common" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
+    <!-- We carry NuGet as part of the package in case the package is used with an older SDKs or with full framework MSBuild. -->
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="NuGet.Packaging" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="NuGet.Protocol" Version="$(NuGetBuildTasksPackageVersion)" />
@@ -33,6 +34,10 @@
   <ItemGroup>
     <None Include="**/*.props;**/*.targets" Pack="true">
       <PackagePath>%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+    </None>
+    <None Include="..\..\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.Compatibility.Common.targets" Pack="true" >
+      <Link>build/Microsoft.NET.Compatibility.Common.targets</Link>
+      <PackagePath>build/%(Filename)%(Extension)</PackagePath>
     </None>
   </ItemGroup>
 
@@ -81,7 +86,8 @@
   <Target Name="_AddBuildOutputToPackageDesktop" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <ItemGroup>
       <!-- Include .NET Framework build outputs in the package under tools directory. -->
-      <TfmSpecificPackageFile Include="$(OutputPath)**" PackagePath="tools/$(TargetFramework)/%(RecursiveDir)%(FileName)%(Extension)"/>
+      <TfmSpecificPackageFile Include="$(OutputPath)**" 
+                              PackagePath="tools/$(TargetFramework)/%(RecursiveDir)%(FileName)%(Extension)" />
     </ItemGroup>
   </Target>
 

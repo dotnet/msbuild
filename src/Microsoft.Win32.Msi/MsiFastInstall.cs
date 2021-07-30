@@ -13,7 +13,7 @@ namespace Microsoft.Win32.Msi
     /// The property is only available in Windows Installer 5.0 or later.
     /// </remarks>
     [Flags]
-    public enum MsiFastInstall
+    public enum MsiFastInstall : int
     {
         /// <summary>
         /// No operations are skipped.

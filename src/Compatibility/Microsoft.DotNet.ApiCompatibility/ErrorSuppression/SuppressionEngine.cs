@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace Microsoft.DotNet.Compatibility.ErrorSuppression
@@ -66,13 +68,14 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 {
                     return true;
                 }
-                else
+                else if (error.DiagnosticId == null || error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    // See if the error is globally suppressed by checking if the same diagnosticid and target are entered
-                    // without any left and right.
-                    return (error.DiagnosticId == null || error.DiagnosticId.StartsWith("cp", StringComparison.InvariantCultureIgnoreCase)) &&
-                            _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Target = error.Target });
+                    // See if the error is globally suppressed by checking if the same diagnosticid and target or with the same left and right
+                    return _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Target = error.Target, IsBaselineSuppression = error.IsBaselineSuppression}) ||
+                           _validationSuppressions.Contains(new Suppression { DiagnosticId = error.DiagnosticId, Left = error.Left, Right = error.Right, IsBaselineSuppression = error.IsBaselineSuppression });
                 }
+
+                return false;
             }
             finally
             {
@@ -139,7 +142,10 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                 _readerWriterLock.EnterReadLock();
                 try
                 {
-                    _serializer.Serialize(writer, _validationSuppressions.ToArray());
+                    XmlTextWriter xmlWriter = new XmlTextWriter(writer, Encoding.UTF8);
+                    xmlWriter.Formatting = Formatting.Indented;
+                    xmlWriter.Indentation = 2;
+                    _serializer.Serialize(xmlWriter, _validationSuppressions.ToArray());
                     AfterWrittingSuppressionsCallback(writer);
                 }
                 finally

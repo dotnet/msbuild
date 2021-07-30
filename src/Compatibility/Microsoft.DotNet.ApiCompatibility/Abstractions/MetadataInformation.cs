@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -14,12 +15,14 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
         public readonly string AssemblyName;
         public readonly string TargetFramework;
         public readonly string AssemblyId;
+        public readonly string DisplayString;
 
-        public MetadataInformation(string name, string targetFramework, string assemblyId)
+        public MetadataInformation(string name, string targetFramework, string assemblyId, string displayString = null)
         {
             AssemblyName = name ?? string.Empty;
             TargetFramework = targetFramework ?? string.Empty;
             AssemblyId = assemblyId ?? string.Empty;
+            DisplayString = displayString ?? assemblyId;
         }
 
         public bool Equals(MetadataInformation other) =>
@@ -27,6 +30,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             string.Equals(TargetFramework, other.TargetFramework, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(AssemblyId, other.AssemblyId, StringComparison.Ordinal);
 
-        public override int GetHashCode() => HashCode.Combine(AssemblyName, TargetFramework, AssemblyId);
+        public override int GetHashCode()
+        {
+            int hashCode = 1447485498;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssemblyName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TargetFramework);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssemblyId);
+            return hashCode;
+        }
     }
 }

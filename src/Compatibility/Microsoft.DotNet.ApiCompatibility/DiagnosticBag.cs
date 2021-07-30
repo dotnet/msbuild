@@ -28,7 +28,11 @@ namespace Microsoft.DotNet.ApiCompatibility
 
         public DiagnosticBag(IEnumerable<string> noWarn, (string diagnosticId, string referenceId)[] ignoredDifferences)
         {
-            _noWarn = new HashSet<string>(noWarn);
+            if (noWarn != null)
+                _noWarn = new HashSet<string>(noWarn);
+            else
+                _noWarn = new HashSet<string>();
+
             _ignore = new Dictionary<string, HashSet<string>>();
 
             if (ignoredDifferences != null)

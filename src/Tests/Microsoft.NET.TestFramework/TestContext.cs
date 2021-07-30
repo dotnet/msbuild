@@ -218,7 +218,7 @@ namespace Microsoft.NET.TestFramework
         {
             string directory = AppContext.BaseDirectory;
 
-            while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
+            while (directory != null && !Directory.Exists(Path.Combine(directory, ".git")))
             {
                 directory = Directory.GetParent(directory)?.FullName;
             }

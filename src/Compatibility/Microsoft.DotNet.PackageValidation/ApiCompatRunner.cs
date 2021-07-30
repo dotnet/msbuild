@@ -1,10 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.ApiCompatibility;
@@ -18,75 +18,108 @@ namespace Microsoft.DotNet.PackageValidation
     /// </summary>
     public class ApiCompatRunner
     {
-        private List<(string leftAssemblyPackagePath, string leftAssemblyRelativePath, string rightAssemblyPackagePath, string rightAssemblyRelativePath, string assemblyName, string compatibilityReason, string header)> _queue = new();
+        private Dictionary<MetadataInformation, List<(MetadataInformation rightAssembly, string header)>> _dict = new();
         private readonly ApiComparer _differ = new();
         private readonly IPackageLogger _log;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, IPackageLogger log)
+        private bool _isBaselineSuppression = false;
+        private string _leftPackagePath;
+        private string _rightPackagePath;
+
+        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, IPackageLogger log)
         {
             _differ.NoWarn = noWarn;
             _differ.IgnoredDifferences = ignoredDifferences;
+            _differ.StrictMode = enableStrictMode;
             _log = log;
         }
 
         /// <summary>
-        /// Runs the api compat for the tuples in the queue.
+        /// Runs the api compat for the tuples in the dictionary.
         /// </summary>
         public void RunApiCompat()
         {
-            foreach (var apicompatTuples in _queue.Distinct())
+            foreach (MetadataInformation left in _dict.Keys)
             {
-                // TODO: Add optimisations tuples.
-                using (Stream leftAssemblyStream = GetFileStreamFromPackage(apicompatTuples.leftAssemblyPackagePath, apicompatTuples.leftAssemblyRelativePath))
-                using (Stream rightAssemblyStream = GetFileStreamFromPackage(apicompatTuples.rightAssemblyPackagePath, apicompatTuples.rightAssemblyRelativePath))
+                IAssemblySymbol leftSymbols;
+                using(Stream leftAssemblyStream = GetFileStreamFromPackage(_leftPackagePath, left.AssemblyId))
                 {
-                    IAssemblySymbol leftSymbols = new AssemblySymbolLoader().LoadAssembly(apicompatTuples.assemblyName, leftAssemblyStream);
-                    IAssemblySymbol rightSymbols = new AssemblySymbolLoader().LoadAssembly(apicompatTuples.assemblyName, rightAssemblyStream);
+                    leftSymbols = new AssemblySymbolLoader().LoadAssembly(left.AssemblyName, leftAssemblyStream);
+                }
+                ElementContainer<IAssemblySymbol> leftContainer = new(leftSymbols, left);
 
-                    _log.LogMessage(MessageImportance.Low, apicompatTuples.header);
-
-                    string leftName = apicompatTuples.leftAssemblyRelativePath;
-                    bool isBaselineSuppression = false;
-                    if (!apicompatTuples.leftAssemblyPackagePath.Equals(apicompatTuples.rightAssemblyPackagePath, System.StringComparison.InvariantCultureIgnoreCase))
+                List<ElementContainer<IAssemblySymbol>> rightContainerList = new();
+                foreach (var rightTuple in _dict[left])
+                {
+                    IAssemblySymbol rightSymbols;
+                    using (Stream rightAssemblyStream = GetFileStreamFromPackage(_rightPackagePath, rightTuple.rightAssembly.AssemblyId))
                     {
-                        isBaselineSuppression = true;
-                        leftName = Resources.Baseline + " " + leftName;
+                        rightSymbols = new AssemblySymbolLoader().LoadAssembly(rightTuple.rightAssembly.AssemblyName, rightAssemblyStream);
                     }
+                    rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightTuple.rightAssembly));
+                }
 
-                    IEnumerable<CompatDifference> differences = _differ.GetDifferences(leftSymbols, rightSymbols, leftName: leftName, rightName: apicompatTuples.rightAssemblyRelativePath);
+                IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
+                    _differ.GetDifferences(leftContainer, rightContainerList);
 
-                    foreach (CompatDifference difference in differences)
+                int counter = 0;
+                foreach ((MetadataInformation, MetadataInformation, IEnumerable<CompatDifference> differences) diff in differences)
+                {
+                    (MetadataInformation rightAssembly, string header) rightTuple = _dict[left][counter++];
+                    _log.LogMessage(MessageImportance.Low, rightTuple.header);
+
+                    foreach (CompatDifference difference in diff.differences)
                     {
                         _log.LogError(
                             new Suppression
                             {
                                 DiagnosticId = difference.DiagnosticId,
                                 Target = difference.ReferenceId,
-                                Left = apicompatTuples.leftAssemblyRelativePath,
-                                Right = apicompatTuples.rightAssemblyRelativePath,
-                                IsBaselineSuppression = isBaselineSuppression
+                                Left = left.AssemblyId,
+                                Right = rightTuple.rightAssembly.AssemblyId,
+                                IsBaselineSuppression = _isBaselineSuppression
                             },
                             difference.DiagnosticId,
                             difference.Message);
                     }
                 }
             }
-            _queue.Clear();
+            _dict.Clear();
         }
 
         /// <summary>
         /// Queues the api compat for 2 assemblies.
         /// </summary>
-        /// <param name="leftPackagePath">Path to package containing left assembly.</param>
-        /// <param name="leftRelativePath">Relative left assembly path in package.</param>
-        /// <param name="rightPackagePath">Path to package containing right assembly.</param>
-        /// <param name="rightRelativePath">Relative right assembly path in package.</param>
-        /// <param name="assemblyName">The name of the assembly.</param>
-        /// <param name="compatibilityReason">The reason for assembly compatibilty.</param>
+        /// <param name="leftMetadataInfo">Metadata information for left assembly.</param>
+        /// <param name="rightMetdataInfo">Metadata information for right assembly.</param>
         /// <param name="header">The header for the api compat diagnostics.</param>
-        public void QueueApiCompat(string leftPackagePath, string leftRelativePath, string rightPackagePath, string rightRelativePath, string assemblyName, string compatibilityReason, string header)
+        public void QueueApiCompat(MetadataInformation leftMetadataInfo, MetadataInformation rightMetdataInfo, string header)
         {
-            _queue.Add((leftPackagePath, leftRelativePath, rightPackagePath, rightRelativePath, assemblyName, compatibilityReason, header));
+            if (_dict.ContainsKey(leftMetadataInfo))
+            {
+                _dict[leftMetadataInfo].Add((rightMetdataInfo, header));
+            }
+            else
+            {
+                _dict.Add(leftMetadataInfo, new List<(MetadataInformation rightAssembly, string header)>() { (rightMetdataInfo, header) });
+            }
+        }
+
+        internal void InitializePaths(string leftPackagePath, string rightPackagePath)
+        {
+            if (string.IsNullOrEmpty(leftPackagePath))
+                throw new ArgumentException(nameof(leftPackagePath));
+
+            if (string.IsNullOrEmpty(rightPackagePath))
+                throw new ArgumentException(nameof(rightPackagePath));
+
+            _leftPackagePath = leftPackagePath;
+            _rightPackagePath = rightPackagePath;
+
+            if (!_leftPackagePath.Equals(rightPackagePath, StringComparison.InvariantCultureIgnoreCase))
+            {
+                _isBaselineSuppression = true;
+            }
         }
 
         private static Stream GetFileStreamFromPackage(string packagePath, string entry)

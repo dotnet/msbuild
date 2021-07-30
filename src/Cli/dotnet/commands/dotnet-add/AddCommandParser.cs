@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class AddCommandParser
     {
-        public static readonly Argument ProjectArgument = new Argument<string>(CommonLocalizableStrings.ProjectArgumentName)
+        public static readonly Argument<string> ProjectArgument = new Argument<string>(CommonLocalizableStrings.ProjectArgumentName)
         {
             Description = CommonLocalizableStrings.ProjectArgumentDescription
         }.DefaultToCurrentDirectory();

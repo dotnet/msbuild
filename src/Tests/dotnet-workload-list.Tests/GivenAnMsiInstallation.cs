@@ -2,21 +2,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Runtime.Versioning;
 using System.IO;
 using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
-using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
 using Microsoft.Win32;
+using Microsoft.DotNet.Installer.Windows;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {
-#pragma warning disable CA1416
     [Collection("MsiWorkloadRecords")]
+    [SupportedOSPlatform("windows")]
     public class GivenAnMsiInstallation : IDisposable
     {
         // Override HKLM to HKCU so we can run tests without needing elevation
-        private static MsiWorkloadInstallationRecordManager RecordManager = new MsiWorkloadInstallationRecordManager(
+        private static RegistryWorkloadInstallationRecordRepository RecordManager = new RegistryWorkloadInstallationRecordRepository(
+            new TestElevationContext(),
+            null,
             Registry.CurrentUser,
             @"SOFTWARE\Microsoft\dotnet-test\InstalledWorkloads\Standalone");
 
@@ -72,5 +76,15 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             RecordManager.WriteWorkloadInstallationRecord(new WorkloadId(workloadId), new SdkFeatureBand(sdkFeatureBand));
         }
     }
-#pragma warning restore CA1416
+
+    internal class TestElevationContext : InstallElevationContextBase
+    {
+        public override bool IsClient => true;
+
+        public override bool IsElevated => true;
+
+        public override void Elevate()
+        {
+        }            
+    }
 }
