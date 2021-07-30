@@ -21,11 +21,14 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
 
         public List<(string, DirectoryPath)> ExtractCallParams = new List<(string, DirectoryPath)>();
 
-        public MockNuGetPackageDownloader(string dotnetRoot, bool manifestDownload = false)
+        public MockNuGetPackageDownloader(string dotnetRoot = null, bool manifestDownload = false)
         {
             _manifestDownload = manifestDownload;
-            _downloadPath = Path.Combine(dotnetRoot, "metadata", "temp");
-            Directory.CreateDirectory(_downloadPath);
+            _downloadPath = dotnetRoot == null ? string.Empty : Path.Combine(dotnetRoot, "metadata", "temp");
+            if (_downloadPath != string.Empty)
+            {
+                Directory.CreateDirectory(_downloadPath);
+            }
         }
 
         public Task<string> DownloadPackageAsync(PackageId packageId,
@@ -37,7 +40,10 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             DownloadCallParams.Add((packageId, packageVersion, downloadFolder, packageSourceLocation));
             var path = Path.Combine(_downloadPath, "mock.nupkg");
             DownloadCallResult.Add(path);
-            File.WriteAllText(path, string.Empty);
+            if (_downloadPath != string.Empty)
+            {
+                File.WriteAllText(path, string.Empty);
+            }
             return Task.FromResult(path);
         }
 

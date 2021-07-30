@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 '{1}' 도구('{2}' 버전)가 설치되었습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="new">The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">도구를 설치하고 로컬 도구 매니페스트에 추가합니다(기본값).</target>
