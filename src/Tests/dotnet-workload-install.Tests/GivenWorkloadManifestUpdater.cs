@@ -317,7 +317,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             Directory.CreateDirectory(Path.Combine(testInstance.Path, ".dotnet"));
             File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", ".workloadAdvertisingUpdates"), @"[""maui""]");
             // Don't check for updates again and overwrite our existing updates file
-            File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", "..workloadAdvertisingManifestSentinal"), string.Empty);
+            File.WriteAllText(Path.Combine(testInstance.Path, ".dotnet", ".workloadAdvertisingManifestSentinal"), string.Empty);
 
             var command = new DotnetCommand(Log);
             command
