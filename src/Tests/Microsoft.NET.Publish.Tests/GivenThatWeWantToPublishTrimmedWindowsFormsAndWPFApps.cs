@@ -21,12 +21,12 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_builds_windows_Forms_app_with_warning()
+        public void It_builds_windows_Forms_app_with_error()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WinformsBuildWarnPresentPassTest",
+                Name = "WinformsBuildErrorFailTest",
                 TargetFrameworks = targetFramework,
                 IsWinExe=true
             };
@@ -37,24 +37,24 @@ namespace Microsoft.NET.Publish.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
-                .Pass()
+                .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1175");
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_builds_windows_Forms_app_with_warning_suppressed()
+        public void It_builds_windows_Forms_app_with_error_suppressed()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WinformsBuildWarnSuppressPassTest",
+                Name = "WinformsBuildErrorSuppressPassTest",
                 TargetFrameworks = targetFramework,
                 IsWinExe = true
             };
             testProject.AdditionalProperties["UseWindowsForms"] = "true";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
-            testProject.AdditionalProperties["NoWarn"] = "NETSDK1175";
+            testProject.AdditionalProperties["_SuppressWinFormsTrimError"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -67,12 +67,12 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_publishes_windows_Forms_app_with_warning()
+        public void It_publishes_windows_Forms_app_with_error()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WinformsWarnPresentPassTest",
+                Name = "WinformsErrorPresentFailTest",
                 TargetFrameworks = targetFramework,
                 IsWinExe = true
             };
@@ -85,18 +85,18 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute()
                 .Should()
-                .Pass()
+                .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1175");
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_publishes_windows_Forms_app_with_warning_suppressed()
+        public void It_publishes_windows_Forms_app_with_error_suppressed()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WinformsWarnSuppressedPassTest",
+                Name = "WinformsErrorSuppressedPassTest",
                 TargetFrameworks = targetFramework,
                 IsWinExe = true
             };
@@ -104,7 +104,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
-            testProject.AdditionalProperties["NoWarn"] = "NETSDK1175";
+            testProject.AdditionalProperties["_SuppressWinFormsTrimError"] = "true";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
@@ -118,12 +118,12 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_builds_wpf_app_with_warning()
+        public void It_builds_wpf_app_with_error()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WpfWarnPresentPassTest",
+                Name = "WpfErrorPresentFailTest",
                 TargetFrameworks = targetFramework,
                 IsWinExe = true
             };
@@ -134,24 +134,24 @@ namespace Microsoft.NET.Publish.Tests
             var buildCommand = new BuildCommand(testAsset);
             buildCommand.Execute()
                 .Should()
-                .Pass()
+                .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1168");
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_builds_wpf_app_with_warning_Suppressed()
+        public void It_builds_wpf_app_with_error_suppressed()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WpfWarnSuppressedPassTest",
+                Name = "WpfErrorSuppressedPassTest",
                 TargetFrameworks = targetFramework,
                 IsWinExe = true
             };
             testProject.AdditionalProperties["UseWPF"] = "true";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
-            testProject.AdditionalProperties["NoWarn"] = "NETSDK1168";
+            testProject.AdditionalProperties["_SuppressWpfTrimError"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
 
             var buildCommand = new BuildCommand(testAsset);
@@ -163,14 +163,13 @@ namespace Microsoft.NET.Publish.Tests
                 .NotHaveStdOutContaining(Strings.@TrimmingWpfIsNotSupported);
         }
 
-
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_publishes_wpf_app_with_warning()
+        public void It_publishes_wpf_app_with_error()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
             {
-                Name = "WpfWarnPresentPassTest",
+                Name = "WpfErrorPresentPassTest",
                 TargetFrameworks = targetFramework,
                 IsWinExe = true
             };
@@ -183,13 +182,13 @@ namespace Microsoft.NET.Publish.Tests
             var publishCommand = new PublishCommand(testAsset);
             publishCommand.Execute()
                 .Should()
-                .Pass()
+                .Fail()
                 .And
                 .HaveStdOutContaining("NETSDK1168");
         }
 
         [WindowsOnlyRequiresMSBuildVersionFact("17.0.0.32901")]
-        public void It_publishes_wpf_app_with_warning_Suppressed()
+        public void It_publishes_wpf_app_with_error_Suppressed()
         {
             var targetFramework = "net6.0-windows";
             TestProject testProject = new TestProject()
@@ -201,7 +200,7 @@ namespace Microsoft.NET.Publish.Tests
             testProject.AdditionalProperties["UseWPF"] = "true";
             testProject.AdditionalProperties["SelfContained"] = "true";
             testProject.AdditionalProperties["RuntimeIdentifier"] = "win-x64";
-            testProject.AdditionalProperties["NoWarn"] = "NETSDK1168";
+            testProject.AdditionalProperties["_SuppressWpfTrimError"] = "true";
             testProject.AdditionalProperties["SuppressTrimAnalysisWarnings"] = "false";
             testProject.AdditionalProperties["PublishTrimmed"] = "true";
             var testAsset = _testAssetsManager.CreateTestProject(testProject);

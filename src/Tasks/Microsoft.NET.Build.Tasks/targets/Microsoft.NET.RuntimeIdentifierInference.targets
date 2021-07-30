@@ -169,11 +169,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                    ResourceName="PublishTrimmedRequiresVersion30" />
 
     <!-- Generate Trimming warnings for WinForms and Wpf applications-->
-    <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
+    <NetSdkError Condition="('$(UseWindowsForms)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWinFormsTrimError)' != 'true')"
                  ResourceName="TrimmingWindowsFormsIsNotSupported" />
-    <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
+    <NetSdkError Condition="('$(UseWpf)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWpfTrimError)' != 'true')"
                  ResourceName="TrimmingWpfIsNotSupported" />
-    
+
   </Target>
 
   <Target Name="_CheckForUnsupportedHostingUsage"
