@@ -55,8 +55,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _toolPackageStore = toolPackageStoreMock;
             _toolPackageStoreQuery = toolPackageStoreMock;
             _createShellShimRepository =
-                (nonGlobalLocation, _) => new ShellShimRepository(
+                (_, nonGlobalLocation) => new ShellShimRepository(
                     new DirectoryPath(_pathToPlaceShim),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem),
                     filePermissionSetter: new NoOpFilePermissionSetter());

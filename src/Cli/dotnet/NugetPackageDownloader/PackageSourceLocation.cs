@@ -17,7 +17,9 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         {
             NugetConfig = nugetConfig;
             RootConfigDirectory = rootConfigDirectory;
+            // Overrides other feeds
             SourceFeedOverrides = ExpandLocalFeed(sourceFeedOverrides);
+            // Feeds to be using in addition to config
             AdditionalSourceFeed = ExpandLocalFeed(additionalSourceFeeds);
         }
 

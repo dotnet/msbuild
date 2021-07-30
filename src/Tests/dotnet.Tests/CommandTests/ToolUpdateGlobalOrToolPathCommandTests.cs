@@ -311,6 +311,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         {
             return new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem));
         }

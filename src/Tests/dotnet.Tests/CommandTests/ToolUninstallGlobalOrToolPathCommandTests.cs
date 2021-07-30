@@ -147,6 +147,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 CreateToolPackageStoreAndUninstaller,
                 (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _reporter);
@@ -247,6 +248,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 (location, forwardArguments) => (store, store, packageInstallerMock),
                 (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _environmentPathInstructionMock,
@@ -272,6 +274,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                 createToolPackageStoreAndUninstaller,
                 (_, _) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _reporter);

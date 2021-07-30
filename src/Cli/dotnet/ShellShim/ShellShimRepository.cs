@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.ShellShim
 
         public ShellShimRepository(
             DirectoryPath shimsDirectory,
-            string appHostSourceDirectory = null,
+            string appHostSourceDirectory,
             IFileSystem fileSystem = null,
             IAppHostShellShimMaker appHostShellShimMaker = null,
             IFilePermissionSetter filePermissionSetter = null)

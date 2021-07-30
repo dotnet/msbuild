@@ -22,7 +22,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null, string appHostSourceDirectory = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
 		DirectoryPath? nonGlobalLocation = null,
 		IEnumerable<string> forwardRestoreArguments = null);
@@ -116,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageInstaller toolPackageInstaller) =
                 _createToolPackageStoresAndInstaller(toolPath, _forwardRestoreArguments);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath, appHostSourceDirectory);
+            IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolPath);
 
             // Prevent installation if any version of the package is installed
             if (toolPackageStoreQuery.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)

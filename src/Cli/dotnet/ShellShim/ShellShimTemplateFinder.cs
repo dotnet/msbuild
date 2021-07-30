@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ShellShim
                 else
                 {
                     // Use the default app host
-                    return null;
+                    return GetDefaultAppHostSourceDirectory();
                 }
             }
             else
@@ -64,6 +64,11 @@ namespace Microsoft.DotNet.ShellShim
             var content = await _nugetPackageDownloader.ExtractPackageAsync(packagePath, _tempDir);
 
             return Path.Combine(_tempDir.Value, "runtimes", rid, "native");
+        }
+
+        public static string GetDefaultAppHostSourceDirectory()
+        {
+            return Path.Combine(AppContext.BaseDirectory, "AppHostTemplate");
         }
     }
 }
