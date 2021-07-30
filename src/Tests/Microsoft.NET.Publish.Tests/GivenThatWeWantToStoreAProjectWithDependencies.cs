@@ -314,7 +314,7 @@ namespace Microsoft.NET.Publish.Tests
                 IsExe = isExe,
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "12.0.1"));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: isExe.ToString());
 
@@ -335,7 +335,7 @@ namespace Microsoft.NET.Publish.Tests
 
             new DirectoryInfo(outputFolder).Should().OnlyHaveFiles(new List<string> {
                "artifact.xml",
-               "newtonsoft.json/12.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
+               "newtonsoft.json/13.0.1/lib/netstandard2.0/Newtonsoft.Json.dll",
             });
         }
 

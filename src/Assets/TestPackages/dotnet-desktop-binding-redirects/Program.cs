@@ -11,7 +11,7 @@ namespace BindingRedirects
 {
     public class Program
     {
-        private const string ExpectedNewtonSoftVersion = "8.0.0.0";
+        private const string ExpectedNewtonSoftVersion = "13.0.1.0";
 
         public static int Main(string[] args)
         {
