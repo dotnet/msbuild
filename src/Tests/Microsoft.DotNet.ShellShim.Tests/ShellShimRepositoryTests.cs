@@ -498,6 +498,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         {
             return new ShellShimRepository(
                     new DirectoryPath(pathToShim),
+                    string.Empty,
                     appHostShellShimMaker: new AppHostShellShimMakerMock());
         }
     }

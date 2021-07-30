@@ -1,6 +1,7 @@
 setTimeout(async function () {
   // dotnet-watch browser reload script
   const webSocketUrls = '{{hostString}}'.split(',');
+  const sharedSecret = await getSecret('{{ServerKey}}');
   let connection;
   for (const url of webSocketUrls) {
     try {
@@ -35,7 +36,7 @@ setTimeout(async function () {
       const payload = JSON.parse(message.data);
       const action = {
         'UpdateStaticFile': () => updateStaticFile(payload.path),
-        'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.deltas),
+        'BlazorHotReloadDeltav1': () => applyBlazorDeltas(payload.sharedSecret, payload.deltas),
         'HotReloadDiagnosticsv1': () => displayDiagnostics(payload.diagnostics),
         'BlazorRequestApplyUpdateCapabilities': getBlazorWasmApplyUpdateCapabilities,
         'AspNetCoreHotReloadApplied': () => aspnetCoreHotReloadApplied()
@@ -115,7 +116,13 @@ setTimeout(async function () {
     styleElement.parentNode.insertBefore(newElement, styleElement.nextSibling);
   }
 
-  function applyBlazorDeltas(deltas) {
+  function applyBlazorDeltas(serverSecret, deltas) {
+    if (sharedSecret && (serverSecret != sharedSecret.encodedSharedSecret)) {
+      // Validate the shared secret if it was specified. It might be unspecified in older versions of VS
+      // that do not support this feature as yet.
+      throw 'Unable to validate the server. Rejecting apply-update payload.';
+    }
+
     let applyFailed = false;
     deltas.forEach(d => {
       try {
@@ -187,9 +194,37 @@ setTimeout(async function () {
     connection.send(new Uint8Array([0]).buffer);
   }
 
+  async function getSecret(serverKeyString) {
+    if (!serverKeyString || !window.crypto || !window.crypto.subtle) {
+      return null;
+    }
+
+    const secretBytes = window.crypto.getRandomValues(new Uint8Array(32)); // 32-bytes of entropy
+
+    // Based on https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#subjectpublickeyinfo_import
+    const binaryServerKey = str2ab(atob(serverKeyString));
+    const serverKey = await window.crypto.subtle.importKey('spki', binaryServerKey, { name: "RSA-OAEP", hash: "SHA-256" }, false, ['encrypt']);
+    const encrypted = await window.crypto.subtle.encrypt({ name: 'RSA-OAEP' }, serverKey, secretBytes);
+    return {
+      encryptedSharedSecret: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
+      encodedSharedSecret: btoa(String.fromCharCode(...secretBytes)),
+    };
+
+    function str2ab(str) {
+      const buf = new ArrayBuffer(str.length);
+      const bufView = new Uint8Array(buf);
+      for (let i = 0, strLen = str.length; i < strLen; i++) {
+        bufView[i] = str.charCodeAt(i);
+      }
+      return buf;
+    }
+  }
+
   function getWebSocket(url) {
     return new Promise((resolve, reject) => {
-      const webSocket = new WebSocket(url);
+      const encryptedSecret = sharedSecret && sharedSecret.encryptedSharedSecret;
+      const protocol = encryptedSecret ? encodeURIComponent(encryptedSecret) : null;
+      const webSocket = new WebSocket(url, protocol);
       let opened = false;
 
       function onOpen() {

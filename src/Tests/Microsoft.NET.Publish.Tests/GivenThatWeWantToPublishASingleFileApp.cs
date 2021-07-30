@@ -8,6 +8,8 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using System.Linq;
+using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using System;
@@ -281,48 +283,53 @@ namespace Microsoft.NET.Publish.Tests
         }
 
 
-        [RequiresMSBuildVersionTheory("17.0.0.32901",
-            Skip = "Failing on unextracted singlefile. Possibly related to https://github.com/dotnet/runtime/issues/45277.")]
+        [RequiresMSBuildVersionTheory("17.0.0.32901")]
         [InlineData(true)]
         [InlineData(false)]
         public void It_supports_composite_r2r(bool extractAll)
         {
-            var projName = "SingleFileTest";
-            if (extractAll)
+            // the test fails once in a while on OSX, but dumps are not very informative,
+            // so enabling this for non-OSX platforms, hoping to get a better crash dump
+            // if you see this failing on Linux, please preserve the dump.
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                projName += "Extracted";
+                var projName = "SingleFileTest";
+                if (extractAll)
+                {
+                    projName += "Extracted";
+                }
+
+                var testProject = new TestProject()
+                {
+                    Name = projName,
+                    TargetFrameworks = "net6.0",
+                    IsExe = true,
+                };
+
+                var testAsset = _testAssetsManager.CreateTestProject(testProject);
+                var publishCommand = new PublishCommand(testAsset);
+                var extraArgs = new List<string>() { PublishSingleFile, ReadyToRun, ReadyToRunComposite, RuntimeIdentifier };
+
+                if (extractAll)
+                {
+                    extraArgs.Add(IncludeAllContent);
+                }
+
+                publishCommand
+                    .Execute(extraArgs.ToArray())
+                    .Should()
+                    .Pass();
+
+                var publishDir = GetPublishDirectory(publishCommand, targetFramework: "net6.0").FullName;
+                var singleFilePath = Path.Combine(publishDir, $"{testProject.Name}{Constants.ExeSuffix}");
+
+                var command = new RunExeCommand(Log, singleFilePath);
+                command.Execute()
+                    .Should()
+                    .Pass()
+                    .And
+                    .HaveStdOutContaining("Hello World");
             }
-
-            var testProject = new TestProject()
-            {
-                Name = projName,
-                TargetFrameworks = "net6.0",
-                IsExe = true,
-            };
-
-            var testAsset = _testAssetsManager.CreateTestProject(testProject);
-            var publishCommand = new PublishCommand(testAsset);
-            var extraArgs = new List<string>() { PublishSingleFile, ReadyToRun, ReadyToRunComposite, RuntimeIdentifier };
-
-            if (extractAll)
-            {
-                extraArgs.Add(IncludeAllContent);
-            }
-
-            publishCommand
-                .Execute(extraArgs.ToArray())
-                .Should()
-                .Pass();
-
-            var publishDir = GetPublishDirectory(publishCommand, targetFramework: "net6.0").FullName;
-            var singleFilePath = Path.Combine(publishDir, $"{testProject.Name}{Constants.ExeSuffix}");
-
-            var command = new RunExeCommand(Log, singleFilePath);
-            command.Execute()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
         }
 
         [RequiresMSBuildVersionFact("16.8.0")]
@@ -828,6 +835,126 @@ class C
             var compressedSize = new FileInfo(singleFilePath).Length;
 
             uncompressedSize.Should().Be(compressedSize);
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void User_can_get_bundle_info_before_bundling()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => VerifyPrepareForBundle(project));
+
+            var publishCommand = new PublishCommand(testAsset);
+            var singleFilePath = Path.Combine(GetPublishDirectory(publishCommand, "net6.0").FullName, $"SingleFileTest{Constants.ExeSuffix}");
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+
+            var command = new RunExeCommand(Log, singleFilePath);
+            command.Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
+
+            void VerifyPrepareForBundle(XDocument project)
+            {
+                var ns = project.Root.Name.Namespace;
+                var targetName = "CheckPrepareForBundleData";
+
+                var target = new XElement(ns + "Target",
+                        new XAttribute("Name", targetName),
+                        new XAttribute("BeforeTargets", "GenerateSingleFileBundle"),
+                        new XAttribute("DependsOnTargets", "PrepareForBundle"));
+
+                project.Root.Add(target);
+
+                //     <Error Condition = "'@(FilesToBundle->AnyHaveMetadataValue('RelativePath', 'System.Private.CoreLib.dll'))' != 'true'" Text="System.Private.CoreLib.dll is not in FilesToBundle list">
+                target.Add(
+                    new XElement(ns + "Error",
+                        new XAttribute("Condition", "'@(FilesToBundle->AnyHaveMetadataValue('RelativePath', 'System.Private.CoreLib.dll'))' != 'true'"),
+                        new XAttribute("Text", "System.Private.CoreLib.dll is not in FilesToBundle list")));
+
+
+                var host = $"SingleFileTest{Constants.ExeSuffix}";
+
+                //     <Error Condition="'$(AppHostFile)' != 'SingleFileTest.exe'" Text="AppHostFile expected to be: 'SingleFileTest.exe' actually: '$(AppHostFile)'" />
+                target.Add(
+                    new XElement(ns + "Error",
+                        new XAttribute("Condition", $"'$(AppHostFile)' != '{host}'"),
+                        new XAttribute("Text", $"AppHostFile expected to be: '{host}' actually: '$(AppHostFile)'")));
+            }
+        }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void User_can_move_file_before_bundling()
+        {
+            var testProject = new TestProject()
+            {
+                Name = "SingleFileTest",
+                TargetFrameworks = "net6.0",
+                IsExe = true,
+            };
+            testProject.AdditionalProperties.Add("SelfContained", "true");
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges(project => VerifyPrepareForBundle(project));
+
+            var publishCommand = new PublishCommand(testAsset);
+
+            publishCommand
+                .Execute(PublishSingleFile, RuntimeIdentifier)
+                .Should()
+                .Pass();
+
+            void VerifyPrepareForBundle(XDocument project)
+            {
+                var ns = project.Root.Name.Namespace;
+                var targetName = "CheckPrepareForBundleData";
+
+                var target = new XElement(ns + "Target",
+                        new XAttribute("Name", targetName),
+                        new XAttribute("BeforeTargets", "GenerateSingleFileBundle"),
+                        new XAttribute("DependsOnTargets", "PrepareForBundle"));
+
+                project.Root.Add(target);
+
+                // Rename SingleFileTest.dll --> SingleFileTest.dll.renamed
+                //
+                //     <Move
+                //         SourceFiles="@(FilesToBundle)"
+                //         DestinationFiles="@(FilesToBundle->'%(FullPath).renamed')"
+                //         Condition = "'%(FilesToBundle.RelativePath)' == 'SingleFileTest.dll'" />
+
+                target.Add(
+                    new XElement(ns + "Move",
+                        new XAttribute("SourceFiles", "@(FilesToBundle)"),
+                        new XAttribute("DestinationFiles", "@(FilesToBundle->'%(FullPath).renamed')"),
+                        new XAttribute("Condition", "'%(FilesToBundle.RelativePath)' == 'SingleFileTest.dll'")));
+
+                // Modify the FilesToBundle to not have SingleFileTest.dll, so that publish could pass.
+                //
+                //         <ItemGroup>
+                //              <FilesToBundle Remove="@(FilesToBundle)"
+                //              Condition="'%(FilesToBundle.RelativePath)' == 'SingleFileTest.dll'" />
+                //         </ItemGroup >
+                //
+
+                target.Add(
+                    new XElement(ns + "ItemGroup",
+                        new XElement(ns + "FilesToBundle",
+                            new XAttribute("Remove", "@(FilesToBundle)"),
+                            new XAttribute("Condition", "'%(FilesToBundle.RelativePath)' == 'SingleFileTest.dll'"))));
+            }
         }
     }
 }

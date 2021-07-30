@@ -44,7 +44,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 }
 
                 // If the build fails, we'll retry until we have a successful build.
-                context.ChangedFile = await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet..."));
+                await fileSetWatcher.GetChangedFileAsync(cancellationToken, () => _reporter.Warn("Waiting for a file to change before restarting dotnet..."));
             }
         }
     }

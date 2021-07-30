@@ -21,8 +21,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--output", "foo" }, "-property:OutputPath=<cwd>foo")]
         [InlineData(new string[] { "-o", "foo1 foo2" }, "\"-property:OutputPath=<cwd>foo1 foo2\"")]
         [InlineData(new string[] { "--no-incremental" }, "-target:Rebuild")]
-        [InlineData(new string[] { "-r", "rid" }, "-property:RuntimeIdentifier=rid")]
-        [InlineData(new string[] { "--runtime", "rid" }, "-property:RuntimeIdentifier=rid")]
+        [InlineData(new string[] { "-r", "rid" }, "-property:RuntimeIdentifier=rid -property:_CommandLineDefinedRuntimeIdentifier=true")]
+        [InlineData(new string[] { "--runtime", "rid" }, "-property:RuntimeIdentifier=rid -property:_CommandLineDefinedRuntimeIdentifier=true")]
         [InlineData(new string[] { "--use-current-runtime" }, "-property:UseCurrentRuntimeIdentifier=True")]
         [InlineData(new string[] { "-c", "config" }, "-property:Configuration=config")]
         [InlineData(new string[] { "--configuration", "config" }, "-property:Configuration=config")]
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-v", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         [InlineData(new string[] { "--no-incremental", "-o", "myoutput", "-r", "myruntime", "-v", "diag", "/ArbitrarySwitchForMSBuild" },
-                                  "-target:Rebuild -property:RuntimeIdentifier=myruntime -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild")]
+                                  "-target:Rebuild -property:RuntimeIdentifier=myruntime -property:_CommandLineDefinedRuntimeIdentifier=true -verbosity:diag -property:OutputPath=<cwd>myoutput /ArbitrarySwitchForMSBuild")]
         [InlineData(new string[] { "/t:CustomTarget" }, "/t:CustomTarget")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
@@ -84,7 +84,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                     .Should()
                     .Be($"{ExpectedPrefix} -nologo -consoleloggerparameters:Summary{expectedAdditionalArgs}");
             });
-
         }
     }
 }

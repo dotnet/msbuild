@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_BlazorWebAssemblySdkToolAssembly>$(BlazorWebAssemblySdkDirectoryRoot)tools\net6.0\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.dll</_BlazorWebAssemblySdkToolAssembly>
   </PropertyGroup>
 
-  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GenerateBlazorWebAssemblyBootJson" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GenerateBlazorWebAssemblyBootJson50" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BlazorWriteSatelliteAssemblyFile" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BlazorReadSatelliteAssemblyFile" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BrotliCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
@@ -288,7 +288,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Code="BLAZORSDK1001"
       Condition="'@(BlazorWebAssemblyLazyLoad)' != '' And !($([System.String]::Copy('$(_BlazorOutputContent)').Contains('%(BlazorWebAssemblyLazyLoad.Identity)')))" />
 
-    <GenerateBlazorWebAssemblyBootJson
+    <GenerateBlazorWebAssemblyBootJson50
       AssemblyPath="@(IntermediateAssembly)"
       Resources="@(_BlazorOutputWithHash)"
       DebugBuild="true"
@@ -531,7 +531,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Code="BLAZORSDK1001"
       Condition="'@(BlazorWebAssemblyLazyLoad)' != '' And !($([System.String]::Copy('$(_BlazorOutputContent)').Contains('%(BlazorWebAssemblyLazyLoad.Identity)')))" />
 
-    <GenerateBlazorWebAssemblyBootJson
+    <GenerateBlazorWebAssemblyBootJson50
       AssemblyPath="@(IntermediateAssembly)"
       Resources="@(_BlazorPublishBootResourceWithHash)"
       DebugBuild="false"

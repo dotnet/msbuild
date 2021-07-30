@@ -18,7 +18,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" Condition="'$(_RazorSdkImportsMicrosoftNetSdk)' == 'true'" />
 
   <PropertyGroup>
-    <RazorSdkCurrentVersionProps Condition="'$(RazorSdkCurrentVersionProps)' == ''">$(MSBuildThisFileDirectory)..\build\netstandard2.0\Sdk.Razor.CurrentVersion.props</RazorSdkCurrentVersionProps>
+    <RazorSdkCurrentVersionProps Condition="'$(RazorSdkCurrentVersionProps)' == ''">$(MSBuildThisFileDirectory)..\targets\Sdk.Razor.CurrentVersion.props</RazorSdkCurrentVersionProps>
   </PropertyGroup>
 
   <Import Project="$(RazorSdkCurrentVersionProps)" />

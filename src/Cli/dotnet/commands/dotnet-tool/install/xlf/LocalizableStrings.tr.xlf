@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 '{1}' aracı (sürüm '{2}') başarıyla yüklendi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="new">The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">Aracı yükle ve yerel araç bildirimine ekle (varsayılan).</target>

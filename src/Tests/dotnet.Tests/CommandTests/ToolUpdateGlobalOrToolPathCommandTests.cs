@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         _mockFeeds
                     )),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                (_) => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
 
             var toolUpdateCommand = new ToolUpdateCommand(
@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         ),
                         installCallback: () => throw new ToolConfigurationException("Simulated error")),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                _ => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
 
             Action a = () => command.Execute();
@@ -260,7 +260,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         ),
                         installCallback: () => throw new ToolConfigurationException("Simulated error")),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                _ => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
 
             Action a = () => command.Execute();
@@ -283,7 +283,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         _reporter,
                         _mockFeeds
                     ))),
-                (_) => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _environmentPathInstructionMock,
                 _reporter);
         }
@@ -303,7 +303,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
                         _mockFeeds
                     )),
                     new ToolPackageUninstallerMock(_fileSystem, _store)),
-                (_) => GetMockedShellShimRepository(),
+                (_, _) => GetMockedShellShimRepository(),
                 _reporter);
         }
 
@@ -311,6 +311,7 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         {
             return new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem));
         }

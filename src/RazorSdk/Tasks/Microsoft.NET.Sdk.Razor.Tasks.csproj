@@ -40,13 +40,13 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCorePackageVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition="'$(TargetFramework)'=='net472'" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonVersion)" Condition="'$(TargetFramework)'=='net472'" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftExtensionsFileSystemGlobbingPackageVersion)" />  
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MicrosoftExtensionsFileSystemGlobbingPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <AdditionalContent Include="$(RazorSdkRoot)Targets\**\*.*">
       <Pack>true</Pack>
-      <PackagePath>build\netstandard2.0</PackagePath>
+      <PackagePath>targets</PackagePath>
     </AdditionalContent>
     <AdditionalContent Include="$(RazorSdkRoot)Sdk\**\*.*">
       <Pack>true</Pack>
@@ -86,7 +86,7 @@
       <_FileSystemGlobbingContent Include ="@(_FileSystemGlobbing)" TargetPath="tasks\$(SdkTargetFramework)\%(_FileSystemGlobbing.Filename)%(_FileSystemGlobbing.Extension)" />
       <AdditionalContent Include="@(_FileSystemGlobbing)" PackagePath="tasks\$(SdkTargetFramework)" />
     </ItemGroup>
-    
+
     <Copy SourceFiles="@(_FileSystemGlobbingContent)" DestinationFiles="@(_FileSystemGlobbingContent->'$(PackageLayoutOutputPath)%(TargetPath)')">
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites" />
     </Copy>

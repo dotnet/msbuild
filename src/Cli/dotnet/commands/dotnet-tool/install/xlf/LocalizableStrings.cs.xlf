@@ -14,6 +14,11 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
 Nástroj {1} (verze {2}) byl úspěšně nainstalován.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRuntimeIdentifier">
+        <source>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</source>
+        <target state="new">The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>Install the tool and add to the local tool manifest (default).</source>
         <target state="translated">Nainstaluje nástroj a přidá ho do manifestu místního nástroje (výchozí).</target>

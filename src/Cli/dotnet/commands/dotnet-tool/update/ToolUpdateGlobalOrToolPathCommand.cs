@@ -19,7 +19,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tool.Update
 {
-    internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IShellShimRepository CreateShellShimRepository(string appHostSourceDirectory, DirectoryPath? nonGlobalLocation = null);
 
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller) CreateToolPackageStoresAndInstallerAndUninstaller(
         DirectoryPath? nonGlobalLocation = null,
@@ -92,7 +92,8 @@ namespace Microsoft.DotNet.Tools.Tool.Update
              IToolPackageInstaller toolPackageInstaller,
              IToolPackageUninstaller toolPackageUninstaller) = _createToolPackageStoreInstallerUninstaller(toolPath, _forwardRestoreArguments);
 
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
+            var appHostSourceDirectory = ShellShimTemplateFinder.GetDefaultAppHostSourceDirectory();
+            IShellShimRepository shellShimRepository = _createShellShimRepository(appHostSourceDirectory, toolPath);
 
             IToolPackage oldPackageNullable = GetOldPackage(toolPackageStoreQuery);
 

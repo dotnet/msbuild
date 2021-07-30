@@ -69,12 +69,16 @@ namespace Microsoft.DotNet.Watcher.Tools
             return;
         }
 
-        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem file, CancellationToken cancellationToken)
+        public async ValueTask<bool> TryHandleFileChange(DotNetWatchContext context, FileItem[] files, CancellationToken cancellationToken)
         {
             HotReloadEventSource.Log.HotReloadStart(HotReloadEventSource.StartType.CompilationHandler);
-            if (!file.FilePath.EndsWith(".cs", StringComparison.Ordinal) &&
-                !file.FilePath.EndsWith(".razor", StringComparison.Ordinal) &&
-                !file.FilePath.EndsWith(".cshtml", StringComparison.Ordinal))
+            var compilationFiles = files.Where(static file =>
+                file.FilePath.EndsWith(".cs", StringComparison.Ordinal) ||
+                file.FilePath.EndsWith(".razor", StringComparison.Ordinal) ||
+                file.FilePath.EndsWith(".cshtml", StringComparison.Ordinal))
+                .ToArray();
+
+            if (compilationFiles.Length == 0)
             {
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
@@ -89,23 +93,34 @@ namespace Microsoft.DotNet.Watcher.Tools
             Debug.Assert(_currentSolution != null);
             Debug.Assert(_deltaApplier != null);
 
-            Solution? updatedSolution = null;
+            var updatedSolution = _currentSolution;
             ProjectId updatedProjectId;
-            if (_currentSolution.Projects.SelectMany(p => p.Documents).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is Document documentToUpdate)
+
+            var foundFiles = false;
+            foreach (var file in compilationFiles)
             {
-                var sourceText = await GetSourceTextAsync(file.FilePath);
-                updatedSolution = documentToUpdate.WithText(sourceText).Project.Solution;
-                updatedProjectId = documentToUpdate.Project.Id;
+                if (updatedSolution.Projects.SelectMany(p => p.Documents).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is Document documentToUpdate)
+                {
+                    var sourceText = await GetSourceTextAsync(file.FilePath);
+                    updatedSolution = documentToUpdate.WithText(sourceText).Project.Solution;
+                    updatedProjectId = documentToUpdate.Project.Id;
+                    foundFiles = true;
+                }
+                else if (updatedSolution.Projects.SelectMany(p => p.AdditionalDocuments).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is AdditionalDocument additionalDocument)
+                {
+                    var sourceText = await GetSourceTextAsync(file.FilePath);
+                    updatedSolution = updatedSolution.WithAdditionalDocumentText(additionalDocument.Id, sourceText, PreservationMode.PreserveValue);
+                    updatedProjectId = additionalDocument.Project.Id;
+                    foundFiles = true;
+                }
+                else
+                {
+                    _reporter.Verbose($"Could not find document with path {file.FilePath} in the workspace.");
+                }
             }
-            else if (_currentSolution.Projects.SelectMany(p => p.AdditionalDocuments).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is AdditionalDocument additionalDocument)
+
+            if (!foundFiles)
             {
-                var sourceText = await GetSourceTextAsync(file.FilePath);
-                updatedSolution = _currentSolution.WithAdditionalDocumentText(additionalDocument.Id, sourceText, PreservationMode.PreserveValue);
-                updatedProjectId = additionalDocument.Project.Id;
-            }
-            else
-            {
-                _reporter.Verbose($"Could not find document with path {file.FilePath} in the workspace.");
                 HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
                 return false;
             }
@@ -123,7 +138,7 @@ namespace Microsoft.DotNet.Watcher.Tools
                 if (diagnostics.IsDefaultOrEmpty)
                 {
                     _reporter.Verbose("No deltas modified. Applying changes to clear diagnostics.");
-                    await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+                    await _deltaApplier.Apply(context, updates, cancellationToken);
                     // Even if there were diagnostics, continue treating this as a success
                     _reporter.Output("No hot reload changes to apply.");
                 }
@@ -154,7 +169,7 @@ namespace Microsoft.DotNet.Watcher.Tools
 
             _currentSolution = updatedSolution;
 
-            var applyState = await _deltaApplier.Apply(context, file.FilePath, updates, cancellationToken);
+            var applyState = await _deltaApplier.Apply(context, updates, cancellationToken);
             _reporter.Verbose($"Received {(applyState ? "successful" : "failed")} apply from delta applier.");
             HotReloadEventSource.Log.HotReloadEnd(HotReloadEventSource.StartType.CompilationHandler);
             if (applyState)

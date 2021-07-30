@@ -319,6 +319,29 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
             PackageSourceProvider packageSourceProvider = new PackageSourceProvider(settings);
             defaultSources = packageSourceProvider.LoadPackageSources().Where(source => source.IsEnabled);
 
+
+            if (packageSourceLocation?.AdditionalSourceFeed?.Any() ?? false)
+            {
+                foreach (string source in packageSourceLocation?.AdditionalSourceFeed)
+                {
+                    if (string.IsNullOrWhiteSpace(source))
+                    {
+                        continue;
+                    }
+
+                    PackageSource packageSource = new PackageSource(source);
+                    if (packageSource.TrySourceAsUri == null)
+                    {
+                        _verboseLogger.LogWarning(string.Format(
+                            LocalizableStrings.FailedToLoadNuGetSource,
+                            source));
+                        continue;
+                    }
+
+                    defaultSources = defaultSources.Append(packageSource);
+                }
+            }
+
             if (!packageSourceLocation?.SourceFeedOverrides.Any() ?? true)
             {
                 if (!defaultSources.Any())

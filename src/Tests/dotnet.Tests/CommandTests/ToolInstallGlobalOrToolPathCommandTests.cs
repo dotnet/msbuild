@@ -21,6 +21,8 @@ using System.Text.Json;
 using Microsoft.NET.TestFramework.Utilities;
 using System.CommandLine.Parsing;
 using Parser = Microsoft.DotNet.Cli.Parser;
+using Microsoft.DotNet.Cli.NuGetPackageDownloader;
+using Microsoft.NET.TestFramework;
 
 namespace Microsoft.DotNet.Tests.Commands.Tool
 {
@@ -53,8 +55,9 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             _toolPackageStore = toolPackageStoreMock;
             _toolPackageStoreQuery = toolPackageStoreMock;
             _createShellShimRepository =
-                (nonGlobalLocation) => new ShellShimRepository(
+                (_, nonGlobalLocation) => new ShellShimRepository(
                     new DirectoryPath(_pathToPlaceShim),
+                    string.Empty,
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem),
                     filePermissionSetter: new NoOpFilePermissionSetter());
@@ -451,6 +454,41 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
             installCommand.Execute().Should().Be(0);
 
             _fileSystem.File.ReadAllText(ExpectedCommandPath()).Should().Be(tokenToIdentifyPackagedShim);
+        }
+
+        [Fact]
+        public void WhenRunWithArchOptionItErrorsOnInvalidRids()
+        {
+            _reporter.Clear();
+            var parseResult = Parser.Instance.Parse($"dotnet tool install -g {PackageId} -a invalid");
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                parseResult,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter);
+
+            var exceptionThrown = Assert.Throws<AggregateException>(() => toolInstallGlobalOrToolPathCommand.Execute());
+            exceptionThrown.Message.Should().Contain("-invalid is invalid");
+        }
+
+        [WindowsOnlyFact]
+        public void WhenRunWithArchOptionItDownloadsAppHostTemplate()
+        {
+            var nugetPackageDownloader = new MockNuGetPackageDownloader();
+            var parseResult = Parser.Instance.Parse($"dotnet tool install -g {PackageId} -a arm64");
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                parseResult,
+                _createToolPackageStoreAndInstaller,
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter,
+                nugetPackageDownloader);
+
+            toolInstallGlobalOrToolPathCommand.Execute().Should().Be(0);
+            nugetPackageDownloader.DownloadCallParams.Count.Should().Be(1);
+            nugetPackageDownloader.ExtractCallParams.Count.Should().Be(1);
+            nugetPackageDownloader.DownloadCallParams.First().Item1.Should().Be(new PackageId("microsoft.netcore.app.host.win-arm64"));
         }
 
         private IToolPackageInstaller CreateToolPackageInstaller(

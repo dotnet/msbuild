@@ -92,8 +92,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir,
-                filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),
-                new NullLogger(), restoreActionConfig: restoreActionConfig);
+                filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger()),
+                _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger(), restoreActionConfig: restoreActionConfig);
             _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, 
                 _workloadInstaller.GetWorkloadInstallationRecordRepository(), _packageSourceLocation);
         }

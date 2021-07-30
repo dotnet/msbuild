@@ -18,7 +18,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Tests
             string.Equals(x.ReferenceId, y.ReferenceId, StringComparison.OrdinalIgnoreCase) &&
             x.Type == y.Type;
 
-        public int GetHashCode(CompatDifference difference) =>
-            HashCode.Combine(difference.DiagnosticId, difference.ReferenceId, difference.Type);
+        public int GetHashCode(CompatDifference difference)
+        {
+            int hashCode = 1447485498;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(difference.DiagnosticId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<DifferenceType>.Default.GetHashCode(difference.Type);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(difference.ReferenceId);
+            return hashCode;
+        }
     }
 }

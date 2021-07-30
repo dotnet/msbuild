@@ -226,4 +226,7 @@ For more reasons, including package naming enforcement, visit https://aka.ms/fai
     <value>If you intended to install a global tool, add `--global` to the command.
 If you would like to create a manifest, use `dotnet new tool-manifest`, usually in the repo root directory.</value>
   </data>
+  <data name="InvalidRuntimeIdentifier" xml:space="preserve">
+    <value>The runtime identifier {0} is invalid. Valid runtime identifiers are: {1}.</value>
+  </data>
 </root>

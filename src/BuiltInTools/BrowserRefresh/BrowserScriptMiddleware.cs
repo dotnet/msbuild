@@ -45,13 +45,20 @@ namespace Microsoft.AspNetCore.Watch.BrowserRefresh
         }
 
         internal static byte[] GetBrowserRefreshJS()
-            => GetWebSocketClientJavaScript(Environment.GetEnvironmentVariable("ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT")!);
+        {
+            var endpoint = Environment.GetEnvironmentVariable("ASPNETCORE_AUTO_RELOAD_WS_ENDPOINT")!;
+            var serverKey = Environment.GetEnvironmentVariable("ASPNETCORE_AUTO_RELOAD_WS_KEY") ?? string.Empty;
 
-        internal static byte[] GetWebSocketClientJavaScript(string hostString)
+            return GetWebSocketClientJavaScript(endpoint, serverKey);
+        }
+
+        internal static byte[] GetWebSocketClientJavaScript(string hostString, string serverKey)
         {
             var jsFileName = "Microsoft.AspNetCore.Watch.BrowserRefresh.WebSocketScriptInjection.js";
             using var reader = new StreamReader(typeof(WebSocketScriptInjection).Assembly.GetManifestResourceStream(jsFileName)!);
-            var script = reader.ReadToEnd().Replace("{{hostString}}", hostString);
+            var script = reader.ReadToEnd()
+                .Replace("{{hostString}}", hostString)
+                .Replace("{{ServerKey}}", serverKey);
 
             return Encoding.UTF8.GetBytes(script);
         }
