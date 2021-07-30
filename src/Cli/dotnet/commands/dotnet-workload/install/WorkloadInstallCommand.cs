@@ -88,8 +88,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _nugetPackageDownloader = nugetPackageDownloader ??
                                       new NuGetPackageDownloader(tempPackagesDir,
                                           filePermissionSetter: null,
-                                          new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, new NullLogger()),
-                                          new NullLogger(), restoreActionConfig: restoreActionConfig);
+                                          new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger()),
+                                          _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger(), restoreActionConfig: restoreActionConfig);
             _workloadInstaller = workloadInstaller ??
                                  WorkloadInstallerFactory.GetWorkloadInstaller(_reporter, sdkFeatureBand,
                                      _workloadResolver, _verbosity, _nugetPackageDownloader, _dotnetPath, _tempDirPath,
