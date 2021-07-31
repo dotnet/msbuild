@@ -210,15 +210,6 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                                 fileAndPermission.Permission);
                     }
                 }
-                else
-                {
-                    // https://github.com/dotnet/sdk/issues/18239
-                    foreach (FilePath filePath in FindAllFilesNeedExecutablePermission(allFilesInPackage,
-                        targetFolder.Value))
-                    {
-                        _filePermissionSetter.SetPermission(filePath.Value, "755");
-                    }
-                }
             }
 
             return allFilesInPackage;
