@@ -372,6 +372,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
 
   <ItemGroup>
+    <RuntimeHostConfigurationOption Include="Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability"
+                                    Condition="'$(VerifyDependencyInjectionOpenGenericServiceTrimmability)' != ''"
+                                    Value="$(VerifyDependencyInjectionOpenGenericServiceTrimmability)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.AggressiveAttributeTrimming"
+                                    Condition="'$(_AggressiveAttributeTrimming)' != ''"
+                                    Value="$(_AggressiveAttributeTrimming)"
+                                    Trim="true" />
+
     <RuntimeHostConfigurationOption Include="System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"
                                     Condition="'$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)' != ''"
                                     Value="$(EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization)"
@@ -422,6 +432,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeHostConfigurationOption Include="System.Reflection.Metadata.MetadataUpdater.IsSupported"
                                     Condition="'$(MetadataUpdaterSupport)' != ''"
                                     Value="$(MetadataUpdaterSupport)"
+                                    Trim="true" />
+
+    <RuntimeHostConfigurationOption Include="System.Reflection.NullabilityInfoContext.IsSupported"
+                                    Condition="'$(NullabilityInfoContextSupport)' != ''"
+                                    Value="$(NullabilityInfoContextSupport)"
                                     Trim="true" />
 
     <RuntimeHostConfigurationOption Include="System.Resources.ResourceManager.AllowCustomResourceTypes"

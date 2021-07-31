@@ -680,6 +680,8 @@ namespace Microsoft.NET.Publish.Tests
             {
                 JObject runtimeConfig = JObject.Parse(runtimeConfigContents);
                 JToken configProperties = runtimeConfig["runtimeOptions"]["configProperties"];
+                configProperties["Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability"].Value<bool>()
+                    .Should().BeTrue();
                 configProperties["System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"].Value<bool>()
                     .Should().BeFalse();
                 configProperties["System.Resources.ResourceManager.AllowCustomResourceTypes"].Value<bool>()
@@ -701,6 +703,7 @@ namespace Microsoft.NET.Publish.Tests
             }
             else
             {
+                runtimeConfigContents.Should().NotContain("Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability");
                 runtimeConfigContents.Should().NotContain("System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization");
                 runtimeConfigContents.Should().NotContain("System.Resources.ResourceManager.AllowCustomResourceTypes");
                 runtimeConfigContents.Should().NotContain("System.Runtime.InteropServices.BuiltInComInterop.IsSupported");

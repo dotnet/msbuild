@@ -9,6 +9,8 @@
   <!-- Host configuration properties
        Keep this list in the same order as the configProperties in GivenThatWeWantToPublishAProjectWithAllFeatures. -->
   <PropertyGroup>
+    <VerifyDependencyInjectionOpenGenericServiceTrimmability>true</VerifyDependencyInjectionOpenGenericServiceTrimmability>
+    <_AggressiveAttributeTrimming>true</_AggressiveAttributeTrimming>
     <EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>false</EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization>
     <DebuggerSupport>true</DebuggerSupport>
     <EventSourceSupport>false</EventSourceSupport>
@@ -20,6 +22,7 @@
     <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
     <UseNativeHttpHandler>true</UseNativeHttpHandler>
     <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <NullabilityInfoContextSupport>false</NullabilityInfoContextSupport>
     <CustomResourceTypesSupport>false</CustomResourceTypesSupport>
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <BuiltInComInteropSupport>false</BuiltInComInteropSupport>

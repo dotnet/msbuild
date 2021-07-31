@@ -43,6 +43,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AutoreleasePoolSupport Condition="'$(AutoreleasePoolSupport)' == ''">false</AutoreleasePoolSupport>
     <EnableCppCLIHostActivation Condition="'$(EnableCppCLIHostActivation)' == ''">false</EnableCppCLIHostActivation>
     <_EnableConsumingManagedCodeFromNativeHosting Condition="'$(_EnableConsumingManagedCodeFromNativeHosting)' == ''">false</_EnableConsumingManagedCodeFromNativeHosting>
+    <VerifyDependencyInjectionOpenGenericServiceTrimmability Condition="'$(VerifyDependencyInjectionOpenGenericServiceTrimmability)' == ''">true</VerifyDependencyInjectionOpenGenericServiceTrimmability>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SuppressTrimAnalysisWarnings)' == '' And ('$(EnableTrimAnalyzer)' == 'true' Or '$(PublishTrimmed)' == 'true')">

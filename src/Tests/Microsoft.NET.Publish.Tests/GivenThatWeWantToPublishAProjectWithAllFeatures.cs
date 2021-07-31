@@ -67,6 +67,8 @@ namespace Microsoft.NET.Publish.Tests
             var baselineConfigJsonObject = JObject.Parse(@"{
     ""runtimeOptions"": {
         ""configProperties"": {
+            ""Microsoft.Extensions.DependencyInjection.VerifyOpenGenericServiceTrimmability"": true,
+            ""System.AggressiveAttributeTrimming"": true,
             ""System.ComponentModel.TypeConverter.EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization"": false,
             ""System.Diagnostics.Debugger.IsSupported"": true,
             ""System.Diagnostics.Tracing.EventSource.IsSupported"": false,
@@ -78,6 +80,7 @@ namespace Microsoft.NET.Publish.Tests
             ""System.Net.Http.EnableActivityPropagation"": false,
             ""System.Net.Http.UseNativeHttpHandler"": true,
             ""System.Reflection.Metadata.MetadataUpdater.IsSupported"": false,
+            ""System.Reflection.NullabilityInfoContext.IsSupported"": false,
             ""System.Resources.ResourceManager.AllowCustomResourceTypes"": false,
             ""System.Resources.UseSystemResourceKeys"": true,
             ""System.Runtime.InteropServices.BuiltInComInterop.IsSupported"": false,
