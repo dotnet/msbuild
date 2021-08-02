@@ -3133,6 +3133,8 @@ namespace Microsoft.Build.CommandLine
                 LoggerVerbosity defaultFileLoggerVerbosity = LoggerVerbosity.Detailed;
                 fileLogger.Verbosity = defaultFileLoggerVerbosity;
 
+                // Check to see if there is a possibility we will be logging from an out-of-proc node.
+                // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
                 if (cpuCount == 1 && Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") != "1")
                 {
                     // We've decided to use the MP logger even in single proc mode.
@@ -3197,6 +3199,8 @@ namespace Microsoft.Build.CommandLine
                     consoleParameters = AggregateParameters(consoleParameters, consoleLoggerParameters);
                 }
 
+                // Check to see if there is a possibility we will be logging from an out-of-proc node.
+                // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
                 if (cpuCount == 1 && Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") != "1")
                 {
                     // We've decided to use the MP logger even in single proc mode.
