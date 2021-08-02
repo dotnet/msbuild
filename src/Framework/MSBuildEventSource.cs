@@ -103,98 +103,98 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of how the project data was evaluated.
         /// </summary>
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(11, Keywords = Keywords.All)]
         public void EvaluateStart(string projectFile)
         {
             WriteEvent(11, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(12, Keywords = Keywords.All)]
         public void EvaluateStop(string projectFile)
         {
             WriteEvent(12, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(13, Keywords = Keywords.All)]
         public void EvaluatePass0Start(string projectFile)
         {
             WriteEvent(13, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(14, Keywords = Keywords.All)]
         public void EvaluatePass0Stop(string projectFile)
         {
             WriteEvent(14, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(15, Keywords = Keywords.All)]
         public void EvaluatePass1Start(string projectFile)
         {
             WriteEvent(15, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(16, Keywords = Keywords.All)]
         public void EvaluatePass1Stop(string projectFile)
         {
             WriteEvent(16, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(17, Keywords = Keywords.All)]
         public void EvaluatePass2Start(string projectFile)
         {
             WriteEvent(17, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(18, Keywords = Keywords.All)]
         public void EvaluatePass2Stop(string projectFile)
         {
             WriteEvent(18, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(19, Keywords = Keywords.All)]
         public void EvaluatePass3Start(string projectFile)
         {
             WriteEvent(19, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(20, Keywords = Keywords.All)]
         public void EvaluatePass3Stop(string projectFile)
         {
             WriteEvent(20, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(21, Keywords = Keywords.All)]
         public void EvaluatePass4Start(string projectFile)
         {
             WriteEvent(21, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(22, Keywords = Keywords.All)]
         public void EvaluatePass4Stop(string projectFile)
         {
             WriteEvent(22, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(23, Keywords = Keywords.All)]
         public void EvaluatePass5Start(string projectFile)
         {
             WriteEvent(23, projectFile);
         }
 
-        /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
         [Event(24, Keywords = Keywords.All)]
         public void EvaluatePass5Stop(string projectFile)
         {
@@ -278,14 +278,14 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of profiling for the function that parses an XML document into a ProjectRootElement.
         /// </summary>
-        /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFileName">Filename of the project being evaluated.</param>
         [Event(33, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void ParseStart(string projectFileName)
         {
             WriteEvent(33, projectFileName);
         }
 
-        /// <param name="projectFileName">Relevant information about where in the run of the progam it is.</param>
+        /// <param name="projectFileName">Filename of the project being evaluated.</param>
         [Event(34, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void ParseStop(string projectFileName)
         {
