@@ -496,6 +496,7 @@ namespace Microsoft.Build.Logging
             {
                 return MessageImportance.High;
             }
+            // The logger does not log messages of any importance.
             return MessageImportance.High - 1;
         }
 
