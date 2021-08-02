@@ -29,9 +29,6 @@ namespace Microsoft.Build.Shared
                 "Microsoft.Build.Utilities.Core",
             }.ToImmutableHashSet();
 
-        internal static readonly string[] Extensions = new[] { "ni.dll", "ni.exe", "dll", "exe" };
-
-
         public MSBuildLoadContext(string assemblyPath)
             : base($"MSBuild plugin {assemblyPath}")
         {
@@ -56,11 +53,9 @@ namespace Microsoft.Build.Shared
                 // bare search directory if that fails.
                 : new[] { assemblyName.CultureName, string.Empty })
             {
-                foreach (var extension in Extensions)
-                {
                     var candidatePath = Path.Combine(_directory,
                         cultureSubfolder,
-                        $"{assemblyName.Name}.{extension}");
+                        $"{assemblyName.Name}.dll");
 
                     if (!FileSystems.Default.FileExists(candidatePath))
                     {
@@ -74,7 +69,6 @@ namespace Microsoft.Build.Shared
                     }
 
                     return LoadFromAssemblyPath(candidatePath);
-                }
             }
 
             // If the Assembly is provided via a file path, the following rules are used to load the assembly:
