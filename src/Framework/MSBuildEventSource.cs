@@ -279,14 +279,14 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of profiling for the function that parses an XML document into a ProjectRootElement.
         /// </summary>
         /// <param name="projectFileName">Filename of the project being evaluated.</param>
-        [Event(33, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(33, Keywords = Keywords.All)]
         public void ParseStart(string projectFileName)
         {
             WriteEvent(33, projectFileName);
         }
 
         /// <param name="projectFileName">Filename of the project being evaluated.</param>
-        [Event(34, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(34, Keywords = Keywords.All)]
         public void ParseStop(string projectFileName)
         {
             WriteEvent(34, projectFileName);
