@@ -2415,7 +2415,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
-    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(IntermediateOutputPath);@(SuggestedBindingRedirects)"
+    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(IntermediateOutputPath);@(SuggestedBindingRedirectsCache)"
     Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
     Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'">
 
@@ -3615,6 +3615,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_AssemblyTimestampBeforeCompile>%(IntermediateAssembly.ModifiedTime)</_AssemblyTimestampBeforeCompile>
     </PropertyGroup>
 
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GenerateSuggestedBindingRedirectsCache
+    Generate a file used to track suggested binding redirects between builds.
+    @(SuggestedBindingRedirects) never contains a file on disk, so create a file
+    that contains a hash of the items to prevent `GenerateBindingRedirects`
+    from running every build.
+
+    See https://github.com/dotnet/msbuild/issues/5943 for details.
+    ============================================================
+    -->
+  <Target Name="_GenerateSuggestedBindingRedirectsCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == true" DependsOnTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <SuggestedBindingRedirectsCacheFile>$(IntermediateOutputPath)$(MSBuildProjectFile).SuggestedBindingRedirects.cache</SuggestedBindingRedirectsCacheFile>
+    </PropertyGroup>
+
+      <Hash ItemsToHash="@(SuggestedBindingRedirects)">
+        <Output TaskParameter="HashResult" PropertyName="SuggestedBindingRedirectsHash"/>
+      </Hash>
+
+      <WriteLinesToFile Lines="$(SuggestedBindingRedirectsHash)" File="$(SuggestedBindingRedirectsCacheFile)" Overwrite="true" WriteOnlyWhenDifferent="true"/>
+
+      <ItemGroup>
+        <SuggestedBindingRedirectsCache Include="$(SuggestedBindingRedirectsCacheFile)"/>
+        <FileWrites Include="$(SuggestedBindingRedirectsCacheFile)"/>
+      </ItemGroup>
   </Target>
 
   <!--
