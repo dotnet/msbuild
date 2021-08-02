@@ -7,7 +7,7 @@
   </PropertyGroup>
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionPrefix>5.0.400</VersionPrefix>
+    <VersionPrefix>5.0.401</VersionPrefix>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
   </PropertyGroup>
   <!-- Production Dependencies -->
