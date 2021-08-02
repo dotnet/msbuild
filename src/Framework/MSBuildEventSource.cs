@@ -112,91 +112,91 @@ namespace Microsoft.Build.Eventing
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(12, Keywords = Keywords.All)]
-        public void EvaluatePass0Start(string projectFile)
+        public void EvaluateStop(string projectFile)
         {
             WriteEvent(12, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(13, Keywords = Keywords.All)]
-        public void EvaluatePass0Stop(string projectFile)
+        public void EvaluatePass0Start(string projectFile)
         {
             WriteEvent(13, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(14, Keywords = Keywords.All)]
-        public void EvaluatePass1Start(string projectFile)
+        public void EvaluatePass0Stop(string projectFile)
         {
             WriteEvent(14, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(15, Keywords = Keywords.All)]
-        public void EvaluatePass1Stop(string projectFile)
+        public void EvaluatePass1Start(string projectFile)
         {
             WriteEvent(15, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(16, Keywords = Keywords.All)]
-        public void EvaluatePass2Start(string projectFile)
+        public void EvaluatePass1Stop(string projectFile)
         {
             WriteEvent(16, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(17, Keywords = Keywords.All)]
-        public void EvaluatePass2Stop(string projectFile)
+        public void EvaluatePass2Start(string projectFile)
         {
             WriteEvent(17, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(18, Keywords = Keywords.All)]
-        public void EvaluatePass3Start(string projectFile)
+        public void EvaluatePass2Stop(string projectFile)
         {
             WriteEvent(18, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(19, Keywords = Keywords.All)]
-        public void EvaluatePass3Stop(string projectFile)
+        public void EvaluatePass3Start(string projectFile)
         {
             WriteEvent(19, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(20, Keywords = Keywords.All)]
-        public void EvaluatePass4Start(string projectFile)
+        public void EvaluatePass3Stop(string projectFile)
         {
             WriteEvent(20, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(21, Keywords = Keywords.All)]
-        public void EvaluatePass4Stop(string projectFile)
+        public void EvaluatePass4Start(string projectFile)
         {
             WriteEvent(21, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(22, Keywords = Keywords.All)]
-        public void EvaluatePass5Start(string projectFile)
+        public void EvaluatePass4Stop(string projectFile)
         {
             WriteEvent(22, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(23, Keywords = Keywords.All)]
-        public void EvaluatePass5Stop(string projectFile)
+        public void EvaluatePass5Start(string projectFile)
         {
             WriteEvent(23, projectFile);
         }
 
         /// <param name="projectFile">Relevant information about where in the run of the progam it is.</param>
         [Event(24, Keywords = Keywords.All)]
-        public void EvaluateStop(string projectFile)
+        public void EvaluatePass5Stop(string projectFile)
         {
             WriteEvent(24, projectFile);
         }
