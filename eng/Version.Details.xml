@@ -2,8 +2,8 @@
 <Dependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.2">
-        <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
-        <Sha />
+      <Uri>https://github.com/dotnet/roslyn-analyzers</Uri>
+      <Sha />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21369.3">
       <Uri>https://github.com/dotnet/arcade</Uri>
