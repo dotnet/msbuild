@@ -211,52 +211,17 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                          .And.HaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
-        [Fact]
-        public void ItErrorsWhenMultipleProjectsAreSpecified()
+        [Theory]
+        [InlineData("-p project1 -p project2")]
+        [InlineData("--project project1 -p project2")]
+        public void ItErrorsWhenMultipleProjectsAreSpecified(string args)
         {
             new DotnetCommand(Log, "run")
-                .Execute($"-p", "project1", "-p", "project2")
+                .Execute(args.Split(" "))
                 .Should()
                 .Fail()
                 .And
                 .HaveStdErrContaining(LocalizableStrings.OnlyOneProjectAllowed);
-        }
-
-        [Theory]
-        [InlineData("--property:prop1=true", "Prop1: true, Prop2: ")]
-        [InlineData("--property prop1=true", "Prop1: true, Prop2: ")]
-        [InlineData("-p:prop1=true", "Prop1: true, Prop2: ")]
-        [InlineData("-p prop1=true", "Prop1: true, Prop2: ")]
-        [InlineData("-p prop1=true -p prop2=false", "Prop1: true, Prop2: false")]
-        public void ItAcceptsPropertyOption(string optionArgs, string expectedPropertyOutput)
-        {
-            var testProject = new TestProject()
-            {
-                Name = "PropertyOption",
-                IsExe = true,
-                TargetFrameworks = "net6.0",
-            };
-            var testInstance = _testAssetsManager.CreateTestProject(testProject, identifier: optionArgs)
-                .WithProjectChanges((projectPath, project) =>
-                {
-                    var ns = project.Root.Name.Namespace;
-                    var target = new XElement(ns + "Target",
-                            new XAttribute("Name", "PrintProperties"),
-                            new XAttribute("AfterTargets", "Build"));
-                    project.Root.Add(target);
-                    target.Add(new XElement(ns + "Message",
-                        new XAttribute("Importance", "High"),
-                        new XAttribute("Text", "Prop1: $(prop1), Prop2: $(prop2)")));
-                });
-
-            new DotnetCommand(Log, "run")
-                .WithWorkingDirectory(Path.Combine(testInstance.Path, testProject.Name))
-                .Execute(optionArgs.Split(" ").Concat(new string[] { "-v", "d" }))
-                .Should().Pass()
-                         .And.HaveStdOutContaining("Build succeeded")
-                         .And.HaveStdOutContaining(expectedPropertyOutput)
-                         .And.HaveStdOutContaining("Hello World!")
-                         .And.NotHaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
         }
 
         [Fact]

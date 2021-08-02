@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
@@ -20,8 +21,7 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<IEnumerable<string>> PropertyOption =
             new ForwardedOption<IEnumerable<string>>(new string[] { "--property", "-p" }, LocalizableStrings.PropertyOptionDescription)
-                .SetForwardingFunction((values, parseResult) => 
-                    parseResult.UsingRunCommandShorthandProjectOption() ? new string[] { string.Empty } : values.Select(value => $"-p:{value}"));
+                .SetForwardingFunction((values, parseResult) => parseResult.GetRunCommandShorthandPropertyValues().Select(value => $"-p:{value}"));
 
         public static readonly Option<string> LaunchProfileOption = new Option<string>("--launch-profile", LocalizableStrings.CommandOptionLaunchProfileDescription);
 

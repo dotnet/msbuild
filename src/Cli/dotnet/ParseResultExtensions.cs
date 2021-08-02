@@ -112,10 +112,10 @@ namespace Microsoft.DotNet.Cli
         {
             if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.ValueForOption(RunCommandParser.PropertyOption).Any())
             {
-                var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
-                if (properties.Any(property => !property.Contains("=")))
+                var projVals = parseResult.GetRunCommandShorthandProjectValues();
+                if (projVals.Any())
                 {
-                    if (properties.Count() != 1)
+                    if (projVals.Count() != 1 || parseResult.HasOption(RunCommandParser.ProjectOption))
                     {
                         throw new GracefulException(Tools.Run.LocalizableStrings.OnlyOneProjectAllowed);
                     }
@@ -123,6 +123,18 @@ namespace Microsoft.DotNet.Cli
                 }
             }
             return false;
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandProjectValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => !property.Contains("="));
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandPropertyValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => property.Contains("="));
         }
     }
 }

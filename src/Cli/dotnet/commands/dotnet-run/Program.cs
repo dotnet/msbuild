@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Run
             if (parseResult.UsingRunCommandShorthandProjectOption())
             {
                 Console.WriteLine(LocalizableStrings.RunCommandProjectAbbreviationDeprecated.Yellow());
-                project = parseResult.ValueForOption(RunCommandParser.PropertyOption).FirstOrDefault();
+                project = parseResult.GetRunCommandShorthandProjectValues().FirstOrDefault();
             }
 
             var command = new RunCommand(
