@@ -30,7 +30,7 @@ namespace Microsoft.Build.Internal
             {
                 // We'll be testing files by comparing their normalized paths. Normalize our file spec right away
                 // to avoid doing this work on each IsMatch call.
-                _unescapedFileSpec = FileUtilities.NormalizePathForComparisonNoThrow(_unescapedFileSpec, _currentDirectory);
+                _unescapedFileSpec = FileUtilities.GetFullPathNoThrow(Path.Combine(_currentDirectory, _unescapedFileSpec));
             }
         }
 

@@ -40,6 +40,11 @@ namespace Microsoft.Build.Evaluation
             /// </remarks>
             protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
+                if (!_conditionResult)
+                {
+                    return;
+                }
+
                 if (_matchOnMetadata.IsEmpty && ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType) && _conditionResult)
                 {
                     // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)

@@ -87,7 +87,7 @@ namespace Microsoft.Build.Evaluation
 
             public override IEnumerable<string> GetReferencedItems()
             {
-                return ReferencedItems.Select(v => v.ItemAsValueFragment.TextFragment);
+                return ReferencedItems.Select(v => EscapingUtilities.UnescapeAll(v.ItemAsValueFragment.TextFragment));
             }
 
             public override IMSBuildGlob ToMSBuildGlob()
@@ -427,7 +427,7 @@ namespace Microsoft.Build.Evaluation
 
         public virtual IEnumerable<string> GetReferencedItems()
         {
-            yield return TextFragment;
+            yield return EscapingUtilities.UnescapeAll(TextFragment);
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()
