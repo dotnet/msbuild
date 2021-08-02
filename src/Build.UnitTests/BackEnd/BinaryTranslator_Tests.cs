@@ -545,7 +545,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 HashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA256,
                 VersionCompatibility = AssemblyVersionCompatibility.SameMachine,
                 CodeBase = "C:\\src",
-                KeyPair = new StrongNameKeyPair(new byte[] { 4, 3, 2, 1 }),
                 ContentType = AssemblyContentType.WindowsRuntime,
                 CultureName = "zh-HK",
             };

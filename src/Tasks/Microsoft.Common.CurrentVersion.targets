@@ -324,8 +324,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Example, C:\MyProjects\MyProject\bin\Debug\MyAssembly.dll -->
     <TargetPath Condition=" '$(TargetPath)' == '' ">$(TargetDir)$(TargetFileName)</TargetPath>
 
-    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' and ('$(ProduceReferenceAssemblyInOutDir)' == 'true' or '$([MSBuild]::AreFeaturesEnabled(17.0))' != 'true' ) ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
-    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(IntermediateOutputPath), 'ref', $(TargetFileName)))</TargetRefPath>
+    <TargetRefPath Condition=" '$(TargetRefPath)' == '' and '$(ProduceReferenceAssembly)' == 'true' ">$([MSBuild]::NormalizePath($(TargetDir), 'ref', $(TargetFileName)))</TargetRefPath>
 
     <!-- Example, C:\MyProjects\MyProject\ -->
     <ProjectDir Condition=" '$(ProjectDir)' == '' ">$([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory)))</ProjectDir>
@@ -394,10 +393,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </ItemGroup>
 
   <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
-    <IntermediateRefAssembly Include="$(IntermediateOutputPath)refint\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
+    <IntermediateRefAssembly Include="$(IntermediateOutputPath)ref\$(TargetName)$(TargetExt)" Condition="'@(IntermediateRefAssembly)' == ''" />
     <CreateDirectory Include="@(IntermediateRefAssembly->'%(RootDir)%(Directory)')" />
-    <CreateDirectory Include="$(OutDir)ref" Condition=" '$(ProduceReferenceAssemblyInOutDir)' == 'true'" />
-    <CreateDirectory Include="$(IntermediateOutputPath)ref" Condition=" '$(ProduceReferenceAssemblyInOutDir)' != 'true'" />
+    <CreateDirectory Include="$(OutDir)ref" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' == 'true'">
@@ -1607,6 +1605,93 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ====================================================================================
+                                        _GetProjectReferencePlatformProperties
+
+    If a project is opted in via $(EnableDynamicPlatformResolution), this target calls the 
+    GetCompatiblePlatform task on all ProjectReference items to determine the most compatible 
+    platform for each project. It then sets SetPlatform metadata on each ProjectReference.
+    This prevents overbuilding a project when 'AnyCPU' is available.
+
+    ======================================================================================
+  -->
+
+  <!-- Managed projects need to have PlatformTarget set for SetPlatform negotiation. Default to $(Platform), which is AnyCPU by default. -->
+  <PropertyGroup>
+    <PlatformTarget Condition="'$(EnableDynamicPlatformResolution)' == 'true' and '$(PlatformTarget)' == ''
+                                and '$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj'">$(Platform)</PlatformTarget>
+
+    <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
+  </PropertyGroup>
+
+  <!-- This target skips VS builds because they already supply Platform and
+       Configuration information. -->
+  <Target Name="_GetProjectReferencePlatformProperties"
+          Condition="'$(EnableDynamicPlatformResolution)' == 'true'
+                     and '$(BuildingInsideVisualStudio)' != 'true'
+                     and '@(_MSBuildProjectReferenceExistent)' != ''">
+
+    <!-- Allow preset SetPlatform to override this operation -->
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetPlatform)' != ''">
+        <SkipGetPlatformProperties>true</SkipGetPlatformProperties>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ProjectReferencePlatformPossibilities Include="@(_MSBuildProjectReferenceExistent)" 
+                                              Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
+    </ItemGroup>
+
+    <!-- Managed Platform "source of truth" is $(PlatformTarget). For cpp it's $(Platform) -->
+    <PropertyGroup>
+      <CurrentPlatform>$(PlatformTarget)</CurrentPlatform>
+      <CurrentPlatform Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">$(Platform)</CurrentPlatform>
+    </PropertyGroup>
+
+    <!-- Assign default PlatformLookupTables when doing Managed <-> Unmanaged hops -->
+    <ItemGroup>
+      <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
+      <_ProjectReferencePlatformPossibilities Condition="'$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj' and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' == 'true'">
+        <!-- Taken from https://docs.microsoft.com/visualstudio/msbuild/assignprojectconfiguration-task -->
+        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">x86=Win32</PlatformLookupTable>
+      </_ProjectReferencePlatformPossibilities>
+
+      <!-- If we're looking at a managed project from a cpp project, map native to managed platforms. -->
+      <_ProjectReferencePlatformPossibilities Condition="('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj') and '%(_ProjectReferencePlatformPossibilities.IsVcxOrNativeProj)' != 'true'">
+        <PlatformLookupTable Condition="'$(UseDefaultPlatformLookupTables)' == 'true' and '$(PlatformLookupTable)' == ''">Win32=x86</PlatformLookupTable>
+      </_ProjectReferencePlatformPossibilities>
+    </ItemGroup>
+
+    <GetCompatiblePlatform AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
+                           CurrentProjectPlatform="$(CurrentPlatform)"
+                           PlatformLookupTable="$(PlatformLookupTable)"
+                           Condition="'@(_ProjectReferencePlatformPossibilities)' != ''">
+      <Output ItemName="_ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
+    </GetCompatiblePlatform>
+
+    <!-- If GetCompatiblePlatform didn't run, @(ProjectsWithPlatformAssignment) will be empty.
+         Don't do anything in this case. Ex: A project references many projects
+         that can't multiplatform.  -->
+    <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
+      <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
+      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
+        <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+        <SetPlatform Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+      </ProjectsWithNearestPlatform>
+
+      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
+        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
+        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' != 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);PlatformTarget</UndefineProperties>
+      </ProjectsWithNearestPlatform>
+
+      <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
+      <_MSBuildProjectReferenceExistent Include="@(ProjectsWithNearestPlatform)"/>
+    </ItemGroup>
+
+  </Target>
+
+  <!--
+    ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
 
     Builds the GetTargetFrameworks target of all existent project references to get a list
@@ -1660,7 +1745,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    -->
    <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and ('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj')">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+        <!-- When we're dynamically figuring out platform, we need the MSBuild call that retrieves TF data. -->
+        <SkipGetTargetFrameworkProperties Condition="'$(EnableDynamicPlatformResolution)' != 'true'">true</SkipGetTargetFrameworkProperties>
         <UndefineProperties>%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
    </ItemGroup>
@@ -1722,8 +1808,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             CurrentProjectTargetPlatform="$(TargetPlatformMoniker)"
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
-                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
-                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true'">
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
@@ -1731,8 +1817,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
-                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities->Count())' != '0' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
-                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' != 'true'">
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' != 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
@@ -1741,9 +1827,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          If the task was skipped or the current TargetFramework is empty, AnnotatedProjects will be empty.
          In this case, copy _ProjectReferenceTargetFrameworkPossibilities as is. See:
             https://github.com/dotnet/sdk/issues/416
+
+        Furthermore, if we're referencing a .vcxproj or .nativeproj, those items won't be populated into `AnnotatedProjects`
+        by `GetReferenceNearestTargetFrameworkTask`, so let them flow when `EnableDynamicPlatformResolution` is set. 
       -->
       <AnnotatedProjects Include="@(_ProjectReferenceTargetFrameworkPossibilities)"
-                         Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''" />
+                         Condition="'$(ReferringTargetFrameworkForProjectReferences)' == '' or
+                                    ('$(EnableDynamicPlatformResolution)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' == 'true')" />
+
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
       <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
@@ -1795,6 +1886,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <!-- Extract necessary information for SetPlatform negotiation -->
+        <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
+        <Platforms>$(Platforms)</Platforms>
+        <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
+             Build the `Platforms` property from that. -->
+        <Platforms Condition="'@(ProjectConfiguration)' != '' and ('$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj')">@(ProjectConfiguration->'%(Platform)'->Distinct())</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
@@ -1862,7 +1959,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PrepareProjectReferencesDependsOn>
       AssignProjectConfiguration;
       _SplitProjectReferencesByFileExistence;
-      _GetProjectReferenceTargetFrameworkProperties
+      _GetProjectReferenceTargetFrameworkProperties;
+      _GetProjectReferencePlatformProperties
     </PrepareProjectReferencesDependsOn>
   </PropertyGroup>
 
@@ -4728,13 +4826,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         GetCopyToOutputDirectoryItems
 
     Get all project items that may need to be transferred to the output directory.
-    This includes baggage items from transitively referenced projects. It would appear
-    that this target computes full transitive closure of content items for all referenced
-    projects; however that is not the case. It only collects the content items from its
-    immediate children and not children of children. The reason this happens is that
-    the ProjectReferenceWithConfiguration list that is consumed by _SplitProjectReferencesByFileExistence
-    is only populated in the current project and is empty in the children. The empty list
-    causes _MSBuildProjectReferenceExistent to be empty and terminates the recursion.
+    This includes baggage items from transitively referenced projects.
+
+    As of 17.0, content items are copied transitively by default.
+    Set `MSBuildCopyContentTransitively` to false to opt out.
+    See https://github.com/dotnet/msbuild/pull/6622 for more info.
     ============================================================
     -->
   <PropertyGroup>
