@@ -104,14 +104,14 @@ namespace Microsoft.Build.Eventing
         /// Call this method to notify listeners of how the project data was evaluated.
         /// </summary>
         /// <param name="projectFile">Filename of the project being evaluated.</param>
-        [Event(11, Keywords = Keywords.All)]
+        [Event(11, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void EvaluateStart(string projectFile)
         {
             WriteEvent(11, projectFile);
         }
 
         /// <param name="projectFile">Filename of the project being evaluated.</param>
-        [Event(12, Keywords = Keywords.All)]
+        [Event(12, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void EvaluateStop(string projectFile)
         {
             WriteEvent(12, projectFile);
