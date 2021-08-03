@@ -80,8 +80,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
-            var _sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_sdkWorkloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            var sdkWorkloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(sdkWorkloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             var tempPackagesDir = new DirectoryPath(Path.Combine(_tempDirPath, "dotnet-sdk-advertising-temp"));
             var restoreActionConfig = _parseResult.ToRestoreActionConfig();
@@ -95,7 +95,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                                      _workloadResolver, _verbosity, _nugetPackageDownloader, _dotnetPath, _tempDirPath,
                                      _packageSourceLocation, restoreActionConfig, elevationRequired: !_printDownloadLinkOnly && string.IsNullOrWhiteSpace(_downloadToCacheOption));
             _userHome = userHome ?? CliFolderPathCalculator.DotnetHomePath;
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _sdkWorkloadManifestProvider, _workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, 
+                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _packageSourceLocation);
 
             ValidateWorkloadIdsInput();
         }

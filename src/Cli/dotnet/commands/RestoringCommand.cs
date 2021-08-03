@@ -84,16 +84,19 @@ namespace Microsoft.DotNet.Tools
 
         public override int Execute()
         {
+            int exitCode;
             if (SeparateRestoreCommand != null)
             {
-                int exitCode = SeparateRestoreCommand.Execute();
+                exitCode = SeparateRestoreCommand.Execute();
                 if (exitCode != 0)
                 {
                     return exitCode;
                 }
             }
 
-            return base.Execute();
+            exitCode = base.Execute();
+            WorkloadManifestUpdater.AdvertiseWorkloadUpdates();
+            return exitCode;
         }
     }
 }

@@ -542,7 +542,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return false;
         }
 
-        public IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider)
+        public WorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider)
         {
             // we specifically don't assign the overlayManifestProvider to the new resolver
             // because it's not possible to refresh an overlay resolver
@@ -559,6 +559,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             overlayResolver.ComposeWorkloadManifests();
 
             return overlayResolver;
+        }
+
+        public string GetSdkFeatureBand()
+        {
+            return _manifestProvider?.GetSdkFeatureBand() ?? throw new Exception("Cannot get SDK feature band from ManifestProvider");
         }
 
         public class PackInfo

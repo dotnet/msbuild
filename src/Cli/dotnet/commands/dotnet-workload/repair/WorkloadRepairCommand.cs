@@ -25,7 +25,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
         private readonly VerbosityOptions _verbosity;
         private readonly IInstaller _workloadInstaller;
         private IWorkloadResolver _workloadResolver;
-        private IWorkloadManifestProvider _workloadManifestProvider;
         private readonly ReleaseVersion _sdkVersion;
         private readonly string _dotnetPath;
 
@@ -50,8 +49,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides: sourceOption);
 
-            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             tempDirPath = tempDirPath ?? (string.IsNullOrWhiteSpace(parseResult.ValueForOption<string>(WorkloadInstallCommandParser.TempDirOption)) ?
                 Path.GetTempPath() :

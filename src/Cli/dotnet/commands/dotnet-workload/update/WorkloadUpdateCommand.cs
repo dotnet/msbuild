@@ -39,7 +39,6 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         private readonly VerbosityOptions _verbosity;
         private readonly IInstaller _workloadInstaller;
         private IWorkloadResolver _workloadResolver;
-        private IWorkloadManifestProvider _workloadManifestProvider;
         private readonly INuGetPackageDownloader _nugetPackageDownloader;
         private readonly IWorkloadManifestUpdater _workloadManifestUpdater;
         private readonly ReleaseVersion _sdkVersion;
@@ -82,8 +81,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _packageSourceLocation = string.IsNullOrEmpty(configOption) && (sourceOption == null || !sourceOption.Any()) ? null :
                 new PackageSourceLocation(string.IsNullOrEmpty(configOption) ? null : new FilePath(configOption), sourceFeedOverrides:  sourceOption);
 
-            _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
-            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            var workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(_dotnetPath, _sdkVersion.ToString());
+            _workloadResolver = workloadResolver ?? WorkloadResolver.Create(workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
             var sdkFeatureBand = new SdkFeatureBand(_sdkVersion);
             var restoreActionConfig = _parseResult.ToRestoreActionConfig();
             _workloadInstaller = workloadInstaller ?? WorkloadInstallerFactory.GetWorkloadInstaller(_reporter,
@@ -95,7 +94,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             _nugetPackageDownloader = nugetPackageDownloader ?? new NuGetPackageDownloader(tempPackagesDir,
                 filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir, _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger()),
                 _verbosity.VerbosityIsDetailedOrDiagnostic() ? new NuGetConsoleLogger() : new NullLogger(), restoreActionConfig: restoreActionConfig);
-            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadManifestProvider, _workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, _packageSourceLocation);
+            _workloadManifestUpdater = workloadManifestUpdater ?? new WorkloadManifestUpdater(_reporter, _workloadResolver, _nugetPackageDownloader, _userHome, _tempDirPath, 
+                _workloadInstaller.GetWorkloadInstallationRecordRepository(), _packageSourceLocation);
         }
 
         public override int Execute()
@@ -169,6 +169,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 _workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
             }
 
+            _workloadManifestUpdater.DeleteUpdatableWorkloadsFile();
+
             _reporter.WriteLine();
             _reporter.WriteLine(string.Format(LocalizableStrings.UpdateSucceeded, string.Join(" ", workloadIds)));
             _reporter.WriteLine();
@@ -241,8 +243,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
             try
             {
                 await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, new DirectoryPath(tempManifestDir));
-                _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
-                _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+                var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempManifestDir, _sdkVersion.ToString());
+                _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString());
 
                 if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
                 {
@@ -306,8 +308,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
         {
             var manifestPackagePaths = await _workloadManifestUpdater.DownloadManifestPackagesAsync(includePreview, tempPath);
             await _workloadManifestUpdater.ExtractManifestPackagesToTempDirAsync(manifestPackagePaths, tempPath);
-            _workloadManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
-            _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, _dotnetPath, _sdkVersion.ToString());
+            var overlayManifestProvider = new TempDirectoryWorkloadManifestProvider(tempPath.Value, _sdkVersion.ToString());
+            _workloadResolver = WorkloadResolver.Create(overlayManifestProvider, _dotnetPath, _sdkVersion.ToString());
         }
 
         private IEnumerable<WorkloadId> GetUpdatableWorkloads()
