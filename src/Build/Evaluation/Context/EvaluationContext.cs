@@ -50,7 +50,7 @@ namespace Microsoft.Build.Evaluation.Context
         /// </summary>
         private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
-        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem)
+        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, IDirectoryCacheFactory directoryCacheFactory)
         {
             // Unsupported case: isolated context with non null file system.
             // Isolated means caches aren't reused, but the given file system might cache.
@@ -59,6 +59,8 @@ namespace Microsoft.Build.Evaluation.Context
                 "IsolatedContextDoesNotSupportFileSystem");
 
             Policy = policy;
+
+            // TODO: Use directoryCacheFactory.
 
             SdkResolverService = new CachingSdkResolverService();
             FileEntryExpansionCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
@@ -91,7 +93,25 @@ namespace Microsoft.Build.Evaluation.Context
         {
             var context = new EvaluationContext(
                 policy,
-                fileSystem);
+                fileSystem,
+                directoryCacheFactory: null);
+
+            TestOnlyHookOnCreate?.Invoke(context);
+
+            return context;
+        }
+
+        /// <summary>
+        ///     Factory for <see cref="EvaluationContext" />
+        /// </summary>
+        /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
+        /// <param name="directoryCacheFactory">The <see cref="IDirectoryCacheFactory"/> to use.</param>
+        public static EvaluationContext Create(SharingPolicy policy, IDirectoryCacheFactory directoryCacheFactory)
+        {
+            var context = new EvaluationContext(
+                policy,
+                fileSystem: null,
+                directoryCacheFactory);
 
             TestOnlyHookOnCreate?.Invoke(context);
 
