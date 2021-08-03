@@ -264,6 +264,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.OrderedItemDataCollection.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
     <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
