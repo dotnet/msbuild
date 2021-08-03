@@ -239,7 +239,7 @@ namespace Microsoft.Build.Evaluation
             #region Inner types
 
             /// <summary>
-            /// An efficient multi-value wrapper holding one or more versioned items.
+            /// An efficient multi-value wrapper holding one or more items.
             /// </summary>
             internal struct DictionaryValue
             {
@@ -281,41 +281,23 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// The version of the containing collection at the time this value was last changed.
-                /// </summary>
-                private int _version;
-
-                /// <summary>
                 /// Holds one value or a list of values.
                 /// </summary>
                 private object _value;
 
-                public DictionaryValue(int version, I item)
+                public DictionaryValue(I item)
                 {
-                    _version = version;
                     _value = item;
                 }
 
-                public void Add(int version, I item)
+                public void Add(I item)
                 {
-                    if (_value is List<I> list)
+                    if (_value is not ImmutableList<I> list)
                     {
-                        if (version != _version)
-                        {
-                            list = new List<I>(list);
-                        }
-                        list.Add(item);
+                        list = ImmutableList<I>.Empty;
+                        list = list.Add((I)_value);
                     }
-                    else
-                    {
-                        list = new List<I>
-                        {
-                            (I)_value,
-                            item
-                        };
-                    }
-                    _version = version;
-                    _value = list;
+                    _value = list.Add(item);
                 }
 
                 public Enumerator GetEnumerator()
@@ -330,11 +312,6 @@ namespace Microsoft.Build.Evaluation
             internal sealed class Builder : IEnumerable<ItemData>
             {
                 /// <summary>
-                /// The current version of the collection.
-                /// </summary>
-                private int _version;
-
-                /// <summary>
                 /// The list of items in the collection. Defines the enumeration order.
                 /// </summary>
                 private ImmutableList<ItemData>.Builder _listBuilder;
@@ -344,9 +321,8 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private ImmutableDictionary<string, DictionaryValue>.Builder _dictionaryBuilder;
 
-                internal Builder(int version, ImmutableList<ItemData>.Builder listBuilder, ImmutableDictionary<string, DictionaryValue>.Builder dictionaryBuilder)
+                internal Builder(ImmutableList<ItemData>.Builder listBuilder, ImmutableDictionary<string, DictionaryValue>.Builder dictionaryBuilder)
                 {
-                    _version = version;
                     _listBuilder = listBuilder;
                     _dictionaryBuilder = dictionaryBuilder;
                 }
@@ -468,7 +444,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 public OrderedItemDataCollection ToImmutable()
                 {
-                    return new OrderedItemDataCollection(_version, _listBuilder.ToImmutable(), _dictionaryBuilder?.ToImmutable());
+                    return new OrderedItemDataCollection(_listBuilder.ToImmutable(), _dictionaryBuilder?.ToImmutable());
                 }
 
                 private IDictionary<string, DictionaryValue> GetOrCreateDictionaryBuilder()
@@ -490,19 +466,17 @@ namespace Microsoft.Build.Evaluation
 
                     if (!_dictionaryBuilder.TryGetValue(key, out var dictionaryValue))
                     {
-                        dictionaryValue = new DictionaryValue(_version, item);
+                        dictionaryValue = new DictionaryValue(item);
                     }
-                    dictionaryValue.Add(_version, item);
+                    else
+                    {
+                        dictionaryValue.Add(item);
+                    }
                     _dictionaryBuilder[key] = dictionaryValue;
                 }
             }
 
             #endregion
-
-            /// <summary>
-            /// The current version of the collection.
-            /// </summary>
-            private int _version;
 
             /// <summary>
             /// The list of items in the collection. Defines the enumeration order.
@@ -514,9 +488,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private ImmutableDictionary<string, DictionaryValue> _dictionary;
 
-            private OrderedItemDataCollection(int version, ImmutableList<ItemData> list, ImmutableDictionary<string, DictionaryValue> dictionary)
+            private OrderedItemDataCollection(ImmutableList<ItemData> list, ImmutableDictionary<string, DictionaryValue> dictionary)
             {
-                _version = version;
                 _list = list;
                 _dictionary = dictionary;
             }
@@ -526,7 +499,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public static Builder CreateBuilder()
             {
-                return new Builder(0, ImmutableList.CreateBuilder<ItemData>(), null);
+                return new Builder(ImmutableList.CreateBuilder<ItemData>(), null);
             }
 
             /// <summary>
@@ -534,7 +507,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public Builder ToBuilder()
             {
-                return new Builder(_version + 1, _list.ToBuilder(), _dictionary?.ToBuilder());
+                return new Builder(_list.ToBuilder(), _dictionary?.ToBuilder());
             }
         }
 
