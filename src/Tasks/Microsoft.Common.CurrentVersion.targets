@@ -2918,6 +2918,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Note: This task should not be batched, since it relies on having all the COM references fed into it at once.
         -->
     <PropertyGroup>
+      <ResolveComReferenceMSBuildArchitecture Condition="$([MSBuild]::AreFeaturesEnabled('17.0'))">x86</ResolveComReferenceMSBuildArchitecture>
       <ResolveComReferenceMSBuildArchitecture Condition="'$(ResolveComReferenceMSBuildArchitecture)' == ''">$(PlatformTargetAsMSBuildArchitecture)</ResolveComReferenceMSBuildArchitecture>
 
       <ResolveComReferenceToolPath Condition="'$(ResolveComReferenceToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</ResolveComReferenceToolPath>
