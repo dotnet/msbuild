@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var expectedArch = RuntimeInformation.ProcessArchitecture.Equals(Architecture.Arm64) ? "arm64" : Environment.Is64BitOperatingSystem ? "x64" : "x86";
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .Be($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch}");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch}");
             });
         }
 
