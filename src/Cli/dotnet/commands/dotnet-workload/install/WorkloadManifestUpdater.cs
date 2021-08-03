@@ -125,12 +125,21 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             File.WriteAllText(filePath, jsonContent);
         }
 
+        public void DeleteUpdatableWorkloadsFile()
+        {
+            var filePath = GetAdvertisingWorkloadsFilePath();
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+
         public static void AdvertiseWorkloadUpdates()
         {
             try
             {
                 var backgroundUpdatesDisabled = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE"), out var disableEnvVar) && disableEnvVar;
-                var adUpdatesFile = Path.Combine(CliFolderPathCalculator.DotnetHomePath, ".dotnet", ".workloadAdvertisingUpdates");
+                var adUpdatesFile = GetAdvertisingWorkloadsFilePath(CliFolderPathCalculator.DotnetHomePath);
                 if (!backgroundUpdatesDisabled && File.Exists(adUpdatesFile))
                 {
                     var updatableWorkloads = JsonSerializer.Deserialize<string[]>(File.ReadAllText(adUpdatesFile));
@@ -433,7 +442,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userHome, ".dotnet", ".workloadAdvertisingManifestSentinal");
 
-        private string GetAdvertisingWorkloadsFilePath() => Path.Combine(_userHome, ".dotnet", ".workloadAdvertisingUpdates");
+        private string GetAdvertisingWorkloadsFilePath() => GetAdvertisingWorkloadsFilePath(_userHome);
+
+        private static string GetAdvertisingWorkloadsFilePath(string userHome) => Path.Combine(userHome, ".dotnet", ".workloadAdvertisingUpdates");
 
         private string GetAdvertisingManifestPath(SdkFeatureBand featureBand, ManifestId manifestId) =>
             Path.Combine(_userHome, ".dotnet", "sdk-advertising", featureBand.ToString(), manifestId.ToString());

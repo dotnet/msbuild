@@ -30,5 +30,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         IEnumerable<string> GetManifestPackageUrls(bool includePreviews);
 
         IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads);
+
+        void DeleteUpdatableWorkloadsFile();
     }
 }

@@ -563,7 +563,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public string GetSdkFeatureBand()
         {
-            return _manifestProvider?.GetSdkFeatureBand() ?? string.Empty;
+            return _manifestProvider?.GetSdkFeatureBand() ?? throw new Exception("Cannot get SDK feature band from ManifestProvider");
         }
 
         public class PackInfo

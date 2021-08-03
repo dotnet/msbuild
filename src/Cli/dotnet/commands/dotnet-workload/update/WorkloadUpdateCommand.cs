@@ -169,6 +169,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
                 _workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
             }
 
+            _workloadManifestUpdater.DeleteUpdatableWorkloadsFile();
+
             _reporter.WriteLine();
             _reporter.WriteLine(string.Format(LocalizableStrings.UpdateSucceeded, string.Join(" ", workloadIds)));
             _reporter.WriteLine();
