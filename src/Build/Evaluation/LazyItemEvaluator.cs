@@ -408,10 +408,7 @@ namespace Microsoft.Build.Evaluation
                                 if (fragment.IsMatchNormalized(kvp.Key))
                                 {
                                     items ??= new HashSet<I>();
-                                    foreach (I item in kvp.Value)
-                                    {
-                                        items.Add(item);
-                                    }
+                                    items.UnionWith(kvp.Value);
                                     keysToRemove ??= new List<string>();
                                     keysToRemove.Add(kvp.Key);
                                 }
