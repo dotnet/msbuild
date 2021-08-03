@@ -383,7 +383,9 @@ namespace Microsoft.Build.Evaluation
                 public void RemoveMatchingItems(ItemSpec<P, I> itemSpec)
                 {
                     HashSet<I> items = null;
+                    List<string> keysToRemove = null;
                     var dictionaryBuilder = GetOrCreateDictionaryBuilder();
+
                     foreach (var fragment in itemSpec.Fragments)
                     {
                         IEnumerable<string> referencedItems = fragment.GetReferencedItems();
@@ -400,14 +402,14 @@ namespace Microsoft.Build.Evaluation
                                     {
                                         items.Add(item);
                                     }
-                                    dictionaryBuilder.Remove(key);
+                                    keysToRemove ??= new List<string>();
+                                    keysToRemove.Add(key);
                                 }
                             }
                         }
                         else
                         {
                             // The fragment cannot enumerate its referenced items. Iterate over the dictionary and test each item.
-                            List<string> keysToRemove = null;
                             foreach (var kvp in dictionaryBuilder)
                             {
                                 if (fragment.IsMatchNormalized(kvp.Key))
@@ -421,18 +423,14 @@ namespace Microsoft.Build.Evaluation
                                     keysToRemove.Add(kvp.Key);
                                 }
                             }
-
-                            if (keysToRemove != null)
-                            {
-                                foreach (string key in keysToRemove)
-                                {
-                                    dictionaryBuilder.Remove(key);
-                                }
-                            }
                         }
                     }
 
                     // Finish by removing items from the list.
+                    if (keysToRemove != null)
+                    {
+                        dictionaryBuilder.RemoveRange(keysToRemove);
+                    }
                     if (items != null)
                     {
                         _listBuilder.RemoveAll(item => items.Contains(item.Item));
@@ -447,7 +445,7 @@ namespace Microsoft.Build.Evaluation
                     return new OrderedItemDataCollection(_listBuilder.ToImmutable(), _dictionaryBuilder?.ToImmutable());
                 }
 
-                private IDictionary<string, DictionaryValue> GetOrCreateDictionaryBuilder()
+                private ImmutableDictionary<string, DictionaryValue>.Builder GetOrCreateDictionaryBuilder()
                 {
                     if (_dictionaryBuilder == null)
                     {
