@@ -427,7 +427,7 @@ namespace Microsoft.Build.Evaluation
 
         public virtual IEnumerable<string> GetReferencedItems()
         {
-            yield return EscapingUtilities.UnescapeAll(TextFragment);
+            return Enumerable.Repeat(EscapingUtilities.UnescapeAll(TextFragment), 1);
         }
 
         public virtual IMSBuildGlob ToMSBuildGlob()

@@ -241,8 +241,45 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// An efficient multi-value wrapper holding one or more versioned items.
             /// </summary>
-            internal struct DictionaryValue : IEnumerable<I>
+            internal struct DictionaryValue
             {
+                /// <summary>
+                /// A non-allocating enumerator for the multi-value.
+                /// </summary>
+                public struct Enumerator : IEnumerator<I>
+                {
+                    private object _value;
+                    private int _index;
+
+                    public Enumerator(object value)
+                    {
+                        _value = value;
+                        _index = -1;
+                    }
+
+                    public I Current => (_value is IList<I> list) ? list[_index] : (I)_value;
+                    object System.Collections.IEnumerator.Current => Current;
+
+                    public void Dispose()
+                    { }
+
+                    public bool MoveNext()
+                    {
+                        int count = (_value is IList<I> list) ? list.Count : 1;
+                        if (_index + 1 < count)
+                        {
+                            _index++;
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    public void Reset()
+                    {
+                        _index = -1;
+                    }
+                }
+
                 /// <summary>
                 /// The version of the containing collection at the time this value was last changed.
                 /// </summary>
@@ -281,22 +318,10 @@ namespace Microsoft.Build.Evaluation
                     _value = list;
                 }
 
-                public IEnumerator<I> GetEnumerator()
+                public Enumerator GetEnumerator()
                 {
-                    if (_value is I item)
-                    {
-                        yield return item;
-                    }
-                    else if (_value is IEnumerable<I> enumerable)
-                    {
-                        foreach (I enumerableItem in enumerable)
-                        {
-                            yield return enumerableItem;
-                        }
-                    }
+                    return new Enumerator(_value);
                 }
-
-                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
             }
 
             /// <summary>
