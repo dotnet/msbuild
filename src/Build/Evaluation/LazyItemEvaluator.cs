@@ -394,10 +394,7 @@ namespace Microsoft.Build.Evaluation
                                 if (dictionaryBuilder.TryGetValue(key, out var multiValue))
                                 {
                                     items ??= new HashSet<I>();
-                                    foreach (I item in multiValue)
-                                    {
-                                        items.Add(item);
-                                    }
+                                    items.UnionWith(multiValue);
                                     dictionaryBuilder.Remove(key);
                                 }
                             }
