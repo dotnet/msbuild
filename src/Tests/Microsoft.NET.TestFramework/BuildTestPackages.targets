@@ -74,16 +74,6 @@
         <Version>$(Version)</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>-->
-      <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-desktop-binding-redirects"
-                              Condition="$([MSBuild]::IsOSPlatform(`Windows`))">
-        <Name>dotnet-desktop-binding-redirects</Name>
-        <ProjectName>dotnet-desktop-binding-redirects.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsMsbuild>True</IsMsbuild>
-        <IsApplicable>$(DesktopAvailable)</IsApplicable>
-        <Version>$(Version)</Version>
-        <Clean>True</Clean>
-      </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Assets/TestPackages/dotnet-hello/v1/dotnet-hello">
         <Name>dotnet-hello</Name>
         <ProjectName>dotnet-hello.csproj</ProjectName>
