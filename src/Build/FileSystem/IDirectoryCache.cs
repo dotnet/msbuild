@@ -8,11 +8,13 @@ using System.IO.Enumeration;
 using Microsoft.IO.Enumeration;
 #endif
 
+using Microsoft.Build.Evaluation;
+
 namespace Microsoft.Build.FileSystem
 {
     public interface IDirectoryCacheFactory
     {
-        IDirectoryCache GetDirectoryCacheForProject(string projectPath);
+        IDirectoryCache GetDirectoryCacheForProject(Project project);
     }
 
     public interface IDirectoryCache
