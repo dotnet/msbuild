@@ -57,7 +57,7 @@ namespace Microsoft.Build.Internal
 
             // Historically we've used slightly different normalization logic depending on the type of matching
             // performed in IsMatchNormalized. We have to keep doing it for compat.
-            if (_regex == null || _filenamePattern == null)
+            if (_regex == null && _filenamePattern == null)
             {
                 fileToMatch = FileUtilities.NormalizePathForComparisonNoThrow(fileToMatch, _currentDirectory);
             }
