@@ -23,6 +23,11 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] XmlElements { get; set; }
 
         /// <summary>
+        /// Opts into or out of using the new schema with Property Name=... rather than just specifying the RootElementName.
+        /// </summary>
+        public bool UseNewSchema { get; set; } = false;
+
+        /// <summary>
         /// The generated XML
         /// </summary>
         [Output]
@@ -32,8 +37,8 @@ namespace Microsoft.Build.Tasks
         {
             if (XmlElements != null)
             {
-                XElement root = RootElementName.StartsWith("PutRootElementAsProperty_") ?
-                    new("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName.Substring("PutRootElementAsProperty_".Length)))) :
+                XElement root = UseNewSchema ?
+                    new("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
                     new(RootElementName);
 
                 foreach (var item in XmlElements)
