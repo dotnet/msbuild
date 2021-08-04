@@ -16,14 +16,19 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
     {
         private Dictionary<ITypeSymbol, TypeMapper> _types;
         private bool _expandedTree = false;
+        private readonly bool _typeforwardsOnly;
 
         /// <summary>
         /// Instantiates an object with the provided <see cref="ComparingSettings"/>.
         /// </summary>
         /// <param name="settings">The settings used to diff the elements in the mapper.</param>
         /// <param name="rightSetSize">The number of elements in the right set to compare.</param>
-        public NamespaceMapper(ComparingSettings settings, int rightSetSize = 1)
-            : base(settings, rightSetSize) { }
+        /// <param name="typeforwardsOnly">Indicates if <see cref="GetTypes"/> should only return typeforwards.</param>
+        public NamespaceMapper(ComparingSettings settings, int rightSetSize = 1, bool typeforwardsOnly = false)
+            : base(settings, rightSetSize)
+        {
+            _typeforwardsOnly = typeforwardsOnly;
+        }
 
         /// <summary>
         /// Gets all the <see cref="TypeMapper"/> representing the types defined in the namespace including the typeforwards.
@@ -34,17 +39,26 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             if (!_expandedTree)
             {
                 EnsureTypesInitialized();
-                AddOrCreateMappers(Left, ElementSide.Left);
 
-                if (Right.Length == 1)
+                // if the typeforwardsOnly flag is specified it means this namespace is already
+                // populated with the resolved typeforwards by the assembly mapper and that we 
+                // didn't find this namespace in the initial assembly. So we avoid getting the types
+                // as that would return the types defined in the assembly where the typeforwardes
+                // were resolved from.
+                if (!_typeforwardsOnly)
                 {
-                    AddOrCreateMappers(Right[0], ElementSide.Right);
-                }
-                else
-                {
-                    for (int i = 0; i < Right.Length; i++)
+                    AddOrCreateMappers(Left, ElementSide.Left);
+
+                    if (Right.Length == 1)
                     {
-                        AddOrCreateMappers(Right[i], ElementSide.Right, i);
+                        AddOrCreateMappers(Right[0], ElementSide.Right);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < Right.Length; i++)
+                        {
+                            AddOrCreateMappers(Right[i], ElementSide.Right, i);
+                        }
                     }
                 }
 

@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,12 +14,52 @@ using System.Reflection.PortableExecutable;
 namespace Microsoft.DotNet.ApiCompatibility
 {
     /// <summary>
+    /// Class that represents a warning that occurred while trying to load a specific assembly.
+    /// </summary>
+    public class AssemblyLoadWarning : IDiagnostic, IEquatable<AssemblyLoadWarning>
+    {
+        private readonly StringComparer _ordinalComparer = StringComparer.Ordinal;
+
+        /// <summary>
+        /// Creates a new instance of an <see cref="AssemblyLoadWarning"/> class with a given <paramref name="diagnosticId"/>,
+        /// <paramref name="referenceId"/> and <paramref name="message"/>.
+        /// </summary>
+        /// <param name="diagnosticId">String representing the diagnostic ID.</param>
+        /// <param name="referenceId">String representing the ID for the object that the diagnostic was created for.</param>
+        /// <param name="message">String describing the diagnostic.</param>
+        public AssemblyLoadWarning(string diagnosticId, string referenceId, string message)
+        {
+            DiagnosticId = diagnosticId;
+            ReferenceId = referenceId;
+            Message = message;
+        }
+
+        /// <inheritdoc/>
+        public string DiagnosticId { get; }
+
+        /// <inheritdoc/>
+        public string ReferenceId { get; }
+
+        /// <inheritdoc/>
+        public string Message { get; }
+
+        /// <inheritdoc/>
+        public bool Equals(AssemblyLoadWarning other) => _ordinalComparer.Equals(DiagnosticId, other.DiagnosticId) &&
+                                                         _ordinalComparer.Equals(ReferenceId, other.ReferenceId) &&
+                                                         _ordinalComparer.Equals(Message, other.Message);
+    }
+
+    /// <summary>
     /// Class that loads <see cref="IAssemblySymbol"/> objects from source files, binaries or directories containing binaries.
     /// </summary>
     public class AssemblySymbolLoader
     {
-        private readonly HashSet<string> _referenceSearchPaths = new();
-        private readonly List<string> _warnings = new();
+        /// <summary>
+        /// Dictionary that holds the paths to help loading dependencies. Keys will be assembly name and 
+        /// value are the containing folder.
+        /// </summary>
+        private readonly Dictionary<string, string> _referencePaths = new(StringComparer.OrdinalIgnoreCase);
+        private readonly List<AssemblyLoadWarning> _warnings = new();
         private readonly Dictionary<string, MetadataReference> _loadedAssemblies;
         private readonly bool _resolveReferences;
         private CSharpCompilation _cSharpCompilation;
@@ -43,7 +84,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         public void AddReferenceSearchDirectories(string paths) => AddReferenceSearchDirectories(SplitPaths(paths));
 
         /// <summary>
-        /// Adds a set of paths to the search directories to resolve references from.
+        /// Adds a set of paths to the search directories to resolve references from. Paths may
+        /// be directories or full paths to assembly files.
         /// This is only used when the setting to resolve assembly references is set to true.
         /// </summary>
         /// <param name="paths">The list of paths to register as search directories.</param>
@@ -55,7 +97,21 @@ namespace Microsoft.DotNet.ApiCompatibility
             }
 
             foreach (string path in paths)
-                _referenceSearchPaths.Add(path);
+            {
+                FileAttributes attr = File.GetAttributes(path);
+
+                if (attr.HasFlag(FileAttributes.Directory))
+                {
+                    if (!_referencePaths.ContainsKey(path))
+                        _referencePaths.Add(path, path);
+                }
+                else
+                {
+                    string assemblyName = Path.GetFileName(path);
+                    if (!_referencePaths.ContainsKey(assemblyName))
+                        _referencePaths.Add(assemblyName, Path.GetDirectoryName(path));
+                }
+            }
         }
 
         /// <summary>
@@ -75,7 +131,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="warnings">List of warnings.</param>
         /// <returns>True if there are any warnings, false otherwise.</returns>
-        public bool HasLoadWarnings(out IEnumerable<string> warnings)
+        public bool HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings)
         {
             warnings = _warnings;
             return _warnings.Count > 0;
@@ -260,7 +316,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 if (warnOnMissingAssemblies && !found)
                 {
                     string assemblyInfo = validateMatchingIdentity ? assembly.Identity.GetDisplayName() : assembly.Name;
-                    _warnings.Add(string.Format(Resources.MatchingAssemblyNotFound, assemblyInfo));
+                    _warnings.Add(new AssemblyLoadWarning(DiagnosticIds.AssemblyNotFound, assemblyInfo, string.Format(Resources.MatchingAssemblyNotFound, assemblyInfo)));
                 }
             }
 
@@ -290,7 +346,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 }
 
                 if (_resolveReferences && !string.IsNullOrEmpty(directory))
-                    _referenceSearchPaths.Add(directory);
+                    _referencePaths.Add(Path.GetFileName(directory), directory);  // Not Sure about this one, we should do something else here.
             }
 
             return result;
@@ -353,23 +409,36 @@ namespace Microsoft.DotNet.ApiCompatibility
                 bool found = _loadedAssemblies.TryGetValue(name, out MetadataReference _);
                 if (!found)
                 {
-                    foreach (string directory in _referenceSearchPaths)
+                    // First we try to see if a reference path for this specific assembly was passed in directly, and if so
+                    // we use that.
+                    if (_referencePaths.TryGetValue(name, out string fullReferencePath))
                     {
-                        string potentialPath = Path.Combine(directory, name);
-                        if (File.Exists(potentialPath))
+                        using FileStream resolvedStream = File.OpenRead(Path.Combine(fullReferencePath, name));
+                        CreateAndAddReferenceToCompilation(name, resolvedStream);
+                        found = true;
+                    }
+                    // If we can't find a specific reference path for the dependency, then we look in the folders where the
+                    // rest of the reference paths are located to see if we can find the dependency there.
+                    else
+                    {
+                        foreach (var referencePath in _referencePaths)
                         {
-                            // TODO: add version check and add a warning if it doesn't match?
-                            using FileStream resolvedStream = File.OpenRead(potentialPath);
-                            CreateAndAddReferenceToCompilation(name, resolvedStream);
-                            found = true;
-                            break;
+                            string potentialPath = Path.Combine(referencePath.Value, name);
+                            if (File.Exists(potentialPath))
+                            {
+                                // TODO: add version check and add a warning if it doesn't match?
+                                using FileStream resolvedStream = File.OpenRead(potentialPath);
+                                CreateAndAddReferenceToCompilation(name, resolvedStream);
+                                found = true;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (!found)
-                {
-                    _warnings.Add(string.Format(Resources.CouldNotResolveReference, name));
+                    if (!found)
+                    {
+                        _warnings.Add(new AssemblyLoadWarning(DiagnosticIds.AssemblyReferenceNotFound, name, string.Format(Resources.CouldNotResolveReference, name)));
+                    }
                 }
             }
         }
