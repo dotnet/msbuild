@@ -46,6 +46,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
+        <!-- Extract necessary information for SetPlatform negotiation -->
+        <!-- This target does not run for cpp projects. -->
+        <IsVcxOrNativeProj>false</IsVcxOrNativeProj>
+        <Platforms>$(Platforms)</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
 
@@ -215,9 +219,5 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
-
-  <!-- TODO: https://github.com/Microsoft/msbuild/issues/1062: Remove this temporary hook when possible. -->
-  <Import Project="$(CoreCrossTargetingTargetsPath)"
-          Condition="'$(CoreCrossTargetingTargetsPath)' != '' and Exists('$(CoreCrossTargetingTargetsPath)')" />
 
 </Project>

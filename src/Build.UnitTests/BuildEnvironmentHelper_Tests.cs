@@ -57,51 +57,14 @@ namespace Microsoft.Build.Engine.UnitTests
         /// If MSBUILD_EXE_PATH is explicitly set, we should detect it as a VisualStudio instance even in older scenarios
         /// (for example when the install path is under 15.0).
         /// </summary>
-        /// <param name="is64BitMSbuild">When true, run the test pointing to amd64 msbuild.exe.</param>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void FindVisualStudioEnvironmentByEnvironmentVariable(bool is64BitMSbuild)
+        public void FindVisualStudioEnvironmentByEnvironmentVariable()
         {
             using (var env = new EmptyVSEnviroment())
             {
-                var msbuildBinDirectory = is64BitMSbuild
-                    ? Path.Combine(env.BuildDirectory, "amd64")
-                    : env.BuildDirectory;
-
-                var msBuildPath = Path.Combine(msbuildBinDirectory, MSBuildExeName);
-                var msBuildConfig = Path.Combine(msbuildBinDirectory, $"{MSBuildExeName}.config");
-                var vsMSBuildDirectory = Path.Combine(env.TempFolderRoot, "MSBuild");
-
-                env.WithEnvironment("MSBUILD_EXE_PATH", msBuildPath);
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
-
-                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
-                BuildEnvironmentHelper.Instance.MSBuildExtensionsPath.ShouldBe(vsMSBuildDirectory);
-                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.ShouldBe(msbuildBinDirectory);
-                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath.ShouldBe(msBuildPath);
-                BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile.ShouldBe(msBuildConfig);
-                // This code is not running inside the Visual Studio devenv.exe process
-                BuildEnvironmentHelper.Instance.RunningInVisualStudio.ShouldBeFalse();
-                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
-                BuildEnvironmentHelper.Instance.RunningTests.ShouldBeFalse();
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void FindOlderVisualStudioEnvironmentByEnvironmentVariable(bool is64BitMSbuild)
-        {
-            using (var env = new EmptyVSEnviroment("15.0"))
-            {
-                var msbuildBinDirectory = is64BitMSbuild
-                    ? Path.Combine(env.BuildDirectory, "amd64")
-                    : env.BuildDirectory;
+                var msbuildBinDirectory = env.BuildDirectory;
 
                 var msBuildPath = Path.Combine(msbuildBinDirectory, MSBuildExeName);
                 var msBuildConfig = Path.Combine(msbuildBinDirectory, $"{MSBuildExeName}.config");

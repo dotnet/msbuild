@@ -153,26 +153,23 @@ namespace Microsoft.Build.Shared
             {
                 foreach (var searchPath in searchPaths)
                 {
-                    foreach (var extension in MSBuildLoadContext.Extensions)
+                    var candidatePath = Path.Combine(searchPath,
+                        cultureSubfolder,
+                        $"{assemblyName.Name}.dll");
+
+                    if (IsAssemblyAlreadyLoaded(candidatePath) ||
+                        !FileSystems.Default.FileExists(candidatePath))
                     {
-                        var candidatePath = Path.Combine(searchPath,
-                            cultureSubfolder,
-                            $"{assemblyName.Name}.{extension}");
-
-                        if (IsAssemblyAlreadyLoaded(candidatePath) ||
-                            !FileSystems.Default.FileExists(candidatePath))
-                        {
-                            continue;
-                        }
-
-                        AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                        if (candidateAssemblyName.Version != assemblyName.Version)
-                        {
-                            continue;
-                        }
-
-                        return LoadAndCache(context, candidatePath);
+                        continue;
                     }
+
+                    AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                    if (candidateAssemblyName.Version != assemblyName.Version)
+                    {
+                        continue;
+                    }
+
+                    return LoadAndCache(context, candidatePath);
                 }
             }
 
