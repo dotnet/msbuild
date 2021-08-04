@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             var command = new WorkloadListCommand(_parseResult, _reporter, workloadInstaller, "6.0.100");
             command.Execute();
 
-            // Expect 3 lines for table headers
+            // Expected number of lines for table headers
             _reporter.Lines.Count.Should().Be(5);
         }
 
