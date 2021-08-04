@@ -511,6 +511,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             foreach (var workloadId in installedWorkloads)
             {
+                if (!_workloads.ContainsKey(workloadId) || !advertisingManifestResolver._workloads.ContainsKey(workloadId))
+                {
+                    continue;
+                }
+
                 var existingWorkload = _workloads[workloadId];
                 var existingPacks = GetPacksInWorkload(existingWorkload.workload, existingWorkload.manifest).Select(p => p.packId).ToHashSet();
                 var updatedWorkload = advertisingManifestResolver._workloads[workloadId].workload;
