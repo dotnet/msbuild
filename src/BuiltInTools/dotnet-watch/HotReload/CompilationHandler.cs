@@ -94,7 +94,6 @@ namespace Microsoft.DotNet.Watcher.Tools
             Debug.Assert(_deltaApplier != null);
 
             var updatedSolution = _currentSolution;
-            ProjectId updatedProjectId;
 
             var foundFiles = false;
             foreach (var file in compilationFiles)
@@ -103,14 +102,12 @@ namespace Microsoft.DotNet.Watcher.Tools
                 {
                     var sourceText = await GetSourceTextAsync(file.FilePath);
                     updatedSolution = documentToUpdate.WithText(sourceText).Project.Solution;
-                    updatedProjectId = documentToUpdate.Project.Id;
                     foundFiles = true;
                 }
                 else if (updatedSolution.Projects.SelectMany(p => p.AdditionalDocuments).FirstOrDefault(d => string.Equals(d.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)) is AdditionalDocument additionalDocument)
                 {
                     var sourceText = await GetSourceTextAsync(file.FilePath);
                     updatedSolution = updatedSolution.WithAdditionalDocumentText(additionalDocument.Id, sourceText, PreservationMode.PreserveValue);
-                    updatedProjectId = additionalDocument.Project.Id;
                     foundFiles = true;
                 }
                 else
@@ -296,7 +293,5 @@ namespace Microsoft.DotNet.Watcher.Tools
                 _currentSolution.Workspace.Dispose();
             }
         }
-
-
     }
 }
