@@ -55,10 +55,13 @@ namespace Microsoft.Build.Internal
         {
             Debug.Assert(!string.IsNullOrEmpty(fileToMatch));
 
-            string normalizedFileToMatch = FileUtilities.PathIsInvalid(fileToMatch)
-                ? fileToMatch
-                : FileUtilities.GetFullPathNoThrow(Path.Combine(_currentDirectory, fileToMatch));
-            return IsMatchNormalized(normalizedFileToMatch);
+            // Historically we've used slightly different normalization logic depending on the type of matching
+            // performed in IsMatchNormalized. We have to keep doing it for compat.
+            if (_regex != null || _filenamePattern != null || !FileUtilities.PathIsInvalid(fileToMatch))
+            {
+                fileToMatch = FileUtilities.GetFullPathNoThrow(Path.Combine(_currentDirectory, fileToMatch));
+            }
+            return IsMatchNormalized(fileToMatch);
         }
 
         /// <summary>
