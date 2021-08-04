@@ -220,4 +220,10 @@ The current {1} is '{2}'.</value>
   <data name="RunCommandProjectAbbreviationDeprecated" xml:space="preserve">
     <value>Warning NETSDK1174: The abbreviation of -p for --project is deprecated. Please use --project.</value>
   </data>
+  <data name="PropertyOptionDescription" xml:space="preserve">
+    <value>Properties to be passed to MSBuild.</value>
+  </data>
+  <data name="OnlyOneProjectAllowed" xml:space="preserve">
+    <value>Only one project can be specified at a time using the `-p` option.</value>
+  </data>
 </root>

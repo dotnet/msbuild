@@ -3,11 +3,14 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
+using Microsoft.NET.TestFramework.ProjectConstruction;
 using Microsoft.NET.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -206,6 +209,19 @@ namespace Microsoft.DotNet.Cli.Run.Tests
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World!")
                          .And.HaveStdOutContaining(LocalizableStrings.RunCommandProjectAbbreviationDeprecated);
+        }
+
+        [Theory]
+        [InlineData("-p project1 -p project2")]
+        [InlineData("--project project1 -p project2")]
+        public void ItErrorsWhenMultipleProjectsAreSpecified(string args)
+        {
+            new DotnetCommand(Log, "run")
+                .Execute(args.Split(" "))
+                .Should()
+                .Fail()
+                .And
+                .HaveStdErrContaining(LocalizableStrings.OnlyOneProjectAllowed);
         }
 
         [Fact]

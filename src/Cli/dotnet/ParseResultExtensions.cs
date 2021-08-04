@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Cli
@@ -105,6 +106,35 @@ namespace Microsoft.DotNet.Cli
                     parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
                     parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
                 null;
+        }
+
+        public static bool UsingRunCommandShorthandProjectOption(this ParseResult parseResult)
+        {
+            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.ValueForOption(RunCommandParser.PropertyOption).Any())
+            {
+                var projVals = parseResult.GetRunCommandShorthandProjectValues();
+                if (projVals.Any())
+                {
+                    if (projVals.Count() != 1 || parseResult.HasOption(RunCommandParser.ProjectOption))
+                    {
+                        throw new GracefulException(Tools.Run.LocalizableStrings.OnlyOneProjectAllowed);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandProjectValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => !property.Contains("="));
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandPropertyValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => property.Contains("="));
         }
     }
 }
