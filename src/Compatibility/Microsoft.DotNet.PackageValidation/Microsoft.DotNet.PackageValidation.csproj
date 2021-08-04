@@ -15,11 +15,11 @@
     <Compile Include="..\..\Tasks\Common\**\*.cs" LinkBase="Common" />
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkVersion)" ExcludeAssets="Runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildUtilitiesCoreVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksPackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="NuGet.Packaging" Version="$(NuGetBuildTasksPackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="NuGet.Protocol" Version="$(NuGetBuildTasksPackageVersion)" ExcludeAssets="Runtime" />
-    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
-    <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" ExcludeAssets="Runtime" />
+    <!-- We carry NuGet as part of the package in case the package is used with an older SDKs or with full framework MSBuild. -->
+    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksPackageVersion)" />
+    <PackageReference Include="NuGet.Packaging" Version="$(NuGetBuildTasksPackageVersion)" />
+    <PackageReference Include="NuGet.Protocol" Version="$(NuGetBuildTasksPackageVersion)" />
+    <ProjectReference Include="..\Microsoft.DotNet.ApiCompatibility\Microsoft.DotNet.ApiCompatibility.csproj" />
   </ItemGroup>
 
   <ItemGroup>
