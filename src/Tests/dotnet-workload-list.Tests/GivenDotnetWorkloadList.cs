@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             command.Execute();
 
             // Expect 3 lines for table headers
-            _reporter.Lines.Count.Should().Be(3);
+            _reporter.Lines.Count.Should().Be(5);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
 
             foreach (var workload in expectedWorkloads)
             {
-                _reporter.Lines.Should().Contain(workload.ToString());
+                _reporter.Lines.Select(line => line.Trim()).Should().Contain(workload.ToString());
             }
         }
 
