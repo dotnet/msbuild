@@ -26,11 +26,11 @@ namespace Microsoft.Build.Internal
             _filenamePattern = filenamePattern;
             _regex = regex;
 
-            if (_regex == null && _filenamePattern == null && !FileUtilities.PathIsInvalid(_unescapedFileSpec))
+            if (_regex == null && _filenamePattern == null)
             {
                 // We'll be testing files by comparing their normalized paths. Normalize our file spec right away
                 // to avoid doing this work on each IsMatch call.
-                _unescapedFileSpec = FileUtilities.GetFullPathNoThrow(Path.Combine(_currentDirectory, _unescapedFileSpec));
+                _unescapedFileSpec = FileUtilities.NormalizePathForComparisonNoThrow(_unescapedFileSpec, _currentDirectory);
             }
         }
 
@@ -57,7 +57,11 @@ namespace Microsoft.Build.Internal
 
             // Historically we've used slightly different normalization logic depending on the type of matching
             // performed in IsMatchNormalized. We have to keep doing it for compat.
-            if (_regex != null || _filenamePattern != null || !FileUtilities.PathIsInvalid(fileToMatch))
+            if (_regex == null || _filenamePattern == null)
+            {
+                fileToMatch = FileUtilities.NormalizePathForComparisonNoThrow(fileToMatch, _currentDirectory);
+            }
+            else
             {
                 fileToMatch = FileUtilities.GetFullPathNoThrow(Path.Combine(_currentDirectory, fileToMatch));
             }
