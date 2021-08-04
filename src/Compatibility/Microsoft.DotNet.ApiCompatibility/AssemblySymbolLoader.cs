@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.DotNet.ApiCompatibility.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,13 +13,29 @@ using System.Reflection.PortableExecutable;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
+    public class AssemblyLoadWarning : IDiagnostic
+    {
+        public AssemblyLoadWarning(string diagnosticId, string referenceId, string message)
+        {
+            DiagnosticId = diagnosticId;
+            ReferenceId = referenceId;
+            Message = message;
+        }
+
+        public string DiagnosticId { get; }
+
+        public string ReferenceId { get; }
+
+        public string Message { get; }
+    }
+
     /// <summary>
     /// Class that loads <see cref="IAssemblySymbol"/> objects from source files, binaries or directories containing binaries.
     /// </summary>
     public class AssemblySymbolLoader
     {
         private readonly HashSet<string> _referenceSearchPaths = new();
-        private readonly List<string> _warnings = new();
+        private readonly List<AssemblyLoadWarning> _warnings = new();
         private readonly Dictionary<string, MetadataReference> _loadedAssemblies;
         private readonly bool _resolveReferences;
         private CSharpCompilation _cSharpCompilation;
@@ -75,7 +92,7 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         /// <param name="warnings">List of warnings.</param>
         /// <returns>True if there are any warnings, false otherwise.</returns>
-        public bool HasLoadWarnings(out IEnumerable<string> warnings)
+        public bool HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings)
         {
             warnings = _warnings;
             return _warnings.Count > 0;
@@ -260,7 +277,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 if (warnOnMissingAssemblies && !found)
                 {
                     string assemblyInfo = validateMatchingIdentity ? assembly.Identity.GetDisplayName() : assembly.Name;
-                    _warnings.Add(string.Format(Resources.MatchingAssemblyNotFound, assemblyInfo));
+                    _warnings.Add(new AssemblyLoadWarning(DiagnosticIds.AssemblyNotFound, assemblyInfo, string.Format(Resources.MatchingAssemblyNotFound, assemblyInfo)));
                 }
             }
 
@@ -365,11 +382,11 @@ namespace Microsoft.DotNet.ApiCompatibility
                             break;
                         }
                     }
-                }
 
-                if (!found)
-                {
-                    _warnings.Add(string.Format(Resources.CouldNotResolveReference, name));
+                    if (!found)
+                    {
+                        _warnings.Add(new AssemblyLoadWarning(DiagnosticIds.AssemblyReferenceNotFound, name, string.Format(Resources.CouldNotResolveReference, name)));
+                    }
                 }
             }
         }

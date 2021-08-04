@@ -25,7 +25,13 @@ namespace Microsoft.DotNet.Compatibility
             _baselineAllErrors = baselineAllErrors;
         }
 
-        public void LogError(Suppression suppression, string code, string format, params string[] args)
+        public void LogError(Suppression suppression, string code, string format, params string[] args) =>
+            LogSuppressableMessage(MessageLevel.Error, suppression, code, format, args);
+
+        public void LogWarning(Suppression suppression, string code, string format, params string[] args) =>
+            LogSuppressableMessage(MessageLevel.Warning, suppression, code, format, args);
+
+        private void LogSuppressableMessage(MessageLevel messageLevel, Suppression suppression, string code, string format, params string[] args)
         {
             if (!_suppressionEngine.IsErrorSuppressed(suppression))
             {
@@ -35,14 +41,12 @@ namespace Microsoft.DotNet.Compatibility
                 }
                 else
                 {
-                    _log.LogNonSdkError(code, format, args);
+                    _log.Log(new Message(messageLevel, string.Format(format, args), code));
                 }
             }
         }
 
         public void LogMessage(MessageImportance importance, string format, params string[] args) => _log.LogMessage(importance, format, args);
-
-        public void LogErrorHeader(string message) => _log.LogNonSdkError(null, message);
 
         public void GenerateSuppressionsFile(string suppressionsFile)
         {

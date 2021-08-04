@@ -21,17 +21,18 @@ namespace Microsoft.DotNet.PackageValidation
         internal Dictionary<MetadataInformation, List<(MetadataInformation rightAssembly, string header)>> _dict = new();
         private readonly ApiComparer _differ = new();
         private readonly ICompatibilityLogger _log;
-
+        private readonly Dictionary<string, HashSet<string>> _referenceDirectories;
         private bool _isBaselineSuppression = false;
         private string _leftPackagePath;
         private string _rightPackagePath;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log)
+        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> referenceDirectories)
         {
             _differ.NoWarn = noWarn;
             _differ.IgnoredDifferences = ignoredDifferences;
             _differ.StrictMode = enableStrictMode;
             _log = log;
+            _referenceDirectories = referenceDirectories ?? new();
         }
 
         /// <summary>
@@ -42,10 +43,12 @@ namespace Microsoft.DotNet.PackageValidation
             foreach (MetadataInformation left in _dict.Keys)
             {
                 IAssemblySymbol leftSymbols;
+                bool runWithReferences = false;
                 using(Stream leftAssemblyStream = GetFileStreamFromPackage(_leftPackagePath, left.AssemblyId))
                 {
-                    leftSymbols = new AssemblySymbolLoader().LoadAssembly(left.AssemblyName, leftAssemblyStream);
+                    leftSymbols = GetAssemblySymbolFromStream(leftAssemblyStream, left, out runWithReferences);
                 }
+
                 ElementContainer<IAssemblySymbol> leftContainer = new(leftSymbols, left);
 
                 List<ElementContainer<IAssemblySymbol>> rightContainerList = new();
@@ -54,11 +57,14 @@ namespace Microsoft.DotNet.PackageValidation
                     IAssemblySymbol rightSymbols;
                     using (Stream rightAssemblyStream = GetFileStreamFromPackage(_rightPackagePath, rightTuple.rightAssembly.AssemblyId))
                     {
-                        rightSymbols = new AssemblySymbolLoader().LoadAssembly(rightTuple.rightAssembly.AssemblyName, rightAssemblyStream);
+                        rightSymbols = GetAssemblySymbolFromStream(rightAssemblyStream, rightTuple.rightAssembly, out bool resolvedReferences);
+                        runWithReferences &= resolvedReferences;
                     }
+
                     rightContainerList.Add(new ElementContainer<IAssemblySymbol>(rightSymbols, rightTuple.rightAssembly));
                 }
 
+                _differ.RunningWithReferences = runWithReferences;
                 IEnumerable<(MetadataInformation, MetadataInformation, IEnumerable<CompatDifference>)> differences =
                     _differ.GetDifferences(leftContainer, rightContainerList);
 
@@ -66,10 +72,16 @@ namespace Microsoft.DotNet.PackageValidation
                 foreach ((MetadataInformation, MetadataInformation, IEnumerable<CompatDifference> differences) diff in differences)
                 {
                     (MetadataInformation rightAssembly, string header) rightTuple = _dict[left][counter++];
-                    _log.LogMessage(MessageImportance.Low, rightTuple.header);
 
+                    bool logHeaderMessage = true;
                     foreach (CompatDifference difference in diff.differences)
                     {
+                        if (logHeaderMessage)
+                        {
+                            _log.LogMessage(MessageImportance.Low, rightTuple.header);
+                            logHeaderMessage = false;
+                        }
+
                         _log.LogError(
                             new Suppression
                             {
@@ -85,6 +97,58 @@ namespace Microsoft.DotNet.PackageValidation
                 }
             }
             _dict.Clear();
+        }
+
+        private IAssemblySymbol GetAssemblySymbolFromStream(Stream assemblyStream, MetadataInformation assemblyInformation, out bool resolvedReferences)
+        {
+            resolvedReferences = false;
+            HashSet<string> directories = null;
+
+            // In order to enable reference support for baseline suppression we need a better way
+            // to resolve references for the baseline package. Let's not enable it for now.
+            bool shouldResolveReferences = !_isBaselineSuppression && _referenceDirectories != null &&
+                _referenceDirectories.TryGetValue(assemblyInformation.TargetFramework, out directories);
+
+            AssemblySymbolLoader loader = new(resolveAssemblyReferences: shouldResolveReferences);
+            if (shouldResolveReferences)
+            {
+                resolvedReferences = true;
+                loader.AddReferenceSearchDirectories(directories);
+            }
+            else if (!_isBaselineSuppression && _referenceDirectories != null)
+            {
+                _log.LogWarning(
+                    new Suppression()
+                    {
+                        DiagnosticId = ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                        Target = assemblyInformation.DisplayString
+                    },
+                    ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm,
+                    "Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation",
+                    assemblyInformation.TargetFramework, assemblyInformation.DisplayString);
+            }
+
+            IAssemblySymbol symbol = loader.LoadAssembly(assemblyInformation.AssemblyName, assemblyStream);
+
+            if (loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings))
+            {
+                resolvedReferences = false;
+                foreach (AssemblyLoadWarning warning in warnings)
+                {
+                    _log.LogWarning(
+                        new Suppression()
+                        {
+                            DiagnosticId = warning.DiagnosticId,
+                            Target = warning.ReferenceId
+                        },
+                        warning.DiagnosticId,
+                        "When loading: '{0}': {1}",
+                        assemblyInformation.DisplayString,
+                        warning.Message);
+                }
+            }
+
+            return symbol;
         }
 
         /// <summary>

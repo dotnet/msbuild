@@ -16,10 +16,10 @@ namespace Microsoft.DotNet.PackageValidation
     public class CompatibleFrameworkInPackageValidator
     {
         private readonly ApiCompatRunner _apiCompatRunner;
-
-        public CompatibleFrameworkInPackageValidator(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log)
+        
+        public CompatibleFrameworkInPackageValidator(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> apiCompatReferences)
         {
-            _apiCompatRunner = new(noWarn, ignoredDifferences, enableStrictMode, log);
+            _apiCompatRunner = new(noWarn, ignoredDifferences, enableStrictMode, log, apiCompatReferences);
         }
 
         /// <summary>

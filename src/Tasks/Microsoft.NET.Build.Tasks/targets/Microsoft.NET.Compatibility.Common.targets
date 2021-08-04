@@ -3,6 +3,7 @@
   <UsingTask TaskName="Microsoft.DotNet.Compatibility.ValidatePackage" AssemblyFile="$(DotNetCompatibilityAssembly)" />
 
   <Target Name="RunPackageValidation"
+          DependsOnTargets="_GetPackageValidationReferenceDirectories"
           AfterTargets="Pack"
           Condition="'$(IsPackable)' == 'true' and '$(EnablePackageValidation)' == 'true'">
 
@@ -34,6 +35,37 @@
       CompatibilitySuppressionFilePath="$(CompatibilitySuppressionFilePath)"
       BaselinePackageTargetPath="$(PackageValidationBaselinePath)"
       DisablePackageBaselineValidation="$(DisablePackageBaselineValidation)"
-      RoslynAssembliesPath="$(RoslynAssembliesPath)" />
+      RoslynAssembliesPath="$(RoslynAssembliesPath)"
+      ReferenceDirectories="@(PackageValidationReferenceDirectories)" />
+  </Target>
+
+  <PropertyGroup>
+    <_GetPackageValidationReferenceDirectoriesDependsOn Condition="'$(IsCrossTargetingBuild)' != 'true'">_GetReferenceDirectoriesForPackageValidation</_GetPackageValidationReferenceDirectoriesDependsOn>
+    <_GetPackageValidationReferenceDirectoriesDependsOn Condition="'$(IsCrossTargetingBuild)' == 'true'">_ComputeTargetFrameworkItems</_GetPackageValidationReferenceDirectoriesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="_GetReferenceDirectoriesForPackageValidation"
+          DependsOnTargets="ResolveReferences"
+          Returns="@(_ReferenceDirectoriesWithTargetFramework)">
+    <ItemGroup>
+      <_referenceDirectories Include="@(ReferencePath -> '%(RootDir)%(Directory)')" />
+      <_ReferenceDirectoriesWithTargetFramework Include="%(_referenceDirectories.Identity)"  TargetFramework="$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GetPackageValidationReferenceDirectories"
+          DependsOnTargets="$(_GetPackageValidationReferenceDirectoriesDependsOn)"
+          Condition="'$(RunPackageValidationWithoutReferences)' != 'true'">
+
+    <MSBuild Projects="@(_InnerBuildProjects)"
+             Condition="'$(IsCrossTargetingBuild)' == 'true'"
+             Targets="_GetReferenceDirectoriesForPackageValidation"
+             Properties="BuildProjectReferences=false">
+      <Output ItemName="PackageValidationReferenceDirectories" TaskParameter="TargetOutputs" />
+    </MSBuild>
+
+    <ItemGroup Condition="'$(IsCrossTargetingBuild)' != 'true'">
+      <PackageValidationReferenceDirectories Include="@(_ReferenceDirectoriesWithTargetFramework)" />
+    </ItemGroup>
   </Target>
 </Project>

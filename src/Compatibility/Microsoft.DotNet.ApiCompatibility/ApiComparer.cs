@@ -37,6 +37,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         public bool StrictMode { get; set; }
 
+        public bool RunningWithReferences { get; set; }
+
         /// <summary>
         /// Callback function to get the <see cref="ComparingSettings"/> to be used when creating the settings to get the differences.
         /// The callback takes a string leftName and string[] rightNames parameters to indicate API Compat via the settings what the 

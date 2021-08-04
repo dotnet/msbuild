@@ -9,7 +9,7 @@ namespace Microsoft.DotNet.PackageValidation
     public interface ICompatibilityLogger
     {
         void LogError(Suppression suppression, string code, string format, params string[] args);
-        void LogErrorHeader(string message);
+        void LogWarning(Suppression suppression, string code, string format, params string[] args);
         void LogMessage(MessageImportance importance, string format, params string[] args);
     }
 }

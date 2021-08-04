@@ -144,14 +144,14 @@ namespace MyNamespace
             AssemblySymbolLoader loader = new();
             IEnumerable<IAssemblySymbol> symbols = loader.LoadMatchingAssemblies(new[] { assembly }, paths);
             Assert.Empty(symbols);
-            Assert.True(loader.HasLoadWarnings(out IEnumerable<string> warnings));
+            Assert.True(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
 
-            IEnumerable<string> expected = new[]
+            IEnumerable<AssemblyLoadWarning> expected = new[]
             {
-                $"Could not find matching assembly: '{assembly.Identity.GetDisplayName()}' in any of the search directories."
+                new AssemblyLoadWarning(DiagnosticIds.AssemblyNotFound, assembly.Identity.GetDisplayName(), $"Could not find matching assembly: '{assembly.Identity.GetDisplayName()}' in any of the search directories.")
             };
 
-            Assert.Equal(expected, warnings, StringComparer.Ordinal);
+            Assert.Equal(expected, warnings);
         }
 
         [Fact]
@@ -195,14 +195,14 @@ namespace MyNamespace
             if (validateIdentities)
             {
                 Assert.Empty(matchingAssemblies);
-                Assert.True(loader.HasLoadWarnings(out IEnumerable<string> warnings));
+                Assert.True(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
 
-                IEnumerable<string> expected = new[]
+                IEnumerable<AssemblyLoadWarning> expected = new[]
                 {
-                    $"Could not find matching assembly: '{fromAssembly.Identity.GetDisplayName()}' in any of the search directories."
+                    new AssemblyLoadWarning(DiagnosticIds.AssemblyNotFound, fromAssembly.Identity.GetDisplayName(), $"Could not find matching assembly: '{fromAssembly.Identity.GetDisplayName()}' in any of the search directories.")
                 };
 
-                Assert.Equal(expected, warnings, StringComparer.Ordinal);
+                Assert.Equal(expected, warnings);
             }
             else
             {
@@ -290,7 +290,7 @@ namespace MyNamespace
 
             if (resolveReferences)
             {
-                Assert.True(loader.HasLoadWarnings(out IEnumerable<string> warnings));
+                Assert.True(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
 
                 string expectedReference = "System.Runtime.dll";
 
@@ -299,16 +299,16 @@ namespace MyNamespace
                     expectedReference = "mscorlib.dll";
                 }
 
-                IEnumerable<string> expected = new[]
+                IEnumerable<AssemblyLoadWarning> expected = new[]
                 {
-                    $"Could not resolve reference '{expectedReference}' in any of the provided search directories."
+                    new AssemblyLoadWarning(DiagnosticIds.AssemblyReferenceNotFound, expectedReference, $"Could not resolve reference '{expectedReference}' in any of the provided search directories.")
                 };
 
-                Assert.Equal(expected, warnings, StringComparer.Ordinal);
+                Assert.Equal(expected, warnings);
             }
             else
             {
-                Assert.False(loader.HasLoadWarnings(out IEnumerable<string> warnings));
+                Assert.False(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
                 Assert.Empty(warnings);
             }
         }
@@ -321,7 +321,7 @@ namespace MyNamespace
             loader.AddReferenceSearchDirectories(Path.GetDirectoryName(typeof(string).Assembly.Location));
             loader.LoadAssembly(Path.Combine(assetInfo.OutputDirectory, assetInfo.TestAsset.TestProject.Name + ".dll"));
 
-            Assert.False(loader.HasLoadWarnings(out IEnumerable<string> warnings));
+            Assert.False(loader.HasLoadWarnings(out IEnumerable<AssemblyLoadWarning> warnings));
             Assert.Empty(warnings);
         }
 

@@ -53,36 +53,50 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
                         return;
                     }
 
+                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer);
+
                     Stack<INamespaceSymbol> stack = new();
                     stack.Push(symbol.GlobalNamespace);
                     while (stack.Count > 0)
                     {
                         INamespaceSymbol nsSymbol = stack.Pop();
-                        if (nsSymbol.GetTypeMembers().Length > 0)
+                        bool hasTypeForwards = typeForwards.TryGetValue(nsSymbol, out List<INamedTypeSymbol> types);
+                        if (hasTypeForwards || nsSymbol.GetTypeMembers().Length > 0)
                         {
-                            AddMapper(nsSymbol);
+                            NamespaceMapper mapper = AddMapper(nsSymbol);
+                            if (hasTypeForwards)
+                            {
+                                mapper.AddForwardedTypes(types, side, setIndex);
+
+                                // remove the typeforwards for this namespace as we did
+                                // find and instance of the namespace on the current assembly
+                                // and we don't want to create a mapper with the namespace in
+                                // the assembly where the forwarded type is defined.
+                                typeForwards.Remove(nsSymbol);
+                            }
                         }
 
                         foreach (INamespaceSymbol child in nsSymbol.GetNamespaceMembers())
                             stack.Push(child);
                     }
 
-                    Dictionary<INamespaceSymbol, List<INamedTypeSymbol>> typeForwards = ResolveTypeForwards(symbol, Settings.EqualityComparer);
+                    // If the current assembly didn't have a namespace symbol for the resolved typeforwards
+                    // use the namespace symbol in the assembly where the forwarded type is defined.
+                    // But create the mapper with typeForwardsOnly setting to not visit types defined in the target assembly.
                     foreach (KeyValuePair<INamespaceSymbol, List<INamedTypeSymbol>> kvp in typeForwards)
                     {
-                        NamespaceMapper mapper = AddMapper(kvp.Key, checkIfExists: true);
+                        NamespaceMapper mapper = AddMapper(kvp.Key, checkIfExists: true, typeforwardsOnly: true);
                         mapper.AddForwardedTypes(kvp.Value, side, setIndex);
                     }
 
-                    NamespaceMapper AddMapper(INamespaceSymbol ns, bool checkIfExists = false)
+                    NamespaceMapper AddMapper(INamespaceSymbol ns, bool checkIfExists = false, bool typeforwardsOnly = false)
                     {
                         if (!_namespaces.TryGetValue(ns, out NamespaceMapper mapper))
                         {
-                            mapper = new NamespaceMapper(Settings, Right.Length);
+                            mapper = new NamespaceMapper(Settings, Right.Length, typeforwardsOnly: typeforwardsOnly);
                             _namespaces.Add(ns, mapper);
                         }
-
-                        if (checkIfExists && mapper.GetElement(side, setIndex) != null)
+                        else if (checkIfExists && mapper.GetElement(side, setIndex) != null)
                         {
                             return mapper;
                         }

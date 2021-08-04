@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
@@ -37,6 +38,8 @@ namespace Microsoft.DotNet.Compatibility
 
         public string CompatibilitySuppressionFilePath { get; set; }
 
+        public ITaskItem[] ReferenceDirectories { get; set; }
+
         public override bool Execute()
         {
             AppDomain.CurrentDomain.AssemblyResolve += ResolverForRoslyn;
@@ -58,16 +61,39 @@ namespace Microsoft.DotNet.Compatibility
                 runtimeGraph = JsonRuntimeFormat.ReadRuntimeGraph(RuntimeGraph);
             }
 
+            Dictionary<string, HashSet<string>> apiCompatReferences = new();
+            if (ReferenceDirectories != null)
+            {
+                foreach (ITaskItem taskItem in ReferenceDirectories)
+                {
+                    string tfm = taskItem.GetMetadata("TargetFramework");
+                    if (string.IsNullOrEmpty(tfm))
+                        continue;
+
+                    string directory = taskItem.GetMetadata("Identity");
+                    if (!Directory.Exists(directory))
+                        continue;
+
+                    if (!apiCompatReferences.TryGetValue(tfm, out HashSet<string> directories))
+                    {
+                        directories = new();
+                        apiCompatReferences.Add(tfm, directories);
+                    }
+
+                    directories.Add(directory);
+                }
+            }
+
             Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph);
             CompatibilityLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile);
 
-            new CompatibleTfmValidator(NoWarn, null, RunApiCompat, EnableStrictModeForCompatibleTfms, logger).Validate(package);
-            new CompatibleFrameworkInPackageValidator(NoWarn, null, EnableStrictModeForCompatibleFrameworksInPackage, logger).Validate(package);
+            new CompatibleTfmValidator(NoWarn, null, RunApiCompat, EnableStrictModeForCompatibleTfms, logger, apiCompatReferences).Validate(package);
+            new CompatibleFrameworkInPackageValidator(NoWarn, null, EnableStrictModeForCompatibleFrameworksInPackage, logger, apiCompatReferences).Validate(package);
 
             if (!DisablePackageBaselineValidation && !string.IsNullOrEmpty(BaselinePackageTargetPath))
             {
                 Package baselinePackage = NupkgParser.CreatePackage(BaselinePackageTargetPath, runtimeGraph);
-                new BaselinePackageValidator(baselinePackage, NoWarn, null, RunApiCompat, logger).Validate(package);
+                new BaselinePackageValidator(baselinePackage, NoWarn, null, RunApiCompat, logger, apiCompatReferences).Validate(package);
             }
 
             if (GenerateCompatibilitySuppressionFile)
