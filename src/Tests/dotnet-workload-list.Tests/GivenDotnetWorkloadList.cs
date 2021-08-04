@@ -40,8 +40,8 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             var command = new WorkloadListCommand(_parseResult, _reporter, workloadInstaller, "6.0.100");
             command.Execute();
 
-            // Expect 3 lines for table headers
-            _reporter.Lines.Count.Should().Be(3);
+            // Expected number of lines for table headers
+            _reporter.Lines.Count.Should().Be(5);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
 
             foreach (var workload in expectedWorkloads)
             {
-                _reporter.Lines.Should().Contain(workload.ToString());
+                _reporter.Lines.Select(line => line.Trim()).Should().Contain(workload.ToString());
             }
         }
 

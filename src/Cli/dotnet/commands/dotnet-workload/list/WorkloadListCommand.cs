@@ -116,6 +116,8 @@ namespace Microsoft.DotNet.Workloads.Workload.List
                 table.PrintRows(installedList, l => _reporter.WriteLine(l));
 
                 _reporter.WriteLine();
+                _reporter.WriteLine(LocalizableStrings.WorkloadListFooter);
+                _reporter.WriteLine();
 
                 var updatableWorkloads = _workloadManifestUpdater.GetUpdatableWorkloadsToAdvertise(installedList).Select(workloadId => workloadId.ToString());
                 if (updatableWorkloads.Any())
