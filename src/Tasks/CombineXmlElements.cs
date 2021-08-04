@@ -32,7 +32,9 @@ namespace Microsoft.Build.Tasks
         {
             if (XmlElements != null)
             {
-                XElement root = new XElement("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName)));
+                XElement root = RootElementName.StartsWith("PutRootElementAsProperty_") ?
+                    new("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName.Substring("PutRootElementAsProperty_".Length)))) :
+                    new(RootElementName);
 
                 foreach (var item in XmlElements)
                 {
