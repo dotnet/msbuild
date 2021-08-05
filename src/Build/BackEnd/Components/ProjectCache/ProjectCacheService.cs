@@ -4,6 +4,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -17,6 +18,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -383,8 +385,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 ErrorUtilities.VerifyThrow(projectConfigurationNodes.Count > 0, "Expected at least one project in solution");
 
                 var definingProjectPath = project.FullPath;
-                var definingProjectGlobalProperties = project.GlobalProperties;
                 var graphEntryPoints = new List<ProjectGraphEntryPoint>(projectConfigurationNodes.Count);
+
+                var templateGlobalProperties = new Dictionary<string, string>(project.GlobalProperties, StringComparer.OrdinalIgnoreCase);
+                RemoveProjectSpecificGlobalProperties(templateGlobalProperties, project);
 
                 foreach (XmlNode node in projectConfigurationNodes)
                 {
@@ -401,13 +405,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     // Take the defining project global properties and override the configuration and platform.
                     // It's sufficient to only set Configuration and Platform.
                     // But we send everything to maximize the plugins' potential to quickly workaround potential MSBuild issues while the MSBuild fixes flow into VS.
-                    var globalProperties = new Dictionary<string, string>(definingProjectGlobalProperties, StringComparer.OrdinalIgnoreCase)
+                    var globalProperties = new Dictionary<string, string>(templateGlobalProperties, StringComparer.OrdinalIgnoreCase)
                     {
                         ["Configuration"] = configuration,
                         ["Platform"] = platform
                     };
-
-                    RemoveProjectSpecificGlobalProperties(globalProperties, project);
 
                     graphEntryPoints.Add(new ProjectGraphEntryPoint(projectPath, globalProperties));
                 }
