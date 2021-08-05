@@ -108,9 +108,9 @@
       <Uri>https://dev.azure.com/devdiv/DevDiv/_git/NuGet-NuGet.Client-Trusted</Uri>
       <Sha>f017f82b310f26a97d8d8aafc7772d40121730a6</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.0.0-preview-20210805-01">
+    <Dependency Name="Microsoft.NET.Test.Sdk" Version="17.0.0-preview-20210805-02">
       <Uri>https://github.com/microsoft/vstest</Uri>
-      <Sha>3b43807256b44cc6b707ca63335c83569a039e74</Sha>
+      <Sha>b9197d0f4ff86ddc4f52a7bdc4b9f54129c2494e</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NET.ILLink.Tasks" Version="6.0.100-preview.6.21404.1">
       <Uri>https://github.com/mono/linker</Uri>
