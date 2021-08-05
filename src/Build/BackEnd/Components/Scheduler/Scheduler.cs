@@ -177,6 +177,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public Scheduler()
         {
+            // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
             _debugDumpState = Traits.Instance.DebugScheduler;
             _debugDumpPath = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
                 ? DebugUtils.DebugPath
