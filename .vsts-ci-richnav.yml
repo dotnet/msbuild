@@ -41,8 +41,3 @@ stages:
               _PublishType: none
               _SignType: test
               _Test: -test
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _Test: -test
