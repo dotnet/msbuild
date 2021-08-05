@@ -8,8 +8,6 @@ trigger:
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: PB_PublishBlobFeedUrl
-    value: ''
   - name: _DotNetPublishToBlobFeed
     value: false
   - name: _DotNetArtifactsCategory

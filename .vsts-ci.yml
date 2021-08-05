@@ -12,25 +12,21 @@ trigger:
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: PB_PublishBlobFeedUrl
-    value: ''
   - name: _DotNetPublishToBlobFeed
     value: false
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCore
-  - name: _PublishToAzure
-    value: false
   - name: PostBuildSign
     value: true
   - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-    - name: PB_PublishBlobFeedUrl
-      value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     - name: _DotNetPublishToBlobFeed
       value: true
-    - name: _PublishToAzure
-      value: true
+    - group: DotNet-MSRC-Storage
+    - name: _InternalRuntimeDownloadArgs
+      value: /p:DotNetRuntimeSourceFeed=https://dotnetclimsrc.blob.core.windows.net/dotnet
+        /p:DotNetRuntimeSourceFeedKey=$(dotnetclimsrc-read-sas-token-base64)
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: DotNet-CLI-SDLValidation-Params
 
@@ -59,11 +55,9 @@ stages:
           Build_Release:
             _BuildConfig: Release
             ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
-              _PublishType: none
               _SignType: test
               _Test: -test
             ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-              _PublishType: blob
               _SignType: real
               _Test: ''
   - template: /eng/common/templates/job/source-build.yml
@@ -90,12 +84,10 @@ stages:
           matrix:
             Build_Debug:
               _BuildConfig: Debug
-              _PublishType: none
               _SignType: test
               _Test: -test
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
               _SignType: test
               _Test: -test
 
@@ -113,7 +105,6 @@ stages:
           matrix:
             Build_Debug:
               _BuildConfig: Debug
-              _PublishType: none
               _SignType: test
 
     - template: /eng/build.yml
@@ -134,7 +125,6 @@ stages:
           matrix:
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
               _SignType: test
 
     - template: /eng/build.yml
@@ -150,7 +140,6 @@ stages:
           matrix:
             Build_Release:
               _BuildConfig: Release
-              _PublishType: none
               _SignType: test
 
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:

@@ -58,7 +58,7 @@
 
   <!-- We use a separate target to publish this to blob storage so that we can push this to
        a relative path inside the blob storage. -->
-  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish" Condition="'$(PublishToAzure)' == 'true'">
+  <Target Name="PublishToolsetAssets" DependsOnTargets="ReadToolsetVersion" BeforeTargets="Publish">
     <ItemGroup>
       <ToolsetAssetsToPushToBlobFeed Include="@(ToolsetAssetsToPublish)">
         <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(ToolsetVersionValue)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
