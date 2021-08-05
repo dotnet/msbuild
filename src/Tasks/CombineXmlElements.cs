@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Opts into or out of using the new schema with Property Name=... rather than just specifying the RootElementName.
         /// </summary>
-        public bool UseNewSchema { get; set; } = false;
+        public bool UseAttributeForTargetFrameworkInfoPropertyNames { get; set; } = false;
 
         /// <summary>
         /// The generated XML
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks
         {
             if (XmlElements != null)
             {
-                XElement root = UseNewSchema ?
+                XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
                     new("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
                     new(RootElementName);
 

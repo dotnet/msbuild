@@ -1870,13 +1870,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
            Text="Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build" />
 
     <PropertyGroup>
-      <UseNewSchema Condition="'$(UseNewSchema)' == ''">false</UseNewSchema>
+      <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="'$(_UseAttributeForTargetFrameworkInfoPropertyNames)' == ''">false</_UseAttributeForTargetFrameworkInfoPropertyNames>
     </PropertyGroup>
   
     <CombineXmlElements
       RootElementName="AdditionalProjectProperties"
       XmlElements="@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)')"
-      UseNewSchema="$(UseNewSchema)">
+      UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)">
       <Output TaskParameter="Result"
         PropertyName="_AdditionalPropertiesFromProject"/>
     </CombineXmlElements>
@@ -1912,13 +1912,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <PropertyGroup>
-      <UseNewSchema Condition="'$(UseNewSchema)' == ''">false</UseNewSchema>
+      <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="'$(_UseAttributeForTargetFrameworkInfoPropertyNames)' == ''">false</_UseAttributeForTargetFrameworkInfoPropertyNames>
     </PropertyGroup>
 
     <CombineTargetFrameworkInfoProperties
         RootElementName="$(TargetFramework)"
         PropertiesAndValues="@(_AdditionalTargetFrameworkInfoPropertyWithValue)"
-        UseNewSchema="$(UseNewSchema)">
+        UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)">
       <Output TaskParameter="Result"
               PropertyName="_AdditionalTargetFrameworkInfoProperties"/>
     </CombineTargetFrameworkInfoProperties>
