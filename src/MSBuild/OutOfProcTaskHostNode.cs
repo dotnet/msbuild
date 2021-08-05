@@ -496,7 +496,7 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine10 Members
 
         [Serializable]
-        private sealed class BuildEngineInterfaceImpl : BuildEngineInterface
+        private sealed class EngineServicesImpl : EngineServices
         {
             /// <summary>
             /// No logging verbosity optimization in OOP nodes.
@@ -504,7 +504,7 @@ namespace Microsoft.Build.CommandLine
             public override bool LogsMessagesOfImportance(MessageImportance importance) => true;
         }
 
-        public BuildEngineInterface EngineInterface { get; } = new BuildEngineInterfaceImpl();
+        public EngineServices EngineServices { get; } = new EngineServicesImpl();
 
         #endregion
 

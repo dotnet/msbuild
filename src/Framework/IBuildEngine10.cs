@@ -4,7 +4,7 @@
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface extends <see cref="IBuildEngine9" /> to provide a reference to the <see cref="BuildEngineInterface" /> class.
+    /// This interface extends <see cref="IBuildEngine9" /> to provide a reference to the <see cref="EngineServices" /> class.
     /// Future engine API should be added to the class as opposed to introducing yet another version of the IBuildEngine interface.
     /// </summary>
     public interface IBuildEngine10 : IBuildEngine9
@@ -12,6 +12,6 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns the new build engine interface.
         /// </summary>
-        BuildEngineInterface EngineInterface { get; }
+        EngineServices EngineServices { get; }
     }
 }

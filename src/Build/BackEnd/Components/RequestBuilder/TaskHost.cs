@@ -130,7 +130,7 @@ namespace Microsoft.Build.BackEnd
             _disableInprocNode = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
                 ? s_disableInprocNodeByEnvironmentVariable || host.BuildParameters.DisableInProcNode
                 : s_disableInprocNodeByEnvironmentVariable;
-            EngineInterface = new BuildEngineInterfaceImpl(this);
+            EngineServices = new EngineServicesImpl(this);
         }
 
         /// <summary>
@@ -878,11 +878,11 @@ namespace Microsoft.Build.BackEnd
         #region IBuildEngine10 Members
 
         [Serializable]
-        private sealed class BuildEngineInterfaceImpl : BuildEngineInterface
+        private sealed class EngineServicesImpl : EngineServices
         {
             private TaskHost _taskHost;
 
-            internal BuildEngineInterfaceImpl(TaskHost taskHost)
+            internal EngineServicesImpl(TaskHost taskHost)
             {
                 _taskHost = taskHost;
             }
@@ -904,7 +904,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        public BuildEngineInterface EngineInterface { get; }
+        public EngineServices EngineServices{ get; }
 
         #endregion
 

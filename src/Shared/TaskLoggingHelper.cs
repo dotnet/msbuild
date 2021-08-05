@@ -247,7 +247,7 @@ namespace Microsoft.Build.Utilities
         public bool LogsMessagesOfImportance(MessageImportance importance)
         {
             return BuildEngine is not IBuildEngine10 buildEngine10
-                || buildEngine10.EngineInterface.LogsMessagesOfImportance(importance);
+                || buildEngine10.EngineServices.LogsMessagesOfImportance(importance);
         }
 
         /// <summary>

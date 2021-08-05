@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// won't break when the class is extended with new members. This base implementation should be throwing <see cref="NotImplementedException"/>.
     /// </remarks>
     [Serializable]
-    public abstract class BuildEngineInterface
+    public abstract class EngineServices
     {
         /// <summary>
         /// Initial version with LogsMessagesOfImportance() as the only exposed member.
