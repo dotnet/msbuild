@@ -158,13 +158,15 @@ function Check-EditedFiles() {
 
 function Check-RequiredVersionBumps() {
   # Log VSTS errors for missing required version bumps
-  $versionLineChanged = $false
-  git --no-pager diff --unified --no-color --exit-code -w origin/$env:SYSTEM_PULLREQUEST_TARGETBRANCH HEAD src\Framework\EngineServices.cs `
-    | Select-String -Pattern "int Version =" | ForEach-Object -process { $versionLineChanged = $true }
-  if (($LASTEXITCODE -ne 0) -and (-not $versionLineChanged)) {
-    throw "##vso[task.logissue type=error] Detected changes in Framework\EngineServices.cs without a version bump.  " +
-          "If you are making API changes, please bump the version.  " +
-          "If the changes in the file are cosmetic, please add/change a comment on the Version prop to silence the error."
+  if ($env:SYSTEM_PULLREQUEST_TARGETBRANCH) {
+    $versionLineChanged = $false
+    git --no-pager diff --unified --no-color --exit-code -w origin/$env:SYSTEM_PULLREQUEST_TARGETBRANCH HEAD src\Framework\EngineServices.cs `
+      | Select-String -Pattern "int Version =" | ForEach-Object -process { $versionLineChanged = $true }
+    if (($LASTEXITCODE -ne 0) -and (-not $versionLineChanged)) {
+      throw "##vso[task.logissue type=error] Detected changes in Framework\EngineServices.cs without a version bump.  " +
+            "If you are making API changes, please bump the version.  " +
+            "If the changes in the file are cosmetic, please add/change a comment on the Version prop to silence the error."
+    }
   }
 }
 
