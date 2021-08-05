@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.FileSystem;
@@ -45,6 +46,9 @@ namespace Microsoft.Build.Evaluation.Context
         internal IFileSystem FileSystem { get; }
         internal EngineFileUtilities EngineFileUtilities { get; }
 
+        private IDirectoryCacheFactory _directoryCacheFactory;
+        private ConditionalWeakTable<Project, IDirectoryCache> _directoryCachesPerProject;
+
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
@@ -60,12 +64,16 @@ namespace Microsoft.Build.Evaluation.Context
 
             Policy = policy;
 
-            // TODO: Use directoryCacheFactory.
-
             SdkResolverService = new CachingSdkResolverService();
             FileEntryExpansionCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
             EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, FileEntryExpansionCache));
+
+            if (directoryCacheFactory != null)
+            {
+                _directoryCacheFactory = directoryCacheFactory;
+                _directoryCachesPerProject = new ConditionalWeakTable<Project, IDirectoryCache>();
+            }
         }
 
         /// <summary>
@@ -143,6 +151,19 @@ namespace Microsoft.Build.Evaluation.Context
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     return null;
             }
+        }
+
+        internal IDirectoryCache GetDirectoryCacheForProject(Project project)
+        {
+            IDirectoryCache directoryCache = _directoryCachesPerProject?.GetValue(
+                project,
+                project => _directoryCacheFactory.GetDirectoryCacheForProject(project));
+            if (directoryCache == null)
+            {
+                return directoryCache;
+            }
+            // TODO
+            return null;
         }
     }
 }

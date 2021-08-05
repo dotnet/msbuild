@@ -881,6 +881,7 @@ namespace Microsoft.Build.Evaluation.Context
     {
         internal EvaluationContext() { }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
+        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.IDirectoryCacheFactory directoryCacheFactory) { throw null; }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem) { throw null; }
         public enum SharingPolicy
         {
@@ -1504,6 +1505,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
 }
 namespace Microsoft.Build.FileSystem
 {
+    public delegate bool FindPredicate(ref System.ReadOnlySpan<char> fileName);
+    public delegate TResult FindTransform<TResult>(ref System.ReadOnlySpan<char> fileName);
+    public partial interface IDirectoryCache
+    {
+        bool DirectoryExists(string path);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateDirectories<TResult>(string path, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        System.Collections.Generic.IEnumerable<TResult> EnumerateFiles<TResult>(string path, Microsoft.Build.FileSystem.FindPredicate predicate, Microsoft.Build.FileSystem.FindTransform<TResult> transform);
+        bool FileExists(string path);
+    }
+    public partial interface IDirectoryCacheFactory
+    {
+        Microsoft.Build.FileSystem.IDirectoryCache GetDirectoryCacheForProject(Microsoft.Build.Evaluation.Project project);
+    }
     public abstract partial class MSBuildFileSystemBase
     {
         protected MSBuildFileSystemBase() { }
