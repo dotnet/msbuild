@@ -201,6 +201,6 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
 
         protected virtual Stream GetReadableStream(string supressionFile) => new FileStream(supressionFile, FileMode.Open);
 
-        protected virtual Stream GetWritableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.OpenOrCreate);
+        protected virtual Stream GetWritableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.Create);
     }
 }
