@@ -39,7 +39,7 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
-            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1));
+            testProject.PackageReferences.Add(new TestPackageReference("Newtonsoft.Json", "13.0.1"));
             testProject.PackageReferences.Add(new TestPackageReference("sqlite", "3.13.0"));
 
              var testProjectInstance = _testAssetsManager
