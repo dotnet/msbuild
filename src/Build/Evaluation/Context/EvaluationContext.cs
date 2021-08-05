@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.FileSystem;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -44,7 +43,7 @@ namespace Microsoft.Build.Evaluation.Context
 
         internal ISdkResolverService SdkResolverService { get; }
         internal IFileSystem FileSystem { get; }
-        internal EngineFileUtilities EngineFileUtilities { get; }
+        internal FileMatcher FileMatcher { get; }
 
         private IDirectoryCacheFactory _directoryCacheFactory;
         private ConditionalWeakTable<Project, IDirectoryCache> _directoryCachesPerProject;
@@ -67,7 +66,7 @@ namespace Microsoft.Build.Evaluation.Context
             SdkResolverService = new CachingSdkResolverService();
             FileEntryExpansionCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
-            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, FileEntryExpansionCache));
+            FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
 
             if (directoryCacheFactory != null)
             {

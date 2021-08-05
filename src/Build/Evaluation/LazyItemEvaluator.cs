@@ -6,7 +6,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -42,7 +41,7 @@ namespace Microsoft.Build.Evaluation
 
         protected IFileSystem FileSystem { get; }
 
-        protected EngineFileUtilities EngineFileUtilities { get; }
+        protected FileMatcher FileMatcher { get; }
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
@@ -55,7 +54,7 @@ namespace Microsoft.Build.Evaluation
             _evaluationProfiler = evaluationProfiler;
 
             FileSystem = evaluationContext.FileSystem;
-            EngineFileUtilities = evaluationContext.EngineFileUtilities;
+            FileMatcher = evaluationContext.FileMatcher;
         }
 
         private ImmutableList<I> GetItems(string itemType)

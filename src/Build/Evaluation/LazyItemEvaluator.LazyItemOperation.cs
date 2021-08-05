@@ -49,7 +49,7 @@ namespace Microsoft.Build.Evaluation
                 _itemSpec.Expander = _expander;
             }
 
-            protected EngineFileUtilities EngineFileUtilities => _lazyEvaluator.EngineFileUtilities;
+            protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
             public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {

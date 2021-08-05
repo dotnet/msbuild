@@ -2216,7 +2216,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             foreach (
                                 var resultantItem in
-                                EngineFileUtilities.Default.GetFileListEscaped(
+                                EngineFileUtilities.GetFileListEscaped(
                                     item.ProjectDirectory,
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))
