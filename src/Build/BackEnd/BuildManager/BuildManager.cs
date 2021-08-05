@@ -1563,26 +1563,26 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            bool setFaultedResult;
+            bool submissionNeedsCompletion;
             lock (_syncLock)
             {
                 // BuildRequest may be null if the submission fails early on.
-                setFaultedResult = submission.BuildRequest != null;
-                if (setFaultedResult)
+                submissionNeedsCompletion = submission.BuildRequest != null;
+                if (submissionNeedsCompletion)
                 {
                     var result = new BuildResult(submission.BuildRequest, ex);
                     submission.CompleteResults(result);
                 }
             }
 
-            if (setFaultedResult)
+            if (submissionNeedsCompletion)
             {
                 WaitForAllLoggingServiceEventsToBeProcessed();
             }
 
             lock (_syncLock)
             {
-                if (setFaultedResult)
+                if (submissionNeedsCompletion)
                 {
                     submission.CompleteLogging();
                 }
