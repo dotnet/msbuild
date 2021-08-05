@@ -94,6 +94,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string Result { get { throw null; } set { } }
         public string RootElementName { get { throw null; } set { } }
+        public bool UseNewSchema { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
     public partial class CombineXmlElements : Microsoft.Build.Tasks.TaskExtension
@@ -102,6 +103,7 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public string Result { get { throw null; } set { } }
         public string RootElementName { get { throw null; } set { } }
+        public bool UseNewSchema { get { throw null; } set { } }
         public Microsoft.Build.Framework.ITaskItem[] XmlElements { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
