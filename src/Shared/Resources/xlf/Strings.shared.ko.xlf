@@ -122,7 +122,7 @@
       </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
-        <target state="translated">MSB4077: "{0}" 작업이 LoadInSeparateAppDomain 특성으로 표시되었지만 MarshalByRefObject에서 파생되지 않습니다. 해당 작업이 MarshalByRefObject 또는 AppDomainIsolatedTask에서 파생되는지 확인하세요.</target>
+        <target state="translated">MSB4077: "{0}" 작업이 LoadInSeparateAppDomain 특성으로 표시되었지만 MarshalByRefObject에서 파생되지 않습니다. 해당 작업이 MarshalByRefObject 또는 AppDomainIsolatedTask에서 파생되는지 확인하십시오.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersion">

@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
     {
 #region Private Data
 
-#if NETCOREAPP2_1 || MONO
+#if NETCOREAPP2_1_OR_GREATER || MONO
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
@@ -42,11 +42,6 @@ namespace Microsoft.Build.BackEnd
         /// The size of the buffers to use for named pipes
         /// </summary>
         private const int PipeBufferSize = 131072;
-
-        /// <summary>
-        /// Flag indicating if we should debug communications or not.
-        /// </summary>
-        private bool _debugCommunications = false;
 
         /// <summary>
         /// The current communication status of the node.
@@ -192,8 +187,6 @@ namespace Microsoft.Build.BackEnd
         internal void InternalConstruct(string pipeName)
         {
             ErrorUtilities.VerifyThrowArgumentLength(pipeName, nameof(pipeName));
-
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
@@ -386,7 +379,7 @@ namespace Microsoft.Build.BackEnd
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
                             int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
-#if NETCOREAPP2_1 || MONO
+#if NETCOREAPP2_1_OR_GREATER || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
@@ -403,7 +396,7 @@ namespace Microsoft.Build.BackEnd
                         if (gotValidConnection)
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
-#if NETCOREAPP2_1 || MONO
+#if NETCOREAPP2_1_OR_GREATER || MONO
                             _pipeServer.ReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
 #else
                             _pipeServer.ReadEndOfHandshakeSignal(false);

@@ -51,6 +51,8 @@ namespace Microsoft.Build.Internal
         internal const string programFiles32 = "MSBuildProgramFiles32";
         internal const string localAppData = "LocalAppData";
         internal const string assemblyVersion = "MSBuildAssemblyVersion";
+        internal const string fileVersion = "MSBuildFileVersion";
+        internal const string semanticVersion = "MSBuildSemanticVersion";
         internal const string version = "MSBuildVersion";
         internal const string osName = "OS";
         internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";

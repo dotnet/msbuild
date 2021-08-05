@@ -207,8 +207,12 @@ namespace Microsoft.Build.Construction
         /// Assumes path is already normalized.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        private ProjectRootElement(string path, ProjectRootElementCacheBase projectRootElementCache,
-            bool preserveFormatting)
+        private ProjectRootElement
+            (
+                string path,
+                ProjectRootElementCacheBase projectRootElementCache,
+                bool preserveFormatting
+            )
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
             ErrorUtilities.VerifyThrowInternalRooted(path);
@@ -222,8 +226,6 @@ namespace Microsoft.Build.Construction
             XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting, projectRootElementCache.LoadProjectsReadOnly);
 
             ProjectParser.Parse(document, this);
-
-            projectRootElementCache.AddEntry(this);
         }
 
         /// <summary>

@@ -54,7 +54,7 @@ namespace Microsoft.Build.Shared
 
         private static class FileSpecRegexParts
         {
-            internal const string FixedDirGroupStart = "^(?<FIXEDDIR>";
+            internal const string BeginningOfLine = "^";
             internal const string WildcardGroupStart = "(?<WILDCARDDIR>";
             internal const string FilenameGroupStart = "(?<FILENAME>";
             internal const string GroupEnd = ")";
@@ -71,10 +71,10 @@ namespace Microsoft.Build.Shared
         }
 
         /*
-         * MAX_PATH + FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
-            + FileSpecRegexParts.WildcardDirFilenameSeparator.Length + FileSpecRegexParts.EndOfLine.Length;
+         * FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.WildcardGroupStart.Length + FileSpecRegexParts.GroupEnd.Length
+            + FileSpecRegexParts.FilenameGroupStart.Length + FileSpecRegexParts.GroupEnd.Length + FileSpecRegexParts.EndOfLine.Length;
          */
-        private const int FileSpecRegexMinLength = 44;
+        private const int FileSpecRegexMinLength = 31;
 
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Shared
                                     "*",
                                     directory,
                                     false));
-                        IEnumerable<string> filteredEntriesForPath = (pattern != null && pattern != "*" && pattern != "*.*")
+                        IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
                             ? allEntriesForPath.Where(o => IsMatch(Path.GetFileName(o), pattern))
                             : allEntriesForPath;
                         return stripProjectDirectory
@@ -501,7 +501,7 @@ namespace Microsoft.Build.Shared
                 else
                 {
                     // Relative
-                    pathRoot = String.Empty;
+                    pathRoot = string.Empty;
                     startingElement = 0;
                 }
             }
@@ -516,7 +516,7 @@ namespace Microsoft.Build.Shared
                 // If there is a zero-length part, then that means there was an extra slash.
                 if (parts[i].Length == 0)
                 {
-                    longParts[i - startingElement] = String.Empty;
+                    longParts[i - startingElement] = string.Empty;
                 }
                 else
                 {
@@ -556,7 +556,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            return pathRoot + String.Join(s_directorySeparator, longParts);
+            return pathRoot + string.Join(s_directorySeparator, longParts);
         }
 
         /// <summary>
@@ -630,8 +630,8 @@ namespace Microsoft.Build.Shared
                  * 
                  *     **
                  */
-                fixedDirectoryPart = String.Empty;
-                wildcardDirectoryPart = String.Empty;
+                fixedDirectoryPart = string.Empty;
+                wildcardDirectoryPart = string.Empty;
                 filenamePart = filespec;
                 return;
             }
@@ -661,7 +661,7 @@ namespace Microsoft.Build.Shared
 
                 // We know the fixed director part now.
                 fixedDirectoryPart = filespec.Substring(0, indexOfLastDirectorySeparator + 1);
-                wildcardDirectoryPart = String.Empty;
+                wildcardDirectoryPart = string.Empty;
                 filenamePart = filespec.Substring(indexOfLastDirectorySeparator + 1);
                 return;
             }
@@ -682,7 +682,7 @@ namespace Microsoft.Build.Shared
                  * 
                  *      dir?\**
                  */
-                fixedDirectoryPart = String.Empty;
+                fixedDirectoryPart = string.Empty;
                 wildcardDirectoryPart = filespec.Substring(0, indexOfLastDirectorySeparator + 1);
                 filenamePart = filespec.Substring(indexOfLastDirectorySeparator + 1);
                 return;
@@ -886,7 +886,7 @@ namespace Microsoft.Build.Shared
                         //  The wildcard path portion of the excluded search matches the include search
                         searchToExclude.RemainingWildcardDirectory == recursionState.RemainingWildcardDirectory &&
                         //  The exclude search will match ALL filenames OR
-                        (searchToExclude.SearchData.Filespec == "*" || searchToExclude.SearchData.Filespec == "*.*" ||
+                        (IsAllFilesWildcard(searchToExclude.SearchData.Filespec) ||
                             //  The exclude search filename pattern matches the include search's pattern
                             searchToExclude.SearchData.Filespec == recursionState.SearchData.Filespec))
                     {
@@ -1091,7 +1091,11 @@ namespace Microsoft.Build.Shared
 
         private static bool MatchFileRecursionStep(RecursionState recursionState, string file)
         {
-            if (recursionState.SearchData.Filespec != null)
+            if (IsAllFilesWildcard(recursionState.SearchData.Filespec))
+            {
+                return true;
+            }
+            else if (recursionState.SearchData.Filespec != null)
             {
                 return IsMatch(Path.GetFileName(file), recursionState.SearchData.Filespec);
             }
@@ -1203,10 +1207,10 @@ namespace Microsoft.Build.Shared
         {
 #if DEBUG
             ErrorUtilities.VerifyThrow(
-                FileSpecRegexMinLength == FileSpecRegexParts.FixedDirGroupStart.Length
+                FileSpecRegexMinLength == FileSpecRegexParts.BeginningOfLine.Length
                 + FileSpecRegexParts.WildcardGroupStart.Length
                 + FileSpecRegexParts.FilenameGroupStart.Length
-                + (FileSpecRegexParts.GroupEnd.Length * 3)
+                + (FileSpecRegexParts.GroupEnd.Length * 2)
                 + FileSpecRegexParts.EndOfLine.Length,
                 "Checked-in length of known regex components differs from computed length. Update checked-in constant."
             );
@@ -1274,7 +1278,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void AppendRegularExpressionFromFixedDirectory(ReuseableStringBuilder regex, string fixedDir)
         {
-            regex.Append(FileSpecRegexParts.FixedDirGroupStart);
+            regex.Append(FileSpecRegexParts.BeginningOfLine);
 
             bool isUncPath = NativeMethodsShared.IsWindows && fixedDir.Length > 1
                              && fixedDir[0] == '\\' && fixedDir[1] == '\\';
@@ -1288,8 +1292,6 @@ namespace Microsoft.Build.Shared
             {
                 AppendRegularExpressionFromChar(regex, fixedDir[i]);
             }
-
-            regex.Append(FileSpecRegexParts.GroupEnd);
         }
 
         /// <summary>
@@ -1565,9 +1567,9 @@ namespace Microsoft.Build.Shared
             FixupParts fixupParts = null)
         {
             needsRecursion = false;
-            fixedDirectoryPart = String.Empty;
-            wildcardDirectoryPart = String.Empty;
-            filenamePart = String.Empty;
+            fixedDirectoryPart = string.Empty;
+            wildcardDirectoryPart = string.Empty;
+            filenamePart = string.Empty;
 
             if (!RawFileSpecIsValid(filespec))
             {
@@ -1659,9 +1661,7 @@ namespace Microsoft.Build.Shared
             internal bool isLegalFileSpec; // initially false
             internal bool isMatch; // initially false
             internal bool isFileSpecRecursive; // initially false
-            internal string fixedDirectoryPart = String.Empty;
-            internal string wildcardDirectoryPart = String.Empty;
-            internal string filenamePart = String.Empty;
+            internal string wildcardDirectoryPart = string.Empty;
         }
 
         /// <summary>
@@ -1853,9 +1853,8 @@ namespace Microsoft.Build.Shared
                     fileToMatch,
                     regexFileMatch,
                     out matchResult.isMatch,
-                    out matchResult.fixedDirectoryPart,
                     out matchResult.wildcardDirectoryPart,
-                    out matchResult.filenamePart);
+                    out _);
             }
 
             return matchResult;
@@ -1865,20 +1864,17 @@ namespace Microsoft.Build.Shared
             string fileToMatch,
             Regex fileSpecRegex,
             out bool isMatch,
-            out string fixedDirectoryPart,
             out string wildcardDirectoryPart,
             out string filenamePart)
         {
             Match match = fileSpecRegex.Match(fileToMatch);
 
             isMatch = match.Success;
-            fixedDirectoryPart = string.Empty;
-            wildcardDirectoryPart = String.Empty;
+            wildcardDirectoryPart = string.Empty;
             filenamePart = string.Empty;
 
             if (isMatch)
             {
-                fixedDirectoryPart = match.Groups["FIXEDDIR"].Value;
                 wildcardDirectoryPart = match.Groups["WILDCARDDIR"].Value;
                 filenamePart = match.Groups["FILENAME"].Value;
             }
@@ -2089,7 +2085,7 @@ namespace Microsoft.Build.Shared
                         return SearchAction.ReturnEmptyList;
                     }
 
-                    stripProjectDirectory = !String.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
+                    stripProjectDirectory = !string.Equals(fixedDirectoryPart, oldFixedDirectoryPart, StringComparison.OrdinalIgnoreCase);
                 }
                 else
                 {
@@ -2563,6 +2559,17 @@ namespace Microsoft.Build.Shared
             int index = directoryPath.LastIndexOfAny(FileUtilities.Slashes);
             return (index != -1 && IsMatch(directoryPath.Substring(index + 1), pattern));
         }
+
+        /// <summary>
+        /// Returns true if <paramref name="pattern"/> is <code>*</code> or <code>*.*</code>.
+        /// </summary>
+        /// <param name="pattern">The filename pattern to check.</param>
+        private static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
+        {
+            1 => pattern[0] == '*',
+            3 => pattern[0] == '*' && pattern[1] == '.' && pattern[2] == '*',
+            _ => false
+        };
 
         internal static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
     }

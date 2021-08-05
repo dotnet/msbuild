@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #if FEATURE_COM_INTEROP
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "disable com tests on mono")]
+        [SkipOnMono("disable com tests on mono")]
         public void TestTranslationRemoteHostObjects()
         {
             var stateInHostObject = 3;
