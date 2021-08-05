@@ -244,7 +244,8 @@
     <Rule Id="SA1002" Action="Info" /> <!-- Semicolons should not be preceded by a space --> 
     <Rule Id="SA1003" Action="None" />
     <Rule Id="SA1004" Action="Info" /> <!-- Documentation line should begin with a space --> 
-    <Rule Id="SA1005" Action="Info" /> <!-- Single line comment should begin with a space --> 
+    <Rule Id="SA1005" Action="Info" /> <!-- Single line comment should begin with a space -->
+    <Rule Id="SA1006" Action="Info" /> <!-- Region should not be preceded by a space -->
     <Rule Id="SA1008" Action="Info" /> <!-- Opening parenthesis should not be preceded by a space --> 
     <Rule Id="SA1009" Action="Info" /> <!-- Closing parenthesis should not be followed by a space --> 
     <Rule Id="SA1010" Action="Info" /> <!-- Opening square brackets should not be preceded by a space --> 
@@ -262,6 +263,7 @@
     <Rule Id="SA1028" Action="None" />
     <Rule Id="SA1100" Action="Info" /> <!-- Do not prefix calls with base unless local implementation exists --> 
     <Rule Id="SA1101" Action="None" />
+    <Rule Id="SA1102" Action="Info" />
     <Rule Id="SA1106" Action="Info" /> <!-- Code should not contain empty statements --> 
     <Rule Id="SA1107" Action="Info" /> <!-- Code should not contain multiple statements on one line --> 
     <Rule Id="SA1108" Action="None" />
@@ -349,6 +351,7 @@
     <Rule Id="SA1515" Action="Info" /> <!-- Single-line comment should be preceded by blank line --> 
     <Rule Id="SA1516" Action="Info" /> <!-- Elements should be separated by blank line --> 
     <Rule Id="SA1517" Action="None" />
+    <Rule Id="SA1518" Action="Info" /> <!-- Code should not contain blank lines at the end of the file -->
     <Rule Id="SA1519" Action="Info" /> <!-- Braces should not be omitted from multi-line child statement --> 
     <Rule Id="SA1520" Action="Info" /> <!-- Use braces consistently --> 
     <Rule Id="SA1600" Action="None" />
@@ -378,6 +381,7 @@
     <Rule Id="SA1642" Action="Info" /> <!-- Constructor summary documentation should begin with standard text --> 
     <Rule Id="SA1643" Action="Info" /> <!-- Destructor summary documentation should begin with standard text --> 
     <Rule Id="SA1649" Action="Info" /> <!-- File name should match first type name --> 
+    <Rule Id="SA1652" Action="None" />
   </Rules> 
   <Rules AnalyzerId="xunit.analyzers" RuleNamespace="xunit.analyzers"> 
     <Rule Id="xUnit2013" Action="None" /> <!-- Do not use equality check to check for collection size. --> 
