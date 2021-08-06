@@ -5,6 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.NET.Sdk.Localization;
+#if USE_SYSTEM_TEXT_JSON
+using System.Text.Json;
+#else
+using Newtonsoft.Json;
+#endif
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -15,6 +21,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private readonly string [] _manifestDirectories;
         private static HashSet<string> _outdatedManifestIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "microsoft.net.workload.android", "microsoft.net.workload.blazorwebassembly", "microsoft.net.workload.ios",
             "microsoft.net.workload.maccatalyst", "microsoft.net.workload.macos", "microsoft.net.workload.tvos" };
+        private readonly HashSet<string>? _knownManifestIds;
 
         public SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion)
             : this(sdkRootPath, sdkVersion, Environment.GetEnvironmentVariable)
@@ -51,8 +58,18 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
 
-            var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
+            var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, ".knownWorkloadIds");
+            if (File.Exists(knownManifestIdsFilePath))
+            {
 
+#if USE_SYSTEM_TEXT_JSON
+                _knownManifestIds = JsonSerializer.Deserialize<HashSet<string>>(File.ReadAllText(knownManifestIdsFilePath));
+#else
+                _knownManifestIds = JsonConvert.DeserializeObject<HashSet<string>>(File.ReadAllText(knownManifestIdsFilePath));
+#endif
+            }
+
+            var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
             var manifestDirectoryEnvironmentVariable = getEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
             if (manifestDirectoryEnvironmentVariable != null)
             {
@@ -80,6 +97,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         public IEnumerable<string> GetManifestDirectories()
         {
+            var manifestIdsToDirectories = new Dictionary<string, string>();
             if (_manifestDirectories.Length == 1)
             {
                 //  Optimization for common case where test hook to add additional directories isn't being used
@@ -89,7 +107,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                     {
                         if (!IsManifestIdOutdated(workloadManifestDirectory))
                         {
-                            yield return workloadManifestDirectory;
+                            manifestIdsToDirectories.Add(Path.GetFileName(workloadManifestDirectory), workloadManifestDirectory);
                         }
                     }
                 }
@@ -113,9 +131,40 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 {
                     if (!IsManifestIdOutdated(workloadManifestDirectory))
                     {
-                        yield return workloadManifestDirectory;
+                        manifestIdsToDirectories.Add(Path.GetFileName(workloadManifestDirectory), workloadManifestDirectory);
                     }
                 }
+            }
+
+            if (_knownManifestIds != null && _knownManifestIds.Any(id => !manifestIdsToDirectories.ContainsKey(id)))
+            {
+                var missingManifestIds = _knownManifestIds.Where(id => !manifestIdsToDirectories.ContainsKey(id));
+                foreach (var missingManifestId in missingManifestIds)
+                {
+                    var manifestDir = FallbackForMissingManifest(missingManifestId);
+                    manifestIdsToDirectories.Add(missingManifestId, manifestDir);
+                }
+            }
+
+            return manifestIdsToDirectories.Values;
+        }
+
+        private string FallbackForMissingManifest(string manifestId)
+        {
+            var candidateFeatureBands = Directory.GetDirectories(Path.Combine(_sdkRootPath, "sdk-manifests"))
+                .Select(dir => Path.GetFileName(dir))
+                .Where(featureBand => Version.TryParse(featureBand, out _))
+                .Select(featureBand => Version.Parse(featureBand))
+                .Where(featureBand => featureBand < Version.Parse(_sdkVersionBand));
+            var matchingManifestFatureBands = candidateFeatureBands
+                .Where(featureBand => Directory.Exists(Path.Combine(_sdkRootPath, "sdk-manifests", featureBand.ToString(), manifestId)));
+            if (matchingManifestFatureBands.Any())
+            {
+                return Path.Combine(_sdkRootPath, "sdk-manifests", matchingManifestFatureBands.Max()!.ToString(), manifestId);
+            }
+            else
+            {
+                throw new Exception(string.Format(Strings.KnownManifestIdDoesNotExist, manifestId));
             }
         }
 

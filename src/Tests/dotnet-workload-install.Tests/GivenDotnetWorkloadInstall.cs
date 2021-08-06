@@ -21,6 +21,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.DotNet.Cli.Utils;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
@@ -264,6 +265,33 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             packRecordDirs.Count().Should().Be(3);
             var installPacks = Directory.GetDirectories(Path.Combine(dotnetRoot, "packs"));
             installPacks.Count().Should().Be(3);
+        }
+
+        [Fact]
+        public void GivenWorkloadInstallItFallsBackToPriorFeatureBands()
+        {
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var sdkFeatureVersion = "6.0.100";
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var manifestPath = Path.Combine(_testAssetsManager.GetAndValidateTestProjectDirectory("SampleManifest"), "MockWorkloadsSample.json");
+            var manifestDirectory = Path.Combine(dotnetRoot, "sdk-manifests", "5.0.100");
+            Directory.CreateDirectory(Path.Combine(manifestDirectory, "SampleManifest"));
+            File.Copy(manifestPath, Path.Combine(manifestDirectory, "SampleManifest", "WorkloadManifest.json"));
+            var knownWorkloadsFilePath = Path.Combine(dotnetRoot, "sdk", "6.0.100", ".knownWorkloadIds");
+            Directory.CreateDirectory(Path.GetDirectoryName(knownWorkloadsFilePath));
+            File.WriteAllText(knownWorkloadsFilePath, JsonSerializer.Serialize(new HashSet<string>() { "SampleManifest" }));
+            var manifestProvider = new SdkDirectoryWorkloadManifestProvider(dotnetRoot, sdkFeatureVersion);
+            var workloadResolver = WorkloadResolver.CreateForTests(manifestProvider, new string[] { dotnetRoot });
+            var manifestUpdater = new MockWorkloadManifestUpdater();
+            var existingWorkload = "mock-1";
+
+            // Successfully install a workload
+            var installParseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", existingWorkload });
+            var installCommand = new WorkloadInstallCommand(installParseResult, reporter: _reporter, workloadResolver: workloadResolver, nugetPackageDownloader: new MockNuGetPackageDownloader(dotnetRoot),
+                workloadManifestUpdater: manifestUpdater, userHome: testDirectory, version: sdkFeatureVersion, dotnetDir: dotnetRoot, tempDirPath: testDirectory);
+            installCommand.Execute()
+                .Should()
+                .Be(0);
         }
 
         private (string, WorkloadInstallCommand, MockPackWorkloadInstaller, IWorkloadResolver, MockWorkloadManifestUpdater, MockNuGetPackageDownloader) GetTestInstallers(
