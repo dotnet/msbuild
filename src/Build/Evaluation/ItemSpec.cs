@@ -322,6 +322,48 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns a list of normalized paths that are common between this itemspec and keys of the given dictionary.
+        /// </summary>
+        /// <param name="itemsByNormalizedValue">The dictionary to match this itemspec against.</param>
+        /// <returns>The keys of <paramref name="itemsByNormalizedValue"/> that are also referenced by this itemspec.</returns>
+        public IList<string> IntersectsWith(IReadOnlyDictionary<string, ItemDataCollectionValue<I>> itemsByNormalizedValue)
+        {
+            IList<string> matches = null;
+
+            foreach (var fragment in Fragments)
+            {
+                IEnumerable<string> referencedItems = fragment.GetReferencedItems();
+                if (referencedItems != null)
+                {
+                    // The fragment can enumerate its referenced items, we can do dictionary lookups.
+                    foreach (var spec in referencedItems)
+                    {
+                        string key = FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory);
+                        if (itemsByNormalizedValue.TryGetValue(key, out var multiValue))
+                        {
+                            matches ??= new List<string>();
+                            matches.Add(key);
+                        }
+                    }
+                }
+                else
+                {
+                    // The fragment cannot enumerate its referenced items. Iterate over the dictionary and test each item.
+                    foreach (var kvp in itemsByNormalizedValue)
+                    {
+                        if (fragment.IsMatchNormalized(kvp.Key))
+                        {
+                            matches ??= new List<string>();
+                            matches.Add(kvp.Key);
+                        }
+                    }
+                }
+            }
+
+            return matches ?? Array.Empty<string>();
+        }
+
+        /// <summary>
         ///     Return an MSBuildGlob that represents this ItemSpec.
         /// </summary>
         public IMSBuildGlob ToMSBuildGlob()

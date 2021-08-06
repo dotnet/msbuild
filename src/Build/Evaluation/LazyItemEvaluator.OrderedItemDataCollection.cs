@@ -20,74 +20,6 @@ namespace Microsoft.Build.Evaluation
             #region Inner types
 
             /// <summary>
-            /// An efficient multi-value wrapper holding one or more items.
-            /// </summary>
-            internal struct DictionaryValue
-            {
-                /// <summary>
-                /// A non-allocating enumerator for the multi-value.
-                /// </summary>
-                public struct Enumerator : IEnumerator<I>
-                {
-                    private object _value;
-                    private int _index;
-
-                    public Enumerator(object value)
-                    {
-                        _value = value;
-                        _index = -1;
-                    }
-
-                    public I Current => (_value is IList<I> list) ? list[_index] : (I)_value;
-                    object System.Collections.IEnumerator.Current => Current;
-
-                    public void Dispose()
-                    { }
-
-                    public bool MoveNext()
-                    {
-                        int count = (_value is IList<I> list) ? list.Count : 1;
-                        if (_index + 1 < count)
-                        {
-                            _index++;
-                            return true;
-                        }
-                        return false;
-                    }
-
-                    public void Reset()
-                    {
-                        _index = -1;
-                    }
-                }
-
-                /// <summary>
-                /// Holds one value or a list of values.
-                /// </summary>
-                private object _value;
-
-                public DictionaryValue(I item)
-                {
-                    _value = item;
-                }
-
-                public void Add(I item)
-                {
-                    if (_value is not ImmutableList<I> list)
-                    {
-                        list = ImmutableList<I>.Empty;
-                        list = list.Add((I)_value);
-                    }
-                    _value = list.Add(item);
-                }
-
-                public Enumerator GetEnumerator()
-                {
-                    return new Enumerator(_value);
-                }
-            }
-
-            /// <summary>
             /// A mutable and enumerable version of <see cref="OrderedItemDataCollection"/>.
             /// </summary>
             internal sealed class Builder : IEnumerable<ItemData>
@@ -100,9 +32,9 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// A dictionary of items keyed by their normalized value.
                 /// </summary>
-                private ImmutableDictionary<string, DictionaryValue>.Builder _dictionaryBuilder;
+                private ImmutableDictionary<string, ItemDataCollectionValue<I>>.Builder _dictionaryBuilder;
 
-                internal Builder(ImmutableList<ItemData>.Builder listBuilder, ImmutableDictionary<string, DictionaryValue>.Builder dictionaryBuilder)
+                internal Builder(ImmutableList<ItemData>.Builder listBuilder, ImmutableDictionary<string, ItemDataCollectionValue<I>>.Builder dictionaryBuilder)
                 {
                     _listBuilder = listBuilder;
                     _dictionaryBuilder = dictionaryBuilder;
@@ -130,6 +62,25 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
+                /// <summary>
+                /// Gets or creates a dictionary keyed by normalized values.
+                /// </summary>
+                public ImmutableDictionary<string, ItemDataCollectionValue<I>>.Builder Dictionary
+                {
+                    get
+                    {
+                        if (_dictionaryBuilder == null)
+                        {
+                            _dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, ItemDataCollectionValue<I>>(StringComparer.OrdinalIgnoreCase);
+                            foreach (ItemData item in _listBuilder)
+                            {
+                                AddToDictionary(item.Item);
+                            }
+                        }
+                        return _dictionaryBuilder;
+                    }
+                }
+
                 public void Add(ItemData data)
                 {
                     _listBuilder.Add(data);
@@ -145,6 +96,9 @@ namespace Microsoft.Build.Evaluation
                     _dictionaryBuilder?.Clear();
                 }
 
+                /// <summary>
+                /// Removes all items passed in a collection.
+                /// </summary>
                 public void RemoveAll(ICollection<I> itemsToRemove)
                 {
                     _listBuilder.RemoveAll(item => itemsToRemove.Contains(item.Item));
@@ -153,69 +107,29 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Removes items from the collection that match the given ItemSpec.
+                /// Removes all items whose normalized path is passed in a collection.
                 /// </summary>
-                /// <remarks>
-                /// If <see cref="_dictionaryBuilder"/> does not exist yet, it is created in this method to avoid the cost of comparing each item
-                /// being removed with each item already in the collection. The dictionary is kept in sync with the <see cref="_listBuilder"/>
-                /// as long as practical. If an operation would result in too much of such work, the dictionary is simply dropped and recreated
-                /// later if/when needed.
-                /// </remarks>
-                public void RemoveMatchingItems(ItemSpec<P, I> itemSpec)
+                public void RemoveAll(ICollection<string> itemPathsToRemove)
                 {
-                    HashSet<I> items = null;
-                    List<string> keysToRemove = null;
-                    var dictionaryBuilder = GetOrCreateDictionaryBuilder();
-
-                    foreach (var fragment in itemSpec.Fragments)
+                    var dictionary = Dictionary;
+                    HashSet<I> itemsToRemove = null;
+                    foreach (string itemValue in itemPathsToRemove)
                     {
-                        IEnumerable<string> referencedItems = fragment.GetReferencedItems();
-                        if (referencedItems != null)
+                        if (dictionary.TryGetValue(itemValue, out var multiItem))
                         {
-                            // The fragment can enumerate its referenced items, we can do dictionary lookups.
-                            foreach (var spec in referencedItems)
+                            foreach (I item in multiItem)
                             {
-                                string key = FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory);
-                                if (dictionaryBuilder.TryGetValue(key, out var multiValue))
-                                {
-                                    items ??= new HashSet<I>();
-                                    foreach (I item in multiValue)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    keysToRemove ??= new List<string>();
-                                    keysToRemove.Add(key);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // The fragment cannot enumerate its referenced items. Iterate over the dictionary and test each item.
-                            foreach (var kvp in dictionaryBuilder)
-                            {
-                                if (fragment.IsMatchNormalized(kvp.Key))
-                                {
-                                    items ??= new HashSet<I>();
-                                    foreach (I item in kvp.Value)
-                                    {
-                                        items.Add(item);
-                                    }
-                                    keysToRemove ??= new List<string>();
-                                    keysToRemove.Add(kvp.Key);
-                                }
+                                itemsToRemove ??= new HashSet<I>();
+                                itemsToRemove.Add(item);
                             }
                         }
                     }
 
-                    // Finish by removing items from the list.
-                    if (keysToRemove != null)
+                    if (itemsToRemove != null)
                     {
-                        dictionaryBuilder.RemoveRange(keysToRemove);
+                        _listBuilder.RemoveAll(item => itemsToRemove.Contains(item.Item));
                     }
-                    if (items != null)
-                    {
-                        _listBuilder.RemoveAll(item => items.Contains(item.Item));
-                    }
+                    _dictionaryBuilder.RemoveRange(itemPathsToRemove);
                 }
 
                 /// <summary>
@@ -226,26 +140,13 @@ namespace Microsoft.Build.Evaluation
                     return new OrderedItemDataCollection(_listBuilder.ToImmutable(), _dictionaryBuilder?.ToImmutable());
                 }
 
-                private ImmutableDictionary<string, DictionaryValue>.Builder GetOrCreateDictionaryBuilder()
-                {
-                    if (_dictionaryBuilder == null)
-                    {
-                        _dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, DictionaryValue>(StringComparer.OrdinalIgnoreCase);
-                        foreach (ItemData item in _listBuilder)
-                        {
-                            AddToDictionary(item.Item);
-                        }
-                    }
-                    return _dictionaryBuilder;
-                }
-
                 private void AddToDictionary(I item)
                 {
                     string key = FileUtilities.NormalizePathForComparisonNoThrow(item.EvaluatedInclude, item.ProjectDirectory);
 
                     if (!_dictionaryBuilder.TryGetValue(key, out var dictionaryValue))
                     {
-                        dictionaryValue = new DictionaryValue(item);
+                        dictionaryValue = new ItemDataCollectionValue<I>(item);
                     }
                     else
                     {
@@ -265,9 +166,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// A dictionary of items keyed by their normalized value.
             /// </summary>
-            private ImmutableDictionary<string, DictionaryValue> _dictionary;
+            private ImmutableDictionary<string, ItemDataCollectionValue<I>> _dictionary;
 
-            private OrderedItemDataCollection(ImmutableList<ItemData> list, ImmutableDictionary<string, DictionaryValue> dictionary)
+            private OrderedItemDataCollection(ImmutableList<ItemData> list, ImmutableDictionary<string, ItemDataCollectionValue<I>> dictionary)
             {
                 _list = list;
                 _dictionary = dictionary;

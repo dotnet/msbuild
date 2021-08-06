@@ -45,18 +45,19 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
-                if (_matchOnMetadata.IsEmpty && ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType) && _conditionResult)
-                {
-                    // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
-                    // then all items are removed and matching is not necessary
-                    listBuilder.Clear();
-                    return;
-                }
-
-                // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
                 if (_matchOnMetadata.IsEmpty)
                 {
-                    listBuilder.RemoveMatchingItems(_itemSpec);
+                    if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
+                    {
+                        // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
+                        // then all items are removed and matching is not necessary
+                        listBuilder.Clear();
+                        return;
+                    }
+
+                    // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
+                    IList<string> matches = _itemSpec.IntersectsWith(listBuilder.Dictionary);
+                    listBuilder.RemoveAll(matches);
                 }
                 else
                 {
