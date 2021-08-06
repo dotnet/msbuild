@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
         /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
         /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
         ///
-        /// When this property is set to true, the previous item operations throw an <see cref="InvalidOperationException"></exception>
+        /// When this property is set to true, the previous item operations throw an <see cref="InvalidOperationException"></see>
         /// instead of expanding the item element.
         /// </summary>
         public bool ThrowInsteadOfSplittingItemElement
