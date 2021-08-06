@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.PackageValidation
                 }
                 else
                 {
-                    if (_runApiCompat)
+                    if (_runApiCompat && compileTimeAsset.Path != runtimeAsset.Path)
                     {
                         string header = string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path);
                         _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, compileTimeAsset, runtimeAsset, header);
@@ -109,7 +109,7 @@ namespace Microsoft.DotNet.PackageValidation
                     }
                     else
                     {
-                        if (_runApiCompat)
+                        if (_runApiCompat && compileTimeAsset.Path != runtimeAsset.Path)
                         {
                             string header = string.Format(Resources.ApiCompatibilityHeader, compileTimeAsset.Path, runtimeAsset.Path);
                             _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, compileTimeAsset, runtimeAsset, header);
