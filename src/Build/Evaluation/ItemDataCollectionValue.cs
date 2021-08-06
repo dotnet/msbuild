@@ -33,6 +33,7 @@ namespace Microsoft.Build.Evaluation
 
             public bool MoveNext()
             {
+                // If value is not a list, it is a single item.
                 int count = (_value is IList<I> list) ? list.Count : 1;
                 if (_index + 1 < count)
                 {
