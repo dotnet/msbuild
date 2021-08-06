@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System.Xml.Linq;
 
 namespace Microsoft.Build.Tasks
@@ -20,12 +19,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The XML elements to include as children of the root element
         /// </summary>
-        public ITaskItem[] XmlElements { get; set; }
-
-        /// <summary>
-        /// Opts into or out of using the new schema with Property Name=... rather than just specifying the RootElementName.
-        /// </summary>
-        public bool UseAttributeForTargetFrameworkInfoPropertyNames { get; set; } = false;
+        public ITaskItem [] XmlElements { get; set; }
 
         /// <summary>
         /// The generated XML
@@ -37,9 +31,7 @@ namespace Microsoft.Build.Tasks
         {
             if (XmlElements != null)
             {
-                XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
-                    new("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
-                    new(RootElementName);
+                XElement root = new XElement(RootElementName);
 
                 foreach (var item in XmlElements)
                 {

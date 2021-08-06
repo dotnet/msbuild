@@ -1869,14 +1869,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Error Condition="'$(IsCrossTargetingBuild)' == 'true'"
            Text="Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build" />
 
-    <PropertyGroup>
-      <_UseAttributeForTargetFrameworkInfoPropertyNames Condition="'$(_UseAttributeForTargetFrameworkInfoPropertyNames)' == ''">false</_UseAttributeForTargetFrameworkInfoPropertyNames>
-    </PropertyGroup>
-  
     <CombineXmlElements
       RootElementName="AdditionalProjectProperties"
-      XmlElements="@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)')"
-      UseAttributeForTargetFrameworkInfoPropertyNames="$(_UseAttributeForTargetFrameworkInfoPropertyNames)">
+      XmlElements="@(_TargetFrameworkInfo->'%(AdditionalPropertiesFromProject)')">
       <Output TaskParameter="Result"
         PropertyName="_AdditionalPropertiesFromProject"/>
     </CombineXmlElements>
