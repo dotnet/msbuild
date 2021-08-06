@@ -359,7 +359,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 NuGetRestoreSupported="$(_NuGetRestoreSupported)"
                                 NetCoreTargetingPackRoot="$(NetCoreTargetingPackRoot)">
       <Output TaskParameter="ReferencesToAdd" ItemName="Reference" />
-      <Output TaskParameter="AnalyzersToAdd" Condition="'$(DisableFrameworkReferenceAnalyzers)' != 'true'" ItemName="Analyzer" />
+      <Output TaskParameter="AnalyzersToAdd" ItemName="Analyzer" />
       <Output TaskParameter="PlatformManifests" ItemName="PlatformManifestsFromTargetingPacks" />
       <Output TaskParameter="PackageConflictPreferredPackages" PropertyName="PackageConflictPreferredPackages" />
       <Output TaskParameter="PackageConflictOverrides" ItemName="PackageConflictOverrides" />
