@@ -70,7 +70,7 @@ namespace Microsoft.Build.Evaluation
                             items.Add(item.Item);
                         }
                     }
-                    if (items != null)
+                    if (items is not null)
                     {
                         listBuilder.RemoveAll(items);
                     }
