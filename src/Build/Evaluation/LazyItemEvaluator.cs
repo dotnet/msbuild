@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -124,12 +125,13 @@ namespace Microsoft.Build.Evaluation
 
         public struct ItemData
         {
-            public ItemData(I item, ProjectItemElement originatingItemElement, int elementOrder, bool conditionResult)
+            public ItemData(I item, ProjectItemElement originatingItemElement, int elementOrder, bool conditionResult, string normalizedItemValue = null)
             {
                 Item = item;
                 OriginatingItemElement = originatingItemElement;
                 ElementOrder = elementOrder;
                 ConditionResult = conditionResult;
+                _normalizedItemValue = normalizedItemValue;
             }
 
             public ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
@@ -140,13 +142,31 @@ namespace Microsoft.Build.Evaluation
                 var clonedItem = itemFactory.CreateItem(Item, OriginatingItemElement.ContainingProject.FullPath);
                 itemFactory.ItemElement = initialItemElementForFactory;
 
-                return new ItemData(clonedItem, OriginatingItemElement, ElementOrder, ConditionResult);
+                return new ItemData(clonedItem, OriginatingItemElement, ElementOrder, ConditionResult, _normalizedItemValue);
             }
 
             public I Item { get; }
             public ProjectItemElement OriginatingItemElement { get; }
             public int ElementOrder { get; }
             public bool ConditionResult { get; }
+
+            /// <summary>
+            /// Lazily created normalized item value.
+            /// </summary>
+            private string _normalizedItemValue;
+            public string NormalizedItemValue
+            {
+                get
+                {
+                    var normalizedItemValue = Volatile.Read(ref _normalizedItemValue);
+                    if (normalizedItemValue == null)
+                    {
+                        normalizedItemValue = FileUtilities.NormalizePathForComparisonNoThrow(Item.EvaluatedInclude, Item.ProjectDirectory);
+                        Volatile.Write(ref _normalizedItemValue, normalizedItemValue);
+                    }
+                    return normalizedItemValue;
+                }
+            }
         }
 
         private class MemoizedOperation : IItemOperation

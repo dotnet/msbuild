@@ -6,6 +6,7 @@ using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -56,9 +57,40 @@ namespace Microsoft.Build.Evaluation
                     get { return _listBuilder[index]; }
                     set
                     {
+                        // Update the dictionary if it exists.
+                        if (_dictionaryBuilder != null)
+                        {
+                            ItemData oldItemData = _listBuilder[index];
+                            string oldNormalizedValue = oldItemData.NormalizedItemValue;
+                            string newNormalizedValue = value.NormalizedItemValue;
+                            if (!string.Equals(oldNormalizedValue, newNormalizedValue, StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Normalized values are different - delete from the old entry and add to the new entry.
+                                ItemDataCollectionValue<I> oldDictionaryEntry = _dictionaryBuilder[oldNormalizedValue];
+                                oldDictionaryEntry.Delete(oldItemData.Item);
+                                if (oldDictionaryEntry.IsEmpty)
+                                {
+                                    _dictionaryBuilder.Remove(oldNormalizedValue);
+                                }
+                                else
+                                {
+                                    _dictionaryBuilder[oldNormalizedValue] = oldDictionaryEntry;
+                                }
+
+                                ItemDataCollectionValue<I> newDictionaryEntry = _dictionaryBuilder[newNormalizedValue];
+                                newDictionaryEntry.Add(value.Item);
+                                _dictionaryBuilder[newNormalizedValue] = newDictionaryEntry;
+
+                            }
+                            else
+                            {
+                                // Normalized values are the same - replace the item in the entry.
+                                ItemDataCollectionValue<I> dictionaryEntry = _dictionaryBuilder[newNormalizedValue];
+                                dictionaryEntry.Replace(oldItemData.Item, value.Item);
+                                _dictionaryBuilder[newNormalizedValue] = dictionaryEntry;
+                            }
+                        }
                         _listBuilder[index] = value;
-                        // This is a rare operation, don't bother updating the dictionary for now. It will be recreated as needed.
-                        _dictionaryBuilder = null;
                     }
                 }
 
@@ -72,9 +104,11 @@ namespace Microsoft.Build.Evaluation
                         if (_dictionaryBuilder == null)
                         {
                             _dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, ItemDataCollectionValue<I>>(StringComparer.OrdinalIgnoreCase);
-                            foreach (ItemData item in _listBuilder)
+                            for (int i = 0; i < _listBuilder.Count; i++)
                             {
-                                AddToDictionary(item.Item);
+                                ItemData itemData = _listBuilder[i];
+                                AddToDictionary(ref itemData);
+                                _listBuilder[i] = itemData;
                             }
                         }
                         return _dictionaryBuilder;
@@ -83,11 +117,11 @@ namespace Microsoft.Build.Evaluation
 
                 public void Add(ItemData data)
                 {
-                    _listBuilder.Add(data);
                     if (_dictionaryBuilder != null)
                     {
-                        AddToDictionary(data.Item);
+                        AddToDictionary(ref data);
                     }
+                    _listBuilder.Add(data);
                 }
 
                 public void Clear()
@@ -140,17 +174,17 @@ namespace Microsoft.Build.Evaluation
                     return new OrderedItemDataCollection(_listBuilder.ToImmutable(), _dictionaryBuilder?.ToImmutable());
                 }
 
-                private void AddToDictionary(I item)
+                private void AddToDictionary(ref ItemData itemData)
                 {
-                    string key = FileUtilities.NormalizePathForComparisonNoThrow(item.EvaluatedInclude, item.ProjectDirectory);
+                    string key = itemData.NormalizedItemValue;
 
                     if (!_dictionaryBuilder.TryGetValue(key, out var dictionaryValue))
                     {
-                        dictionaryValue = new ItemDataCollectionValue<I>(item);
+                        dictionaryValue = new ItemDataCollectionValue<I>(itemData.Item);
                     }
                     else
                     {
-                        dictionaryValue.Add(item);
+                        dictionaryValue.Add(itemData.Item);
                     }
                     _dictionaryBuilder[key] = dictionaryValue;
                 }

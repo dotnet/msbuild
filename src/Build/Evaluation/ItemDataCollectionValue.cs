@@ -70,6 +70,30 @@ namespace Microsoft.Build.Evaluation
             _value = list.Add(item);
         }
 
+        public void Delete(I item)
+        {
+            if (object.ReferenceEquals(_value, item))
+            {
+                _value = null;
+            }
+            else if (_value is ImmutableList<I> list)
+            {
+                _value = list.Remove(item);
+            }
+        }
+
+        public void Replace(I oldItem, I newItem)
+        {
+            if (object.ReferenceEquals(_value, oldItem))
+            {
+                _value = newItem;
+            }
+            else if (_value is ImmutableList<I> list)
+            {
+                _value = list.Replace(oldItem, newItem);
+            }
+        }
+
         public Enumerator GetEnumerator()
         {
             return new Enumerator(_value);
