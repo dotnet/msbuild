@@ -58,7 +58,7 @@ namespace Microsoft.Build.Evaluation
                     set
                     {
                         // Update the dictionary if it exists.
-                        if (_dictionaryBuilder != null)
+                        if (_dictionaryBuilder is not null)
                         {
                             ItemData oldItemData = _listBuilder[index];
                             string oldNormalizedValue = oldItemData.NormalizedItemValue;
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Evaluation
 
                 public void Add(ItemData data)
                 {
-                    if (_dictionaryBuilder != null)
+                    if (_dictionaryBuilder is not null)
                     {
                         AddToDictionary(ref data);
                     }
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
 
-                    if (itemsToRemove != null)
+                    if (itemsToRemove is not null)
                     {
                         _listBuilder.RemoveAll(item => itemsToRemove.Contains(item.Item));
                     }
