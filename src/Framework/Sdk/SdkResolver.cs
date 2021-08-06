@@ -31,7 +31,7 @@ namespace Microsoft.Build.Framework
         ///     applicable for a particular <see cref="SdkReference"/>.
         ///  </returns>   
         ///  <remarks>
-        ///    Note: You must use <see cref="Microsoft.Build.Framework.SdkResultFactory"> to return a result.
+        ///    Note: You must use <see cref="Microsoft.Build.Framework.SdkResultFactory"/> to return a result.
         ///  </remarks>
         /// 
         public abstract SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext,
