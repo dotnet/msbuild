@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Update all installed optional workloads.</value>
+    <value>Update all installed workloads.</value>
   </data>
   <data name="UpdateSucceeded" xml:space="preserve">
     <value>Successfully updated workload(s): {0}.</value>
@@ -127,10 +127,10 @@
     <value>Workload '{0}' failed to update due to the following:</value>
   </data>
   <data name="RollBackFailedMessage" xml:space="preserve">
-    <value>Installation roll back failed: {0}</value>
+    <value>Installation rollback failed: {0}</value>
   </data>
   <data name="RollingBackInstall" xml:space="preserve">
-    <value>Workload installation failed, rolling back installed packs...</value>
+    <value>Workload installation failed. Rolling back installed packs...</value>
   </data>
   <data name="WorkloadCacheDownloadFailed" xml:space="preserve">
     <value>Failed to download workload update packages to cache: {0}</value>
@@ -139,10 +139,10 @@
     <value>Workload update failed: {0}</value>
   </data>
   <data name="FromPreviousSdkOptionDescription" xml:space="preserve">
-    <value>Include workloads installed with previous SDK versions in update.</value>
+    <value>Include workloads installed with earlier SDK versions in update.</value>
   </data>
   <data name="NoWorkloadsToUpdate" xml:space="preserve">
-    <value>No workloads installed for this feature band. To update from the previous SDK, include the --from-previous-sdk option.</value>
+    <value>No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</value>
   </data>
   <data name="WorkloadUpdateAdManifestsSucceeded" xml:space="preserve">
     <value>Successfully updated advertising manifests.</value>

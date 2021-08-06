@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Start the elevate server process to facilitate MSI based installations</source>
-        <target state="new">Start the elevate server process to facilitate MSI based installations</target>
+        <source>Start the elevated server process to facilitate MSI based installations.</source>
+        <target state="new">Start the elevated server process to facilitate MSI based installations.</target>
         <note />
       </trans-unit>
       <trans-unit id="RequiresWindows">
-        <source>This command can only be executed on Windows</source>
-        <target state="new">This command can only be executed on Windows</target>
+        <source>This command can only be run on Windows</source>
+        <target state="new">This command can only be run on Windows</target>
         <note />
       </trans-unit>
     </body>

@@ -118,22 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="PackageIdArgumentName" xml:space="preserve">
-    <value>PACKAGE_ID</value>
+    <value>WORKLOAD_ID</value>
   </data>
   <data name="PackageIdArgumentDescription" xml:space="preserve">
-    <value>The NuGet Package Id of the workload to uninstall.</value>
+    <value>The workload ID(s) to uninstall.</value>
   </data>
   <data name="SpecifyExactlyOnePackageId" xml:space="preserve">
-    <value>Specify one workload Package Id to uninstall.</value>
+    <value>Specify one workload ID to uninstall.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Uninstall a workload.</value>
+    <value>Uninstall one or more workloads.</value>
   </data>
   <data name="UninstallSucceeded" xml:space="preserve">
     <value>Successfully uninstalled workload(s): {0}</value>
   </data>
   <data name="WorkloadNotInstalled" xml:space="preserve">
-    <value>Could not find workloads with id(s): {0}</value>
+    <value>Couldn't find workload ID(s): {0}</value>
   </data>
   <data name="RemovingWorkloadInstallationRecord" xml:space="preserve">
     <value>Removing workload installation record for {0}...</value>

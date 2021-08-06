@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AdManifestPackageDoesNotExist">
-        <source>Failed to update advertising manifest, manifest package for {0} does not exist.</source>
-        <target state="new">Failed to update advertising manifest, manifest package for {0} does not exist.</target>
+        <source>Failed to update advertising manifest. Manifest package {0} doesn't exist.</source>
+        <target state="new">Failed to update advertising manifest. Manifest package {0} doesn't exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdManifestUpdated">
@@ -13,23 +13,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CacheMissingPackage">
-        <source>Package {0} version {1} does not exist in offline cache {2}.</source>
-        <target state="new">Package {0} version {1} does not exist in offline cache {2}.</target>
+        <source>Package {0} version {1} doesn't exist in offline cache {2}.</source>
+        <target state="new">Package {0} version {1} doesn't exist in offline cache {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="DeletingWorkloadPack">
-        <source>Uninstalling workload pack {0} version {1}.</source>
-        <target state="new">Uninstalling workload pack {0} version {1}.</target>
+        <source>Uninstalling workload pack {0} version {1}…</source>
+        <target state="new">Uninstalling workload pack {0} version {1}…</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadToCacheOptionDescription">
-        <source>Download packages needed to install a workload to a folder which can be used for offline installation.</source>
-        <target state="new">Download packages needed to install a workload to a folder which can be used for offline installation.</target>
+        <source>Download packages needed to install a workload to a folder that can be used for offline installation.</source>
+        <target state="new">Download packages needed to install a workload to a folder that can be used for offline installation.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadingPackToCacheMessage">
-        <source>Downloading pack {0} version {1} to offline cache {2}...</source>
-        <target state="new">Downloading pack {0} version {1} to offline cache {2}...</target>
+        <source>Downloading pack {0} version {1} to offline cache {2}…</source>
+        <target state="new">Downloading pack {0} version {1} to offline cache {2}…</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedAdManifestUpdate">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FailedToGetPackageManifestUrl">
-        <source>Failed to resolve manifest package url {0}.</source>
-        <target state="new">Failed to resolve manifest package url {0}.</target>
+        <source>Failed to resolve manifest package URL {0}.</source>
+        <target state="new">Failed to resolve manifest package URL {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToInstallWorkloadManifest">
@@ -58,13 +58,13 @@
         <note />
       </trans-unit>
       <trans-unit id="GarbageCollectingSdkFeatureBandsMessage">
-        <source>Garbage collecting for SDK feature bands {0}...</source>
-        <target state="new">Garbage collecting for SDK feature bands {0}...</target>
+        <source>Garbage collecting for SDK feature band(s) {0}...</source>
+        <target state="new">Garbage collecting for SDK feature band(s) {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="InadequatePermissions">
-        <source>Inadequate permissions to access, please elevate to run this command.</source>
-        <target state="new">Inadequate permissions to access, please elevate to run this command.</target>
+        <source>Inadequate permissions. Run the command with elevated privileges.</source>
+        <target state="new">Inadequate permissions. Run the command with elevated privileges.</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludePreviewOptionDescription">
@@ -73,8 +73,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IncompatibleManifests">
-        <source>The current SDK is not compatible with workload manifests of SDK version {0}.</source>
-        <target state="new">The current SDK is not compatible with workload manifests of SDK version {0}.</target>
+        <source>The current SDK isn't compatible with workload manifests of SDK version {0}.</source>
+        <target state="new">The current SDK isn't compatible with workload manifests of SDK version {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -88,8 +88,8 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallingWorkloadManifest">
-        <source>Installing workload manifest {0} version {1}.</source>
-        <target state="new">Installing workload manifest {0} version {1}.</target>
+        <source>Installing workload manifest {0} version {1}…</source>
+        <target state="new">Installing workload manifest {0} version {1}…</target>
         <note />
       </trans-unit>
       <trans-unit id="InsufficientPrivilegeToStartServer">
@@ -103,7 +103,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Install a workload.</source>
+        <source>Install one or more workloads.</source>
         <target state="needs-review-translation">Установка глобального или локального средства. Локальные средства добавляются в манифест и восстанавливаются.</target>
         <note />
       </trans-unit>
@@ -118,8 +118,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ManifestDoesNotExist">
-        <source>No manifest with id {0} exists.</source>
-        <target state="new">No manifest with id {0} exists.</target>
+        <source>No manifest with ID {0} exists.</source>
+        <target state="new">No manifest with ID {0} exists.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoManifestsExistForFeatureBand">
@@ -138,28 +138,28 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolvingPackageUrls">
-        <source>Resolving package urls for workload(s) {0}...</source>
-        <target state="new">Resolving package urls for workload(s) {0}...</target>
+        <source>Resolving package URLs for workload(s) {0}...</source>
+        <target state="new">Resolving package URLs for workload(s) {0}...</target>
         <note />
       </trans-unit>
       <trans-unit id="RollBackFailedMessage">
-        <source>Installation roll back failed: {0}</source>
-        <target state="new">Installation roll back failed: {0}</target>
+        <source>Installation rollback failed: {0}</source>
+        <target state="new">Installation rollback failed: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionContainsExtraneousManifestIds">
-        <source>Invalid rollback definition. Manifest IDs in rollback definition {0} do not match installed manifest IDs.</source>
-        <target state="new">Invalid rollback definition. Manifest IDs in rollback definition {0} do not match installed manifest IDs.</target>
+        <source>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</source>
+        <target state="new">Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollbackDefinitionFileDoesNotExist">
-        <source>Provided rollback definition file {0} does not exist.</source>
-        <target state="new">Provided rollback definition file {0} does not exist.</target>
+        <source>Provided rollback definition file {0} doesn't exist.</source>
+        <target state="new">Provided rollback definition file {0} doesn't exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollingBackInstall">
-        <source>Workload installation failed, rolling back installed packs...</source>
-        <target state="new">Workload installation failed, rolling back installed packs...</target>
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="new">Workload installation failed. Rolling back installed packs...</target>
         <note />
       </trans-unit>
       <trans-unit id="RollingBackPackInstall">
@@ -173,13 +173,13 @@
         <note />
       </trans-unit>
       <trans-unit id="SkippingManifestUpdate">
-        <source>Manifest packages were not found, skipping manifest update...</source>
-        <target state="new">Manifest packages were not found, skipping manifest update...</target>
+        <source>Manifest packages were not found. Skipping manifest update...</source>
+        <target state="new">Manifest packages were not found. Skipping manifest update...</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionDescription">
-        <source>The NuGet package source to use during the restore.</source>
-        <target state="new">The NuGet package source to use during the restore.</target>
+        <source>The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</source>
+        <target state="new">The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</target>
         <note />
       </trans-unit>
       <trans-unit id="SourceOptionName">
@@ -188,18 +188,18 @@
         <note />
       </trans-unit>
       <trans-unit id="TempDirOptionDescription">
-        <source>Configure the temporary directory used for this command (must be secure).</source>
-        <target state="new">Configure the temporary directory used for this command (must be secure).</target>
+        <source>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</source>
+        <target state="new">Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedPackError">
-        <source>Pack Id {0} unrecognized.</source>
-        <target state="new">Pack Id {0} unrecognized.</target>
+        <source>Pack ID {0} unrecognized.</source>
+        <target state="new">Pack ID {0} unrecognized.</target>
         <note />
       </trans-unit>
       <trans-unit id="PrintDownloadLinkOnlyDescription">
-        <source>Only print the list of links to download without downloading it.</source>
-        <target state="new">Only print the list of links to download without downloading it.</target>
+        <source>Only print the list of links to download without downloading.</source>
+        <target state="new">Only print the list of links to download without downloading.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingCacheForPackInstall">
@@ -213,18 +213,18 @@
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
-        <source>.NET Install Command</source>
-        <target state="translated">Команда установки .NET</target>
+        <source>.NET install command</source>
+        <target state="needs-review-translation">Команда установки .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetConfigurationFileDoesNotExist">
-        <source>NuGet configuration file '{0}' does not exist.</source>
-        <target state="translated">Файл конфигурации NuGet "{0}" не существует.</target>
+        <source>NuGet configuration file '{0}' doesn't exist.</source>
+        <target state="needs-review-translation">Файл конфигурации NuGet "{0}" не существует.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionRange">
-        <source>Specified version '{0}' is not a valid NuGet version range.</source>
-        <target state="translated">Указанная версия "{0}" не входит в допустимый диапазон версий NuGet.</target>
+        <source>Specified version '{0}' isn't a valid NuGet version range.</source>
+        <target state="needs-review-translation">Указанная версия "{0}" не входит в допустимый диапазон версий NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
@@ -243,13 +243,13 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadCacheDownloadFailed">
-        <source>Downloading workload packs to offline cache failed: {0}</source>
-        <target state="new">Downloading workload packs to offline cache failed: {0}</target>
+        <source>Download of workload packs to offline cache failed: {0}</source>
+        <target state="new">Download of workload packs to offline cache failed: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to install.</source>
-        <target state="new">The NuGet Package Id of the workload to install.</target>
+        <source>The NuGet package ID of the workload to install.</source>
+        <target state="new">The NuGet package ID of the workload to install.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdArgumentName">
@@ -263,13 +263,13 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotRecognized">
-        <source>Workload with id {0} is not recognized.</source>
-        <target state="new">Workload with id {0} is not recognized.</target>
+        <source>Workload ID {0} is not recognized.</source>
+        <target state="new">Workload ID {0} is not recognized.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotSupportedOnPlatform">
-        <source>Workload with id {0} is not supported on this platform.</source>
-        <target state="new">Workload with id {0} is not supported on this platform.</target>
+        <source>Workload ID {0} isn't supported on this platform.</source>
+        <target state="new">Workload ID {0} isn't supported on this platform.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadPackAlreadyInstalledMessage">
@@ -278,8 +278,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadPathOptionDescription">
-        <source>The directory where the workload will be installed. The directory will be created if it does not exist.</source>
-        <target state="new">The directory where the workload will be installed. The directory will be created if it does not exist.</target>
+        <source>The directory where the workload will be installed. The directory will be created if it doesn't exist.</source>
+        <target state="new">The directory where the workload will be installed. The directory will be created if it doesn't exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadPathOptionName">

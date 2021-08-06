@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Start the elevate server process to facilitate MSI based installations</value>
+    <value>Start the elevated server process to facilitate MSI based installations.</value>
   </data>
   <data name="RequiresWindows" xml:space="preserve">
-    <value>This command can only be executed on Windows</value>
+    <value>This command can only be run on Windows</value>
   </data>
 </root>

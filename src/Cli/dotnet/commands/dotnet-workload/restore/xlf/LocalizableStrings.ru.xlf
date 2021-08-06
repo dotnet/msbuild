@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Restore workloads required for the project.</source>
+        <source>Restore workloads required for a project.</source>
         <target state="needs-review-translation">Восстановление средств, определенных в манифесте локального инструмента.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindAProject">
-        <source>Couldn't find a project. Ensure a project exists in {0}, or pass the path to the project using {1}.</source>
-        <target state="new">Couldn't find a project. Ensure a project exists in {0}, or pass the path to the project using {1}.</target>
+        <source>Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</source>
+        <target state="new">Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToRunTarget">
