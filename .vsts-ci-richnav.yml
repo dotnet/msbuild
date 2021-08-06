@@ -5,8 +5,6 @@ trigger:
       - main
       - release/*.*
 
-pr: none
-
 variables:
   - name: teamName
     value: Roslyn-Project-System
