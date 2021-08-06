@@ -5,6 +5,8 @@ trigger:
       - main
       - release/*.*
 
+pr: none
+
 variables:
   - name: teamName
     value: Roslyn-Project-System
@@ -34,6 +36,7 @@ stages:
         pool:
             name: NetCorePublic-Pool
             queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
+        helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
         strategy:
           matrix:
             Build_Debug:
