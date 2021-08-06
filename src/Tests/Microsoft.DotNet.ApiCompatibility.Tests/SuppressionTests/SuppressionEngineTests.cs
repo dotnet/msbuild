@@ -73,10 +73,21 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
                 using StreamReader reader = new(stream);
                 output = reader.ReadToEnd();
             });
+
             string filePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName(), "DummyFile.xml");
-            engine.WriteSuppressionsToFile(filePath);
+            Assert.True(engine.WriteSuppressionsToFile(filePath));
 
             Assert.Equal(engine.suppressionsFileWithoutComment.Trim(), output.Trim(), ignoreCase: true);
+        }
+
+        [Fact]
+        public void EmptySuppressionsFileIsNotWritten()
+        {
+            int callbackCount = 0;
+            EmptyTestSuppressionEngine engine = new(() => { callbackCount++; });
+            Assert.Equal(0, engine.GetSuppressionCount());
+            Assert.False(engine.WriteSuppressionsToFile(""));
+            Assert.Equal(0, callbackCount);
         }
 
         [Fact]
@@ -123,7 +134,7 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
 
             engine.AddSuppression(newSuppression);
             string filePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName(), "DummyFile.xml");
-            engine.WriteSuppressionsToFile(filePath);
+            Assert.True(engine.WriteSuppressionsToFile(filePath));
 
             XmlSerializer xmlSerializer = new(typeof(Suppression[]), new XmlRootAttribute("Suppressions"));
             Suppression[] deserializedSuppressions = xmlSerializer.Deserialize(stream) as Suppression[];
@@ -138,6 +149,34 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression.Tests
             }, deserializedSuppressions[0]);
 
             Assert.Equal(newSuppression, deserializedSuppressions[9]);
+        }
+    }
+
+    public class EmptyTestSuppressionEngine : SuppressionEngine
+    {
+        private Stream _stream;
+        private readonly Action _callback;
+
+        public EmptyTestSuppressionEngine(Action callback)
+        {
+            _callback = callback;
+        }
+
+        public int GetSuppressionCount() => _validationSuppressions.Count;
+
+        protected override Stream GetReadableStream(string baselineFile)
+        {
+            // Not Disposing stream since it will be disposed by caller.
+            _stream = new MemoryStream();
+            return _stream;
+        }
+
+        protected override Stream GetWritableStream(string validationSuppressionFile) => new MemoryStream();
+
+        protected override void AfterWrittingSuppressionsCallback(Stream stream)
+        {
+            if (_callback != null)
+                _callback();
         }
     }
 

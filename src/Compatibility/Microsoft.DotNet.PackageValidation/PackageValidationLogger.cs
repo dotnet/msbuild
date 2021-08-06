@@ -45,8 +45,8 @@ namespace Microsoft.DotNet.PackageValidation
 
         public void GenerateSuppressionsFile(string suppressionsFile)
         {
-            _suppressionEngine.WriteSuppressionsToFile(suppressionsFile);
-            LogMessage(MessageImportance.High, Resources.WroteSuppressions, suppressionsFile);
+            if (_suppressionEngine.WriteSuppressionsToFile(suppressionsFile))
+                LogMessage(MessageImportance.High, Resources.WroteSuppressions, suppressionsFile);
         }
     }
 }
