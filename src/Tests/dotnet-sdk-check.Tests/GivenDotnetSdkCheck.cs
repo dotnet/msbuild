@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
         private readonly BufferedReporter _reporter;
         private readonly string fakeReleasesPath;
 
-        private const string HelpText = @"check:
+        private const string HelpText = @"Description:
       .NET SDK Check Command
     
     Usage:

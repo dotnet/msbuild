@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Cli.Remove.Package.Tests
 {
     public class GivenDotnetRemovePackage : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"package:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   Remove a NuGet package reference from the project.
 
 Usage:
@@ -30,7 +30,7 @@ Options:
   --interactive     Allows the command to stop and wait for user input or action (for example to complete authentication).
   -?, -h, --help    Show command line help.";
 
-        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"remove:
+        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"Description:
   .NET Remove Command
 
 Usage:
