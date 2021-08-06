@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
         /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
         /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
         ///
-        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
+        /// When this property is set to true, the previous item operations throw an <see cref="InvalidOperationException"></exception>
         /// instead of expanding the item element.
         /// </summary>
         public bool ThrowInsteadOfSplittingItemElement
@@ -2406,7 +2406,7 @@ namespace Microsoft.Build.Evaluation
             /// their previously stored value to find out, and if so perhaps decide to update their own state.
             /// Note that the number may not increase monotonically.
             ///
-            /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
+            /// This number corresponds to the <see cref="BuildEventContext.EvaluationId"/> and can be used to connect
             /// evaluation logging events back to the Project instance.
             /// </summary>
             public override int LastEvaluationId => _data.EvaluationId;

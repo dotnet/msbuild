@@ -11,11 +11,11 @@ namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Generates a hash of a given ItemGroup items. Metadata is not considered in the hash.
+    /// </summary>
     /// <remarks>
     /// Currently uses SHA1. Implementation subject to change between MSBuild versions. Not
     /// intended as a cryptographic security measure, only uniqueness between build executions.
     /// </remarks>
-    /// </summary>
     public class Hash : TaskExtension
     {
         private const char ItemSeparatorCharacter = '\u2028';
