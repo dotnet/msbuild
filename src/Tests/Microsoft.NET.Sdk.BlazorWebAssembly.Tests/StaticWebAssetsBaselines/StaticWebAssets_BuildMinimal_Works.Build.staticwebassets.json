@@ -1,14 +1,15 @@
 {
   "Version": 1,
-  "Hash": "9Q2F4wXzJSw9Amz1qOkUGG11b84neMUQ6Dg\u002BfEeULC8=",
+  "Hash": "__hash__",
   "Source": "blazorwasm-minimal",
   "BasePath": "/",
   "Mode": "Root",
   "ManifestType": "Build",
-  "RelatedManifests": [],
+  "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [
     {
       "Name": "blazorwasm-minimal\\wwwroot",
+      "Source": "blazorwasm-minimal",
       "ContentRoot": "${ProjectRoot}\\wwwroot\\",
       "BasePath": "/",
       "Pattern": "**"
@@ -30,7 +31,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.authorization\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Authorization.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.authorization\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Authorization.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Forms.dll",
@@ -47,7 +48,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.forms\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.Forms.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.forms\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.Forms.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Web.dll",
@@ -64,7 +65,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.web\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.Web.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.web\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.Web.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll",
@@ -81,7 +82,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.WebAssembly.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.WebAssembly.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.dll",
@@ -98,7 +99,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Metadata.dll",
@@ -115,7 +116,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.metadata\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Metadata.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.metadata\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Metadata.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.CSharp.dll",
@@ -149,7 +150,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Binder.dll",
@@ -166,7 +167,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.binder\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Binder.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.binder\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Binder.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll",
@@ -183,7 +184,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.fileextensions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.FileExtensions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.fileextensions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.FileExtensions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Json.dll",
@@ -200,7 +201,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.json\\${PackageVersion}.0\\lib\\netstandard2.1\\Microsoft.Extensions.Configuration.Json.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.json\\[[CustomPackageVersion]]\\lib\\netstandard2.1\\Microsoft.Extensions.Configuration.Json.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.dll",
@@ -217,7 +218,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll",
@@ -234,7 +235,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.dll",
@@ -251,7 +252,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.Extensions.DependencyInjection.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.Extensions.DependencyInjection.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll",
@@ -268,7 +269,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll",
@@ -285,7 +286,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.physical\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Physical.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.physical\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Physical.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll",
@@ -302,7 +303,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.filesystemglobbing\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.FileSystemGlobbing.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.filesystemglobbing\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.FileSystemGlobbing.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll",
@@ -319,7 +320,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Logging.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Logging.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Logging.dll",
@@ -336,7 +337,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging\\${PackageVersion}.0\\lib\\netstandard2.1\\Microsoft.Extensions.Logging.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging\\[[CustomPackageVersion]]\\lib\\netstandard2.1\\Microsoft.Extensions.Logging.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Options.dll",
@@ -353,7 +354,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.options\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.Extensions.Options.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.options\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.Extensions.Options.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Primitives.dll",
@@ -370,7 +371,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.primitives\\${PackageVersion}.0\\lib\\netcoreapp3.0\\Microsoft.Extensions.Primitives.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.primitives\\[[CustomPackageVersion]]\\lib\\netcoreapp3.0\\Microsoft.Extensions.Primitives.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.JSInterop.WebAssembly.dll",
@@ -387,7 +388,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop.webassembly\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.JSInterop.WebAssembly.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop.webassembly\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.JSInterop.WebAssembly.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.JSInterop.dll",
@@ -404,7 +405,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.JSInterop.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.JSInterop.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.VisualBasic.Core.dll",
@@ -1288,7 +1289,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\system.io.pipelines\\${PackageVersion}.0\\lib\\netcoreapp3.0\\System.IO.Pipelines.dll"
+      "OriginalItemSpec": "${RestorePath}\\system.io.pipelines\\[[CustomPackageVersion]]\\lib\\netcoreapp3.0\\System.IO.Pipelines.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Pipes.AccessControl.dll",
@@ -3226,7 +3227,7 @@
       "AssetTraitValue": "boot",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\${PackageVersion}.0\\build\\net${PackageVersion}\\blazor.webassembly.js"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\[[CustomPackageVersion]]\\build\\net5.0\\blazor.webassembly.js"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazorwasm-minimal.dll",

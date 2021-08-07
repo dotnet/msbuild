@@ -310,7 +310,8 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var testInstance = CreateAspNetSdkTestAsset(testAppName);
             
             var buildCommand = new BuildCommand(testInstance, "blazorhosted");
-            buildCommand.Execute().Should().Pass();
+            buildCommand.WithWorkingDirectory(testInstance.TestRoot);
+            buildCommand.Execute("/bl").Should().Pass();
 
             var buildOutputDirectory = buildCommand.GetOutputDirectory(DefaultTfm).ToString();
 
@@ -354,13 +355,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             var intermediateOutputPath = buildCommand.GetIntermediateDirectory(DefaultTfm).ToString();
 
             // GenerateStaticWebAssetsManifest should generate the manifest file.
-            var path = Path.Combine(intermediateOutputPath, "StaticWebAssets.build.json");
+            var path = Path.Combine(intermediateOutputPath, "staticwebassets.build.json");
             new FileInfo(path).Should().Exist();
             var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(path));
             AssertManifest(manifest, LoadBuildManifest());
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
-            var finalPath = Path.Combine(outputPath, "blazorwasm.staticwebassets.json");
+            var finalPath = Path.Combine(outputPath, "blazorwasm.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
 
             AssertBuildAssets(

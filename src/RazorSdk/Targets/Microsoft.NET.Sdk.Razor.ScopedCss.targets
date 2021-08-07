@@ -58,12 +58,12 @@ Integration with static web assets:
     _AddScopedCssBundles;
   </ResolveStaticWebAssetsInputsDependsOn>
 
-  <CopyStaticWebAssetsToOutputFolderDependsOn>
-    $(CopyStaticWebAssetsToOutputFolderDependsOn);
+  <GenerateComputedBuildStaticWebAssetsDependsOn>
+    $(GenerateComputedBuildStaticWebAssetsDependsOn);
     _ResolveBundlingConfiguration;
     _GenerateScopedCssFiles;
     BundleScopedCssFiles;
-  </CopyStaticWebAssetsToOutputFolderDependsOn>
+  </GenerateComputedBuildStaticWebAssetsDependsOn>
 
 </PropertyGroup>
 
@@ -75,10 +75,10 @@ Integration with static web assets:
     _AddGeneratedScopedCssFiles;
   </ResolveStaticWebAssetsInputsDependsOn>
 
-  <CopyStaticWebAssetsToOutputFolderDependsOn>
+  <GenerateComputedBuildStaticWebAssetsDependsOn>
     _GenerateScopedCssFiles;
-    $(CopyStaticWebAssetsToOutputFolderDependsOn);
-  </CopyStaticWebAssetsToOutputFolderDependsOn>
+    $(GenerateComputedBuildStaticWebAssetsDependsOn);
+  </GenerateComputedBuildStaticWebAssetsDependsOn>
 
 </PropertyGroup>
 
@@ -89,8 +89,6 @@ Integration with static web assets:
   -->
   <_ScopedCssExtension>.rz.scp.css</_ScopedCssExtension>
 </PropertyGroup>
-
-<Target Name="_PrepareForScopedCss" DependsOnTargets="$(_PrepareForScopedCssDependsOn)" />
 
 <Target Name="ResolveScopedCssInputs">
     <!--

@@ -35,7 +35,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Static web assets defaults -->
     <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">/</StaticWebAssetBasePath>
     <StaticWebAssetProjectMode Condition="'$(StaticWebAssetProjectMode)' == ''">Root</StaticWebAssetProjectMode>    
-    <StaticWebAssetsPublishTarget>ComputeFilesToPublish</StaticWebAssetsPublishTarget>
+    <StaticWebAssetsGetPublishAssetsTargets>ComputeFilesToPublish;GetCurrentProjectPublishStaticWebAssetItems</StaticWebAssetsGetPublishAssetsTargets>
     <StaticWebAssetsAdditionalPublishProperties>$(StaticWebAssetsAdditionalPublishProperties);BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true;_PublishingBlazorWasmProject=true</StaticWebAssetsAdditionalPublishProperties>
     <StaticWebAssetsAdditionalPublishPropertiesToRemove>$(StaticWebAssetsAdditionalPublishPropertiesToRemove);NoBuild;RuntimeIdentifier</StaticWebAssetsAdditionalPublishPropertiesToRemove>
 

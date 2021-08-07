@@ -15,8 +15,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <ResolveStaticWebAssetsInputsDependsOn>$(ResolveStaticWebAssetsInputsDependsOn);_AddServiceWorkerAssets</ResolveStaticWebAssetsInputsDependsOn>
-    <CopyStaticWebAssetsToPublishDirectoryDependsOn>$(CopyStaticWebAssetsToPublishDirectoryDependsOn);_WritePublishServiceWorkerAssetsManifest</CopyStaticWebAssetsToPublishDirectoryDependsOn>
-    <CopyStaticWebAssetsToOutputFolderDependsOn>$(CopyStaticWebAssetsToOutputFolderDependsOn);_WriteBuildServiceWorkerAssetsManifest</CopyStaticWebAssetsToOutputFolderDependsOn>
+    <GenerateComputedPublishStaticWebAssetsDependsOn>$(GenerateComputedPublishStaticWebAssetsDependsOn);_WritePublishServiceWorkerAssetsManifest</GenerateComputedPublishStaticWebAssetsDependsOn>
+    <GenerateComputedBuildStaticWebAssetsDependsOn>$(GenerateComputedBuildStaticWebAssetsDependsOn);_WriteBuildServiceWorkerAssetsManifest</GenerateComputedBuildStaticWebAssetsDependsOn>
   </PropertyGroup>
 
   <Target Name="_AddServiceWorkerAssets" DependsOnTargets="_ComputeServiceWorkerAssets">
@@ -108,12 +108,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
-  <Target Name="_WriteBuildServiceWorkerAssetsManifest" DependsOnTargets="_ComputeServiceWorkerAssets">
+  <Target Name="_WriteBuildServiceWorkerAssetsManifest" DependsOnTargets="ResolveStaticWebAssetsInputs">
 
     <ItemGroup>
-      <_BuildAssetsForManifest Include="@(StaticWebAsset)" Condition="'%(AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative' and '%(AssetKind)' != 'Publish' and Exists('%(Identity)')" />
-      <_BuildAssetsForManifest Include="@(StaticWebAsset->'%(OriginalItemSpec)')" Condition="'%(AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative' and '%(AssetKind)' != 'Publish' and !Exists('%(Identity)')" />
+      <_BuildAssetsForManifestCandidate Include="@(StaticWebAsset)" Condition="'%(StaticWebAsset.AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative' and Exists('%(Identity)')" />
+      <_BuildAssetsForManifestCandidate Include="@(StaticWebAsset->'%(OriginalItemSpec)')" Condition="'%(StaticWebAsset.AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative' and !Exists('%(Identity)')" />
     </ItemGroup>
+
+    <ComputeStaticWebAssetsForCurrentProject
+      Assets="@(_BuildAssetsForManifestCandidate)"
+      ProjectMode="$(StaticWebAssetProjectMode)"
+      AssetKind="Build"
+      Source="$(PackageId)"
+    >
+      <Output TaskParameter="StaticWebAssets" ItemName="_BuildAssetsForManifest" />
+    </ComputeStaticWebAssetsForCurrentProject>
 
     <ComputeStaticWebAssetsTargetPaths Assets="@(_BuildAssetsForManifest)" PathPrefix="$(StaticWebAssetBasePath)" UseAlternatePathDirectorySeparator="true">
       <Output TaskParameter="AssetsWithTargetPath" ItemName="_BuildAssetsForManifestWithTargetPath" />
@@ -123,7 +132,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_BuildServiceWorkItem Include="@(_BuildAssetsForManifestWithTargetPath)">
         <AssetUrl>%(_BuildAssetsForManifestWithTargetPath.TargetPath)</AssetUrl>
       </_BuildServiceWorkItem>
-      <_BuildServiceWorkerFile Include="@(StaticWebAsset)" Condition="'%(AssetKind)' == 'Build' And '%(AssetTraitName)' == 'BlazorServiceWorker' And '%(AssetTraitValue)' == 'ServiceWorkerJs'" />
+      <_BuildServiceWorkerFile Include="@(StaticWebAsset)" Condition="'%(AssetKind)' == 'Build' And '%(StaticWebAsset.AssetTraitName)' == 'BlazorServiceWorker' And '%(StaticWebAsset.AssetTraitValue)' == 'ServiceWorkerJs'" />
     </ItemGroup>
 
     <GenerateServiceWorkerAssetsManifest
@@ -157,21 +166,30 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
-  <Target Name="_WritePublishServiceWorkerAssetsManifest" DependsOnTargets="_ComputeServiceWorkerAssets;LoadStaticWebAssetsPublishManifest" AfterTargets="GenerateStaticWebAssetsPublishManifest">
+  <Target Name="_WritePublishServiceWorkerAssetsManifest" DependsOnTargets="_ComputeServiceWorkerAssets;LoadStaticWebAssetsPublishManifest">
 
     <ItemGroup>
-      <_PublishAssetsForManifest Include="@(StaticWebAsset)" Condition="'%(AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative'" />
+      <_PublishAssetsForManifestCandidate Include="@(StaticWebAsset)" Condition="'%(StaticWebAsset.AssetTraitName)' != 'BlazorServiceWorker' and '%(AssetRole)' != 'Alternative'" />
     </ItemGroup>
 
+    <ComputeStaticWebAssetsForCurrentProject
+      Assets="@(_PublishAssetsForManifestCandidate)"
+      ProjectMode="$(StaticWebAssetProjectMode)"
+      AssetKind="Publish"
+      Source="$(PackageId)"
+    >
+      <Output TaskParameter="StaticWebAssets" ItemName="_PublishAssetsForManifest" />
+    </ComputeStaticWebAssetsForCurrentProject>
+
     <ComputeStaticWebAssetsTargetPaths Assets="@(_PublishAssetsForManifest)" PathPrefix="$(StaticWebAssetBasePath)" UseAlternatePathDirectorySeparator="true">
-      <Output TaskParameter="AssetsWithTargetPath" ItemName="_AssetsForManifestWithTargetPath" />
+      <Output TaskParameter="AssetsWithTargetPath" ItemName="_PublishAssetsForManifestWithTargetPath" />
     </ComputeStaticWebAssetsTargetPaths>
 
     <ItemGroup>
-      <_ServiceWorkItem Include="@(_AssetsForManifestWithTargetPath)">
-        <AssetUrl>%(_AssetsForManifestWithTargetPath.TargetPath)</AssetUrl>
+      <_ServiceWorkItem Include="@(_PublishAssetsForManifestWithTargetPath)">
+        <AssetUrl>%(_PublishAssetsForManifestWithTargetPath.TargetPath)</AssetUrl>
       </_ServiceWorkItem>
-      <_PublishServiceWorkerFile Include="@(StaticWebAsset)" Condition="'%(AssetKind)' == 'Publish' And '%(AssetTraitName)' == 'BlazorServiceWorker' And '%(AssetTraitValue)' == 'ServiceWorkerJs'" />
+      <_PublishServiceWorkerFile Include="@(StaticWebAsset)" Condition="'%(AssetKind)' == 'Publish' And '%(StaticWebAsset.AssetTraitName)' == 'BlazorServiceWorker' And '%(StaticWebAsset.AssetTraitValue)' == 'ServiceWorkerJs'" />
     </ItemGroup>
 
     <GenerateServiceWorkerAssetsManifest

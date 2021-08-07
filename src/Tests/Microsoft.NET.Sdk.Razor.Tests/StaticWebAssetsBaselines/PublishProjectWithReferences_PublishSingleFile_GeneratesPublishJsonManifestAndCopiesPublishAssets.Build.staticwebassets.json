@@ -1,61 +1,45 @@
 {
   "Version": 1,
-  "Hash": "ItgpN1c3I4Evz\u002Bk4IRoNXw4IWp\u002B2QGWu\u002BvojOtJmZqI=",
+  "Hash": "__hash__",
   "Source": "AppWithPackageAndP2PReference",
   "BasePath": "_content/AppWithPackageAndP2PReference",
   "Mode": "Default",
   "ManifestType": "Build",
-  "RelatedManifests": [
+  "ReferencedProjectsConfiguration": [
     {
-      "Identity": "${ProjectRoot}\\AnotherClassLib\\obj\\Debug\\net6.0\\StaticWebAssets.build.json",
+      "Identity": "${ProjectRoot}\\AnotherClassLib\\AnotherClassLib.csproj",
+      "Version": 2,
       "Source": "AnotherClassLib",
-      "ManifestType": "Build",
-      "ProjectFile": "${ProjectRoot}\\AnotherClassLib\\AnotherClassLib.csproj",
-      "PublishTarget": "",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
       "AdditionalPublishProperties": ";",
       "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "\u002BdGr1\u002BQ8\u002BsSZYlyyHsVRXIv\u002BPlxknOHB15MrTCjbbMw="
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": ";",
+      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
     },
     {
-      "Identity": "${ProjectRoot}\\AnotherClassLib\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
-      "Source": "AnotherClassLib",
-      "ManifestType": "Publish",
-      "ProjectFile": "${ProjectRoot}\\AnotherClassLib\\AnotherClassLib.csproj",
-      "PublishTarget": "ComputeReferencedStaticWebAssetsPublishManifest",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": ""
-    },
-    {
-      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\StaticWebAssets.build.json",
+      "Identity": "${ProjectRoot}\\ClassLibrary\\ClassLibrary.csproj",
+      "Version": 2,
       "Source": "ClassLibrary",
-      "ManifestType": "Build",
-      "ProjectFile": "${ProjectRoot}\\ClassLibrary\\ClassLibrary.csproj",
-      "PublishTarget": "",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
       "AdditionalPublishProperties": ";",
       "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "syXaF7D2p8Jj5evbBjOpWLHZVba8aRjabW\u002B34AzbzK8="
-    },
-    {
-      "Identity": "${ProjectRoot}\\ClassLibrary\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
-      "Source": "ClassLibrary",
-      "ManifestType": "Publish",
-      "ProjectFile": "${ProjectRoot}\\ClassLibrary\\ClassLibrary.csproj",
-      "PublishTarget": "ComputeReferencedStaticWebAssetsPublishManifest",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": ""
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": ";",
+      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
     }
   ],
   "DiscoveryPatterns": [
     {
       "Name": "AnotherClassLib\\wwwroot",
+      "Source": "AnotherClassLib",
       "ContentRoot": "${ProjectRoot}\\AnotherClassLib\\wwwroot\\",
       "BasePath": "_content/AnotherClassLib",
       "Pattern": "**"
     },
     {
       "Name": "ClassLibrary\\wwwroot",
+      "Source": "ClassLibrary",
       "ContentRoot": "${ProjectRoot}\\ClassLibrary\\wwwroot\\",
       "BasePath": "_content/ClassLibrary",
       "Pattern": "**"
@@ -165,10 +149,10 @@
       "OriginalItemSpec": "wwwroot\\js\\project-transitive-dep.v4.js"
     },
     {
-      "Identity": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\PackageLibraryDirectDependency.bundle.scp.css",
+      "Identity": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\PackageLibraryDirectDependency.bundle.scp.css",
       "SourceId": "PackageLibraryDirectDependency",
       "SourceType": "Package",
-      "ContentRoot": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\",
+      "ContentRoot": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\",
       "BasePath": "_content/PackageLibraryDirectDependency",
       "RelativePath": "PackageLibraryDirectDependency.bundle.scp.css",
       "AssetKind": "All",
@@ -179,13 +163,13 @@
       "AssetTraitValue": "ProjectBundle",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\PackageLibraryDirectDependency.bundle.scp.css"
+      "OriginalItemSpec": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\PackageLibraryDirectDependency.bundle.scp.css"
     },
     {
-      "Identity": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\css\\site.css",
+      "Identity": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\css\\site.css",
       "SourceId": "PackageLibraryDirectDependency",
       "SourceType": "Package",
-      "ContentRoot": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\",
+      "ContentRoot": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\",
       "BasePath": "_content/PackageLibraryDirectDependency",
       "RelativePath": "css/site.css",
       "AssetKind": "All",
@@ -196,13 +180,13 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\css\\site.css"
+      "OriginalItemSpec": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\css\\site.css"
     },
     {
-      "Identity": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\js\\pkg-direct-dep.js",
+      "Identity": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\js\\pkg-direct-dep.js",
       "SourceId": "PackageLibraryDirectDependency",
       "SourceType": "Package",
-      "ContentRoot": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\",
+      "ContentRoot": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\",
       "BasePath": "_content/PackageLibraryDirectDependency",
       "RelativePath": "js/pkg-direct-dep.js",
       "AssetKind": "All",
@@ -213,13 +197,13 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${RestorePath}\\packagelibrarydirectdependency\\1.0.0\\staticwebassets\\js\\pkg-direct-dep.js"
+      "OriginalItemSpec": "${RestorePath}\\packagelibrarydirectdependency\\[[CustomPackageVersion]]\\staticwebassets\\js\\pkg-direct-dep.js"
     },
     {
-      "Identity": "${RestorePath}\\packagelibrarytransitivedependency\\1.0.0\\staticwebassets\\js\\pkg-transitive-dep.js",
+      "Identity": "${RestorePath}\\packagelibrarytransitivedependency\\[[CustomPackageVersion]]\\staticwebassets\\js\\pkg-transitive-dep.js",
       "SourceId": "PackageLibraryTransitiveDependency",
       "SourceType": "Package",
-      "ContentRoot": "${RestorePath}\\packagelibrarytransitivedependency\\1.0.0\\staticwebassets\\",
+      "ContentRoot": "${RestorePath}\\packagelibrarytransitivedependency\\[[CustomPackageVersion]]\\staticwebassets\\",
       "BasePath": "_content/PackageLibraryTransitiveDependency",
       "RelativePath": "js/pkg-transitive-dep.js",
       "AssetKind": "All",
@@ -230,7 +214,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${RestorePath}\\packagelibrarytransitivedependency\\1.0.0\\staticwebassets\\js\\pkg-transitive-dep.js"
+      "OriginalItemSpec": "${RestorePath}\\packagelibrarytransitivedependency\\[[CustomPackageVersion]]\\staticwebassets\\js\\pkg-transitive-dep.js"
     }
   ]
 }

@@ -21,11 +21,10 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         private static readonly JsonSerializerOptions ManifestSerializationOptions = new()
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            WriteIndented = true
         };
 
         [Required]
-        public string BasePath { get; set; }
+        public string Source { get; set; }
 
         [Required]
         public ITaskItem[] DiscoveryPatterns { get; set; }
@@ -42,7 +41,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             {
                 var manifest = ComputeDevelopmentManifest(
                     Assets.Select(a => StaticWebAsset.FromTaskItem(a)),
-                    DiscoveryPatterns.Select(ComputeDiscoveryPattern));
+                    DiscoveryPatterns.Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem));
 
                 PersistManifest(manifest);
             }
@@ -58,20 +57,42 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             IEnumerable<StaticWebAsset> assets,
             IEnumerable<StaticWebAssetsManifest.DiscoveryPattern> discoveryPatterns)
         {
-            var assetsWithPathSegments = assets
-                .GroupBy(
-                a => a.ComputeTargetPath("", '/'),
-                ChooseAsset)
-                .Where(pair => pair.Item2 != null)
-                .ToArray();
+            var assetsWithPathSegments = ComputeManifestAssets(assets).ToArray();
 
             var discoveryPatternsByBasePath = DiscoveryPatterns
-                .Select(ComputeDiscoveryPattern)
-                .GroupBy(p => p.BasePath == BasePath ? "" : p.BasePath,
+                .Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem)
+                .GroupBy(p => p.HasSourceId(Source) ? "" : p.BasePath,
                  (key, values) => (key.Split(new[] { '/' }, options: StringSplitOptions.RemoveEmptyEntries), values));
 
             var manifest = CreateManifest(assetsWithPathSegments, discoveryPatternsByBasePath);
             return manifest;
+        }
+
+        private IEnumerable<SegmentsAssetPair> ComputeManifestAssets(IEnumerable<StaticWebAsset> assets)
+        {
+            var assetsByTargetPath = assets
+                .GroupBy(a => a.ComputeTargetPath("", '/'));
+
+            foreach (var group in assetsByTargetPath)
+            {
+                var asset = StaticWebAsset.ChooseNearestAssetKind(group, StaticWebAsset.AssetKinds.Build).SingleOrDefault();
+
+                if (asset == null)
+                {
+                    Log.LogMessage("Skipping candidate asset '{0}' because it is a 'Publish' asset.", group.Key);
+                }
+
+                if (asset.HasSourceId(Source) && !StaticWebAssetsManifest.ManifestModes.ShouldIncludeAssetInCurrentProject(asset, StaticWebAssetsManifest.ManifestModes.Root))
+                {
+                    Log.LogMessage("Skipping candidate asset '{0}' because asset mode is '{2}'",
+                        asset.Identity,
+                        asset.AssetMode);
+
+                    continue;
+                }
+
+                yield return new SegmentsAssetPair(group.Key, asset);
+            }
         }
 
         private void PersistManifest(StaticWebAssetsDevelopmentManifest manifest)
@@ -81,7 +102,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             var currentHash = sha256.ComputeHash(data);
 
             var fileExists = File.Exists(ManifestPath);
-            var existingManifestHash = fileExists ?  sha256.ComputeHash(File.ReadAllBytes(ManifestPath)) : Array.Empty<byte>();
+            var existingManifestHash = fileExists ? sha256.ComputeHash(File.ReadAllBytes(ManifestPath)) : Array.Empty<byte>();
 
             if (!fileExists)
             {
@@ -100,7 +121,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         }
 
         private StaticWebAssetsDevelopmentManifest CreateManifest(
-            (string[], StaticWebAsset) [] assetsWithPathSegments,
+            SegmentsAssetPair[] assetsWithPathSegments,
             IEnumerable<(string[], IEnumerable<StaticWebAssetsManifest.DiscoveryPattern> values)> discoveryPatternsByBasePath)
         {
             var contentRootIndex = new Dictionary<string, int>();
@@ -111,7 +132,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 for (var i = 0; i < segments.Length; i++)
                 {
                     var segment = segments[i];
-                    if (segments.Length -1 == i)
+                    if (segments.Length - 1 == i)
                     {
                         if (!contentRootIndex.TryGetValue(asset.ContentRoot, out var index))
                         {
@@ -134,7 +155,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     }
                     else
                     {
-                        currentNode.Children ??= new Dictionary<string,StaticWebAssetNode>();
+                        currentNode.Children ??= new Dictionary<string, StaticWebAssetNode>();
                         if (currentNode.Children.TryGetValue(segment, out var existing))
                         {
                             currentNode = existing;
@@ -235,8 +256,8 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 }
             }
 
-            return new StaticWebAssetsDevelopmentManifest 
-            { 
+            return new StaticWebAssetsDevelopmentManifest
+            {
                 ContentRoots = contentRootIndex.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key).ToArray(),
                 Root = root
             };
@@ -269,76 +290,23 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             public StaticWebAssetPattern[] Patterns { get; set; }
         }
 
-        // We at most get three assets here since we assume a valid manifest (Build, All, Publish)
-        // We will ignore publish assets since they don't matter for development and we will prefer
-        // build specific assets over 'All' (which means it can be used for build and publish).
-        // We've already validated that assets targeting the same path come from the same project, so
-        // we don't need to worry about that here.
-        private static (string[], StaticWebAsset) ChooseAsset(string key, IEnumerable<StaticWebAsset> candidates)
+        private struct SegmentsAssetPair
         {
-            StaticWebAsset buildSpecificAsset = null;
-            StaticWebAsset buildAndPublishAsset = null;
-            foreach (var candidate in candidates)
+            public SegmentsAssetPair(string path, StaticWebAsset asset)
             {
-                // Todo, perform filtering based on project mode.
-
-                if (candidate.IsBuildOnly())
-                {
-                    buildSpecificAsset = candidate;
-                }
-                if (candidate.IsBuildAndPublish())
-                {
-                    buildSpecificAsset = candidate;
-                }
+                PathSegments = path.Split(new[] { '/' }, options: StringSplitOptions.RemoveEmptyEntries);
+                Asset = asset;
             }
 
-            return (key.Split(new[] { '/' }, options: StringSplitOptions.RemoveEmptyEntries), buildSpecificAsset ?? buildAndPublishAsset);
-        }
+            public string[] PathSegments { get; }
 
-        private StaticWebAssetsManifest.DiscoveryPattern ComputeDiscoveryPattern(ITaskItem pattern)
-        {
-            var name = pattern.ItemSpec;
-            var contentRoot = pattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.ContentRoot));
-            var basePath = pattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.BasePath));
-            var glob = pattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Pattern));
+            public StaticWebAsset Asset { get; }
 
-            return StaticWebAssetsManifest.DiscoveryPattern.Create(name, contentRoot, basePath, glob);
-        }
-
-        private StaticWebAssetsManifest.ManifestReference ComputeManifestReference(ITaskItem reference)
-        {
-            var identity = reference.GetMetadata("FullPath");
-            var source = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.Source));
-            var manifestType = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.ManifestType));
-            var projectFile = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.ProjectFile));
-            var publishTarget = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.PublishTarget));
-            var additionalPublishProperties = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.AdditionalPublishProperties));
-            var additionalPublishPropertiesToRemove = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.AdditionalPublishPropertiesToRemove));
-
-            if (!File.Exists(identity))
+            public void Deconstruct(out string[] segments, out StaticWebAsset asset)
             {
-                if (!StaticWebAssetsManifest.ManifestTypes.IsPublish(manifestType))
-                {
-                    Log.LogError("Manifest '{0}' for project '{1}' with type '{2}' does not exist.", identity, source, manifestType);
-                    return null;
-                }
-
-                var publishManifest = StaticWebAssetsManifest.ManifestReference.Create(identity, source, manifestType, projectFile, "");
-                publishManifest.PublishTarget = publishTarget;
-                publishManifest.AdditionalPublishProperties = additionalPublishProperties;
-                publishManifest.AdditionalPublishPropertiesToRemove = additionalPublishPropertiesToRemove;
-
-                return publishManifest;
+                asset = Asset;
+                segments = PathSegments;
             }
-
-            var relatedManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(identity));
-
-            var result = StaticWebAssetsManifest.ManifestReference.Create(identity, source, manifestType, projectFile, relatedManifest.Hash);
-            result.PublishTarget = publishTarget;
-            result.AdditionalPublishProperties = additionalPublishProperties;
-            result.AdditionalPublishPropertiesToRemove = additionalPublishPropertiesToRemove;
-
-            return result;
         }
     }
 }

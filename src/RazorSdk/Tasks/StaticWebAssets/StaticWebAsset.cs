@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-#if NET472_OR_GREATER
 using System.Collections.Generic;
-#endif
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Framework;
@@ -54,6 +52,50 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             return result;
         }
+
+        // Iterate over the list of assets with the same Identity and choose the one closest to the asset kind we've been given:
+        // The given asset kind here will always be Build or Publish.
+        // We need to iterate over the assets, the moment we detect one asset for our specific kind, we return that asset
+        // While we iterate over the list of assets we keep any asset of the `All` kind we find on a variable.
+        // * If we find a more specific asset, we will ignore it in favor of the specific one.
+        // * If we don't find a more specfic (Build or Publish) asset we will return the `All` asset.
+        // We assume that the manifest is correct and don't try to deal with errors at this level, if for some reason we find more
+        // than one type of asset we will just return all of them.
+        // One exception to this is the `All` kind of assets, where we will just return the first two we find. The reason for it is
+        // to avoid having to allocate a buffer to collect all the `All` assets.
+        internal static IEnumerable<StaticWebAsset> ChooseNearestAssetKind(IEnumerable<StaticWebAsset> group, string assetKind)
+        {
+            StaticWebAsset allKindAssetCandidate = null;
+
+            var ignoreAllKind = false;
+            foreach (var item in group)
+            {
+                if (item.HasKind(assetKind))
+                {
+                    ignoreAllKind = true;
+
+                    yield return item;
+                }
+                else if (!ignoreAllKind && item.IsBuildAndPublish())
+                {
+                    if (allKindAssetCandidate != null)
+                    {
+                        yield return allKindAssetCandidate;
+                        yield return item;
+                        yield break;
+                    }
+                    allKindAssetCandidate = item;
+                }
+            }
+
+            if (!ignoreAllKind)
+            {
+                yield return allKindAssetCandidate;
+            }
+        }
+
+        private bool HasKind(string assetKind) =>
+            AssetKinds.IsKind(AssetKind, assetKind);
 
         public static StaticWebAsset FromV1TaskItem(ITaskItem item)
         {
@@ -258,6 +300,9 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             return result;
         }
 
+        internal bool HasSourceId(string source) =>
+            StaticWebAsset.HasSourceId(SourceId, source);
+
         public void Normalize()
         {
             ContentRoot = NormalizeContentRootPath(ContentRoot);
@@ -399,6 +444,12 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             internal static bool IsPrimary(string assetRole)
                 => string.Equals(assetRole, Primary, StringComparison.Ordinal);
         }
+
+        internal static bool HasSourceId(ITaskItem asset, string source) =>
+            string.Equals(asset.GetMetadata(nameof(SourceId)), source, StringComparison.Ordinal);
+
+        internal static bool HasSourceId(string candidate, string source) =>
+            string.Equals(candidate, source, StringComparison.Ordinal);
 
         private string GetDebuggerDisplay()
         {

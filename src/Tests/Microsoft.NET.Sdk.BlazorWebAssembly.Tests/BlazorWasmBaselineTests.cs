@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
-using System;
-using System.IO;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.Sdk.Razor.Tests;
 using Microsoft.NET.TestFramework;
@@ -20,7 +18,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
 
         private string TemplatizeCompressedAssets(StaticWebAsset asset, string originalValue, StaticWebAsset relatedAsset)
         {
-            if (!asset.IsAlternativeAsset())
+            if (!asset.IsAlternativeAsset() && Path.GetExtension(asset.Identity) != ".gz")
             {
                 return null;
             }
@@ -30,12 +28,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                 return null;
             }
 
-            if (originalValue.Contains("[["))
+            if (originalValue.Replace("[[CustomPackageVersion]]", "__CustomVersion__").Contains("[["))
             {
                 return null;
             }
 
-            return Path.Combine(Path.GetDirectoryName(asset.Identity), "[[" + asset.RelativePath + "]]");
+            var result = Path.Combine(Path.GetDirectoryName(asset.Identity), "[[" + asset.RelativePath + "]]");
+            return !GenerateBaselines ?
+                result.Replace("${RuntimeVersion}", RuntimeVersion).Replace("${PackageVersion}", DefaultPackageVersion) :
+                result.Replace(RuntimeVersion, "${RuntimeVersion}").Replace(DefaultPackageVersion, "${PackageVersion}");
         }
 
         protected override string EmbeddedResourcePrefix => string.Join('.', "Microsoft.NET.Sdk.BlazorWebAssembly.Tests", "StaticWebAssetsBaselines");

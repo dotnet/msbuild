@@ -394,7 +394,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_BlazorPublishPrefilteredAssets 
         Include="@(StaticWebAsset)" 
-        Condition="'%(AssetTraitName)' == 'BlazorWebAssemblyResource' or '%(AssetTraitName)' == 'Culture' or '%(AssetRole)' == 'Alternative'" />
+        Condition="'%(StaticWebAsset.AssetTraitName)' == 'BlazorWebAssemblyResource' or '%(StaticWebAsset.AssetTraitName)' == 'Culture' or '%(AssetRole)' == 'Alternative'" />
     </ItemGroup>
 
     <ComputeBlazorPublishAssets 
@@ -432,11 +432,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <_BlazorPublishAsset 
         Include="@(StaticWebAsset)" 
-        Condition="'%(AssetKind)' != 'Build' and ('%(AssetTraitName)' == 'BlazorWebAssemblyResource' or '%(AssetTraitName)' == 'Culture') and '%(RelativePath)' != '_framework/blazor.webassembly.js'" />
+        Condition="'%(AssetKind)' != 'Build' and ('%(StaticWebAsset.AssetTraitName)' == 'BlazorWebAssemblyResource' or '%(StaticWebAsset.AssetTraitName)' == 'Culture') and '%(RelativePath)' != '_framework/blazor.webassembly.js'" />
 
       <_BlazorPublishConfigFile 
         Include="@(StaticWebAsset)" 
-        Condition="'%(AssetTraitName)' == 'BlazorWebAssemblyResource' and '%(AssetTraitValue)' == 'settings'"/>
+        Condition="'%(StaticWebAsset.AssetTraitName)' == 'BlazorWebAssemblyResource' and '%(StaticWebAsset.AssetTraitValue)' == 'settings'"/>
     
     </ItemGroup>
 
@@ -515,7 +515,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <_GzipFileToCompressForPublish Include="@(StaticWebAsset)" 
-        Condition="'%(AssetKind)' != 'Build' and ('%(AssetTraitName)' == 'BlazorWebAssemblyResource' or '%(AssetTraitName)' == 'Culture')" >
+        Condition="'%(AssetKind)' != 'Build' and ('%(StaticWebAsset.AssetTraitName)' == 'BlazorWebAssemblyResource' or '%(StaticWebAsset.AssetTraitName)' == 'Culture')" >
         <RelatedAsset>%(Identity)</RelatedAsset>
         <AssetRole>Alternative</AssetRole>
         <AssetTraitName>Content-Encoding</AssetTraitName>
@@ -530,7 +530,7 @@ Copyright (c) .NET Foundation. All rights reserved.
            need to check that they are still relevant (we have updated existing assets to account for linking) -->
       <_AlreadyGzipCompressedAssets 
         Include="@(StaticWebAsset)"
-        Condition="'%(AssetKind)' != 'Build' and ('%(AssetTraitName)' == 'Content-Encoding' and '%(AssetTraitValue)' == 'gzip')" />
+        Condition="'%(AssetKind)' != 'Build' and ('%(StaticWebAsset.AssetTraitName)' == 'Content-Encoding' and '%(StaticWebAsset.AssetTraitValue)' == 'gzip')" />
       <_GzipFileToCompressForPublish Remove="@(_AlreadyGzipCompressedAssets->'%(RelatedAsset)')" />
     </ItemGroup>
 

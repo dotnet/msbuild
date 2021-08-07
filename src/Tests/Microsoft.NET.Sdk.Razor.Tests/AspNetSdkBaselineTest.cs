@@ -12,10 +12,12 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.TestFramework;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Razor.Tests
 {
+    [Trait("AspNetCoreBaseline", "true")]
     public class AspNetSdkBaselineTest : AspNetSdkTest
     {
         private static readonly JsonSerializerOptions BaselineSerializationOptions = new() { WriteIndented = true };
@@ -56,7 +58,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
         public string BaselinesFolder =>
             _baselinesFolder ??= ComputeBaselineFolder();
-        
+
         protected Assembly TestAssembly { get; }
 
         protected virtual string ComputeBaselineFolder() =>
@@ -105,6 +107,34 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 asset.Identity = PathTemplatizer(asset, asset.Identity, null) ?? asset.Identity;
                 asset.RelatedAsset = PathTemplatizer(asset, asset.RelatedAsset, relatedAsset) ?? asset.RelatedAsset;
                 asset.OriginalItemSpec = PathTemplatizer(asset, asset.OriginalItemSpec, null) ?? asset.OriginalItemSpec;
+            }
+        }
+
+        private void UpdateCustomPackageVersions(string restorePath, StaticWebAssetsManifest manifest)
+        {
+            foreach (var asset in manifest.Assets)
+            {
+                asset.Identity = UpdateAssetVersion(restorePath, asset.Identity);
+                asset.ContentRoot = UpdateAssetVersion(restorePath, asset.ContentRoot);
+                asset.ContentRoot = asset.ContentRoot.EndsWith(Path.DirectorySeparatorChar) ? asset.ContentRoot : asset.ContentRoot + Path.DirectorySeparatorChar;
+                asset.OriginalItemSpec = UpdateAssetVersion(restorePath, asset.OriginalItemSpec);
+                asset.RelatedAsset = UpdateAssetVersion(restorePath, asset.RelatedAsset);
+            }
+
+            string UpdateAssetVersion(string restorePath, string property)
+            {
+                if (property.Contains(restorePath))
+                {
+                    var segments = property.Substring(restorePath.Length).Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+                    ref var versionSegment = ref segments[1];
+                    if (versionSegment != RuntimeVersion && versionSegment != DefaultPackageVersion)
+                    {
+                        versionSegment = "[[CustomPackageVersion]]";
+                        property = Path.Combine(segments.Prepend(restorePath).ToArray());
+                    }
+                }
+
+                return property;
             }
         }
 
@@ -298,15 +328,16 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             {
                 ApplyPathsToAssets(expected, ProjectDirectory.TestRoot, TestContext.Current.NuGetCachePath);
                 ApplyTemplatizerToAssets(manifest);
+                UpdateCustomPackageVersions(TestContext.Current.NuGetCachePath, manifest);
                 //Many of the properties in the manifest contain full paths, to avoid flakiness on the tests, we don't compare the full paths.
                 manifest.Version.Should().Be(expected.Version);
                 manifest.Source.Should().Be(expected.Source);
                 manifest.BasePath.Should().Be(expected.BasePath);
                 manifest.Mode.Should().Be(expected.Mode);
                 manifest.ManifestType.Should().Be(expected.ManifestType);
-                manifest.RelatedManifests.Select(rm => new ComparableManifest(rm.Identity, rm.Source, rm.ManifestType)).OrderBy(cm => cm.Source).ThenBy(cm => cm.Type)
+                manifest.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity)
                     .Should()
-                    .BeEquivalentTo(expected.RelatedManifests.Select(rm => new ComparableManifest(rm.Identity, rm.Source, rm.ManifestType)).OrderBy(cm => cm.Source).ThenBy(cm => cm.Type));
+                    .BeEquivalentTo(expected.ReferencedProjectsConfiguration.OrderBy(cm => cm.Identity));
                 manifest.DiscoveryPatterns.OrderBy(dp => dp.Name).ShouldBeEquivalentTo(expected.DiscoveryPatterns.OrderBy(dp => dp.Name));
                 manifest.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind)
                     .ShouldBeEquivalentTo(expected.Assets.OrderBy(a => a.BasePath).ThenBy(a => a.RelativePath).ThenBy(a => a.AssetKind));
@@ -327,7 +358,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             => Path.Combine(BaselinesFolder, $"{name}{(!string.IsNullOrEmpty(suffix) ? $"_{suffix}" : "")}.{manifestType}.staticwebassets.json");
 
         private Stream GetManifestEmbeddedResource(string suffix, string name, string manifestType)
-            =>  TestAssembly.GetManifestResourceStream(string.Join('.', EmbeddedResourcePrefix, $"{name}{(!string.IsNullOrEmpty(suffix) ? $"_{suffix}" : "")}.{manifestType}.staticwebassets.json"));
+            => TestAssembly.GetManifestResourceStream(string.Join('.', EmbeddedResourcePrefix, $"{name}{(!string.IsNullOrEmpty(suffix) ? $"_{suffix}" : "")}.{manifestType}.staticwebassets.json"));
 
 
         private string GetExpectedFilesPath(string suffix, string name, string manifestType)
@@ -344,57 +375,48 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             foreach (var asset in manifest.Assets)
             {
                 asset.Identity = asset.Identity.Replace("${ProjectRoot}", projectRoot);
-                asset.Identity = asset.Identity
-                    .Replace("${RestorePath}", restorePath)
-                    .Replace("${RuntimeVersion}", RuntimeVersion)
-                    .Replace("${PackageVersion}", DefaultPackageVersion)
-                    .Replace('\\', Path.DirectorySeparatorChar);
+                asset.Identity = ReplaceRestorePath(restorePath, asset.Identity);
 
                 asset.RelativePath = asset.RelativePath.Replace("${RuntimeVersion}", RuntimeVersion);
 
                 asset.ContentRoot = asset.ContentRoot.Replace("${ProjectRoot}", projectRoot);
-                asset.ContentRoot = asset.ContentRoot
-                    .Replace("${RestorePath}", restorePath)
-                    .Replace("${RuntimeVersion}", RuntimeVersion)
-                    .Replace("${PackageVersion}", DefaultPackageVersion)
-                    .Replace('\\', Path.DirectorySeparatorChar);
+                asset.ContentRoot = ReplaceRestorePath(restorePath, asset.ContentRoot);
 
                 asset.RelatedAsset = asset.RelatedAsset.Replace("${ProjectRoot}", projectRoot);
-                asset.RelatedAsset = asset.RelatedAsset
-                    .Replace("${RestorePath}", restorePath)
-                    .Replace("${RuntimeVersion}", RuntimeVersion)
-                    .Replace("${PackageVersion}", DefaultPackageVersion)
-                    .Replace('\\', Path.DirectorySeparatorChar);
+                asset.RelatedAsset = ReplaceRestorePath(restorePath, asset.RelatedAsset);
 
                 asset.OriginalItemSpec = asset.OriginalItemSpec.Replace("${ProjectRoot}", projectRoot);
-                asset.OriginalItemSpec = asset.OriginalItemSpec
-                    .Replace("${RestorePath}", restorePath)
-                    .Replace("${RuntimeVersion}", RuntimeVersion)
-                    .Replace("${PackageVersion}", DefaultPackageVersion)
-                    .Replace('\\', Path.DirectorySeparatorChar);
+                asset.OriginalItemSpec = ReplaceRestorePath(restorePath, asset.OriginalItemSpec);
             }
 
             foreach (var discovery in manifest.DiscoveryPatterns)
             {
                 discovery.ContentRoot = discovery.ContentRoot.Replace("${ProjectRoot}", projectRoot);
                 discovery.ContentRoot = discovery.ContentRoot
-                    .Replace("${RestorePath}", restorePath)
-                    .Replace("${RuntimeVersion}", RuntimeVersion)
-                    .Replace("${PackageVersion}", DefaultPackageVersion)
                     .Replace('\\', Path.DirectorySeparatorChar);
-                
+
                 discovery.Name = discovery.Name.Replace('\\', Path.DirectorySeparatorChar);
                 discovery.Pattern.Replace('\\', Path.DirectorySeparatorChar);
             }
 
-            foreach (var relatedManifest in manifest.RelatedManifests)
+            foreach (var relatedConfiguration in manifest.ReferencedProjectsConfiguration)
             {
-                relatedManifest.Identity = relatedManifest.Identity.Replace("${ProjectRoot}", projectRoot).Replace('\\', Path.DirectorySeparatorChar);
+                relatedConfiguration.Identity = relatedConfiguration.Identity.Replace("${ProjectRoot}", projectRoot).Replace('\\', Path.DirectorySeparatorChar);
+            }
+
+            string ReplaceRestorePath(string restorePath, string property)
+            {
+                return property
+                    .Replace("${RestorePath}", restorePath)
+                    .Replace("${RuntimeVersion}", RuntimeVersion)
+                    .Replace("${PackageVersion}", DefaultPackageVersion)
+                    .Replace('\\', Path.DirectorySeparatorChar);
             }
         }
 
         private string Templatize(StaticWebAssetsManifest manifest, string projectRoot, string restorePath)
         {
+            manifest.Hash = "__hash__";
             var assetsByIdentity = manifest.Assets.ToDictionary(a => a.Identity);
             foreach (var asset in manifest.Assets)
             {
@@ -413,11 +435,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
                 }
 
                 asset.OriginalItemSpec = asset.OriginalItemSpec.Replace(projectRoot, "${ProjectRoot}");
-                asset.OriginalItemSpec = asset.OriginalItemSpec
-                    .Replace(restorePath, "${RestorePath}")
-                    .Replace(RuntimeVersion, "${RuntimeVersion}")
-                    .Replace(DefaultPackageVersion, "${PackageVersion}")
-                    .Replace(Path.DirectorySeparatorChar, '\\');
+                asset.OriginalItemSpec = TemplatizeRestorePath(restorePath, asset.OriginalItemSpec);
                 asset.OriginalItemSpec = PathTemplatizer(asset, asset.OriginalItemSpec, null) ?? asset.OriginalItemSpec;
             }
 
@@ -425,54 +443,67 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             {
                 discovery.ContentRoot = discovery.ContentRoot.Replace(projectRoot, "${ProjectRoot}");
                 discovery.ContentRoot = discovery.ContentRoot
-                    .Replace(restorePath, "${RestorePath}")
-                    .Replace(RuntimeVersion, "${RuntimeVersion}")
-                    .Replace(DefaultPackageVersion, "${PackageVersion}")
                     .Replace(Path.DirectorySeparatorChar, '\\');
                 discovery.Name = discovery.Name.Replace(Path.DirectorySeparatorChar, '\\');
                 discovery.Pattern = discovery.Pattern.Replace(Path.DirectorySeparatorChar, '\\');
             }
 
-            foreach (var relatedManifest in manifest.RelatedManifests)
+            foreach (var relatedManifest in manifest.ReferencedProjectsConfiguration)
             {
                 relatedManifest.Identity = relatedManifest.Identity.Replace(projectRoot, "${ProjectRoot}").Replace(Path.DirectorySeparatorChar, '\\');
-                relatedManifest.ProjectFile = relatedManifest.ProjectFile.Replace(projectRoot, "${ProjectRoot}").Replace(Path.DirectorySeparatorChar, '\\');
             }
 
             // Sor everything now to ensure we produce stable baselines independent of the machine they were generated on.
             Array.Sort(manifest.DiscoveryPatterns, (l, r) => StringComparer.Ordinal.Compare(l.Name, r.Name));
             Array.Sort(manifest.Assets, (l, r) => StringComparer.Ordinal.Compare(l.Identity, r.Identity));
-            Array.Sort(manifest.RelatedManifests, (l, r) => StringComparer.Ordinal.Compare(l.Identity, r.Identity));
+            Array.Sort(manifest.ReferencedProjectsConfiguration, (l, r) => StringComparer.Ordinal.Compare(l.Identity, r.Identity));
             return JsonSerializer.Serialize(manifest, BaselineSerializationOptions);
 
             void TemplatizeAsset(string projectRoot, string restorePath, StaticWebAsset asset)
             {
                 asset.Identity = asset.Identity.Replace(projectRoot, "${ProjectRoot}");
-                asset.Identity = asset.Identity
-                    .Replace(restorePath, "${RestorePath}")
-                    .Replace(RuntimeVersion, "${RuntimeVersion}")
-                    .Replace(DefaultPackageVersion, "${PackageVersion}")
-                    .Replace(Path.DirectorySeparatorChar, '\\');
+                asset.Identity = TemplatizeRestorePath(restorePath, asset.Identity);
                 asset.Identity = PathTemplatizer(asset, asset.Identity, null) ?? asset.Identity;
 
                 asset.RelativePath = asset.RelativePath.Replace(RuntimeVersion, "${RuntimeVersion}");
 
                 asset.ContentRoot = asset.ContentRoot.Replace(projectRoot, "${ProjectRoot}");
-                asset.ContentRoot = asset.ContentRoot
-                    .Replace(restorePath, "${RestorePath}")
-                    .Replace(RuntimeVersion, "${RuntimeVersion}")
-                    .Replace(DefaultPackageVersion, "${PackageVersion}")
-                    .Replace(Path.DirectorySeparatorChar, '\\');
+                asset.ContentRoot = TemplatizeRestorePath(restorePath, asset.ContentRoot) + '\\';
 
                 asset.RelatedAsset = asset.RelatedAsset.Replace(projectRoot, "${ProjectRoot}");
-                asset.RelatedAsset = asset.RelatedAsset
+                asset.RelatedAsset = TemplatizeRestorePath(restorePath, asset.RelatedAsset);
+            }
+
+            string TemplatizeRestorePath(string restorePath, string property)
+            {
+                property = property
                     .Replace(restorePath, "${RestorePath}")
-                    .Replace(RuntimeVersion, "${RuntimeVersion}")
-                    .Replace(DefaultPackageVersion, "${PackageVersion}")
                     .Replace(Path.DirectorySeparatorChar, '\\');
+
+                var customPackageVersion = true;
+                var segments = property.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+                for (var i = 0; i < segments.Length; i++)
+                {
+                    ref var segment = ref segments[i];
+                    if (segment.Contains(RuntimeVersion))
+                    {
+                        segment = segment.Replace(RuntimeVersion, "${RuntimeVersion}");
+                        customPackageVersion = false;
+                    }
+                    if (segment == DefaultPackageVersion)
+                    {
+                        segment = "${PackageVersion}";
+                        customPackageVersion = false;
+                    }
+                }
+
+                if (segments.Length > 0 && segments[0] == "${RestorePath}" && customPackageVersion)
+                {
+                    segments[2] = "[[CustomPackageVersion]]";
+                }
+
+                return string.Join('\\', segments);
             }
         }
-
-        private record ComparableManifest(string Identity, string Source, string Type);
     }
 }

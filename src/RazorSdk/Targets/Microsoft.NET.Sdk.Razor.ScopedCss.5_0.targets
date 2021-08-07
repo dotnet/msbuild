@@ -98,6 +98,11 @@ Integration with static web assets:
     _AddGeneratedScopedCssFilesForReference;
   </GenerateStaticWebAssetsPackTargetsDependsOn>
 
+  <GetCurrentProjectStaticWebAssetsV2DependsOn>
+    $(GetCurrentProjectStaticWebAssetsV2DependsOn);
+    _UpdateScopedCssStaticWebAssetsForV2;
+  </GetCurrentProjectStaticWebAssetsV2DependsOn>
+
   <!-- We are going to use .rz.scp.css as the extension to mark scoped css files that come from packages or that have been pre-procesed by
        referenced class libraries. This way, we can use that information to adjust the build pipeline without having to rely on external
        sources like an additional itemgroup or metadata.
@@ -387,6 +392,45 @@ Integration with static web assets:
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <RelativePath>$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)','$([MSBuild]::NormalizePath('wwwroot\%(BasePath)\%(RelativePath)'))'))</RelativePath>
     </_ExternalPublishStaticWebAsset>
+  </ItemGroup>
+</Target>
+
+<!-- Forward compat with new static web assets -->
+
+<Target Name="_UpdateScopedCssStaticWebAssetsForV2">
+  <PropertyGroup>
+    <_AppBundleStaticWebAssetIdentity>@(_AppBundleStaticWebAsset)</_AppBundleStaticWebAssetIdentity>
+    <_ProjectBundleStaticWebAssetIdentity>@(_ProjectBundleStaticWebAsset)</_ProjectBundleStaticWebAssetIdentity>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- <<App>>.bundle.scp.css -->
+    <_CurrentProjectBundle Include="@(_ThisProjectStaticWebAssets)" Condition="'%(SourceId)' == '$(PackageId)' and '%(_ThisProjectStaticWebAssets.Identity)' == '$(_ProjectBundleStaticWebAssetIdentity)'">
+      <AssetMode>Reference</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName>ScopedCss</AssetTraitName>
+      <AssetTraitValue>ProjectBundle</AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </_CurrentProjectBundle>
+
+    <_ThisProjectStaticWebAssets Remove="@(_CurrentProjectBundle)" />
+    <_ThisProjectStaticWebAssets Include="@(_CurrentProjectBundle)" />
+
+    <!-- <<App>>.styles.css -->
+    <_CurrentProjectAppBundle Include="@(_ThisProjectStaticWebAssets)" Condition="'%(SourceId)' == '$(PackageId)' and '%(Identity)' == '$(_AppBundleStaticWebAssetIdentity)'">
+      <AssetMode>CurrentProject</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName>ScopedCss</AssetTraitName>
+      <AssetTraitValue>ApplicationBundle</AssetTraitValue>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </_CurrentProjectAppBundle>
+
+    <_ThisProjectStaticWebAssets Remove="@(_CurrentProjectAppBundle)" />
+    <_ThisProjectStaticWebAssets Include="@(_CurrentProjectAppBundle)" />
   </ItemGroup>
 </Target>
 
