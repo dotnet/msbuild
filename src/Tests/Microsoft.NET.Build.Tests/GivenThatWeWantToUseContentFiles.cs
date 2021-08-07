@@ -54,23 +54,78 @@ namespace {project.Name}
             var asset = _testAssetsManager
                 .CreateTestProject(project);
 
+            // First Build
             var cmd = new BuildCommand(asset);
             cmd.Execute().Should().Pass();
 
-            cmd.GetOutputDirectory(targetFramework)
-               .Should()
-               .OnlyHaveFiles(
-                    new[]
+            string outputDir = cmd.GetOutputDirectory(targetFramework).FullName;
+            string intmediateDir = cmd.GetIntermediateDirectory(targetFramework).FullName;
+            string[] filePaths =
                     {
-                        "ContentFiles.deps.json",
-                        "ContentFiles.dll",
-                        "ContentFiles.pdb",
-                        "ContentFiles.runtimeconfig.dev.json",
-                        "ContentFiles.runtimeconfig.json",
-                        "tools/run.cmd",
-                        "tools/run.sh",
-                    }
-                );
+                        Path.Combine(outputDir, @"ContentFiles.deps.json"),
+                        Path.Combine(outputDir, @"ContentFiles.dll"),
+                        Path.Combine(outputDir, @"ContentFiles.pdb"),
+                        Path.Combine(outputDir, @"ContentFiles.runtimeconfig.dev.json"),
+                        Path.Combine(outputDir, @"ContentFiles.runtimeconfig.json"),
+                        Path.Combine(outputDir, @"tools\run.cmd"),
+                        Path.Combine(outputDir, @"tools\run.sh"),
+                        Path.Combine(intmediateDir, @"NuGet\61139A41364EEBD4B8F4B70445B190E5E43DDAC3\ContentFilesExample\1.0.2\ExampleReader.cs")
+                    };
+
+            VerifyFileExists(filePaths, true, out DateTime firstBuild);
+
+            // Incremental Build
+            cmd = new BuildCommand(asset);
+            cmd.Execute().Should().Pass();
+            VerifyFileExists(filePaths, true, out DateTime firstIncremental);
+
+            (firstBuild == firstIncremental).Should().BeTrue("First Incremental build should not update any files in the output directory.");
+
+            // Incremental Build
+            cmd = new BuildCommand(asset);
+            cmd.Execute().Should().Pass();
+            VerifyFileExists(filePaths, true, out DateTime secondIncremental);
+
+            (firstBuild == secondIncremental).Should().BeTrue("Second Incremental build should not update any files in the output directory.");
+
+            // Clean Project
+            var cleanCmd = new MSBuildCommand(asset, "Clean");
+            cleanCmd.Execute().Should().Pass();
+            VerifyFileExists(filePaths, false, out _);
+
+            // Rebuild Project
+            var rebuildCmd = new MSBuildCommand(asset, "ReBuild");
+            rebuildCmd.Execute().Should().Pass();
+            VerifyFileExists(filePaths, true, out _);
+
+            // Rebuild again to verify that clean worked.
+            rebuildCmd = new MSBuildCommand(asset, "ReBuild");
+            rebuildCmd.Execute().Should().Pass();
+            VerifyFileExists(filePaths, true, out _);
+
+            // Validate Clean Project works after a Rebuild
+            cleanCmd = new MSBuildCommand(asset, "Clean");
+            cleanCmd.Execute().Should().Pass();
+            VerifyFileExists(filePaths, false, out _);
+        }
+
+        private void VerifyFileExists(string[] fileList, bool shouldExists, out DateTime latestDate)
+        {
+            latestDate = DateTime.MinValue;
+            long longTime = 0;
+
+            foreach (string filePath in fileList)
+            {
+                var fileInfo = new FileInfo(filePath);
+                if (shouldExists)
+                    fileInfo.Should().Exist();
+                else
+                    fileInfo.Should().NotExist();
+
+                longTime = Math.Max(fileInfo.CreationTimeUtc.Ticks, latestDate.Ticks);
+            }
+
+            latestDate = DateTime.FromFileTimeUtc(longTime);
         }
     }
 }

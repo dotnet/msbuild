@@ -386,7 +386,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="RunProduceContentAssets"
           DependsOnTargets="ResolvePackageAssets"
-          Condition="'@(_ContentFilesToPreprocess)' != ''">
+          Condition="'@(_ContentFilesToPreprocess)' != '' and '$(_CleaningWithoutRebuilding)' != 'true'">
 
     <ProduceContentAssets
       ContentFileDependencies="@(_ContentFilesToPreprocess)"
