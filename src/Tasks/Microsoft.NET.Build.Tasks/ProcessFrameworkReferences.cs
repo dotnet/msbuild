@@ -238,26 +238,26 @@ namespace Microsoft.NET.Build.Tasks
                     isTrimmable = selectedRuntimePack?.IsTrimmable;
                 }
 
-                bool includeInPackageDownload;
+                bool useRuntimePackAndDownloadIfNecessary;
                 KnownRuntimePack runtimePackForRuntimeIDProcessing;
                 if (knownFrameworkReference.Name.Equals(knownFrameworkReference.RuntimeFrameworkName, StringComparison.OrdinalIgnoreCase))
                 {
                     //  Only add runtime packs where the framework reference name matches the RuntimeFrameworkName
                     //  Framework references for "profiles" will use the runtime pack from the corresponding non-profile framework
                     runtimePackForRuntimeIDProcessing = selectedRuntimePack.Value;
-                    includeInPackageDownload = true;
+                    useRuntimePackAndDownloadIfNecessary = true;
                 }
                 else if (!knownFrameworkReference.RuntimePackRuntimeIdentifiers.Equals(selectedRuntimePack?.RuntimePackRuntimeIdentifiers))
                 {
                     // If the profile has a different set of runtime identifiers than the runtime pack, use the profile.
                     runtimePackForRuntimeIDProcessing = knownFrameworkReference.ToKnownRuntimePack();
-                    includeInPackageDownload = true;
+                    useRuntimePackAndDownloadIfNecessary = true;
                 }
                 else
                 {
                     // For the remaining profiles, don't include them in package download but add them to unavailable if necessary.
                     runtimePackForRuntimeIDProcessing = knownFrameworkReference.ToKnownRuntimePack();
-                    includeInPackageDownload = false;
+                    useRuntimePackAndDownloadIfNecessary = false;
                 }
 
                 bool processedPrimaryRuntimeIdentifier = false;
@@ -288,7 +288,7 @@ namespace Microsoft.NET.Build.Tasks
                     }
 
                     ProcessRuntimeIdentifier(hasRuntimePackAlwaysCopyLocal ? "any" : RuntimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack,
-                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, EnableRuntimePackDownload && includeInPackageDownload);
+                        unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks, packagesToDownload, isTrimmable, EnableRuntimePackDownload && useRuntimePackAndDownloadIfNecessary);
 
                     processedPrimaryRuntimeIdentifier = true;
                 }
@@ -306,7 +306,7 @@ namespace Microsoft.NET.Build.Tasks
                         //  Pass in null for the runtimePacks list, as for these runtime identifiers we only want to
                         //  download the runtime packs, but not use the assets from them
                         ProcessRuntimeIdentifier(runtimeIdentifier, runtimePackForRuntimeIDProcessing, runtimePackVersion, additionalFrameworkReferencesForRuntimePack: null,
-                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload, isTrimmable, includeInPackageDownload);
+                            unrecognizedRuntimeIdentifiers, unavailableRuntimePacks, runtimePacks: null, packagesToDownload, isTrimmable, useRuntimePackAndDownloadIfNecessary);
                     }
                 }
 
@@ -442,7 +442,7 @@ namespace Microsoft.NET.Build.Tasks
             List<ITaskItem> runtimePacks,
             List<ITaskItem> packagesToDownload,
             string isTrimmable,
-            bool addToPackageDownload)
+            bool addRuntimePackAndDownloadIfNecessary)
         {
             var runtimeGraph = new RuntimeGraphCache(this).GetRuntimeGraph(RuntimeGraphPath);
             var knownFrameworkReferenceRuntimePackRuntimeIdentifiers = selectedRuntimePack.RuntimePackRuntimeIdentifiers.Split(';');
@@ -473,11 +473,20 @@ namespace Microsoft.NET.Build.Tasks
                     unrecognizedRuntimeIdentifiers.Add(runtimeIdentifier);
                 }
             }
-            else if (addToPackageDownload)
+            else if (addRuntimePackAndDownloadIfNecessary)
             {
                 foreach (var runtimePackNamePattern in selectedRuntimePack.RuntimePackNamePatterns.Split(';'))
                 {
                     string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
+                    string runtimePackPath = null;
+                    if (!string.IsNullOrEmpty(TargetingPackRoot))
+                    {
+                        runtimePackPath = Path.Combine(TargetingPackRoot, runtimePackName, runtimePackVersion);
+                        if (!Directory.Exists(runtimePackPath))
+                        {
+                            runtimePackPath = null;
+                        }
+                    }
 
                     if (runtimePacks != null)
                     {
@@ -498,13 +507,21 @@ namespace Microsoft.NET.Build.Tasks
                             runtimePackItem.SetMetadata(MetadataKeys.AdditionalFrameworkReferences, string.Join(";", additionalFrameworkReferencesForRuntimePack));
                         }
 
+                        if (runtimePackPath != null)
+                        {
+                            runtimePackItem.SetMetadata(MetadataKeys.PackageDirectory, runtimePackPath);
+                        }
+
                         runtimePacks.Add(runtimePackItem);
                     }
 
-                    TaskItem packageToDownload = new TaskItem(runtimePackName);
-                    packageToDownload.SetMetadata(MetadataKeys.Version, runtimePackVersion);
+                    if (runtimePackPath == null)
+                    {
+                        TaskItem packageToDownload = new TaskItem(runtimePackName);
+                        packageToDownload.SetMetadata(MetadataKeys.Version, runtimePackVersion);
 
-                    packagesToDownload.Add(packageToDownload);
+                        packagesToDownload.Add(packageToDownload);
+                    }
                 }
             }
         }
