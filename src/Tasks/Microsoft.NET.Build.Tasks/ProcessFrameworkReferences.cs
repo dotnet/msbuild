@@ -196,12 +196,8 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 //  Get the path of the targeting pack in the targeting pack root (e.g. dotnet/packs)
-                string targetingPackPath = null;
-                if (!string.IsNullOrEmpty(TargetingPackRoot))
-                {
-                    targetingPackPath = Path.Combine(TargetingPackRoot, knownFrameworkReference.TargetingPackName, targetingPackVersion);
-                }
-                if (targetingPackPath != null && Directory.Exists(targetingPackPath))
+                string targetingPackPath = GetPackPath(knownFrameworkReference.TargetingPackName, targetingPackVersion);
+                if (targetingPackPath != null)
                 {
                     // Use targeting pack from packs folder
                     targetingPack.SetMetadata(MetadataKeys.PackageDirectory, targetingPackPath);
@@ -478,15 +474,7 @@ namespace Microsoft.NET.Build.Tasks
                 foreach (var runtimePackNamePattern in selectedRuntimePack.RuntimePackNamePatterns.Split(';'))
                 {
                     string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
-                    string runtimePackPath = null;
-                    if (!string.IsNullOrEmpty(TargetingPackRoot))
-                    {
-                        runtimePackPath = Path.Combine(TargetingPackRoot, runtimePackName, runtimePackVersion);
-                        if (!Directory.Exists(runtimePackPath))
-                        {
-                            runtimePackPath = null;
-                        }
-                    }
+                    string runtimePackPath = GetPackPath(runtimePackName, runtimePackVersion);
 
                     if (runtimePacks != null)
                     {
@@ -624,6 +612,36 @@ namespace Microsoft.NET.Build.Tasks
                     // Unreachable
                     throw new InvalidOperationException();
             }
+        }
+
+        private string GetPackPath(string packName, string packVersion)
+        {
+            IEnumerable<string> GetPackFolders()
+            {
+                if (!string.IsNullOrEmpty(TargetingPackRoot))
+                {
+                    yield return TargetingPackRoot;
+                }
+                var packRootEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_PACK_ROOTS");
+                if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
+                {
+                    foreach (var packRoot in packRootEnvironmentVariable.Split(Path.PathSeparator))
+                    {
+                        yield return Path.Combine(packRoot, "packs");
+                    }
+                }
+            }
+
+            foreach (var packFolder in GetPackFolders())
+            {
+                string packPath = Path.Combine(packFolder, packName, packVersion);
+                if (Directory.Exists(packPath))
+                {
+                    return packPath;
+                }
+            }
+
+            return null;
         }
 
         private enum RuntimePatchRequest
