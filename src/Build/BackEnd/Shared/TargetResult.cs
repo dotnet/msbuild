@@ -243,22 +243,15 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                ITranslator translator = GetResultsCacheTranslator(configId, targetName, TranslationDirection.WriteToStream);
+                using ITranslator translator = GetResultsCacheTranslator(configId, targetName, TranslationDirection.WriteToStream);
 
                 // If the translator is null, it means these results were cached once before.  Since target results are immutable once they
                 // have been created, there is no point in writing them again.
                 if (translator != null)
                 {
-                    try
-                    {
-                        TranslateItems(translator);
-                        _items = null;
-                        _cacheInfo = new CacheInfo(configId, targetName);
-                    }
-                    finally
-                    {
-                        translator.Writer.BaseStream.Dispose();
-                    }
+                    TranslateItems(translator);
+                    _items = null;
+                    _cacheInfo = new CacheInfo(configId, targetName);
                 }
             }
         }
@@ -284,17 +277,10 @@ namespace Microsoft.Build.Execution
             {
                 if (_items == null)
                 {
-                    ITranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
+                    using ITranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
 
-                    try
-                    {
-                        TranslateItems(translator);
-                        _cacheInfo = new CacheInfo();
-                    }
-                    finally
-                    {
-                        translator.Reader.BaseStream.Dispose();
-                    }
+                    TranslateItems(translator);
+                    _cacheInfo = new CacheInfo();
                 }
             }
         }
@@ -339,7 +325,7 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during translation.");
 
                 using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
-                var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
+                using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
                 _items = new TaskItem[itemsCount];
                 for (int i = 0; i < _items.Length; i++)
                 {

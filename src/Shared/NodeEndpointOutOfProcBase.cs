@@ -44,11 +44,6 @@ namespace Microsoft.Build.BackEnd
         private const int PipeBufferSize = 131072;
 
         /// <summary>
-        /// Flag indicating if we should debug communications or not.
-        /// </summary>
-        private bool _debugCommunications = false;
-
-        /// <summary>
         /// The current communication status of the node.
         /// </summary>
         private LinkStatus _status;
@@ -192,8 +187,6 @@ namespace Microsoft.Build.BackEnd
         internal void InternalConstruct(string pipeName)
         {
             ErrorUtilities.VerifyThrowArgumentLength(pipeName, nameof(pipeName));
-
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
