@@ -1,9 +1,6 @@
 parameters:
   # Agent OS identifier and used as job name
   agentOs: ''
-  enableRichCodeNavigation: false
-  richCodeNavigationLanguage: 'csharp'
-  richCodeNavigationEnvironment: 'production'
 
   # Agent pool
   pool: {}
@@ -27,9 +24,6 @@ jobs:
 - template: /eng/common/templates/job/job.yml
   parameters:
     name: ${{ parameters.agentOs }}
-    enableRichCodeNavigation: ${{ parameters.enableRichCodeNavigation }}
-    richCodeNavigationLanguage: ${{ parameters.richCodeNavigationLanguage }}
-    richCodeNavigationEnvironment: ${{ parameters.richCodeNavigationEnvironment }}
     enableMicrobuild: true
     enablePublishBuildAssets: true
     enableTelemetry: true
