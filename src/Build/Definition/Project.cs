@@ -3623,6 +3623,7 @@ namespace Microsoft.Build.Evaluation
 
                 Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                     _data,
+                    Owner,
                     Xml,
                     loadSettings,
                     ProjectCollection.MaxNodeCount,

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Evaluation
         private readonly Expander<P, I> _outerExpander;
         private readonly IEvaluatorData<P, I, M, D> _evaluatorData;
         private readonly Expander<P, I> _expander;
-        private readonly IItemFactory<I, I> _itemFactory;
+        protected readonly IItemFactory<I, I> _itemFactory;
         private readonly LoggingContext _loggingContext;
         private readonly EvaluationProfiler _evaluationProfiler;
 
@@ -43,7 +43,8 @@ namespace Microsoft.Build.Evaluation
 
         protected FileMatcher FileMatcher { get; }
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext,
+            FileMatcher fileMatcher)
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext.FileSystem);
@@ -54,7 +55,7 @@ namespace Microsoft.Build.Evaluation
             _evaluationProfiler = evaluationProfiler;
 
             FileSystem = evaluationContext.FileSystem;
-            FileMatcher = evaluationContext.FileMatcher;
+            FileMatcher = fileMatcher;
         }
 
         private ImmutableList<I> GetItems(string itemType)

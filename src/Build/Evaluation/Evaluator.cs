@@ -32,6 +32,7 @@ using Constants = Microsoft.Build.Internal.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
+using Microsoft.Build.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -179,6 +180,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private List<string> _streamImports;
 
+        /// <summary>
+        /// The <see cref="FileMatcher"/> to use for expanding globs.
+        /// </summary>
+        private FileMatcher _fileMatcher;
+
         private readonly bool _interactive;
 
         private readonly bool _isRunningInVisualStudio;
@@ -188,6 +194,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private Evaluator(
             IEvaluatorData<P, I, M, D> data,
+            Project project,
             ProjectRootElement projectRootElement,
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
@@ -259,6 +266,10 @@ namespace Microsoft.Build.Evaluation
             _streamImports = new List<string>();
             // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
             _streamImports.Add(string.Empty);
+
+            // Create a FileMatcher for the given combination of EvaluationContext and the project being evaluated.
+            IDirectoryCache directoryCache = _evaluationContext.GetDirectoryCacheForProject(project);
+            _fileMatcher = new FileMatcher(evaluationContext.FileSystem, evaluationContext.FileEntryExpansionCache);
         }
 
         /// <summary>
@@ -283,6 +294,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal static void Evaluate(
             IEvaluatorData<P, I, M, D> data,
+            Project project,
             ProjectRootElement root,
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
@@ -301,6 +313,7 @@ namespace Microsoft.Build.Evaluation
             var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
             var evaluator = new Evaluator<P, I, M, D>(
                 data,
+                project,
                 root,
                 loadSettings,
                 maxNodeCount,
@@ -356,7 +369,7 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, null /* TODO */);
 
                         if (includeSplitFilesEscaped.Length > 0)
                         {
@@ -645,7 +658,7 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
-                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext);
+                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext, _fileMatcher);
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
@@ -2008,7 +2021,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _evaluationContext.FileMatcher);
+                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _fileMatcher);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
