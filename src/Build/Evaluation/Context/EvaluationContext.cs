@@ -48,10 +48,12 @@ namespace Microsoft.Build.Evaluation.Context
         private IDirectoryCacheFactory _directoryCacheFactory;
         private ConditionalWeakTable<Project, IDirectoryCache> _directoryCachesPerProject;
 
+        private IDirectoryCache _defaultDirectoryCache;
+
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
-        private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
+        internal ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, IDirectoryCacheFactory directoryCacheFactory)
         {
@@ -157,12 +159,18 @@ namespace Microsoft.Build.Evaluation.Context
             IDirectoryCache directoryCache = _directoryCachesPerProject?.GetValue(
                 project,
                 project => _directoryCacheFactory.GetDirectoryCacheForProject(project));
+
+            // If we don't have a non-null directory cache factory or it returned null, lazily create a wrapper over IFileSystem.
             if (directoryCache == null)
             {
-                return directoryCache;
+                directoryCache = Volatile.Read(ref _defaultDirectoryCache);
+                if (directoryCache == null)
+                {
+                    directoryCache = new DirectoryCacheOverFileSystem(FileSystem);
+                    Volatile.Write(ref _defaultDirectoryCache, directoryCache);
+                }
             }
-            // TODO
-            return null;
+            return directoryCache;
         }
     }
 }
