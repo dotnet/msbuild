@@ -23,13 +23,13 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentDescription">
-        <source>Workload id to search for.</source>
-        <target state="new">Workload id to search for.</target>
+        <source>The text to search for in the IDs of available workloads.</source>
+        <target state="new">The text to search for in the IDs of available workloads.</target>
         <note />
       </trans-unit>
       <trans-unit id="WorkloadIdStubArgumentName">
-        <source>WORKLOAD_ID</source>
-        <target state="new">WORKLOAD_ID</target>
+        <source>SEARCH_STRING</source>
+        <target state="new">SEARCH_STRING</target>
         <note />
       </trans-unit>
     </body>

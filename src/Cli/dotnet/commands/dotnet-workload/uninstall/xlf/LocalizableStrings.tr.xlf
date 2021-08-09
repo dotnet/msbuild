@@ -3,18 +3,18 @@
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to uninstall.</source>
-        <target state="translated">Kaldırılacak aracın NuGet Paket Kimliği.</target>
+        <source>The workload ID(s) to uninstall.</source>
+        <target state="needs-review-translation">Kaldırılacak aracın NuGet Paket Kimliği.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a workload.</source>
+        <source>Uninstall one or more workloads.</source>
         <target state="needs-review-translation">Genel veya yerel bir aracı kaldırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
+        <source>WORKLOAD_ID</source>
+        <target state="needs-review-translation">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Specify one workload Package Id to uninstall.</source>
-        <target state="translated">Kaldırılacak tek bir aracın Paket Kimliğini belirtin.</target>
+        <source>Specify one workload ID to uninstall.</source>
+        <target state="needs-review-translation">Kaldırılacak tek bir aracın Paket Kimliğini belirtin.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -33,7 +33,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>Could not find workloads with id(s): {0}</source>
+        <source>Couldn't find workload ID(s): {0}</source>
         <target state="needs-review-translation">'{0}' paket kimliğine sahip araç bulunamadı. 
 
 Araçlar, aracı çağırırken kullandığınız araç adından farklı olabilen 

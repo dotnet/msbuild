@@ -121,7 +121,7 @@
     <value>WORKLOAD_ID</value>
   </data>
   <data name="WorkloadIdArgumentDescription" xml:space="preserve">
-    <value>The NuGet Package Id of the workload to install.</value>
+    <value>The NuGet package ID of the workload to install.</value>
   </data>
   <data name="VersionOptionName" xml:space="preserve">
     <value>VERSION</value>
@@ -133,10 +133,10 @@
     <value>SOURCE</value>
   </data>
   <data name="SourceOptionDescription" xml:space="preserve">
-    <value>The NuGet package source to use during the restore.</value>
+    <value>The NuGet package source to use during the restore. To specify multiple sources, repeat the option.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Install a workload.</value>
+    <value>Install one or more workloads.</value>
   </data>
   <data name="ConfigFileOptionName" xml:space="preserve">
     <value>FILE</value>
@@ -151,13 +151,13 @@
     <value>Skip updating the workload manifests.</value>
   </data>
   <data name="NuGetConfigurationFileDoesNotExist" xml:space="preserve">
-    <value>NuGet configuration file '{0}' does not exist.</value>
+    <value>NuGet configuration file '{0}' doesn't exist.</value>
   </data>
   <data name="InstallationSucceeded" xml:space="preserve">
     <value>Successfully installed workload(s) {0}.</value>
   </data>
   <data name="InstallFullCommandNameLocalized" xml:space="preserve">
-    <value>.NET Install Command</value>
+    <value>.NET install command</value>
   </data>
   <data name="InvalidWorkloadConfiguration" xml:space="preserve">
     <value>The settings file in the workload's NuGet package is invalid: {0}</value>
@@ -166,40 +166,40 @@
     <value>Workload installation failed: {0}</value>
   </data>
   <data name="WorkloadCacheDownloadFailed" xml:space="preserve">
-    <value>Downloading workload packs to offline cache failed: {0}</value>
+    <value>Download of workload packs to offline cache failed: {0}</value>
   </data>
   <data name="WorkloadAlreadyInstalled" xml:space="preserve">
     <value>Workload '{0}' is already installed.</value>
   </data>
   <data name="InvalidNuGetVersionRange" xml:space="preserve">
-    <value>Specified version '{0}' is not a valid NuGet version range.</value>
+    <value>Specified version '{0}' isn't a valid NuGet version range.</value>
   </data>
   <data name="WorkloadPathOptionName" xml:space="preserve">
     <value>PATH</value>
   </data>
   <data name="WorkloadPathOptionDescription" xml:space="preserve">
-    <value>The directory where the workload will be installed. The directory will be created if it does not exist.</value>
+    <value>The directory where the workload will be installed. The directory will be created if it doesn't exist.</value>
   </data>
   <data name="PrintDownloadLinkOnlyDescription" xml:space="preserve">
-    <value>Only print the list of links to download without downloading it.</value>
+    <value>Only print the list of links to download without downloading.</value>
   </data>
   <data name="DownloadToCacheOptionDescription" xml:space="preserve">
-    <value>Download packages needed to install a workload to a folder which can be used for offline installation.</value>
+    <value>Download packages needed to install a workload to a folder that can be used for offline installation.</value>
   </data>
   <data name="FromCacheOptionDescription" xml:space="preserve">
     <value>Complete the operation from cache (offline).</value>
   </data>
   <data name="TempDirOptionDescription" xml:space="preserve">
-    <value>Configure the temporary directory used for this command (must be secure).</value>
+    <value>Specify a temporary directory for this command to download and extract NuGet packages (must be secure).</value>
   </data>
   <data name="UnrecognizedPackError" xml:space="preserve">
-    <value>Pack Id {0} unrecognized.</value>
+    <value>Pack ID {0} unrecognized.</value>
   </data>
   <data name="InstallingPackVersionMessage" xml:space="preserve">
     <value>Installing pack {0} version {1}...</value>
   </data>
   <data name="DownloadingPackToCacheMessage" xml:space="preserve">
-    <value>Downloading pack {0} version {1} to offline cache {2}...</value>
+    <value>Downloading pack {0} version {1} to offline cache {2}…</value>
   </data>
   <data name="WorkloadPackAlreadyInstalledMessage" xml:space="preserve">
     <value>Pack {0} version {1} is already installed.</value>
@@ -211,19 +211,19 @@
     <value>Writing workload installation record for {0}...</value>
   </data>
   <data name="GarbageCollectingSdkFeatureBandsMessage" xml:space="preserve">
-    <value>Garbage collecting for SDK feature bands {0}...</value>
+    <value>Garbage collecting for SDK feature band(s) {0}...</value>
   </data>
   <data name="RollBackFailedMessage" xml:space="preserve">
-    <value>Installation roll back failed: {0}</value>
+    <value>Installation rollback failed: {0}</value>
   </data>
   <data name="RollingBackInstall" xml:space="preserve">
-    <value>Workload installation failed, rolling back installed packs...</value>
+    <value>Workload installation failed. Rolling back installed packs...</value>
   </data>
   <data name="RollingBackPackInstall" xml:space="preserve">
     <value>Rolling back pack {0} installation...</value>
   </data>
   <data name="CacheMissingPackage" xml:space="preserve">
-    <value>Package {0} version {1} does not exist in offline cache {2}.</value>
+    <value>Package {0} version {1} doesn't exist in offline cache {2}.</value>
   </data>
   <data name="UsingCacheForPackInstall" xml:space="preserve">
     <value>Installing package {0} version {1} from offline cache {2}.</value>
@@ -235,58 +235,58 @@
     <value>Failed to update the advertising manifest {0}: {1}.</value>
   </data>
   <data name="AdManifestPackageDoesNotExist" xml:space="preserve">
-    <value>Failed to update advertising manifest, manifest package for {0} does not exist.</value>
+    <value>Failed to update advertising manifest. Manifest package {0} doesn't exist.</value>
   </data>
   <data name="ManifestDoesNotExist" xml:space="preserve">
-    <value>No manifest with id {0} exists.</value>
+    <value>No manifest with ID {0} exists.</value>
   </data>
   <data name="FailedToInstallWorkloadManifest" xml:space="preserve">
     <value>Failed to install manifest {0} version {1}: {2}.</value>
   </data>
   <data name="InstallingWorkloadManifest" xml:space="preserve">
-    <value>Installing workload manifest {0} version {1}.</value>
+    <value>Installing workload manifest {0} version {1}…</value>
   </data>
   <data name="IncludePreviewOptionDescription" xml:space="preserve">
     <value>Allow prerelease workload manifests.</value>
   </data>
   <data name="ResolvingPackageUrls" xml:space="preserve">
-    <value>Resolving package urls for workload(s) {0}...</value>
+    <value>Resolving package URLs for workload(s) {0}...</value>
   </data>
   <data name="FailedToDownloadPackageManifest" xml:space="preserve">
     <value>Failed to download manifest package {0}.</value>
   </data>
   <data name="FailedToGetPackageManifestUrl" xml:space="preserve">
-    <value>Failed to resolve manifest package url {0}.</value>
+    <value>Failed to resolve manifest package URL {0}.</value>
   </data>
   <data name="OSDoesNotSupportMsi" xml:space="preserve">
     <value>MSI installations are only supported on Windows.</value>
   </data>
   <data name="DeletingWorkloadPack" xml:space="preserve">
-    <value>Uninstalling workload pack {0} version {1}.</value>
+    <value>Uninstalling workload pack {0} version {1}…</value>
   </data>
   <data name="SkippingManifestUpdate" xml:space="preserve">
-    <value>Manifest packages were not found, skipping manifest update...</value>
+    <value>Manifest packages were not found. Skipping manifest update...</value>
   </data>
   <data name="NoManifestsExistForFeatureBand" xml:space="preserve">
     <value>No manifests exist for SDK version {0}.</value>
   </data>
   <data name="IncompatibleManifests" xml:space="preserve">
-    <value>The current SDK is not compatible with workload manifests of SDK version {0}.</value>
+    <value>The current SDK isn't compatible with workload manifests of SDK version {0}.</value>
   </data>
   <data name="InadequatePermissions" xml:space="preserve">
-    <value>Inadequate permissions to access, please elevate to run this command.</value>
+    <value>Inadequate permissions. Run the command with elevated privileges.</value>
   </data>
   <data name="WorkloadNotSupportedOnPlatform" xml:space="preserve">
-    <value>Workload with id {0} is not supported on this platform.</value>
+    <value>Workload ID {0} isn't supported on this platform.</value>
   </data>
   <data name="WorkloadNotRecognized" xml:space="preserve">
-    <value>Workload with id {0} is not recognized.</value>
+    <value>Workload ID {0} is not recognized.</value>
   </data>
   <data name="RollbackDefinitionFileDoesNotExist" xml:space="preserve">
-    <value>Provided rollback definition file {0} does not exist.</value>
+    <value>Provided rollback definition file {0} doesn't exist.</value>
   </data>
   <data name="RollbackDefinitionContainsExtraneousManifestIds" xml:space="preserve">
-    <value>Invalid rollback definition. Manifest IDs in rollback definition {0} do not match installed manifest IDs.</value>
+    <value>Invalid rollback definition. The manifest IDs in rollback definition {0} do not match installed manifest IDs.</value>
   </data>
   <data name="InsufficientPrivilegeToStartServer" xml:space="preserve">
     <value>Insufficient privilege to start the server.</value>

@@ -121,10 +121,10 @@
     <value>Search for available workloads.</value>
   </data>
   <data name="WorkloadIdStubArgumentName" xml:space="preserve">
-    <value>WORKLOAD_ID</value>
+    <value>SEARCH_STRING</value>
   </data>
   <data name="WorkloadIdStubArgumentDescription" xml:space="preserve">
-    <value>Workload id to search for.</value>
+    <value>The text to search for in the IDs of available workloads.</value>
   </data>
   <data name="WorkloadIdColumnName" xml:space="preserve">
     <value>Workload ID</value>

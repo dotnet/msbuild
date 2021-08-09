@@ -8,13 +8,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Update all installed optional workloads.</source>
+        <source>Update all installed workloads.</source>
         <target state="needs-review-translation">グローバル ツールを更新します。</target>
         <note />
       </trans-unit>
       <trans-unit id="FromPreviousSdkOptionDescription">
-        <source>Include workloads installed with previous SDK versions in update.</source>
-        <target state="new">Include workloads installed with previous SDK versions in update.</target>
+        <source>Include workloads installed with earlier SDK versions in update.</source>
+        <target state="new">Include workloads installed with earlier SDK versions in update.</target>
         <note />
       </trans-unit>
       <trans-unit id="FromRollbackDefinitionOptionDescription">
@@ -23,18 +23,18 @@
         <note />
       </trans-unit>
       <trans-unit id="NoWorkloadsToUpdate">
-        <source>No workloads installed for this feature band. To update from the previous SDK, include the --from-previous-sdk option.</source>
-        <target state="new">No workloads installed for this feature band. To update from the previous SDK, include the --from-previous-sdk option.</target>
+        <source>No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</source>
+        <target state="new">No workloads installed for this feature band. To update workloads installed with earlier SDK versions, include the --from-previous-sdk option.</target>
         <note />
       </trans-unit>
       <trans-unit id="RollBackFailedMessage">
-        <source>Installation roll back failed: {0}</source>
-        <target state="new">Installation roll back failed: {0}</target>
+        <source>Installation rollback failed: {0}</source>
+        <target state="new">Installation rollback failed: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RollingBackInstall">
-        <source>Workload installation failed, rolling back installed packs...</source>
-        <target state="new">Workload installation failed, rolling back installed packs...</target>
+        <source>Workload installation failed. Rolling back installed packs...</source>
+        <target state="new">Workload installation failed. Rolling back installed packs...</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFailed">

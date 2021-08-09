@@ -3,18 +3,18 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to uninstall.</source>
-        <target state="translated">제거할 도구의 NuGet 패키지 ID입니다.</target>
+        <source>The workload ID(s) to uninstall.</source>
+        <target state="needs-review-translation">제거할 도구의 NuGet 패키지 ID입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a workload.</source>
+        <source>Uninstall one or more workloads.</source>
         <target state="needs-review-translation">전역 도구 또는 로컬 도구를 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
+        <source>WORKLOAD_ID</source>
+        <target state="needs-review-translation">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Specify one workload Package Id to uninstall.</source>
-        <target state="translated">제거할 도구 패키지 ID를 하나 지정하세요.</target>
+        <source>Specify one workload ID to uninstall.</source>
+        <target state="needs-review-translation">제거할 도구 패키지 ID를 하나 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -33,7 +33,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>Could not find workloads with id(s): {0}</source>
+        <source>Couldn't find workload ID(s): {0}</source>
         <target state="needs-review-translation">패키지 ID가 '{0}'인 도구를 찾을 수 없습니다. 
 
 도구를 호출할 때 사용한 도구 이름과 다를 수 있는 패키지 ID를 사용하여 
