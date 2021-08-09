@@ -33,6 +33,7 @@ namespace Microsoft.DotNet.Cli
                     $"Calls to {nameof(CommandDirectoryContext)}.{nameof(PerformActionWithBasePath)} cannot be nested.");
             }
             _basePath = basePath;
+            Telemetry.Telemetry.CurrentSessionId = null;
             try
             {
                 action();
