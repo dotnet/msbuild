@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Restore workloads required for the project.</value>
+    <value>Restore workloads required for a project.</value>
   </data>
   <data name="InstallingWorkloads" xml:space="preserve">
     <value>Installing workloads: {0}</value>
   </data>
   <data name="CouldNotFindAProject" xml:space="preserve">
-    <value>Couldn't find a project. Ensure a project exists in {0}, or pass the path to the project using {1}.</value>
+    <value>Couldn't find a project. Ensure that a project exists in {0}, or pass the path to the project using {1}.</value>
   </data>
   <data name="FailedToRunTarget" xml:space="preserve">
     <value>Failed to restore workload for project {0}: Failed to run MSBuild Target _GetRequiredWorkloads.</value>
