@@ -17,6 +17,11 @@
         <target state="new">Use `dotnet workload search` to find additional workloads to install.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WorkloadListHeader">
+        <source>This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</source>
+        <target state="new">This command lists only workloads that were installed via `dotnet workload install` in this version of the SDK and not those that were installed via Visual Studio.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WorkloadUpdatesAvailable">
         <source>Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</source>
         <target state="new">Updates are avaliable for the following workload(s): {0}. Run `dotnet workload update` to get the latest.</target>

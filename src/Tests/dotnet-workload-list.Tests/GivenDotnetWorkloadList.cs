@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Workload.List.Tests
             command.Execute();
 
             // Expected number of lines for table headers
-            _reporter.Lines.Count.Should().Be(5);
+            _reporter.Lines.Count.Should().Be(8);
         }
 
         [Fact]
