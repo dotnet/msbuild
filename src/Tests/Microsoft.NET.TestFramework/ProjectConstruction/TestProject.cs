@@ -59,7 +59,7 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
         public Dictionary<string, string> AdditionalProperties { get; } = new Dictionary<string, string>();
 
-        public Dictionary<string, Dictionary<string, string>> AdditionalItems { get; } = new Dictionary<string, Dictionary<string, string>>();
+        public List<KeyValuePair<string, Dictionary<string, string>>> AdditionalItems { get; } = new ();
 
         public List<Action<XDocument>> ProjectChanges { get; } = new List<Action<XDocument>>();
 
@@ -389,6 +389,16 @@ namespace {this.Name}
             {
                 File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
             }
+        }
+
+        public void AddItem(string itemName, string attributeName, string attributeValue)
+        {
+            AddItem(itemName, new Dictionary<string, string>() { { attributeName, attributeValue } } );
+        }
+
+        public void AddItem(string itemName, Dictionary<string, string> attributes)
+        {
+            AdditionalItems.Add(new(itemName, attributes));
         }
 
         public static bool ReferenceAssembliesAreInstalled(TargetDotNetFrameworkVersion targetFrameworkVersion)

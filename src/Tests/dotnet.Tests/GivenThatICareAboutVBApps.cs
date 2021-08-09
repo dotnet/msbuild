@@ -36,7 +36,7 @@ Module Program
     End Sub
 End Module
 ";
-            testProject.AdditionalItems["Import"] = new Dictionary<string, string> { ["Remove"] = "System" };
+            testProject.AddItem("Import", "Remove", "System");
             var testInstance = _testAssetsManager.CreateTestProject(testProject);
 
             new BuildCommand(testInstance)
