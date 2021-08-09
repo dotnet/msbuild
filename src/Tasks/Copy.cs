@@ -462,7 +462,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destPath);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destPath, true);
                 }
 
                 if (copyComplete)
@@ -570,7 +570,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec);
+                            MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec, true);
                         }
 
                         if (copyComplete)
@@ -727,7 +727,7 @@ namespace Microsoft.Build.Tasks
                         "SkipUnchangedFiles",
                         "true"
                     );
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
                 // We only do the cheap check for identicalness here, we try the more expensive check
                 // of comparing the fullpaths of source and destination to see if they are identical,
@@ -737,12 +737,12 @@ namespace Microsoft.Build.Tasks
                              destinationFileState.Name,
                              StringComparison.OrdinalIgnoreCase))
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, false);
                     success = DoCopyWithRetries(sourceFileState, destinationFileState, copyFile);
                 }
                 else
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
                 }
             }
             catch (OperationCanceledException)

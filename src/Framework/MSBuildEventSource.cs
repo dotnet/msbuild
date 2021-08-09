@@ -437,9 +437,9 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(59, Keywords = Keywords.All)]
-        public void CopyUpToDateStop(string path)
+        public void CopyUpToDateStop(string path, bool wasUpToDate)
         {
-            WriteEvent(59, path);
+            WriteEvent(59, path, wasUpToDate);
         }
         #endregion
     }
