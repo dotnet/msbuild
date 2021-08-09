@@ -38,7 +38,7 @@ namespace Microsoft.Build.Tasks
             if (PropertiesAndValues != null)
             {
                 XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
-                    new("Property", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
+                    new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
                     new(RootElementName);
 
                 foreach (ITaskItem item in PropertiesAndValues)
