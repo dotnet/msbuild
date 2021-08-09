@@ -186,7 +186,4 @@
   <data name="CyclicWorkloadRedirect" xml:space="preserve">
     <value>Cyclic workload redirect '{0}' in manifest '{1}' [{2}]</value>
   </data>
-  <data name="KnownManifestIdDoesNotExist" xml:space="preserve">
-    <value>Known manifest id {0} does not exist.</value>
-  </data>
 </root>

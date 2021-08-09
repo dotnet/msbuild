@@ -6,11 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.NET.Sdk.Localization;
-#if USE_SYSTEM_TEXT_JSON
-using System.Text.Json;
-#else
-using Newtonsoft.Json;
-#endif
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -58,15 +53,10 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             _sdkRootPath = sdkRootPath;
             _sdkVersionBand = sdkVersionBand;
 
-            var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, ".knownWorkloadIds");
+            var knownManifestIdsFilePath = Path.Combine(_sdkRootPath, "sdk", sdkVersion, "IncludedWorkloadManifests.txt");
             if (File.Exists(knownManifestIdsFilePath))
             {
-
-#if USE_SYSTEM_TEXT_JSON
-                _knownManifestIds = JsonSerializer.Deserialize<HashSet<string>>(File.ReadAllText(knownManifestIdsFilePath));
-#else
-                _knownManifestIds = JsonConvert.DeserializeObject<HashSet<string>>(File.ReadAllText(knownManifestIdsFilePath));
-#endif
+                _knownManifestIds = File.ReadAllLines(knownManifestIdsFilePath).Where(l => !string.IsNullOrEmpty(l)).ToHashSet();
             }
 
             var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
@@ -164,7 +154,8 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
             else
             {
-                throw new Exception(string.Format(Strings.KnownManifestIdDoesNotExist, manifestId));
+                // Manifest does not exist
+                return string.Empty;
             }
         }
 

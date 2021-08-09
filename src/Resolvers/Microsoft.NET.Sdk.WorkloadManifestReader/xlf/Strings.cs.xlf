@@ -57,11 +57,6 @@
         <target state="translated">Dokument předčasně ukončen</target>
         <note />
       </trans-unit>
-      <trans-unit id="KnownManifestIdDoesNotExist">
-        <source>Known manifest id {0} does not exist.</source>
-        <target state="new">Known manifest id {0} does not exist.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ManifestDependencyMissing">
         <source>Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</source>
         <target state="new">Did not find workload manifest dependency '{0}' required by manifest '{1}' [{2}]</target>
