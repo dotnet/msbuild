@@ -55,6 +55,8 @@
     <PackageReference Include="xunit.core" />
     <PackageReference Include="xunit.assert" />
 
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
+
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
@@ -67,6 +69,9 @@
          PrivateAssets to keep this reference (auto-added when targeting netcoreapp*)
          from making it into our NuGet packages. -->
     <PackageReference Update="Microsoft.NETCore.App" PrivateAssets="All" />
+
+    <!-- Configure analyzer to forbid certain API calls -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
   </ItemGroup>
 
   <!-- GenAPI settings -->
@@ -78,9 +83,9 @@
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and $([MSBuild]::IsOSPlatform('windows'))">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
-    <GenAPIShortFrameworkIdentifier Condition=" '$(TargetFrameworkIdentifier)' == '.NETFramework' ">net</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netstandard'))">netstandard</GenAPIShortFrameworkIdentifier>
-    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0'))">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">net</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</GenAPIShortFrameworkIdentifier>
+    <GenAPIShortFrameworkIdentifier Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
 

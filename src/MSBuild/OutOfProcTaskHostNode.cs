@@ -33,7 +33,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine9
+        IBuildEngine10
 #endif
     {
         /// <summary>
@@ -172,7 +172,7 @@ namespace Microsoft.Build.CommandLine
             // We don't know what the current build thinks this variable should be until RunTask(), but as a fallback in case there are
             // communications before we get the configuration set up, just go with what was already in the environment from when this node
             // was initially launched.
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
+            _debugCommunications = Traits.Instance.DebugNodeCommunication;
 
             _receivedPackets = new Queue<INodePacket>();
 
@@ -492,6 +492,22 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion
+
+        #region IBuildEngine10 Members
+
+        [Serializable]
+        private sealed class EngineServicesImpl : EngineServices
+        {
+            /// <summary>
+            /// No logging verbosity optimization in OOP nodes.
+            /// </summary>
+            public override bool LogsMessagesOfImportance(MessageImportance importance) => true;
+        }
+
+        public EngineServices EngineServices { get; } = new EngineServicesImpl();
+
+        #endregion
+
 #endif
 
         #region INodePacketFactory Members

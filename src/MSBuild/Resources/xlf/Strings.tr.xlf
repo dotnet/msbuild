@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../Strings.resx">
     <body>
@@ -506,7 +506,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                             devre dışı bırak.
                         EnableMPLogging--Çok işlemci olmayan modda çalışırken 
                             bile çok işlemcili günlük stilini etkinleştir. Bu 
-                            günlük stili varsayılan olarak açıktır.  
+                            günlük stili varsayılan olarak açıktır.
                         ForceConsoleColor--Konsol desteklemese bile ANSI
                             konsol renklerini kullan
                                                 Verbosity--Bu günlükçü için /verbosity ayarını
@@ -789,7 +789,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  -distributedFileLogger                                                       
+        <target state="translated">  -distributedFileLogger
                      Derleme çıkışını, her MSBuild düğümü için bir günlük
                      dosyası olmak üzere birden çok günlük dosyasına kaydeder. Bu
                      dosyaların ilk konumu geçerli dizindir. Dosyaların 
@@ -1631,7 +1631,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Bu, proje ağacınızın paketlerin oluşturulabilmesi için
                      önce geri yüklenmesini gerektirdiği durumlarda yararlıdır.
                      -restore değerinin belirtilmesi, -restore:True değerinin
-                     belirtilmesiyle aynıdır.  Yanıt dosyasından gelen bir değeri
+                     belirtilmesiyle aynıdır. Yanıt dosyasından gelen bir değeri
                      geçersiz kılmak için parametreyi kullanın.
                      (Kısa biçim: -r)
     </target>

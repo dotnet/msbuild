@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
@@ -505,7 +505,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                             bei der Mehrprozessorprotokollierung im Modus mit nur einem Prozessor.
                         EnableMPLogging: Aktiviert das Format der
                             Mehrprozessorprotokollierung auch bei der Ausführung
-                            im Modus mit nur einem Prozessor. Dieses Protokollierungsformat ist standardmäßig aktiviert.  
+                            im Modus mit nur einem Prozessor. Dieses Protokollierungsformat ist standardmäßig aktiviert. 
                         ForceConsoleColor: Verwendet selbst dann
                             ANSI-Konsolenfarben, wenn
                             die Konsole dies nicht unterstützt.

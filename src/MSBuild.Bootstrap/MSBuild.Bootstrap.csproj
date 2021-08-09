@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
-    
+
     <!-- Direct project references needed here to avoid NuGet version conflict errors -->
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
@@ -37,11 +37,6 @@
     <Content Include="$(MSBuildExtensionsPath)\**\*" LinkBase="Extensions" CopyToOutputDirectory="PreserveNewest" />
 
     <Content Include="$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(MonoBuild)' != 'true'">
-    <!-- Include DependencyModel libraries. -->
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
