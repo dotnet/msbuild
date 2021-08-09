@@ -62,6 +62,11 @@
         <target state="new">Garbage collecting for SDK feature band(s) {0}...</target>
         <note />
       </trans-unit>
+      <trans-unit id="GarbageCollectionFailed">
+        <source>Warning: Workload garbage collection failed with error: {0}.</source>
+        <target state="new">Warning: Workload garbage collection failed with error: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InadequatePermissions">
         <source>Inadequate permissions. Run the command with elevated privileges.</source>
         <target state="new">Inadequate permissions. Run the command with elevated privileges.</target>

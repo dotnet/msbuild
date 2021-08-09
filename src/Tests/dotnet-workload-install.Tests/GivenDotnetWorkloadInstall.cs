@@ -97,7 +97,6 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             var exceptionThrown = Assert.Throws<Exception>(() => installManager.InstallWorkloads(mockWorkloadIds, true));
             exceptionThrown.Message.Should().Be("Failing workload: xamarin-android-build");
             string.Join(" ", _reporter.Lines).Should().Contain("Rollback failure");
-
         }
 
 		[Fact]
@@ -111,6 +110,22 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
             installer.InstalledManifests.Should().BeEmpty(); // Didn't try to alter any installed manifests
             manifestUpdater.CalculateManifestUpdatesCallCount.Should().Be(1);
             manifestUpdater.UpdateAdvertisingManifestsCallCount.Should().Be(1);
+        }
+
+        [Fact]
+        public void GivenWorkloadInstallItWarnsOnGarbageCollectionFailure()
+        {
+            _reporter.Clear();
+            var mockWorkloadIds = new WorkloadId[] { new WorkloadId("xamarin-android"), new WorkloadId("xamarin-android-build") };
+            var testDirectory = _testAssetsManager.CreateTestDirectory().Path;
+            var dotnetRoot = Path.Combine(testDirectory, "dotnet");
+            var installer = new MockPackWorkloadInstaller(failingGarbageCollection: true);
+            var workloadResolver = WorkloadResolver.CreateForTests(new MockManifestProvider(new[] { _manifestPath }), new string[] { dotnetRoot });
+            var parseResult = Parser.Instance.Parse(new string[] { "dotnet", "workload", "install", "xamarin-android", "xamarin-android-build", "--skip-manifest-update" });
+            var installManager = new WorkloadInstallCommand(parseResult, reporter: _reporter, workloadResolver: workloadResolver, workloadInstaller: installer, version: "6.0.100");
+
+            installManager.InstallWorkloads(mockWorkloadIds, true);
+            string.Join(" ", _reporter.Lines).Should().Contain("Failing garbage collection");
         }
 
         [Fact]

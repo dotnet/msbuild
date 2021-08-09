@@ -23,16 +23,19 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         public bool GarbageCollectionCalled = false;
         public MockInstallationRecordRepository InstallationRecordRepository;
         public bool FailingRollback;
+        public bool FailingGarbageCollection;
         private readonly string FailingPack;
 
         public int ExitCode => 0;
 
-        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, IList<PackInfo> installedPacks = null)
+        public MockPackWorkloadInstaller(string failingWorkload = null, string failingPack = null, bool failingRollback = false, IList<WorkloadId> installedWorkloads = null, 
+            IList<PackInfo> installedPacks = null, bool failingGarbageCollection = false)
         {
             InstallationRecordRepository = new MockInstallationRecordRepository(failingWorkload, installedWorkloads);
             FailingRollback = failingRollback;
             InstalledPacks = installedPacks ?? new List<PackInfo>();
             FailingPack = failingPack;
+            FailingGarbageCollection = failingGarbageCollection;
         }
 
         public void InstallWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
@@ -61,6 +64,10 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public void GarbageCollectInstalledWorkloadPacks()
         {
+            if (FailingGarbageCollection)
+            {
+                throw new Exception("Failing garbage collection");
+            }
             GarbageCollectionCalled = true;
         }
 
