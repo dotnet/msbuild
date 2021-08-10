@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            var fileMatcherWithCache = new FileMatcher(FileSystems.Default, new ConcurrentDictionary<string, IReadOnlyList<string>>());
+            var fileMatcherWithCache = new FileMatcher(FileSystems.DefaultDirectoryCache, new ConcurrentDictionary<string, IReadOnlyList<string>>());
 
             void Verify(string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
             {
@@ -2376,7 +2376,7 @@ namespace Microsoft.Build.UnitTests
         {
             MockFileSystem mockFileSystem = new MockFileSystem(matchingFiles, nonmatchingFiles, untouchableFiles);
 
-            var fileMatcher = new FileMatcher(new FileSystemAdapter(mockFileSystem), mockFileSystem.GetAccessibleFileSystemEntries);
+            var fileMatcher = new FileMatcher(new DirectoryCacheOverFileSystem(new FileSystemAdapter(mockFileSystem)), mockFileSystem.GetAccessibleFileSystemEntries);
 
             string[] files = fileMatcher.GetFiles
             (
@@ -2447,7 +2447,7 @@ namespace Microsoft.Build.UnitTests
          * Validate that SplitFileSpec(...) is returning the expected constituent values.
          *************************************************************************************/
 
-        private static FileMatcher loopBackFileMatcher = new FileMatcher(FileSystems.Default, GetFileSystemEntriesLoopBack);
+        private static FileMatcher loopBackFileMatcher = new FileMatcher(FileSystems.DefaultDirectoryCache, GetFileSystemEntriesLoopBack);
 
         private static void ValidateSplitFileSpec
             (

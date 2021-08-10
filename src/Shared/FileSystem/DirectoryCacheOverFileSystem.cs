@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
+#if BUILD_ENGINE
+using Microsoft.Build.FileSystem;
+#endif
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Build.FileSystem
+namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>
     /// Implements <see cref="IDirectoryCache"/> on top of <see cref="IFileSystem"/>.
