@@ -154,7 +154,7 @@ namespace Microsoft.NET.Build.Tests
 				.HaveStdOutContaining("Hello World!");
 		}
 
-        [Fact]
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
         public void It_resolves_runtimepack_from_packs_folder()
         {
             var testProject = new TestProject()
