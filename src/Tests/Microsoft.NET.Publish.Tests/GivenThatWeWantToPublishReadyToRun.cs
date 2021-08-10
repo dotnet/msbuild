@@ -11,6 +11,7 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -82,9 +83,11 @@ namespace Microsoft.NET.Publish.Tests
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                NuGetFramework framework = NuGetFramework.Parse(targetFramework);
+
                 publishDirectory.Should().NotHaveFiles(new[] {
-                    GetPDBFileName(mainProjectDll),
-                    GetPDBFileName(classLibDll),
+                    GetPDBFileName(mainProjectDll, framework),
+                    GetPDBFileName(classLibDll, framework),
                 });
             }
 
@@ -306,9 +309,11 @@ namespace Microsoft.NET.Publish.Tests
 
             if (emitNativeSymbols && !RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                NuGetFramework framework = NuGetFramework.Parse(targetFramework);
+
                 publishDirectory.Should().HaveFiles(new[] {
-                    GetPDBFileName(mainProjectDll),
-                    GetPDBFileName(classLibDll),
+                    GetPDBFileName(mainProjectDll, framework),
+                    GetPDBFileName(classLibDll, framework),
                 });
             }
         }
@@ -351,7 +356,7 @@ public class Program
             return testProject;
         }
 
-        public static string GetPDBFileName(string assemblyFile)
+        public static string GetPDBFileName(string assemblyFile, NuGetFramework framework)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -360,6 +365,12 @@ public class Program
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                if (framework.Version.Major >= 6)
+                {
+                    return Path.GetFileName(Path.ChangeExtension(assemblyFile, "ni.r2rmap"));
+                }
+
+                // Legacy perfmap file naming prior to .NET 6
                 using (FileStream fs = new FileStream(assemblyFile, FileMode.Open, FileAccess.Read))
                 {
                     PEReader pereader = new PEReader(fs);
