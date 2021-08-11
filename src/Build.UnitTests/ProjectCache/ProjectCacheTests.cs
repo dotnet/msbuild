@@ -526,6 +526,29 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         [MemberData(nameof(SuccessfulGraphsWithBuildParameters))]
         public void ProjectCacheByVsWorkaroundWorks(GraphCacheResponse testData, BuildParameters buildParameters)
         {
+            ProjectGraph? graph = null;
+
+            var (logger, nodesToBuildResults) = BuildGraphByVsWorkaround(
+                () =>
+                {
+                    graph = testData.CreateGraph(_env);
+                    return graph;
+                },
+                buildParameters);
+
+            graph.ShouldNotBeNull();
+
+            AssertCacheBuild(graph!, testData, null, logger, nodesToBuildResults);
+        }
+
+        private (MockLogger logger, Dictionary<ProjectGraphNode, BuildResult> nodesToBuildResults) BuildGraphByVsWorkaround(
+            Func<ProjectGraph> graphProducer,
+            BuildParameters? buildParameters = null
+        )
+        {
+            var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
+            MockLogger? logger;
+
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
 
             try
@@ -539,20 +562,22 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
                 // Reset the environment variables stored in the build params to take into account TestEnvironmentChanges.
-                buildParameters = new BuildParameters(buildParameters, resetEnvironment: true);
+                buildParameters = buildParameters  is null
+                    ? new BuildParameters()
+                    : new BuildParameters(buildParameters, resetEnvironment: true);
 
                 BuildManager.ProjectCacheItems.ShouldBeEmpty();
 
-                var graph = testData.CreateGraph(_env);
+                var graph = graphProducer.Invoke();
+
+                BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
+
                 var projectPaths = graph.ProjectNodes.Select(n => n.ProjectInstance.FullPath).ToArray();
 
                 // VS sets this global property on every project it builds.
                 var solutionConfigurationGlobalProperty = CreateSolutionConfigurationProperty(projectPaths);
 
-                BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
-
                 using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
-                var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
 
                 foreach (var node in graph.ProjectNodesTopologicallySorted)
                 {
@@ -572,30 +597,32 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     nodesToBuildResults[node] = buildResult;
                 }
 
-                buildSession.Logger.FullLog.ShouldContain("Visual Studio Workaround based");
-                buildSession.Logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
+                logger = buildSession.Logger;
+
+                logger.FullLog.ShouldContain("Visual Studio Workaround based");
+                logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
                 foreach (var projectPath in projectPaths)
                 {
                     var projectName = Path.GetFileNameWithoutExtension(projectPath);
 
                     // Ensure MSBuild passes config / platform information set by VS.
-                    buildSession.Logger.FullLog.ShouldContain($"EntryPoint: {projectPath}");
-                    buildSession.Logger.FullLog.ShouldContain($"Configuration:{projectName}Debug");
-                    buildSession.Logger.FullLog.ShouldContain($"Platform:{projectName}x64");
+                    logger.FullLog.ShouldContain($"EntryPoint: {projectPath}");
+                    logger.FullLog.ShouldContain($"Configuration:{projectName}Debug");
+                    logger.FullLog.ShouldContain($"Platform:{projectName}x64");
 
                     // Ensure MSBuild removes the inner build property if present.
-                    buildSession.Logger.FullLog.ShouldContain($"{PropertyNames.InnerBuildProperty}:TheInnerBuildProperty");
-                    buildSession.Logger.FullLog.ShouldNotContain("TheInnerBuildProperty:FooBar");
+                    logger.FullLog.ShouldContain($"{PropertyNames.InnerBuildProperty}:TheInnerBuildProperty");
+                    logger.FullLog.ShouldNotContain("TheInnerBuildProperty:FooBar");
                 }
-
-                AssertCacheBuild(graph, testData, null, buildSession.Logger, nodesToBuildResults);
             }
             finally
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
                 BuildManager.ProjectCacheItems.Clear();
             }
+
+            return (logger, nodesToBuildResults);
         }
 
         private static string CreateSolutionConfigurationProperty(string[] projectPaths)
