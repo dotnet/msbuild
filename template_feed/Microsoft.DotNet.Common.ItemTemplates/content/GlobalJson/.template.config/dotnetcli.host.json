@@ -5,6 +5,10 @@
       "longName": "sdk-version",
       "shortName": ""
     },
+    "RollForward": {
+      "longName": "roll-forward",
+      "shortName": ""
+    },
     "dotnet-cli-version": {
       "isHidden": "true"
     }

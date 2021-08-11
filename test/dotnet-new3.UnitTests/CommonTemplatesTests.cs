@@ -228,6 +228,46 @@ Restore succeeded\.");
             Directory.Delete(workingDir, true);
         }
 
+        [Theory]
+        [InlineData(
+@"{
+  ""sdk"": {
+    ""version"": ""5.0.200""
+  }
+}",
+            "globaljson",
+            "--sdk-version",
+            "5.0.200")]
+        [InlineData(
+@"{
+  ""sdk"": {
+    ""rollForward"": ""major"",
+    ""version"": ""5.0.200""
+  }
+}",
+            "globaljson",
+            "--sdk-version",
+            "5.0.200",
+            "--roll-forward",
+            "major")]
+        public void GlobalJsonTests( string expectedContent, params string[] parameters)
+        {
+            string workingDir = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, parameters)
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOut($@"The template ""global.json file"" was created successfully.");
+
+            string globalJsonConent = File.ReadAllText(Path.Combine(workingDir, "global.json"));
+            Assert.Equal(expectedContent.Replace("\r\n", "\n"), globalJsonConent.Replace("\r\n", "\n"));
+            Directory.Delete(workingDir, true);
+        }
+
         #region Project templates language features tests
 
         /// <summary>

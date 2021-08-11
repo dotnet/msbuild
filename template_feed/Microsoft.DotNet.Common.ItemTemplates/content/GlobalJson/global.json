@@ -1,5 +1,8 @@
 {
   "sdk": {
+    //#if (RollForward!="")
+    "rollForward": "ROLL_FORWARD_VALUE",
+    //#endif
     "version": "SDK_VERSION"
   }
 }
