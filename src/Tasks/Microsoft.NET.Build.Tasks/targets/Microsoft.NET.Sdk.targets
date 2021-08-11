@@ -1066,14 +1066,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Don't generate a NETSDK1151 error if a non self-contained Exe references a Blazor wasm Exe -->
     <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(IsTestProject)' == 'true' And '$(ValidateExecutableReferencesMatchSelfContained)' == ''">
     <!-- Don't generate an error if a test project references a self-contained Exe.  Test projects
          use an OutputType of Exe but will usually call APIs in a referenced Exe rather than try
          to run it. -->
     <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <!-- Don't generate an error if an Exe project references a test project. -->
     <ShouldBeValidatedAsExecutableReference>false</ShouldBeValidatedAsExecutableReference>
@@ -1102,13 +1102,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ValidateCommandLineProperties"
           AfterTargets="_CheckForInvalidConfigurationAndPlatform" >
-    
+
     <NETSdkWarning Condition="'$(_CommandLineDefinedSelfContained)' != 'true' and
                    '$(_CommandLineDefinedRuntimeIdentifier)' == 'true' and
                    '$(TargetFrameworkIdentifier)' == '.NETCoreApp' and
                    $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))"
                ResourceName="SelfContainedOptionShouldBeUsedWithRuntime" />
-  
+
   </Target>
 
   <!--
@@ -1124,11 +1124,6 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- Reference Manager capabilities -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <ProjectCapability Remove="ReferenceManagerAssemblies" />
-  </ItemGroup>
-
-  <!-- Enable hot reload in 6.0 and newer apps by default -->
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
-    <ProjectCapability Include="SupportsHotReload" />
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />

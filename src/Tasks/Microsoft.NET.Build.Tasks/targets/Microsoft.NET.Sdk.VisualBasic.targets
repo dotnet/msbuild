@@ -93,6 +93,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <FinalDefineConstants Condition="'$(MyType)' == ''">$(FinalDefineConstants),_MyType=&quot;Empty&quot;</FinalDefineConstants>
   </PropertyGroup>
 
+  <!-- Enable hot reload in 6.0 and newer VB projects -->
+  <ItemGroup Condition="'$(SupportsHotReload)' != 'false' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
+    <ProjectCapability Include="SupportsHotReload" />
+  </ItemGroup>
+
   <!--
     NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML
           build. We also must not pull in a dependency on ResolveAssemblyReferences
