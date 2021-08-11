@@ -73,6 +73,11 @@ Si desea crear un manifiesto, utilice "dotnet new tool-manifest", normalmente en
         <target state="translated">La plataforma de destino para la que se instala la herramienta.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="new">The --prerelease and --version options are not supported in the same command</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
         <target state="translated">La versión del paquete de herramientas para instalar.</target>

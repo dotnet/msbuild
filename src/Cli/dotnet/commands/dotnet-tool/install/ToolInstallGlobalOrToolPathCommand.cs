@@ -97,14 +97,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                         Path.GetFullPath(_configFilePath)));
             }
 
-            VersionRange versionRange = null;
-            if (!string.IsNullOrEmpty(_packageVersion) && !VersionRange.TryParse(_packageVersion, out versionRange))
-            {
-                throw new GracefulException(
-                    string.Format(
-                        LocalizableStrings.InvalidNuGetVersionRange,
-                        _packageVersion));
-            }
+            VersionRange versionRange = _parseResult.GetVersionRange();
 
             DirectoryPath? toolPath = null;
             if (!string.IsNullOrEmpty(_toolPath))

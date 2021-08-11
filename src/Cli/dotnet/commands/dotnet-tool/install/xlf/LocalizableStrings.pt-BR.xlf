@@ -73,6 +73,11 @@ Se quiser criar um manifesto, use `dotnet new tool-manifest`, normalmente no dir
         <target state="translated">A estrutura de destino para a qual instalar a ferramenta.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="new">The --prerelease and --version options are not supported in the same command</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
         <target state="translated">A versão do pacote da ferramenta a ser instalada.</target>

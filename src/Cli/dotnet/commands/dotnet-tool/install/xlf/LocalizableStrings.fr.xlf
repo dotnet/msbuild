@@ -73,6 +73,11 @@ Si vous souhaitez créer un manifeste, utilisez 'dotnet new tool-manifest', gén
         <target state="translated">Framework cible pour lequel l'outil doit être installé.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="new">The --prerelease and --version options are not supported in the same command</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
         <target state="translated">Version du package d'outils à installer.</target>
