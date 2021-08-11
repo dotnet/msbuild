@@ -149,6 +149,29 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         Log.LogMessage("Candidate '{0}' is defined as a native application resource.", resource.ItemSpec);
                         resourceList = resourceData.runtime;
                     }
+                    else if (string.Equals("JSModule", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
+                             string.Equals(assetTraitValue, "JSLibraryModule", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log.LogMessage("Candidate '{0}' is defined as a library initializer resource.", resource.ItemSpec);
+                        resourceData.libraryInitializers ??= new();
+                        resourceList = resourceData.libraryInitializers;
+                        AddResourceToList(resource, resourceList, resource.GetMetadata("TargetPath"));
+                        continue;
+                    }
+                    else if (string.Equals("BlazorWebAssemblyResource", assetTraitName, StringComparison.OrdinalIgnoreCase) &&
+                             assetTraitValue.StartsWith("extension:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log.LogMessage("Candidate '{0}' is defined as an extension resource '{1}'.", resource.ItemSpec, assetTraitValue);
+                        var extensionName = assetTraitValue.Substring("extension:".Length);
+                        resourceData.extensions ??= new();
+                        if (!resourceData.extensions.TryGetValue(extensionName, out resourceList))
+                        {
+                            resourceList = new();
+                            resourceData.extensions[extensionName] = resourceList;
+                        }
+                        AddResourceToList(resource, resourceList, resource.GetMetadata("TargetPath"));
+                        continue;
+                    }
                     else
                     {
                         Log.LogMessage("Skipping resource '{0}' since it doesn't belong to a defined category.", resource.ItemSpec);
@@ -156,11 +179,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                         continue;
                     }
 
-                    if (!resourceList.ContainsKey(resourceName))
-                    {
-                        Log.LogMessage("Added resource '{0}' to the manifest.", resource.ItemSpec);
-                        resourceList.Add(resourceName, $"sha256-{resource.GetMetadata("FileHash")}");
-                    }
+                    AddResourceToList(resource, resourceList, resourceName);
                 }
 
                 if (remainingLazyLoadAssemblies.Count > 0)
@@ -192,8 +211,6 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 }
             }
 
-            ListManifestContents(result);
-
             var serializer = new DataContractJsonSerializer(typeof(BootJsonData), new DataContractJsonSerializerSettings
             {
                 UseSimpleDictionaryFormat = true
@@ -201,79 +218,13 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
 
             using var writer = JsonReaderWriterFactory.CreateJsonWriter(output, Encoding.UTF8, ownsStream: false, indent: true);
             serializer.WriteObject(writer, result);
-        }
 
-        private void ListManifestContents(BootJsonData result)
-        {
-            if (result.resources.assembly == null || result.resources.assembly.Count == 0)
+            void AddResourceToList(ITaskItem resource, ResourceHashesByNameDictionary resourceList, string resourceKey)
             {
-                Log.LogMessage("No assemblies defined.");
-            }
-            else
-            {
-                foreach (var assembly in result.resources.assembly)
+                if (!resourceList.ContainsKey(resourceKey))
                 {
-                    Log.LogMessage("Assembly: '{0}' with hash '{1}'", assembly.Key, assembly.Value);
-                }
-            }
-
-            if (result.resources.lazyAssembly == null || result.resources.lazyAssembly.Count == 0)
-            {
-                Log.LogMessage("No lazy loaded assemblies defined.");
-            }
-            else
-            {
-                foreach (var lazyAssembly in result.resources.lazyAssembly)
-                {
-                    Log.LogMessage("Lazy loaded assembly: '{0}' with hash '{1}'", lazyAssembly.Key, lazyAssembly.Value);
-                }
-            }
-
-            if (result.resources.pdb == null || result.resources.pdb.Count == 0)
-            {
-                Log.LogMessage("No debug symbol files defined.");
-            }
-            else
-            {
-                foreach (var symbol in result.resources.pdb)
-                {
-                    Log.LogMessage("Lazy loaded assembly: '{0}' with hash '{1}'", symbol.Key, symbol.Value);
-                }
-            }
-
-            if (result.resources.runtime == null || result.resources.runtime.Count == 0)
-            {
-                Log.LogMessage("No runtime resources defined.");
-            }
-            else
-            {
-                foreach (var native in result.resources.runtime)
-                {
-                    Log.LogMessage("Runtime resource: '{0}' with hash '{1}'", native.Key, native.Value);
-                }
-            }
-
-            if (result.resources.satelliteResources == null || result.resources.satelliteResources.Count == 0)
-            {
-                Log.LogMessage("No satellite resources defined.");
-            }
-            else
-            {
-                foreach (var pair in result.resources.satelliteResources)
-                {
-                    var language = pair.Key;
-                    var resources = pair.Value;
-                    if (resources.Count == 0)
-                    {
-                        Log.LogMessage("No satellite resources defined for '{0}'.", language);
-                    }
-                    else
-                    {
-                        foreach (var assembly in resources)
-                        {
-                            Log.LogMessage("Satellite assembly: '{0}' with hash '{1}' for culture '{2}'", assembly.Key, assembly.Value, language);
-                        }
-                    }
+                    Log.LogMessage("Added resource '{0}' to the manifest.", resource.ItemSpec);
+                    resourceList.Add(resourceKey, $"sha256-{resource.GetMetadata("FileHash")}");
                 }
             }
         }

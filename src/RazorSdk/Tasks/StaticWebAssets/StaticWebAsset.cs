@@ -379,6 +379,33 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             return !allowEmpyPath && normalizedPath.Equals("") ? "/" : normalizedPath;
         }
 
+        public static string ComputeAssetRelativePath(ITaskItem asset, out string metadataProperty)
+        {
+            var relativePath = asset.GetMetadata("RelativePath");
+            if (!string.IsNullOrEmpty(relativePath))
+            { 
+                metadataProperty = "RelativePath";
+                return relativePath;
+            }
+
+            var targetPath = asset.GetMetadata("TargetPath");
+            if (!string.IsNullOrEmpty(targetPath))
+            { 
+                metadataProperty = "TargetPath";
+                return targetPath;
+            }
+
+            var linkPath = asset.GetMetadata("Link");
+            if (!string.IsNullOrEmpty(linkPath))
+            {
+                metadataProperty = "Link";
+                return linkPath;
+            }
+
+            metadataProperty = null;
+            return asset.ItemSpec;
+        }
+
         public override bool Equals(object obj)
         {
             return obj is StaticWebAsset asset &&

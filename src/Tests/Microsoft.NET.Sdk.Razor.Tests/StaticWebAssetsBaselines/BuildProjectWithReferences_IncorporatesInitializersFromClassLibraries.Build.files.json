@@ -1,0 +1,5 @@
+[
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\jsmodules\\AppWithPackageAndP2PReference.modules.json",
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\jsmodules\\jsmodules.build.manifest.json",
+  "${ProjectPath}\\AppWithPackageAndP2PReference\\obj\\Debug\\net6.0\\scopedcss\\bundle\\AppWithPackageAndP2PReference.styles.css"
+]

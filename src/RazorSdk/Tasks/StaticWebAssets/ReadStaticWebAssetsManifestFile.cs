@@ -34,11 +34,11 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             {
                 var manifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(ManifestPath));
 
-                Assets = manifest.Assets.Select(a => a.ToTaskItem()).ToArray();
+                Assets = manifest.Assets?.Select(a => a.ToTaskItem()).ToArray() ?? Array.Empty<ITaskItem>();
 
-                DiscoveryPatterns = manifest.DiscoveryPatterns.Select(dp => dp.ToTaskItem()).ToArray();
+                DiscoveryPatterns = manifest.DiscoveryPatterns?.Select(dp => dp.ToTaskItem()).ToArray() ?? Array.Empty<ITaskItem>();
 
-                ReferencedProjectsConfiguration = manifest.ReferencedProjectsConfiguration.Select(m => m.ToTaskItem()).ToArray();
+                ReferencedProjectsConfiguration = manifest.ReferencedProjectsConfiguration?.Select(m => m.ToTaskItem()).ToArray() ?? Array.Empty<ITaskItem>();
             }
             catch (Exception ex)
             {

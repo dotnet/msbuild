@@ -86,6 +86,15 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
                         ("RelativePath", "satellite-assembly3.dll"),
                         ("AssetTraitName", "Culture"),
                         ("AssetTraitValue", "en-GB")),
+
+                    CreateResourceTaskItem(
+                        ("FileName", "my-custom-extension.blz"),
+                        ("Extension", ".blz"),
+                        ("FileHash", "my-custom-extensionhash"),
+                        ("RelativePath", "my-custom-extension.blz"),
+                        ("TargetPath", "_bin/my-custom-extension.blz"),
+                        ("AssetTraitName", "BlazorWebAssemblyResource"),
+                        ("AssetTraitValue", "extension:custom-extension")),
                 }
             };
 
@@ -123,9 +132,12 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             satelliteResources["en-GB"].Should().Contain("en-GB/satellite-assembly1.dll", "sha256-hashsatelliteassembly1");
             satelliteResources["en-GB"].Should().Contain("en-GB/satellite-assembly3.dll", "sha256-hashsatelliteassembly3");
 
-
             satelliteResources.Should().ContainKey("fr");
             satelliteResources["fr"].Should().Contain("fr/satellite-assembly2.dll", "sha256-hashsatelliteassembly2");
+
+            var extensions = parsedContent.resources.extensions;
+            extensions.Should().ContainKey("custom-extension");
+            extensions["custom-extension"].Should().Contain("_bin/my-custom-extension.blz", "sha256-my-custom-extensionhash");
         }
 
         [Theory]

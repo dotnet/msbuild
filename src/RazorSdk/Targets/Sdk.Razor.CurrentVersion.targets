@@ -104,6 +104,8 @@ Copyright (c) .NET Foundation. All rights reserved.
      
     <!-- Controls whether or not the scoped css feature is enabled. By default is enabled for net6.0 applications and RazorLangVersion 5 or above -->
     <ScopedCssEnabled Condition="'$(ScopedCssEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_Targeting30OrNewerRazorLangVersion)</ScopedCssEnabled>
+
+    <JSModulesEnabled Condition="'$(JSModulesEnabled)' == '' and '$(StaticWebAssetsEnabled)' == 'true'">$(_TargetingNET60OrLater)</JSModulesEnabled>
   </PropertyGroup>
 
 
@@ -393,6 +395,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="Microsoft.NET.Sdk.Razor.ScopedCss.5_0.targets" Condition="'$(UseStaticWebAssetsV2)' != 'true' And '$(ScopedCssEnabled)' == 'true'" />
   <Import Project="Microsoft.NET.Sdk.Razor.ScopedCss.targets" Condition="'$(UseStaticWebAssetsV2)' == 'true' And '$(ScopedCssEnabled)' == 'true'" />
+
+  <Import Project="Microsoft.NET.Sdk.Razor.JSModules.targets" Condition="'$(JSModulesEnabled)' == 'true'" />
 
   <Import Project="Microsoft.NET.Sdk.Razor.GenerateAssemblyInfo.targets" />
 

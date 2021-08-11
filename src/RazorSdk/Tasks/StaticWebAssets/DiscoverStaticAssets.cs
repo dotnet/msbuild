@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -42,16 +43,20 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 {
                     var candidate = Candidates[i];
                     var candidateMatchPath = GetCandidateMatchPath(candidate);
-                    var match = matcher.Match(candidateMatchPath);
-                    if (!match.HasMatches)
+                    var candidateRelativePath = candidateMatchPath;
+                    if (string.IsNullOrEmpty(candidate.GetMetadata("RelativePath")))
                     {
-                        Log.LogMessage("Rejected asset '{0}' for pattern '{1}'", candidateMatchPath, Pattern);
-                        continue;
+                        var match = matcher.Match(candidateMatchPath);
+                        if (!match.HasMatches)
+                        {
+                            Log.LogMessage("Rejected asset '{0}' for pattern '{1}'", candidateMatchPath, Pattern);
+                            continue;
+                        }
+
+                        Log.LogMessage("Accepted asset '{0}' for pattern '{1}' with relative path '{2}'", candidateMatchPath, Pattern, match.Files.Single().Stem);
+
+                        candidateRelativePath = StaticWebAsset.Normalize(match.Files.Single().Stem);
                     }
-
-                    Log.LogMessage("Accepted asset '{0}' for pattern '{1}' with relative path '{2}'", candidateMatchPath, Pattern, match.Files.Single().Stem);
-
-                    var candidateRelativePath = StaticWebAsset.Normalize(match.Files.Single().Stem);
 
                     var asset = new StaticWebAsset
                     {
@@ -93,22 +98,17 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
         private string GetCandidateMatchPath(ITaskItem candidate)
         {
-            var targetPath = candidate.GetMetadata("TargetPath");
-            if (!string.IsNullOrEmpty(targetPath))
+            var computedPath = StaticWebAsset.ComputeAssetRelativePath(candidate, out var property);
+            if (property != null)
             {
-                Log.LogMessage("TargetPath '{0}' found for candidate '{1}' and will be used for matching.", targetPath, candidate.ItemSpec);
-                return targetPath;
+                Log.LogMessage(
+                    "{0} '{1}' found for candidate '{2}' and will be used for matching.",
+                    property,
+                    computedPath,
+                    candidate.ItemSpec);
             }
 
-            var linkPath = candidate.GetMetadata("Link");
-            if (!string.IsNullOrEmpty(linkPath))
-            {
-                Log.LogMessage("Link '{0}' found for candidate '{1}' and will be used for matching.", linkPath, candidate.ItemSpec);
-
-                return linkPath;
-            }
-
-            return candidate.ItemSpec;
+            return computedPath;
         }
 
         private void UpdateAssetKindIfNecessary(Dictionary<string, List<ITaskItem>> assetsByRelativePath, string candidateRelativePath, ITaskItem asset)

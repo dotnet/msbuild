@@ -330,7 +330,7 @@ Integration with static web assets:
   </ItemGroup>
 </Target>
 
-<Target Name="BundleScopedCssFiles" Condition="'$(DisableScopedCssBundling)' != 'true'" DependsOnTargets="_CollectAllScopedCssAssets;_GenerateScopedCssFiles" >
+<Target Name="BundleScopedCssFiles" Condition="'$(DisableScopedCssBundling)' != 'true'" DependsOnTargets="_CollectAllScopedCssAssets;_GenerateScopedCssFiles;_ResolveBundlingConfiguration" >
   <!-- Incrementalism is built into the task itself. -->
   <ItemGroup>
     <_CurrentProjectDiscoveredScopedCssFiles Include="@(_DiscoveredScopedCssFiles)" />

@@ -1,0 +1,8 @@
+[
+  "${OutputPath}\\wwwroot\\ComponentApp.lib.module.js",
+  "${OutputPath}\\wwwroot\\ComponentApp.modules.json",
+  "${OutputPath}\\wwwroot\\ComponentApp.styles.css",
+  "${ProjectPath}\\obj\\Debug\\net6.0\\jsmodules\\jsmodules.publish.manifest.json",
+  "${ProjectPath}\\obj\\Debug\\net6.0\\scopedcss\\bundle\\ComponentApp.styles.css",
+  "${ProjectPath}\\obj\\Debug\\net6.0\\scopedcss\\projectbundle\\ComponentApp.bundle.scp.css"
+]
