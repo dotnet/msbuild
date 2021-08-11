@@ -9,7 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 using FluentAssertions;
-
+using Microsoft.DotNet.Cli;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.NET.TestFramework;
 
@@ -114,7 +114,7 @@ namespace ManifestReaderTests
             Directory.CreateDirectory(additionalManifestDirectory);
 
             var environmentMock = new EnvironmentMock();
-            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
+            environmentMock.Add(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, additionalManifestDirectory);
 
             //  Manifest in test hook directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
@@ -144,7 +144,7 @@ namespace ManifestReaderTests
             Directory.CreateDirectory(additionalManifestDirectory);
 
             var environmentMock = new EnvironmentMock();
-            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
+            environmentMock.Add(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, additionalManifestDirectory);
 
             //  Manifest in test hook directory
             Directory.CreateDirectory(Path.Combine(additionalManifestDirectory, sdkVersion, "Android"));
@@ -176,7 +176,7 @@ namespace ManifestReaderTests
             Directory.CreateDirectory(additionalManifestDirectory2);
 
             var environmentMock = new EnvironmentMock();
-            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory1 + Path.PathSeparator + additionalManifestDirectory2);
+            environmentMock.Add(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, additionalManifestDirectory1 + Path.PathSeparator + additionalManifestDirectory2);
 
 
             //  Manifests in default directory
@@ -214,7 +214,7 @@ namespace ManifestReaderTests
             var additionalManifestDirectory = Path.Combine(_testDirectory, "AdditionalManifests");
                 
             var environmentMock = new EnvironmentMock();
-            environmentMock.Add("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS", additionalManifestDirectory);
+            environmentMock.Add(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, additionalManifestDirectory);
 
             //  Manifest in default directory
             Directory.CreateDirectory(Path.Combine(_manifestDirectory, "Android"));

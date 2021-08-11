@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.Cli;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
 
@@ -622,7 +623,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     yield return TargetingPackRoot;
                 }
-                var packRootEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_PACK_ROOTS");
+                var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
                 if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
                 {
                     foreach (var packRoot in packRootEnvironmentVariable.Split(Path.PathSeparator))

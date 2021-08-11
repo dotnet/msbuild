@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
+using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
@@ -219,7 +220,7 @@ namespace Microsoft.NET.Build.Tests
 
             //  Now build the original test project with the packs folder with the runtime packs we just downloaded
             var buildCommand = new BuildCommand(testAsset)
-                .WithEnvironmentVariable("DOTNETSDK_WORKLOAD_PACK_ROOTS", Path.Combine(packageDownloadAsset.TestRoot, packageDownloadProject.Name));
+                .WithEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS, Path.Combine(packageDownloadAsset.TestRoot, packageDownloadProject.Name));
 
             buildCommand
                 .Execute()

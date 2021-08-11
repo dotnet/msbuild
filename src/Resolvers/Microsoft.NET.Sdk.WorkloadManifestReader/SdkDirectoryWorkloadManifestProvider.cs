@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
@@ -53,7 +54,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
             var manifestDirectory = Path.Combine(_sdkRootPath, "sdk-manifests", _sdkVersionBand);
 
-            var manifestDirectoryEnvironmentVariable = getEnvironmentVariable("DOTNETSDK_WORKLOAD_MANIFEST_ROOTS");
+            var manifestDirectoryEnvironmentVariable = getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS);
             if (manifestDirectoryEnvironmentVariable != null)
             {
                 //  Append the SDK version band to each manifest root specified via the environment variable.  This allows the same

@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenAdvertisingManifestUpdateItUpdatesWhenDue()
         {
-            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS") ? "0" : string.Empty;
+            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS) ? "0" : string.Empty;
             (var manifestUpdater, var nugetDownloader, var testDir) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
 
             var sentinalPath = Path.Combine(testDir, ".dotnet", _manifestSentinalFileName);
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         [Fact]
         public void GivenAdvertisingManifestUpdateItHonorsDisablingEnvVar()
         {
-            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE") ? "true" :  string.Empty;
+            Func<string, string> getEnvironmentVariable = (envVar) => envVar.Equals(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE) ? "true" :  string.Empty;
             (var manifestUpdater, var nugetDownloader, _) = GetTestUpdater(getEnvironmentVariable: getEnvironmentVariable);
 
             manifestUpdater.BackgroundUpdateAdvertisingManifestsWhenRequiredAsync().Wait();
