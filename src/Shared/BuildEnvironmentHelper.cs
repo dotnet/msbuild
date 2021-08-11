@@ -220,7 +220,7 @@ namespace Microsoft.Build.Shared
                 string visualStudioRoot = GetVsRootFromMSBuildAssembly(msbuildExe);
                 return new BuildEnvironment(
                         BuildEnvironmentMode.VisualStudio,
-                        msbuildExe,
+                        GetMSBuildExeFromVsRoot(visualStudioRoot),
                         runningTests: s_runningTests(),
                         runningInVisualStudio: false,
                         visualStudioPath: visualStudioRoot);
