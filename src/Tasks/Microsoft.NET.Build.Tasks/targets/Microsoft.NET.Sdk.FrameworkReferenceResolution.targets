@@ -107,7 +107,9 @@ Copyright (c) .NET Foundation. All rights reserved.
                                 EnableTargetingPackDownload="$(EnableTargetingPackDownload)"
                                 EnableRuntimePackDownload="$(EnableRuntimePackDownload)"
                                 KnownCrossgen2Packs="@(KnownCrossgen2Pack)"
-                                NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)">
+                                NETCoreSdkRuntimeIdentifier="$(NETCoreSdkRuntimeIdentifier)"
+                                NetCoreRoot="$(NetCoreRoot)"
+                                NETCoreSdkVersion="$(NETCoreSdkVersion)">
 
       <Output TaskParameter="PackagesToDownload" ItemName="_PackageToDownload" />
       <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />

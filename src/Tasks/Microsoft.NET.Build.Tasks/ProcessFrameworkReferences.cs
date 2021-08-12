@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli;
+using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
 
@@ -65,6 +66,12 @@ namespace Microsoft.NET.Build.Tasks
 
         [Required]
         public string NETCoreSdkRuntimeIdentifier { get; set; }
+
+        [Required]
+        public string NetCoreRoot { get; set; }
+
+        [Required]
+        public string NETCoreSdkVersion { get; set; }
 
         [Output]
         public ITaskItem[] PackagesToDownload { get; set; }
@@ -182,6 +189,10 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     targetingPackVersion = knownFrameworkReference.TargetingPackVersion;
                 }
+
+                //  Look up targeting pack version from workload manifests if necessary
+                targetingPackVersion = GetResolvedPackVersion(knownFrameworkReference.TargetingPackName, targetingPackVersion);
+
                 targetingPack.SetMetadata(MetadataKeys.NuGetPackageVersion, targetingPackVersion);
                 targetingPack.SetMetadata("TargetingPackFormat", knownFrameworkReference.TargetingPackFormat);
                 targetingPack.SetMetadata("TargetFramework", knownFrameworkReference.TargetFramework.GetShortFolderName());
@@ -475,13 +486,17 @@ namespace Microsoft.NET.Build.Tasks
                 foreach (var runtimePackNamePattern in selectedRuntimePack.RuntimePackNamePatterns.Split(';'))
                 {
                     string runtimePackName = runtimePackNamePattern.Replace("**RID**", runtimePackRuntimeIdentifier);
-                    string runtimePackPath = GetPackPath(runtimePackName, runtimePackVersion);
+
+                    //  Look up runtimePackVersion from workload manifests if necessary
+                    string resolvedRuntimePackVersion = GetResolvedPackVersion(runtimePackName, runtimePackVersion);
+
+                    string runtimePackPath = GetPackPath(runtimePackName, resolvedRuntimePackVersion);
 
                     if (runtimePacks != null)
                     {
                         TaskItem runtimePackItem = new TaskItem(runtimePackName);
                         runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageId, runtimePackName);
-                        runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageVersion, runtimePackVersion);
+                        runtimePackItem.SetMetadata(MetadataKeys.NuGetPackageVersion, resolvedRuntimePackVersion);
                         runtimePackItem.SetMetadata(MetadataKeys.FrameworkName, selectedRuntimePack.Name);
                         runtimePackItem.SetMetadata(MetadataKeys.RuntimeIdentifier, runtimePackRuntimeIdentifier);
                         runtimePackItem.SetMetadata(MetadataKeys.IsTrimmable, isTrimmable);
@@ -507,7 +522,7 @@ namespace Microsoft.NET.Build.Tasks
                     if (runtimePackPath == null)
                     {
                         TaskItem packageToDownload = new TaskItem(runtimePackName);
-                        packageToDownload.SetMetadata(MetadataKeys.Version, runtimePackVersion);
+                        packageToDownload.SetMetadata(MetadataKeys.Version, resolvedRuntimePackVersion);
 
                         packagesToDownload.Add(packageToDownload);
                     }
@@ -643,6 +658,31 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return null;
+        }
+
+        SdkDirectoryWorkloadManifestProvider _workloadManifestProvider;
+        WorkloadResolver _workloadResolver;
+
+        private string GetResolvedPackVersion(string packID, string packVersion)
+        {
+            if (!packVersion.Equals("**FromWorload**", StringComparison.OrdinalIgnoreCase))
+            {
+                return packVersion;
+            }
+
+            if (_workloadManifestProvider == null)
+            {
+                _workloadManifestProvider = new SdkDirectoryWorkloadManifestProvider(NetCoreRoot, NETCoreSdkVersion);
+                _workloadResolver = WorkloadResolver.Create(_workloadManifestProvider, NetCoreRoot, NETCoreSdkVersion);
+            }
+
+            var packInfo = _workloadResolver.TryGetPackInfo(new WorkloadPackId(packID));
+            if (packInfo == null)
+            {
+                Log.LogError("NETSDKZZZZ: Error getting pack version: Pack '{0}' was not present in workload manifests.", packID);
+                return packVersion;
+            }
+            return packInfo.Version;
         }
 
         private enum RuntimePatchRequest
