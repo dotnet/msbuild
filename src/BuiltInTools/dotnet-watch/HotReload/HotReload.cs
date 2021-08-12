@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Watcher.Tools
         public HotReload(ProcessRunner processRunner, IReporter reporter)
         {
             _staticFileHandler = new StaticFileHandler(reporter);
-            _scopedCssFileHandler = new ScopedCssFileHandler(processRunner, reporter);
+            _scopedCssFileHandler = new ScopedCssFileHandler(reporter);
             _compilationHandler = new CompilationHandler(reporter);
         }
 
