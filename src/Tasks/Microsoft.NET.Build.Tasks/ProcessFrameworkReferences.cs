@@ -665,7 +665,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private string GetResolvedPackVersion(string packID, string packVersion)
         {
-            if (!packVersion.Equals("**FromWorload**", StringComparison.OrdinalIgnoreCase))
+            if (!packVersion.Equals("**FromWorkload**", StringComparison.OrdinalIgnoreCase))
             {
                 return packVersion;
             }

@@ -269,10 +269,10 @@ namespace Microsoft.NET.Build.Tests
     <KnownFrameworkReference Include='Microsoft.NETCore.App.Test'
                           TargetFramework='net6.0'
                           RuntimeFrameworkName='Microsoft.NETCore.App.Test'
-                          DefaultRuntimeFrameworkVersion='**FromWorload**'
-                          LatestRuntimeFrameworkVersion='**FromWorload**'
+                          DefaultRuntimeFrameworkVersion='**FromWorkload**'
+                          LatestRuntimeFrameworkVersion='**FromWorkload**'
                           TargetingPackName='Microsoft.NETCore.App.Test.Ref'
-                          TargetingPackVersion='**FromWorload**'
+                          TargetingPackVersion='**FromWorkload**'
                           RuntimePackNamePatterns='Microsoft.NETCore.App.Test.RuntimePack'
                           RuntimePackRuntimeIdentifiers='any'
                               />
