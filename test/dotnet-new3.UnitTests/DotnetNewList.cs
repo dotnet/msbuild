@@ -107,6 +107,7 @@ Class Library                                 classlib       [C#],F#,VB  Common/
 Console Application                           console        [C#],F#,VB  Common/Console        
 dotnet gitignore file                         gitignore                  Config                
 Dotnet local tool manifest file               tool-manifest              Config                
+EditorConfig file                             editorconfig               Config                
 global.json file                              globaljson                 Config                
 NuGet Config                                  nugetconfig                Config                
 Razor Class Library                           razorclasslib  [C#]        Web/Razor/Library     
@@ -454,7 +455,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: --unknown.")
-                .And.HaveStdErrContaining("8 template(s) partially matched, but failed on --unknown.")
+                .And.HaveStdErrContaining("9 template(s) partially matched, but failed on --unknown.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--unknown")
@@ -462,7 +463,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: 'c', --unknown.")
-                .And.HaveStdErrContaining("5 template(s) partially matched, but failed on --unknown.")
+                .And.HaveStdErrContaining("6 template(s) partially matched, but failed on --unknown.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--unknown", "--language", "C#")
@@ -470,7 +471,7 @@ Worker Service                                worker         [C#],F#     Common/
               .Execute()
               .Should().Fail()
               .And.HaveStdErrContaining("No templates found matching: 'c', language='C#', --unknown.")
-              .And.HaveStdErrContaining("5 template(s) partially matched, but failed on language='C#', --unknown.")
+              .And.HaveStdErrContaining("6 template(s) partially matched, but failed on language='C#', --unknown.")
               .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
         }
 
@@ -494,7 +495,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: --framework='unknown'.")
-                .And.HaveStdErrContaining("8 template(s) partially matched, but failed on --framework='unknown'.")
+                .And.HaveStdErrContaining("9 template(s) partially matched, but failed on --framework='unknown'.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--framework", "unknown")
@@ -502,7 +503,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: 'c', --framework='unknown'.")
-                .And.HaveStdErrContaining("5 template(s) partially matched, but failed on --framework='unknown'.")
+                .And.HaveStdErrContaining("6 template(s) partially matched, but failed on --framework='unknown'.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
         }
 
@@ -526,7 +527,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: language='unknown'.")
-                .And.HaveStdErrContaining("8 template(s) partially matched, but failed on language='unknown'.")
+                .And.HaveStdErrContaining("9 template(s) partially matched, but failed on language='unknown'.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 <TEMPLATE_NAME> --search");
 
             new DotnetNewCommand(_log, "c", "--list", "--language", "unknown", "--framework", "unknown")
@@ -534,7 +535,7 @@ Worker Service                                worker         [C#],F#     Common/
                 .Execute()
                 .Should().Fail()
                 .And.HaveStdErrContaining("No templates found matching: 'c', language='unknown'.")
-                .And.HaveStdErrContaining("5 template(s) partially matched, but failed on language='unknown'.")
+                .And.HaveStdErrContaining("6 template(s) partially matched, but failed on language='unknown'.")
                 .And.HaveStdErrContaining($"To search for the templates on NuGet.org, run:{Environment.NewLine}   dotnet new3 c --search");
         }
 

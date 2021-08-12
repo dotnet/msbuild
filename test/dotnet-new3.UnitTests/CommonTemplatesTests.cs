@@ -3,6 +3,7 @@
 
 #nullable enable
 
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -225,6 +226,44 @@ Restore succeeded\.");
                 .And.NotHaveStdErr()
                 .And.HaveStdOut($@"The template ""{expectedTemplateName}"" was created successfully.");
 
+            Directory.Delete(workingDir, true);
+        }
+
+        [Fact]
+        public void EditorConfigTests()
+        {
+            string workingDir = TestUtils.CreateTemporaryFolder();
+
+            new DotnetNewCommand(_log, "editorconfig")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOut($@"The template ""EditorConfig file"" was created successfully.");
+
+            string path = Path.Combine(workingDir, ".editorconfig");
+            string editorConfigContent = File.ReadAllText(path);
+            Assert.Contains("dotnet_naming_rule", editorConfigContent);
+            Assert.Contains("dotnet_style_", editorConfigContent);
+            Assert.Contains("dotnet_naming_symbols", editorConfigContent);
+            File.Delete(path);
+
+            new DotnetNewCommand(_log, "editorconfig", "--empty")
+                .WithCustomHive(_fixture.HomeDirectory)
+                .WithWorkingDirectory(workingDir)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOut($@"The template ""EditorConfig file"" was created successfully.");
+
+            editorConfigContent = File.ReadAllText(path);
+            Assert.DoesNotContain("dotnet_naming_rule", editorConfigContent);
+            Assert.DoesNotContain("dotnet_style_", editorConfigContent);
+            Assert.DoesNotContain("dotnet_naming_symbols", editorConfigContent);
+            Assert.Contains("root = true", editorConfigContent);
             Directory.Delete(workingDir, true);
         }
 
