@@ -412,7 +412,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     ErrorUtilities.VerifyThrow(projectPathAttribute is not null, "Expected VS to set the project path on each ProjectConfiguration element.");
 
                     var projectPath = projectPathAttribute!.Value;
-                    ErrorUtilities.VerifyThrow(FileSystems.Default.FileExists(projectPath), "Expected the projects in the solution to exist.");
 
                     var (configuration, platform) = SolutionFile.ParseConfigurationName(node.InnerText, definingProjectPath, 0, solutionConfigurationXml);
 
