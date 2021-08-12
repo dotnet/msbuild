@@ -157,12 +157,16 @@ namespace Microsoft.Build.UnitTests
 
         internal static void ShouldHaveSucceeded(this BuildResult result)
         {
-            result.OverallResult.ShouldBe(BuildResultCode.Success, result.Exception is not null ? result.Exception.ToString() : string.Empty);
+            result.OverallResult.ShouldBe(
+                BuildResultCode.Success,
+                customMessage: result.Exception is not null ? result.Exception.ToString() : string.Empty);
         }
 
         internal static void ShouldHaveSucceeded(this GraphBuildResult result)
         {
-            result.OverallResult.ShouldBe(BuildResultCode.Success, result.Exception is not null ? result.Exception.ToString() : string.Empty);
+            result.OverallResult.ShouldBe(
+                BuildResultCode.Success,
+                customMessage: result.Exception is not null ? result.Exception.ToString() : string.Empty);
         }
 
         internal static void ShouldHaveFailed(this BuildResult result, string exceptionMessageSubstring = null)
