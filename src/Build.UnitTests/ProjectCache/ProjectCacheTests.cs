@@ -541,9 +541,64 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             AssertCacheBuild(graph!, testData, null, logger, nodesToBuildResults);
         }
 
+        [Fact]
+        public void ProjectCacheByVsWorkaroundIgnoresSlnDisabledProjects()
+        {
+            var testData = new GraphCacheResponse(
+                new Dictionary<int, int[]>
+                {
+                    {1, new[] {2}}
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>()
+                {
+                    {1, "<PropertyGroup> <BuildProjectInSolution>false</BuildProjectInSolution> </PropertyGroup>"}
+                });
+
+            ProjectGraph? graph = null;
+
+            var (logger, nodesToBuildResults) = BuildGraphByVsWorkaround(
+                graphProducer: () =>
+                {
+                    graph = testData.CreateGraph(_env);
+                    return graph;
+                },
+                assertBuildResults: false
+            );
+
+            graph.ShouldNotBeNull();
+
+            logger.FullLog.ShouldNotContain($"EntryPoint: {graph!.GraphRoots.First().ProjectInstance.FullPath}");
+            logger.FullLog.ShouldContain($"EntryPoint: {graph.GraphRoots.First().ProjectReferences.First().ProjectInstance.FullPath}");
+        }
+
+        [Fact]
+        public void ProjectCacheByVsWorkaroundShouldNotSupportSolutionOnlyDependencies()
+        {
+            var testData = new GraphCacheResponse(
+                new Dictionary<int, int[]>
+                {
+                    {1, Array.Empty<int>()}
+                },
+                extraContentPerProjectNumber: new Dictionary<int, string>()
+                {
+                    {1, $"<PropertyGroup> <ProjectDependency>{Guid.NewGuid()}</ProjectDependency> </PropertyGroup>"}
+                });
+
+            var (logger, nodeResults) = BuildGraphByVsWorkaround(
+                graphProducer: () => testData.CreateGraph(_env),
+                assertBuildResults: false);
+
+            nodeResults.ShouldHaveSingleItem();
+
+            var buildResult = nodeResults.First().Value;
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult.Exception.Message.ShouldContain("Project cache service does not support solution only dependencies when running under Visual Studio.");
+        }
+
         private (MockLogger logger, Dictionary<ProjectGraphNode, BuildResult> nodesToBuildResults) BuildGraphByVsWorkaround(
             Func<ProjectGraph> graphProducer,
-            BuildParameters? buildParameters = null
+            BuildParameters? buildParameters = null,
+            bool assertBuildResults = true
         )
         {
             var nodesToBuildResults = new Dictionary<ProjectGraphNode, BuildResult>();
@@ -575,7 +630,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 var projectPaths = graph.ProjectNodes.Select(n => n.ProjectInstance.FullPath).ToArray();
 
                 // VS sets this global property on every project it builds.
-                var solutionConfigurationGlobalProperty = CreateSolutionConfigurationProperty(projectPaths);
+                var solutionConfigurationGlobalProperty = CreateSolutionConfigurationProperty(graph.ProjectNodes);
 
                 using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
 
@@ -592,28 +647,35 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                                 { "TheInnerBuildProperty", "FooBar"},
                             });
 
-                    buildResult.ShouldHaveSucceeded();
+                    if (assertBuildResults)
+                    {
+                        buildResult.ShouldHaveSucceeded();
+                    }
 
                     nodesToBuildResults[node] = buildResult;
                 }
 
                 logger = buildSession.Logger;
 
-                logger.FullLog.ShouldContain("Visual Studio Workaround based");
-                logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
-
-                foreach (var projectPath in projectPaths)
+                if (assertBuildResults)
                 {
-                    var projectName = Path.GetFileNameWithoutExtension(projectPath);
+                    logger.FullLog.ShouldContain("Visual Studio Workaround based");
+                    logger.FullLog.ShouldContain("Running project cache with Visual Studio workaround");
 
-                    // Ensure MSBuild passes config / platform information set by VS.
-                    logger.FullLog.ShouldContain($"EntryPoint: {projectPath}");
-                    logger.FullLog.ShouldContain($"Configuration:{projectName}Debug");
-                    logger.FullLog.ShouldContain($"Platform:{projectName}x64");
+                    foreach (var node in graph.ProjectNodes)
+                    {
+                        var projectPath = node.ProjectInstance.FullPath;
+                        var projectName = Path.GetFileNameWithoutExtension(projectPath);
 
-                    // Ensure MSBuild removes the inner build property if present.
-                    logger.FullLog.ShouldContain($"{PropertyNames.InnerBuildProperty}:TheInnerBuildProperty");
-                    logger.FullLog.ShouldNotContain("TheInnerBuildProperty:FooBar");
+                        // Ensure MSBuild passes config / platform information set by VS.
+                        logger.FullLog.ShouldContain($"EntryPoint: {projectPath}");
+                        logger.FullLog.ShouldContain($"Configuration:{projectName}Debug");
+                        logger.FullLog.ShouldContain($"Platform:{projectName}x64");
+
+                        // Ensure MSBuild removes the inner build property if present.
+                        logger.FullLog.ShouldContain($"{PropertyNames.InnerBuildProperty}:TheInnerBuildProperty");
+                        logger.FullLog.ShouldNotContain("TheInnerBuildProperty:FooBar");
+                    }
                 }
             }
             finally
@@ -625,16 +687,28 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             return (logger, nodesToBuildResults);
         }
 
-        private static string CreateSolutionConfigurationProperty(string[] projectPaths)
+        private static string CreateSolutionConfigurationProperty(IReadOnlyCollection<ProjectGraphNode> projectNodes)
         {
             var sb = new StringBuilder();
 
             sb.AppendLine("<SolutionConfiguration>");
 
-            foreach (var projectPath in projectPaths)
+            foreach (var node in projectNodes)
             {
+                var projectPath = node.ProjectInstance.FullPath;
                 var projectName = Path.GetFileNameWithoutExtension(projectPath);
-                sb.AppendLine($"<ProjectConfiguration Project=\"{Guid.NewGuid()}\" AbsolutePath=\"{projectPath}\">{projectName}Debug|{projectName}x64</ProjectConfiguration>");
+
+                var buildProjectInSolutionValue = node.ProjectInstance.GetPropertyValue("BuildProjectInSolution");
+                var buildProjectInSolutionAttribute = string.IsNullOrWhiteSpace(buildProjectInSolutionValue)
+                    ? string.Empty
+                    : $"BuildProjectInSolution=\"{buildProjectInSolutionValue}\"";
+
+                var projectDependencyValue = node.ProjectInstance.GetPropertyValue("ProjectDependency");
+                var projectDependencyElement = string.IsNullOrWhiteSpace(projectDependencyValue)
+                    ? string.Empty
+                    : $"<ProjectDependency Project=\"{projectDependencyValue}\" />";
+
+                sb.AppendLine($"<ProjectConfiguration Project=\"{Guid.NewGuid()}\" AbsolutePath=\"{projectPath}\" {buildProjectInSolutionAttribute}>{projectName}Debug|{projectName}x64{projectDependencyElement}</ProjectConfiguration>");
             }
 
             sb.AppendLine("</SolutionConfiguration>");
@@ -1456,7 +1530,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 BuildManager.ProjectCacheItems.ShouldHaveSingleItem();
 
                 var solutionConfigurationGlobalProperty =
-                    CreateSolutionConfigurationProperty(graph.ProjectNodes.Select(n => n.ProjectInstance.FullPath).ToArray());
+                    CreateSolutionConfigurationProperty(graph.ProjectNodes);
 
                 using var buildSession = new Helpers.BuildManagerSession(_env, new BuildParameters
                 {

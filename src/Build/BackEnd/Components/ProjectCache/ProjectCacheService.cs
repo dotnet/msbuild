@@ -394,6 +394,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 {
                     ErrorUtilities.VerifyThrowInternalNull(node.Attributes, nameof(node.Attributes));
 
+                    var buildProjectInSolution = node.Attributes!["BuildProjectInSolution"];
+                    if (buildProjectInSolution is not null &&
+                        string.IsNullOrWhiteSpace(buildProjectInSolution.Value) is false &&
+                        bool.TryParse(buildProjectInSolution.Value, out var buildProject) &&
+                        buildProject is false)
+                    {
+                        continue;
+                    }
+
+                    ErrorUtilities.VerifyThrow(
+                        node.ChildNodes.OfType<XmlElement>().FirstOrDefault(e => e.Name == "ProjectDependency") is null,
+                        "Project cache service does not support solution only dependencies when running under Visual Studio.");
+
                     var projectPathAttribute = node.Attributes!["AbsolutePath"];
                     ErrorUtilities.VerifyThrow(projectPathAttribute is not null, "Expected VS to set the project path on each ProjectConfiguration element.");
 
