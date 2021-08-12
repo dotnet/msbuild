@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Shared;
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -33,12 +30,11 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// A dictionary of items keyed by their normalized value.
                 /// </summary>
-                private ImmutableDictionary<string, ItemDataCollectionValue<I>>.Builder _dictionaryBuilder;
+                private Dictionary<string, ItemDataCollectionValue<I>> _dictionaryBuilder;
 
-                internal Builder(ImmutableList<ItemData>.Builder listBuilder, ImmutableDictionary<string, ItemDataCollectionValue<I>>.Builder dictionaryBuilder)
+                internal Builder(ImmutableList<ItemData>.Builder listBuilder)
                 {
                     _listBuilder = listBuilder;
-                    _dictionaryBuilder = dictionaryBuilder;
                 }
 
                 #region IEnumerable implementation
@@ -97,13 +93,13 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Gets or creates a dictionary keyed by normalized values.
                 /// </summary>
-                public ImmutableDictionary<string, ItemDataCollectionValue<I>>.Builder Dictionary
+                public Dictionary<string, ItemDataCollectionValue<I>> Dictionary
                 {
                     get
                     {
                         if (_dictionaryBuilder == null)
                         {
-                            _dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, ItemDataCollectionValue<I>>(StringComparer.OrdinalIgnoreCase);
+                            _dictionaryBuilder = new Dictionary<string, ItemDataCollectionValue<I>>(StringComparer.OrdinalIgnoreCase);
                             for (int i = 0; i < _listBuilder.Count; i++)
                             {
                                 ItemData itemData = _listBuilder[i];
@@ -156,6 +152,7 @@ namespace Microsoft.Build.Evaluation
                                 itemsToRemove ??= new HashSet<I>();
                                 itemsToRemove.Add(item);
                             }
+                            _dictionaryBuilder.Remove(itemValue);
                         }
                     }
 
@@ -163,7 +160,6 @@ namespace Microsoft.Build.Evaluation
                     {
                         _listBuilder.RemoveAll(item => itemsToRemove.Contains(item.Item));
                     }
-                    _dictionaryBuilder.RemoveRange(itemPathsToRemove);
                 }
 
                 /// <summary>
@@ -171,7 +167,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 public OrderedItemDataCollection ToImmutable()
                 {
-                    return new OrderedItemDataCollection(_listBuilder.ToImmutable(), _dictionaryBuilder?.ToImmutable());
+                    return new OrderedItemDataCollection(_listBuilder.ToImmutable());
                 }
 
                 private void AddToDictionary(ref ItemData itemData)
@@ -197,15 +193,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private ImmutableList<ItemData> _list;
 
-            /// <summary>
-            /// A dictionary of items keyed by their normalized value.
-            /// </summary>
-            private ImmutableDictionary<string, ItemDataCollectionValue<I>> _dictionary;
-
-            private OrderedItemDataCollection(ImmutableList<ItemData> list, ImmutableDictionary<string, ItemDataCollectionValue<I>> dictionary)
+            private OrderedItemDataCollection(ImmutableList<ItemData> list)
             {
                 _list = list;
-                _dictionary = dictionary;
             }
 
             /// <summary>
@@ -213,7 +203,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public static Builder CreateBuilder()
             {
-                return new Builder(ImmutableList.CreateBuilder<ItemData>(), null);
+                return new Builder(ImmutableList.CreateBuilder<ItemData>());
             }
 
             /// <summary>
@@ -221,7 +211,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public Builder ToBuilder()
             {
-                return new Builder(_list.ToBuilder(), _dictionary?.ToBuilder());
+                return new Builder(_list.ToBuilder());
             }
         }
     }
