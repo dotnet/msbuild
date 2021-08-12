@@ -376,6 +376,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 ProjectInstance project
             )
             {
+                // TODO: fix code clone for parsing CurrentSolutionConfiguration xml: https://github.com/dotnet/msbuild/issues/6751
                 var doc = new XmlDocument();
                 doc.LoadXml(solutionConfigurationXml);
 
