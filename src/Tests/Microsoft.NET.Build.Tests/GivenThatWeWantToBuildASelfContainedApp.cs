@@ -235,5 +235,116 @@ namespace Microsoft.NET.Build.Tests
                 new DirectoryInfo(path).Should().NotExist("Runtime Pack should have been resolved from packs folder");
             }
         }
+
+        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        public void It_resolves_pack_versions_from_workload_manifest()
+        {
+            string GetVersionBand(string sdkVersion)
+            {
+                if (!Version.TryParse(sdkVersion.Split('-')[0], out var sdkVersionParsed))
+                {
+                    throw new ArgumentException($"'{nameof(sdkVersion)}' should be a version, but get {sdkVersion}");
+                }
+
+                static int Last2DigitsTo0(int versionBuild)
+                {
+                    return (versionBuild / 100) * 100;
+                }
+
+                return $"{sdkVersionParsed.Major}.{sdkVersionParsed.Minor}.{Last2DigitsTo0(sdkVersionParsed.Build)}";
+            }
+
+            var testProject = new TestProject()
+            {
+                IsExe = true,
+                TargetFrameworks = "net6.0",
+                RuntimeIdentifier = EnvironmentInfo.GetCompatibleRid()
+            };
+
+            //  Set up test FrameworkReference that will use workload manifest to resolve versions
+            testProject.ProjectChanges.Add(project =>
+            {
+                var itemGroup = XElement.Parse(@"
+  <ItemGroup>
+    <KnownFrameworkReference Include='Microsoft.NETCore.App.Test'
+                          TargetFramework='net6.0'
+                          RuntimeFrameworkName='Microsoft.NETCore.App.Test'
+                          DefaultRuntimeFrameworkVersion='**FromWorload**'
+                          LatestRuntimeFrameworkVersion='**FromWorload**'
+                          TargetingPackName='Microsoft.NETCore.App.Test.Ref'
+                          TargetingPackVersion='**FromWorload**'
+                          RuntimePackNamePatterns='Microsoft.NETCore.App.Test.RuntimePack'
+                          RuntimePackRuntimeIdentifiers='any'
+                              />
+  
+    <FrameworkReference Include='Microsoft.NETCore.App.Test'/>
+  </ItemGroup>");
+                project.Root.Add(itemGroup);
+            });
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject);
+
+            //  Set up test workload manifest that will suply targeting and runtime pack versions
+            string sdkVersionBand = GetVersionBand(TestContext.Current.ToolsetUnderTest.SdkVersion);
+            string manifestRoot = Path.Combine(testAsset.TestRoot, "manifests");
+            string manifestFolder = Path.Combine(manifestRoot, sdkVersionBand, "RuntimePackVersionTestWorkload");
+            Directory.CreateDirectory(manifestFolder);
+            string manifestPath = Path.Combine(manifestFolder, "WorkloadManifest.json");
+            File.WriteAllText(manifestPath, @"
+{
+    ""version"": ""6.0.0-test"",
+    ""workloads"": {
+        ""testruntimepackworkload"": {
+            ""packs"": [
+                ""Microsoft.NETCore.App.Test.RuntimePack"",
+                ""Microsoft.NETCore.App.Test.Ref""
+            ]
+        }
+    },
+    ""packs"": {
+        ""Microsoft.NETCore.App.Test.RuntimePack"": {
+            ""kind"": ""framework"",
+            ""version"": ""1.0.42-abc""
+        },
+        ""Microsoft.NETCore.App.Test.Ref"": {
+            ""kind"": ""framework"",
+            ""version"": ""1.0.42-xyz""
+        }
+    }
+}
+");
+
+            //  Verify correct targeting pack version is resolved
+            var getValuesCommand = (GetValuesCommand) new GetValuesCommand(testAsset, "TargetingPack", GetValuesCommand.ValueType.Item)
+                .WithEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, manifestRoot);
+            getValuesCommand.MetadataNames = new List<string>() { "NuGetPackageId", "NuGetPackageVersion" };
+            getValuesCommand.DependsOnTargets = "ProcessFrameworkReferences";
+            getValuesCommand.ShouldRestore = false;
+
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+
+            var targetingPacks = getValuesCommand.GetValuesWithMetadata();
+            var testTargetingPack = targetingPacks.Single(p => p.value == "Microsoft.NETCore.App.Test");
+            testTargetingPack.metadata["NuGetPackageId"].Should().Be("Microsoft.NETCore.App.Test.Ref");
+            testTargetingPack.metadata["NuGetPackageVersion"].Should().Be("1.0.42-xyz");
+
+            //  Verify correct runtime pack version is resolved
+            getValuesCommand = (GetValuesCommand)new GetValuesCommand(testAsset, "RuntimePack", GetValuesCommand.ValueType.Item)
+                .WithEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_MANIFEST_ROOTS, manifestRoot);
+            getValuesCommand.MetadataNames = new List<string>() { "NuGetPackageId", "NuGetPackageVersion" };
+            getValuesCommand.DependsOnTargets = "ProcessFrameworkReferences";
+            getValuesCommand.ShouldRestore = false;
+
+            getValuesCommand.Execute()
+                .Should()
+                .Pass();
+
+            var runtimePacks = getValuesCommand.GetValuesWithMetadata();
+            var testRuntimePack = runtimePacks.Single(p => p.value == "Microsoft.NETCore.App.Test.RuntimePack");
+            testRuntimePack.metadata["NuGetPackageId"].Should().Be("Microsoft.NETCore.App.Test.RuntimePack");
+            testRuntimePack.metadata["NuGetPackageVersion"].Should().Be("1.0.42-abc");
+        }
     }
 }
