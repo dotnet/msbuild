@@ -8,6 +8,8 @@
 
     <PropertyGroup Condition="'$(RoslynAssembliesPath)' == ''">
       <RoslynAssembliesPath>$(RoslynTargetsPath)</RoslynAssembliesPath>
+      <RoslynAssembliesPath Condition="'$(MSBuildProjectExtension)' == '.csproj'">$([System.IO.Path]::GetDirectoryName($(CSharpCoreTargetsPath)))</RoslynAssembliesPath>
+      <RoslynAssembliesPath Condition="'$(MSBuildProjectExtension)' == '.vbproj'">$([System.IO.Path]::GetDirectoryName($(VisualBasicCoreTargetsPath)))</RoslynAssembliesPath>
       <RoslynAssembliesPath Condition="'$(MSBuildRuntimeType)' == 'Core'">$([System.IO.Path]::Combine('$(RoslynAssembliesPath)', bincore))</RoslynAssembliesPath>
     </PropertyGroup>
 
