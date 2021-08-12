@@ -49,8 +49,8 @@ namespace Microsoft.NET.Pack.Tests
 
             var expectedFileTargets = new[]
             {
-                @"lib\netcoreapp2.1\HelloWorld.runtimeconfig.json",
-                @"lib\netcoreapp2.1\HelloWorld.dll"
+                @"lib\net6.0\HelloWorld.runtimeconfig.json",
+                @"lib\net6.0\HelloWorld.dll"
             }.Select(p => p.Replace('\\', Path.DirectorySeparatorChar));
 
             fileTargets.Should().BeEquivalentTo(expectedFileTargets);

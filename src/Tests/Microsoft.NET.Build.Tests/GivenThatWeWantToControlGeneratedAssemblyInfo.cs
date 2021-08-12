@@ -83,9 +83,9 @@ namespace Microsoft.NET.Build.Tests
                 expectedInfo.Remove(attributeToOptOut);
             }
 
-            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v2.1");
+            expectedInfo.Add("TargetFrameworkAttribute", ".NETCoreApp,Version=v6.0");
 
-            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("netcoreapp2.1", "Release").FullName, "HelloWorld.dll");
+            var assemblyPath = Path.Combine(buildCommand.GetOutputDirectory("net6.0", "Release").FullName, "HelloWorld.dll");
             var actualInfo = AssemblyInfo.Get(assemblyPath);
 
             actualInfo.Should().Equal(expectedInfo);

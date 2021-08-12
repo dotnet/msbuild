@@ -31,11 +31,12 @@ namespace Microsoft.NET.Pack.Tests
             var outputDirectory = new DirectoryInfo(Path.Combine(testAsset.TestRoot, "bin", "Debug"));
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "HelloWorld.1.0.0.nupkg",
-                "netcoreapp2.1/HelloWorld.dll",
-                "netcoreapp2.1/HelloWorld.pdb",
-                "netcoreapp2.1/HelloWorld.deps.json",
-                "netcoreapp2.1/HelloWorld.runtimeconfig.json",
-                "netcoreapp2.1/HelloWorld.runtimeconfig.dev.json",
+                "net6.0/HelloWorld.dll",
+                "net6.0/HelloWorld.pdb",
+                "net6.0/HelloWorld.deps.json",
+                "net6.0/HelloWorld.runtimeconfig.json",
+                "net6.0/HelloWorld.exe",
+                "net6.0/ref/HelloWorld.dll"
             });
         }
     }
