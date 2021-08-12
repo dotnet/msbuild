@@ -36,8 +36,7 @@ namespace Microsoft.DotNet.Watcher
 
             _filters = new IWatchFilter[]
             {
-                new MSBuildEvaluationFilter(fileSetFactory),
-                new DotNetBuildFilter(_processRunner, _reporter),
+                new DotNetBuildFilter(fileSetFactory, _processRunner, _reporter),
                 new LaunchBrowserFilter(dotNetWatchOptions),
                 new BrowserRefreshFilter(dotNetWatchOptions, _reporter),
             };
@@ -47,11 +46,6 @@ namespace Microsoft.DotNet.Watcher
         public async Task WatchAsync(DotNetWatchContext context, CancellationToken cancellationToken)
         {
             var processSpec = context.ProcessSpec;
-
-            if (context.SuppressMSBuildIncrementalism)
-            {
-                _reporter.Verbose("MSBuild incremental optimizations suppressed.");
-            }
 
             _reporter.Output("Hot reload enabled. For a list of supported edits, see https://aka.ms/dotnet/hot-reload. " +
                 "Press \"Ctrl + Shift + R\" to restart.");
@@ -76,9 +70,6 @@ namespace Microsoft.DotNet.Watcher
                 {
                     await _filters[i].ProcessAsync(context, cancellationToken);
                 }
-
-                // Reset for next run
-                context.RequiresMSBuildRevaluation = false;
 
                 processSpec.EnvironmentVariables["DOTNET_WATCH_ITERATION"] = (context.Iteration + 1).ToString(CultureInfo.InvariantCulture);
 
@@ -141,7 +132,6 @@ namespace Microsoft.DotNet.Watcher
                             if (MayRequireRecompilation(context, fileItems) is { } newFile)
                             {
                                 _reporter.Output($"New file: {newFile.FilePath}. Rebuilding the application.");
-                                context.RequiresMSBuildRevaluation = true;
                                 break;
                             }
                             else if (fileItems.All(f => f.IsNewFile))
@@ -193,18 +183,13 @@ namespace Microsoft.DotNet.Watcher
 
                     if (finishedTask == processTask)
                     {
-                        // Process exited. Redo evaludation
-                        context.RequiresMSBuildRevaluation = true;
                         // Now wait for a file to change before restarting process
                         _reporter.Warn("Waiting for a file to change before restarting dotnet...");
                         await fileSetWatcher.GetChangedFileAsync(cancellationToken);
                     }
                     else
                     {
-
                         Debug.Assert(finishedTask == fileSetTask);
-                        var changedFiles = fileSetTask.Result;
-                        context.RequiresMSBuildRevaluation = MayRequireRecompilation(context, changedFiles) is not null;
                     }
                 }
                 catch (Exception e)
