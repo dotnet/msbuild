@@ -66,7 +66,7 @@ namespace Microsoft.NET.Publish.Tests
                 "ClassLib");
 
             testProject.AdditionalProperties["PublishReadyToRun"] = "True";
-            testProject.AdditionalItems["PublishReadyToRunExclude"] = new Dictionary<string, string> { ["Include"] = "Classlib.dll" };
+            testProject.AddItem("PublishReadyToRunExclude", "Include", "Classlib.dll");
 
             var testProjectInstance = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 

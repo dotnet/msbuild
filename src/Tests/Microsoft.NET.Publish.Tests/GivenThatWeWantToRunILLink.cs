@@ -252,7 +252,7 @@ namespace Microsoft.NET.Publish.Tests
             var rid = EnvironmentInfo.GetCompatibleRid(targetFramework);
 
             var testProject = CreateTestProjectForILLinkTesting(targetFramework, projectName, referenceProjectName);
-            testProject.AdditionalItems["TrimmableAssembly"] = new Dictionary<string, string> { ["Include"] = referenceProjectName };
+            testProject.AddItem("TrimmableAssembly", "Include", referenceProjectName);
             var testAsset = _testAssetsManager.CreateTestProject(testProject, identifier: targetFramework);
 
             var publishCommand = new PublishCommand(testAsset);
@@ -1492,11 +1492,11 @@ namespace Microsoft.NET.Publish.Tests
   </assembly>
 </linker>
 ";
-
-            testProject.AdditionalItems["EmbeddedResource"] = new Dictionary<string, string> {
+            
+            testProject.AddItem("EmbeddedResource", new Dictionary<string, string> {
                 ["Include"] = substitutionsFilename,
                 ["LogicalName"] = substitutionsFilename
-            };
+            });
         }
 
         private void AddRuntimeConfigOption(XDocument project, bool trim)

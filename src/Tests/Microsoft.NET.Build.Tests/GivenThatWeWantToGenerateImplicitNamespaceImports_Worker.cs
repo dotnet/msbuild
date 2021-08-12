@@ -90,10 +90,8 @@ global using global::System.Threading.Tasks;
                 TargetFrameworks = tfm,
                 ProjectSdk = "Microsoft.NET.Sdk.Worker"
             };
-            testProject.AdditionalItems["PackageReference"] = new Dictionary<string, string> { 
-                ["Include"] = "Microsoft.Extensions.Hosting", 
-                ["Version"] = "6.0.0-preview.5.21301.5"
-            };
+            testProject.PackageReferences.Add(new TestPackageReference("Microsoft.Extensions.Hosting", "6.0.0-preview.5.21301.5"));
+
             testProject.SourceFiles["Program.cs"] = @"
 namespace WorkerApp
 {

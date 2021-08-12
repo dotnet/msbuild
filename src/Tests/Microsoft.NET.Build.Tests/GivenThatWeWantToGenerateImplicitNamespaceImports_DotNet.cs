@@ -72,7 +72,7 @@ global using global::System.Threading.Tasks;
         {
             var tfm = "net6.0";
             var testProject = CreateTestProject(tfm);
-            testProject.AdditionalItems["Import"] = new Dictionary<string, string> { ["Remove"] = "System.IO" };
+            testProject.AddItem("Import", "Remove", "System.IO");
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var importFileName = $"{testAsset.TestProject.Name}.ImplicitNamespaceImports.cs";
 
@@ -104,7 +104,7 @@ global using global::System.Threading.Tasks;
             var tfm = "net6.0";
             var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["DisableImplicitNamespaceImports_DotNet"] = "true";
-            testProject.AdditionalItems["Import"] = new Dictionary<string, string> { ["Include"] = "CustomNamespace" };
+            testProject.AddItem("Import", "Include", "CustomNamespace");
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var importFileName = $"{testAsset.TestProject.Name}.ImplicitNamespaceImports.cs";
 
@@ -130,7 +130,7 @@ global using global::CustomNamespace;
             var tfm = "net6.0";
             var testProject = CreateTestProject(tfm);
             testProject.AdditionalProperties["DisableImplicitNamespaceImports_DotNet"] = "true";
-            testProject.AdditionalItems["Import"] = new Dictionary<string, string> { ["Include"] = "CustomNamespace;CustomNamespace" };
+            testProject.AddItem("Import", "Include", "CustomNamespace;CustomNamespace");
             var testAsset = _testAssetsManager.CreateTestProject(testProject);
             var importFileName = $"{testAsset.TestProject.Name}.ImplicitNamespaceImports.cs";
 
