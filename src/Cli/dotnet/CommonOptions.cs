@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli
 
         public static Option<bool> SelfContainedOption() =>
             new ForwardedOption<bool>(
-                "--self-contained",
+                new string[] { "-s", "--self-contained" },
                 CommonLocalizableStrings.SelfContainedOptionDescription)
             .ForwardAsMany(o => new string[] { $"-property:SelfContained={o}", "-property:_CommandLineDefinedSelfContained=true" });
 
