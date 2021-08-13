@@ -242,9 +242,4 @@ Copyright (c) .NET Foundation. All rights reserved.
     <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DisableWinExeOutputInference Condition="'$(DisableWinExeOutputInference)' == '' and ('$(TargetFrameworkIdentifier)' != '.NETCoreApp' or $([MSBuild]::VersionLessThan('$(TargetFrameworkVersion)', '5.0')))">true</DisableWinExeOutputInference>
-    <OutputType Condition="'$(DisableWinExeOutputInference)' != 'true' and '$(OutputType)' == 'Exe' and ('$(UseWindowsForms)' == 'true' or '$(UseWPF)' == 'true')">WinExe</OutputType>
-  </PropertyGroup>
-
 </Project>
