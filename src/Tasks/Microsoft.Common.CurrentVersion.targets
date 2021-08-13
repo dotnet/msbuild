@@ -2415,7 +2415,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
-    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);@(SuggestedBindingRedirectsCache)"
+    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(SuggestedBindingRedirectsCacheFile)"
     Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
     Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'"
     DependsOnTargets="_GenerateSuggestedBindingRedirectsCache">
@@ -3641,7 +3641,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <WriteLinesToFile Lines="$(SuggestedBindingRedirectsHash)" File="$(SuggestedBindingRedirectsCacheFile)" Overwrite="true" WriteOnlyWhenDifferent="true"/>
 
       <ItemGroup>
-        <SuggestedBindingRedirectsCache Include="$(SuggestedBindingRedirectsCacheFile)"/>
         <FileWrites Include="$(SuggestedBindingRedirectsCacheFile)"/>
       </ItemGroup>
   </Target>
