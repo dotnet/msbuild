@@ -18,8 +18,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Automatically set AnalysisLevel if not specified -->
     <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
                               (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
+                               $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '6.0'))) Or
+                               '$(AnalysisMode)' != '')">latest</AnalysisLevel>
+
+        <!-- Automatically set AnalysisLevel to 5 if targeting .net 5 and nothing else specified -->
+    <AnalysisLevel Condition="'$(AnalysisLevel)' == '' And
+                              (('$(TargetFrameworkIdentifier)' == '.NETCoreApp' And
                                $([MSBuild]::VersionGreaterThanOrEquals($(_TargetFrameworkVersionWithoutV), '5.0'))) Or
-							                 '$(AnalysisMode)' != '')">latest</AnalysisLevel>
+                               '$(AnalysisMode)' != '')">5</AnalysisLevel>
 
     <!-- AnalysisLevel can also contain compound values with a prefix and suffix separated by a '-' character.
          The prefix indicates the core AnalysisLevel and the suffix indicates the bucket of
