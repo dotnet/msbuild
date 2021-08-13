@@ -28,15 +28,17 @@ namespace Microsoft.NET.Pack.Tests
                 .Should()
                 .Pass();
 
+            
+
             var outputDirectory = new DirectoryInfo(Path.Combine(testAsset.TestRoot, "bin", "Debug"));
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 "HelloWorld.1.0.0.nupkg",
-                "net6.0/HelloWorld.dll",
-                "net6.0/HelloWorld.pdb",
-                "net6.0/HelloWorld.deps.json",
-                "net6.0/HelloWorld.runtimeconfig.json",
-                "net6.0/HelloWorld.exe",
-                "net6.0/ref/HelloWorld.dll"
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.dll",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.pdb",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.deps.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld.runtimeconfig.json",
+                $"{ToolsetInfo.CurrentTargetFramework}/HelloWorld{EnvironmentInfo.ExecutableExtension}",
+                $"{ToolsetInfo.CurrentTargetFramework}/ref/HelloWorld.dll"
             });
         }
     }

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>ConsoleApp16</RootNamespace>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>$(CurrentTargetFramework)</TargetFramework>
   </PropertyGroup>
 
 </Project>

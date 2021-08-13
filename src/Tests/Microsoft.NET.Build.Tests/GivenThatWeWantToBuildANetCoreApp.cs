@@ -251,7 +251,7 @@ namespace Microsoft.NET.Build.Tests
                 .WithSource();
 
             var getValuesCommand = new GetValuesCommand(Log, testAsset.TestRoot,
-                "net6.0", "TargetDefinitions", GetValuesCommand.ValueType.Item)
+                ToolsetInfo.CurrentTargetFramework, "TargetDefinitions", GetValuesCommand.ValueType.Item)
             {
                 DependsOnTargets = "RunResolvePackageDependencies",
                 Properties = { { "EmitLegacyAssetsFileItems", "true" } }
@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tests
             // should only contain one target with no RIDs
             var targetDefs = getValuesCommand.GetValues();
             targetDefs.Count.Should().Be(1);
-            targetDefs.Should().Contain("net6.0");
+            targetDefs.Should().Contain(ToolsetInfo.CurrentTargetFramework);
         }
 
         [Theory]
