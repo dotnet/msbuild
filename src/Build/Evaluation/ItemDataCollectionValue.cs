@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -54,7 +53,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private object _value;
 
-        public bool IsEmpty => _value == null || (_value is ImmutableList<I> list && list.Count == 0);
+        public bool IsEmpty => _value == null || (_value is List<I> list && list.Count == 0);
 
         public ItemDataCollectionValue(I item)
         {
@@ -63,12 +62,12 @@ namespace Microsoft.Build.Evaluation
 
         public void Add(I item)
         {
-            if (_value is not ImmutableList<I> list)
+            if (_value is not List<I> list)
             {
-                list = ImmutableList<I>.Empty;
-                list = list.Add((I)_value);
+                list = new List<I>();
+                _value = list;
             }
-            _value = list.Add(item);
+            list.Add(item);
         }
 
         public void Delete(I item)
@@ -77,9 +76,9 @@ namespace Microsoft.Build.Evaluation
             {
                 _value = null;
             }
-            else if (_value is ImmutableList<I> list)
+            else if (_value is List<I> list)
             {
-                _value = list.Remove(item);
+                list.Remove(item);
             }
         }
 
@@ -89,9 +88,13 @@ namespace Microsoft.Build.Evaluation
             {
                 _value = newItem;
             }
-            else if (_value is ImmutableList<I> list)
+            else if (_value is List<I> list)
             {
-                _value = list.Replace(oldItem, newItem);
+                int index = list.FindIndex(item => object.ReferenceEquals(item, oldItem));
+                if (index >= 0)
+                {
+                    list[index] = newItem;
+                }
             }
         }
 
