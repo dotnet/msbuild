@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -45,7 +46,8 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
-                if (_matchOnMetadata.IsEmpty)
+                bool matchingOnMetadata = !_matchOnMetadata.IsEmpty;
+                if (!matchingOnMetadata)
                 {
                     if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
                     {
@@ -56,24 +58,30 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
-                    IList<string> matches = _itemSpec.IntersectsWith(listBuilder.Dictionary);
-                    listBuilder.RemoveAll(matches);
+                    if (listBuilder.Count >= Traits.Instance.DictionaryBasedItemRemoveThreshold)
+                    {
+                        // Perf optimization: If the number of items in the running list is large, construct a dictionary,
+                        // enumerate all items referenced by the item spec, and perform dictionary look-ups to find items
+                        // to remove.
+                        IList<string> matches = _itemSpec.IntersectsWith(listBuilder.Dictionary);
+                        listBuilder.RemoveAll(matches);
+                        return;
+                    }
                 }
-                else
+
+                HashSet<I> items = null;
+                foreach (ItemData item in listBuilder)
                 {
-                    HashSet<I> items = null;
-                    foreach (ItemData item in listBuilder)
+                    bool isMatch = matchingOnMetadata ? MatchesItemOnMetadata(item.Item) : _itemSpec.MatchesItem(item.Item);
+                    if (isMatch)
                     {
-                        if (MatchesItemOnMetadata(item.Item))
-                        {
-                            items ??= new HashSet<I>();
-                            items.Add(item.Item);
-                        }
+                        items ??= new HashSet<I>();
+                        items.Add(item.Item);
                     }
-                    if (items != null)
-                    {
-                        listBuilder.RemoveAll(items);
-                    }
+                }
+                if (items != null)
+                {
+                    listBuilder.RemoveAll(items);
                 }
             }
 
