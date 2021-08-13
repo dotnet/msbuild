@@ -7,7 +7,7 @@
   "symbols/Framework/description": "A estrutura de destino para o projeto.",
   "symbols/Framework/choices/netcoreapp1.0/description": "Netcoreapp1.0 de destino",
   "symbols/Framework/choices/netcoreapp1.0/displayName": ".NET Core 1.0",
-  "symbols/Framework/choices/netcoreapp1.1/description": "Netcoreapp 1.1 de destino",
+  "symbols/Framework/choices/netcoreapp1.1/description": "Netcoreapp1.1 de destino",
   "symbols/Framework/choices/netcoreapp1.1/displayName": ".NET Core 1.1",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Definir a langVersion no arquivo do projeto criado",

@@ -268,7 +268,7 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: not enough information specified for search.</source>
-        <target state="needs-review-translation">Hledání selhalo: není zadaný název šablony.</target>
+        <target state="translated">Hledání se nezdařilo: pro vyhledávání není zadáno dostatečné množství informací.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -278,7 +278,7 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
         <source>Search failed: {0}</source>
-        <target state="new">Search failed: {0}</target>
+        <target state="translated">Vyhledávání se nezdařilo: {0}</target>
         <note>0 - localized error message</note>
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
@@ -298,7 +298,7 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
-        <target state="needs-review-translation">Pokud chcete šablonu vyhledat, zadejte název šablony nebo použijte jeden z podporovaných filtrů: {0}.</target>
+        <target state="translated">Pokud chcete šablony vyhledat, zadejte částečný název šablony nebo použijte jeden z podporovaných filtrů: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -557,7 +557,7 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
       </trans-unit>
       <trans-unit id="InvalidSyntax">
         <source>Invalid command syntax: use '{0}' instead.</source>
-        <target state="new">Invalid command syntax: use '{0}' instead.</target>
+        <target state="translated">Neplatná syntaxe příkazu: místo toho použijte {0}.</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="LanguageParameter">

@@ -5,7 +5,7 @@
   "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
   "symbols/TargetFrameworkOverride/displayName": "Remplacement du frame cible",
   "symbols/Framework/description": "Framework cible du projet.",
-  "symbols/Framework/choices/netcoreapp2.2/description": "Netcoreapp2.2 cible",
+  "symbols/Framework/choices/netcoreapp2.2/description": "netcoreapp2.2 cible",
   "symbols/Framework/choices/netcoreapp2.2/displayName": ".NET Core 2.2",
   "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "S’il est spécifié, ignore la restauration automatique du projet lors de la création.",

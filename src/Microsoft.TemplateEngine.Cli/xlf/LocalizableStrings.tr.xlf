@@ -268,7 +268,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: not enough information specified for search.</source>
-        <target state="needs-review-translation">Arama başarısız oldu: şablon adı belirtilmedi.</target>
+        <target state="translated">Arama başarısız: arama için yeterli bilgi belirtilmedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -278,7 +278,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
         <source>Search failed: {0}</source>
-        <target state="new">Search failed: {0}</target>
+        <target state="translated">Arama başarısız: {0}</target>
         <note>0 - localized error message</note>
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
@@ -298,7 +298,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
-        <target state="needs-review-translation">Şablonu aramak için şablon adını belirtin veya desteklenen filtrelerden birini kullanın: {0}.</target>
+        <target state="translated">Şablonları aramak için kısmi şablon adını belirtin veya desteklenen filtrelerden birini kullanın: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -557,7 +557,7 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
       </trans-unit>
       <trans-unit id="InvalidSyntax">
         <source>Invalid command syntax: use '{0}' instead.</source>
-        <target state="new">Invalid command syntax: use '{0}' instead.</target>
+        <target state="translated">Geçersiz komut söz dizimi: bunun yerine '{0}' kullanın.</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="LanguageParameter">

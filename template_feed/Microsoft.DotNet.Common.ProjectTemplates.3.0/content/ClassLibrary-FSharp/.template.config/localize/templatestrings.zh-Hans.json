@@ -5,7 +5,7 @@
   "symbols/TargetFrameworkOverride/description": "替代目标框架",
   "symbols/TargetFrameworkOverride/displayName": "目标框架替代",
   "symbols/Framework/description": "项目的目标框架。",
-  "symbols/Framework/choices/netcoreapp3.0/description": "目标netcoreapp3.0",
+  "symbols/Framework/choices/netcoreapp3.0/description": "目标 netcoreapp3.0",
   "symbols/Framework/choices/netcoreapp3.0/displayName": ".NET Core 3.0",
   "symbols/Framework/choices/netstandard2.1/description": "目标 netstandard2.1",
   "symbols/Framework/choices/netstandard2.1/displayName": ".NET Standard 2.1",

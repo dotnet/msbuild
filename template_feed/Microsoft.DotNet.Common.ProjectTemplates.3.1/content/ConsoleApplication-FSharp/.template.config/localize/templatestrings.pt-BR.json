@@ -5,7 +5,7 @@
   "symbols/TargetFrameworkOverride/description": "Substitui a estrutura de destino",
   "symbols/TargetFrameworkOverride/displayName": "Substituição da estrutura de destino",
   "symbols/Framework/description": "A estrutura de destino do projeto.",
-  "symbols/Framework/choices/netcoreapp3.1/description": "Netstandard3.1 de destino",
+  "symbols/Framework/choices/netcoreapp3.1/description": "Netcoreapp3.1 de destino",
   "symbols/Framework/choices/netcoreapp3.1/displayName": ".NET Core 3.1",
   "symbols/Framework/displayName": "Framework",
   "symbols/skipRestore/description": "Se especificado, ignora a restauração automática do projeto sendo criado.",

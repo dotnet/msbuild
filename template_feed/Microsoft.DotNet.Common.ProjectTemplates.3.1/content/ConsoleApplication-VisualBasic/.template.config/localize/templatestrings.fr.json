@@ -5,7 +5,7 @@
   "symbols/TargetFrameworkOverride/description": "Remplace l’infrastructure cible",
   "symbols/TargetFrameworkOverride/displayName": "Remplacement de l’infrastructure cible",
   "symbols/Framework/description": "Framework cible du projet.",
-  "symbols/Framework/choices/netcoreapp3.1/description": "Netcoreapp3.1 cible",
+  "symbols/Framework/choices/netcoreapp3.1/description": "netcoreapp3.1 cible",
   "symbols/Framework/choices/netcoreapp3.1/displayName": ".NET Core 3.1",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Définit la propriété LangVersion dans le fichier projet créé",

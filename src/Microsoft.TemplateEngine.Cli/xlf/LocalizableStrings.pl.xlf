@@ -268,7 +268,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NoTemplateName">
         <source>Search failed: not enough information specified for search.</source>
-        <target state="needs-review-translation">Wyszukiwanie nie powiodło się: nie określono nazwy szablonu.</target>
+        <target state="translated">Wyszukiwanie nie powiodło się: nie określono wystarczającej ilości informacji do wyszukiwania.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_NotFound">
@@ -278,7 +278,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_SearchFailure">
         <source>Search failed: {0}</source>
-        <target state="new">Search failed: {0}</target>
+        <target state="translated">Wyszukiwanie nie powiodło się: {0}</target>
         <note>0 - localized error message</note>
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Error_TemplateNameIsTooShort">
@@ -298,7 +298,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchHelp">
         <source>To search for templates, specify partial template name or use one of supported filters: {0}.</source>
-        <target state="needs-review-translation">Aby wyszukać szablonu, określ nazwę szablonu lub użyj jednego z obsługiwanych filtrów: {0}.</target>
+        <target state="translated">Aby wyszukać szablony, określ częściową nazwę szablonu lub użyj jednego z obsługiwanych filtrów: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CliTemplateSearchCoordinator_Info_SearchInProgress">
@@ -557,7 +557,7 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
       </trans-unit>
       <trans-unit id="InvalidSyntax">
         <source>Invalid command syntax: use '{0}' instead.</source>
-        <target state="new">Invalid command syntax: use '{0}' instead.</target>
+        <target state="translated">Nieprawidłowa składnia polecenia: zamiast tego użyj "{0}".</target>
         <note>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</note>
       </trans-unit>
       <trans-unit id="LanguageParameter">

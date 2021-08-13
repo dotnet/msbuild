@@ -5,7 +5,7 @@
   "symbols/TargetFrameworkOverride/description": "Invalida la plataforma de destino",
   "symbols/TargetFrameworkOverride/displayName": "Invalidación de la plataforma de destino",
   "symbols/Framework/description": "Marco de destino del proyecto.",
-  "symbols/Framework/choices/netcoreapp2.1/description": "Destino Net Core App 2.1",
+  "symbols/Framework/choices/netcoreapp2.1/description": "Objetivo netcoreapp2.1",
   "symbols/Framework/choices/netcoreapp2.1/displayName": ".NET Core 2.1",
   "symbols/Framework/displayName": "Plataforma",
   "symbols/skipRestore/description": "Si se especifica, se omite la restauración automática del proyecto durante la creación.",

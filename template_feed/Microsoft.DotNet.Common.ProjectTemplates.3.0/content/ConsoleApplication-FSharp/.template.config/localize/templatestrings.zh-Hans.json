@@ -5,7 +5,7 @@
   "symbols/TargetFrameworkOverride/description": "替代目标框架",
   "symbols/TargetFrameworkOverride/displayName": "目标框架替代",
   "symbols/Framework/description": "项目的目标框架。",
-  "symbols/Framework/choices/netcoreapp3.0/description": "目标netcoreapp3.0",
+  "symbols/Framework/choices/netcoreapp3.0/description": "目标 netcoreapp3.0",
   "symbols/Framework/choices/netcoreapp3.0/displayName": ".NET Core 3.0",
   "symbols/Framework/displayName": "框架",
   "symbols/skipRestore/description": "如果指定，则在创建时跳过项目的自动还原。",
