@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -1182,8 +1183,29 @@ namespace Microsoft.Build.BackEnd.Logging
             // shutdown and nulled out the events we were going to wait on.
             if (_logMode == LoggerMode.Asynchronous && _loggingQueue != null)
             {
-                TerminateLoggingEventQueue();
-                CreateLoggingEventQueue();
+                BufferBlock<object> loggingQueue = null;
+                ActionBlock<object> loggingQueueProcessor = null;
+
+                lock (_lockObject)
+                {
+                    loggingQueue = _loggingQueue;
+                    loggingQueueProcessor = _loggingQueueProcessor;
+
+                    // Replaces _loggingQueue and _loggingQueueProcessor with new one, this will assure that
+                    // no further messages could possibly be trying to be added into queue we are about to drain
+                    CreateLoggingEventQueue();
+                }
+
+                // Drain queue.
+                // This shall not be locked to avoid possible deadlock caused by
+                // event handlers to reenter 'this' instance while trying to log something.
+                if (loggingQueue != null)
+                {
+                    Debug.Assert(!Monitor.IsEntered(_lockObject));
+
+                    loggingQueue.Complete();
+                    loggingQueueProcessor.Completion.Wait();
+                }
             }
         }
 
@@ -1244,21 +1266,27 @@ namespace Microsoft.Build.BackEnd.Logging
                 BoundedCapacity = Convert.ToInt32(_queueCapacity)
             };
 
-            _loggingQueue = new BufferBlock<object>(dataBlockOptions);
+            var loggingQueue = new BufferBlock<object>(dataBlockOptions);
 
             var executionDataBlockOptions = new ExecutionDataflowBlockOptions
             {
                 BoundedCapacity = 1
             };
 
-            _loggingQueueProcessor = new ActionBlock<object>(loggingEvent => LoggingEventProcessor(loggingEvent), executionDataBlockOptions);
+            var loggingQueueProcessor = new ActionBlock<object>(loggingEvent => LoggingEventProcessor(loggingEvent), executionDataBlockOptions);
 
             var dataLinkOptions = new DataflowLinkOptions
             {
                 PropagateCompletion = true
             };
 
-            _loggingQueue.LinkTo(_loggingQueueProcessor, dataLinkOptions);
+            loggingQueue.LinkTo(loggingQueueProcessor, dataLinkOptions);
+
+            lock (_lockObject)
+            {
+                _loggingQueue = loggingQueue;
+                _loggingQueueProcessor = loggingQueueProcessor;
+            }
         }
 
         /// <summary>

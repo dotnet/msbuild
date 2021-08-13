@@ -441,6 +441,19 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(59, path, wasUpToDate);
         }
+
+        [Event(60, Keywords = Keywords.All)]
+        public void WriteLinesToFileUpToDateStart()
+        {
+            WriteEvent(60);
+        }
+
+        [Event(61, Keywords = Keywords.All)]
+        public void WriteLinesToFileUpToDateStop(string fileItemSpec, bool wasUpToDate)
+        {
+            WriteEvent(61, fileItemSpec, wasUpToDate);
+        }
+
         #endregion
     }
 }

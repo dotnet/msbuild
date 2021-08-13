@@ -1745,7 +1745,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    -->
    <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SkipGetTargetFrameworkProperties)' == '' and ('%(Extension)' == '.vcxproj' or '%(Extension)' == '.nativeproj')">
-        <!-- When we're dynamically figuring out platform, we need the MSBuild call that retrieves TF data. -->
+        <!-- 
+          Platform negotiation requires the MSBuild task call to GetTargetFrameworks.
+          Don't skip when opted into the feature.
+        -->
         <SkipGetTargetFrameworkProperties Condition="'$(EnableDynamicPlatformResolution)' != 'true'">true</SkipGetTargetFrameworkProperties>
         <UndefineProperties>%(_MSBuildProjectReferenceExistent.UndefineProperties);TargetFramework</UndefineProperties>
       </_MSBuildProjectReferenceExistent>
@@ -1764,7 +1767,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
     <ItemGroup>
       <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.SetTargetFramework)' != ''">
-        <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+        <!-- 
+          Platform negotiation requires the MSBuild task call to GetTargetFrameworks.
+          Don't skip when opted into the feature.
+        -->
+        <SkipGetTargetFrameworkProperties Condition="'$(EnableDynamicPlatformResolution)' != 'true'">true</SkipGetTargetFrameworkProperties>
       </_MSBuildProjectReferenceExistent>
     </ItemGroup>
 

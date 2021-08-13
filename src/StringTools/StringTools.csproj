@@ -15,6 +15,7 @@
     <SemanticVersioningV1>true</SemanticVersioningV1>
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
+    <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
