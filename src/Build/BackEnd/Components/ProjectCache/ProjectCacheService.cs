@@ -431,13 +431,19 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 void RemoveProjectSpecificGlobalProperties(Dictionary<string, string> globalProperties, ProjectInstance project)
                 {
-                    // Remove the inner build property from the graph entry point global properties.
-                    // If the inner build property is set (TargetFramework), it will propagate down the project graph and force all nodes to that innerbuild value, which is incorrect.
+                    // If any project specific property is set, it will propagate down the project graph and force all nodes to that property's specific side effects, which is incorrect.
+
+                    // TargetFramework for the managed sdk.
                     var innerBuildPropertyName = ProjectInterpretation.GetInnerBuildPropertyName(project);
 
-                    if (!string.IsNullOrWhiteSpace(innerBuildPropertyName) && globalProperties.ContainsKey(innerBuildPropertyName))
+                    IEnumerable<string> projectSpecificPropertyNames = new []{innerBuildPropertyName, "Configuration", "Platform", "TargetPlatform", "OutputType"};
+
+                    foreach (var propertyName in projectSpecificPropertyNames)
                     {
-                        globalProperties.Remove(innerBuildPropertyName);
+                        if (!string.IsNullOrWhiteSpace(propertyName) && globalProperties.ContainsKey(propertyName))
+                        {
+                            globalProperties.Remove(propertyName);
+                        }
                     }
                 }
             }
