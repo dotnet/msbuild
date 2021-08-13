@@ -13,7 +13,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <_BlazorWebAssemblyTargetsFile Condition="'$(_BlazorWebAssemblyTargetsFile)' == ''">$(MSBuildThisFileDirectory)..\targets\Microsoft.NET.Sdk.BlazorWebAssembly.Current.targets</_BlazorWebAssemblyTargetsFile>
-    <DisableImplicitNamespaceImports_BlazorWasm Condition="'$(DisableImplicitNamespaceImports_BlazorWasm)' == '' and '$(DisableImplicitNamespaceImports)' != 'true'">false</DisableImplicitNamespaceImports_BlazorWasm>
   </PropertyGroup>
 
   <ItemGroup>

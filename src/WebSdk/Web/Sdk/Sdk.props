@@ -58,18 +58,16 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsImplicitlyDefined="true" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports_Web)' != 'true'
-      And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-      And $([MSBuild]::VersionGreaterThanOrEquals('$(_TargetFrameworkVersionWithoutV)', '6.0'))">
-    <Import Include="System.Net.Http.Json" />
-    <Import Include="Microsoft.AspNetCore.Builder" />
-    <Import Include="Microsoft.AspNetCore.Hosting" />
-    <Import Include="Microsoft.AspNetCore.Http" />
-    <Import Include="Microsoft.AspNetCore.Routing" />
-    <Import Include="Microsoft.Extensions.Configuration" />
-    <Import Include="Microsoft.Extensions.DependencyInjection" />
-    <Import Include="Microsoft.Extensions.Hosting" />
-    <Import Include="Microsoft.Extensions.Logging" />
+  <ItemGroup Condition="'$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable'">
+    <Using Include="System.Net.Http.Json" />
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Hosting" />
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Microsoft.AspNetCore.Routing" />
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Hosting" />
+    <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 
 </Project>

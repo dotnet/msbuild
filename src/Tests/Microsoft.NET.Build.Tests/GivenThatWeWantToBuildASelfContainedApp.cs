@@ -9,6 +9,8 @@ using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -276,7 +278,7 @@ namespace Microsoft.NET.Build.Tests
                           RuntimePackNamePatterns='Microsoft.NETCore.App.Test.RuntimePack'
                           RuntimePackRuntimeIdentifiers='any'
                               />
-  
+
     <FrameworkReference Include='Microsoft.NETCore.App.Test'/>
   </ItemGroup>");
                 project.Root.Add(itemGroup);

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using ManifestReaderTests;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.DotNet.Cli.Workload.List.Tests
 {

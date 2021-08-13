@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         {
         }
 
-        [RequiresMSBuildVersionFact("17.0.0.32901")]
+        [RequiresMSBuildVersionFact("17.0.0.32901", Skip = "Unskipping tracked by https://github.com/dotnet/sdk/issues/19696")]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
             string projectDirectory = _testAssetsManager.CreateTestDirectory().Path;

@@ -39,7 +39,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ComputeNETCoreBuildOutputFiles Condition=" '$(ComputeNETCoreBuildOutputFiles)' == '' and '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">true</ComputeNETCoreBuildOutputFiles>
     <_GenerateRuntimeConfigurationPropertyInputsCache Condition="'$(_GenerateRuntimeConfigurationPropertyInputsCache)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).genruntimeconfig.cache</_GenerateRuntimeConfigurationPropertyInputsCache>
     <_GenerateRuntimeConfigurationPropertyInputsCache>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_GenerateRuntimeConfigurationPropertyInputsCache)))</_GenerateRuntimeConfigurationPropertyInputsCache>
-    <DisableImplicitNamespaceImports Condition="'$(DisableImplicitNamespaceImports)'==''">$(DisableImplicitFrameworkReferences)</DisableImplicitNamespaceImports>
   </PropertyGroup>
 
   <ItemGroup>
@@ -1129,7 +1128,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DisableStandardFrameworkResolution.targets" Condition="'$(DisableStandardFrameworkResolution)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.DesignerSupport.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateAssemblyInfo.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'"/>
-  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateImplicitNamespaceImports.targets" Condition="'$(DisableImplicitNamespaceImports)' != 'true' and '$(Language)' == 'C#'"/>
+  <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateGlobalUsings.targets" Condition="'$(Language)' == 'C#'"/>
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.GenerateSupportedRuntime.targets" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.ComposeStore.targets" Condition="'$(UsingNETSdkDefaults)' == 'true'" />
   <Import Project="$(MSBuildThisFileDirectory)Microsoft.NET.CrossGen.targets" />

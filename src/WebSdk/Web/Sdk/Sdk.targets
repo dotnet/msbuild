@@ -22,7 +22,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       Microsoft.AspNetCore.App. This needs to happen after the .NET SDK has evaluated TFMs.
      -->
     <AddRazorSupportForMvc Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(AddRazorSupportForMvc)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">true</AddRazorSupportForMvc>
-    <DisableImplicitNamespaceImports_Web Condition="'$(DisableImplicitNamespaceImports_Web)' == '' and '$(DisableImplicitNamespaceImports)' != 'true'">false</DisableImplicitNamespaceImports_Web>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />
