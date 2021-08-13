@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -92,7 +93,7 @@ namespace Microsoft.DotNet.PackageValidation
                     }
                 }
  
-                foreach (string rid in package.Rids)
+                foreach (string rid in package.Rids.Where(t => IsSupportedRidTargetFrameworkPair(framework, t)))
                 {
                     runtimeAsset = package.FindBestRuntimeAssetForFrameworkAndRuntime(framework, rid);
                     if (runtimeAsset == null)
@@ -139,6 +140,12 @@ namespace Microsoft.DotNet.PackageValidation
                 }
             }
             return packageTfmMapping;
+        }
+
+        // https://github.com/NuGet/Home/issues/11146
+        private static bool IsSupportedRidTargetFrameworkPair(NuGetFramework tfm, string rid)
+        {
+            return tfm.Framework == ".NETFramework" ? rid.StartsWith("win", StringComparison.OrdinalIgnoreCase) : true;
         }
     }
 }
