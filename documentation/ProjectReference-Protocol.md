@@ -106,7 +106,7 @@ As of MSBuild 16.10, it is possible to gather additional properties from referen
 
 These properties will then be gathered via the `GetTargetFrameworks` call.  They will be available to the referencing project via the `AdditionalPropertiesFromProject` metadata on the `_MSBuildProjectReferenceExistent` item.  The `AdditionalPropertiesFromProject` value will be an XML string which contains the values of the properties for each `TargetFramework` in the referenced project.  For example:
 
-> :warning: This format is being changed. Soon, the schema will replace <net5.0> with <Property Name="net5.0">. You can opt into that behavior early by setting the _UseAttributeForTargetFrameworkInfoPropertyNames property to true. This property will have no effect after the transition is complete.
+> :warning: This format is being changed. Soon, the schema will replace <net5.0> with <TargetFramework Name="net5.0">. You can opt into that behavior early by setting the _UseAttributeForTargetFrameworkInfoPropertyNames property to true. This property will have no effect after the transition is complete.
 
 ```xml
 <AdditionalProjectProperties>
