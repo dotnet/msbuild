@@ -1,8 +1,3 @@
-- [Single project isolated builds: implementation details](#single-project-isolated-builds-implementation-details)
-  - [Input / Output cache implementation](#input--output-cache-implementation)
-  - [Isolation implementation](#isolation-implementation)
-    - [How isolation exemption complicates everything](#how-isolation-exemption-complicates-everything)
-
 # Single project isolated builds: implementation details
 
 <!-- workflow -->
@@ -17,7 +12,7 @@ The presence of either input or output caches turns on [isolated build constrain
 
 ## Input / Output cache implementation
 <!-- cache structure -->
-The cache files contain the serialized state of MSBuild's [ConfigCache](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/Components/Caching/ConfigCache.cs) and [ResultsCache](https://github.com/dotnet/msbuild/blob/master/src/Build/BackEnd/Components/Caching/ResultsCache.cs). These two caches have been traditionally used by the engine to cache build results. For example, it is these caches which ensure that a target is only built once per build submission. The `ConfigCache` entries are instances of [BuildRequestConfiguration](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Shared/BuildRequestConfiguration.cs#L25). The `ResultsCache` entries are instances of [BuildResult](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Shared/BuildResult.cs#L34), which contain or more instances of [TargetResult](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Shared/TargetResult.cs#L22). 
+The cache files contain the serialized state of MSBuild's [ConfigCache](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/Components/Caching/ConfigCache.cs) and [ResultsCache](https://github.com/dotnet/msbuild/blob/master/src/Build/BackEnd/Components/Caching/ResultsCache.cs). These two caches have been traditionally used by the engine to cache build results. For example, it is these caches which ensure that a target is only built once per build submission. The `ConfigCache` entries are instances of [BuildRequestConfiguration](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Shared/BuildRequestConfiguration.cs#L25). The `ResultsCache` entries are instances of [BuildResult](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Shared/BuildResult.cs#L34), which contain or more instances of [TargetResult](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/Shared/TargetResult.cs#L22).
 
 One can view the two caches as the following mapping: `(project path, global properties) -> results`. `(project path, global properties)` is represented by a `BuildRequestConfiguration`, and the results are represented by `BuildResult` and `TargetResult`.
 
