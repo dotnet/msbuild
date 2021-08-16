@@ -181,14 +181,28 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             InstallWorkloadsWithInstallRecord(workloadIds, _sdkFeatureBand, manifestsToUpdate, offlineCache);
 
-            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-            {
-                _workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
-            }
+            TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity);
 
             _reporter.WriteLine();
             _reporter.WriteLine(string.Format(LocalizableStrings.InstallationSucceeded, string.Join(" ", workloadIds)));
             _reporter.WriteLine();
+        }
+
+        internal static void TryRunGarbageCollection(IInstaller workloadInstaller, IReporter reporter, VerbosityOptions verbosity)
+        {
+            try
+            {
+                if (workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+                {
+                    workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
+                }
+            }
+            catch (Exception e)
+            {
+                // Garbage collection failed, warn user
+                reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectionFailed,
+                    verbosity.VerbosityIsDetailedOrDiagnostic() ? e.StackTrace.ToString() : e.Message).Yellow());
+            }
         }
 
         private void InstallWorkloadsWithInstallRecord(

@@ -297,4 +297,7 @@
   <data name="WorkloadUpdatesAvailable" xml:space="preserve">
     <value>Workload updates are available. Run `dotnet workload list` for more information.</value>
   </data>
+  <data name="GarbageCollectionFailed" xml:space="preserve">
+    <value>Warning: Workload garbage collection failed with error: {0}.</value>
+  </data>
 </root>
