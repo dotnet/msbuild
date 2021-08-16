@@ -429,10 +429,9 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 return graphEntryPoints;
 
+                // If any project specific property is set, it will propagate down the project graph and force all nodes to that property's specific side effects, which is incorrect.
                 void RemoveProjectSpecificGlobalProperties(Dictionary<string, string> globalProperties, ProjectInstance project)
                 {
-                    // If any project specific property is set, it will propagate down the project graph and force all nodes to that property's specific side effects, which is incorrect.
-
                     // InnerBuildPropertyName is TargetFramework for the managed sdk.
                     var innerBuildPropertyName = ProjectInterpretation.GetInnerBuildPropertyName(project);
 
