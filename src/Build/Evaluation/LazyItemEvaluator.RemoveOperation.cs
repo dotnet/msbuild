@@ -57,7 +57,6 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
                     if (listBuilder.Count >= Traits.Instance.DictionaryBasedItemRemoveThreshold)
                     {
                         // Perf optimization: If the number of items in the running list is large, construct a dictionary,
@@ -69,6 +68,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
+                // todo Perf: do not match against the globs: https://github.com/Microsoft/msbuild/issues/2329
                 HashSet<I> items = null;
                 foreach (ItemData item in listBuilder)
                 {
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
                         items.Add(item.Item);
                     }
                 }
-                if (items != null)
+                if (items is not null)
                 {
                     listBuilder.RemoveAll(items);
                 }
