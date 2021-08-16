@@ -181,22 +181,28 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             InstallWorkloadsWithInstallRecord(workloadIds, _sdkFeatureBand, manifestsToUpdate, offlineCache);
 
+            TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity);
+
+            _reporter.WriteLine();
+            _reporter.WriteLine(string.Format(LocalizableStrings.InstallationSucceeded, string.Join(" ", workloadIds)));
+            _reporter.WriteLine();
+        }
+
+        internal static void TryRunGarbageCollection(IInstaller workloadInstaller, IReporter reporter, VerbosityOptions verbosity)
+        {
             try
             {
-                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
+                if (workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
                 {
-                    _workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
+                    workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
                 }
             }
             catch (Exception e)
             {
                 // Garbage collection failed, warn user
-                _reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectionFailed, e.Message).Yellow());
+                reporter.WriteLine(string.Format(LocalizableStrings.GarbageCollectionFailed,
+                    verbosity.VerbosityIsDetailedOrDiagnostic() ? e.StackTrace.ToString() : e.Message).Yellow());
             }
-
-            _reporter.WriteLine();
-            _reporter.WriteLine(string.Format(LocalizableStrings.InstallationSucceeded, string.Join(" ", workloadIds)));
-            _reporter.WriteLine();
         }
 
         private void InstallWorkloadsWithInstallRecord(

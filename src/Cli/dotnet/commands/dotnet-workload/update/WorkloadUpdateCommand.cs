@@ -164,10 +164,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Update
 
             UpdateWorkloadsWithInstallRecord(workloadIds, featureBand, manifestsToUpdate, offlineCache);
 
-            if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-            {
-                _workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
-            }
+            WorkloadInstallCommand.TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity);
 
             _workloadManifestUpdater.DeleteUpdatableWorkloadsFile();
 

@@ -79,10 +79,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Repair
 
                 ReinstallWorkloadsBasedOnCurrentManifests(workloadIds, new SdkFeatureBand(_sdkVersion));
 
-                if (_workloadInstaller.GetInstallationUnit().Equals(InstallationUnit.Packs))
-                {
-                    _workloadInstaller.GetPackInstaller().GarbageCollectInstalledWorkloadPacks();
-                }
+                WorkloadInstallCommand.TryRunGarbageCollection(_workloadInstaller, _reporter, _verbosity);
 
                 _reporter.WriteLine();
                 _reporter.WriteLine(string.Format(LocalizableStrings.RepairSucceeded, string.Join(" ", workloadIds)));
