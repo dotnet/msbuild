@@ -124,7 +124,7 @@
     <value>Workload repair failed: {0}</value>
   </data>
   <data name="RepairSucceeded" xml:space="preserve">
-    <value>Successfully repaired worklods: {0}</value>
+    <value>Successfully repaired workloads: {0}</value>
   </data>
   <data name="RepairingWorkloads" xml:space="preserve">
     <value>Repairing workload installation for workloads: {0}</value>

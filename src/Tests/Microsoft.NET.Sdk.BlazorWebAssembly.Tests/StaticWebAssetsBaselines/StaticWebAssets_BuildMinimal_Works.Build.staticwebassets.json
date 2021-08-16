@@ -1,14 +1,15 @@
 {
   "Version": 1,
-  "Hash": "8ePzgrWdnZu73jCuaEqP67mDDFH\u002BE/OUt66KL9CQSCU=",
+  "Hash": "__hash__",
   "Source": "blazorwasm-minimal",
   "BasePath": "/",
   "Mode": "Root",
   "ManifestType": "Build",
-  "RelatedManifests": [],
+  "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [
     {
       "Name": "blazorwasm-minimal\\wwwroot",
+      "Source": "blazorwasm-minimal",
       "ContentRoot": "${ProjectRoot}\\wwwroot\\",
       "BasePath": "/",
       "Pattern": "**"
@@ -30,7 +31,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.authorization\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Authorization.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.authorization\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Authorization.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Forms.dll",
@@ -47,7 +48,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.forms\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.Forms.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.forms\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.Forms.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Web.dll",
@@ -64,7 +65,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.web\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.Web.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.web\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.Web.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll",
@@ -81,7 +82,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.WebAssembly.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.WebAssembly.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.dll",
@@ -98,7 +99,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Components.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Components.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Metadata.dll",
@@ -115,7 +116,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.metadata\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.AspNetCore.Metadata.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.metadata\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.AspNetCore.Metadata.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.CSharp.dll",
@@ -149,7 +150,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Binder.dll",
@@ -166,7 +167,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.binder\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Binder.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.binder\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.Binder.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll",
@@ -183,7 +184,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.fileextensions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.FileExtensions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.fileextensions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.FileExtensions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Json.dll",
@@ -200,7 +201,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.json\\${PackageVersion}.0\\lib\\netstandard2.1\\Microsoft.Extensions.Configuration.Json.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration.json\\[[CustomPackageVersion]]\\lib\\netstandard2.1\\Microsoft.Extensions.Configuration.Json.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.dll",
@@ -217,7 +218,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.configuration\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Configuration.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll",
@@ -234,7 +235,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.dll",
@@ -251,7 +252,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.Extensions.DependencyInjection.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.dependencyinjection\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.Extensions.DependencyInjection.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll",
@@ -268,7 +269,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll",
@@ -285,7 +286,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.physical\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Physical.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.fileproviders.physical\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.FileProviders.Physical.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll",
@@ -302,7 +303,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.filesystemglobbing\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.FileSystemGlobbing.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.filesystemglobbing\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.FileSystemGlobbing.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll",
@@ -319,7 +320,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging.abstractions\\${PackageVersion}.0\\lib\\netstandard2.0\\Microsoft.Extensions.Logging.Abstractions.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging.abstractions\\[[CustomPackageVersion]]\\lib\\netstandard2.0\\Microsoft.Extensions.Logging.Abstractions.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Logging.dll",
@@ -336,7 +337,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging\\${PackageVersion}.0\\lib\\netstandard2.1\\Microsoft.Extensions.Logging.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.logging\\[[CustomPackageVersion]]\\lib\\netstandard2.1\\Microsoft.Extensions.Logging.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Options.dll",
@@ -353,7 +354,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.options\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.Extensions.Options.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.options\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.Extensions.Options.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Primitives.dll",
@@ -370,7 +371,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.primitives\\${PackageVersion}.0\\lib\\netcoreapp3.0\\Microsoft.Extensions.Primitives.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.extensions.primitives\\[[CustomPackageVersion]]\\lib\\netcoreapp3.0\\Microsoft.Extensions.Primitives.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.JSInterop.WebAssembly.dll",
@@ -387,7 +388,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop.webassembly\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.JSInterop.WebAssembly.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop.webassembly\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.JSInterop.WebAssembly.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.JSInterop.dll",
@@ -404,7 +405,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop\\${PackageVersion}.0\\lib\\net${PackageVersion}\\Microsoft.JSInterop.dll"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.jsinterop\\[[CustomPackageVersion]]\\lib\\net5.0\\Microsoft.JSInterop.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.VisualBasic.Core.dll",
@@ -1288,7 +1289,7 @@
       "AssetTraitValue": "runtime",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
-      "OriginalItemSpec": "${RestorePath}\\system.io.pipelines\\${PackageVersion}.0\\lib\\netcoreapp3.0\\System.IO.Pipelines.dll"
+      "OriginalItemSpec": "${RestorePath}\\system.io.pipelines\\[[CustomPackageVersion]]\\lib\\netcoreapp3.0\\System.IO.Pipelines.dll"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Pipes.AccessControl.dll",
@@ -3226,7 +3227,7 @@
       "AssetTraitValue": "boot",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\${PackageVersion}.0\\build\\net${PackageVersion}\\blazor.webassembly.js"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\[[CustomPackageVersion]]\\build\\net5.0\\blazor.webassembly.js"
     },
     {
       "Identity": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazorwasm-minimal.dll",
@@ -3416,7 +3417,7 @@
       "OriginalItemSpec": "${RestorePath}\\microsoft.netcore.app.runtime.mono.browser-wasm\\${RuntimeVersion}\\runtimes\\browser-wasm\\native\\dotnet.js"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.AspNetCore.Authorization.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.AspNetCore.Authorization.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3433,7 +3434,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Authorization.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.AspNetCore.Components.Forms.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.AspNetCore.Components.Forms.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3450,7 +3451,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Forms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.AspNetCore.Components.Web.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.AspNetCore.Components.Web.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3467,7 +3468,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.AspNetCore.Components.WebAssembly.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.AspNetCore.Components.WebAssembly.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3484,7 +3485,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.WebAssembly.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.AspNetCore.Components.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.AspNetCore.Components.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3501,7 +3502,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Components.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.AspNetCore.Metadata.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.AspNetCore.Metadata.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3518,7 +3519,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.AspNetCore.Metadata.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.CSharp.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.CSharp.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3535,7 +3536,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.CSharp.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Configuration.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Configuration.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3552,7 +3553,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Configuration.Binder.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Configuration.Binder.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3569,7 +3570,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Binder.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Configuration.FileExtensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Configuration.FileExtensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3586,7 +3587,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.FileExtensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Configuration.Json.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Configuration.Json.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3603,7 +3604,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Configuration.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Configuration.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3620,7 +3621,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Configuration.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.DependencyInjection.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3637,7 +3638,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.DependencyInjection.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.DependencyInjection.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3654,7 +3655,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.DependencyInjection.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.FileProviders.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.FileProviders.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3671,7 +3672,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.FileProviders.Physical.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.FileProviders.Physical.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3688,7 +3689,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileProviders.Physical.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.FileSystemGlobbing.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.FileSystemGlobbing.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3705,7 +3706,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.FileSystemGlobbing.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Logging.Abstractions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Logging.Abstractions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3722,7 +3723,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Logging.Abstractions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Logging.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Logging.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3739,7 +3740,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Logging.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Options.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Options.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3756,7 +3757,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Options.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Extensions.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Extensions.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3773,7 +3774,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Extensions.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.JSInterop.WebAssembly.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.JSInterop.WebAssembly.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3790,7 +3791,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.JSInterop.WebAssembly.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.JSInterop.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.JSInterop.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3807,7 +3808,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.JSInterop.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.VisualBasic.Core.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.VisualBasic.Core.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3824,7 +3825,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.VisualBasic.Core.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.VisualBasic.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.VisualBasic.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3841,7 +3842,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.VisualBasic.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Win32.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Win32.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3858,7 +3859,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Win32.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/Microsoft.Win32.Registry.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/Microsoft.Win32.Registry.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3875,7 +3876,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\Microsoft.Win32.Registry.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.AppContext.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.AppContext.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3892,7 +3893,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.AppContext.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Buffers.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Buffers.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3909,7 +3910,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Buffers.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Collections.Concurrent.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Collections.Concurrent.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3926,7 +3927,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Collections.Concurrent.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Collections.Immutable.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Collections.Immutable.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3943,7 +3944,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Collections.Immutable.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Collections.NonGeneric.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Collections.NonGeneric.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3960,7 +3961,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Collections.NonGeneric.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Collections.Specialized.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Collections.Specialized.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3977,7 +3978,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Collections.Specialized.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Collections.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Collections.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -3994,7 +3995,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Collections.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ComponentModel.Annotations.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ComponentModel.Annotations.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4011,7 +4012,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ComponentModel.Annotations.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ComponentModel.DataAnnotations.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ComponentModel.DataAnnotations.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4028,7 +4029,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ComponentModel.DataAnnotations.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ComponentModel.EventBasedAsync.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ComponentModel.EventBasedAsync.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4045,7 +4046,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ComponentModel.EventBasedAsync.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ComponentModel.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ComponentModel.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4062,7 +4063,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ComponentModel.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ComponentModel.TypeConverter.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ComponentModel.TypeConverter.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4079,7 +4080,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ComponentModel.TypeConverter.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ComponentModel.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ComponentModel.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4096,7 +4097,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ComponentModel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Configuration.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Configuration.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4113,7 +4114,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Configuration.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Console.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Console.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4130,7 +4131,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Console.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Core.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Core.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4147,7 +4148,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Core.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Data.Common.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Data.Common.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4164,7 +4165,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Data.Common.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Data.DataSetExtensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Data.DataSetExtensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4181,7 +4182,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Data.DataSetExtensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Data.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Data.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4198,7 +4199,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Data.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.Contracts.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.Contracts.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4215,7 +4216,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.Contracts.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.Debug.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.Debug.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4232,7 +4233,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.Debug.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.DiagnosticSource.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.DiagnosticSource.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4249,7 +4250,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.DiagnosticSource.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.FileVersionInfo.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.FileVersionInfo.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4266,7 +4267,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.FileVersionInfo.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.Process.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.Process.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4283,7 +4284,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.Process.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.StackTrace.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.StackTrace.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4300,7 +4301,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.StackTrace.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.TextWriterTraceListener.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.TextWriterTraceListener.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4317,7 +4318,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.TextWriterTraceListener.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.Tools.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.Tools.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4334,7 +4335,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.Tools.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.TraceSource.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.TraceSource.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4351,7 +4352,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.TraceSource.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Diagnostics.Tracing.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Diagnostics.Tracing.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4368,7 +4369,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Diagnostics.Tracing.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Drawing.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Drawing.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4385,7 +4386,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Drawing.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Drawing.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Drawing.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4402,7 +4403,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Drawing.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Dynamic.Runtime.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Dynamic.Runtime.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4419,7 +4420,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Dynamic.Runtime.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Formats.Asn1.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Formats.Asn1.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4436,7 +4437,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Formats.Asn1.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Globalization.Calendars.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Globalization.Calendars.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4453,7 +4454,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Globalization.Calendars.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Globalization.Extensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Globalization.Extensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4470,7 +4471,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Globalization.Extensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Globalization.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Globalization.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4487,7 +4488,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Globalization.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.Compression.Brotli.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.Compression.Brotli.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4504,7 +4505,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Compression.Brotli.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.Compression.FileSystem.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.Compression.FileSystem.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4521,7 +4522,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Compression.FileSystem.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.Compression.ZipFile.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.Compression.ZipFile.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4538,7 +4539,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Compression.ZipFile.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.Compression.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.Compression.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4555,7 +4556,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Compression.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.FileSystem.AccessControl.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.FileSystem.AccessControl.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4572,7 +4573,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.FileSystem.AccessControl.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.FileSystem.DriveInfo.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.FileSystem.DriveInfo.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4589,7 +4590,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.FileSystem.DriveInfo.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.FileSystem.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.FileSystem.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4606,7 +4607,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.FileSystem.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.FileSystem.Watcher.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.FileSystem.Watcher.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4623,7 +4624,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.FileSystem.Watcher.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.FileSystem.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.FileSystem.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4640,7 +4641,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.FileSystem.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.IsolatedStorage.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.IsolatedStorage.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4657,7 +4658,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.IsolatedStorage.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.MemoryMappedFiles.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.MemoryMappedFiles.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4674,7 +4675,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.MemoryMappedFiles.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.Pipelines.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.Pipelines.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4691,7 +4692,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Pipelines.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.Pipes.AccessControl.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.Pipes.AccessControl.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4708,7 +4709,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Pipes.AccessControl.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.Pipes.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.Pipes.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4725,7 +4726,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.Pipes.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.UnmanagedMemoryStream.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.UnmanagedMemoryStream.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4742,7 +4743,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.UnmanagedMemoryStream.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.IO.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.IO.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4759,7 +4760,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.IO.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Linq.Expressions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Linq.Expressions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4776,7 +4777,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Linq.Expressions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Linq.Parallel.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Linq.Parallel.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4793,7 +4794,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Linq.Parallel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Linq.Queryable.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Linq.Queryable.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4810,7 +4811,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Linq.Queryable.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Linq.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Linq.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4827,7 +4828,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Linq.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Memory.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Memory.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4844,7 +4845,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Memory.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Http.Json.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Http.Json.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4861,7 +4862,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Http.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Http.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Http.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4878,7 +4879,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Http.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.HttpListener.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.HttpListener.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4895,7 +4896,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.HttpListener.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Mail.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Mail.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4912,7 +4913,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Mail.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.NameResolution.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.NameResolution.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4929,7 +4930,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.NameResolution.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.NetworkInformation.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.NetworkInformation.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4946,7 +4947,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.NetworkInformation.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Ping.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Ping.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4963,7 +4964,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Ping.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4980,7 +4981,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Quic.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Quic.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -4997,7 +4998,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Quic.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Requests.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Requests.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5014,7 +5015,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Requests.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Security.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Security.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5031,7 +5032,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Security.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.ServicePoint.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.ServicePoint.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5048,7 +5049,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.ServicePoint.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.Sockets.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.Sockets.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5065,7 +5066,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.Sockets.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.WebClient.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.WebClient.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5082,7 +5083,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.WebClient.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.WebHeaderCollection.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.WebHeaderCollection.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5099,7 +5100,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.WebHeaderCollection.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.WebProxy.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.WebProxy.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5116,7 +5117,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.WebProxy.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.WebSockets.Client.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.WebSockets.Client.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5133,7 +5134,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.WebSockets.Client.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.WebSockets.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.WebSockets.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5150,7 +5151,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.WebSockets.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Net.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Net.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5167,7 +5168,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Net.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Numerics.Vectors.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Numerics.Vectors.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5184,7 +5185,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Numerics.Vectors.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Numerics.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Numerics.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5201,7 +5202,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Numerics.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ObjectModel.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ObjectModel.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5218,7 +5219,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ObjectModel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Private.CoreLib.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Private.CoreLib.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5235,7 +5236,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Private.CoreLib.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Private.DataContractSerialization.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Private.DataContractSerialization.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5252,7 +5253,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Private.DataContractSerialization.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Private.Runtime.InteropServices.JavaScript.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Private.Runtime.InteropServices.JavaScript.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5269,7 +5270,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Private.Runtime.InteropServices.JavaScript.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Private.Uri.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Private.Uri.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5286,7 +5287,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Private.Uri.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Private.Xml.Linq.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Private.Xml.Linq.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5303,7 +5304,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Private.Xml.Linq.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Private.Xml.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Private.Xml.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5320,7 +5321,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Private.Xml.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.DispatchProxy.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.DispatchProxy.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5337,7 +5338,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.DispatchProxy.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.Emit.ILGeneration.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.Emit.ILGeneration.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5354,7 +5355,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.Emit.ILGeneration.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.Emit.Lightweight.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.Emit.Lightweight.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5371,7 +5372,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.Emit.Lightweight.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.Emit.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.Emit.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5388,7 +5389,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.Emit.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.Extensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.Extensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5405,7 +5406,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.Extensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.Metadata.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.Metadata.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5422,7 +5423,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.Metadata.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5439,7 +5440,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.TypeExtensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.TypeExtensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5456,7 +5457,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.TypeExtensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Reflection.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Reflection.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5473,7 +5474,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Reflection.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Resources.Reader.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Resources.Reader.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5490,7 +5491,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Resources.Reader.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Resources.ResourceManager.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Resources.ResourceManager.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5507,7 +5508,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Resources.ResourceManager.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Resources.Writer.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Resources.Writer.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5524,7 +5525,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Resources.Writer.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.CompilerServices.Unsafe.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.CompilerServices.Unsafe.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5541,7 +5542,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.CompilerServices.Unsafe.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.CompilerServices.VisualC.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.CompilerServices.VisualC.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5558,7 +5559,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.CompilerServices.VisualC.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Extensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Extensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5575,7 +5576,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Extensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Handles.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Handles.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5592,7 +5593,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Handles.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.InteropServices.RuntimeInformation.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.InteropServices.RuntimeInformation.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5609,7 +5610,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.InteropServices.RuntimeInformation.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.InteropServices.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.InteropServices.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5626,7 +5627,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.InteropServices.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Intrinsics.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Intrinsics.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5643,7 +5644,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Intrinsics.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Loader.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Loader.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5660,7 +5661,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Loader.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Numerics.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Numerics.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5677,7 +5678,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Numerics.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Serialization.Formatters.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Serialization.Formatters.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5694,7 +5695,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Serialization.Formatters.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Serialization.Json.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Serialization.Json.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5711,7 +5712,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Serialization.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Serialization.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Serialization.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5728,7 +5729,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Serialization.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Serialization.Xml.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Serialization.Xml.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5745,7 +5746,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Serialization.Xml.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.Serialization.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.Serialization.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5762,7 +5763,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.Serialization.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Runtime.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Runtime.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5779,7 +5780,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Runtime.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.AccessControl.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.AccessControl.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5796,7 +5797,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.AccessControl.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Claims.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Claims.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5813,7 +5814,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Claims.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Cryptography.Algorithms.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Cryptography.Algorithms.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5830,7 +5831,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Cryptography.Algorithms.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Cryptography.Cng.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Cryptography.Cng.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5847,7 +5848,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Cryptography.Cng.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Cryptography.Csp.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Cryptography.Csp.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5864,7 +5865,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Cryptography.Csp.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Cryptography.Encoding.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Cryptography.Encoding.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5881,7 +5882,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Cryptography.Encoding.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Cryptography.OpenSsl.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Cryptography.OpenSsl.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5898,7 +5899,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Cryptography.OpenSsl.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Cryptography.Primitives.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Cryptography.Primitives.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5915,7 +5916,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Cryptography.Primitives.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Cryptography.X509Certificates.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Cryptography.X509Certificates.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5932,7 +5933,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Cryptography.X509Certificates.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Principal.Windows.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Principal.Windows.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5949,7 +5950,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Principal.Windows.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.Principal.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.Principal.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5966,7 +5967,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.Principal.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.SecureString.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.SecureString.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -5983,7 +5984,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.SecureString.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Security.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Security.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6000,7 +6001,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Security.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ServiceModel.Web.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ServiceModel.Web.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6017,7 +6018,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ServiceModel.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ServiceProcess.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ServiceProcess.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6034,7 +6035,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ServiceProcess.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Text.Encoding.CodePages.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Text.Encoding.CodePages.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6051,7 +6052,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Text.Encoding.CodePages.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Text.Encoding.Extensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Text.Encoding.Extensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6068,7 +6069,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Text.Encoding.Extensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Text.Encoding.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Text.Encoding.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6085,7 +6086,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Text.Encoding.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Text.Encodings.Web.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Text.Encodings.Web.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6102,7 +6103,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Text.Encodings.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Text.Json.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Text.Json.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6119,7 +6120,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Text.Json.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Text.RegularExpressions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Text.RegularExpressions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6136,7 +6137,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Text.RegularExpressions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Channels.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Channels.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6153,7 +6154,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Channels.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Overlapped.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Overlapped.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6170,7 +6171,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Overlapped.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Tasks.Dataflow.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Tasks.Dataflow.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6187,7 +6188,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Tasks.Dataflow.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Tasks.Extensions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Tasks.Extensions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6204,7 +6205,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Tasks.Extensions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Tasks.Parallel.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Tasks.Parallel.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6221,7 +6222,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Tasks.Parallel.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Tasks.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Tasks.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6238,7 +6239,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Tasks.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Thread.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Thread.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6255,7 +6256,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Thread.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.ThreadPool.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.ThreadPool.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6272,7 +6273,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.ThreadPool.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.Timer.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.Timer.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6289,7 +6290,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.Timer.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Threading.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Threading.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6306,7 +6307,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Threading.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Transactions.Local.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Transactions.Local.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6323,7 +6324,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Transactions.Local.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Transactions.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Transactions.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6340,7 +6341,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Transactions.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.ValueTuple.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.ValueTuple.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6357,7 +6358,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.ValueTuple.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Web.HttpUtility.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Web.HttpUtility.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6374,7 +6375,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Web.HttpUtility.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Web.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Web.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6391,7 +6392,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Web.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Windows.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Windows.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6408,7 +6409,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Windows.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.Linq.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.Linq.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6425,7 +6426,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.Linq.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.ReaderWriter.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.ReaderWriter.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6442,7 +6443,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.ReaderWriter.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.Serialization.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.Serialization.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6459,7 +6460,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.Serialization.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.XDocument.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.XDocument.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6476,7 +6477,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.XDocument.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.XPath.XDocument.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.XPath.XDocument.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6493,7 +6494,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.XPath.XDocument.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.XPath.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.XPath.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6510,7 +6511,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.XPath.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.XmlDocument.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.XmlDocument.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6527,7 +6528,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.XmlDocument.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.XmlSerializer.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.XmlSerializer.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6544,7 +6545,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.XmlSerializer.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.Xml.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.Xml.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6561,7 +6562,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.Xml.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/System.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/System.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6578,7 +6579,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\System.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/WindowsBase.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/WindowsBase.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6595,7 +6596,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\WindowsBase.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/blazor.webassembly.js.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/blazor.webassembly.js.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6612,7 +6613,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazor.webassembly.js"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/blazorwasm-minimal.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/blazorwasm-minimal.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6629,7 +6630,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazorwasm-minimal.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/blazorwasm-minimal.pdb.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/blazorwasm-minimal.pdb.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6646,7 +6647,24 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\blazorwasm-minimal.pdb"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/dotnet.timezones.blat.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.${RuntimeVersion}.js.gz]]",
+      "SourceId": "blazorwasm-minimal",
+      "SourceType": "Computed",
+      "ContentRoot": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\",
+      "BasePath": "/",
+      "RelativePath": "_framework/dotnet.${RuntimeVersion}.js.gz",
+      "AssetKind": "Build",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "RelatedAsset": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "CopyToOutputDirectory": "PreserveNewest",
+      "CopyToPublishDirectory": "Never",
+      "OriginalItemSpec": "${ProjectRoot}\\obj\\Debug\\net6.0\\blazor\\_framework\\dotnet.js"
+    },
+    {
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.timezones.blat.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6663,7 +6681,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.timezones.blat"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/dotnet.wasm.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/dotnet.wasm.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6680,7 +6698,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.wasm"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/icudt.dat.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/icudt.dat.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6697,7 +6715,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/icudt_CJK.dat.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/icudt_CJK.dat.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6714,7 +6732,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_CJK.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/icudt_EFIGS.dat.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/icudt_EFIGS.dat.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6731,7 +6749,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_EFIGS.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/icudt_no_CJK.dat.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/icudt_no_CJK.dat.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6748,7 +6766,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\icudt_no_CJK.dat"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/mscorlib.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/mscorlib.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",
@@ -6765,7 +6783,7 @@
       "OriginalItemSpec": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\_framework\\mscorlib.dll"
     },
     {
-      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\{_framework/netstandard.dll.gz}",
+      "Identity": "${ProjectRoot}\\obj\\Debug\\net6.0\\build-gz\\[[_framework/netstandard.dll.gz]]",
       "SourceId": "blazorwasm-minimal",
       "SourceType": "Computed",
       "ContentRoot": "${ProjectRoot}\\bin\\Debug\\net6.0\\wwwroot\\",

@@ -3,18 +3,18 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to uninstall.</source>
-        <target state="translated">アンインストールするツールの NuGet パッケージ ID。</target>
+        <source>The workload ID(s) to uninstall.</source>
+        <target state="needs-review-translation">アンインストールするツールの NuGet パッケージ ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a workload.</source>
+        <source>Uninstall one or more workloads.</source>
         <target state="needs-review-translation">グローバル ツールまたはローカル ツールをアンインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
+        <source>WORKLOAD_ID</source>
+        <target state="needs-review-translation">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Specify one workload Package Id to uninstall.</source>
-        <target state="translated">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
+        <source>Specify one workload ID to uninstall.</source>
+        <target state="needs-review-translation">アンインストールするツール パッケージの ID を 1 つ指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -33,7 +33,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>Could not find workloads with id(s): {0}</source>
+        <source>Couldn't find workload ID(s): {0}</source>
         <target state="needs-review-translation">パッケージ Id が ' {0} ' のツールが見つかりませんでした。
 
 ツールは、異なるパッケージ Id を使用してアンインストールされます

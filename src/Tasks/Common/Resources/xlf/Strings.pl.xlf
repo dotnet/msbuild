@@ -264,6 +264,11 @@
         <target state="translated">Nie można określić wyniku, ponieważ element „{0}” nie jest zestawem.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotGetPackVersionFromWorkloadManifests">
+        <source>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</source>
+        <target state="new">NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</target>
+        <note>{StrBegin="NETSDK1181: "}</note>
+      </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
         <target state="translated">NETSDK1042: Nie można załadować elementu PlatformManifest z lokalizacji „{0}”, ponieważ ta lokalizacja nie istnieje.</target>
@@ -611,8 +616,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1121: "}</note>
       </trans-unit>
       <trans-unit id="NonSelfContainedExeCannotReferenceSelfContained">
-        <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.</source>
-        <target state="translated">NETSDK1151: projekt „{0}”, do którego istnieje odwołanie, jest samodzielnym plikiem wykonywalnym.  Samodzielny plik wykonywalny nie może odwoływać się do niesamodzielnego pliku wykonywalnego.</target>
+        <source>NETSDK1151: The referenced project '{0}' is a self-contained executable.  A self-contained executable cannot be referenced by a non self-contained executable.  For more information, see https://aka.ms/netsdk1151</source>
+        <target state="needs-review-translation">NETSDK1151: projekt „{0}”, do którego istnieje odwołanie, jest samodzielnym plikiem wykonywalnym.  Samodzielny plik wykonywalny nie może odwoływać się do niesamodzielnego pliku wykonywalnego.</target>
         <note>{StrBegin="NETSDK1151: "}</note>
       </trans-unit>
       <trans-unit id="PDBGeneratorInputExecutableNotFound">
@@ -731,9 +736,19 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1112: "}</note>
       </trans-unit>
       <trans-unit id="SelfContainedExeCannotReferenceNonSelfContained">
-        <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.</source>
-        <target state="translated">NETSDK1150: projekt „{0}”, do którego istnieje odwołanie, nie jest samodzielnym plikiem wykonywalnym.  Niesamodzielny plik wykonywalny nie może odwoływać się do samodzielnego pliku wykonywalnego.</target>
+        <source>NETSDK1150: The referenced project '{0}' is a non self-contained executable.  A non self-contained executable cannot be referenced by a self-contained executable.  For more information, see https://aka.ms/netsdk1150</source>
+        <target state="needs-review-translation">NETSDK1150: projekt „{0}”, do którego istnieje odwołanie, nie jest samodzielnym plikiem wykonywalnym.  Niesamodzielny plik wykonywalny nie może odwoływać się do samodzielnego pliku wykonywalnego.</target>
         <note>{StrBegin="NETSDK1150: "}</note>
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionShouldBeUsedWithRuntime">
+        <source>NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</source>
+        <target state="new">NETSDK1179: One of '--self-contained' or '--no-self-contained' options are required when '--runtime' is used.</target>
+        <note>{StrBegin="NETSDK1179: "}</note>
+      </trans-unit>
+      <trans-unit id="SingleFileWin7Incompatible">
+        <source>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</source>
+        <target state="new">NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</target>
+        <note>{StrBegin="NETSDK1180: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
         <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>

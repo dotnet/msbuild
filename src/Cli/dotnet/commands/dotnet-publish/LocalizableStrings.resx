@@ -135,10 +135,6 @@
   <data name="ManifestOptionDescription" xml:space="preserve">
     <value>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</value>
   </data>
-  <data name="SelfContainedOptionDescription" xml:space="preserve">
-    <value>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</value>
-  </data>
   <data name="NoBuildOptionDescription" xml:space="preserve">
     <value>Do not build the project before publishing. Implies --no-restore.</value>
   </data>
@@ -154,11 +150,5 @@ The default is to publish a framework-dependent application.</value>
   </data>
   <data name="CmdNoLogo" xml:space="preserve">
     <value>Do not display the startup banner or the copyright message.</value>
-  </data>
-  <data name="NoSelfContainedOptionDescription" xml:space="preserve">
-    <value>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</value>
-  </data>
-  <data name="SelfContainAndNoSelfContainedConflict" xml:space="preserve">
-    <value>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</value>
   </data>
 </root>

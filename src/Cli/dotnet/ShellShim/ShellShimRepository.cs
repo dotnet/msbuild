@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
@@ -15,8 +14,6 @@ namespace Microsoft.DotNet.ShellShim
 {
     internal class ShellShimRepository : IShellShimRepository
     {
-        private const string ApphostNameWithoutExtension = "apphost";
-
         private readonly DirectoryPath _shimsDirectory;
         private readonly IFileSystem _fileSystem;
         private readonly IAppHostShellShimMaker _appHostShellShimMaker;
@@ -24,7 +21,7 @@ namespace Microsoft.DotNet.ShellShim
 
         public ShellShimRepository(
             DirectoryPath shimsDirectory,
-            string appHostSourceDirectory = null,
+            string appHostSourceDirectory,
             IFileSystem fileSystem = null,
             IAppHostShellShimMaker appHostShellShimMaker = null,
             IFilePermissionSetter filePermissionSetter = null)

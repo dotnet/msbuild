@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine.Parsing;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using static Microsoft.DotNet.Cli.Parser;
 
 namespace Microsoft.DotNet.Cli
@@ -90,6 +91,50 @@ namespace Microsoft.DotNet.Cli
             {
                 return string.Empty;
             }
+        }
+
+        public static bool BothArchAndOsOptionsSpecified(this ParseResult parseResult) =>
+            parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) && 
+            parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First());
+
+        internal static string GetCommandLineRuntimeIdentifier(this ParseResult parseResult)
+        {
+            return parseResult.HasOption(RunCommandParser.RuntimeOption) ?
+                parseResult.ValueForOption<string>(RunCommandParser.RuntimeOption) :
+                parseResult.HasOption(CommonOptions.OperatingSystemOption().Aliases.First()) || parseResult.HasOption(CommonOptions.ArchitectureOption().Aliases.First()) ?
+                CommonOptions.ResolveRidShorthandOptionsToRuntimeIdentifier(
+                    parseResult.ValueForOption<string>(CommonOptions.OperatingSystemOption().Aliases.First()),
+                    parseResult.ValueForOption<string>(CommonOptions.ArchitectureOption().Aliases.First())) :
+                null;
+        }
+
+        public static bool UsingRunCommandShorthandProjectOption(this ParseResult parseResult)
+        {
+            if (parseResult.HasOption(RunCommandParser.PropertyOption) && parseResult.ValueForOption(RunCommandParser.PropertyOption).Any())
+            {
+                var projVals = parseResult.GetRunCommandShorthandProjectValues();
+                if (projVals.Any())
+                {
+                    if (projVals.Count() != 1 || parseResult.HasOption(RunCommandParser.ProjectOption))
+                    {
+                        throw new GracefulException(Tools.Run.LocalizableStrings.OnlyOneProjectAllowed);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandProjectValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => !property.Contains("="));
+        }
+
+        public static IEnumerable<string> GetRunCommandShorthandPropertyValues(this ParseResult parseResult)
+        {
+            var properties = parseResult.ValueForOption(RunCommandParser.PropertyOption);
+            return properties.Where(property => property.Contains("="));
         }
     }
 }

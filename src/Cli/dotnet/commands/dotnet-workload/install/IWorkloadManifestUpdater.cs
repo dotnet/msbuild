@@ -28,5 +28,9 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         Task ExtractManifestPackagesToTempDirAsync(IEnumerable<string> manifestPackages, DirectoryPath tempDir);
 
         IEnumerable<string> GetManifestPackageUrls(bool includePreviews);
+
+        IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads);
+
+        void DeleteUpdatableWorkloadsFile();
     }
 }

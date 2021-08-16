@@ -10,6 +10,30 @@ Copyright (c) .NET Foundation. All rights reserved.
 ***********************************************************************************************
 -->
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <!-- These namespaces are present in 2.0 Framework assemblies -->
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <!-- These namespaces are introduced in 3.5 Framework assemblies -->
+    <Import Include="System.Linq" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <Import Include="System.Xml.Linq" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '3.5' "/>
+    <!-- This namespace is introduced in 4.0 Framework assemblies -->
+    <Import Include="System.Threading.Tasks" Condition=" '$(_TargetFrameworkVersionWithoutV)' >= '4.0' "/>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports)' != 'true' and '$(_IsNETCoreOrNETStandard)' == 'true'">
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+    <Import Include="System.Threading.Tasks" />
+  </ItemGroup>
   <PropertyGroup Condition="'$(DisableImplicitConfigurationDefines)' != 'true' and '$(Configuration)' != ''">
     <ImplicitConfigurationDefine>$(Configuration.ToUpperInvariant())</ImplicitConfigurationDefine>
 
@@ -92,6 +116,11 @@ Copyright (c) .NET Foundation. All rights reserved.
      -->
     <FinalDefineConstants Condition="'$(MyType)' == ''">$(FinalDefineConstants),_MyType=&quot;Empty&quot;</FinalDefineConstants>
   </PropertyGroup>
+
+  <!-- Enable hot reload in 6.0 and newer VB projects -->
+  <ItemGroup Condition="'$(SupportsHotReload)' != 'false' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
+    <ProjectCapability Include="SupportsHotReload" />
+  </ItemGroup>
 
   <!--
     NOTE: We must hook directly to CoreCompile for compatibility with two phase XAML

@@ -22,11 +22,6 @@
         <target state="translated">A estrutura de destino da publicação. A estrutura de destino precisa ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="translated">Publique o seu aplicativo como um aplicativo dependente de estrutura sem o runtime do .NET. Um runtime do .NET com suporte precisa ser instalado para executar o aplicativo.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -62,18 +57,6 @@ O padrão é publicar uma aplicação dependente de framework.</target>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">A configuração para a qual a publicação ocorrerá. O padrão para a maioria dos projetos é 'Debug'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">As opções '--self-contained' e '--no-self-contained' são conflitantes entre si. Especifique apenas uma das opções.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publique o runtime do .NET com seu aplicativo para que ele não precise estar instalado no computador de destino.
-O padrão é 'true' se um identificador de runtime for especificado.</target>
         <note />
       </trans-unit>
     </body>

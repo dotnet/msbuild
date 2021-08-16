@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
     public class GivenDotnetSlnList : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"list:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   List all projects in a solution file.
 
 Usage:

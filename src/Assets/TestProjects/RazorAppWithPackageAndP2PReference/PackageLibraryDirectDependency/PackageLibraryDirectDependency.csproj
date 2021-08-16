@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(AspNetTestTfm)</TargetFramework>
     <Copyright>© Microsoft</Copyright>
     <Product>Razor Test</Product>
     <Company>Microsoft</Company>
@@ -16,7 +16,6 @@
 
   <PropertyGroup>
     <!-- We don't want to run build server when not running as tests. -->
-    <UseStaticWebAssetsV1>false</UseStaticWebAssetsV1>
     <UseRazorBuildServer>false</UseRazorBuildServer>
   </PropertyGroup>
 

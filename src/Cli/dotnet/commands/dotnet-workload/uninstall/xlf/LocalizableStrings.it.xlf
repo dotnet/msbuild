@@ -3,18 +3,18 @@
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>The NuGet Package Id of the workload to uninstall.</source>
-        <target state="translated">ID pacchetto NuGet dello strumento da disinstallare.</target>
+        <source>The workload ID(s) to uninstall.</source>
+        <target state="needs-review-translation">ID pacchetto NuGet dello strumento da disinstallare.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a workload.</source>
+        <source>Uninstall one or more workloads.</source>
         <target state="needs-review-translation">Disinstalla uno strumento globale o locale.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
-        <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
+        <source>WORKLOAD_ID</source>
+        <target state="needs-review-translation">PACKAGE_ID</target>
         <note />
       </trans-unit>
       <trans-unit id="RemovingWorkloadInstallationRecord">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
-        <source>Specify one workload Package Id to uninstall.</source>
-        <target state="translated">Specificare un ID pacchetto dello strumento da disinstallare.</target>
+        <source>Specify one workload ID to uninstall.</source>
+        <target state="needs-review-translation">Specificare un ID pacchetto dello strumento da disinstallare.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -33,7 +33,7 @@
         <note />
       </trans-unit>
       <trans-unit id="WorkloadNotInstalled">
-        <source>Could not find workloads with id(s): {0}</source>
+        <source>Couldn't find workload ID(s): {0}</source>
         <target state="needs-review-translation">Non è stato possibile trovare uno strumento con l'ID pacchetto '{0}'. 
 
 Per disinstallare gli strumenti, si usa il relativo ID pacchetto che potrebbe 

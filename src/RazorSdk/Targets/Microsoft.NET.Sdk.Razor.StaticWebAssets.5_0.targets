@@ -350,6 +350,70 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <!--
+    Forward compatibility with new version of static web assets. This target is invoked by later versions of static web assets to determine
+    what targets to invoke, what properties to set, and what properties to remove when doing so, for retrieving the referenced project static
+    web assets. For earlier versions of static web assets we will collect the assets and "upgrade" them newer versions by providing default
+    values for the additional metadata.
+  -->
+  <Target Name="GetStaticWebAssetsProjectConfiguration" Returns="@(_StaticWebAssetThisProjectConfiguration)">
+    <ItemGroup>
+      <_StaticWebAssetThisProjectConfiguration Include="$(MSBuildProjectFullPath)">
+        <Version>1</Version>
+        <Source>$(PackageId)</Source>
+        <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+        <GetBuildAssetsTargets>GetCurrentProjectStaticWebAssetsV2</GetBuildAssetsTargets>
+        <AdditionalBuildProperties>$(StaticWebAssetsAdditionalBuildProperties)</AdditionalBuildProperties>
+        <AdditionalBuildPropertiesToRemove>$(StaticWebAssetsAdditionalBuildPropertiesToRemove)</AdditionalBuildPropertiesToRemove>
+        <GetPublishAssetsTargets></GetPublishAssetsTargets>
+      </_StaticWebAssetThisProjectConfiguration>
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <GetCurrentProjectStaticWebAssetsV2DependsOn>GetCurrentProjectStaticWebAssets;$(GetCurrentProjectStaticWebAssetsV2DependsOn);</GetCurrentProjectStaticWebAssetsV2DependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetCurrentProjectStaticWebAssetsV2" DependsOnTargets="$(GetCurrentProjectStaticWebAssetsV2DependsOn)" Returns="@(_ThisProjectStaticWebAssetItems)">
+    <ItemGroup>
+      <_StaticWebAssetUpgradeMetadataToKeep Include="SourceType" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="SourceId" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="BasePath" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="RelativePath" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="ContentRoot" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="AssetKind" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="AssetMode" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="AssetRole" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="RelatedAsset" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="AssetTraitName" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="AssetTraitValue" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="CopyToOutputDirectory" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="CopyToPublishDirectory" />
+      <_StaticWebAssetUpgradeMetadataToKeep Include="OriginalItemSpec" />
+
+      <_ThisProjectStaticWebAssetItems KeepMetadata="@(_StaticWebAssetUpgradeMetadataToKeep)" Include="@(_ThisProjectStaticWebAssets->'%(FullPath)')">
+        <ResultType>StaticWebAsset</ResultType>
+        <SourceType>Project</SourceType>
+        <AssetKind Condition="'%(_ThisProjectStaticWebAssets.AssetKind)' == ''">All</AssetKind>
+        <AssetMode Condition="'%(_ThisProjectStaticWebAssets.AssetMode)' == ''">All</AssetMode>
+        <AssetRole Condition="'%(_ThisProjectStaticWebAssets.AssetRole)' == ''">Primary</AssetRole>
+        <RelatedAsset Condition="'%(_ThisProjectStaticWebAssets.RelatedAsset)' == ''"></RelatedAsset>
+        <AssetTraitName Condition="'%(_ThisProjectStaticWebAssets.AssetTraitName)' == ''"></AssetTraitName>
+        <AssetTraitValue Condition="'%(_ThisProjectStaticWebAssets.AssetTraitValue)' == ''"></AssetTraitValue>
+        <CopyToOutputDirectory Condition="'%(_ThisProjectStaticWebAssets.CopyToOutputDirectory)' == ''">Never</CopyToOutputDirectory>
+        <CopyToPublishDirectory  Condition="'%(_ThisProjectStaticWebAssets.CopyToPublishDirectory)' == ''">PreserveNewest</CopyToPublishDirectory>
+        <OriginalItemSpec Condition="'%(_ThisProjectStaticWebAssets.OriginalItemSpec)' == ''">%(_ThisProjectStaticWebAssets.Identity)</OriginalItemSpec>
+      </_ThisProjectStaticWebAssetItems>
+      <_ThisProjectStaticWebAssetItems Include="$(PackageId)\wwwroot" Condition="Exists('$(MSBuildProjectDirectory)\wwwroot')">
+        <ResultType>StaticWebAssetDiscoveryPattern</ResultType>
+        <ContentRoot>$(MSBuildProjectDirectory)\wwwroot\</ContentRoot>
+        <BasePath>$(StaticWebAssetBasePath)</BasePath>
+        <Source>$(PackageId)</Source>
+        <Pattern>**</Pattern>
+      </_ThisProjectStaticWebAssetItems>
+    </ItemGroup>
+  </Target>
+
+  <!--
     ============================================================
                                         Static web assets packing related targets
 

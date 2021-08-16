@@ -22,11 +22,6 @@
         <target state="translated">公開する対象のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルで指定する必要があります。</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoSelfContainedOptionDescription">
-        <source>Publish your application as a framework dependent application without the .NET runtime. A supported .NET runtime must be installed to run your application.</source>
-        <target state="translated">.NET ランタイムを使用せずに、アプリケーションをフレームワーク依存アプリケーションとして公開します。アプリケーションを実行するには、サポートされている .NET ランタイムをインストールする必要があります。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputOption">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
@@ -62,18 +57,6 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">公開する対象の構成。大部分のプロジェクトで、既定値は 'Debug' です。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainAndNoSelfContainedConflict">
-        <source>The '--self-contained' and '--no-self-contained' options conflict with each other. Specify only one of the options.</source>
-        <target state="translated">'--self-contained' と '--no-self-contained' オプションは競合しています。いずれかのオプションのみを指定してください。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">ランタイムをターゲット マシンにインストールする必要がないように、アプリケーションと一緒に .NET ランタイムを発行します。
-ランタイム識別子が指定されている場合、既定値は 'true' です。</target>
         <note />
       </trans-unit>
     </body>

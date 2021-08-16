@@ -132,17 +132,21 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
         }
 
         /// <summary>
-        /// Writes all suppressions in collection down to a file.
+        /// Writes all suppressions in collection down to a file, if empty it doesn't write anything.
         /// </summary>
         /// <param name="supressionFile">The path to the file to be written.</param>
-        public void WriteSuppressionsToFile(string supressionFile)
+        /// <returns>Whether it wrote the file.</returns>
+        public bool WriteSuppressionsToFile(string supressionFile)
         {
+            if (_validationSuppressions.Count <= 0)
+                return false;
+
             using (Stream writer = GetWritableStream(supressionFile))
             {
                 _readerWriterLock.EnterReadLock();
                 try
                 {
-                    XmlTextWriter xmlWriter = new XmlTextWriter(writer, Encoding.UTF8);
+                    XmlTextWriter xmlWriter = new(writer, Encoding.UTF8);
                     xmlWriter.Formatting = Formatting.Indented;
                     xmlWriter.Indentation = 2;
                     _serializer.Serialize(xmlWriter, _validationSuppressions.ToArray());
@@ -153,6 +157,8 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
                     _readerWriterLock.ExitReadLock();
                 }
             }
+
+            return true;
         }
 
         protected virtual void AfterWrittingSuppressionsCallback(Stream stream)
@@ -201,6 +207,6 @@ namespace Microsoft.DotNet.Compatibility.ErrorSuppression
 
         protected virtual Stream GetReadableStream(string supressionFile) => new FileStream(supressionFile, FileMode.Open);
 
-        protected virtual Stream GetWritableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.OpenOrCreate);
+        protected virtual Stream GetWritableStream(string suppressionFile) => new FileStream(suppressionFile, FileMode.Create);
     }
 }

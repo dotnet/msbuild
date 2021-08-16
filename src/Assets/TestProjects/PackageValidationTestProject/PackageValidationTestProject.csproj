@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <DefineConstants Condition="'$(ForceValidationProblem)' == 'true'">$(DefineConstants);ForceValidationProblem</DefineConstants>
     <DefineConstants Condition="'$(AddBreakingChange)' == 'true'">$(DefineConstants);AddBreakingChange</DefineConstants>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,8 +16,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.0.0-1.21277.15" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildProjectDirectory)\..\..\..\..\src\Compatibility\Microsoft.DotNet.PackageValidation\build\Microsoft.DotNet.PackageValidation.targets" />
-  
+  <Import Project="$(MSBuildProjectDirectory)\..\..\..\..\src\Tasks\Microsoft.NET.Build.Tasks\targets\Microsoft.NET.Compatibility.targets" />
+
   <PropertyGroup>
     <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\netstandard2.0\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>
     <DotNetPackageValidationAssembly Condition="'$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)\bin\$(Configuration)\net6.0\Microsoft.DotNet.PackageValidation.dll</DotNetPackageValidationAssembly>

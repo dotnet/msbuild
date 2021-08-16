@@ -32,8 +32,8 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
         }
 
         public IEnumerable<(
-            ManifestId manifestId, 
-            ManifestVersion existingVersion, 
+            ManifestId manifestId,
+            ManifestVersion existingVersion,
             ManifestVersion newVersion,
             Dictionary<WorkloadId, WorkloadDefinition> Workloads)> CalculateManifestUpdates()
         {
@@ -65,5 +65,7 @@ namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 
         public Task BackgroundUpdateAdvertisingManifestsWhenRequiredAsync() => throw new System.NotImplementedException();
         public IEnumerable<(ManifestId manifestId, ManifestVersion existingVersion, ManifestVersion newVersion)> CalculateManifestRollbacks(string rollbackDefinitionFilePath) => throw new System.NotImplementedException();
+        public IEnumerable<WorkloadId> GetUpdatableWorkloadsToAdvertise(IEnumerable<WorkloadId> installedWorkloads) => throw new System.NotImplementedException();
+        public void DeleteUpdatableWorkloadsFile() { }
     }
 }

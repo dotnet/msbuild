@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 #nullable disable
@@ -12,13 +13,23 @@ namespace Microsoft.DotNet.NativeWrapper
     public static partial class Interop
     {
         public static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#if NETCOREAPP
+        private static readonly string HostFxrPath;
+#endif
 
         static Interop()
         {
             if (RunningOnWindows)
             {
-                PreloadWindowsLibrary("hostfxr.dll");
+                PreloadWindowsLibrary(Constants.HostFxr);
             }
+#if NETCOREAPP
+            else
+            {
+                HostFxrPath = (string)AppContext.GetData(Constants.RuntimeProperty.HostFxrPath);
+                System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(Assembly.GetExecutingAssembly()).ResolvingUnmanagedDll += HostFxrResolver;
+            }
+#endif
         }
 
         // MSBuild SDK resolvers are required to be AnyCPU, but we have a native dependency and .NETFramework does not
@@ -29,18 +40,39 @@ namespace Microsoft.DotNet.NativeWrapper
         {
             string basePath = Path.GetDirectoryName(typeof(Interop).Assembly.Location);
             string architecture = IntPtr.Size == 8 ? "x64" : "x86";
-            string dllPath = Path.Combine(basePath, architecture, dllFileName);
+            string dllPath = Path.Combine(basePath, architecture, $"{dllFileName}.dll");
 
             // return value is intentionally ignored as we let the subsequent P/Invokes fail naturally.
             LoadLibraryExW(dllPath, IntPtr.Zero, LOAD_WITH_ALTERED_SEARCH_PATH);
         }
+
+#if NETCOREAPP
+        private static IntPtr HostFxrResolver(Assembly assembly, string libraryName)
+        {
+            if (libraryName != Constants.HostFxr)
+            {
+                return IntPtr.Zero;
+            }
+
+            if (string.IsNullOrEmpty(HostFxrPath))
+            {
+                throw new HostFxrRuntimePropertyNotSetException();
+            }
+
+            if (!NativeLibrary.TryLoad(HostFxrPath, out var handle))
+            {
+                throw new HostFxrNotFoundException(HostFxrPath);
+            }
+
+            return handle;
+        }
+#endif
 
         // lpFileName passed to LoadLibraryEx must be a full path.
         private const int LOAD_WITH_ALTERED_SEARCH_PATH = 0x8;
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
         private static extern IntPtr LoadLibraryExW(string lpFileName, IntPtr hFile, int dwFlags);
-
 
         [Flags]
         internal enum hostfxr_resolve_sdk2_flags_t : int
@@ -88,7 +120,7 @@ namespace Microsoft.DotNet.NativeWrapper
             IntPtr info,
             IntPtr result_context);
 
-        [DllImport("hostfxr", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(Constants.HostFxr, CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int hostfxr_get_dotnet_environment_info(
             string dotnet_root,
             IntPtr reserved,
@@ -104,7 +136,7 @@ namespace Microsoft.DotNet.NativeWrapper
                 hostfxr_resolve_sdk2_result_key_t key,
                 string value);
 
-            [DllImport("hostfxr", CharSet = UTF16, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(Constants.HostFxr, CharSet = UTF16, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             internal static extern int hostfxr_resolve_sdk2(
                 string exe_dir,
                 string working_dir,
@@ -117,7 +149,7 @@ namespace Microsoft.DotNet.NativeWrapper
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
                 string[] sdk_dirs);
 
-            [DllImport("hostfxr", CharSet = UTF16, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(Constants.HostFxr, CharSet = UTF16, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             internal static extern int hostfxr_get_available_sdks(
                 string exe_dir,
                 hostfxr_get_available_sdks_result_fn result);
@@ -134,7 +166,7 @@ namespace Microsoft.DotNet.NativeWrapper
                 hostfxr_resolve_sdk2_result_key_t key,
                 string value);
 
-            [DllImport("hostfxr", CharSet = UTF8, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(Constants.HostFxr, CharSet = UTF8, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             internal static extern int hostfxr_resolve_sdk2(
                 string exe_dir,
                 string working_dir,
@@ -147,7 +179,7 @@ namespace Microsoft.DotNet.NativeWrapper
                 [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
                 string[] sdk_dirs);
 
-            [DllImport("hostfxr", CharSet = UTF8, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(Constants.HostFxr, CharSet = UTF8, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             internal static extern int hostfxr_get_available_sdks(
                 string exe_dir,
                 hostfxr_get_available_sdks_result_fn result);

@@ -20,11 +20,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Project="$(_BlazorWebAssemblyPropsFile)" />
 
-  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports_BlazorWasm)' != 'true'
-      And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-      And $([MSBuild]::VersionGreaterThanOrEquals('$(_TargetFrameworkVersionWithoutV)', '6.0'))">
-    <Import Include="Microsoft.Extensions.Configuration" />
-    <Import Include="Microsoft.Extensions.DependencyInjection" />
-    <Import Include="Microsoft.Extensions.Logging" />
+  <ItemGroup Condition="'$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable'">
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 </Project>

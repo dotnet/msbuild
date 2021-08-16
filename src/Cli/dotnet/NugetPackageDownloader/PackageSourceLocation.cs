@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.EnvironmentAbstractions;
 
@@ -13,18 +12,23 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
         public PackageSourceLocation(
             FilePath? nugetConfig = null,
             DirectoryPath? rootConfigDirectory = null,
-            string[] sourceFeedOverrides = null)
+            string[] sourceFeedOverrides = null,
+            string[] additionalSourceFeeds = null)
         {
             NugetConfig = nugetConfig;
             RootConfigDirectory = rootConfigDirectory;
-            ExpandLocalFeedAndAssign(sourceFeedOverrides);
+            // Overrides other feeds
+            SourceFeedOverrides = ExpandLocalFeed(sourceFeedOverrides);
+            // Feeds to be using in addition to config
+            AdditionalSourceFeed = ExpandLocalFeed(additionalSourceFeeds);
         }
 
         public FilePath? NugetConfig { get; }
         public DirectoryPath? RootConfigDirectory { get; }
         public string[] SourceFeedOverrides { get; private set; }
+        public string[] AdditionalSourceFeed { get; private set; }
 
-        private void ExpandLocalFeedAndAssign(string[] sourceFeedOverrides)
+        private string[] ExpandLocalFeed(string[] sourceFeedOverrides)
         {
             if (sourceFeedOverrides != null)
             {
@@ -42,11 +46,11 @@ namespace Microsoft.DotNet.Cli.NuGetPackageDownloader
                     }
                 }
 
-                SourceFeedOverrides = localFeedsThatIsRooted;
+                return localFeedsThatIsRooted;
             }
             else
             {
-                SourceFeedOverrides = Array.Empty<string>();
+                return Array.Empty<string>();
             }
         }
     }

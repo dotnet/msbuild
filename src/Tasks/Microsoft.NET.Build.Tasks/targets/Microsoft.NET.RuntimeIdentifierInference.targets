@@ -137,6 +137,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.EndsWith('arm64')) and
                                   $(DefaultAppHostRuntimeIdentifier.StartsWith('osx')) and
                                   $([MSBuild]::VersionLessThan('$(_TargetFrameworkVersionWithoutV)', '6.0'))">$(DefaultAppHostRuntimeIdentifier.Replace("arm64", "x64"))</DefaultAppHostRuntimeIdentifier>
+    <!-- If we are running on win-arm64 and the TFM is < 5.0, we have to use a x64 apphost since there are no win-arm64 apphosts previous to .NET 5.0. -->
+    <DefaultAppHostRuntimeIdentifier Condition="$(DefaultAppHostRuntimeIdentifier.EndsWith('arm64')) and
+                                  $(DefaultAppHostRuntimeIdentifier.StartsWith('win')) and
+                                  $([MSBuild]::VersionLessThan('$(_TargetFrameworkVersionWithoutV)', '5.0'))">$(DefaultAppHostRuntimeIdentifier.Replace("arm64", "x64"))</DefaultAppHostRuntimeIdentifier>
   </PropertyGroup>
 
   <Target Name="_CheckForUnsupportedAppHostUsage"
@@ -155,6 +159,10 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and '$(_TargetFrameworkVersionWithoutV)' &lt; '3.0'"
                  ResourceName="PublishSingleFileRequiresVersion30" />
 
+    <NETSdkError Condition="'$(PublishSingleFile)' == 'true' and $(RuntimeIdentifier.StartsWith('win7-'))"
+                 ResourceName="SingleFileWin7Incompatible"
+                 FormatArguments="$(RuntimeIdentifier)" />
+
     <!-- The TFM version checks for PublishReadyToRun PublishTrimmed only generate warnings in .Net core 3.1
          because we do not want the behavior to be a breaking change compared to version 3.0 -->
 
@@ -165,11 +173,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                    ResourceName="PublishTrimmedRequiresVersion30" />
 
     <!-- Generate Trimming warnings for WinForms and Wpf applications-->
-    <NetSdkWarning Condition="'$(UseWindowsForms)' == 'true' and '$(PublishTrimmed)' == 'true'"
+    <NetSdkError Condition="('$(UseWindowsForms)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWinFormsTrimError)' != 'true')"
                  ResourceName="TrimmingWindowsFormsIsNotSupported" />
-    <NetSdkWarning Condition="'$(UseWpf)' == 'true' and '$(PublishTrimmed)' == 'true'"
+    <NetSdkError Condition="('$(UseWpf)' == 'true') and ('$(PublishTrimmed)' == 'true') and ('$(_SuppressWpfTrimError)' != 'true')"
                  ResourceName="TrimmingWpfIsNotSupported" />
-    
+
   </Target>
 
   <Target Name="_CheckForUnsupportedHostingUsage"

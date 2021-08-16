@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace Microsoft.Extensions.HotReload
 {
@@ -184,7 +185,6 @@ namespace Microsoft.Extensions.HotReload
                 _handlerActions ??= GetMetadataUpdateHandlerActions();
                 var handlerActions = _handlerActions;
 
-                Type[]? updatedTypes = GetMetadataUpdateTypes(deltas);
 
                 for (var i = 0; i < deltas.Count; i++)
                 {
@@ -193,7 +193,7 @@ namespace Microsoft.Extensions.HotReload
                     {
                         if (TryGetModuleId(assembly) is Guid moduleId && moduleId == item.ModuleId)
                         {
-                            System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
+                            MetadataUpdater.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
                         }
                     }
 
@@ -201,6 +201,8 @@ namespace Microsoft.Extensions.HotReload
                     var cachedDeltas = _deltas.GetOrAdd(item.ModuleId, static _ => new());
                     cachedDeltas.Add(item);
                 }
+
+                Type[]? updatedTypes = GetMetadataUpdateTypes(deltas);
 
                 handlerActions.ClearCache.ForEach(a => a(updatedTypes));
                 handlerActions.UpdateApplication.ForEach(a => a(updatedTypes));
@@ -219,16 +221,21 @@ namespace Microsoft.Extensions.HotReload
 
             foreach (var delta in deltas)
             {
-                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => TryGetModuleId(assembly) is Guid moduleId && moduleId == delta.ModuleId);
+                if (assembly is null)
                 {
-                    if (TryGetModuleId(assembly) is Guid moduleId && moduleId == delta.ModuleId)
+                    continue;
+                }
+
+                var assemblyTypes = assembly.GetTypes();
+
+                foreach (var updatedType in delta.UpdatedTypes)
+                {
+                    var type = assemblyTypes.FirstOrDefault(t => t.MetadataToken == updatedType);
+                    if (type != null)
                     {
-                        var type = assembly.GetTypes().FirstOrDefault(f => delta.UpdatedTypes.Any(d => d == f.MetadataToken));
-                        if (type != null)
-                        {
-                            types ??= new();
-                            types.Add(type);
-                        }
+                        types ??= new();
+                        types.Add(type);
                     }
                 }
             }
@@ -247,7 +254,7 @@ namespace Microsoft.Extensions.HotReload
 
                 foreach (var item in deltas)
                 {
-                    System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
+                    MetadataUpdater.ApplyUpdate(assembly, item.MetadataDelta, item.ILDelta, ReadOnlySpan<byte>.Empty);
                 }
 
                 _log("Deltas applied.");

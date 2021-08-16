@@ -31,6 +31,12 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<bool> NoRestoreOption = CommonOptions.NoRestoreOption();
 
+        public static readonly Option SelfContainedOption = CommonOptions.SelfContainedOption();
+
+        public static readonly Option NoSelfContainedOption = CommonOptions.NoSelfContainedOption();
+
+        public static readonly Option RuntimeOption = CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription);
+
         public static Command GetCommand()
         {
             var command = new Command("build", LocalizableStrings.AppFullName);
@@ -39,7 +45,7 @@ namespace Microsoft.DotNet.Cli
             RestoreCommandParser.AddImplicitRestoreOptions(command, includeRuntimeOption: false, includeNoDependenciesOption: false);
             command.AddOption(CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription));
             command.AddOption(CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription));
-            command.AddOption(CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription));
+            command.AddOption(RuntimeOption);
             command.AddOption(CommonOptions.VersionSuffixOption());
             command.AddOption(NoRestoreOption);
             command.AddOption(CommonOptions.InteractiveMsBuildForwardOption());
@@ -49,6 +55,10 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(NoIncrementalOption);
             command.AddOption(NoDependenciesOption);
             command.AddOption(NoLogoOption);
+            command.AddOption(SelfContainedOption);
+            command.AddOption(NoSelfContainedOption);
+            command.AddOption(CommonOptions.ArchitectureOption());
+            command.AddOption(CommonOptions.OperatingSystemOption());
 
             return command;
         }

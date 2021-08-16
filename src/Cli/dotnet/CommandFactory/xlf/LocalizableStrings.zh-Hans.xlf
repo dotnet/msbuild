@@ -135,8 +135,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
-        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
-        <target state="translated">无法生成 deps.json，可能已生成。可在诊断输出的工具名称之前指定 "-d" 选项(例如，"dotnet-d &lt;toolname&gt;": {0}</target>
+        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option option after "dotnet" for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
+        <target state="needs-review-translation">无法生成 deps.json，可能已生成。可在诊断输出的工具名称之前指定 "-d" 选项(例如，"dotnet-d &lt;toolname&gt;": {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">

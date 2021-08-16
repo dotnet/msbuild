@@ -24,7 +24,7 @@ namespace Microsoft.NET.Build.Tests
 {
     public class AppHostTests : SdkTest
     {
-        private string[] GetExpectedFilesFromBuild(TestAsset testAsset, string targetFramework)
+        private static string[] GetExpectedFilesFromBuild(TestAsset testAsset, string targetFramework)
         {
             var testProjectName = testAsset.TestProject?.Name ?? testAsset.Name;
             var expectedFiles = new List<string>()
@@ -39,13 +39,8 @@ namespace Microsoft.NET.Build.Tests
             if (!string.IsNullOrEmpty(targetFramework))
             {
                 var parsedTargetFramework = NuGetFramework.Parse(targetFramework);
-
-                // TODO: Remove after Framework MSBuild picks up https://github.com/dotnet/msbuild/pull/6560
-                if (UsingFullFrameworkMSBuild)
-                {
-                    if (parsedTargetFramework.Version.Major >= 5)
-                        expectedFiles.Add($"ref/{testProjectName}.dll");
-                }
+                if (parsedTargetFramework.Version.Major >= 5)
+                    expectedFiles.Add($"ref/{testProjectName}.dll");
 
                 if (parsedTargetFramework.Version.Major < 6)
                     expectedFiles.Add($"{testProjectName}.runtimeconfig.dev.json");

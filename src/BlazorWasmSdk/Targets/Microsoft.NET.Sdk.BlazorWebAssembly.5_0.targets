@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_BlazorWebAssemblySdkToolAssembly>$(BlazorWebAssemblySdkDirectoryRoot)tools\net6.0\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.dll</_BlazorWebAssemblySdkToolAssembly>
   </PropertyGroup>
 
-  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GenerateBlazorWebAssemblyBootJson" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.GenerateBlazorWebAssemblyBootJson50" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BlazorWriteSatelliteAssemblyFile" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BlazorReadSatelliteAssemblyFile" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
   <UsingTask TaskName="Microsoft.NET.Sdk.BlazorWebAssembly.BrotliCompress" AssemblyFile="$(_BlazorWebAssemblySdkTasksAssembly)" />
@@ -267,12 +267,31 @@ Copyright (c) .NET Foundation. All rights reserved.
       _BlazorWasmReplaceBundle;
       _BlazorWasmPrepareForRun;
     </GetCurrentProjectStaticWebAssetsDependsOn>
+
+    <GetCurrentProjectStaticWebAssetsV2DependsOn>
+      $(GetCurrentProjectStaticWebAssetsV2DependsOn);
+      _UpdateBlazorWasmStaticWebAssetsForV2;
+    </GetCurrentProjectStaticWebAssetsV2DependsOn>
   </PropertyGroup>
 
   <Target Name="_BlazorWasmReplaceBundle">
     <ItemGroup>
       <StaticWebAsset Include="@(_AppBundleStaticWebAsset)" />
       <Staticwebasset Remove="@(_ProjectBundleStaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_UpdateBlazorWasmStaticWebAssetsForV2" DependsOnTargets="GetCurrentProjectStaticWebAssets">
+    <ItemGroup>
+      <_CurrentWasmProjectStaticWebAssets Include="@(_ThisProjectStaticWebAssets)" Condition="'%(SourceId)' == '$(PackageId)'" />
+      <_CurrentWasmProjectStaticWebAssets>
+        <!-- We set the asset kind explicitly to build becasue blazor before 6.0 did its own publishing and was
+             not fully integrated with static web assets, so we let it be even when called from 6.0 targets
+        -->
+        <AssetKind>Build</AssetKind>
+      </_CurrentWasmProjectStaticWebAssets>
+      <_ThisProjectStaticWebAssets Remove="@(_CurrentWasmProjectStaticWebAssets)" />
+      <_ThisProjectStaticWebAssets Include="@(_CurrentWasmProjectStaticWebAssets)" />
     </ItemGroup>
   </Target>
 
@@ -288,7 +307,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Code="BLAZORSDK1001"
       Condition="'@(BlazorWebAssemblyLazyLoad)' != '' And !($([System.String]::Copy('$(_BlazorOutputContent)').Contains('%(BlazorWebAssemblyLazyLoad.Identity)')))" />
 
-    <GenerateBlazorWebAssemblyBootJson
+    <GenerateBlazorWebAssemblyBootJson50
       AssemblyPath="@(IntermediateAssembly)"
       Resources="@(_BlazorOutputWithHash)"
       DebugBuild="true"
@@ -531,7 +550,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Code="BLAZORSDK1001"
       Condition="'@(BlazorWebAssemblyLazyLoad)' != '' And !($([System.String]::Copy('$(_BlazorOutputContent)').Contains('%(BlazorWebAssemblyLazyLoad.Identity)')))" />
 
-    <GenerateBlazorWebAssemblyBootJson
+    <GenerateBlazorWebAssemblyBootJson50
       AssemblyPath="@(IntermediateAssembly)"
       Resources="@(_BlazorPublishBootResourceWithHash)"
       DebugBuild="false"

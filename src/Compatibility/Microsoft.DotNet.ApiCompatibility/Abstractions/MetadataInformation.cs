@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.DotNet.ApiCompatibility.Abstractions
 {
@@ -29,6 +30,13 @@ namespace Microsoft.DotNet.ApiCompatibility.Abstractions
             string.Equals(TargetFramework, other.TargetFramework, StringComparison.OrdinalIgnoreCase) &&
             string.Equals(AssemblyId, other.AssemblyId, StringComparison.Ordinal);
 
-        public override int GetHashCode() => HashCode.Combine(AssemblyName, TargetFramework, AssemblyId);
+        public override int GetHashCode()
+        {
+            int hashCode = 1447485498;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssemblyName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TargetFramework);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AssemblyId);
+            return hashCode;
+        }
     }
 }

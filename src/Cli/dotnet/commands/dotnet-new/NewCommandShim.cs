@@ -62,6 +62,7 @@ namespace Microsoft.DotNet.Tools.New
             builtIns.AddRange(Microsoft.TemplateEngine.Orchestrator.RunnableProjects.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateEngine.Edge.Components.AllComponents);
             builtIns.AddRange(Microsoft.TemplateEngine.Cli.Components.AllComponents);
+            builtIns.AddRange(Microsoft.TemplateSearch.Common.Components.AllComponents);
             if (!disableSdkTemplates)
             {
                 builtIns.Add((typeof(ITemplatePackageProviderFactory), new BuiltInTemplatePackageProviderFactory()));

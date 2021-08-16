@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RepairSucceeded">
-        <source>Successfully repaired worklods: {0}</source>
-        <target state="new">Successfully repaired worklods: {0}</target>
+        <source>Successfully repaired workloads: {0}</source>
+        <target state="new">Successfully repaired workloads: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="RepairingWorkloads">

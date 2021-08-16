@@ -85,6 +85,19 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
         public ResourceHashesByNameDictionary lazyAssembly { get; set; }
+
+        /// <summary>
+        /// JavaScript module initializers that Blazor will be in charge of loading.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public ResourceHashesByNameDictionary libraryInitializers { get; set; }
+
+        /// <summary>
+        /// Extensions created by users customizing the initialization process. The format of the file(s)
+        /// is up to the user.
+        /// </summary>
+        [DataMember(EmitDefaultValue = false)]
+        public Dictionary<string, ResourceHashesByNameDictionary> extensions { get; set; }
     }
 
     public enum ICUDataMode

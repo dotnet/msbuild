@@ -5,11 +5,11 @@ trigger:
       - main
       - release/*.*
 
+pr: none
+
 variables:
   - name: teamName
     value: Roslyn-Project-System
-  - name: PB_PublishBlobFeedUrl
-    value: ''
   - name: _DotNetPublishToBlobFeed
     value: false
   - name: _DotNetArtifactsCategory
@@ -25,16 +25,16 @@ stages:
 - stage: build
   displayName: Build
   jobs:
-    - template: /eng/build.yml
+    - template: /eng/common/templates/job/job.yml
       parameters:
+        name: Windows_NT_FullFramework
         enableRichCodeNavigation: true
         richCodeNavigationLanguage: 'csharp'
         richCodeNavigationEnvironment: 'production'
-        agentOs: Windows_NT_FullFramework
         pool:
             name: NetCorePublic-Pool
-            queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open
-          helixTargetQueue: Windows.Server.Amd64.VS2019.Pre.Open
+            queue: BuildPool.Windows.10.Amd64.VS2019.Pre.Open  
+        timeoutInMinutes: 180
         strategy:
           matrix:
             Build_Debug:
@@ -42,8 +42,48 @@ stages:
               _PublishType: none
               _SignType: test
               _Test: -test
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
-              _Test: -test
+        workspace:
+          clean: all
+        variables:
+          - _AgentOSName: Windows_NT_FullFramework
+          - _TeamName: DotNetCore
+          - _OfficialBuildIdArgs: ''
+          - _PublishArgs: ''
+          - _SignArgs: ''
+          - _InternalRuntimeDownloadArgs: ''
+        steps:
+        - script: eng\CIBuild.cmd
+                    -configuration $(_BuildConfig)
+                    $(_PublishArgs)
+                    $(_SignArgs)
+                    $(_OfficialBuildIdArgs)
+                    $(_InternalRuntimeDownloadArgs)
+                    /p:Test=false
+          displayName: Build
+          env:
+            BuildConfig: $(_BuildConfig)
+            BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+            PublishType: $(_PublishType)
+            TestFullMSBuild: 'true'
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+        - task: CopyFiles@2	
+          displayName: Gather Logs	
+          inputs:	
+            SourceFolder: '$(Build.SourcesDirectory)/artifacts'	
+            Contents: |	
+              log/$(_BuildConfig)/**/*	
+              TestResults/$(_BuildConfig)/**/*	
+              SymStore/$(_BuildConfig)/**/* 
+            TargetFolder: '$(Build.ArtifactStagingDirectory)'	
+          continueOnError: true	
+          condition: always()
+
+        - task: PublishBuildArtifacts@1	
+          displayName: Publish Logs to VSTS	
+          inputs:	
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'	
+            ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'	
+            publishLocation: Container	
+          continueOnError: true	
+          condition: always()

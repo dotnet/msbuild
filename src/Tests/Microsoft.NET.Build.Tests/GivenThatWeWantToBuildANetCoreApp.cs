@@ -891,17 +891,17 @@ class Program
                 .Should()
                 .Pass();
 
-            var intermediatePath = buildCommand.GetIntermediateDirectory(targetFramework: "net5.0").FullName;
+            var outputPath = buildCommand.GetOutputDirectory(targetFramework: "net5.0").FullName;
             if (produceOnlyReferenceAssembly == true)
             {
-                var refPath = Path.Combine(intermediatePath, "ref");
+                var refPath = Path.Combine(outputPath, "ref");
                 Directory.Exists(refPath)
                     .Should()
                     .BeFalse();
             }
             else
             {
-                var refPath = Path.Combine(intermediatePath, "ref", "MainProject.dll");
+                var refPath = Path.Combine(outputPath, "ref", "MainProject.dll");
                 File.Exists(refPath)
                     .Should()
                     .BeTrue();

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using Microsoft.DotNet.Cli;
 using Microsoft.NET.Sdk.Localization;
 using FXVersion = Microsoft.DotNet.MSBuildSdkResolver.FXVersion;
 
@@ -34,7 +34,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
                 File.ReadAllLines(runtimeIdentifierChainPath).Where(l => !string.IsNullOrEmpty(l)).ToArray() :
                 new string[] { };
 
-            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable("DOTNETSDK_WORKLOAD_PACK_ROOTS");
+            var packRootEnvironmentVariable = Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_PACK_ROOTS);
 
             string[] dotnetRootPaths;
             if (!string.IsNullOrEmpty(packRootEnvironmentVariable))
@@ -511,6 +511,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         {
             foreach (var workloadId in installedWorkloads)
             {
+                if (!_workloads.ContainsKey(workloadId) || !advertisingManifestResolver._workloads.ContainsKey(workloadId))
+                {
+                    continue;
+                }
+
                 var existingWorkload = _workloads[workloadId];
                 var existingPacks = GetPacksInWorkload(existingWorkload.workload, existingWorkload.manifest).Select(p => p.packId).ToHashSet();
                 var updatedWorkload = advertisingManifestResolver._workloads[workloadId].workload;
@@ -542,7 +547,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             return false;
         }
 
-        public IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider)
+        public WorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider)
         {
             // we specifically don't assign the overlayManifestProvider to the new resolver
             // because it's not possible to refresh an overlay resolver
@@ -559,6 +564,11 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             overlayResolver.ComposeWorkloadManifests();
 
             return overlayResolver;
+        }
+
+        public string GetSdkFeatureBand()
+        {
+            return _manifestProvider?.GetSdkFeatureBand() ?? throw new Exception("Cannot get SDK feature band from ManifestProvider");
         }
 
         public class PackInfo
