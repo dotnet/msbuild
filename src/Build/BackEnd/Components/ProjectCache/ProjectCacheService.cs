@@ -433,7 +433,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 {
                     // If any project specific property is set, it will propagate down the project graph and force all nodes to that property's specific side effects, which is incorrect.
 
-                    // TargetFramework for the managed sdk.
+                    // InnerBuildPropertyName is TargetFramework for the managed sdk.
                     var innerBuildPropertyName = ProjectInterpretation.GetInnerBuildPropertyName(project);
 
                     IEnumerable<string> projectSpecificPropertyNames = new []{innerBuildPropertyName, "Configuration", "Platform", "TargetPlatform", "OutputType"};
