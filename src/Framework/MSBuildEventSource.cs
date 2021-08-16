@@ -430,6 +430,18 @@ namespace Microsoft.Build.Eventing
             WriteEvent(57, result);
         }
         
+        [Event(58, Keywords = Keywords.All)]
+        public void CopyUpToDateStart(string path)
+        {
+            WriteEvent(58, path);
+        }
+
+        [Event(59, Keywords = Keywords.All)]
+        public void CopyUpToDateStop(string path, bool wasUpToDate)
+        {
+            WriteEvent(59, path, wasUpToDate);
+        }
+
         [Event(60, Keywords = Keywords.All)]
         public void WriteLinesToFileUpToDateStart()
         {
