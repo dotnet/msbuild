@@ -6,7 +6,7 @@
   ],
   "name": "EditorConfig file",
   "generatorVersions": "[1.0.0.0-*)",
-  "description": "Creates an .editorconfig file for .NET project.",
+  "description": "Creates an .editorconfig file for configuring code style preferences.",
   "tags": {
     "type": "item"
   },
@@ -31,7 +31,7 @@
       "defaultValue": "false",
       "defaultIfOptionWithoutValue": "true",
       "displayName": "Empty",
-      "description": "Creates empty .editorconfig instead of .NET specific."
+      "description": "Creates empty .editorconfig instead of the defaults for .NET."
     }
   }
 }
