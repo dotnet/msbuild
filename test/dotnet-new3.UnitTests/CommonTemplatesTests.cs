@@ -605,21 +605,19 @@ Restore succeeded\.");
                 .ExitWith(0)
                 .And.NotHaveStdErr();
 
-            //TODO: https://github.com/dotnet/templating/issues/3634
-            _ = buildPass; // We must use `buildPass` parameter or compiler reports an error
-            //var buildResult = new DotnetCommand(_log, "build", "MyProject")
-            //    .WithWorkingDirectory(workingDir)
-            //    .Execute();
+            var buildResult = new DotnetCommand(_log, "build", "MyProject")
+                .WithWorkingDirectory(workingDir)
+                .Execute();
 
-            //if (buildPass)
-            //{
-            //    buildResult.Should().ExitWith(0).And.NotHaveStdErr();
-            //}
-            //else
-            //{
-            //    buildResult.Should().Fail();
-            //    return;
-            //}
+            if (buildPass)
+            {
+                buildResult.Should().ExitWith(0).And.NotHaveStdErr();
+            }
+            else
+            {
+                buildResult.Should().Fail();
+                return;
+            }
             string codeFileName = name == "console" ? "Program.cs" : "Class1.cs";
             string programFileContent = File.ReadAllText(Path.Combine(workingDir, "MyProject", codeFileName));
             XDocument projectXml = XDocument.Load(Path.Combine(workingDir, "MyProject", "MyProject.csproj"));
