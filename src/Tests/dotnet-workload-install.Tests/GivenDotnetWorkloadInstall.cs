@@ -21,6 +21,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.DotNet.Cli.Utils;
+using System.Text.Json;
 
 namespace Microsoft.DotNet.Cli.Workload.Install.Tests
 {
