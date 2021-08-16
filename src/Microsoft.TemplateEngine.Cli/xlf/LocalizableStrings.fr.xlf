@@ -515,6 +515,16 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <target state="translated">Exemples :</target>
         <note />
       </trans-unit>
+      <trans-unit id="HostSpecificDataLoader_Warning_FailedToRead">
+        <source>Failed to load dotnet CLI host data for template {0} from cache.</source>
+        <target state="new">Failed to load dotnet CLI host data for template {0} from cache.</target>
+        <note>{0} - template short name</note>
+      </trans-unit>
+      <trans-unit id="HostSpecificDataLoader_Warning_FailedToReadFromFile">
+        <source>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</source>
+        <target state="new">Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</target>
+        <note>{0} - template short name, {1} - file path to host data.</note>
+      </trans-unit>
       <trans-unit id="InstallHelp">
         <source>Installs a source or a template package.</source>
         <target state="translated">Installe une source ou un package de modèle.</target>

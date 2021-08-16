@@ -99,7 +99,14 @@ namespace Microsoft.TemplateEngine.Cli
         {
             if (logEntry.Exception != null)
             {
-                textWriter.WriteLine($"Details: {logEntry.Exception}");
+                if (logEntry.LogLevel == LogLevel.Debug || logEntry.LogLevel == LogLevel.Trace)
+                {
+                    textWriter.WriteLine($"Details: {logEntry.Exception}");
+                }
+                else
+                {
+                    textWriter.WriteLine($"Details: {logEntry.Exception.Message}");
+                }
             }
         }
     }

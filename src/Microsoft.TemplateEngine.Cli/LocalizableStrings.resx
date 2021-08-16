@@ -761,4 +761,12 @@ The supported columns are: language, tags, author, type.</value>
     <value>Invalid command syntax: use '{0}' instead.</value>
     <comment>{0} - command syntax, example: dotnet new [PARTIAL_NAME] --list [FILTER_OPTIONS].</comment>
   </data>
+  <data name="HostSpecificDataLoader_Warning_FailedToRead" xml:space="preserve">
+    <value>Failed to load dotnet CLI host data for template {0} from cache.</value>
+    <comment>{0} - template short name</comment>
+  </data>
+  <data name="HostSpecificDataLoader_Warning_FailedToReadFromFile" xml:space="preserve">
+    <value>Failed to load dotnet CLI host data for template {0} from {1}. The host data will be ignored.</value>
+    <comment>{0} - template short name, {1} - file path to host data.</comment>
+  </data>
 </root>

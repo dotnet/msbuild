@@ -43,8 +43,10 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 catch (Exception e)
                 {
-                    _engineEnvironment.Host.Logger.LogDebug(e, $"Failed to load host data for template {templateInfo.ShortNameList?[0] ?? templateInfo.Name}: the json data in {nameof(ITemplateInfoHostJsonCache.HostData)} is incorrect.");
-                    return HostSpecificTemplateData.Default;
+                    _engineEnvironment.Host.Logger.LogWarning(
+                        e,
+                        LocalizableStrings.HostSpecificDataLoader_Warning_FailedToRead,
+                        templateInfo.ShortNameList?[0] ?? templateInfo.Name);
                 }
             }
 
@@ -70,8 +72,11 @@ namespace Microsoft.TemplateEngine.Cli
             }
             catch (Exception e)
             {
-                _engineEnvironment.Host.Logger.LogDebug(e, $"Failed to load host data for template {templateInfo.ShortNameList?[0] ?? templateInfo.Name}, file: " +
-                    $"{file?.GetDisplayPath() ?? templateInfo.MountPointUri + templateInfo.HostConfigPlace}");
+                _engineEnvironment.Host.Logger.LogWarning(
+                    e,
+                    LocalizableStrings.HostSpecificDataLoader_Warning_FailedToReadFromFile,
+                    templateInfo.ShortNameList?[0] ?? templateInfo.Name,
+                    file?.GetDisplayPath() ?? templateInfo.MountPointUri + templateInfo.HostConfigPlace);
             }
             finally
             {

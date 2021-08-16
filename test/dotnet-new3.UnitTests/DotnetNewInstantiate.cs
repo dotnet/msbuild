@@ -460,5 +460,23 @@ namespace Dotnet_new3.IntegrationTests
                 Assert.Equal(sourceText, targetText);
             }
         }
+
+        [Fact]
+        public void CanShowWarning_WhenHostDataIsIncorrect()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+            Helpers.InstallTestTemplate("Invalid/InvalidHostData", _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, "TestAssets.Invalid.InvalidHostData")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"TestAssets.Invalid.InvalidHostData\" was created successfully.")
+                .And.HaveStdOutContaining("Warning: Failed to load dotnet CLI host data ");
+        }
     }
 }

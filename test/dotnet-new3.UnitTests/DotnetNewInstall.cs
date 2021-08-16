@@ -526,5 +526,22 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining($"  Source location './' is outside the specified install source location.")
                 .And.HaveStdOutContaining($"No templates were found in the package {invalidTemplatePath}.");
         }
+
+        [Fact]
+        public void CanShowWarning_WhenHostDataIsIncorrect()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string invalidTemplatePath = TestUtils.GetTestTemplateLocation("Invalid/InvalidHostData");
+            new DotnetNewCommand(_log, "-i", invalidTemplatePath)
+                .WithCustomHive(home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("Warning: Failed to load host data ")
+                .And.HaveStdOutContaining($"Success: {invalidTemplatePath} installed the following templates:")
+                .And.HaveStdOutContaining("TestAssets.Invalid.InvalidHostData");
+        }
     }
 }
