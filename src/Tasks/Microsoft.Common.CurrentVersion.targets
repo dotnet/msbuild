@@ -3621,7 +3621,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!--
     ============================================================
                                         _GenerateSuggestedBindingRedirectsCache
-    Generate a file used to track suggested binding redirects between builds.
+    Generate a file used to track whether suggested binding redirects changed between builds.
     @(SuggestedBindingRedirects) never contains a file on disk, so create a file
     that contains a hash of the items to prevent `GenerateBindingRedirects`
     from running every build.
