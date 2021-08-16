@@ -13,6 +13,7 @@
     <Description>The MSBuild targets and properties for building .NET Core projects.</Description>
     <OutputType>Library</OutputType>
     <TargetFrameworks>$(SdkTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">$(SdkTargetFramework)</TargetFrameworks>
     <Nullable>annotations</Nullable>
   </PropertyGroup>
 
