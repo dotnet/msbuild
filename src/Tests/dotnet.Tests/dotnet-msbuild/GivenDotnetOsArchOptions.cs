@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var expectedArch = RuntimeInformation.ProcessArchitecture.Equals(Architecture.Arm64) ? "arm64" : Environment.Is64BitOperatingSystem ? "x64" : "x86";
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch}");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-{expectedArch} -property:SelfContained=false");
             });
         }
 
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 }
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier={expectedOs}-arch");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier={expectedOs}-arch -property:SelfContained=false");
             });
         }
 
@@ -71,7 +71,20 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 var command = BuildCommand.FromArgs(new string[] { "--arch", "arch", "--os", "os" }, msbuildPath);
                 command.GetArgumentsToMSBuild()
                     .Should()
-                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-arch");
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:RuntimeIdentifier=os-arch -property:SelfContained=false");
+            });
+        }
+
+        [Fact]
+        public void OptionsRespectUserSpecifiedSelfContained()
+        {
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                var msbuildPath = "<msbuildpath>";
+                var command = BuildCommand.FromArgs(new string[] { "--arch", "arch", "--os", "os", "--self-contained" }, msbuildPath);
+                command.GetArgumentsToMSBuild()
+                    .Should()
+                    .StartWith($"{ExpectedPrefix} -restore -consoleloggerparameters:Summary -property:SelfContained=True -property:_CommandLineDefinedSelfContained=true -property:RuntimeIdentifier=os-arch");
             });
         }
 
@@ -126,7 +139,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             new DotnetCommand(Log)
                 .WithWorkingDirectory(testInstance.Path)
-                .Execute(command, "--arch", "x86")
+                .Execute(command, "--arch", RuntimeInformation.ProcessArchitecture.Equals(Architecture.Arm64) ? "arm64" : Environment.Is64BitOperatingSystem ? "x64" : "x86")
                 .Should()
                 .Pass();
         }
