@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -36,7 +34,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     .Where(asset => StaticWebAsset.HasSourceId(asset, Source))
                     .Select(StaticWebAsset.FromTaskItem)
                     .GroupBy(
-                        a => a.Identity,
+                        a => a.ComputeTargetPath("", '/'),
                         (key, group) => (key, StaticWebAsset.ChooseNearestAssetKind(group, AssetKind)));
 
                 var resultAssets = new List<StaticWebAsset>();

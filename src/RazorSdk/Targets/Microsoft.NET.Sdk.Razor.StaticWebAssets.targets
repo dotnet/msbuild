@@ -43,11 +43,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
 
   <UsingTask
-    TaskName="Microsoft.AspNetCore.Razor.Tasks.ComputeReferencedProjectAssets"
-    AssemblyFile="$(RazorSdkBuildTasksAssembly)"
-    Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />
-
-  <UsingTask
     TaskName="Microsoft.AspNetCore.Razor.Tasks.UpdatePackageStaticWebAssets"
     AssemblyFile="$(RazorSdkBuildTasksAssembly)"
     Condition="'$(RazorSdkBuildTasksAssembly)' != ''" />    

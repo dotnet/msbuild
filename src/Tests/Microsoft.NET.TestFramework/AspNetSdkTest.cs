@@ -8,10 +8,12 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using Microsoft.NET.TestFramework;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.NET.TestFramework
 {
+    [Trait("AspNetCore", "Integration")]
     public abstract class AspNetSdkTest : SdkTest
     {
         public readonly string DefaultTfm;

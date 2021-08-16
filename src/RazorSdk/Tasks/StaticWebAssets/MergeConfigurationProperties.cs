@@ -58,19 +58,14 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         foundProjectReference.GetMetadata("SetPlatform"),
                         foundProjectReference.GetMetadata("SetTargetFramework"));
 
-                    additionalBuildProperties = Regex.Replace(additionalBuildProperties, ";{2,}", ";");
-
-                    entry.SetMetadata("AdditionalBuildProperties", additionalBuildProperties);
+                    CleanupMetadata(entry, "AdditionalBuildProperties", additionalBuildProperties);
 
                     var buildPropertiesToRemove = string.Join(
                         ";", configuration.GetMetadata("AdditionalBuildPropertiesToRemove"),
-                        foundProjectReference.GetMetadata("GlobalPropertiesToRemove"));
+                        foundProjectReference.GetMetadata("GlobalPropertiesToRemove"),
+                        foundProjectReference.GetMetadata("UndefineProperties"));
 
-                    buildPropertiesToRemove = Regex.Replace(buildPropertiesToRemove, ";{2,}", ";");
-
-                    entry.SetMetadata(
-                        "AdditionalBuildPropertiesToRemove",
-                        buildPropertiesToRemove);
+                    CleanupMetadata(entry, "AdditionalBuildPropertiesToRemove", buildPropertiesToRemove);
 
                     var additionalPublishProperties = string.Join(
                         ";", configuration.GetMetadata("AdditionalPublishProperties"),
@@ -78,29 +73,31 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         foundProjectReference.GetMetadata("SetPlatform"),
                         foundProjectReference.GetMetadata("SetTargetFramework"));
 
-                    additionalPublishProperties = Regex.Replace(additionalPublishProperties, ";{2,}", ";");
-
-                    entry.SetMetadata("AdditionalPublishProperties", additionalPublishProperties);
+                    CleanupMetadata(entry, "AdditionalPublishProperties", additionalPublishProperties);
 
                     var publishPropertiesToRemove = string.Join(
                         ";", configuration.GetMetadata("AdditionalPublishPropertiesToRemove"),
-                        foundProjectReference.GetMetadata("GlobalPropertiesToRemove"));
+                        foundProjectReference.GetMetadata("GlobalPropertiesToRemove"),
+                        foundProjectReference.GetMetadata("UndefineProperties"));
 
-                    publishPropertiesToRemove = Regex.Replace(publishPropertiesToRemove, ";{2,}", ";");
-
-                    entry.SetMetadata(
-                        "AdditionalPublishPropertiesToRemove",
-                        publishPropertiesToRemove);
+                    CleanupMetadata(entry, "AdditionalPublishPropertiesToRemove", publishPropertiesToRemove);
 
                     ProjectConfigurations[i] = entry;
                 }
             }
             catch (Exception ex)
             {
-                Log.LogError(ex.ToString());
+                Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, file: null);
             }
 
             return !Log.HasLoggedErrors;
+
+            static void CleanupMetadata(TaskItem entry, string metadataName, string metadataValue)
+            {
+                metadataValue = Regex.Replace(metadataValue, ";{2,}", ";");
+                metadataValue = metadataValue.Trim(';');
+                entry.SetMetadata(metadataName, metadataValue);
+            }
         }
 
         private ITaskItem FindMatchingProject(ITaskItem configuration)

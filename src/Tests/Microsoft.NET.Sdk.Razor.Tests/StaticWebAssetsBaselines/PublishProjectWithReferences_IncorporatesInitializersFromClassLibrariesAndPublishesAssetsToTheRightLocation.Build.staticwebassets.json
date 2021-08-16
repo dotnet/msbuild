@@ -11,22 +11,22 @@
       "Version": 2,
       "Source": "AnotherClassLib",
       "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
+      "AdditionalPublishProperties": "",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier",
       "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": ";",
-      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
+      "AdditionalBuildProperties": "",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier"
     },
     {
       "Identity": "${ProjectRoot}\\ClassLibrary\\ClassLibrary.csproj",
       "Version": 2,
       "Source": "ClassLibrary",
       "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
+      "AdditionalPublishProperties": "",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier",
       "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": ";",
-      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
+      "AdditionalBuildProperties": "",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier"
     }
   ],
   "DiscoveryPatterns": [

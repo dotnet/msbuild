@@ -40,7 +40,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                     .Where(asset => StaticWebAsset.HasSourceId(asset, Source))
                     .Select(StaticWebAsset.FromTaskItem)
                     .GroupBy(
-                        a => a.Identity,
+                        a => a.ComputeTargetPath("", '/'),
                         (key, group) => (key, StaticWebAsset.ChooseNearestAssetKind(group, AssetKind)));
 
                 var resultAssets = new List<StaticWebAsset>();
@@ -71,20 +71,16 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 var patterns = new List<StaticWebAssetsManifest.DiscoveryPattern>();
                 if (Patterns != null)
                 {
-                    var existingPatterns = Patterns.Where(p => StaticWebAssetsManifest.DiscoveryPattern.HasSourceId(p, Source))
-                        .Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem)
-                        .ToArray();
-
-                    foreach (var pattern in existingPatterns)
+                    foreach (var pattern in Patterns)
                     {
-                        if (!pattern.HasSourceId(Source))
+                        if (!StaticWebAssetsManifest.DiscoveryPattern.HasSourceId(pattern, Source))
                         {
-                            Log.LogMessage("Skipping pattern '{0}' because is not defined in the current project.", pattern.ToString());
+                            Log.LogMessage("Skipping pattern '{0}' because is not defined in the current project.", pattern.ItemSpec);
                         }
                         else
                         {
                             Log.LogMessage("Including pattern '{0}' because is defined in the current project.", pattern.ToString());
-                            patterns.Add(pattern);
+                            patterns.Add(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem(pattern));
                         }
                     }
                 }
@@ -94,7 +90,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogError(ex.ToString());
+                Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, file: null);
             }
 
             return !Log.HasLoggedErrors;

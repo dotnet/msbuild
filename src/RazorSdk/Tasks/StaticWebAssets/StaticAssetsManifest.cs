@@ -231,7 +231,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 #endif
             }
 
-            internal ITaskItem ToTaskItem()
+            public ITaskItem ToTaskItem()
             {
                 var result = new TaskItem(Identity);
 
@@ -301,7 +301,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 #endif
             }
 
-            internal ITaskItem ToTaskItem()
+            public ITaskItem ToTaskItem()
             {
                 var result = new TaskItem(Name);
 

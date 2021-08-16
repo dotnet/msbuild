@@ -28,6 +28,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             if (!File.Exists(ManifestPath))
             {
                 Log.LogError($"Manifest file at '{ManifestPath}' not found.");
+                return false;
             }
 
             try
@@ -42,7 +43,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogError(ex.ToString());
+                Log.LogErrorFromException(ex, showStackTrace: true, showDetail: true, file: ManifestPath);
             }
 
             return !Log.HasLoggedErrors;

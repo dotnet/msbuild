@@ -11,22 +11,22 @@
       "Version": 2,
       "Source": "classlibrarywithsatelliteassemblies",
       "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
+      "AdditionalPublishProperties": "",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier",
       "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": ";",
-      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
+      "AdditionalBuildProperties": "",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier"
     },
     {
       "Identity": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
       "Version": 2,
       "Source": "RazorClassLibrary",
       "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
+      "AdditionalPublishProperties": "",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier",
       "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": ";",
-      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
+      "AdditionalBuildProperties": "",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier"
     }
   ],
   "DiscoveryPatterns": [

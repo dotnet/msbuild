@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -53,6 +52,16 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             {
                 var assets = Assets.OrderBy(a => a.GetMetadata("FullPath")).Select(StaticWebAsset.FromTaskItem);
 
+                var assetsByTargetPath = assets.GroupBy(a => a.ComputeTargetPath("", '/'), StringComparer.OrdinalIgnoreCase);
+                foreach (var group in assetsByTargetPath)
+                {
+                    if (!StaticWebAsset.ValidateAssetGroup(group.Key, group.ToArray(), ManifestType, out var reason))
+                    {
+                        Log.LogError(reason);
+                        return false;
+                    }
+                }
+
                 var discoveryPatterns = DiscoveryPatterns
                     .OrderBy(a => a.ItemSpec)
                     .Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem)
@@ -74,8 +83,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogError(ex.ToString());
-                Log.LogErrorFromException(ex);
+                Log.LogErrorFromException(ex, showStackTrace: true, showDetail:true, file: null);
             }
             return !Log.HasLoggedErrors;
         }
