@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.Cli.Remove.Reference.Tests
 {
     public class GivenDotnetRemoveReference : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"reference:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   Remove a project-to-project reference from the project.
 
 Usage:
@@ -34,7 +34,7 @@ Options:
   -f, --framework <FRAMEWORK>    Remove the reference only when targeting a specific framework.
   -?, -h, --help                 Show command line help.";
 
-        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"remove:
+        private Func<string, string> RemoveCommandHelpText = (defaultVal) => $@"Description:
       .NET Remove Command
     
     Usage:

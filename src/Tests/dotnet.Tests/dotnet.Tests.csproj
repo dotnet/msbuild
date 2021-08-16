@@ -52,7 +52,6 @@
     <Compile Include="..\Microsoft.DotNet.CommandFactory.Tests\**\*.cs" LinkBase="CommandFactory" />
     <Compile Include="..\Microsoft.DotNet.Configurer.UnitTests\**\*.cs" LinkBase="Configurer" />
     <Compile Include="..\Microsoft.DotNet.ShellShim.Tests\**\*.cs" LinkBase="ShellShim" />
-    
 
     <None Include="..\Microsoft.DotNet.ShellShim.Tests\WpfBinaryTestAsssets\testwpf.dll" LinkBase="WpfBinaryTestAsssets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

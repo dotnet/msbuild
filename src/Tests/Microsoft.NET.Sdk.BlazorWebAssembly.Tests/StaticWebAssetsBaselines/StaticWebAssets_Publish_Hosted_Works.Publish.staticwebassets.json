@@ -1,53 +1,50 @@
 {
   "Version": 1,
-  "Hash": "G0PSop0ko5iR2MCyrDo46auZlCwUZ1/SrgbPuHNdu0Q=",
+  "Hash": "__hash__",
   "Source": "blazorhosted",
   "BasePath": "_content/blazorhosted",
   "Mode": "Default",
   "ManifestType": "Publish",
-  "RelatedManifests": [
+  "ReferencedProjectsConfiguration": [
     {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\StaticWebAssets.build.json",
+      "Identity": "${ProjectRoot}\\blazorwasm\\blazorwasm.csproj",
+      "Version": 2,
       "Source": "blazorwasm",
-      "ManifestType": "Build",
-      "ProjectFile": "${ProjectRoot}\\blazorwasm\\blazorwasm.csproj",
-      "PublishTarget": "",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "GKUMxZnYlQsIBvz\u002BEGiSXKRH5fngxMGuhbr98uxjmso="
-    },
-    {
-      "Identity": "${ProjectRoot}\\blazorwasm\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
-      "Source": "blazorwasm",
-      "ManifestType": "Publish",
-      "ProjectFile": "${ProjectRoot}\\blazorwasm\\blazorwasm.csproj",
-      "PublishTarget": "ComputeFilesToPublish",
+      "GetPublishAssetsTargets": "ComputeFilesToPublish;GetCurrentProjectPublishStaticWebAssetItems",
       "AdditionalPublishProperties": ";BuildProjectReferences=false;ResolveAssemblyReferencesFindRelatedSatellites=true;_PublishingBlazorWasmProject=true;",
       "AdditionalPublishPropertiesToRemove": ";NoBuild;RuntimeIdentifier;WebPublishProfileFile",
-      "Hash": "M5dmWIQferZL8zhrY9XUijL7m5ltGycO\u002BOJFESkhNmg="
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": ";",
+      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
     },
     {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\net6.0\\StaticWebAssets.build.json",
+      "Identity": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
+      "Version": 2,
       "Source": "RazorClassLibrary",
-      "ManifestType": "Build",
-      "ProjectFile": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
-      "PublishTarget": "",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
       "AdditionalPublishProperties": ";",
       "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "L2ink3gUhKALyI93SzAC8wnudkBUopb8CmEN1tsnfHs="
-    },
-    {
-      "Identity": "${ProjectRoot}\\razorclasslibrary\\obj\\Debug\\net6.0\\StaticWebAssets.publish.json",
-      "Source": "RazorClassLibrary",
-      "ManifestType": "Publish",
-      "ProjectFile": "${ProjectRoot}\\razorclasslibrary\\RazorClassLibrary.csproj",
-      "PublishTarget": "ComputeReferencedStaticWebAssetsPublishManifest",
-      "AdditionalPublishProperties": ";",
-      "AdditionalPublishPropertiesToRemove": ";WebPublishProfileFile",
-      "Hash": "ci6D3MJDTpZ3PIAdMtuHUIN32BhZYDR6SuTv/dUnDG8="
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": ";",
+      "AdditionalBuildPropertiesToRemove": ";WebPublishProfileFile"
     }
   ],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "RazorClassLibrary\\wwwroot",
+      "Source": "RazorClassLibrary",
+      "ContentRoot": "${ProjectRoot}\\razorclasslibrary\\wwwroot\\",
+      "BasePath": "_content/RazorClassLibrary",
+      "Pattern": "**"
+    },
+    {
+      "Name": "blazorwasm\\wwwroot",
+      "Source": "blazorwasm",
+      "ContentRoot": "${ProjectRoot}\\blazorwasm\\wwwroot\\",
+      "BasePath": "/",
+      "Pattern": "**"
+    }
+  ],
   "Assets": [
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\LinkToWebRoot\\css\\app.css",
@@ -81,7 +78,7 @@
       "AssetTraitValue": "boot",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\${PackageVersion}.0\\build\\net${PackageVersion}\\blazor.webassembly.js"
+      "OriginalItemSpec": "${RestorePath}\\microsoft.aspnetcore.components.webassembly\\[[CustomPackageVersion]]\\build\\net5.0\\blazor.webassembly.js"
     },
     {
       "Identity": "${ProjectRoot}\\blazorwasm\\bin\\Debug\\net6.0\\wwwroot\\_framework\\dotnet.timezones.blat",

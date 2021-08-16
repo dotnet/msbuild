@@ -4,6 +4,7 @@
     "projects": [
       "src\\BlazorWasmSdk\\Tasks\\Microsoft.NET.Sdk.BlazorWebAssembly.Tasks.csproj",
       "src\\BlazorWasmSdk\\Tool\\Microsoft.NET.Sdk.BlazorWebAssembly.Tool.csproj",
+      "src\\Cli\\Microsoft.DotNet.Cli.Utils\\Microsoft.DotNet.Cli.Utils.csproj",
       "src\\RazorSdk\\SourceGenerators\\Microsoft.NET.Sdk.Razor.SourceGenerators.csproj",
       "src\\RazorSdk\\Tasks\\Microsoft.NET.Sdk.Razor.Tasks.csproj",
       "src\\RazorSdk\\Tool\\Microsoft.NET.Sdk.Razor.Tool.csproj",

@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.PackageValidation
     public class CompatibleFrameworkInPackageValidator
     {
         private readonly ApiCompatRunner _apiCompatRunner;
-        
+
         public CompatibleFrameworkInPackageValidator(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, IPackageLogger log)
         {
             _apiCompatRunner = new(noWarn, ignoredDifferences, enableStrictMode, log);
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.PackageValidation
                     compatibleFrameworkAsset = contentItemCollection.FindBestItemGroup(managedCriteria, conventions.Patterns.CompileLibAssemblies)?.Items.FirstOrDefault();
                 }
 
-                if (compatibleFrameworkAsset != null)
+                if (compatibleFrameworkAsset != null && compatibleFrameworkAsset.Path != compileTimeAsset.Path)
                 {
                     string header = string.Format(Resources.ApiCompatibilityHeader, compatibleFrameworkAsset.Path, compileTimeAsset.Path);
                     _apiCompatRunner.QueueApiCompatFromContentItem(package.PackageId, compatibleFrameworkAsset, compileTimeAsset, header);

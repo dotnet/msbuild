@@ -4,6 +4,7 @@
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.NativeWrapper;
+using System;
 using System.CommandLine.Parsing;
 using EnvironmentProvider = Microsoft.DotNet.NativeWrapper.EnvironmentProvider;
 using Parser = Microsoft.DotNet.Cli.Parser;
@@ -29,18 +30,32 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
 
         public override int Execute()
         {
-            var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
-            var productCollection = _productCollectionProvider.GetProductCollection();
-            var environmentInfo = _netBundleProvider.GetDotnetEnvironmentInfo(dotnetPath);
-            var sdkFormatter = new SdkOutputWriter(environmentInfo.SdkInfo, productCollection, _productCollectionProvider, _reporter);
-            var runtimeFormatter = new RuntimeOutputWriter(environmentInfo.RuntimeInfo, productCollection, _productCollectionProvider, _reporter);
+            try
+            {
+                var dotnetPath = EnvironmentProvider.GetDotnetExeDirectory();
+                var productCollection = _productCollectionProvider.GetProductCollection();
+                var environmentInfo = _netBundleProvider.GetDotnetEnvironmentInfo(dotnetPath);
+                var sdkFormatter = new SdkOutputWriter(environmentInfo.SdkInfo, productCollection, _productCollectionProvider, _reporter);
+                var runtimeFormatter = new RuntimeOutputWriter(environmentInfo.RuntimeInfo, productCollection, _productCollectionProvider, _reporter);
 
-            sdkFormatter.PrintSdkInfo();
-            _reporter.WriteLine();
-            runtimeFormatter.PrintRuntimeInfo();
-            _reporter.WriteLine();
-            _reporter.WriteLine(LocalizableStrings.CommandFooter);
-            _reporter.WriteLine();
+                sdkFormatter.PrintSdkInfo();
+                _reporter.WriteLine();
+                runtimeFormatter.PrintRuntimeInfo();
+                _reporter.WriteLine();
+                _reporter.WriteLine(LocalizableStrings.CommandFooter);
+                _reporter.WriteLine();
+            }
+            catch (HostFxrResolutionException hostfxrResolutionException)
+            {
+                switch (hostfxrResolutionException)
+                {
+                    case HostFxrRuntimePropertyNotSetException:
+                        throw new GracefulException(new[] { LocalizableStrings.RuntimePropertyNotFound }, new string[] { }, isUserError: false);
+
+                    case HostFxrNotFoundException hostFxrNotFoundException:
+                        throw new GracefulException(new[] { LocalizableStrings.HostFxrCouldNotBeLoaded }, new string[] { hostFxrNotFoundException.Message }, isUserError: false);
+                }
+            }
 
             return 0;
         }

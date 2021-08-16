@@ -10,6 +10,7 @@ using Microsoft.NET.TestFramework.Commands;
 using Microsoft.NET.TestFramework.ProjectConstruction;
 using System.Linq;
 using System.Xml.Linq;
+using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
 using System;
@@ -445,9 +446,12 @@ namespace Microsoft.NET.Publish.Tests
                 .Should()
                 .Pass();
 
-            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework: "net5.0", runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
+            string targetFramework = "net5.0";
+            NuGetFramework framework = NuGetFramework.Parse(targetFramework);
+
+            var intermediateDirectory = publishCommand.GetIntermediateDirectory(targetFramework, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier);
             var mainProjectDll = Path.Combine(intermediateDirectory.FullName, $"{TestProjectName}.dll");
-            var niPdbFile = GivenThatWeWantToPublishReadyToRun.GetPDBFileName(mainProjectDll);
+            var niPdbFile = GivenThatWeWantToPublishReadyToRun.GetPDBFileName(mainProjectDll, framework);
 
             string[] expectedFiles = { SingleFile, PdbFile, niPdbFile };
             GetPublishDirectory(publishCommand)

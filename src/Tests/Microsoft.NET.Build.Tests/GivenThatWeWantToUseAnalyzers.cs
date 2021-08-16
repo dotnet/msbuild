@@ -97,7 +97,6 @@ namespace Microsoft.NET.Build.Tests
 
             //  Disable analyzers built in to the SDK so we can more easily test the ones coming from NuGet packages
             testProject.AdditionalProperties["EnableNETAnalyzers"] = "false";
-            testProject.AdditionalProperties["DisableFrameworkReferenceAnalyzers"] = "false";
 
             testProject.ProjectChanges.Add(project =>
             {

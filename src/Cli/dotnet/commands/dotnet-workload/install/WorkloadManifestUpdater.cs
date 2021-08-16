@@ -17,6 +17,7 @@ using Microsoft.DotNet.Configurer;
 using NuGet.Common;
 using System.Text.Json;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Cli;
 
 namespace Microsoft.DotNet.Workloads.Workload.Install
 {
@@ -138,7 +139,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             try
             {
-                var backgroundUpdatesDisabled = bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE"), out var disableEnvVar) && disableEnvVar;
+                var backgroundUpdatesDisabled = bool.TryParse(Environment.GetEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
                 var adUpdatesFile = GetAdvertisingWorkloadsFilePath(CliFolderPathCalculator.DotnetHomePath);
                 if (!backgroundUpdatesDisabled && File.Exists(adUpdatesFile))
                 {
@@ -387,7 +388,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             var sentinalPath = GetAdvertisingManifestSentinalPath();
             int updateIntervalHours;
-            if (!int.TryParse(_getEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS"), out updateIntervalHours))
+            if (!int.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_INTERVAL_HOURS), out updateIntervalHours))
             {
                 updateIntervalHours = 24;
             }
@@ -438,7 +439,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         private bool BackgroundUpdatesAreDisabled() =>
-            bool.TryParse(_getEnvironmentVariable("DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE"), out var disableEnvVar) && disableEnvVar;
+            bool.TryParse(_getEnvironmentVariable(EnvironmentVariableNames.WORKLOAD_UPDATE_NOTIFY_DISABLE), out var disableEnvVar) && disableEnvVar;
 
         private string GetAdvertisingManifestSentinalPath() => Path.Combine(_userHome, ".dotnet", ".workloadAdvertisingManifestSentinal");
 

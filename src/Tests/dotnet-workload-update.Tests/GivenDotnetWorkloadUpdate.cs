@@ -275,7 +275,7 @@ namespace Microsoft.DotNet.Cli.Workload.Update.Tests
 ");
 
             var exceptionThrown = Assert.Throws<GracefulException>(() => new WorkloadUpdateCommand(updateParseResult, reporter: _reporter, dotnetDir: dotnetRoot));
-            exceptionThrown.Message.Should().Contain("not compatible with workload manifests");
+            exceptionThrown.Message.Should().Contain(string.Format(Workloads.Workload.Install.LocalizableStrings.IncompatibleManifests, "7.0.100"));
         }
 
         [Fact]

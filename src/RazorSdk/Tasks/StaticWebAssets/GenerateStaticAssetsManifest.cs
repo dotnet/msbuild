@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         public string ManifestType { get; set; }
 
         [Required]
-        public ITaskItem[] RelatedManifests { get; set; }
+        public ITaskItem[] ReferencedProjectsConfigurations { get; set; }
 
         [Required]
         public ITaskItem[] DiscoveryPatterns { get; set; }
@@ -53,19 +53,13 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             {
                 var assets = Assets.OrderBy(a => a.GetMetadata("FullPath")).Select(StaticWebAsset.FromTaskItem);
 
-                var relatedManifests = RelatedManifests.OrderBy(a => a.GetMetadata("FullPath"))
-                    .Select(ComputeManifestReference)
-                    .Where(r => r != null)
-                    .ToArray();
-
-                if (Log.HasLoggedErrors)
-                {
-                    return false;
-                }
-
                 var discoveryPatterns = DiscoveryPatterns
                     .OrderBy(a => a.ItemSpec)
-                    .Select(ComputeDiscoveryPattern)
+                    .Select(StaticWebAssetsManifest.DiscoveryPattern.FromTaskItem)
+                    .ToArray();
+
+                var referencedProjectsConfiguration = ReferencedProjectsConfigurations.OrderBy(a => a.ItemSpec)
+                    .Select(StaticWebAssetsManifest.ReferencedProjectConfiguration.FromTaskItem)
                     .ToArray();
 
                 PersistManifest(
@@ -74,7 +68,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                         BasePath,
                         Mode,
                         ManifestType,
-                        relatedManifests,
+                        referencedProjectsConfiguration,
                         discoveryPatterns,
                         assets.ToArray()));
             }
@@ -84,52 +78,6 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 Log.LogErrorFromException(ex);
             }
             return !Log.HasLoggedErrors;
-        }
-
-        private StaticWebAssetsManifest.DiscoveryPattern ComputeDiscoveryPattern(ITaskItem pattern)
-        {
-            var name = pattern.ItemSpec;
-            var contentRoot = pattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.ContentRoot));
-            var basePath = pattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.BasePath));
-            var glob = pattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Pattern));
-
-            return StaticWebAssetsManifest.DiscoveryPattern.Create(name, contentRoot, basePath, glob);
-        }
-
-        private StaticWebAssetsManifest.ManifestReference ComputeManifestReference(ITaskItem reference)
-        {
-            var identity = reference.GetMetadata("FullPath");
-            var source = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.Source));
-            var manifestType = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.ManifestType));
-            var projectFile = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.ProjectFile));
-            var publishTarget = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.PublishTarget));
-            var additionalPublishProperties = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.AdditionalPublishProperties));
-            var additionalPublishPropertiesToRemove = reference.GetMetadata(nameof(StaticWebAssetsManifest.ManifestReference.AdditionalPublishPropertiesToRemove));
-
-            if (!File.Exists(identity))
-            {
-                if (!StaticWebAssetsManifest.ManifestTypes.IsPublish(manifestType))
-                {
-                    Log.LogError("Manifest '{0}' for project '{1}' with type '{2}' does not exist.", identity, source, manifestType);
-                    return null;
-                }
-
-                var publishManifest = StaticWebAssetsManifest.ManifestReference.Create(identity, source, manifestType, projectFile, "");
-                publishManifest.PublishTarget = publishTarget;
-                publishManifest.AdditionalPublishProperties = additionalPublishProperties;
-                publishManifest.AdditionalPublishPropertiesToRemove = additionalPublishPropertiesToRemove;
-
-                return publishManifest;
-            }
-
-            var relatedManifest = StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(identity));
-
-            var result = StaticWebAssetsManifest.ManifestReference.Create(identity, source, manifestType, projectFile, relatedManifest.Hash);
-            result.PublishTarget = publishTarget;
-            result.AdditionalPublishProperties = additionalPublishProperties;
-            result.AdditionalPublishPropertiesToRemove = additionalPublishPropertiesToRemove;
-
-            return result;
         }
 
         private void PersistManifest(StaticWebAssetsManifest manifest)

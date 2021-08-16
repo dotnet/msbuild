@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
 {
     public class GivenDotnetSlnRemove : SdkTest
     {
-        private Func<string, string> HelpText = (defaultVal) => $@"remove:
+        private Func<string, string> HelpText = (defaultVal) => $@"Description:
   Remove one or more projects from a solution file.
 
 Usage:

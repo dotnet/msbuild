@@ -38,13 +38,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_ContentIncludedByDefault Include="@(Content)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(DisableImplicitNamespaceImports_Worker)' != 'true'
-      And '$(TargetFrameworkIdentifier)' == '.NETCoreApp'
-      And $([MSBuild]::VersionGreaterThanOrEquals('$(_TargetFrameworkVersionWithoutV)', '6.0'))">
-    <Import Include="Microsoft.Extensions.Configuration" />
-    <Import Include="Microsoft.Extensions.DependencyInjection" />
-    <Import Include="Microsoft.Extensions.Hosting" />
-    <Import Include="Microsoft.Extensions.Logging" />
+  <ItemGroup Condition="'$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable'">
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.DependencyInjection" />
+    <Using Include="Microsoft.Extensions.Hosting" />
+    <Using Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
 
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="../targets/Microsoft.NET.Sdk.Web.DefaultItems.props" />

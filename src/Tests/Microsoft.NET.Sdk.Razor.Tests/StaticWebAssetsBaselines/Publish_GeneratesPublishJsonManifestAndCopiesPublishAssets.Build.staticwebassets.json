@@ -1,11 +1,11 @@
 {
   "Version": 1,
-  "Hash": "s30o0PExwjiMLIAlVdVgYISc2E/1Czf85yUraUyutfs=",
+  "Hash": "__hash__",
   "Source": "ComponentApp",
   "BasePath": "_content/ComponentApp",
   "Mode": "Default",
   "ManifestType": "Build",
-  "RelatedManifests": [],
+  "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
   "Assets": [
     {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -20,7 +21,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             string basePath,
             string mode,
             string manifestType,
-            ManifestReference[] relatedManifests,
+            ReferencedProjectConfiguration[] referencedProjectConfigurations,
             DiscoveryPattern[] discoveryPatterns,
             StaticWebAsset[] assets)
         {
@@ -31,7 +32,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 BasePath = basePath,
                 Mode = mode,
                 ManifestType = manifestType,
-                RelatedManifests = relatedManifests,
+                ReferencedProjectsConfiguration = referencedProjectConfigurations,
                 DiscoveryPatterns = discoveryPatterns,
                 Assets = assets
             };
@@ -48,7 +49,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             JsonSerializer.Serialize(writer, BasePath);
             JsonSerializer.Serialize(writer, Mode);
             JsonSerializer.Serialize(writer, ManifestType);
-            JsonSerializer.Serialize(writer, RelatedManifests);
+            JsonSerializer.Serialize(writer, ReferencedProjectsConfiguration);
             JsonSerializer.Serialize(writer, DiscoveryPatterns);
             JsonSerializer.Serialize(writer, Assets);
             writer.Flush();
@@ -58,6 +59,10 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             return Convert.ToBase64String(sha256.ComputeHash(stream));
         }
+
+        internal bool IsPublishManifest() => ManifestTypes.IsPublish(ManifestType);
+
+        internal bool IsCurrentProjectAsset(StaticWebAsset asset) => asset.HasSourceId(Source);
 
         public int Version { get; set; } = 1;
 
@@ -71,7 +76,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
         public string ManifestType { get; set; }
 
-        public ManifestReference[] RelatedManifests { get; set; }
+        public ReferencedProjectConfiguration[] ReferencedProjectsConfiguration { get; set; }
 
         public DiscoveryPattern[] DiscoveryPatterns { get; set; }
 
@@ -115,7 +120,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
         }
 
         public override bool Equals(object obj) => Equals(obj as StaticWebAssetsManifest);
-        public bool Equals(StaticWebAssetsManifest other) => 
+        public bool Equals(StaticWebAssetsManifest other) =>
             other != null
             && Version == other.Version
             && Hash == other.Hash
@@ -123,7 +128,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             && BasePath == other.BasePath
             && Mode == other.Mode
             && ManifestType == other.ManifestType
-            && EqualityComparer<ManifestReference[]>.Default.Equals(RelatedManifests, other.RelatedManifests)
+            && EqualityComparer<ReferencedProjectConfiguration[]>.Default.Equals(ReferencedProjectsConfiguration, other.ReferencedProjectsConfiguration)
             && EqualityComparer<DiscoveryPattern[]>.Default.Equals(DiscoveryPatterns, other.DiscoveryPatterns)
             && EqualityComparer<StaticWebAsset[]>.Default.Equals(Assets, other.Assets);
 
@@ -137,7 +142,7 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             hash.Add(BasePath);
             hash.Add(Mode);
             hash.Add(ManifestType);
-            hash.Add(RelatedManifests);
+            hash.Add(ReferencedProjectsConfiguration);
             hash.Add(DiscoveryPatterns);
             hash.Add(Assets);
             return hash.ToHashCode();
@@ -149,67 +154,79 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(BasePath);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Mode);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ManifestType);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ManifestReference[]>.Default.GetHashCode(RelatedManifests);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ReferencedProjectConfiguration[]>.Default.GetHashCode(ReferencedProjectsConfiguration);
             hashCode = hashCode * -1521134295 + EqualityComparer<DiscoveryPattern[]>.Default.GetHashCode(DiscoveryPatterns);
             hashCode = hashCode * -1521134295 + EqualityComparer<StaticWebAsset[]>.Default.GetHashCode(Assets);
             return hashCode;
 #endif
         }
 
-        public class ManifestReference
+        public class ReferencedProjectConfiguration
         {
-            internal static ManifestReference Create(string identity, string source, string manifestType, string projectFile, string hash)
+            internal static ReferencedProjectConfiguration Create(string identity, string source)
             {
-                return new ManifestReference()
+                return new ReferencedProjectConfiguration()
                 {
                     Identity = identity,
-                    Source = source,
-                    ManifestType = manifestType,
-                    ProjectFile = projectFile,
-                    Hash = hash,
+                    Source = source
                 };
             }
 
             public string Identity { get; set; }
 
+            public int Version { get; set; }
+
             public string Source { get; set; }
 
-            public string ManifestType { get; set; }
+            public string GetPublishAssetsTargets { get; set; }
 
-            public string ProjectFile { get; set; }
-
-            public string PublishTarget { get; set; }
-            
             public string AdditionalPublishProperties { get; set; }
 
             public string AdditionalPublishPropertiesToRemove { get; set; }
 
-            public string Hash { get; set; }
+            public string GetBuildAssetsTargets { get; set; }
 
-            public override bool Equals(object obj) => obj is ManifestReference reference
+            public string AdditionalBuildProperties { get; set; }
+
+            public string AdditionalBuildPropertiesToRemove { get; set; }
+
+            public override bool Equals(object obj) => obj is ReferencedProjectConfiguration reference
                 && Identity == reference.Identity
+                && Version == reference.Version
                 && Source == reference.Source
-                && ManifestType == reference.ManifestType
-                && ProjectFile == reference.ProjectFile
-                && PublishTarget == reference.PublishTarget
+                && GetBuildAssetsTargets == reference.GetBuildAssetsTargets
+                && AdditionalBuildProperties == reference.AdditionalBuildProperties
+                && AdditionalBuildPropertiesToRemove == reference.AdditionalBuildPropertiesToRemove
+                && GetPublishAssetsTargets == reference.GetPublishAssetsTargets
                 && AdditionalPublishProperties == reference.AdditionalPublishProperties
-                && AdditionalPublishPropertiesToRemove == reference.AdditionalPublishPropertiesToRemove
-                && Hash == reference.Hash;
+                && AdditionalPublishPropertiesToRemove == reference.AdditionalPublishPropertiesToRemove;
 
             public override int GetHashCode()
             {
 #if NET6_0_OR_GREATER
-                return HashCode.Combine(Identity, Source, ManifestType, Hash, ProjectFile, PublishTarget, AdditionalPublishProperties, AdditionalPublishPropertiesToRemove);
+                var hashCode = new HashCode();
+                hashCode.Add(Identity);
+                hashCode.Add(Version);
+                hashCode.Add(Source);
+                hashCode.Add(GetBuildAssetsTargets);
+                hashCode.Add(AdditionalBuildProperties);
+                hashCode.Add(AdditionalBuildPropertiesToRemove);
+                hashCode.Add(GetPublishAssetsTargets);
+                hashCode.Add(AdditionalPublishProperties);
+                hashCode.Add(AdditionalPublishPropertiesToRemove);
+
+                return hashCode.ToHashCode();
 #else
                 int hashCode = -868952447;
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Identity);
+                hashCode = hashCode * -1521134295 + EqualityComparer<int>.Default.GetHashCode(Version);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Source);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ManifestType);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ProjectFile);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(PublishTarget);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(GetBuildAssetsTargets);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AdditionalBuildProperties);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AdditionalBuildPropertiesToRemove);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(GetPublishAssetsTargets);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AdditionalPublishProperties);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AdditionalPublishPropertiesToRemove);
-                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Hash);
                 return hashCode;
 #endif
             }
@@ -217,31 +234,43 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             internal ITaskItem ToTaskItem()
             {
                 var result = new TaskItem(Identity);
+
+                result.SetMetadata(nameof(Version), Version.ToString(CultureInfo.InvariantCulture));
                 result.SetMetadata(nameof(Source), Source);
-                result.SetMetadata(nameof(ManifestType), ManifestType);
-                result.SetMetadata(nameof(ProjectFile), ProjectFile);
-                result.SetMetadata(nameof(PublishTarget), PublishTarget);
+                result.SetMetadata(nameof(GetBuildAssetsTargets), GetBuildAssetsTargets);
+                result.SetMetadata(nameof(AdditionalBuildProperties), AdditionalBuildProperties);
+                result.SetMetadata(nameof(AdditionalBuildPropertiesToRemove), AdditionalBuildPropertiesToRemove);
+                result.SetMetadata(nameof(GetPublishAssetsTargets), GetPublishAssetsTargets);
                 result.SetMetadata(nameof(AdditionalPublishProperties), AdditionalPublishProperties);
                 result.SetMetadata(nameof(AdditionalPublishPropertiesToRemove), AdditionalPublishPropertiesToRemove);
-                result.SetMetadata(nameof(Hash), Hash);
+
+                return result;
+            }
+
+            internal static ReferencedProjectConfiguration FromTaskItem(ITaskItem arg)
+            {
+                var result = new ReferencedProjectConfiguration();
+
+                result.Identity = arg.GetMetadata("FullPath");
+                result.Version = int.Parse(arg.GetMetadata(nameof(Version)), CultureInfo.InvariantCulture);
+                result.Source = arg.GetMetadata(nameof(Source));
+                result.GetBuildAssetsTargets = arg.GetMetadata(nameof(GetBuildAssetsTargets));
+                result.AdditionalBuildProperties = arg.GetMetadata(nameof(AdditionalBuildProperties));
+                result.AdditionalBuildPropertiesToRemove = arg.GetMetadata(nameof(AdditionalBuildPropertiesToRemove));
+                result.GetPublishAssetsTargets = arg.GetMetadata(nameof(GetPublishAssetsTargets));
+                result.AdditionalPublishProperties = arg.GetMetadata(nameof(AdditionalPublishProperties));
+                result.AdditionalPublishPropertiesToRemove = arg.GetMetadata(nameof(AdditionalPublishPropertiesToRemove));
+
                 return result;
             }
         }
 
+        [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
         public class DiscoveryPattern
         {
-            public static DiscoveryPattern Create(string name, string contentRoot, string basePath, string pattern)
-            {
-                return new DiscoveryPattern
-                {
-                    Name = name,
-                    ContentRoot = contentRoot,
-                    BasePath = basePath,
-                    Pattern = pattern,
-                };
-            }
-
             public string Name { get; set; }
+
+            public string Source { get; set; }
 
             public string ContentRoot { get; set; }
 
@@ -249,9 +278,10 @@ namespace Microsoft.AspNetCore.Razor.Tasks
 
             public string Pattern { get; set; }
 
-            public override bool Equals(object obj) => 
+            public override bool Equals(object obj) =>
                 obj is DiscoveryPattern pattern
                 && Name == pattern.Name
+                && Source == pattern.Source
                 && ContentRoot == pattern.ContentRoot
                 && BasePath == pattern.BasePath
                 && Pattern == pattern.Pattern;
@@ -259,10 +289,11 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             public override int GetHashCode()
             {
 #if NET6_0_OR_GREATER
-                return HashCode.Combine(Name, ContentRoot, BasePath, Pattern);
+                return HashCode.Combine(Name, Source, ContentRoot, BasePath, Pattern);
 #else
                 int hashCode = 1513180540;
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Source);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ContentRoot);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(BasePath);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Pattern);
@@ -277,9 +308,35 @@ namespace Microsoft.AspNetCore.Razor.Tasks
                 result.SetMetadata(nameof(ContentRoot), ContentRoot);
                 result.SetMetadata(nameof(BasePath), BasePath);
                 result.SetMetadata(nameof(Pattern), Pattern);
+                result.SetMetadata(nameof(Source), Source);
 
                 return result;
             }
+
+            internal static bool HasSourceId(ITaskItem pattern, string source) =>
+                HasSourceId(pattern.GetMetadata(nameof(Source)), source);
+
+            internal static bool HasSourceId(string candidate, string source) =>
+                string.Equals(candidate, source, StringComparison.Ordinal);
+
+            internal bool HasSourceId(string source) => HasSourceId(Source, source);
+
+            internal static DiscoveryPattern FromTaskItem(ITaskItem pattern)
+            {
+                var result = new DiscoveryPattern();
+
+                result.Name = pattern.ItemSpec;
+                result.Source = pattern.GetMetadata(nameof(Source));
+                result.BasePath = pattern.GetMetadata(nameof(BasePath));
+                result.ContentRoot = pattern.GetMetadata(nameof(ContentRoot));
+                result.Pattern = pattern.GetMetadata(nameof(Pattern));
+
+                return result;
+            }
+
+            public override string ToString() => string.Join(" - ", Name, Source, Pattern, BasePath, ContentRoot);
+
+            private string GetDebuggerDisplay() => ToString();
         }
 
         public class ManifestTypes
@@ -299,6 +356,22 @@ namespace Microsoft.AspNetCore.Razor.Tasks
             public const string Default = nameof(Default);
             public const string Root = nameof(Root);
             public const string SelfContained = nameof(SelfContained);
+
+            internal static bool IsDefault(string projectMode) =>
+                string.Equals(projectMode, Default, StringComparison.Ordinal);
+
+            internal static bool IsRoot(string projectMode) =>
+                string.Equals(Root, projectMode, StringComparison.Ordinal);
+
+            internal static bool ShouldIncludeAssetInCurrentProject(StaticWebAsset asset, string projectMode)
+            {
+                return IsRoot(projectMode) && !asset.IsForReferencedProjectsOnly();
+            }
+
+            internal static bool ShouldIncludeAssetAsReference(StaticWebAsset asset, string projectMode) =>
+                IsRoot(projectMode) && !asset.IsForReferencedProjectsOnly() ||
+                IsDefault(projectMode) && !asset.IsForCurrentProjectOnly();
+
         }
 
         private string GetDebuggerDisplay()

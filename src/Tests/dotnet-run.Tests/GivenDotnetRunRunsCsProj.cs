@@ -247,6 +247,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             new DotnetCommand(Log, "run")
                 .WithWorkingDirectory(rootPath)
+                .WithEnvironmentVariable("ImplicitUsings", "enable") // Removing tracked as part of https://github.com/dotnet/sdk/issues/19696
                 .Execute("--no-restore")
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello, World");

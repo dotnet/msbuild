@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Cli.List.Reference.Tests
 {
     public class GivenDotnetListReference : SdkTest
     {
-        private Func<string, string> ListProjectReferenceCommandHelpText = (defaultVal) => $@"reference:
+        private Func<string, string> ListProjectReferenceCommandHelpText = (defaultVal) => $@"Description:
   List all project-to-project references of the project.
 
 Usage:
@@ -30,7 +30,7 @@ Arguments:
 Options:
   -?, -h, --help    Show command line help.";
 
-        private Func<string, string> ListCommandHelpText = (defaultVal) => $@"list:
+        private Func<string, string> ListCommandHelpText = (defaultVal) => $@"Description:
   List references or packages of a .NET project.
 
 Usage:

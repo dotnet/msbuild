@@ -264,6 +264,11 @@
         <target state="translated">Vítěze nebylo možné určit, protože {0} není sestavení.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotGetPackVersionFromWorkloadManifests">
+        <source>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</source>
+        <target state="new">NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</target>
+        <note>{StrBegin="NETSDK1181: "}</note>
+      </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
         <target state="translated">NETSDK1042: Ze souboru {0} nebylo možné načíst manifest platformy, protože neexistoval.</target>

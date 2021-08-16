@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Add.Reference.Tests
 {
     public class GivenDotnetAddReference : SdkTest
     {
-        private Func<string, string, string> HelpText = (defaultVal, frameworkVal) => $@"reference:
+        private Func<string, string, string> HelpText = (defaultVal, frameworkVal) => $@"Description:
   Add a project-to-project reference to the project.
 
 Usage:
@@ -30,11 +30,11 @@ Arguments:
   <PROJECT_PATH>    The paths to the projects to add as references.
 
 Options:
-  -f, --framework <{frameworkVal}>    Add the reference only when targeting a specific framework.
+  -f, --framework <FRAMEWORK>    Add the reference only when targeting a specific framework.
   --interactive                  Allows the command to stop and wait for user input or action (for example to complete authentication).
   -?, -h, --help                 Show command line help.";
 
-        private Func<string, string> AddCommandHelpText = (defaultVal) => $@"add:
+        private Func<string, string> AddCommandHelpText = (defaultVal) => $@"Description:
   .NET Add Command
 
 Usage:

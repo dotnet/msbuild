@@ -22,6 +22,11 @@
         <target state="new">The latest versions of .NET can be installed from https://aka.ms/dotnet-core-download. For more information about .NET lifecycles, see https://aka.ms/dotnet-core-support.</target>
         <note />
       </trans-unit>
+      <trans-unit id="HostFxrCouldNotBeLoaded">
+        <source>Could not load hostfxr from '{0}'.</source>
+        <target state="new">Could not load hostfxr from '{0}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MaintenanceMessage">
         <source>.NET {0} is going out of support soon.</source>
         <target state="new">.NET {0} is going out of support soon.</target>
@@ -50,6 +55,11 @@
       <trans-unit id="ReleasesLibraryFailed">
         <source>Unable to get releases information: {0}</source>
         <target state="new">Unable to get releases information: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimePropertyNotFound">
+        <source>Runtime property 'HOSTFXR_PATH' was not set or empty.</source>
+        <target state="new">Runtime property 'HOSTFXR_PATH' was not set or empty.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeSectionHeader">

@@ -828,4 +828,8 @@ You may need to build the project on another operating system or architecture, o
     <value>NETSDK1180: Specified runtime identifier '{0}'' implies Windows 7 compatibility. Single File publishing is not compatible with Windows 7.</value>
     <comment>{StrBegin="NETSDK1180: "}</comment>
   </data>
+  <data name="CouldNotGetPackVersionFromWorkloadManifests" xml:space="preserve">
+    <value>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</value>
+    <comment>{StrBegin="NETSDK1181: "}</comment>
+  </data>
 </root>

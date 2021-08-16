@@ -3,10 +3,13 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using FluentAssertions;
 using Microsoft.AspNetCore.Razor.Tasks;
+using Microsoft.Build.Evaluation;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -247,7 +250,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var projectDirectory = CreateAspNetSdkTestAsset(testAsset);
 
             var publish = new PublishCommand(Log, projectDirectory.TestRoot);
-            publish.Execute().Should().Pass();
+            publish.WithWorkingDirectory(projectDirectory.TestRoot);
+            publish.Execute("/bl").Should().Pass();
 
             var publishOutputPath = publish.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
@@ -419,18 +423,107 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
 
             // GenerateStaticWebAssetsManifest should copy the file to the output folder.
-            var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.json");
+            var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.runtime.json");
             new FileInfo(finalPath).Should().Exist();
             AssertManifest(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
                 LoadBuildManifest());
 
             AssertBuildAssets(
-                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(finalPath)),
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
                 outputPath,
                 intermediateOutputPath);
 
             var appBundle = new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "AppWithPackageAndP2PReference.styles.css"));
+            appBundle.Should().Exist();
+
+            appBundle.Should().Contain("_content/ClassLibrary/ClassLibrary.bundle.scp.css");
+            appBundle.Should().Contain("_content/PackageLibraryDirectDependency/PackageLibraryDirectDependency.bundle.scp.css");
+        }
+
+        [Fact]
+        public void ScopedCss_IsBackwardsCompatible_WithPreviousVersions()
+        {
+            var testAsset = "RazorAppWithPackageAndP2PReference";
+            ProjectDirectory = CreateAspNetSdkTestAsset(testAsset)
+                .WithProjectChanges((project, document) =>
+                {
+                    if (Path.GetFileName(project) == "AnotherClassLib.csproj")
+                    {
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.1");
+                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                    }
+                    if (Path.GetFileName(project) == "ClassLibrary.csproj")
+                    {
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.0");
+                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                    }
+                });
+
+            var build = new BuildCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
+            build.WithWorkingDirectory(ProjectDirectory.TestRoot);
+            build.Execute("/bl").Should().Pass();
+
+            var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
+            var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
+
+            // GenerateStaticWebAssetsManifest should copy the file to the output folder.
+            var finalPath = Path.Combine(outputPath, "AppWithPackageAndP2PReference.staticwebassets.runtime.json");
+            new FileInfo(finalPath).Should().Exist();
+            AssertManifest(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                LoadBuildManifest());
+
+            AssertBuildAssets(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.build.json"))),
+                outputPath,
+                intermediateOutputPath);
+
+            var appBundle = new FileInfo(Path.Combine(intermediateOutputPath, "scopedcss", "bundle", "AppWithPackageAndP2PReference.styles.css"));
+            appBundle.Should().Exist();
+
+            appBundle.Should().Contain("_content/ClassLibrary/ClassLibrary.bundle.scp.css");
+            appBundle.Should().Contain("_content/PackageLibraryDirectDependency/PackageLibraryDirectDependency.bundle.scp.css");
+        }
+
+        [Fact]
+        public void ScopedCss_PublishIsBackwardsCompatible_WithPreviousVersions()
+        {
+            var testAsset = "RazorAppWithPackageAndP2PReference";
+            ProjectDirectory = CreateAspNetSdkTestAsset(testAsset)
+                .WithProjectChanges((project, document) =>
+                {
+                    if (Path.GetFileName(project) == "AnotherClassLib.csproj")
+                    {
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.1");
+                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                    }
+                    if (Path.GetFileName(project) == "ClassLibrary.csproj")
+                    {
+                        document.Descendants("TargetFramework").Single().ReplaceNodes("netcoreapp3.0");
+                        document.Descendants("PropertyGroup").First().Add(new XElement("RazorLangVersion", "3.0"));
+                    }
+                });
+
+            var build = new PublishCommand(ProjectDirectory, "AppWithPackageAndP2PReference");
+            build.WithWorkingDirectory(ProjectDirectory.TestRoot);
+            build.Execute("/bl").Should().Pass();
+
+            var intermediateOutputPath = build.GetIntermediateDirectory(DefaultTfm, "Debug").ToString();
+            var outputPath = build.GetOutputDirectory(DefaultTfm, "Debug").ToString();
+
+            var finalPath = Path.Combine(intermediateOutputPath, "staticwebassets.publish.json");
+            new FileInfo(finalPath).Should().Exist();
+            AssertManifest(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.publish.json"))),
+                LoadPublishManifest());
+
+            AssertPublishAssets(
+                StaticWebAssetsManifest.FromJsonBytes(File.ReadAllBytes(Path.Combine(intermediateOutputPath, "staticwebassets.publish.json"))),
+                outputPath,
+                intermediateOutputPath);
+
+            var appBundle = new FileInfo(Path.Combine(outputPath, "wwwroot", "AppWithPackageAndP2PReference.styles.css"));
             appBundle.Should().Exist();
 
             appBundle.Should().Contain("_content/ClassLibrary/ClassLibrary.bundle.scp.css");

@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Help.Tests
     public class GivenThatIWantToShowHelpForDotnetHelpCommand : SdkTest
     {
         private const string HelpText =
-@"help
+@"Description:
   .NET CLI help utility
 
 Usage:

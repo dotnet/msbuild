@@ -264,6 +264,11 @@
         <target state="translated">Impossible de déterminer un gagnant, car '{0}' n'est pas un assembly.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotGetPackVersionFromWorkloadManifests">
+        <source>NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</source>
+        <target state="new">NETSDK1181: Error getting pack version: Pack '{0}' was not present in workload manifests.</target>
+        <note>{StrBegin="NETSDK1181: "}</note>
+      </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
         <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
         <target state="translated">NETSDK1042: Impossible de charger PlatformManifest à partir de '{0}', car il n'existe pas.</target>

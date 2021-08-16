@@ -33,4 +33,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);$(VersionlessImplicitFrameworkDefine);$(ImplicitFrameworkDefine);$(BackwardsCompatFrameworkDefine)</DefineConstants>
   </PropertyGroup>
+
+  <!-- Enable hot reload in 6.0 and newer C# projects -->
+  <ItemGroup Condition="'$(SupportsHotReload)' != 'false' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), '6.0'))">
+    <ProjectCapability Include="SupportsHotReload" />
+  </ItemGroup>
 </Project>

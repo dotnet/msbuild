@@ -1,0 +1,241 @@
+<!--
+***********************************************************************************************
+Microsoft.NET.Sdk.Razor.JsModule.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="14.0">
+
+  <!-- General description of the JS modules pipeline and its integration with static web assets:
+  * JS module files get discovered and put into a JsModule itemgroup.
+  * Any file with a module.lib.js extension gets processed as a JS module file. That means:
+    * It will be included in a generated list of module files "<project-name>.modules.json"
+    * Users can define their own convention by adding their own JsModule file to the item group.
+    * For web applications (Blazor webassembly and Blazor server) the main project is responsible for producing a bundle <project-name>.modules.json that will contain the list of modules to load
+  * For packing in razor class libraries, the JsModule files will get processed and added as static web assets to the pack.
+
+  Integration with static web assets:
+  * The JS modules will be added as regular static web assets to participate in the pipeline.
+    * Generated JS module files will have a unique extension '.module.lib.js' that will be used by the pipeline to identify them as such unless otherwise identified.
+  * In razor class libraries these generated files will be packaged normally as part of the static web assets process and will be accessible at <<StaticWebAssetsBasePath>>/<<RelativePath>>.
+    * Using the extension is useful as it allows for third party tooling to do alternative processing in an easy way, these files will be
+      removed off from the list of static web assets when the default bundling is enabled, so they won't show up in the final output.
+  -->
+
+  <UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.GenerateJsModuleManifest" AssemblyFile="$(RazorSdkBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.ApplyJsModules" AssemblyFile="$(RazorSdkBuildTasksAssembly)" />
+
+  <PropertyGroup>
+    <GenerateJSModuleManifest Condition="$(GenerateJSModuleManifest) == ''">true</GenerateJSModuleManifest>
+    <ResolveStaticWebAssetsInputsDependsOn>
+      $(ResolveStaticWebAssetsInputsDependsOn);
+      _AddJsModulesToStaticWebAssets;
+    </ResolveStaticWebAssetsInputsDependsOn>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GenerateJSModuleManifest)' == 'true'">
+    <StaticWebAssetsPrepareForRunDependsOn>
+      $(StaticWebAssetsPrepareForRunDependsOn);
+      _GenerateBuildJsModuleManifest;
+    </StaticWebAssetsPrepareForRunDependsOn>
+
+    <StaticWebAssetsPrepareForPublishDependsOn>
+      $(StaticWebAssetsPrepareForPublishDependsOn);
+      _GeneratePublishJsModuleManifest;
+    </StaticWebAssetsPrepareForPublishDependsOn>
+
+    <ResolveStaticWebAssetsInputsDependsOn>
+      $(ResolveStaticWebAssetsInputsDependsOn);
+      _AddBuildJsModuleManifest;
+    </ResolveStaticWebAssetsInputsDependsOn>
+
+    <ResolvePublishStaticWebAssetsDependsOn>
+      $(ResolvePublishStaticWebAssetsDependsOn);
+      _AddPublishJsModuleManifest
+    </ResolvePublishStaticWebAssetsDependsOn>
+
+  </PropertyGroup>
+
+  <Target Name="_ResolveJsModuleInputs" BeforeTargets="AssignRazorComponentTargetPaths;AssignRazorGenerateTargetPaths" DependsOnTargets="ResolveProjectStaticWebAssets">
+
+    <ItemGroup>
+      <_JSModuleCandidates Include="@(StaticWebAsset)" Condition="'%(SourceType)' == 'Discovered'" />
+
+      <!-- To avoid situations where the content is defined twice, if the user defines the JS module explicitly as
+           a content item, we'll prefer that over the potential item in the None item group
+      -->
+      <_JSFileModuleCandidates Include="@(Content)" />
+      <_JSFileModuleNoneCandidates Include="@(None)" Exclude="@(Content)" />
+      <_JSFileModuleCandidates Include="@(_JSFileModuleNoneCandidates)" />
+    </ItemGroup>
+
+    <!-- This runs after we've discovered the original set of files, we already found the assets in the wwwroot, and here we just need
+         to identify them and correctly clasify them. Modules from other projects or packages will already be correctly tagged when we
+         retrieve them.
+    -->
+    <DefineStaticWebAssets Condition="@(_JSModuleCandidates) != ''"
+      CandidateAssets="@(_JSModuleCandidates)"
+      AssetTraitName="JSModule"
+      AssetTraitValue="JSLibraryModule"
+      RelativePathFilter="**/$(PackageId).lib.module.js"
+      PropertyOverrides="AssetTraitName;AssetTraitValue"
+    >
+      <Output TaskParameter="Assets" ItemName="_JSModuleStaticWebAsset" />
+    </DefineStaticWebAssets>
+
+    <!-- Find JS module files -->
+    <!-- **/*.razor.js -->
+    <DiscoverStaticWebAssets Candidates="@(_JSFileModuleCandidates)"
+      SourceId="$(PackageId)"
+      Pattern="**/*.razor.js"
+      ContentRoot="$(MSBuildProjectDirectory)"
+      BasePath="$(StaticWebAssetBasePath)"
+    >
+      <Output TaskParameter="DiscoveredStaticWebAssets" ItemName="_ComponentJSModule" />
+    </DiscoverStaticWebAssets>
+
+    <!-- **/*.cshtml.js -->
+    <DiscoverStaticWebAssets Candidates="@(_JSFileModuleCandidates)"
+      SourceId="$(PackageId)"
+      Pattern="**/*.cshtml.js"
+      ContentRoot="$(MSBuildProjectDirectory)"
+      BasePath="$(StaticWebAssetBasePath)"
+    >
+      <Output TaskParameter="DiscoveredStaticWebAssets" ItemName="_MvcJSModule" />
+    </DiscoverStaticWebAssets>
+
+    <ApplyJsModules RazorComponents="@(RazorComponent)" RazorGenerate="@(RazorGenerate)" JSFileModuleCandidates="@(_ComponentJSModule);@(_MvcJSModule)">
+      <Output TaskParameter="JsFileModules" ItemName="_JsFileModuleStaticWebAsset" />
+    </ApplyJsModules>  
+
+    <ItemGroup>
+      <!-- Remove the items from their original groups since they've now become a StaticWebAsset -->
+      <Content Remove="@(_JsFileModuleStaticWebAsset->'%(OriginalItemSpec)')" />
+      <None Remove="@(_JsFileModuleStaticWebAsset->'%(OriginalItemSpec)')" />
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="_AddJsModulesToStaticWebAssets" DependsOnTargets="_ResolveJsModuleInputs">
+    <ItemGroup>
+      <StaticWebAsset Include="@(_ComponentJSModule)" />
+      <StaticWebAsset Include="@(_MvcJSModule)" />
+
+      <!-- Update the discovered initializers -->
+      <StaticWebAsset Remove="@(_JSModuleStaticWebAsset)" />
+      <StaticWebAsset Include="@(_JSModuleStaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- BuildManifest manifest -->
+
+  <Target Name="_ResolveBuildJsModuleManifest" DependsOnTargets="_ResolveJsModuleInputs;ResolveReferencedProjectsStaticWebAssets">
+    <ItemGroup>
+      <_ExistingBuildJSModules
+        Include="@(StaticWebAsset)"
+        Condition="'%(StaticWebAsset.AssetTraitName)' == 'JSModule' and '%(StaticWebAsset.AssetTraitValue)' == 'JSLibraryModule' and '%(AssetKind)' != 'Publish'" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_JSModuleManifestPath>$(IntermediateOutputPath)jsmodules\jsmodules.build.manifest.json</_JSModuleManifestPath>
+      <JSModuleManifestRelativePath Condition="'$(JSModuleManifestRelativePath)' == ''">$(PackageId).modules.json</JSModuleManifestRelativePath>      
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_JsModuleBuildManifestCandidate Include="$(IntermediateOutputPath)jsmodules\jsmodules.build.manifest.json">
+        <RelativePath>$(JSModuleManifestRelativePath)</RelativePath>
+      </_JsModuleBuildManifestCandidate>
+    </ItemGroup>
+
+    <DefineStaticWebAssets Condition="@(_ExistingBuildJSModules) != ''"
+      CandidateAssets="@(_JsModuleBuildManifestCandidate)"
+      SourceId="$(PackageId)"
+      SourceType="Computed"
+      BasePath="$(StaticWebAssetBasePath)"
+      ContentRoot="$(IntermediateOutputPath)jsmodules\"
+      AssetKind="Build"
+      AssetMode="CurrentProject"
+      AssetRole="Primary"
+      AssetTraitName="JSModule"
+      AssetTraitValue="JSModuleManifest"
+    >
+      <Output TaskParameter="Assets" ItemName="_BuildJsModuleManifestStaticWebAsset" />
+    </DefineStaticWebAssets>
+
+  </Target>
+
+  <Target Name="_AddBuildJsModuleManifest" DependsOnTargets="_ResolveBuildJsModuleManifest">
+    <ItemGroup Condition="'$(GenerateJSModuleManifest)' == 'true'">
+      <StaticWebAsset Include="@(_BuildJsModuleManifestStaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GenerateBuildJsModuleManifest" Condition="@(_ExistingBuildJSModules) != ''">
+    <GenerateJsModuleManifest Condition="'$(GenerateJSModuleManifest)' == 'true'" OutputFile="@(_JsModuleBuildManifestCandidate)" JsModules="@(_ExistingBuildJSModules)" />
+
+    <ItemGroup>
+      <FileWrites Include="@(_JsModuleBuildManifestCandidate)" />
+    </ItemGroup>
+
+  </Target>
+
+  <!-- Publish manifest -->
+
+  <Target Name="_ResolvePublishJsModuleManifest" DependsOnTargets="ComputeReferencedProjectsPublishAssets">
+    <ItemGroup>
+      <_ExistingPublishJSModules
+        Include="@(StaticWebAsset)"
+        Condition="'%(StaticWebAsset.AssetTraitName)' == 'JSModule' and '%(StaticWebAsset.AssetTraitValue)' == 'JSLibraryModule' and '%(AssetKind)' != 'Build'" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_JSModuleManifestPath>$(IntermediateOutputPath)jsmodules\jsmodules.publish.manifest.json</_JSModuleManifestPath>
+      <JSModuleManifestRelativePath Condition="'$(JSModuleManifestRelativePath)' == ''">$(PackageId).modules.json</JSModuleManifestRelativePath>      
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_JsModulePublishManifestCandidate Include="$(IntermediateOutputPath)jsmodules\jsmodules.publish.manifest.json">
+        <RelativePath>$(JSModuleManifestRelativePath)</RelativePath>
+      </_JsModulePublishManifestCandidate>
+    </ItemGroup>
+
+    <DefineStaticWebAssets Condition="@(_ExistingPublishJSModules) != ''"
+      CandidateAssets="@(_JsModulePublishManifestCandidate)"
+      SourceId="$(PackageId)"
+      SourceType="Computed"
+      BasePath="$(StaticWebAssetBasePath)"
+      ContentRoot="$(IntermediateOutputPath)jsmodules\"
+      AssetKind="Publish"
+      AssetMode="CurrentProject"
+      AssetRole="Primary"
+      AssetTraitName="JSModule"
+      AssetTraitValue="JSModuleManifest"
+    >
+      <Output TaskParameter="Assets" ItemName="_PublishJsModuleManifestStaticWebAsset" />
+    </DefineStaticWebAssets>
+
+  </Target>
+
+  <Target Name="_AddPublishJsModuleManifest" DependsOnTargets="_ResolvePublishJsModuleManifest">
+    <ItemGroup>
+      <StaticWebAsset Condition="'$(GenerateJSModuleManifest)' == 'true'" Include="@(_PublishJsModuleManifestStaticWebAsset)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GeneratePublishJsModuleManifest" Condition="@(_ExistingPublishJSModules) != ''">
+    <GenerateJsModuleManifest Condition="'$(GenerateJSModuleManifest)' == 'true'" OutputFile="@(_JsModulePublishManifestCandidate)" JsModules="@(_ExistingPublishJSModules)" />
+
+    <ItemGroup>
+      <FileWrites Include="@(_JsModulePublishManifestCandidate)" />
+    </ItemGroup>
+
+  </Target>
+
+</Project>

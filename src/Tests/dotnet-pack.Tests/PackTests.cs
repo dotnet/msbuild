@@ -39,8 +39,8 @@ namespace Microsoft.DotNet.Pack.Tests
             var outputDir = new DirectoryInfo(Path.Combine(testInstance.Path, "bin", "Test"));
 
             outputDir.Should().Exist()
-                          .And.HaveFiles(new [] 
-                                            { 
+                          .And.HaveFiles(new []
+                                            {
                                                 "TestLibraryWithConfiguration.1.0.0.nupkg"
                                             });
         }
@@ -59,8 +59,8 @@ namespace Microsoft.DotNet.Pack.Tests
                 .Should().Pass();
 
             outputDir.Should().Exist()
-                          .And.HaveFiles(new [] 
-                                            { 
+                          .And.HaveFiles(new []
+                                            {
                                                 "TestLibraryWithConfiguration.1.0.0.nupkg"
                                             });
         }
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Pack.Tests
             var output = new FileInfo(Path.Combine(testInstance.Path,
                                      "bin", "Debug", "netstandard1.5",
                                      "TestLibraryWithConfiguration.dll"));
-            
+
             var informationalVersion = PeReaderUtils.GetAssemblyAttributeValue(output.FullName, "AssemblyInformationalVersionAttribute");
 
             informationalVersion.Should().NotBeNull()
@@ -88,7 +88,7 @@ namespace Microsoft.DotNet.Pack.Tests
             var outputPackage = new FileInfo(Path.Combine(testInstance.Path,
                                             "bin", "Debug",
                                             "TestLibraryWithConfiguration.1.0.0-85.nupkg"));
-            
+
             outputPackage.Should().Exist();
         }
 
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Pack.Tests
             var outputPackage = new FileInfo(Path.Combine(testInstance.Path,
                                             "bin", "Debug",
                                             "EndToEndTestApp.1.0.0.nupkg"));
-            
+
             outputPackage.Should().Exist();
 
             ZipFile.Open(outputPackage.FullName, ZipArchiveMode.Read)
@@ -127,11 +127,11 @@ namespace Microsoft.DotNet.Pack.Tests
                 .Execute()
                 .Should().Pass();
 
-            
+
             var outputPackage = new FileInfo(Path.Combine(testInstance.Path,
                                             "bin", "Debug",
                                             "LibraryWithOutputAssemblyName.1.0.0.nupkg"));
-            
+
             outputPackage.Should().Exist();
 
             ZipFile.Open(outputPackage.FullName, ZipArchiveMode.Read)
@@ -141,7 +141,7 @@ namespace Microsoft.DotNet.Pack.Tests
             var symbolsPackage = new FileInfo(Path.Combine(testInstance.Path,
                                              "bin", "Debug",
                                              "LibraryWithOutputAssemblyName.1.0.0.symbols.nupkg"));
-            
+
             symbolsPackage.Should().Exist();
 
             ZipFile.Open(symbolsPackage.FullName, ZipArchiveMode.Read)
@@ -262,6 +262,7 @@ namespace Microsoft.DotNet.Pack.Tests
 
             new DotnetPackCommand(Log)
                 .WithWorkingDirectory(rootPath)
+                .WithEnvironmentVariable("ImplicitUsings", "enable") // Removing tracked as part of https://github.com/dotnet/sdk/issues/19696
                 .Execute("--no-restore")
                 .Should()
                 .Pass();
