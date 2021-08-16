@@ -90,20 +90,20 @@ namespace Microsoft.NET.TestFramework
                 File.Copy(srcFile, destFile, true);
             }
 
-            this.UpdateCurrentFramework();
+            this.UpdateCurrentTargetFramework();
 
             return this;
         }
 
-        public TestAsset UpdateCurrentFramework()
+        public TestAsset UpdateCurrentTargetFramework()
         {
             return WithTargetFramework(
             p =>
             {
                 var ns = p.Root.Name.Namespace;
-                var currentTargetFramework = p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").SingleOrDefault()?.Value;
-                p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").SingleOrDefault()?.SetValue(
-                                    currentTargetFramework?.Replace("$(CurrentTargetFramework)", ToolsetInfo.CurrentTargetFramework));
+                var currentTargetFramework = p.Root.Elements(ns + "PropertyGroup").Elements(ns + "TargetFramework").SingleOrDefault();
+                currentTargetFramework?.SetValue(currentTargetFramework?.Value.Replace("$(CurrentTargetFramework)", 
+                                                                                        ToolsetInfo.CurrentTargetFramework));
             },
             ToolsetInfo.CurrentTargetFramework);
         }
@@ -179,21 +179,17 @@ namespace Microsoft.NET.TestFramework
             {
                 FindProjectFiles();
             }
-            try
+            foreach (var projectFile in _projectFiles)
             {
-                foreach (var projectFile in _projectFiles)
+                var project = XDocument.Load(projectFile);
+
+                xmlAction(projectFile, project);
+
+                using (var file = File.CreateText(projectFile))
                 {
-                    var project = XDocument.Load(projectFile);
-
-                    xmlAction(projectFile, project);
-
-                    using (var file = File.CreateText(projectFile))
-                    {
-                        project.Save(file);
-                    }
+                    project.Save(file);
                 }
             }
-            catch (System.Xml.XmlException) { }
             return this;
 
             }

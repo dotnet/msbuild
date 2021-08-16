@@ -196,12 +196,27 @@ Options:
             string projName = "Broken/Broken.csproj";
             var setup = Setup();
 
+            string brokenFolder = Path.Combine(setup.TestRoot, "Broken");
+            Directory.CreateDirectory(brokenFolder);
+            string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
+            File.WriteAllText(brokenProjectPath, @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+    < PropertyGroup >
+        < OutputType > Library </ OutputType >
+        < TargetFrameworks > net451; netcoreapp2.1 </ TargetFrameworks >
+    </ PropertyGroup >
+
+    < ItemGroup >
+        < Compile Include = ""**\*.cs"" />
+        < EmbeddedResource Include = ""**\*.resx"" />
+    < !--intentonally broken-- >
+");
+
             var cmd = new RemoveReferenceCommand(Log)
                     .WithProject(projName)
                     .WithWorkingDirectory(setup.TestRoot)
                     .Execute(setup.ValidRefCsprojPath);
             cmd.ExitCode.Should().NotBe(0);
-            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, "Broken/Broken.csproj"));
+            cmd.StdErr.Should().Be(string.Format(CommonLocalizableStrings.ProjectIsInvalid, projName));
             cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText(setup.TestRoot));
         }
 
