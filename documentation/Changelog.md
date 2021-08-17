@@ -2,9 +2,12 @@
 
 ## MSBuild 16.11.0
 
-This version of MSBuild will ship with Visual Studio 2019 version 16.11.0 and .NET SDK 5.0.400.
+This version of MSBuild shipped with Visual Studio 2019 version 16.11.0 and .NET SDK 5.0.400.
 
 ### What's new
+
+* MSBuild now supports long paths in the 64-bit `amd64\MSBuild.exe` executable.
+* New version properties `MSBuildFileVersion` (4-part, matches file version) and `MSBuildSemanticVersion` (matches package versions) are now available for use (#6534).
 
 ### Detailed release notes
 
@@ -26,6 +29,10 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.11.0 and .N
 * Allow `ResolveAssemblyReferences` precomputed cache files to be in read-only locations (#6393).
 * 64-bit `al.exe` is used when targeting 64-bit architectures (for real this time) (#6484).
 * Builds with `ProduceOnlyReferenceAssembly` no longer expect debug symbols to be produced (#6511). Thanks, @Zastai!
+* 64-bit `MSBuild.exe` supports long paths (and other .NET default behaviors) (#6562).
+* Non-graph builds no longer crash in the experimental project cache (#6568).
+* The experimental project cache is initialized only once (#6569).
+* The experimental project cache no longer tries to schedule proxy builds to the in-proc node (#6635).
 
 #### Infrastructure
 
@@ -34,8 +41,6 @@ This version of MSBuild will ship with Visual Studio 2019 version 16.11.0 and .N
 * Conditional compilation for .NET Core within our repo now includes new .NET 5.0+ runtimes (#6538).
 * Switched to OneLocBuild for localization PRs (#6561).
 * Moved to latest Ubuntu image for PR test legs (#6573).
-
-#### Documentation
 
 ## MSBuild 16.10.2
 
