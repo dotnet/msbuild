@@ -117,37 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ApiCompatibilityHeader" xml:space="preserve">
-    <value>API compatibility errors between '{0}' (left) and '{1}' (right):</value>
+  <data name="WroteSuppressions" xml:space="preserve">
+    <value>Successfully wrote compatibility suppressions to '{0}'.</value>
   </data>
-  <data name="MissingTargetFramework" xml:space="preserve">
-    <value>Target framework {0} is no longer supported in the latest version.</value>
-  </data>
-  <data name="MissingTargetFrameworkAndRid" xml:space="preserve">
-    <value>Target framework {0} and runtime identifier (RID) {1} is no longer supported in the latest version.</value>
-  </data>
-  <data name="NoCompatibleCompileTimeAsset" xml:space="preserve">
-    <value>Target framework {0} does not have a compatible compile time asset in the package.</value>
-  </data>
-  <data name="NoCompatibleRidSpecificRuntimeAsset" xml:space="preserve">
-    <value>Target framework {0}-{1} does not have a compatible runtime asset in the package.</value>
-  </data>
-  <data name="NoCompatibleRuntimeAsset" xml:space="preserve">
-    <value>Target framework {0} does not have a compatible runtime asset in the package.</value>
-  </data>
-  <data name="ApiCompatibilityBaselineHeader" xml:space="preserve">
-    <value>Breaking changes to the API surface between '{0}' (left) and '{1}' (right) for versions {2} and {3} respectively:</value>
-  </data>
-  <data name="EmptyPackagePath" xml:space="preserve">
-    <value>Package path is empty. Please provide a valid package path.</value>
-  </data>
-  <data name="InvalidPackagePath" xml:space="preserve">
-    <value>Package path '{0}' is invalid.</value>
-  </data>
-  <data name="NonExistentPackagePath" xml:space="preserve">
-    <value>Package '{0}' not found. Please provide a valid package path.</value>
-  </data>
-  <data name="Baseline" xml:space="preserve">
-    <value>[Baseline]</value>
+  <data name="UpdateSdkVersion" xml:space="preserve">
+    <value> The minimum version required of Roslyn is '{1}' and you are using '{0}' version of the Roslyn. You can update the sdk to get the latest version.</value>
   </data>
 </root>

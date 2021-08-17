@@ -22,9 +22,9 @@ namespace Microsoft.DotNet.PackageValidation
         private readonly bool _runApiCompat;
         private readonly DiagnosticBag<IDiagnostic> _diagnosticBag;
         private readonly ApiCompatRunner _apiCompatRunner;
-        private readonly IPackageLogger _log;
+        private readonly ICompatibilityLogger _log;
 
-        public BaselinePackageValidator(Package baselinePackage, string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, IPackageLogger log)
+        public BaselinePackageValidator(Package baselinePackage, string noWarn, (string, string)[] ignoredDifferences, bool runApiCompat, ICompatibilityLogger log)
         {
             _baselinePackage = baselinePackage;
             _runApiCompat = runApiCompat;

@@ -4,20 +4,21 @@
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.DotNet.Compatibility.ErrorSuppression;
+using Microsoft.DotNet.PackageValidation;
 using Microsoft.NET.Build.Tasks;
 
-namespace Microsoft.DotNet.PackageValidation
+namespace Microsoft.DotNet.Compatibility
 {
-    internal class PackageValidationLogger : IPackageLogger
+    internal class CompatibilityLogger : ICompatibilityLogger
     {
         private readonly Logger _log;
         private readonly SuppressionEngine _suppressionEngine;
         private readonly bool _baselineAllErrors;
 
-        public PackageValidationLogger(Logger log, string suppressionsFile)
+        public CompatibilityLogger(Logger log, string suppressionsFile)
             : this(log, suppressionsFile, false) {}
 
-        public PackageValidationLogger(Logger log, string suppressionsFile, bool baselineAllErrors)
+        public CompatibilityLogger(Logger log, string suppressionsFile, bool baselineAllErrors)
         {
             _log = log;
             _suppressionEngine = baselineAllErrors && !File.Exists(suppressionsFile) ? SuppressionEngine.Create() : SuppressionEngine.CreateFromFile(suppressionsFile);

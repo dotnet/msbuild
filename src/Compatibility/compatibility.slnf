@@ -6,6 +6,7 @@
       "src\\Cli\\Microsoft.DotNet.InternalAbstractions\\Microsoft.DotNet.InternalAbstractions.csproj",
       "src\\Compatibility\\Microsoft.DotNet.ApiCompatibility\\Microsoft.DotNet.ApiCompatibility.csproj",
       "src\\Compatibility\\Microsoft.DotNet.PackageValidation\\Microsoft.DotNet.PackageValidation.csproj",
+      "src\\Compatibility\\Microsoft.DotNet.Compatibility\\Microsoft.DotNet.Compatibility.csproj",
       "src\\Layout\\toolset-tasks\\toolset-tasks.csproj",
       "src\\Tests\\Microsoft.DotNet.ApiCompatibility.Tests\\Microsoft.DotNet.ApiCompatibility.Tests.csproj",
       "src\\Tests\\Microsoft.DotNet.PackageValidation.Tests\\Microsoft.DotNet.PackageValidation.Tests.csproj",

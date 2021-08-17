@@ -5,10 +5,11 @@ using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.DotNet.PackageValidation;
 using Microsoft.NET.Build.Tasks;
 using NuGet.RuntimeModel;
 
-namespace Microsoft.DotNet.PackageValidation
+namespace Microsoft.DotNet.Compatibility
 {
     public class ValidatePackage : TaskBase
     {
@@ -58,7 +59,7 @@ namespace Microsoft.DotNet.PackageValidation
             }
 
             Package package = NupkgParser.CreatePackage(PackageTargetPath, runtimeGraph);
-            PackageValidationLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile);
+            CompatibilityLogger logger = new(Log, CompatibilitySuppressionFilePath, GenerateCompatibilitySuppressionFile);
 
             new CompatibleTfmValidator(NoWarn, null, RunApiCompat, EnableStrictModeForCompatibleTfms, logger).Validate(package);
             new CompatibleFrameworkInPackageValidator(NoWarn, null, EnableStrictModeForCompatibleFrameworksInPackage, logger).Validate(package);

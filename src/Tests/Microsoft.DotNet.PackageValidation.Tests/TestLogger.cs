@@ -8,7 +8,7 @@ using Microsoft.DotNet.Compatibility.ErrorSuppression;
 
 namespace Microsoft.DotNet.PackageValidation.Tests
 {
-    public class TestLogger : IPackageLogger
+    public class TestLogger : ICompatibilityLogger
     {
         public List<string> errors = new();
 
