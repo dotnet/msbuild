@@ -6,6 +6,7 @@
     <IsShippingPackage>false</IsShippingPackage>
     <EnablePublicApiAnalyzer>true</EnablePublicApiAnalyzer>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Shared\JExtensions.cs" Link="JExtensions.cs" />
