@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.Localization;
 using FXVersion = Microsoft.DotNet.MSBuildSdkResolver.FXVersion;
 
@@ -27,7 +28,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
         private Func<string, bool>? _fileExistOverride;
         private Func<string, bool>? _directoryExistOverride;
 
-        public static WorkloadResolver Create(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion)
+        public static WorkloadResolver Create(IWorkloadManifestProvider manifestProvider, string dotnetRootPath, string sdkVersion, string userProfileDir = null!)
         {
             string runtimeIdentifierChainPath = Path.Combine(dotnetRootPath, "sdk", sdkVersion, "NETCoreSdkRuntimeIdentifierChain.txt");
             string[] currentRuntimeIdentifiers = File.Exists(runtimeIdentifierChainPath) ?
@@ -44,6 +45,12 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             else
             {
                 dotnetRootPaths = new[] { dotnetRootPath };
+            }
+
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            if (WorkloadInstall.IsUserLocal(dotnetRootPath, sdkVersion) && Directory.Exists(userProfileDir))
+            {
+                dotnetRootPaths = new[] { userProfileDir }.Concat(dotnetRootPaths).ToArray();
             }
 
             return new WorkloadResolver(manifestProvider, dotnetRootPaths, currentRuntimeIdentifiers);

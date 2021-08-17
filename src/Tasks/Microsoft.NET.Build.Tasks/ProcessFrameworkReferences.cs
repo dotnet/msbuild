@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
@@ -634,6 +635,15 @@ namespace Microsoft.NET.Build.Tasks
         {
             IEnumerable<string> GetPackFolders()
             {
+                if (!string.IsNullOrEmpty(NetCoreRoot) && !string.IsNullOrEmpty(NETCoreSdkVersion))
+                {
+                    if (WorkloadInstall.IsUserLocal(NetCoreRoot, NETCoreSdkVersion))
+                    {
+                        // TODO: should DotnetUserProfileFolderPath come from a property?
+                        yield return Path.Combine(CliFolderPathCalculator.DotnetUserProfileFolderPath, "packs");
+                    }
+                }
+
                 if (!string.IsNullOrEmpty(TargetingPackRoot))
                 {
                     yield return TargetingPackRoot;

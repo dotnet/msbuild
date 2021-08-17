@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Configurer;
 using Microsoft.NET.Sdk.Localization;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
@@ -25,7 +26,7 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
 
         }
 
-        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable)
+        internal SdkDirectoryWorkloadManifestProvider(string sdkRootPath, string sdkVersion, Func<string, string?> getEnvironmentVariable, string userProfileDir = null!)
         {
             if (string.IsNullOrWhiteSpace(sdkVersion))
             {
@@ -74,6 +75,16 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             else
             {
                 _manifestDirectories = new[] { manifestDirectory };
+            }
+
+            userProfileDir ??= CliFolderPathCalculator.DotnetUserProfileFolderPath;
+            if (WorkloadInstall.IsUserLocal(_sdkRootPath, sdkVersion) && Directory.Exists(userProfileDir))
+            {
+                string userManifestsDir = Path.Combine(userProfileDir, "sdk-manifests", _sdkVersionBand);
+                if (Directory.Exists(userManifestsDir))
+                {
+                    _manifestDirectories = new[] { userManifestsDir }.Concat(_manifestDirectories).ToArray();
+                }
             }
         }
 

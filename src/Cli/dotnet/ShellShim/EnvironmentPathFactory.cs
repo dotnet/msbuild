@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.ShellShim
             else if (OperatingSystem.IsLinux() && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new LinuxEnvironmentPath(
-                    CliFolderPathCalculator.ToolsShimPathInUnix,
+                    ToolsShimPathInUnix,
                     Reporter.Output,
                     environmentProvider,
                     new FileWrapper());
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.ShellShim
             else if (OperatingSystem.IsMacOS() && isDotnetBeingInvokedFromNativeInstaller)
             {
                 environmentPath = new OsxBashEnvironmentPath(
-                    executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
+                    executablePath: ToolsShimPathInUnix,
                     reporter: Reporter.Output,
                     environmentProvider: environmentProvider,
                     fileSystem: new FileWrapper());
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.ShellShim
             if (OperatingSystem.IsMacOS() && ZshDetector.IsZshTheUsersShell(environmentProvider))
             {
                 return new OsxZshEnvironmentPathInstruction(
-                    executablePath: CliFolderPathCalculator.ToolsShimPathInUnix,
+                    executablePath: ToolsShimPathInUnix,
                     reporter: Reporter.Output,
                     environmentProvider: environmentProvider);
             }
@@ -88,5 +88,10 @@ namespace Microsoft.DotNet.ShellShim
 
             return CreateEnvironmentPath(true, environmentProvider);
         }
+
+        private static BashPathUnderHomeDirectory ToolsShimPathInUnix =>
+            new BashPathUnderHomeDirectory(
+                CliFolderPathCalculator.DotnetHomePath,
+                Path.Combine(CliFolderPathCalculator.DotnetProfileDirectoryName, CliFolderPathCalculator.ToolsShimFolderName));
     }
 }

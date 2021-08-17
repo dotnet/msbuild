@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+    <Compile Include="$(RepoRoot)src\Common\CliFolderPathCalculator.cs" LinkBase="Common"/>
   </ItemGroup>
 
   <ItemGroup>

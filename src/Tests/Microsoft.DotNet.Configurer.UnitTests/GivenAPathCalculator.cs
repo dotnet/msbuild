@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         {
             // shim name will conflict with the folder that is PackageId, if commandName and packageId are the same.
             CliFolderPathCalculator.ToolsPackagePath.Should().NotBe(CliFolderPathCalculator.ToolsShimPath);
-            CliFolderPathCalculator.ToolsPackagePath.Should().NotBe(CliFolderPathCalculator.ToolsShimPathInUnix.Path);
+            CliFolderPathCalculator.ToolsPackagePath.Should().NotBe($"{CliFolderPathCalculator.DotnetHomePath}/{Path.Combine(CliFolderPathCalculator.DotnetProfileDirectoryName, CliFolderPathCalculator.ToolsShimFolderName)}");
         }
     }
 }

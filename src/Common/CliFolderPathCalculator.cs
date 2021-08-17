@@ -4,31 +4,26 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.DotNet.Cli.Utils;
-using NuGet.Common;
+// using Microsoft.DotNet.Cli.Utils;
+// using NuGet.Common;
 
 namespace Microsoft.DotNet.Configurer
 {
-    public static class CliFolderPathCalculator
+    static class CliFolderPathCalculator
     {
         public const string DotnetHomeVariableName = "DOTNET_CLI_HOME";
-        private const string DotnetProfileDirectoryName = ".dotnet";
-        private const string ToolsShimFolderName = "tools";
+        public const string DotnetProfileDirectoryName = ".dotnet";
+        public const string ToolsShimFolderName = "tools";
         private const string ToolsResolverCacheFolderName = "toolResolverCache";
 
         public static string CliFallbackFolderPath =>
             Environment.GetEnvironmentVariable("DOTNET_CLI_TEST_FALLBACKFOLDER") ??
-            Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName, "NuGetFallbackFolder");
+            Path.Combine(new DirectoryInfo(AppContext.BaseDirectory).Parent!.FullName, "NuGetFallbackFolder");
 
         public static string ToolsShimPath => Path.Combine(DotnetUserProfileFolderPath, ToolsShimFolderName);
 
         public static string ToolsPackagePath =>
             ToolPackageFolderPathCalculator.GetToolPackageFolderPath(ToolsShimPath);
-
-        public static BashPathUnderHomeDirectory ToolsShimPathInUnix =>
-            new BashPathUnderHomeDirectory(
-                DotnetHomePath,
-                Path.Combine(DotnetProfileDirectoryName, ToolsShimFolderName));
 
         public static string WindowsNonExpandedToolsShimPath
         {
@@ -46,7 +41,7 @@ namespace Microsoft.DotNet.Configurer
         public static string ToolsResolverCachePath => Path.Combine(DotnetUserProfileFolderPath, ToolsResolverCacheFolderName);
 
         public static string PlatformHomeVariableName =>
-            OperatingSystem.IsWindows() ? "USERPROFILE" : "HOME";
+            IsWindows ? "USERPROFILE" : "HOME";
 
         public static string DotnetHomePath
         {
@@ -58,11 +53,12 @@ namespace Microsoft.DotNet.Configurer
                     home = Environment.GetEnvironmentVariable(PlatformHomeVariableName);
                     if (string.IsNullOrEmpty(home))
                     {
-                        throw new ConfigurationException(
-                                string.Format(
-                                    LocalizableStrings.FailedToDetermineUserHomeDirectory,
-                                    DotnetHomeVariableName))
-                            .DisplayAsError();
+                        throw new Exception(); // TODO
+                        // throw new ConfigurationException(
+                        //         string.Format(
+                        //             LocalizableStrings.FailedToDetermineUserHomeDirectory,
+                        //             DotnetHomeVariableName))
+                        //     .DisplayAsError();
                     }
                 }
 
@@ -70,7 +66,15 @@ namespace Microsoft.DotNet.Configurer
             }
         }
 
-        public static string NuGetUserSettingsDirectory =>
-            NuGetEnvironment.GetFolderPath(NuGetFolderPath.UserSettingsDirectory);
+        private static bool IsWindows => Path.DirectorySeparatorChar == '\\';
+    }
+
+    static class ToolPackageFolderPathCalculator
+    {
+        private const string NestedToolPackageFolderName = ".store";
+        public static string GetToolPackageFolderPath(string toolsShimPath)
+        {
+            return Path.Combine(toolsShimPath, NestedToolPackageFolderName);
+        }
     }
 }

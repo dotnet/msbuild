@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     nugetPackageDownloader, verbosity, packageSourceLocation, reporter, tempDirPath);
             }
 
-            if (elevationRequired && !CanWriteToDotnetRoot(dotnetDir))
+            if (elevationRequired && !WorkloadInstall.IsUserLocal(dotnetDir, sdkFeatureBand.ToString()) && !CanWriteToDotnetRoot(dotnetDir))
             {
                 throw new GracefulException(LocalizableStrings.InadequatePermissions, isUserError: false);
             }
@@ -63,6 +63,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// <returns>The <see cref="InstallType"/> associated with the SDK.</returns>
         public static InstallType GetWorkloadInstallType(SdkFeatureBand sdkFeatureBand, string dotnetDir)
         {
+            // TODO: does this file come with the SDK under dotnetDir? Or can it be under the userProfileDir for local installs?
             string installerTypePath = Path.Combine(dotnetDir, "metadata",
                 "workloads", $"{sdkFeatureBand}", "installertype");
 
@@ -74,7 +75,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             return InstallType.FileBased;
         }
 
-        private static bool CanWriteToDotnetRoot(string dotnetDir = null)
+        private static bool CanWriteToDotnetRoot(string dotnetDir = null) // TODO
         {
             dotnetDir = dotnetDir ?? Path.GetDirectoryName(Environment.ProcessPath);
             try
