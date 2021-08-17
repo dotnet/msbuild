@@ -36,7 +36,11 @@ namespace Microsoft.TemplateEngine.Cli
         {
             _telemetryLogger = telemetryLogger;
             _host = new CliTemplateEngineHost(host, commandInput);
-            EnvironmentSettings = new EngineEnvironmentSettings(_host, settingsLocation: hivePath, virtualizeSettings: virtualize);
+            EnvironmentSettings = new EngineEnvironmentSettings(
+                _host,
+                settingsLocation: hivePath,
+                virtualizeSettings: virtualize,
+                environment: new CliEnvironment());
             _templatePackageManager = new TemplatePackageManager(EnvironmentSettings);
             _templateCreator = new TemplateCreator(EnvironmentSettings);
             _aliasRegistry = new AliasRegistry(EnvironmentSettings);

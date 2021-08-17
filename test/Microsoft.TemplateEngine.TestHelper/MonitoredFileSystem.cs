@@ -16,6 +16,7 @@ namespace Microsoft.TemplateEngine.TestHelper
         private readonly IPhysicalFileSystem _baseFileSystem;
         private ConcurrentBag<DirectoryScanParameters> _directoriesScanned = new();
         private ConcurrentBag<string> _filesOpened = new();
+        private ConcurrentBag<string> _filesWatched = new();
 
         public MonitoredFileSystem(IPhysicalFileSystem baseFileSystem)
         {
@@ -24,7 +25,9 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public IReadOnlyList<DirectoryScanParameters> DirectoriesScanned => _directoriesScanned.ToArray();
 
-        public IReadOnlyList<string> FilesOpened => _filesOpened.ToArray();
+        public IEnumerable<string> FilesOpened => _filesOpened;
+
+        public IEnumerable<string> FilesWatched => _filesWatched;
 
         public void CreateDirectory(string path) => _baseFileSystem.CreateDirectory(path);
 
@@ -74,7 +77,11 @@ namespace Microsoft.TemplateEngine.TestHelper
 
         public void WriteAllText(string path, string value) => _baseFileSystem.WriteAllText(path, value);
 
-        public IDisposable WatchFileChanges(string filepath, FileSystemEventHandler fileChanged) => _baseFileSystem.WatchFileChanges(filepath, fileChanged);
+        public IDisposable WatchFileChanges(string filepath, FileSystemEventHandler fileChanged)
+        {
+            _filesWatched.Add(filepath);
+            return _baseFileSystem.WatchFileChanges(filepath, fileChanged);
+        }
 
         public DateTime GetLastWriteTimeUtc(string file) => _baseFileSystem.GetLastWriteTimeUtc(file);
 
