@@ -47,7 +47,7 @@ namespace Microsoft.NET.Clean.Tests
             var cleanCommand = new CleanCommand(Log, testAsset.TestRoot);
 
             cleanCommand
-                .Execute()
+                .Execute("/p:CheckEolTargetFramework=false")
                 .Should()
                 .Pass()
                 .And
