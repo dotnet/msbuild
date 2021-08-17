@@ -423,7 +423,8 @@ public static class Program
         {
             var helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("HelloWorld")
-                .WithSource();
+                .WithSource()
+                .WithTargetFramework("netcoreapp2.1");
 
             var publishCommand = new PublishCommand(helloWorldAsset);
             var publishResult = publishCommand.Execute("/p:RuntimeIdentifier=notvalid", "/p:EnsureNETCoreAppRuntime=false");

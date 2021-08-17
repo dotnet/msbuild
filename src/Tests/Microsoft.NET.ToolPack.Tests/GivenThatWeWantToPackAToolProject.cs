@@ -287,12 +287,7 @@ namespace Microsoft.NET.ToolPack.Tests
             TestAsset helloWorldAsset = _testAssetsManager
                 .CopyTestAsset("PortableTool")
                 .WithSource()
-                .WithProjectChanges(project =>
-                {
-                    XNamespace ns = project.Root.Name.Namespace;
-                    XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
-                    propertyGroup.Elements("TargetFramework").First().SetValue("net5.0-windows");
-                });
+                .WithTargetFramework($"{ToolsetInfo.CurrentTargetFramework}-windows");
 
             _testRoot = helloWorldAsset.TestRoot;
 
