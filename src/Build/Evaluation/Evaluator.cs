@@ -268,8 +268,8 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
 
             // Create a FileMatcher for the given combination of EvaluationContext and the project being evaluated.
-            IDirectoryCache directoryCache = _evaluationContext.GetDirectoryCacheForProject(project);
-            _fileMatcher = new FileMatcher(evaluationContext.FileSystem, evaluationContext.FileEntryExpansionCache);
+            IFileSystem fileSystem = _evaluationContext.GetFileSystemForProject(project);
+            _fileMatcher = new FileMatcher(fileSystem, evaluationContext.FileEntryExpansionCache);
         }
 
         /// <summary>

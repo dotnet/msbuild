@@ -2564,7 +2564,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if <paramref name="pattern"/> is <code>*</code> or <code>*.*</code>.
         /// </summary>
         /// <param name="pattern">The filename pattern to check.</param>
-        private static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
+        internal static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
         {
             1 => pattern[0] == '*',
             3 => pattern[0] == '*' && pattern[1] == '.' && pattern[2] == '*',

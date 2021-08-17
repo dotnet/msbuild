@@ -46,9 +46,7 @@ namespace Microsoft.Build.Evaluation.Context
         internal FileMatcher FileMatcher { get; }
 
         private IDirectoryCacheFactory _directoryCacheFactory;
-        private ConditionalWeakTable<Project, IDirectoryCache> _directoryCachesPerProject;
-
-        private IDirectoryCache _defaultDirectoryCache;
+        private ConditionalWeakTable<Project, IFileSystem> _fileSystemsPerProject;
 
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
@@ -73,7 +71,7 @@ namespace Microsoft.Build.Evaluation.Context
             if (directoryCacheFactory != null)
             {
                 _directoryCacheFactory = directoryCacheFactory;
-                _directoryCachesPerProject = new ConditionalWeakTable<Project, IDirectoryCache>();
+                _fileSystemsPerProject = new ConditionalWeakTable<Project, IFileSystem>();
             }
         }
 
@@ -154,23 +152,22 @@ namespace Microsoft.Build.Evaluation.Context
             }
         }
 
-        internal IDirectoryCache GetDirectoryCacheForProject(Project project)
+        internal IFileSystem GetFileSystemForProject(Project project)
         {
-            IDirectoryCache directoryCache = _directoryCachesPerProject?.GetValue(
+            IFileSystem fileSystemForProject = _fileSystemsPerProject?.GetValue(
                 project,
-                project => _directoryCacheFactory.GetDirectoryCacheForProject(project));
-
-            // If we don't have a non-null directory cache factory or it returned null, lazily create a wrapper over IFileSystem.
-            if (directoryCache == null)
-            {
-                directoryCache = Volatile.Read(ref _defaultDirectoryCache);
-                if (directoryCache == null)
+                project =>
                 {
-                    directoryCache = new DirectoryCacheOverFileSystem(FileSystem);
-                    Volatile.Write(ref _defaultDirectoryCache, directoryCache);
-                }
-            }
-            return directoryCache;
+                    IDirectoryCache directoryCache = _directoryCacheFactory.GetDirectoryCacheForProject(project);
+                    if(directoryCache != null)
+                    {
+                        return new DirectoryCacheFileSystemWrapper(FileSystem, directoryCache);
+                    }
+                    return null;
+                });
+
+            // If we don't have a non-null directory cache factory or it returned null, fall back to returning the shared FileSystem.
+            return fileSystemForProject ?? FileSystem;
         }
     }
 }
