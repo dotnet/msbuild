@@ -1,0 +1,22 @@
+{
+  "author": "Test Asset",
+  "classifications": [ "Test Asset" ],
+  "name": "TemplateWithConditions",
+  "generatorVersions": "[1.0.0.0-*)",
+  "groupIdentity": "TestAssets.TemplateWithConditions",
+  "precedence": "100",
+  "identity": "TestAssets.TemplateWithConditions",
+  "shortName": "TestAssets.TemplateWithConditions",
+  "symbols": {
+    "A": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "false"
+    },
+    "B": {
+      "type": "parameter",
+      "dataType": "bool",
+      "defaultValue": "false"
+    }
+  }
+}

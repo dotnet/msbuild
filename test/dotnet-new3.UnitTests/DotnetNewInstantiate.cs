@@ -478,5 +478,89 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("The template \"TestAssets.Invalid.InvalidHostData\" was created successfully.")
                 .And.HaveStdOutContaining("Warning: Failed to load dotnet CLI host data ");
         }
+
+        [Theory]
+        [InlineData(".dockerignore", "singleHash", false)]
+        [InlineData(".editorconfig", "singleHash", false)]
+        [InlineData(".gitattributes", "singleHash", false)]
+        [InlineData(".gitignore", "singleHash", false)]
+        [InlineData("Dockerfile", "singleHash", false)]
+        [InlineData("nuget.config", "xml", false)]
+        [InlineData("cake", "cSharpNoComments")]
+        [InlineData("sln", "singleHash")]
+        [InlineData("yaml", "singleHash")]
+        [InlineData("md", "xml")]
+        public void CanInstantiateTemplate_WithConditions_BasedOnFileName(string testCase, string conditionType, bool useAsExtension = true)
+        {
+            string expectedCommandFormat = conditionType switch
+            {
+                "singleHash" => "# comment {0}",
+                "xml" => "<!-- comment {0} -->",
+                "cSharpNoComments" => "// comment {0}",
+                _ => throw new NotSupportedException($"conditionType {conditionType} is not supported")
+            };
+
+            string fileName = useAsExtension ? $"test.{testCase}" : testCase;
+
+            //sln always has CRLF line ending, as per .gitattributes settings
+            string expectedEol = testCase == "sln" ? "\r\n" : Environment.NewLine;
+
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            //The template has the following conditions defined in various file types: non actionable on parameter A and actionable on parameter B
+            //#if (A)
+            //# comment foo
+            //foo
+            //#endif
+            //##if (B)
+            //## comment bar
+            //#bar
+            //#endif
+            //For extension test cases the template has 'test.<extension>' file defined.
+
+            Helpers.InstallTestTemplate("TemplateWithConditions", _log, workingDirectory, home);
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--A", "true")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"TemplateWithConditions\" was created successfully.");
+
+            string testFile = Path.Combine(workingDirectory, fileName);
+            Assert.True(File.Exists(testFile));
+            Assert.Equal($"{string.Format(expectedCommandFormat, "foo")}{expectedEol}foo{expectedEol}", File.ReadAllText(testFile));
+
+            workingDirectory = TestUtils.CreateTemporaryFolder();
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--A", "false")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"TemplateWithConditions\" was created successfully.");
+
+            testFile = Path.Combine(workingDirectory, fileName);
+            Assert.True(File.Exists(testFile));
+            Assert.Equal($"", File.ReadAllText(testFile));
+
+            workingDirectory = TestUtils.CreateTemporaryFolder();
+            new DotnetNewCommand(_log, "TestAssets.TemplateWithConditions", "--B", "true")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(workingDirectory)
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And.NotHaveStdErr()
+                .And.HaveStdOutContaining("The template \"TemplateWithConditions\" was created successfully.");
+
+            testFile = Path.Combine(workingDirectory, fileName);
+            Assert.True(File.Exists(testFile));
+            Assert.Equal($"{string.Format(expectedCommandFormat, "bar")}{expectedEol}bar{expectedEol}", File.ReadAllText(testFile));
+        }
+
     }
 }
