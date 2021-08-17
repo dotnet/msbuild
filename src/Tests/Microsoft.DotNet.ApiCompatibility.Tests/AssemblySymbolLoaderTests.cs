@@ -299,7 +299,7 @@ namespace MyNamespace
                     expectedReference = "mscorlib.dll";
                 }
 
-                IEnumerable<AssemblyLoadWarning> expected = new[]
+                IEnumerable<AssemblyLoadWarning> expected = new List<AssemblyLoadWarning>
                 {
                     new AssemblyLoadWarning(DiagnosticIds.AssemblyReferenceNotFound, expectedReference, $"Could not resolve reference '{expectedReference}' in any of the provided search directories.")
                 };

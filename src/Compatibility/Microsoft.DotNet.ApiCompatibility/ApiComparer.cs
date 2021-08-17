@@ -37,6 +37,9 @@ namespace Microsoft.DotNet.ApiCompatibility
         /// </summary>
         public bool StrictMode { get; set; }
 
+        /// <summary>
+        /// Flag indicating whether the ApiComparison will be performed using references or not.
+        /// </summary>
         public bool RunningWithReferences { get; set; }
 
         /// <summary>

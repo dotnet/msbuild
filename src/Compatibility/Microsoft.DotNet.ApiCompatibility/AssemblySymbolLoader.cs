@@ -13,8 +13,10 @@ using System.Reflection.PortableExecutable;
 
 namespace Microsoft.DotNet.ApiCompatibility
 {
-    public class AssemblyLoadWarning : IDiagnostic
+    public class AssemblyLoadWarning : IDiagnostic, IEquatable<AssemblyLoadWarning>
     {
+        private readonly StringComparer _ordinalComparer = StringComparer.Ordinal;
+
         public AssemblyLoadWarning(string diagnosticId, string referenceId, string message)
         {
             DiagnosticId = diagnosticId;
@@ -27,6 +29,10 @@ namespace Microsoft.DotNet.ApiCompatibility
         public string ReferenceId { get; }
 
         public string Message { get; }
+
+        public bool Equals(AssemblyLoadWarning other) => _ordinalComparer.Equals(DiagnosticId, other.DiagnosticId) &&
+                                                         _ordinalComparer.Equals(ReferenceId, other.ReferenceId) &&
+                                                         _ordinalComparer.Equals(Message, other.Message);
     }
 
     /// <summary>
