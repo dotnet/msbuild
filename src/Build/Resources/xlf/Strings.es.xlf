@@ -2380,8 +2380,8 @@ Utilización:          Utilización media de {0}: {1:###.0}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: La resolución del SDK "{0}" no se pudo ejecutar. {1}</target>
+        <source>MSB4242: The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}</source>
+        <target state="new">MSB4242: The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">

@@ -2380,8 +2380,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: SDK 解析程序“{0}”运行失败。{1}</target>
+        <source>MSB4242: The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}</source>
+        <target state="new">MSB4242: The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">

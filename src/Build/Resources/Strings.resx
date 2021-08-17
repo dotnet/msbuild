@@ -1286,7 +1286,7 @@
     <comment>{StrBegin="MSB4244: "}</comment>
   </data>
   <data name="CouldNotRunSdkResolver" xml:space="preserve">
-    <value>MSB4242: The SDK resolver "{0}" failed to run. {1}</value>
+    <value>MSB4242: The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}": {2}</value>
     <comment>{StrBegin="MSB4242: "}</comment>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
