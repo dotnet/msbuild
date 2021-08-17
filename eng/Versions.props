@@ -38,7 +38,7 @@
     <SystemReflectionMetadataLoadContextVersion>6.0.0-rc.1.21415.6</SystemReflectionMetadataLoadContextVersion>
     <DeploymentReleasesVersion>1.0.0-preview1.1.21112.1</DeploymentReleasesVersion>
     <SystemManagementPackageVersion>4.6.0</SystemManagementPackageVersion>
-    <SystemCommandLineVersion>2.0.0-beta1.21406.1</SystemCommandLineVersion>
+    <SystemCommandLineVersion>2.0.0-beta1.21416.6</SystemCommandLineVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Dependencies from https://github.com/dotnet/runtime -->
