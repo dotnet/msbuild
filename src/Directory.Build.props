@@ -14,6 +14,9 @@
     <!-- Ensure that compiler errors emit full paths so that files
          can be correctly annotated in GitHub. -->
     <GenerateFullPaths>true</GenerateFullPaths>
+    
+    <!-- https://docs.microsoft.com/en-us/dotnet/core/compatibility/sdk/6.0/implicit-namespaces -->
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
 
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
