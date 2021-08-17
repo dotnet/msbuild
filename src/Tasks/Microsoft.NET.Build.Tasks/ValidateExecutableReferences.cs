@@ -28,7 +28,7 @@ namespace Microsoft.NET.Build.Tasks
                 return;
             }
 
-            foreach (var project in ReferencedProjects)
+            foreach (ITaskItem project in ReferencedProjects)
             {
                 string nearestTargetFramework = project.GetMetadata("NearestTargetFramework");
 
@@ -40,16 +40,22 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var additionalPropertiesXml = XElement.Parse(project.GetMetadata("AdditionalPropertiesFromProject"));
-                var targetFrameworkElement = additionalPropertiesXml.Element(nearestTargetFramework);
+                XElement targetFrameworkElement = additionalPropertiesXml.Element("TargetFramework");
+                if (!targetFrameworkElement.HasAttributes || !targetFrameworkElement.FirstAttribute.Value.Equals(nearestTargetFramework))
+                {
+                    // The TargetFramework did not match.
+                    continue;
+                }
+
                 Dictionary<string, string> projectAdditionalProperties = new(StringComparer.OrdinalIgnoreCase);
-                foreach (var propertyElement in targetFrameworkElement.Elements())
+                foreach (XElement propertyElement in targetFrameworkElement.Elements())
                 {
                     projectAdditionalProperties[propertyElement.Name.LocalName] = propertyElement.Value;
                 }
 
-                var shouldBeValidatedAsExecutableReference = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["ShouldBeValidatedAsExecutableReference"], true);
-                var referencedProjectIsExecutable = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_IsExecutable"]);
-                var referencedProjectIsSelfContained = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["SelfContained"]);
+                bool shouldBeValidatedAsExecutableReference = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["ShouldBeValidatedAsExecutableReference"], true);
+                bool referencedProjectIsExecutable = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["_IsExecutable"]);
+                bool referencedProjectIsSelfContained = MSBuildUtilities.ConvertStringToBool(projectAdditionalProperties["SelfContained"]);
 
                 if (referencedProjectIsExecutable && shouldBeValidatedAsExecutableReference)
                 {
