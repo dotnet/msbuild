@@ -27,6 +27,8 @@ namespace Microsoft.DotNet.Cli
 
         public static readonly Option<string> ToolManifestOption = ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName);
 
+        public static readonly Option<bool> PrereleaseOption = ToolSearchCommandParser.PrereleaseOption;
+
         public static readonly Option<VerbosityOptions> VerbosityOption = ToolInstallCommandParser.VerbosityOption;
 
         public static Command GetCommand()
@@ -42,6 +44,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(FrameworkOption);
             command.AddOption(VersionOption);
             command.AddOption(ToolManifestOption);
+            command.AddOption(PrereleaseOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);

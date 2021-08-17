@@ -73,6 +73,11 @@ Pokud chcete vytvořit manifest, použijte příkaz dotnet new tool-manifest, ob
         <target state="translated">Cílová architektura, pro kterou se má nástroj nainstalovat</target>
         <note />
       </trans-unit>
+      <trans-unit id="PrereleaseAndVersionAreNotSupportedAtTheSameTime">
+        <source>The --prerelease and --version options are not supported in the same command</source>
+        <target state="new">The --prerelease and --version options are not supported in the same command</target>
+        <note />
+      </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
         <target state="translated">Verze balíčku nástroje, který se má nainstalovat</target>

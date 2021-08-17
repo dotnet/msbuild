@@ -361,6 +361,78 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
         }
 
         [Fact]
+        public void WhenRunWithPrereleaseItShouldSucceed()
+        {
+            IToolPackageInstaller toolToolPackageInstaller = GetToolToolPackageInstallerWithPreviewInFeed();
+
+            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --prerelease");
+
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                result,
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolToolPackageInstaller),
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter);
+
+            toolInstallGlobalOrToolPathCommand.Execute().Should().Be(0);
+
+            _reporter
+                .Lines
+                .Should()
+                .Contain(l => l == string.Format(
+                    LocalizableStrings.InstallationSucceeded,
+                    ToolCommandName,
+                    PackageId,
+                    "2.0.1-preview1").Green());
+        }
+
+        [Fact]
+        public void WhenRunWithPrereleaseAndPackageVersionItShouldThrow()
+        {
+            IToolPackageInstaller toolToolPackageInstaller = GetToolToolPackageInstallerWithPreviewInFeed();
+
+            ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version 2.0 --prerelease");
+
+            var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
+                result,
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolToolPackageInstaller),
+                _createShellShimRepository,
+                _environmentPathInstructionMock,
+                _reporter);
+
+            Action a = () => toolInstallGlobalOrToolPathCommand.Execute();
+            a.ShouldThrow<GracefulException>();
+        }
+
+        private IToolPackageInstaller GetToolToolPackageInstallerWithPreviewInFeed()
+        {
+            var toolToolPackageInstaller = CreateToolPackageInstaller(
+                feeds: new List<MockFeed>
+                {
+                    new MockFeed
+                    {
+                        Type = MockFeedType.ImplicitAdditionalFeed,
+                        Packages = new List<MockFeedPackage>
+                        {
+                            new MockFeedPackage
+                            {
+                                PackageId = PackageId,
+                                Version = "1.0.4",
+                                ToolCommandName = "SimulatorCommand"
+                            },
+                            new MockFeedPackage
+                            {
+                                PackageId = PackageId,
+                                Version = "2.0.1-preview1",
+                                ToolCommandName = "SimulatorCommand"
+                            }
+                        }
+                    }
+                });
+            return toolToolPackageInstaller;
+        }
+
+        [Fact]
         public void WhenRunWithoutAMatchingRangeItShouldFail()
         {
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version [5.0,10.0]");

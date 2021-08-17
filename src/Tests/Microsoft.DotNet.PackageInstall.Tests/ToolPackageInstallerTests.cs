@@ -250,6 +250,90 @@ namespace Microsoft.DotNet.PackageInstall.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        public void GivenOfflineFeedInstallWhenCallWithprereleaseItSucceeds(bool testMockBehaviorIsInSync)
+        {
+            IToolPackageInstaller installer = null;
+            IToolPackageUninstaller uninstaller = null;
+            if (testMockBehaviorIsInSync == false)
+            {
+                var testFeedWithOnlyPreviewPackages =
+                    Path.Combine(Path.GetTempPath(),
+                        Path.GetRandomFileName());
+
+                Directory.CreateDirectory(testFeedWithOnlyPreviewPackages);
+                var tempFeed = GetTestLocalFeedPath();
+                File.Copy(Path.Combine(GetTestLocalFeedPath(), "global.tool.console.demo.1.0.4.nupkg"),
+                    Path.Combine(testFeedWithOnlyPreviewPackages, "global.tool.console.demo.1.0.4.nupkg"));
+                File.Copy(Path.Combine(GetTestLocalFeedPath(), "global.tool.console.demo.2.0.1-preview1.nupkg"),
+                    Path.Combine(testFeedWithOnlyPreviewPackages, "global.tool.console.demo.2.0.1-preview1.nupkg"));
+
+                var (store, storeQuery, realInstaller, realUninstaller, reporter, fileSystem) = Setup(
+                    useMock: testMockBehaviorIsInSync,
+                    offlineFeed: new DirectoryPath(testFeedWithOnlyPreviewPackages),
+                    feeds: GetOfflineMockFeed());
+
+                installer = realInstaller;
+                uninstaller = realUninstaller;
+            }
+            else
+            {
+                var fileSystem = new FileSystemMockBuilder().Build();
+                var root = new DirectoryPath(_testAssetsManager
+                    .CreateTestDirectory(nameof(GivenOfflineFeedInstallWhenCallWithprereleaseItSucceeds) +
+                                         testMockBehaviorIsInSync).Path);
+                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem);
+                var store = toolPackageStoreMock;
+                var storeQuery = toolPackageStoreMock;
+                installer = new ToolPackageInstallerMock(
+                    fileSystem: fileSystem,
+                    store: toolPackageStoreMock,
+                    projectRestorer: new ProjectRestorerMock(
+                        fileSystem: fileSystem,
+                        reporter: new BufferedReporter(),
+                        feeds: new List<MockFeed>
+                        {
+                            new MockFeed
+                            {
+                                Type = MockFeedType.ImplicitAdditionalFeed,
+                                Packages = new List<MockFeedPackage>
+                                {
+                                    new MockFeedPackage
+                                    {
+                                        PackageId = TestPackageId.ToString(),
+                                        Version = "1.0.4",
+                                        ToolCommandName = "SimulatorCommand"
+                                    },
+                                    new MockFeedPackage
+                                    {
+                                        PackageId = TestPackageId.ToString(),
+                                        Version = "2.0.1-preview1",
+                                        ToolCommandName = "SimulatorCommand"
+                                    }
+                                }
+                            }
+                        }));
+                uninstaller = new ToolPackageUninstallerMock(fileSystem, toolPackageStoreMock);
+            }
+
+
+            var package = installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
+                versionRange: VersionRange.Parse("*-*"), targetFramework: _testTargetframework);
+
+            package.Version.ToNormalizedString().Should().Be("2.0.1-preview1");
+
+            uninstaller.Uninstall(package.PackageDirectory);
+
+            var package2 = installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
+                versionRange: VersionRange.Parse("2.0*-*"), targetFramework: _testTargetframework);
+
+            package2.Version.ToNormalizedString().Should().Be("2.0.1-preview1");
+
+            uninstaller.Uninstall(package.PackageDirectory);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         public void GivenAllButNoTargetFrameworkItCanDownloadThePackage(bool testMockBehaviorIsInSync)
         {
             var nugetConfigPath = GenerateRandomNugetConfigFilePath();

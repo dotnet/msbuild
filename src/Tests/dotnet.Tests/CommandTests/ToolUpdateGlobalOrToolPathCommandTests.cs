@@ -173,7 +173,22 @@ namespace Microsoft.DotNet.Tests.Commands.Tool
 
             _reporter.Lines.First().Should().Contain(string.Format(
                 LocalizableStrings.UpdateSucceeded,
-                _packageId, LowerPackageVersion, HigherPreviewPackageVersion));
+                _packageId, LowerPackageVersion, HigherPackageVersion));
+        }
+
+        [Fact]
+        public void GivenAnExistedLowerversionInstallationWhenCallWithPrereleaseVersionItCanPrintSuccessMessage()
+        {
+            CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
+            _reporter.Lines.Clear();
+
+            var command = CreateUpdateCommand($"-g {_packageId} --prerelease");
+
+            command.Execute();
+
+            _reporter.Lines.First().Should().Contain(string.Format(
+                LocalizableStrings.UpdateSucceeded,
+                _packageId, LowerPackageVersion, HigherPackageVersion));
         }
 
         [Fact]

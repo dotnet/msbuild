@@ -36,6 +36,8 @@ namespace Microsoft.DotNet.Cli
             ArgumentHelpName = LocalizableStrings.FrameworkOptionName
         };
 
+        public static readonly Option<bool> PrereleaseOption = ToolSearchCommandParser.PrereleaseOption;
+
         public static readonly Option<VerbosityOptions> VerbosityOption = CommonOptions.VerbosityOption();
 
         // Don't use the common options version as we don't want this to be a forwarded option
@@ -54,6 +56,7 @@ namespace Microsoft.DotNet.Cli
             command.AddOption(ToolAppliedOption.ToolManifestOption(LocalizableStrings.ManifestPathOptionDescription, LocalizableStrings.ManifestPathOptionName));
             command.AddOption(AddSourceOption);
             command.AddOption(FrameworkOption);
+            command.AddOption(PrereleaseOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.DisableParallelOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption);
             command.AddOption(ToolCommandRestorePassThroughOptions.NoCacheOption);
