@@ -63,9 +63,20 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <AssemblyInformationCachePaths Condition="Exists('$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SdkPrecomputedAssemblyReferences.cache')">$(AssemblyInformationCachePaths);$(NetCoreRoot)sdk\$(NetCoreSdkVersion)\SDKPrecomputedAssemblyReferences.cache</AssemblyInformationCachePaths>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);*.log</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
 
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
+  
+  <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />
+
+  <PropertyGroup>
+    <EnableAnalyzers>true</EnableAnalyzers>
+  </PropertyGroup>
+  
 </Project>

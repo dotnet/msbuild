@@ -1069,36 +1069,38 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(submission, nameof(submission));
             ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
 
-            lock (_syncLock)
+            BuildRequestConfiguration resolvedConfiguration = null;
+            bool shuttingDown = false;
+
+            try
             {
-                ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
-                if (projectInstance != null)
+                lock (_syncLock)
                 {
-                    if (_acquiredProjectRootElementCacheFromProjectInstance)
+                    ProjectInstance projectInstance = submission.BuildRequestData.ProjectInstance;
+                    if (projectInstance != null)
                     {
-                        ErrorUtilities.VerifyThrowArgument(
-                            _buildParameters.ProjectRootElementCache == projectInstance.ProjectRootElementCache,
-                            "OM_BuildSubmissionsMultipleProjectCollections");
+                        if (_acquiredProjectRootElementCacheFromProjectInstance)
+                        {
+                            ErrorUtilities.VerifyThrowArgument(
+                                _buildParameters.ProjectRootElementCache == projectInstance.ProjectRootElementCache,
+                                "OM_BuildSubmissionsMultipleProjectCollections");
+                        }
+                        else
+                        {
+                            _buildParameters.ProjectRootElementCache = projectInstance.ProjectRootElementCache;
+                            _acquiredProjectRootElementCacheFromProjectInstance = true;
+                        }
                     }
-                    else
+                    else if (_buildParameters.ProjectRootElementCache == null)
                     {
-                        _buildParameters.ProjectRootElementCache = projectInstance.ProjectRootElementCache;
-                        _acquiredProjectRootElementCacheFromProjectInstance = true;
+                        // Create our own cache; if we subsequently get a build submission with a project instance attached,
+                        // we'll dump our cache and use that one.
+                        _buildParameters.ProjectRootElementCache =
+                            new ProjectRootElementCache(false /* do not automatically reload from disk */);
                     }
-                }
-                else if (_buildParameters.ProjectRootElementCache == null)
-                {
-                    // Create our own cache; if we subsequently get a build submission with a project instance attached,
-                    // we'll dump our cache and use that one.
-                    _buildParameters.ProjectRootElementCache =
-                        new ProjectRootElementCache(false /* do not automatically reload from disk */);
-                }
 
-                VerifyStateInternal(BuildManagerState.Building);
+                    VerifyStateInternal(BuildManagerState.Building);
 
-                BuildRequestConfiguration resolvedConfiguration = null;
-                try
-                {
                     // If we have an unnamed project, assign it a temporary name.
                     if (string.IsNullOrEmpty(submission.BuildRequestData.ProjectFullPath))
                     {
@@ -1129,44 +1131,47 @@ namespace Microsoft.Build.Execution
 
                     resolvedConfiguration.ExplicitlyLoaded = true;
 
-                    if (_shuttingDown)
+                    // assign shutting down to local variable to avoid race condition: "setting _shuttingDown after this point during this method execution"
+                    shuttingDown = _shuttingDown;
+                    if (!shuttingDown)
                     {
-                        // We were already canceled!
-                        AddBuildRequestToSubmission(submission, resolvedConfiguration.ConfigurationId);
-                        BuildResult result = new BuildResult(submission.BuildRequest, new BuildAbortedException());
-                        submission.CompleteResults(result);
-                        submission.CompleteLogging(true);
-                        CheckSubmissionCompletenessAndRemove(submission);
-                        return;
-                    }
-
-                    if (ProjectCacheIsPresent())
-                    {
-                        IssueCacheRequestForBuildSubmission(new CacheRequest(submission, resolvedConfiguration));
-                    }
-                    else
-                    {
-                        AddBuildRequestToSubmission(submission, resolvedConfiguration.ConfigurationId);
-                        IssueBuildRequestForBuildSubmission(submission, allowMainThreadBuild);
+                        if (ProjectCacheIsPresent())
+                        {
+                            IssueCacheRequestForBuildSubmission(new CacheRequest(submission, resolvedConfiguration));
+                        }
+                        else
+                        {
+                            AddBuildRequestToSubmission(submission, resolvedConfiguration.ConfigurationId);
+                            IssueBuildRequestForBuildSubmission(submission, resolvedConfiguration, allowMainThreadBuild);
+                        }
                     }
                 }
-                catch (ProjectCacheException ex)
+            }
+            catch (ProjectCacheException ex)
+            {
+                ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having BuildRequestConfiguration");
+                CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                if (resolvedConfiguration is not null)
                 {
-                    ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having ");
                     CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
                 }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                else
                 {
-                    if (resolvedConfiguration is not null)
-                    {
-                        CompleteSubmissionWithException(submission, resolvedConfiguration, ex);
-                    }
-                    else
-                    {
-                        HandleSubmissionException(submission, ex);
-                        throw;
-                    }
+                    HandleSubmissionException(submission, ex);
+                    throw;
                 }
+            }
+
+            // We are shutting down so submission has to be completed with BuildAbortedException
+            Debug.Assert(!Monitor.IsEntered(_syncLock));
+            if (shuttingDown)
+            {
+                ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having BuildRequestConfiguration");
+                // We were already canceled!
+                CompleteSubmissionWithException(submission, resolvedConfiguration, new BuildAbortedException());
             }
         }
 
@@ -1516,24 +1521,34 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        /// <remarks>
+        /// To avoid deadlock possibility, this method MUST NOT be called inside of 'lock (_syncLock)'
+        /// </remarks>
         private void CompleteSubmissionWithException(BuildSubmission submission, BuildRequestConfiguration configuration, Exception exception)
         {
+            Debug.Assert(!Monitor.IsEntered(_syncLock));
+
             lock (_syncLock)
             {
                 if (submission.BuildRequest is null)
                 {
                     AddBuildRequestToSubmission(submission, configuration.ConfigurationId);
                 }
-
-                HandleSubmissionException(submission, exception);
             }
+
+            HandleSubmissionException(submission, exception);
         }
 
         /// <summary>
         /// Deals with exceptions that may be thrown when handling a submission.
         /// </summary>
+        /// <remarks>
+        /// To avoid deadlock possibility, this method MUST NOT be called inside of 'lock (_syncLock)'
+        /// </remarks>
         private void HandleSubmissionException(BuildSubmission submission, Exception ex)
         {
+            Debug.Assert(!Monitor.IsEntered(_syncLock));
+
             if (ex is AggregateException ae && ae.InnerExceptions.Count == 1)
             {
                 ex = ae.InnerExceptions.First();
@@ -1548,19 +1563,48 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            lock(_syncLock)
+            bool submissionNeedsCompletion;
+            lock (_syncLock)
             {
                 // BuildRequest may be null if the submission fails early on.
-                if (submission.BuildRequest != null)
+                submissionNeedsCompletion = submission.BuildRequest != null;
+                if (submissionNeedsCompletion)
                 {
                     var result = new BuildResult(submission.BuildRequest, ex);
                     submission.CompleteResults(result);
-                    submission.CompleteLogging(true);
+                }
+            }
+
+            if (submissionNeedsCompletion)
+            {
+                WaitForAllLoggingServiceEventsToBeProcessed();
+            }
+
+            lock (_syncLock)
+            {
+                if (submissionNeedsCompletion)
+                {
+                    submission.CompleteLogging();
                 }
 
                 _overallBuildSuccess = false;
                 CheckSubmissionCompletenessAndRemove(submission);
             }
+        }
+
+        /// <summary>
+        /// Waits to drain all events of logging service.
+        /// This method shall be used carefully because during draining, LoggingService will block all incoming events.
+        /// </summary>
+        /// <remarks>
+        /// To avoid deadlock possibility, this method MUST NOT be called inside of 'lock (_syncLock)'
+        /// </remarks>
+        private void WaitForAllLoggingServiceEventsToBeProcessed()
+        {
+            // this has to be called out of the lock (_syncLock)
+            // because processing events can callback to 'this' instance and cause deadlock
+            Debug.Assert(!Monitor.IsEntered(_syncLock));
+            ((LoggingService) ((IBuildComponentHost) this).LoggingService).WaitForThreadToProcessEvents();
         }
 
         /// <summary>
@@ -1624,7 +1668,7 @@ namespace Microsoft.Build.Execution
         /// The submission is a top level build request entering the BuildManager.
         /// Sends the request to the scheduler with optional legacy threading semantics behavior.
         /// </summary>
-        private void IssueBuildRequestForBuildSubmission(BuildSubmission submission, bool allowMainThreadBuild = false)
+        private void IssueBuildRequestForBuildSubmission(BuildSubmission submission, BuildRequestConfiguration configuration, bool allowMainThreadBuild = false)
         {
             _workQueue.Post(
                 () =>
@@ -1635,11 +1679,7 @@ namespace Microsoft.Build.Execution
                     }
                     catch (BuildAbortedException bae)
                     {
-                        // We were canceled before we got issued by the work queue.
-                        var result = new BuildResult(submission.BuildRequest, bae);
-                        submission.CompleteResults(result);
-                        submission.CompleteLogging(true);
-                        CheckSubmissionCompletenessAndRemove(submission);
+                        CompleteSubmissionWithException(submission, configuration, bae);
                     }
                     catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                     {
@@ -1703,11 +1743,17 @@ namespace Microsoft.Build.Execution
                             var buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                             ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
                         }
+                    }
 
-                        submission.CompleteLogging(true);
+                    WaitForAllLoggingServiceEventsToBeProcessed();
+
+                    lock (_syncLock)
+                    {
+                        submission.CompleteLogging();
                         ReportResultsToSubmission(new BuildResult(submission.BuildRequest, ex));
                         _overallBuildSuccess = false;
                     }
+
                 }
             }
         }
@@ -2259,14 +2305,14 @@ namespace Microsoft.Build.Execution
                         {
                             // Issue the real build request.
                             AddBuildRequestToSubmission(submission, configuration.ConfigurationId);
-                            IssueBuildRequestForBuildSubmission(submission, allowMainThreadBuild: false);
+                            IssueBuildRequestForBuildSubmission(submission, configuration, allowMainThreadBuild: false);
                         }
                         else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.ProxyTargets != null)
                         {
                             // Setup submission.BuildRequest with proxy targets. The proxy request is built on the inproc node (to avoid
                             // ProjectInstance serialization). The proxy target results are used as results for the real targets.
                             AddProxyBuildRequestToSubmission(submission, configuration.ConfigurationId, cacheResult.ProxyTargets);
-                            IssueBuildRequestForBuildSubmission(submission, allowMainThreadBuild: false);
+                            IssueBuildRequestForBuildSubmission(submission, configuration, allowMainThreadBuild: false);
                         }
                         else if (cacheResult.ResultType == CacheResultType.CacheHit && cacheResult.BuildResult != null)
                         {
@@ -2282,7 +2328,7 @@ namespace Microsoft.Build.Execution
                             }
 
                             _resultsCache.AddResult(result);
-                            submission.CompleteLogging(false);
+                            submission.CompleteLogging();
                             ReportResultsToSubmission(result);
                         }
                     }
@@ -2496,7 +2542,7 @@ namespace Microsoft.Build.Execution
 
                     // If we never received a project started event, consider logging complete anyhow, since the nodes have
                     // shut down.
-                    submission.CompleteLogging(waitForLoggingThread: false);
+                    submission.CompleteLogging();
 
                     _overallBuildSuccess = _overallBuildSuccess && (submission.BuildResult.OverallResult == BuildResultCode.Success);
                     CheckSubmissionCompletenessAndRemove(submission);
@@ -2625,7 +2671,7 @@ namespace Microsoft.Build.Execution
                     */
                     if (!submission.LoggingCompleted && result.Exception != null)
                     {
-                        submission.CompleteLogging(waitForLoggingThread: false);
+                        submission.CompleteLogging();
                     }
 
                     submission.CompleteResults(result);
@@ -2782,7 +2828,7 @@ namespace Microsoft.Build.Execution
                         {
                             submission.BuildResult.Exception = e;
                         }
-                        submission.CompleteLogging(waitForLoggingThread: false);
+                        submission.CompleteLogging();
                         submission.CompleteResults(new BuildResult(submission.BuildRequest, e));
 
                         CheckSubmissionCompletenessAndRemove(submission);
@@ -2823,7 +2869,7 @@ namespace Microsoft.Build.Execution
                         _projectStartedEvents.Remove(e.BuildEventContext.SubmissionId);
                         if (_buildSubmissions.TryGetValue(e.BuildEventContext.SubmissionId, out var submission))
                         {
-                            submission.CompleteLogging(false);
+                            submission.CompleteLogging();
                             CheckSubmissionCompletenessAndRemove(submission);
                         }
                     }
@@ -3113,7 +3159,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The logger registered to the logging service when no other one is.
         /// </summary>
-        private class NullLogger : ILogger
+        internal class NullLogger : ILogger
         {
             #region ILogger Members
 
