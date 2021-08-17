@@ -40,13 +40,7 @@ namespace Microsoft.NET.Build.Tasks
                 }
 
                 var additionalPropertiesXml = XElement.Parse(project.GetMetadata("AdditionalPropertiesFromProject"));
-                XElement targetFrameworkElement = additionalPropertiesXml.Element("TargetFramework");
-                if (!targetFrameworkElement.HasAttributes || !targetFrameworkElement.FirstAttribute.Value.Equals(nearestTargetFramework))
-                {
-                    // The TargetFramework did not match.
-                    continue;
-                }
-
+                XElement targetFrameworkElement = additionalPropertiesXml.Elements().Where(el => el.HasAttributes && el.FirstAttribute.Value.Equals(nearestTargetFramework)).Single();
                 Dictionary<string, string> projectAdditionalProperties = new(StringComparer.OrdinalIgnoreCase);
                 foreach (XElement propertyElement in targetFrameworkElement.Elements())
                 {
