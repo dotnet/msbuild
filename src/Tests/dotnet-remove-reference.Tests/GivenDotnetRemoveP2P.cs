@@ -200,16 +200,15 @@ Options:
             Directory.CreateDirectory(brokenFolder);
             string brokenProjectPath = Path.Combine(brokenFolder, "Broken.csproj");
             File.WriteAllText(brokenProjectPath, @"<Project Sdk=""Microsoft.NET.Sdk"" ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-    < PropertyGroup >
-        < OutputType > Library </ OutputType >
-        < TargetFrameworks > net451; netcoreapp2.1 </ TargetFrameworks >
-    </ PropertyGroup >
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFrameworks>net451;netcoreapp2.1</TargetFrameworks>
+    </PropertyGroup>
 
-    < ItemGroup >
-        < Compile Include = ""**\*.cs"" />
-        < EmbeddedResource Include = ""**\*.resx"" />
-    < !--intentonally broken-- >
-");
+    <ItemGroup>
+        <Compile Include=""**\*.cs""/>
+        <EmbeddedResource Include=""**\*.resx""/>
+    <!--intentonally broken-->");
 
             var cmd = new RemoveReferenceCommand(Log)
                     .WithProject(projName)

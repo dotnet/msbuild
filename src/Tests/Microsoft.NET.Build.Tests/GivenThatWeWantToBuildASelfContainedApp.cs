@@ -120,7 +120,7 @@ namespace Microsoft.NET.Build.Tests
 		[Fact]
 		public void It_succeeds_when_RuntimeIdentifier_and_PlatformTarget_mismatch_but_PT_is_AnyCPU()
 		{
-			var targetFramework = "net6.0";
+			var targetFramework = ToolsetInfo.CurrentTargetFramework;
 			var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid(targetFramework);
 			var testAsset = _testAssetsManager
 				.CopyTestAsset("HelloWorld")
