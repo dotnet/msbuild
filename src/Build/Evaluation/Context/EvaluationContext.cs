@@ -43,6 +43,7 @@ namespace Microsoft.Build.Evaluation.Context
 
         internal ISdkResolverService SdkResolverService { get; }
         internal IFileSystem FileSystem { get; }
+        internal FileMatcher FileMatcher { get; }
 
         private IDirectoryCacheFactory _directoryCacheFactory;
         private ConditionalWeakTable<Project, IDirectoryCache> _directoryCachesPerProject;
@@ -67,6 +68,7 @@ namespace Microsoft.Build.Evaluation.Context
             SdkResolverService = new CachingSdkResolverService();
             FileEntryExpansionCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
+            FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
 
             if (directoryCacheFactory != null)
             {
