@@ -79,9 +79,9 @@ namespace Microsoft.Build.FileSystem
         {
             FindPredicate predicate = (ref ReadOnlySpan<char> fileName) =>
             {
-                string fileNameString = fileName.ToString();
-                return FileMatcher.IsAllFilesWildcard(searchPattern) || FileMatcher.IsMatch(fileNameString, searchPattern);
+                return FileMatcher.IsAllFilesWildcard(searchPattern) || FileMatcher.IsMatch(fileName, searchPattern);
             };
+            // TODO: Don't create a new string and use Path.Join when it becomes available.
             FindTransform<string> transform = (ref ReadOnlySpan<char> fileName) => Path.Combine(path, fileName.ToString());
 
             IEnumerable<string> directories = includeDirectories
