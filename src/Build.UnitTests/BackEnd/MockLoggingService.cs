@@ -223,6 +223,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { }
         }
 
+        public MessageImportance MinimumRequiredMessageImportance
+        {
+            get => MessageImportance.Low;
+        }
+
         public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
@@ -553,7 +558,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
         /// <returns>The task logging context</returns>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }

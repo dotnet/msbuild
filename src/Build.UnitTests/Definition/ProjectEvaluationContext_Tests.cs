@@ -119,14 +119,12 @@ namespace Microsoft.Build.UnitTests.Definition
                         {Path.Combine(_env.DefaultTestDirectory.Path, "2.file"), 1}
                     }.OrderBy(kvp => kvp.Key));
 
-            fileSystem.DirectoryEntryExistsCalls.ShouldBe(2);
+            fileSystem.FileOrDirectoryExistsCalls.ShouldBe(2);
         }
 
         [Fact]
         public void IsolatedContextShouldNotSupportBeingPassedAFileSystem()
         {
-            _env.DoNotLaunchDebugger();
-
             var fileSystem = new Helpers.LoggingFileSystem();
             Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
         }

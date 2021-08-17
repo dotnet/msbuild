@@ -52,6 +52,16 @@ This version of MSBuild shipped with Visual Studio 2019 version 16.10.2 and will
 * Fixed a regression in glob matching where files without extensions were erroneously not matched (#6531).
 * Fixed a change in logging that caused crashes in Azure DevOps loggers (#6520).
 
+## MSBuild 16.10.2
+
+This version of MSBuild shipped with Visual Studio 2019 version 16.10.2 and will ship with .NET SDK 5.0.302.
+
+#### Fixed
+
+* Fixed a regression in the `MakeRelative` property function that dropped trailing slashes (#6513). Thanks, @dsparkplug and @pmisik!
+* Fixed a regression in glob matching where files without extensions were erroneously not matched (#6531).
+* Fixed a change in logging that caused crashes in Azure DevOps loggers (#6520).
+
 ## MSBuild 16.10.1
 
 This version of MSBuild shipped with Visual Studio 2019 version 16.10.1 and .NET SDK 5.0.301.

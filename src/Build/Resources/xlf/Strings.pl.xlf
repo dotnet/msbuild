@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
-        <target state="new">MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</target>
+        <target state="translated">MSB4274: wyłączenie węzła InProc prowadzi do obniżenia wydajności, gdy używane są wtyczki pamięci podręcznej projektu, które emitują żądania kompilowania serwera proxy.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1790,8 +1790,8 @@
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
-        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: Podana koligacja żądania {0} jest w konflikcie z poprzednią koligacją {1} określoną dla tego projektu.</target>
+        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</source>
+        <target state="new">MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">

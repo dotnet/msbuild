@@ -166,11 +166,11 @@ namespace Microsoft.Build.Utilities
         Version461 = 8,
         Version452 = 9,
         Version462 = 10,
-        VersionLatest = 10,
         Version47 = 11,
         Version471 = 12,
         Version472 = 13,
         Version48 = 14,
+        VersionLatest = 14,
         Latest = 9999,
     }
     public partial class TargetPlatformSDK : System.IEquatable<Microsoft.Build.Utilities.TargetPlatformSDK>
@@ -265,6 +265,7 @@ namespace Microsoft.Build.Utilities
         public bool LogMessagesFromFile(string fileName) { throw null; }
         public bool LogMessagesFromFile(string fileName, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
         public bool LogMessagesFromStream(System.IO.TextReader stream, Microsoft.Build.Framework.MessageImportance messageImportance) { throw null; }
+        public bool LogsMessagesOfImportance(Microsoft.Build.Framework.MessageImportance importance) { throw null; }
         public void LogTelemetry(string eventName, System.Collections.Generic.IDictionary<string, string> properties) { }
         public void LogWarning(string message, params object[] messageArgs) { }
         public void LogWarning(string subcategory, string warningCode, string helpKeyword, string file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber, string message, params object[] messageArgs) { }
@@ -433,8 +434,8 @@ namespace Microsoft.Build.Utilities
         Version120 = 2,
         Version140 = 3,
         Version150 = 4,
-        VersionLatest = 4,
         Version160 = 5,
         Version170 = 6,
+        VersionLatest = 6,
     }
 }

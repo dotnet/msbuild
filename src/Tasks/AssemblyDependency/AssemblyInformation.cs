@@ -405,6 +405,11 @@ namespace Microsoft.Build.Tasks
                         }
 
                         var container = metadataReader.GetMemberReference((MemberReferenceHandle) ctorHandle).Parent;
+                        if (container.Kind != HandleKind.TypeReference)
+                        {
+                            continue;
+                        }
+
                         var name = metadataReader.GetTypeReference((TypeReferenceHandle) container).Name;
                         if (!string.Equals(metadataReader.GetString(name), "TargetFrameworkAttribute"))
                         {

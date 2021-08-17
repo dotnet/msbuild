@@ -21,7 +21,9 @@ namespace Microsoft.Build.Evaluation
             
             readonly string _rootDirectory;
 
-            readonly ImmutableList<string> _excludes;
+            // TODO: Convert this to ImmutableSegmentedList<T> once available.
+            // https://github.com/dotnet/msbuild/issues/6601
+            readonly List<string> _excludes;
 
             readonly ImmutableList<ProjectMetadataElement> _metadata;
 
@@ -31,7 +33,7 @@ namespace Microsoft.Build.Evaluation
                 _elementOrder = builder.ElementOrder;
                 _rootDirectory = builder.RootDirectory;
 
-                _excludes = builder.Excludes.ToImmutable();
+                _excludes = builder.Excludes;
                 _metadata = builder.Metadata.ToImmutable();
             }
 
@@ -92,7 +94,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
                         // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
-                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8);
+                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
                         if (!skipGlob)
                         {
                             string glob = globFragment.TextFragment;
@@ -167,7 +169,9 @@ namespace Microsoft.Build.Evaluation
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }
 
-            public ImmutableList<string>.Builder Excludes { get; } = ImmutableList.CreateBuilder<string>();
+            // TODO: Convert this to ImmutableSegmentedList<T>.Builder once available.
+            // https://github.com/dotnet/msbuild/issues/6601
+            public List<string> Excludes { get; } = new();
 
             public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {

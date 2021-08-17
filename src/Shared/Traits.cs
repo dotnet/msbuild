@@ -27,11 +27,14 @@ namespace Microsoft.Build.Utilities
         public Traits()
         {
             EscapeHatches = new EscapeHatches();
+
+            DebugScheduler = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
+            DebugNodeCommunication = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"));
         }
 
         public EscapeHatches EscapeHatches { get; }
 
-        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION"); 
+        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
@@ -85,6 +88,10 @@ namespace Microsoft.Build.Utilities
         /// Log property tracking information.
         /// </summary>
         public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
+
+        public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
+        public readonly bool DebugScheduler;
+        public readonly bool DebugNodeCommunication;
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {

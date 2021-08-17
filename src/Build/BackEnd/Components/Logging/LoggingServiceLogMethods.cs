@@ -450,13 +450,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 // Raise the event with the filters
                 ProcessLoggingEvent(buildEvent);
-
-                // Make sure we process this event before going any further
-                if (_logMode == LoggerMode.Asynchronous)
-                {
-                    WaitForThreadToProcessEvents();
-                }
             }
+
+            // Make sure we process this event before going any further
+            WaitForThreadToProcessEvents();
         }
 
         /// <summary>
@@ -478,12 +475,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 BuildFinishedEventArgs buildEvent = new BuildFinishedEventArgs(message, null /* no help keyword */, success);
 
                 ProcessLoggingEvent(buildEvent);
-
-                if (_logMode == LoggerMode.Asynchronous)
-                {
-                    WaitForThreadToProcessEvents();
-                }
             }
+
+            // Make sure we process this event before going any further
+            WaitForThreadToProcessEvents();
         }
 
         /// <inheritdoc />
@@ -754,9 +749,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">Task Name</param>
         /// <param name="projectFile">Project file being built</param>
         /// <param name="projectFileOfTaskNode">Project file which contains the task</param>
+        /// <param name="line">The line number in the file where the task invocation is located.</param>
+        /// <param name="column">The column number in the file where the task invocation is located.</param>
         /// <returns>The build event context for the task.</returns>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column)
         {
             lock (_lockObject)
             {
@@ -782,6 +779,8 @@ namespace Microsoft.Build.BackEnd.Logging
                             taskName
                         );
                     buildEvent.BuildEventContext = taskBuildEventContext;
+                    buildEvent.LineNumber = line;
+                    buildEvent.ColumnNumber = column;
                     ProcessLoggingEvent(buildEvent);
                 }
 
