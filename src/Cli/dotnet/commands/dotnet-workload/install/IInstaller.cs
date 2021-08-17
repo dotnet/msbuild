@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         IWorkloadInstaller GetWorkloadInstaller();
 
-        void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
+        void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false);
 
         IWorkloadInstallationRecordRepository GetWorkloadInstallationRecordRepository();
 

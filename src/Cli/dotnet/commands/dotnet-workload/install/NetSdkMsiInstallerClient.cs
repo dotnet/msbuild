@@ -1,12 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.Versioning;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
@@ -17,6 +12,7 @@ using Microsoft.DotNet.Workloads.Workload.Install.InstallRecord;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Microsoft.NET.Sdk.WorkloadManifestReader;
 using Microsoft.Win32.Msi;
+using NuGet.Common;
 using NuGet.Versioning;
 using static Microsoft.NET.Sdk.WorkloadManifestReader.WorkloadResolver;
 
@@ -51,6 +47,8 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             _sdkFeatureBand = sdkFeatureBand;
             _workloadResolver = workloadResolver;
             _dependent = $"{DependentPrefix},{sdkFeatureBand},{HostArchitecture}";
+
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
 
             Log?.LogMessage($"Executing: {CurrentProcess.GetCommandLine()}, PID: {CurrentProcess.Id}, PPID: {ParentProcess.Id}");
             Log?.LogMessage($"{nameof(IsElevated)}: {IsElevated}");
@@ -88,10 +86,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// <summary>
         /// Cleans up and removes stale workload packs.
         /// </summary>
-        public void GarbageCollectInstalledWorkloadPacks()
+        public void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache = null)
         {
             try
             {
+                ReportPendingReboot();
                 Log?.LogMessage("Starting garbage collection.");
                 IEnumerable<SdkFeatureBand> installedFeatureBands = GetInstalledFeatureBands();
                 IEnumerable<WorkloadId> installedWorkloads = RecordRepository.GetInstalledWorkloads(_sdkFeatureBand);
@@ -156,7 +155,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                             {
                                 // If the current SDK feature band is listed as a dependent, we can validate
                                 // the workload pack against the expected pack IDs and versions to potentially remove it.
-                                if (!expectedWorkloadPacks.Where(p => packRecord.PackId.Equals(p.ResolvedPackageId))
+                                if (!expectedWorkloadPacks.Where(p => packRecord.PackId.ToString().Equals(p.ResolvedPackageId))
                                     .Where(p => p.Version.Equals(packRecord.PackVersion.ToString())).Any())
                                 {
                                     Log?.LogMessage($"Removing dependent '{dependent}' because the pack record does not match any expected packs.");
@@ -192,21 +191,30 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     // if a previous removal was interrupted. We can't safely clean up orphaned records because it's too expensive
                     // to query all installed components and determine the product codes associated with the component that
                     // created the record.
-                    DetectState state = Detect(record.ProductCode, out string _);
+                    DetectState state = DetectPackage(record.ProductCode, out Version _);
 
                     if (state == DetectState.Present)
                     {
-                        // We don't have package information and can't construct it accurately.
+                        // Manually construct the MSI payload package details
                         string id = $"{record.PackId}.Msi.{HostArchitecture}";
+                        MsiPayload msi = GetCachedMsiPayload(id, record.PackVersion.ToString(), offlineCache);
 
-                        MsiPayload msiPayload = GetCachedMsiPayload(id, record.PackVersion.ToString());
-                        VerifyPackage(msiPayload);
-                        InstallAction plannedAction = GetPlannedAction(state, InstallAction.Uninstall);
-
-                        string logFile = GetMsiLogName(record, plannedAction);
-
-                        uint error = ExecuteWithProgress($"Removing {id} ", () => UninstallMsi(record.ProductCode, logFile));
-                        ExitOnError(error, $"Failed to uninstall {msiPayload.MsiPath}.");
+                        // Make sure the package we have in the cache matches with the record. If it doesn't, we'll do the uninstall
+                        // the hard way
+                        if (!string.Equals(record.ProductCode, msi.ProductCode, StringComparison.OrdinalIgnoreCase))
+                        {
+                            Log?.LogMessage($"ProductCode mismatch! Cached package: {msi.ProductCode}, pack record: {record.ProductCode}.");
+                            string logFile = GetMsiLogName(record, InstallAction.Uninstall);
+                            uint error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressUninstall, id), () => UninstallMsi(record.ProductCode, logFile));
+                            ExitOnError(error, $"Failed to uninstall {msi.MsiPath}.");
+                        }
+                        else
+                        {
+                            // No need to plan. We know that there are no other dependents, the MSI is installed and we
+                            // want to remove it.
+                            VerifyPackage(msi);
+                            ExecutePackage(msi, InstallAction.Uninstall);
+                        }
                     }
                 }
             }
@@ -234,21 +242,89 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         public IWorkloadInstaller GetWorkloadInstaller() => throw new InvalidOperationException($"{GetType()} is not a workload installer.");
 
-        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        public void InstallWorkloadManifest(ManifestId manifestId, ManifestVersion manifestVersion, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null, bool isRollback = false)
         {
             try
             {
-                Log?.LogMessage($"Installing manifest, {nameof(manifestId)}: {manifestId}, {nameof(manifestVersion)}: {manifestVersion}, {nameof(sdkFeatureBand)}: {sdkFeatureBand}");
+                ReportPendingReboot();
+
+                // Rolling back a manifest update after a successful install is essentially a downgrade, which is blocked so we have to
+                // treat it as a special case and is different from the install failing and rolling that back, though depending where the install
+                // failed, it may have removed the old product already.
+                Log?.LogMessage($"Installing manifest: Id: {manifestId}, version: {manifestVersion}, feature band: {sdkFeatureBand}, rollback: {isRollback}.");
 
                 // Resolve the package ID for the manifest payload package
-                string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId).ToString();
+                string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId, InstallType.Msi).ToString();                
                 string msiPackageVersion = $"{manifestVersion}";
 
-                Log?.LogMessage($"Resolving {manifestId} ({manifestVersion}) to {msiPackageId}.{msiPackageVersion}.");
+                Log?.LogMessage($"Resolving {manifestId} ({manifestVersion}) to {msiPackageId} ({msiPackageVersion}).");
 
                 // Retrieve the payload from the MSI package cache. 
-                MsiPayload msiPayload = GetCachedMsiPayload(msiPackageId, msiPackageVersion);
-                VerifyPackage(msiPayload);
+                MsiPayload msi = GetCachedMsiPayload(msiPackageId, msiPackageVersion, offlineCache);
+                VerifyPackage(msi);
+                DetectState state = DetectPackage(msi.ProductCode, out Version installedVersion);
+                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> relatedProducts);
+
+                // If we've detected a downgrade, it's possible we might be doing a rollback after the manifests were updated, 
+                // but another error occurred. In this case we need to try and uninstall the upgrade and the install the lower
+                // version of the MSI.
+                if (plannedAction == InstallAction.Downgrade && isRollback && state == DetectState.Absent)
+                {
+                    Log?.LogMessage($"Rolling back manifest update.");
+
+                    // The provider keys for manifest packages are stable across feature bands so we retain dependents during upgrades.
+                    DependencyProvider depProvider = new DependencyProvider(msi.Manifest.ProviderKeyName);
+
+                    // Let's try and remove the SDK dependency. If anything's left then this is a shared installation, e.g.
+                    // the manifest was already installed by VS, we triggered a CLI installation, but because the package was
+                    // present, we simply added a dependent against it. 
+                    UpdateDependent(InstallRequestType.RemoveDependent, msi.Manifest.ProviderKeyName, _dependent);
+
+                    if (depProvider.Dependents.Any())
+                    {
+                        Log?.LogMessage($"Cannot remove manifest, other dependents remain: {string.Join(", ", depProvider.Dependents)}.");
+                        return;
+                    }
+
+                    // Since we don't have records for manifests, we need to try and retrieve the ProductCode of
+                    // the newer MSI that's installed that we want to remove using its dependency provider.
+                    string productCode = depProvider.ProductCode;
+
+                    if (string.IsNullOrWhiteSpace(productCode))
+                    {
+                        // We don't know the MSI package that wrote this provider key, so if the ProductCode is missing
+                        // we can't do anything else.
+                        Log?.LogMessage($"Failed to retrieve the ProductCode for provider: {depProvider.ProviderKeyName}.");
+                        return;
+                    }
+
+                    Log?.LogMessage($"Found ProductCode {productCode} registered against provider, {depProvider.ProviderKeyName}.");
+
+                    // This is a best effort. If for some reason the manifest installers were fixed, for example, manually
+                    // adding additional upgrade paths to work around previous faulty authoring, we may have multiple related
+                    // products. The best we can do is to check for at least one match and remove it and then try the rollback.
+                    if (!relatedProducts.Contains(productCode, StringComparer.OrdinalIgnoreCase))
+                    {
+                        Log?.LogMessage($"Cannot rollback manifest. ProductCode does not match any detected related products.");
+                        return;
+                    }
+
+                    string logFile = GetMsiLogName(productCode, InstallAction.Uninstall);
+                    uint error = UninstallMsi(productCode, logFile);
+
+                    ExitOnError(error, "Failed to uninstall manifest package.");
+
+                    // Detect the package again and fall through to the original execution. If that fails, then there's nothing
+                    // we could have done.
+                    Log?.LogMessage("Replanning manifest package.");
+                    state = DetectPackage(msi, out Version _);
+                    plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> _);
+                }
+
+                ExecutePackage(msi, plannedAction);
+
+                // Update the reference count against the MSI.
+                UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
             }
             catch (Exception e)
             {
@@ -261,17 +337,20 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             try
             {
+                ReportPendingReboot();
+
                 // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
                 string msiPackageId = GetMsiPackageId(packInfo);
 
                 // Retrieve the payload from the MSI package cache. 
-                MsiPayload msiPayload = GetCachedMsiPayload(msiPackageId, packInfo.Version);
-                VerifyPackage(msiPayload);
-                DetectState state = Detect(msiPayload.Manifest.ProductCode, out string _);
-                PlanAndExecute(msiPayload, packInfo, state, InstallAction.Repair);
+                MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
+                VerifyPackage(msi);
+                DetectState state = DetectPackage(msi, out Version installedVersion);
+                PlanPackage(msi, state, InstallAction.Repair, installedVersion, out _);
+                ExecutePackage(msi, InstallAction.Repair);
 
                 // Update the reference count against the MSI.
-                UpdateDependent(InstallRequestType.AddDependent, msiPayload.Manifest.ProviderKeyName, _dependent);
+                UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
             }
             catch (Exception e)
             {
@@ -284,29 +363,72 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         {
             try
             {
+                ReportPendingReboot();
+
                 // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
                 string msiPackageId = GetMsiPackageId(packInfo);
 
                 // Retrieve the payload from the MSI package cache. 
-                MsiPayload msiPayload = GetCachedMsiPayload(msiPackageId, packInfo.Version);
-                VerifyPackage(msiPayload);
-                DetectState state = Detect(msiPayload.Manifest.ProductCode, out string _);
-                PlanAndExecute(msiPayload, packInfo, state, InstallAction.Install);
+                MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
+                VerifyPackage(msi);
+                DetectState state = DetectPackage(msi, out Version installedVersion);
+                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out _);
+                ExecutePackage(msi, plannedAction);
 
                 // Update the reference count against the MSI.
-                UpdateDependent(InstallRequestType.AddDependent, msiPayload.Manifest.ProviderKeyName, _dependent);
+                UpdateDependent(InstallRequestType.AddDependent, msi.Manifest.ProviderKeyName, _dependent);
+            }
+            catch (Exception e)
+            {
+                LogException(e);
+                RollBackWorkloadPackInstall(packInfo, sdkFeatureBand, offlineCache);
+            }
+        }
+
+        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null)
+        {
+            try
+            {
+                ReportPendingReboot();
+                Log?.LogMessage($"Rolling back workload pack installation for {packInfo.ResolvedPackageId}.");
+
+                // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
+                string msiPackageId = GetMsiPackageId(packInfo);
+
+                // Retrieve the payload from the MSI package cache. 
+                MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
+                VerifyPackage(msi);
+
+                // Check the provider key first in case we were installed and we only need to remove
+                // a dependent.
+                DependencyProvider depProvider = new DependencyProvider(msi.Manifest.ProviderKeyName);
+
+                // Try and remove the dependent against this SDK. If any remain we'll simply exit.
+                UpdateDependent(InstallRequestType.RemoveDependent, msi.Manifest.ProviderKeyName, _dependent);
+
+                if (depProvider.Dependents.Any())
+                {
+                    Log?.LogMessage($"Cannot remove pack, other dependents remain: {string.Join(", ", depProvider.Dependents)}.");
+                    return;
+                }
+
+                // Make sure the MSI is actually installed.
+                DetectState state = DetectPackage(msi, out Version installedVersion);
+                InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Uninstall, installedVersion, out _);
+
+                // The previous steps would have logged the final action. If the verdict is not to uninstall we can exit.
+                if (plannedAction == InstallAction.Uninstall)
+                {
+                    ExecutePackage(msi, plannedAction);
+                }
+
+                Log?.LogMessage("Rollback completed.");
             }
             catch (Exception e)
             {
                 LogException(e);
                 throw;
             }
-        }
-
-        public void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand)
-        {
-            Log?.LogMessage($"Rolling back workload pack.");
-            LogPackInfo(packInfo);
         }
 
         public void Shutdown()
@@ -337,18 +459,167 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// <param name="productCode">The product code of the MSI to detect.</param>
         /// <param name="installedVersion">If detected, contains the version of the installed MSI.</param>
         /// <returns>The detect state of the specified MSI.</returns>
-        private DetectState Detect(string productCode, out string installedVersion)
+        private DetectState DetectPackage(string productCode, out Version installedVersion)
         {
-            uint error = WindowsInstaller.GetProductInfo(productCode, InstallProperty.VERSIONSTRING, out installedVersion);
+            installedVersion = default;
+            uint error = WindowsInstaller.GetProductInfo(productCode, InstallProperty.VERSIONSTRING, out string versionValue);
 
             DetectState state = error == Error.SUCCESS ? DetectState.Present
                 : (error == Error.UNKNOWN_PRODUCT) || (error == Error.UNKNOWN_PROPERTY) ? DetectState.Absent
                 : DetectState.Unknown;
 
-            ExitOnError(state == DetectState.Unknown, error, $"Failed to detect MSI package with ProductCode={productCode}.");
-            Log?.LogMessage($"Detected package, ProductCode: {productCode}, version: {(string.IsNullOrWhiteSpace(installedVersion) ? "n/a" : $"{installedVersion}")}, state: {state}.");
+            ExitOnError(state == DetectState.Unknown, error, $"DetectPackage: Failed to detect MSI package, ProductCode: {productCode}.");
+
+            if (state == DetectState.Present)
+            {
+                if (!Version.TryParse(versionValue, out installedVersion))
+                {
+                    Log?.LogMessage($"DetectPackage: Failed to parse version: {versionValue}.");
+                }
+            }
+
+            Log?.LogMessage($"DetectPackage: ProductCode: {productCode}, version: {installedVersion?.ToString() ?? "n/a"}, state: {state}.");
 
             return state;
+        }
+
+        /// <summary>
+        /// Determines the state of the specified product.
+        /// </summary>
+        /// <param name="msi">The MSI package to detect.</param>
+        /// <param name="installedVersion">If detected, contains the version of the installed MSI.</param>
+        /// <returns>The detect state of the specified MSI.</returns>
+        private DetectState DetectPackage(MsiPayload msi, out Version installedVersion)
+        {
+            return DetectPackage(msi.ProductCode, out installedVersion);
+        }
+
+        /// <summary>
+        /// Plans the specified MSI payload based on its state and the requested install action.
+        /// </summary>
+        /// <param name="msi">The MSI package to plan.</param>
+        /// <param name="state">The detected state of the package.</param>
+        /// <param name="requestedAction">The requested action to perform.</param>
+        /// <returns>The action that will be performed.</returns>
+        private InstallAction PlanPackage(MsiPayload msi, DetectState state, InstallAction requestedAction, Version installedVersion, out IEnumerable<string> relatedProductCodes)
+        {
+            InstallAction plannedAction = InstallAction.None;
+            HashSet<string> relatedProducts = new();
+
+            Log?.LogMessage($"PlanPackage: Begin, name: {msi.Name}, version: {msi.ProductVersion}, state: {state}, installed version: {installedVersion?.ToString() ?? "n/a"}, requested: {requestedAction}.");
+
+            // Manifest packages should support major upgrades (both the ProductCode and ProductVersion should be different) while
+            // workload packs should always be SxS (ProductCode and Upgrade should be different for each version).
+            //
+            // We cannot discount someone generating a minor update (ProductCode remains unchanged, but ProductVersion changes),
+            // so we'll detect downgrades and minor updates. For more details, see https://docs.microsoft.com/en-us/windows/win32/msi/minor-upgrades.
+            if (state == DetectState.Present)
+            {
+                if (msi.ProductVersion < installedVersion)
+                {
+                    Log?.LogMessage($"PlanPackage: Downgrade detected, installed version: {installedVersion}, requested version: {msi.ProductVersion}.");
+                    plannedAction = InstallAction.Downgrade;
+                    state = DetectState.Superseded;
+                }
+                else if (msi.ProductVersion > installedVersion)
+                {
+                    Log?.LogMessage($"PlanPackage: Minor update detected, installed version: {installedVersion}, requested version: {msi.ProductVersion}.");
+                    plannedAction = InstallAction.MinorUpdate;
+                    state = DetectState.Obsolete;
+                }
+                else
+                {
+                    // If the package is installed, then we can uninstall and repair it.
+                    plannedAction = (requestedAction != InstallAction.Repair) && (requestedAction != InstallAction.Uninstall) ? InstallAction.None : requestedAction;
+                }
+            }
+            else if (state == DetectState.Absent)
+            {
+                // If we're absent, convert repair to install or keep install.
+                plannedAction = (requestedAction == InstallAction.Repair) ? InstallAction.Install
+                    : (requestedAction == InstallAction.Install) ? InstallAction.Install
+                    : InstallAction.None;
+            }
+
+            // At this point we know the MSI is absent so there are only three outcomes when executing the package:
+            //   1. We'll just do a clean install if we don't find related products so we're either brand new or SxS.
+            //   2. We'll perform a major upgrade.
+            //   3. We'll trigger a downgrade and likely an error since most MSIs detect and block downgrades.
+            //
+            // We'll process the related product information to make a determination. This is similar to what the FindRelatedProducts
+            // action does when an MSI is executed.
+            foreach (RelatedProduct relatedProduct in msi.RelatedProducts)
+            {
+                foreach (string relatedProductCode in WindowsInstaller.FindRelatedProducts(relatedProduct.UpgradeCode))
+                {
+                    // Ignore potentially detecting ourselves.
+                    if (string.Equals(relatedProductCode, msi.ProductCode, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    // Check whether the related product is installed and retrieve its version to determine
+                    // how we're related.
+                    uint error = WindowsInstaller.GetProductInfo(relatedProductCode, InstallProperty.VERSIONSTRING, out string relatedVersionValue);
+
+                    // Continue searching if the related product is not installed.
+                    if (error == Error.UNKNOWN_PRODUCT || error == Error.UNKNOWN_PROPERTY)
+                    {
+                        continue;
+                    }
+
+                    ExitOnError(error, $"PlanPackage: Failed to retrieve version for related product: ProductCode: {relatedProductCode}.");
+
+                    // Parse the version, but don't try to catch any errors. If the version is invalid we want to fail
+                    // because we can't compare invalid versions to see whether it's excluded by the VersionMin and VersionMax
+                    // columns from the Upgrade table.
+                    Version relatedVersion = Version.Parse(relatedVersionValue);
+
+                    if (relatedProduct.ExcludesMinVersion(relatedVersion) || relatedProduct.ExcludesMaxVersion(relatedVersion))
+                    {
+                        continue;
+                    }
+
+                    // Check if the related product contains a matching language code (LCID). If we don't have any languages,
+                    // all languages are detectable as related and we can ignore the msidbUpgradeAttributesLanguagesExclusive flag.
+                    if (relatedProduct.Languages.Any())
+                    {
+                        string relatedLanguage = "0";
+                        error = WindowsInstaller.GetProductInfo(relatedProductCode, InstallProperty.LANGUAGE, out relatedLanguage);
+
+                        if (int.TryParse(relatedLanguage, out int lcid))
+                        {
+                            if (relatedProduct.ExcludesLanguage(lcid))
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            Log?.LogMessage($"PlanPackage: Failed to read Language property for related product, ProductCode: {relatedProductCode}. The related product will be skipped.");
+                            continue;
+                        }
+                    }
+
+                    relatedProducts.Add(relatedProductCode);
+                    plannedAction = InstallAction.MajorUpgrade;
+
+                    if (relatedProduct.Attributes.HasFlag(UpgradeAttributes.OnlyDetect) && (state == DetectState.Absent))
+                    {
+                        // If we're not installed, but detect-only related, it's very likely that 
+                        // that we'd trigger a downgrade launch condition. We can't know for sure, but
+                        // generally that's the most common use for detect-only entries.
+                        plannedAction = InstallAction.Downgrade;
+                    }
+
+                    Log?.LogMessage($"PlanPackage: Detected related product, ProductCode: {relatedProductCode}, version: {relatedVersion}, attributes: {relatedProduct.Attributes}, planned action: {plannedAction}.");
+                }
+            }
+
+            Log?.LogMessage($"PlanPackage: Completed, name: {msi.Name}, version: {msi.ProductVersion}, state: {state}, installed version: {installedVersion?.ToString() ?? "n/a"}, requested: {requestedAction}, planned: {plannedAction}.");
+
+            relatedProductCodes = relatedProducts.Select(p => p);
+            return plannedAction;
         }
 
         /// <summary>
@@ -363,18 +634,36 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         /// <summary>
-        /// Downloads the NuGet package carrying the MSI and JSON manifest and extracts it locally to
-        /// a temporary folder.
+        /// Extracts the MSI and JSON manifest using the NuGet package in the offline cache to a temporary
+        /// folder or downloads a copy before extracting it.
         /// </summary>
         /// <param name="packageId">The ID of the package to download.</param>
         /// <param name="packageVersion">The version of the package to download.</param>
+        /// <param name="offlineCache">The path of the offline package cache. If <see langword="null"/>, the package
+        /// is downloaded.</param>
         /// <returns>The directory where the package was extracted.</returns>
-        private string DownloadAndExtractPackage(string packageId, string packageVersion)
+        /// <exception cref="FileNotFoundException" />
+        private string ExtractPackage(string packageId, string packageVersion, DirectoryPath? offlineCache)
         {
-            string packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packageId), new NuGetVersion(packageVersion),
-                _packageSourceLocation).Result;
+            string packagePath;
 
-            Log?.LogMessage($"Downloaded {packageId} ({packageVersion}) to '{packagePath}");
+            if (offlineCache == null || !offlineCache.HasValue)
+            {
+                Reporter.WriteLine($"Downloading {packageId} ({packageVersion})");
+                packagePath = _nugetPackageDownloader.DownloadPackageAsync(new PackageId(packageId), new NuGetVersion(packageVersion),
+                    _packageSourceLocation).Result;
+                Log?.LogMessage($"Downloaded {packageId} ({packageVersion}) to '{packagePath}");
+            }
+            else
+            {
+                packagePath = Path.Combine(offlineCache.Value.Value, $"{packageId}.{packageVersion}.nupkg");
+                Log?.LogMessage($"Using offline cache, package: {packagePath}");
+            }
+
+            if (!File.Exists(packagePath))
+            {
+                throw new FileNotFoundException(string.Format(LocalizableStrings.CacheMissingPackage, packageId, packageVersion, offlineCache));
+            }
 
             // Extract the contents to a random folder to avoid potential file injection/hijacking 
             // shenanigans before moving it to the final cache directory.
@@ -414,16 +703,17 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         /// </summary>
         /// <param name="packageId">The ID of the payload package.</param>
         /// <param name="packageVersion">The version of the payload package.</param>
+        /// <param name="offlineCache">The path to the offline cache. When <see langword="null"/>, packages are downloaded using the
+        /// existing package feeds.</param>
         /// <returns>The MSI payload or <see langword="null"/> if unsuccessful.</returns>
-        private MsiPayload GetCachedMsiPayload(string packageId, string packageVersion)
+        private MsiPayload GetCachedMsiPayload(string packageId, string packageVersion, DirectoryPath? offlineCache)
         {
             if (!Cache.TryGetPayloadFromCache(packageId, packageVersion, out MsiPayload msiPayload))
             {
-                // If it's not fully cached, download and extract the payload package into a temporary location
-                // and try to cache it again. We DO NOT trust partially cached packages.
-                string extractedPackageRootPath = DownloadAndExtractPackage(packageId, packageVersion);
+                // If it's not fully cached, download or copy if from the local cache and extract the payload package into a
+                // temporary location and try to cache it again in the MSI cache. We DO NOT trust partially cached packages.
+                string extractedPackageRootPath = ExtractPackage(packageId, packageVersion, offlineCache);
                 string manifestPath = Path.Combine(extractedPackageRootPath, "data", "msi.json");
-
                 Cache.CachePayload(packageId, packageVersion, manifestPath);
                 Directory.Delete(extractedPackageRootPath, recursive: true);
 
@@ -437,63 +727,38 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         /// <summary>
-        /// Determines the final <see cref="InstallAction"/> based on the requested action and detection
-        /// state of the MSI.
+        /// Executes an MSI package. The type of execution is determined by the requested action.
         /// </summary>
-        /// <param name="state">The detected state of the MSI.</param>
-        /// <param name="requestAction">The requested action to perform.</param>
-        /// <returns>The final action that should be performed.</returns>
-        private InstallAction GetPlannedAction(DetectState state, InstallAction requestAction)
-        {
-            InstallAction plannedAction = InstallAction.None;
-
-            if (state == DetectState.Absent)
-            {
-                if (requestAction == InstallAction.Install || requestAction == InstallAction.Repair)
-                {
-                    plannedAction = InstallAction.Install;
-                }
-            }
-            else if (state == DetectState.Present)
-            {
-                if (requestAction == InstallAction.Repair || requestAction == InstallAction.Uninstall)
-                {
-                    plannedAction = requestAction;
-                }
-            }
-
-            return plannedAction;
-        }
-
-        /// <summary>
-        /// Executes a windows installer package using the provided MSI payload, the state of the package and the desired install action.
-        /// </summary>
-        /// <param name="msiPayload"></param>
-        /// <param name="packInfo"></param>
-        /// <param name="state"></param>
-        /// <param name="requestAction"></param>
-        private void PlanAndExecute(MsiPayload msiPayload, PackInfo packInfo, DetectState state, InstallAction requestAction)
+        /// <param name="msi">The MSI package to execute.</param>
+        /// <param name="action">The action to perform.</param>
+        private void ExecutePackage(MsiPayload msi, InstallAction action)
         {
             uint error = Error.SUCCESS;
-            InstallAction plannedAction = GetPlannedAction(state, requestAction);
+            string logFile = GetMsiLogName(msi, action);
 
-            Log?.LogMessage($"Execute package, id: {packInfo.ResolvedPackageId}, state: {state}, requested: {requestAction}, execute: {plannedAction}");
-            string logFile = GetMsiLogName(packInfo, plannedAction);
+            switch (action)
+            {
+                case InstallAction.MinorUpdate:
+                case InstallAction.Install:
+                case InstallAction.MajorUpgrade:
+                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressInstall, msi.Payload), () => InstallMsi(msi.MsiPath, logFile));
+                    ExitOnError(error, $"Failed to install {msi.Payload}.");
+                    break;
 
-            if (plannedAction == InstallAction.Install)
-            {
-                error = ExecuteWithProgress($"Installing {packInfo.ResolvedPackageId}", () => InstallMsi(msiPayload.MsiPath, logFile));
-                ExitOnError(error, $"Failed to install {msiPayload.MsiPath}.");
-            }
-            else if (plannedAction == InstallAction.Uninstall)
-            {
-                error = ExecuteWithProgress($"Removing {packInfo.ResolvedPackageId} ", () => UninstallMsi(msiPayload.Manifest.ProductCode, logFile));
-                ExitOnError(error, $"Failed to uninstall {msiPayload.MsiPath}.");
-            }
-            else if (plannedAction == InstallAction.Repair)
-            {
-                error = ExecuteWithProgress($"Repairing {packInfo.ResolvedPackageId} ", () => RepairMsi(msiPayload.Manifest.ProductCode, logFile));
-                ExitOnError(error, $"Failed to repair {msiPayload.MsiPath}.");
+                case InstallAction.Repair:
+                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressRepair, msi.Payload), () => RepairMsi(msi.ProductCode, logFile));
+                    ExitOnError(error, $"Failed to repair {msi.Payload}.");
+                    break;
+
+                case InstallAction.Uninstall:
+                    error = ExecuteWithProgress(String.Format(LocalizableStrings.MsiProgressUninstall, msi.Payload), () => UninstallMsi(msi.ProductCode, logFile));
+                    ExitOnError(error, $"Failed to remove {msi.Payload}.");
+                    break;
+
+                case InstallAction.None:
+                case InstallAction.Downgrade:
+                default:
+                    break;
             }
         }
 
@@ -562,13 +827,40 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             INuGetPackageDownloader nugetPackageDownloader = null,
             VerbosityOptions verbosity = VerbosityOptions.normal,
             PackageSourceLocation packageSourceLocation = null,
-            IReporter reporter = null)
+            IReporter reporter = null,
+            string tempDirPath = null,
+            RestoreActionConfig restoreActionConfig = null)
         {
-            TimestampedFileLogger logger = new(Path.Combine(Path.GetTempPath(), $"Microsoft.NET_Workload_Install_{DateTime.Now:yyyyMMdd_HHmmss}.log"));
+            TimestampedFileLogger logger = new(Path.Combine(Path.GetTempPath(), $"Microsoft.NET.Workload_{DateTime.Now:yyyyMMdd_HHmmss}.log"));
             InstallClientElevationContext elevationContext = new(logger);
+
+            if (nugetPackageDownloader == null)
+            {
+                DirectoryPath tempPackagesDir = new(string.IsNullOrWhiteSpace(tempDirPath) ? Path.GetTempPath() : tempDirPath);
+
+                nugetPackageDownloader = new NuGetPackageDownloader(tempPackagesDir,
+                    filePermissionSetter: null, new FirstPartyNuGetPackageSigningVerifier(tempPackagesDir),
+                    new NullLogger(), restoreActionConfig: restoreActionConfig);
+            }
 
             return new NetSdkMsiInstallerClient(elevationContext, logger, workloadResolver, sdkFeatureBand, nugetPackageDownloader,
                 verbosity, packageSourceLocation, reporter);
+        }
+
+        /// <summary>
+        /// Reports any pending reboots.
+        /// </summary>
+        private void ReportPendingReboot()
+        {
+            if (RebootPending)
+            {
+                ReportOnce(AnsiColorExtensions.Yellow(LocalizableStrings.PendingReboot));
+            }
+        }
+
+        private void OnProcessExit(object sender, EventArgs e)
+        {
+            Shutdown();
         }
     }
 }

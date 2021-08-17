@@ -3,13 +3,17 @@
 
 #nullable disable
 
-using System;
-using System.IO;
 using System.IO.Pipes;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Security;
 using System.Security.AccessControl;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Installer.Windows.Security;
+using Microsoft.Win32.Msi;
 using Newtonsoft.Json;
 
 namespace Microsoft.DotNet.Installer.Windows
@@ -20,6 +24,11 @@ namespace Microsoft.DotNet.Installer.Windows
     [SupportedOSPlatform("windows")]
     internal class MsiPackageCache : InstallerBase
     {
+        /// <summary>
+        /// <see langword="true"/> if the executing command has a valid AuthentiCode signature; <see langword="false"/> otherwise.
+        /// </summary>
+        private static readonly bool s_IsDotNetSigned;
+
         /// <summary>
         /// Default inheritance to apply to directory ACLs.
         /// </summary>
@@ -121,7 +130,7 @@ namespace Microsoft.DotNet.Installer.Windows
         {
             if (!File.Exists(manifestPath))
             {
-                throw new FileNotFoundException($"Manifest file not found: {manifestPath}");
+                throw new FileNotFoundException($"CachePayload: Manifest file not found: {manifestPath}");
             }
 
             Elevate();
@@ -201,7 +210,7 @@ namespace Microsoft.DotNet.Installer.Windows
             // trust that the MSI in the cache directory is the correct file.
             if (!File.Exists(manifestPath))
             {
-                Log?.LogMessage($"Manifest file does not exist, '{manifestPath}'");
+                Log?.LogMessage($"MSI manifest file does not exist, '{manifestPath}'");
                 return false;
             }
 
@@ -216,9 +225,71 @@ namespace Microsoft.DotNet.Installer.Windows
                 return false;
             }
 
+            VerifyPackageSignature(msiPath);
+
             payload = new MsiPayload(manifestPath, msiPath);
 
             return true;
+        }
+
+        /// <summary>
+        /// Verifies the AuthentiCode signature of an MSI package if the executing command itself is running
+        /// from a signed module.
+        /// </summary>
+        /// <param name="msiPath">The pathof the MSI to verify.</param>
+        private void VerifyPackageSignature(string msiPath)
+        {
+            if (s_IsDotNetSigned)
+            {
+                bool isAuthentiCodeSigned = AuthentiCode.IsSigned(msiPath);
+
+                // Need to capture the error now as other OS calls might change the last error.
+                uint lastError = !isAuthentiCodeSigned ? unchecked((uint)Marshal.GetLastWin32Error()) : Error.SUCCESS;
+
+                bool isTrustedOrganization = AuthentiCode.IsSignedByTrustedOrganization(msiPath, AuthentiCode.TrustedOrganizations);
+
+                if (isAuthentiCodeSigned && isTrustedOrganization)
+                {
+                    Log?.LogMessage($"Successfully verified AuthentiCode signature for {msiPath}.");
+                }
+                else
+                {
+                    // Summarize the failure and then report additional details.
+                    Log?.LogMessage($"Failed to verify signature for {msiPath}. AuthentiCode signed: {isAuthentiCodeSigned}, Trusted organization: {isTrustedOrganization}.");
+                    IEnumerable<X509Certificate2> certificates = AuthentiCode.GetCertificates(msiPath);
+
+                    // Dump all the certificates if there are any.
+                    if (certificates.Any())
+                    {
+                        Log?.LogMessage($"Certificate(s):");
+
+                        foreach (X509Certificate2 certificate in certificates)
+                        {
+                            Log?.LogMessage($"       Subject={certificate.Subject}");
+                            Log?.LogMessage($"        Issuer={certificate.Issuer}");
+                            Log?.LogMessage($"    Not before={certificate.NotBefore}");
+                            Log?.LogMessage($"     Not after={certificate.NotAfter}");
+                            Log?.LogMessage($"    Thumbprint={certificate.Thumbprint}");
+                            Log?.LogMessage($"     Algorithm={certificate.SignatureAlgorithm.FriendlyName}");
+                        }
+                    }
+
+                    if (!isAuthentiCodeSigned)
+                    {
+                        // If it was a WinTrust failure, we can exit using that error code and include a proper message from the OS.
+                        ExitOnError(lastError, $"Failed to verify authenticode signature for {msiPath}.");
+                    }
+
+                    if (!isTrustedOrganization)
+                    {
+                        throw new SecurityException(string.Format(LocalizableStrings.AuthentiCodeNoTrustedOrg, msiPath));
+                    }
+                }
+            }
+            else
+            {
+                Log?.LogMessage($"Command is not signed, skipping signature verification for {msiPath}.");
+            }
         }
 
         /// <summary>
@@ -235,6 +306,11 @@ namespace Microsoft.DotNet.Installer.Windows
             directorySecurity.SetAccessRule(s_LocalSystemRule);
             directorySecurity.SetAccessRule(s_UsersRule);
             directoryInfo.SetAccessControl(directorySecurity);
+        }
+
+        static MsiPackageCache()
+        {
+            s_IsDotNetSigned = AuthentiCode.IsSigned(Assembly.GetExecutingAssembly().Location);
         }
     }
 }

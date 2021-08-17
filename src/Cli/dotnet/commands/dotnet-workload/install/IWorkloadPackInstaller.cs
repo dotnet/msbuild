@@ -15,11 +15,11 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         void RepairWorkloadPack(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
-        void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand);
+        void RollBackWorkloadPackInstall(PackInfo packInfo, SdkFeatureBand sdkFeatureBand, DirectoryPath? offlineCache = null);
 
         void DownloadToOfflineCache(PackInfo packInfo, DirectoryPath offlineCache, bool includePreviews);
 
-        void GarbageCollectInstalledWorkloadPacks();
+        void GarbageCollectInstalledWorkloadPacks(DirectoryPath? offlineCache =  null);
 
         IEnumerable<(WorkloadPackId Id, string Version)> GetInstalledPacks(SdkFeatureBand sdkFeatureBand);
     }

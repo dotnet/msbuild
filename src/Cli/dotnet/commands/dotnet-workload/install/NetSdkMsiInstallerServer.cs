@@ -158,7 +158,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
             string logPipeName = WindowsUtils.CreatePipeName(CurrentProcess.Id, "log");
             NamedPipeServerStream logPipe = NamedPipeServerStreamAcl.Create(logPipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Message,
                 PipeOptions.None, 65535, 65535, pipeSecurity);
-            PipeStreamSetupLogger logger = new PipeStreamSetupLogger(logPipe, logPipeName);
+            PipeStreamSetupLogger logger = new(logPipe, logPipeName);
             InstallServerElevationContext elevationContext = new(serverPipe);
 
             return new NetSdkMsiInstallerServer(elevationContext, logger);
