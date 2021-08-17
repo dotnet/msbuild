@@ -93,8 +93,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
-            result.Path.ShouldBe("resolverpath1");
-            _logger.Warnings.Select(i => i.Message).ShouldBe(new [] { "The SDK resolver \"MockSdkResolverThrows\" failed to run. EXMESSAGE" });
+            result.Path.ShouldBe(null);
+            _logger.ErrorCount.ShouldBe(1);
+            _logger.Errors.First().Code.ShouldBe("MSB4242");
         }
 
         [Fact]
