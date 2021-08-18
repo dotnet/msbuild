@@ -231,12 +231,14 @@ namespace Microsoft.Build.Shared
                 // FormatResourceString calls ToString() which returns the full name of the type!
                 foreach (object param in args)
                 {
-                    // Check it has a real implementation of ToString()
+                    // Check it has a real implementation of ToString() and the type is not actually System.String
                     if (param != null)
                     {
-                        if (String.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal))
+                        if (string.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal) &&
+                            param.GetType() != typeof(string))
                         {
-                            ErrorUtilities.ThrowInternalError("Invalid resource parameter type, was {0}", param.GetType().FullName);
+                            ErrorUtilities.ThrowInternalError("Invalid resource parameter type, was {0}",
+                                param.GetType().FullName);
                         }
                     }
                 }
