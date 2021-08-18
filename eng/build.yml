@@ -50,7 +50,6 @@ jobs:
       - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
         - group: dotnet-benchview
         - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-        - _PublishArgs: /p:DotNetPublishUsingPipelines=true
         - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
         - _PerfIterations: 25
 
