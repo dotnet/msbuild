@@ -178,8 +178,9 @@ Examples:
         [Fact]
         public void CanFilterAuthor()
         {
-            var commandResult = new DotnetNewCommand(_log, "console", "--search", "--columns", "author", "--author", "micro")
+            var commandResult = new DotnetNewCommand(_log, "func", "--search", "--columns", "author", "--author", "micro")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -193,7 +194,7 @@ Examples:
 
             var tableOutput = ParseTableOutput(commandResult.StdOut, expectedColumns: new[] { "Template Name", "Short Name", "Author", "Package", "Downloads" });
 
-            Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "console"), "'Template Name' or 'Short Name' columns do not contain the criteria");
+            Assert.True(AllRowsContain(tableOutput, new[] { "Template Name", "Short Name" }, "func"), "'Template Name' or 'Short Name' columns do not contain the criteria");
             Assert.True(AllRowsContain(tableOutput, new[] { "Author" }, "micro"), "'Author' column does not contain the criteria");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Template Name"), "'Template Name' column contains empty values");
             Assert.True(AtLeastOneRowIsNotEmpty(tableOutput, "Short Name"), "'Short Name' column contains empty values");
@@ -207,6 +208,7 @@ Examples:
         {
             var commandResult = new DotnetNewCommand(_log, "--search", "--columns", "author", "--author", "micro")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -490,6 +492,7 @@ Examples:
         {
             var commandResult = new DotnetNewCommand(_log, "con", "--search", "--langVersion")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -511,6 +514,7 @@ Examples:
 
             commandResult = new DotnetNewCommand(_log, "--search", "--langVersion")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -535,6 +539,7 @@ Examples:
         {
             var commandResult = new DotnetNewCommand(_log, "con", "--search", "--langVersion", "smth")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -556,6 +561,7 @@ Examples:
 
             commandResult = new DotnetNewCommand(_log, "--search", "--langVersion", "smth")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -580,6 +586,7 @@ Examples:
         {
             var commandResult = new DotnetNewCommand(_log, "con", "--search", "-f", "netcoreapp3.1")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -601,6 +608,7 @@ Examples:
 
             commandResult = new DotnetNewCommand(_log, "--search", "-f", "net5.0")
                 .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithDebug()
                 .Execute();
 
             commandResult.Should()
