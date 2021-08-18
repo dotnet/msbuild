@@ -75,9 +75,9 @@
       <Sha>d7011db2291806506cdd45e110dcf67f30b9b16e</Sha>
       <SourceBuild RepoName="fsharp" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="dotnet-format" Version="6.0.241702">
+    <Dependency Name="dotnet-format" Version="6.0.241801">
       <Uri>https://github.com/dotnet/format</Uri>
-      <Sha>727a4ec856a56e39e1dea812107b876199865e32</Sha>
+      <Sha>624afb5283ab901837c7ed7af734586d21a8f8ed</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.0.0-4.21416.10">
       <Uri>https://github.com/dotnet/roslyn</Uri>
