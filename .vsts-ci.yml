@@ -54,7 +54,7 @@ stages:
         matrix:
           Build_Release:
             _BuildConfig: Release
-            _PublishArgs: '-publish'
+            _PublishArgs: '-publish /p:DotNetPublishUsingPipelines=true'
             ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
               _SignType: test
               _Test: -test
