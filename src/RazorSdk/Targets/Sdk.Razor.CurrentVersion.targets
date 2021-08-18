@@ -384,7 +384,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!-- When targeting 3.x and later projects, we have to infer configuration by inspecting the project. -->
   <Import Project="Microsoft.NET.Sdk.Razor.Configuration.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'" />
 
-  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" Condition="'$(UseRazorSourceGenerator)' != 'true'" />
+  <Import Project="Microsoft.NET.Sdk.Razor.CodeGeneration.targets" />
 
   <Import Project="Microsoft.NET.Sdk.Razor.Component.targets" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(UseRazorSourceGenerator)' != 'true'" />
 
