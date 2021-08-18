@@ -268,7 +268,7 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
 
             // Create a FileMatcher for the given project being evaluated, evaluation context, and evaluation ID.
-            IDirectoryCache directoryCache = project.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            IDirectoryCache directoryCache = project?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
             IFileSystem fileSystem = directoryCache is not null
                 ? new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache)
                 : evaluationContext.FileSystem;

@@ -1715,7 +1715,7 @@ namespace Microsoft.Build.Shared
 #endif
             {
                 char inputChar = input[iIndex];
-                char patternChar = pattern[iIndex];
+                char patternChar = pattern[pIndex];
 
                 // We will mostly be comparing ASCII characters, check English letters first.
                 char inputCharLower = (char)(inputChar | 0x20);
@@ -1770,7 +1770,7 @@ namespace Microsoft.Build.Shared
                                     break;
                                 }
                                 // If the tail doesn't match, we can safely return e.g. ("aaa", "*b")
-                                if (!CompareIgnoreCase(ref input, patternTailIndex, inputTailIndex) &&
+                                if (!CompareIgnoreCase(ref input, inputTailIndex, patternTailIndex) &&
                                     pattern[patternTailIndex] != '?')
                                 {
                                     return false;
