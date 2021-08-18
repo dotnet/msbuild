@@ -498,6 +498,7 @@ namespace Microsoft.Build.Definition
     public partial class ProjectOptions
     {
         public ProjectOptions() { }
+        public Microsoft.Build.FileSystem.IDirectoryCacheFactory DirectoryCacheFactory { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.Context.EvaluationContext EvaluationContext { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings LoadSettings { get { throw null; } set { } }
@@ -881,7 +882,6 @@ namespace Microsoft.Build.Evaluation.Context
     {
         internal EvaluationContext() { }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
-        public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.IDirectoryCacheFactory directoryCacheFactory) { throw null; }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy, Microsoft.Build.FileSystem.MSBuildFileSystemBase fileSystem) { throw null; }
         public enum SharingPolicy
         {
@@ -1510,7 +1510,7 @@ namespace Microsoft.Build.FileSystem
     }
     public partial interface IDirectoryCacheFactory
     {
-        Microsoft.Build.FileSystem.IDirectoryCache GetDirectoryCacheForProject(Microsoft.Build.Evaluation.Project project);
+        Microsoft.Build.FileSystem.IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId);
     }
     public abstract partial class MSBuildFileSystemBase
     {

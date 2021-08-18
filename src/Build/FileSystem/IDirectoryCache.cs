@@ -18,10 +18,10 @@ namespace Microsoft.Build.FileSystem
     public interface IDirectoryCacheFactory
     {
         /// <summary>
-        /// Returns an <see cref="IDirectoryCache"/> to be used when evaluating the given <see cref="Project"/>.
+        /// Returns an <see cref="IDirectoryCache"/> to be used when evaluating the project associated with this <see cref="IDirectoryCacheFactory"/>.
         /// </summary>
-        /// <param name="project">The project being evaluated.</param>
-        IDirectoryCache GetDirectoryCacheForProject(Project project);
+        /// <param name="evaluationId">The ID of the evaluation for which the interface is requested.</param>
+        IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId);
     }
 
     /// <summary>

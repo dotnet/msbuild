@@ -267,8 +267,11 @@ namespace Microsoft.Build.Evaluation
             // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
             _streamImports.Add(string.Empty);
 
-            // Create a FileMatcher for the given combination of EvaluationContext and the project being evaluated.
-            IFileSystem fileSystem = _evaluationContext.GetFileSystemForProject(project);
+            // Create a FileMatcher for the given project being evaluated, evaluation context, and evaluation ID.
+            IDirectoryCache directoryCache = project.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            IFileSystem fileSystem = directoryCache is not null
+                ? new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache)
+                : evaluationContext.FileSystem;
             _fileMatcher = new FileMatcher(fileSystem, evaluationContext.FileEntryExpansionCache);
         }
 

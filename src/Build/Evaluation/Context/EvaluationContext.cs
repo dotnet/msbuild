@@ -45,15 +45,12 @@ namespace Microsoft.Build.Evaluation.Context
         internal IFileSystem FileSystem { get; }
         internal FileMatcher FileMatcher { get; }
 
-        private IDirectoryCacheFactory _directoryCacheFactory;
-        private ConditionalWeakTable<Project, IFileSystem> _fileSystemsPerProject;
-
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
         internal ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
-        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, IDirectoryCacheFactory directoryCacheFactory)
+        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem)
         {
             // Unsupported case: isolated context with non null file system.
             // Isolated means caches aren't reused, but the given file system might cache.
@@ -67,12 +64,6 @@ namespace Microsoft.Build.Evaluation.Context
             FileEntryExpansionCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
             FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
-
-            if (directoryCacheFactory != null)
-            {
-                _directoryCacheFactory = directoryCacheFactory;
-                _fileSystemsPerProject = new ConditionalWeakTable<Project, IFileSystem>();
-            }
         }
 
         /// <summary>
@@ -100,25 +91,7 @@ namespace Microsoft.Build.Evaluation.Context
         {
             var context = new EvaluationContext(
                 policy,
-                fileSystem,
-                directoryCacheFactory: null);
-
-            TestOnlyHookOnCreate?.Invoke(context);
-
-            return context;
-        }
-
-        /// <summary>
-        ///     Factory for <see cref="EvaluationContext" />
-        /// </summary>
-        /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
-        /// <param name="directoryCacheFactory">The <see cref="IDirectoryCacheFactory"/> to use.</param>
-        public static EvaluationContext Create(SharingPolicy policy, IDirectoryCacheFactory directoryCacheFactory)
-        {
-            var context = new EvaluationContext(
-                policy,
-                fileSystem: null,
-                directoryCacheFactory);
+                fileSystem);
 
             TestOnlyHookOnCreate?.Invoke(context);
 
@@ -150,24 +123,6 @@ namespace Microsoft.Build.Evaluation.Context
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     return null;
             }
-        }
-
-        internal IFileSystem GetFileSystemForProject(Project project)
-        {
-            IFileSystem fileSystemForProject = _fileSystemsPerProject?.GetValue(
-                project,
-                project =>
-                {
-                    IDirectoryCache directoryCache = _directoryCacheFactory.GetDirectoryCacheForProject(project);
-                    if(directoryCache != null)
-                    {
-                        return new DirectoryCacheFileSystemWrapper(FileSystem, directoryCache);
-                    }
-                    return null;
-                });
-
-            // If we don't have a non-null directory cache factory or it returned null, fall back to returning the shared FileSystem.
-            return fileSystemForProject ?? FileSystem;
         }
     }
 }
