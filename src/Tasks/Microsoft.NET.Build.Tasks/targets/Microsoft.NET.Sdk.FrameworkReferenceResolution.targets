@@ -369,6 +369,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     </ResolveTargetingPackAssets>
 
+    <PropertyGroup>
+      <!-- Unescape this semicolon-delimited ordered list so that it's passed as a list to targets
+           that consume it. -->
+      <PackageConflictPreferredPackages>$([MSBuild]::Unescape($(PackageConflictPreferredPackages)))</PackageConflictPreferredPackages>
+    </PropertyGroup>
+
     <ItemGroup Condition="'$(RuntimeIdentifier)' == '' or '$(SelfContained)' != 'true'">
       <PackageConflictPlatformManifests Include="@(PlatformManifestsFromTargetingPacks)" />
     </ItemGroup>
