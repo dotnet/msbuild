@@ -1,6 +1,10 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.Build.Framework;
@@ -76,7 +80,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             var task = new GenerateStaticWebAssetsManifest
             {
                 BuildEngine = buildEngine.Object,
-                Assets = new[] 
+                Assets = new[]
                 {
                     asset.ToTaskItem()
                 },
@@ -101,7 +105,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             newAsset.Should().Be(asset);
         }
 
-        public static TheoryData<Action<StaticWebAsset>> GeneratesManifestFailsWhenInvalidAssetsAreProvidedData 
+        public static TheoryData<Action<StaticWebAsset>> GeneratesManifestFailsWhenInvalidAssetsAreProvidedData
         {
             get
             {
