@@ -48,7 +48,7 @@
       "description": "Sets the LangVersion property in the created project file",
       "defaultValue": "",
       "replaces": "$(ProjectLanguageVersion)",
-      "displayName": "Language Version"
+      "displayName": "Language version"
     },
     "HostIdentifier": {
       "type": "bind",

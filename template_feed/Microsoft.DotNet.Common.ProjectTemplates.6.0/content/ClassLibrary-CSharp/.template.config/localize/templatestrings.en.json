@@ -13,11 +13,9 @@
   "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Sets the LangVersion property in the created project file",
-  "symbols/langVersion/displayName": "Language Version",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "If specified, skips the automatic restore of the project on create.",
   "symbols/skipRestore/displayName": "Skip restore",
-  "symbols/Nullable/description": "Whether to enable nullable reference types for this project.",
-  "symbols/Nullable/displayName": "Enable nullable",
   "postActions/restore/description": "Restore NuGet packages required by this project.",
   "postActions/restore/manualInstructions/default/text": "Run 'dotnet restore'",
   "postActions/open-file/description": "Opens Class1.cs in the editor"

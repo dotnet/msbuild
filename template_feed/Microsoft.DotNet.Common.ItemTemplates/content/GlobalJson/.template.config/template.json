@@ -49,46 +49,55 @@
     "RollForward": {
       "type": "parameter",
       "description": "The roll-forward policy to use when selecting an SDK version.",
-      "displayName": "Roll Forward",
+      "displayName": "Roll-forward policy",
       "replaces": "ROLL_FORWARD_VALUE",
       "defaultValue": "",
       "datatype": "choice",
       "choices": [
         {
           "choice": "patch",
-          "description": "Uses the specified version.\nIf not found, rolls forward to the latest patch level.\nIf not found, fails.\nThis value is the legacy behavior from the earlier versions of the SDK."
+          "description": "Uses the specified version.\nIf not found, rolls forward to the latest patch level.\nIf not found, fails.\nThis value is the legacy behavior from the earlier versions of the SDK.",
+          "displayName": "Patch"
         },
         {
           "choice": "feature",
-          "description": "Uses the latest patch level for the specified major, minor, and feature band.\nIf not found, rolls forward to the next higher feature band within the same major/minor and uses the latest patch level for that feature band.\nIf not found, fails."
+          "description": "Uses the latest patch level for the specified major, minor, and feature band.\nIf not found, rolls forward to the next higher feature band within the same major/minor and uses the latest patch level for that feature band.\nIf not found, fails.",
+          "displayName": "Feature"
         },
         {
           "choice": "minor",
-          "description": "Uses the latest patch level for the specified major, minor, and feature band.\nIf not found, rolls forward to the next higher feature band within the same major/minor version and uses the latest patch level for that feature band.\nIf not found, rolls forward to the next higher minor and feature band within the same major and uses the latest patch level for that feature band.\nIf not found, fails."
+          "description": "Uses the latest patch level for the specified major, minor, and feature band.\nIf not found, rolls forward to the next higher feature band within the same major/minor version and uses the latest patch level for that feature band.\nIf not found, rolls forward to the next higher minor and feature band within the same major and uses the latest patch level for that feature band.\nIf not found, fails.",
+          "displayName": "Minor"
         },
         {
           "choice": "major",
-          "description": "Uses the latest patch level for the specified major, minor, and feature band.\nIf not found, rolls forward to the next higher feature band within the same major/minor version and uses the latest patch level for that feature band.\nIf not found, rolls forward to the next higher minor and feature band within the same major and uses the latest patch level for that feature band.\nIf not found, rolls forward to the next higher major, minor, and feature band and uses the latest patch level for that feature band.\nIf not found, fails."
+          "description": "Uses the latest patch level for the specified major, minor, and feature band.\nIf not found, rolls forward to the next higher feature band within the same major/minor version and uses the latest patch level for that feature band.\nIf not found, rolls forward to the next higher minor and feature band within the same major and uses the latest patch level for that feature band.\nIf not found, rolls forward to the next higher major, minor, and feature band and uses the latest patch level for that feature band.\nIf not found, fails.",
+          "displayName": "Major"
         },
         {
           "choice": "latestPatch",
-          "description": "Uses the latest installed patch level that matches the requested major, minor, and feature band with a patch level and that is greater or equal than the specified value.\nIf not found, fails."
+          "description": "Uses the latest installed patch level that matches the requested major, minor, and feature band with a patch level and that is greater or equal than the specified value.\nIf not found, fails.",
+          "displayName": "Latest patch"
         },
         {
           "choice": "latestFeature",
-          "description": "Uses the highest installed feature band and patch level that matches the requested major and minor with a feature band and patch level that is greater or equal than the specified value.\nIf not found, fails."
+          "description": "Uses the highest installed feature band and patch level that matches the requested major and minor with a feature band and patch level that is greater or equal than the specified value.\nIf not found, fails.",
+          "displayName": "Latest feature"
         },
         {
           "choice": "latestMinor",
-          "description": "Uses the highest installed minor, feature band, and patch level that matches the requested major with a minor, feature band, and patch level that is greater or equal than the specified value.\nIf not found, fails."
+          "description": "Uses the highest installed minor, feature band, and patch level that matches the requested major with a minor, feature band, and patch level that is greater or equal than the specified value.\nIf not found, fails.",
+          "displayName": "Latest minor"
         },
         {
           "choice": "latestMajor",
-          "description": "Uses the highest installed .NET SDK with a version that is greater or equal than the specified value.\nIf not found, fail."
+          "description": "Uses the highest installed .NET SDK with a version that is greater or equal than the specified value.\nIf not found, fail.",
+          "displayName": "Latest major"
         },
         {
           "choice": "disable",
-          "description": "Doesn't roll forward. Exact match required."
+          "description": "Doesn't roll forward. Exact match required.",
+          "displayName": "Disable roll-forward"
         }
       ]
     }
