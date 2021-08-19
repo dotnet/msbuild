@@ -42,7 +42,7 @@ namespace dotnet.Tests
             Directory.CreateDirectory(_updaterDir);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void ItShouldReturnListOfManifestFiles()
         {
             Initialize(nameof(ItShouldReturnListOfManifestFiles));
