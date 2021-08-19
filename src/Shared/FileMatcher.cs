@@ -94,7 +94,7 @@ namespace Microsoft.Build.Shared
         {
         }
 
-        internal FileMatcher(IFileSystem fileSystem, GetFileSystemEntries getFileSystemEntries, ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
+        internal FileMatcher(IFileSystem fileSystem, GetFileSystemEntries getFileSystemEntries, ConcurrentDictionary<string, IReadOnlyList<string>> getFileSystemDirectoryEntriesCache = null)
         {
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -103,12 +103,12 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                _cachedGlobExpansions = fileEntryExpansionCache;
+                _cachedGlobExpansions = getFileSystemDirectoryEntriesCache;
             }
 
             _fileSystem = fileSystem;
 
-            _getFileSystemEntries = fileEntryExpansionCache == null
+            _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
                 ? getFileSystemEntries
                 : (type, path, pattern, directory, stripProjectDirectory) =>
                 {
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Shared
                             FileSystemEntity.FilesAndDirectories => "A",
                             _ => throw new NotImplementedException()
                         } + ";" + path;
-                        IReadOnlyList<string> allEntriesForPath = fileEntryExpansionCache.GetOrAdd(
+                        IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
                                 cacheKey,
                                 s => getFileSystemEntries(
                                     type,
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Shared
                         // Cache only directories, for files we won't hit the cache because the file name patterns tend to be unique
                         if (type == FileSystemEntity.Directories)
                         {
-                            return fileEntryExpansionCache.GetOrAdd(
+                            return getFileSystemDirectoryEntriesCache.GetOrAdd(
                                 $"D;{path};{pattern ?? "*"}",
                                 s => getFileSystemEntries(
                                     type,

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Evaluation
         private readonly Expander<P, I> _outerExpander;
         private readonly IEvaluatorData<P, I, M, D> _evaluatorData;
         private readonly Expander<P, I> _expander;
-        protected readonly IItemFactory<I, I> _itemFactory;
+        private readonly IItemFactory<I, I> _itemFactory;
         private readonly LoggingContext _loggingContext;
         private readonly EvaluationProfiler _evaluationProfiler;
 
