@@ -284,7 +284,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             // Assert
             result.Should().Be(false);
             errorMessages.Count.Should().Be(1);
-            errorMessages[0].Should().Be($@"Two assets found targeting the same path with incompatible asset kinds:
+            errorMessages[0].Should().Be($@"Two assets found targeting the same path with incompatible asset kinds: 
 '{Path.GetFullPath(Path.Combine("wwwroot", "candidate.js"))}' with kind '{firstKind}'
 '{Path.GetFullPath(Path.Combine("wwwroot", "candidate.publish.js"))}' with kind '{secondKind}'
 for path 'candidate.js'");
