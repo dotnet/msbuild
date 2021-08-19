@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandFooter">
-        <source>The latest versions of .NET can be installed from https://aka.ms/dotnet-core-download. For more information about .NET lifecycles, see https://aka.ms/dotnet-core-support.</source>
-        <target state="new">The latest versions of .NET can be installed from https://aka.ms/dotnet-core-download. For more information about .NET lifecycles, see https://aka.ms/dotnet-core-support.</target>
+        <source>The latest versions of .NET can be installed from {0}. For more information about .NET lifecycles, see {1}.</source>
+        <target state="new">The latest versions of .NET can be installed from {0}. For more information about .NET lifecycles, see {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostFxrCouldNotBeLoaded">
