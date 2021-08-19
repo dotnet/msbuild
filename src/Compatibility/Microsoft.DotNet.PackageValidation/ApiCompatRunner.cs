@@ -21,18 +21,18 @@ namespace Microsoft.DotNet.PackageValidation
         internal Dictionary<MetadataInformation, List<(MetadataInformation rightAssembly, string header)>> _dict = new();
         private readonly ApiComparer _differ = new();
         private readonly ICompatibilityLogger _log;
-        private readonly Dictionary<string, HashSet<string>> _referenceDirectories;
+        private readonly Dictionary<string, HashSet<string>> _referencePaths;
         private bool _isBaselineSuppression = false;
         private string _leftPackagePath;
         private string _rightPackagePath;
 
-        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> referenceDirectories)
+        public ApiCompatRunner(string noWarn, (string, string)[] ignoredDifferences, bool enableStrictMode, ICompatibilityLogger log, Dictionary<string, HashSet<string>> referencePaths)
         {
             _differ.NoWarn = noWarn;
             _differ.IgnoredDifferences = ignoredDifferences;
             _differ.StrictMode = enableStrictMode;
             _log = log;
-            _referenceDirectories = referenceDirectories ?? new();
+            _referencePaths = referencePaths ?? new();
         }
 
         /// <summary>
@@ -102,20 +102,20 @@ namespace Microsoft.DotNet.PackageValidation
         private IAssemblySymbol GetAssemblySymbolFromStream(Stream assemblyStream, MetadataInformation assemblyInformation, out bool resolvedReferences)
         {
             resolvedReferences = false;
-            HashSet<string> directories = null;
+            HashSet<string> referencePathForTFM = null;
 
             // In order to enable reference support for baseline suppression we need a better way
             // to resolve references for the baseline package. Let's not enable it for now.
-            bool shouldResolveReferences = !_isBaselineSuppression && _referenceDirectories != null &&
-                _referenceDirectories.TryGetValue(assemblyInformation.TargetFramework, out directories);
+            bool shouldResolveReferences = !_isBaselineSuppression && _referencePaths != null &&
+                _referencePaths.TryGetValue(assemblyInformation.TargetFramework, out referencePathForTFM);
 
             AssemblySymbolLoader loader = new(resolveAssemblyReferences: shouldResolveReferences);
             if (shouldResolveReferences)
             {
                 resolvedReferences = true;
-                loader.AddReferenceSearchDirectories(directories);
+                loader.AddReferenceSearchDirectories(referencePathForTFM);
             }
-            else if (!_isBaselineSuppression && _referenceDirectories != null)
+            else if (!_isBaselineSuppression && _referencePaths != null)
             {
                 _log.LogWarning(
                     new Suppression()

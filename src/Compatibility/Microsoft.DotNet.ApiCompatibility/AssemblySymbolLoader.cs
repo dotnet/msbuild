@@ -40,7 +40,11 @@ namespace Microsoft.DotNet.ApiCompatibility
     /// </summary>
     public class AssemblySymbolLoader
     {
-        private readonly HashSet<string> _referenceSearchPaths = new();
+        /// <summary>
+        /// Dictionary that holds the paths to help loading dependencies. Keys will be assembly name and 
+        /// value are the containing folder.
+        /// </summary>
+        private readonly Dictionary<string, string> _referencePaths = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<AssemblyLoadWarning> _warnings = new();
         private readonly Dictionary<string, MetadataReference> _loadedAssemblies;
         private readonly bool _resolveReferences;
@@ -66,7 +70,8 @@ namespace Microsoft.DotNet.ApiCompatibility
         public void AddReferenceSearchDirectories(string paths) => AddReferenceSearchDirectories(SplitPaths(paths));
 
         /// <summary>
-        /// Adds a set of paths to the search directories to resolve references from.
+        /// Adds a set of paths to the search directories to resolve references from. Paths may
+        /// be directories or full paths to assembly files.
         /// This is only used when the setting to resolve assembly references is set to true.
         /// </summary>
         /// <param name="paths">The list of paths to register as search directories.</param>
@@ -78,7 +83,21 @@ namespace Microsoft.DotNet.ApiCompatibility
             }
 
             foreach (string path in paths)
-                _referenceSearchPaths.Add(path);
+            {
+                FileAttributes attr = File.GetAttributes(path);
+
+                if (attr.HasFlag(FileAttributes.Directory))
+                {
+                    if (!_referencePaths.ContainsKey(path))
+                        _referencePaths.Add(path, path);
+                }
+                else
+                {
+                    string assemblyName = Path.GetFileName(path);
+                    if (!_referencePaths.ContainsKey(assemblyName))
+                        _referencePaths.Add(assemblyName, Path.GetDirectoryName(path));
+                }
+            }
         }
 
         /// <summary>
@@ -313,7 +332,7 @@ namespace Microsoft.DotNet.ApiCompatibility
                 }
 
                 if (_resolveReferences && !string.IsNullOrEmpty(directory))
-                    _referenceSearchPaths.Add(directory);
+                    _referencePaths.Add(Path.GetFileName(directory), directory);  // Not Sure about this one, we should do something else here.
             }
 
             return result;
@@ -376,16 +395,29 @@ namespace Microsoft.DotNet.ApiCompatibility
                 bool found = _loadedAssemblies.TryGetValue(name, out MetadataReference _);
                 if (!found)
                 {
-                    foreach (string directory in _referenceSearchPaths)
+                    // First we try to see if a reference path for this specific assembly was passed in directly, and if so
+                    // we use that.
+                    if (_referencePaths.TryGetValue(name, out string fullReferencePath))
                     {
-                        string potentialPath = Path.Combine(directory, name);
-                        if (File.Exists(potentialPath))
+                        using FileStream resolvedStream = File.OpenRead(Path.Combine(fullReferencePath, name));
+                        CreateAndAddReferenceToCompilation(name, resolvedStream);
+                        found = true;
+                    }
+                    // If we can't find a specific reference path for the dependency, then we look in the folders where the
+                    // rest of the reference paths are located to see if we can find the dependency there.
+                    else
+                    {
+                        foreach (var referencePath in _referencePaths)
                         {
-                            // TODO: add version check and add a warning if it doesn't match?
-                            using FileStream resolvedStream = File.OpenRead(potentialPath);
-                            CreateAndAddReferenceToCompilation(name, resolvedStream);
-                            found = true;
-                            break;
+                            string potentialPath = Path.Combine(referencePath.Value, name);
+                            if (File.Exists(potentialPath))
+                            {
+                                // TODO: add version check and add a warning if it doesn't match?
+                                using FileStream resolvedStream = File.OpenRead(potentialPath);
+                                CreateAndAddReferenceToCompilation(name, resolvedStream);
+                                found = true;
+                                break;
+                            }
                         }
                     }
 

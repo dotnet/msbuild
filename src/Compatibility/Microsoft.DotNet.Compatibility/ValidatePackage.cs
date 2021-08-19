@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
@@ -38,7 +39,7 @@ namespace Microsoft.DotNet.Compatibility
 
         public string CompatibilitySuppressionFilePath { get; set; }
 
-        public ITaskItem[] ReferenceDirectories { get; set; }
+        public ITaskItem[] ReferencePaths { get; set; }
 
         public override bool Execute()
         {
@@ -62,16 +63,16 @@ namespace Microsoft.DotNet.Compatibility
             }
 
             Dictionary<string, HashSet<string>> apiCompatReferences = new();
-            if (ReferenceDirectories != null)
+            if (ReferencePaths != null)
             {
-                foreach (ITaskItem taskItem in ReferenceDirectories)
+                foreach (ITaskItem taskItem in ReferencePaths)
                 {
                     string tfm = taskItem.GetMetadata("TargetFramework");
                     if (string.IsNullOrEmpty(tfm))
                         continue;
 
-                    string directory = taskItem.GetMetadata("Identity");
-                    if (!Directory.Exists(directory))
+                    string referencePath = taskItem.GetMetadata("Identity");
+                    if (!File.Exists(referencePath))
                         continue;
 
                     if (!apiCompatReferences.TryGetValue(tfm, out HashSet<string> directories))
@@ -80,7 +81,7 @@ namespace Microsoft.DotNet.Compatibility
                         apiCompatReferences.Add(tfm, directories);
                     }
 
-                    directories.Add(directory);
+                    directories.Add(referencePath);
                 }
             }
 
