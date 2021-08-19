@@ -1,6 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Security.Principal;
 using System.Text.Json;
 using FluentAssertions;
@@ -270,7 +273,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             task.ReferencedProjectsConfiguration.Should().BeEmpty();
             task.Assets.Should().BeEmpty();
             var discoveryPattern = task.DiscoveryPatterns[0];
-            
+
             discoveryPattern.ItemSpec.ShouldBeEquivalentTo(Path.Combine("AnotherClassLib", "wwwroot"));
             discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.Source)).ShouldBeEquivalentTo("AnotherClassLib");
             discoveryPattern.GetMetadata(nameof(StaticWebAssetsManifest.DiscoveryPattern.ContentRoot)).ShouldBeEquivalentTo($"{contentRoot}");
