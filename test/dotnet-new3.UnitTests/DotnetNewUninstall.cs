@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System.Reflection;
 using System.Text.RegularExpressions;
 using FluentAssertions;
 using Microsoft.NET.TestFramework.Assertions;
@@ -27,7 +26,7 @@ namespace Dotnet_new3.IntegrationTests
         {
             string home = TestUtils.CreateTemporaryFolder("Home");
             string workingDirectory = TestUtils.CreateTemporaryFolder();
-            Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
+            string testTemplate = Helpers.InstallTestTemplate("TemplateResolution/DifferentLanguagesGroup/BasicFSharp", _log, workingDirectory, home);
 
             new DotnetNewCommand(_log, "-u")
                 .WithCustomHive(home)
@@ -38,7 +37,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And
                 .NotHaveStdErr()
                 .And.HaveStdOutContaining($"TemplateResolution{Path.DirectorySeparatorChar}DifferentLanguagesGroup{Path.DirectorySeparatorChar}BasicFSharp")
-                .And.HaveStdOutMatching($"^\\s*dotnet new3 --uninstall .*TemplateResolution{Regex.Escape(Path.DirectorySeparatorChar.ToString())}DifferentLanguagesGroup{Regex.Escape(Path.DirectorySeparatorChar.ToString())}BasicFSharp$", RegexOptions.Multiline);
+                .And.HaveStdOutContaining($"         dotnet new3 --uninstall {testTemplate}");
         }
 
         [Fact]
@@ -69,7 +68,7 @@ namespace Dotnet_new3.IntegrationTests
                 .And.HaveStdOutContaining("Version: 5.0.0")
                 .And.HaveStdOutContaining("Author: Microsoft")
                 .And.HaveStdOutMatching("NuGetSource: [0-9.\\-A-Za-z]+")
-                .And.HaveStdOutContaining("dotnet new3 --uninstall Microsoft.DotNet.Web.ProjectTemplates.5.0");
+                .And.HaveStdOutContaining("         dotnet new3 --uninstall Microsoft.DotNet.Web.ProjectTemplates.5.0");
         }
 
         [Fact]
@@ -404,6 +403,38 @@ namespace Dotnet_new3.IntegrationTests
                 .Execute()
                 .Should().ExitWith(0)
                 .And.HaveStdOutContaining("(No Items)");
+        }
+
+        [Fact]
+        public void CanListTemplateInstalledFromFolderWithSpace()
+        {
+            string home = TestUtils.CreateTemporaryFolder("Home");
+            string workingDirectory = TestUtils.CreateTemporaryFolder();
+
+            string testFolderWithSpace = Path.Combine(workingDirectory, "My Test Folder");
+
+            Directory.CreateDirectory(testFolderWithSpace);
+            TestUtils.DirectoryCopy(TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicFSharp"), testFolderWithSpace, copySubDirs: true);
+            Helpers.InstallNuGetTemplate(testFolderWithSpace, _log, workingDirectory, home);
+
+            string testFolderWithoutSpace = Path.Combine(workingDirectory, "MyTestFolder");
+
+            Directory.CreateDirectory(testFolderWithoutSpace);
+            TestUtils.DirectoryCopy(TestUtils.GetTestTemplateLocation("TemplateResolution/DifferentLanguagesGroup/BasicVB"), testFolderWithoutSpace, copySubDirs: true);
+            Helpers.InstallNuGetTemplate(testFolderWithoutSpace, _log, workingDirectory, home);
+
+            new DotnetNewCommand(_log, "-u")
+                .WithCustomHive(home)
+                .WithWorkingDirectory(TestUtils.CreateTemporaryFolder())
+                .Execute()
+                .Should()
+                .ExitWith(0)
+                .And
+                .NotHaveStdErr()
+                .And.HaveStdOutContaining($"Basic FSharp (basic) F#")
+                .And.HaveStdOutContaining($"         dotnet new3 --uninstall '{testFolderWithSpace}'")
+                .And.HaveStdOutContaining($"Basic VB (basic) VB")
+                .And.HaveStdOutContaining($"         dotnet new3 --uninstall {testFolderWithoutSpace}");
         }
     }
 }

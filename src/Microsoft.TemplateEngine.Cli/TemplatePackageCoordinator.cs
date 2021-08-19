@@ -591,7 +591,7 @@ namespace Microsoft.TemplateEngine.Cli
 
                 // uninstall command:
                 Reporter.Output.WriteLine($"{LocalizableStrings.TemplatePackageCoordinator_Uninstall_Info_UninstallCommandHint}".Indent(level: 2));
-                Reporter.Output.WriteCommand(commandInput.UninstallCommandExample(managedSource.Identifier));
+                Reporter.Output.WriteCommand(commandInput.UninstallCommandExample(managedSource.Identifier), indentLevel: 2);
 
                 Reporter.Output.WriteLine();
             }

@@ -21,11 +21,20 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
             if (string.IsNullOrWhiteSpace(version))
             {
+                if (packageID.Any(char.IsWhiteSpace))
+                {
+                    packageID = $"'{packageID}'";
+                }
                 return $"dotnet {command.CommandName} --install {packageID}";
             }
             else
             {
-                return $"dotnet {command.CommandName} --install {packageID}::{version}";
+                string packageAndVersion = $"{packageID}::{version}";
+                if (packageAndVersion.Any(char.IsWhiteSpace))
+                {
+                    packageAndVersion = $"'{packageAndVersion}'";
+                }
+                return $"dotnet {command.CommandName} --install {packageAndVersion}";
             }
         }
 
@@ -77,6 +86,11 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
             if (string.IsNullOrWhiteSpace(packageId))
             {
                 return $"dotnet {command.CommandName} --uninstall <PACKAGE_ID>";
+            }
+
+            if (packageId.Any(char.IsWhiteSpace))
+            {
+                packageId = $"'{packageId}'";
             }
             return $"dotnet {command.CommandName} --uninstall {packageId}";
         }

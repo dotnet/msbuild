@@ -13,7 +13,7 @@ namespace Dotnet_new3.IntegrationTests
         internal static void InstallNuGetTemplate(string packageName, ITestOutputHelper log, string workingDirectory, string homeDirectory)
         {
             new DotnetNewCommand(log, "-i", packageName)
-                  .WithCustomHive(homeDirectory).WithDebug()
+                  .WithCustomHive(homeDirectory)
                   .WithWorkingDirectory(workingDirectory)
                   .Execute()
                   .Should()
