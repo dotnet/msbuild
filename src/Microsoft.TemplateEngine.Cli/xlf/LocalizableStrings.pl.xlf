@@ -391,11 +391,6 @@ Uruchom polecenie "dotnet {1}--show-aliases" bez argumentów, aby wyświetlić w
         <target state="translated">Polecenie zostało pomyślnie wykonane.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Skrót zatwierdzenia:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Skonfigurowana wartość: {0}</target>

@@ -391,11 +391,6 @@ Eseguire 'dotnet {1}--show-alias ' senza argomenti per mostrare tutti gli alias.
         <target state="translated">Comando riuscito.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Hash del commit:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Valore configurato: {0}</target>

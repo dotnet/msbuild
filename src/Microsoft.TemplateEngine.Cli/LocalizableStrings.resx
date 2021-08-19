@@ -432,9 +432,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="PartialTemplateMatchSwitchesNotValidForAllMatches" xml:space="preserve">
     <value>Some partially matched templates may not support these input switches:</value>
   </data>
-  <data name="CommitHash" xml:space="preserve">
-    <value>Commit Hash:</value>
-  </data>
   <data name="Version" xml:space="preserve">
     <value>Version:</value>
   </data>

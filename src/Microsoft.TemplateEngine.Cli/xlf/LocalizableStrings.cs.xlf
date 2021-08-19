@@ -391,11 +391,6 @@ Pokud si chcete zobrazit všechny aliasy, spusťte bez argumentů příkaz dotne
         <target state="translated">Příkaz proběhl úspěšně.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Hodnota hash potvrzení:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Nakonfigurovaná hodnota: {0}</target>

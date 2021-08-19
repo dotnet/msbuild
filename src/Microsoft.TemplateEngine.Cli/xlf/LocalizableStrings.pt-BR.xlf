@@ -391,11 +391,6 @@ Execute 'dotnet {1} --mostrar- aliases' sem nenhum args para mostrar todos os al
         <target state="translated">O comando foi bem-sucedido.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Confirmar Hash:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Valor Configurado: {0}</target>

@@ -743,15 +743,6 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Commit Hash:.
-        /// </summary>
-        internal static string CommitHash {
-            get {
-                return ResourceManager.GetString("CommitHash", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Configured Value: {0}.
         /// </summary>
         internal static string ConfiguredValue {

@@ -391,11 +391,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">명령이 성공했습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">해시 커밋:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">구성된 값:{0}</target>

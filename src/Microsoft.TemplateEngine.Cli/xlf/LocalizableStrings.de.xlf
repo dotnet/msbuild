@@ -391,11 +391,6 @@ Führen Sie "dotnet {1}--show-aliases" ohne Argumente aus, um alle Aliase anzuze
         <target state="translated">Ausführen des Befehls erfolgreich.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Commithash:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Konfigurierter Wert: {0}</target>

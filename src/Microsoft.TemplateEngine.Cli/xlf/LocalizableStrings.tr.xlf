@@ -391,11 +391,6 @@ Tüm diğer adları göstermek için 'dotnet {1} --show-aliases' komutunu bağı
         <target state="translated">Komut başarılı oldu.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Commit Karması:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Yapılandırılan Değer: {0}</target>

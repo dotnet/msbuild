@@ -391,11 +391,6 @@ Exécutez « dotnet {1} --show-aliases » sans arguments pour afficher tous le
         <target state="translated">Commande réussie.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Valider le code de hachage :</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Valeur configurée : {0}</target>

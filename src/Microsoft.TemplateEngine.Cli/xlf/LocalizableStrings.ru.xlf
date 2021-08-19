@@ -391,11 +391,6 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</source>
         <target state="translated">Команда выполнена.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommitHash">
-        <source>Commit Hash:</source>
-        <target state="translated">Фиксировать хеш:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ConfiguredValue">
         <source>Configured Value: {0}</source>
         <target state="translated">Настроено значение: {0}</target>
