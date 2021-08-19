@@ -85,17 +85,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void AssertErrorLoggedWhenResolverThrows()
+        public void AssertResolverThrows()
         {
             SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeErrorResolver: true));
 
             SdkReference sdk = new SdkReference("1sdkName", "version1", "minimumVersion");
 
-            var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
-
-            result.Path.ShouldBe(null);
-            _logger.ErrorCount.ShouldBe(1);
-            _logger.Errors.First().Code.ShouldBe("MSB4242");
+            // When an SDK resolver throws, the expander will catch it and stop the build.
+            Should.Throw<Exception>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
         }
 
         [Fact]
