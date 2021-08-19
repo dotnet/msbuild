@@ -2,8 +2,13 @@
 <Project>
   <UsingTask TaskName="Microsoft.DotNet.Compatibility.ValidatePackage" AssemblyFile="$(DotNetCompatibilityAssembly)" />
 
+  <PropertyGroup>
+    <!--Add any custom targets that need to run before package validation to the following property-->
+    <RunPackageValidationDependsOn>_GetReferencePathFromInnerProjects;$(RunPackageValidationDependsOn)</RunPackageValidationDependsOn>
+  </PropertyGroup>
+
   <Target Name="RunPackageValidation"
-          DependsOnTargets="_GetReferencePathFromInnerProjects"
+          DependsOnTargets="$(RunPackageValidationDependsOn)"
           AfterTargets="Pack"
           Condition="'$(IsPackable)' == 'true' and '$(EnablePackageValidation)' == 'true'">
 

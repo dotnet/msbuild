@@ -150,4 +150,10 @@
   <data name="Baseline" xml:space="preserve">
     <value>[Baseline]</value>
   </data>
+  <data name="AssemblyLoadWarning" xml:space="preserve">
+    <value>When loading: '{0}': {1}</value>
+  </data>
+  <data name="MissingSearchDirectory" xml:space="preserve">
+    <value>Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation</value>
+  </data>
 </root>

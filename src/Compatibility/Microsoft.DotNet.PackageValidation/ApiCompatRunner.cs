@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.PackageValidation
                         Target = assemblyInformation.DisplayString
                     },
                     ApiCompatibility.DiagnosticIds.SearchDirectoriesNotFoundForTfm,
-                    "Could not find a reference directory in the provided directories for TargetFramework '{0}' when loading '{1}'. For more information see: https://aka.ms/dotnetpackagevalidation",
+                    Resources.MissingSearchDirectory,
                     assemblyInformation.TargetFramework, assemblyInformation.DisplayString);
             }
 
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.PackageValidation
                             Target = warning.ReferenceId
                         },
                         warning.DiagnosticId,
-                        "When loading: '{0}': {1}",
+                        Resources.AssemblyLoadWarning,
                         assemblyInformation.DisplayString,
                         warning.Message);
                 }
