@@ -180,11 +180,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private List<string> _streamImports;
 
-        /// <summary>
-        /// The <see cref="FileMatcher"/> to use for expanding globs.
-        /// </summary>
-        private FileMatcher _fileMatcher;
-
         private readonly bool _interactive;
 
         private readonly bool _isRunningInVisualStudio;
@@ -212,6 +207,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(evaluationContext, nameof(evaluationContext));
             ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
             ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
 
@@ -226,12 +222,20 @@ namespace Microsoft.Build.Evaluation
                 // Wrap the IEvaluatorData<> object passed in.
                 data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
             }
-            _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+
+            // If the host wishes to provide a directory cache for this evaluation, wrap the EvaluationContext to use the right file system.
+            _evaluationContext = evaluationContext;
+            IDirectoryCache directoryCache = project?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            if (directoryCache is not null)
+            {
+                IFileSystem fileSystem = new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache);
+                _evaluationContext = evaluationContext.ContextWithFileSystem(fileSystem);
+            }
 
             // Create containers for the evaluation results
             data.InitializeForEvaluation(toolsetProvider, _evaluationContext.FileSystem);
 
-            _expander = new Expander<P, I>(data, data, _evaluationContext.FileSystem);
+            _expander = new Expander<P, I>(data, data, _evaluationContext);
 
             // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
             _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
@@ -266,13 +270,6 @@ namespace Microsoft.Build.Evaluation
             _streamImports = new List<string>();
             // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
             _streamImports.Add(string.Empty);
-
-            // Create a FileMatcher for the given project being evaluated, evaluation context, and evaluation ID.
-            IDirectoryCache directoryCache = project?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
-            IFileSystem fileSystem = directoryCache is not null
-                ? new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache)
-                : evaluationContext.FileSystem;
-            _fileMatcher = new FileMatcher(fileSystem, evaluationContext.FileEntryExpansionCache);
         }
 
         /// <summary>
@@ -309,7 +306,7 @@ namespace Microsoft.Build.Evaluation
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContext evaluationContext = null,
+            EvaluationContext evaluationContext,
             bool interactive = false)
         {
             MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
@@ -372,7 +369,7 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, null /* TODO */);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, expander.EvaluationContext.FileMatcher);
 
                         if (includeSplitFilesEscaped.Length > 0)
                         {
@@ -661,7 +658,7 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
-                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext, _fileMatcher);
+                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext);
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
@@ -2024,7 +2021,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _fileMatcher);
+                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _evaluationContext.FileMatcher);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
