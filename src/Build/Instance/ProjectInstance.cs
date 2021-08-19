@@ -1347,7 +1347,7 @@ namespace Microsoft.Build.Execution
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.
-            InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
+            InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
         {
             // All been done in the constructor.  We don't allow re-evaluation of project instances.
         }

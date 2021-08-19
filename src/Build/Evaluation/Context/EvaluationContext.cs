@@ -48,7 +48,7 @@ namespace Microsoft.Build.Evaluation.Context
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
-        internal ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
+        private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
             ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
@@ -126,10 +126,17 @@ namespace Microsoft.Build.Evaluation.Context
             }
         }
 
+        /// <summary>
+        /// Creates a copy of this <see cref="EvaluationContext"/> with a given <see cref="IFileSystem"/> swapped in.
+        /// </summary>
+        /// <param name="fileSystem">The file system to use by the new evaluation context.</param>
+        /// <returns>The new evaluation context.</returns>
         internal EvaluationContext ContextWithFileSystem(IFileSystem fileSystem)
         {
-            var newContext = new EvaluationContext(this.Policy, fileSystem, this.SdkResolverService, this.FileEntryExpansionCache);
-            newContext._used = 1;
+            var newContext = new EvaluationContext(this.Policy, fileSystem, this.SdkResolverService, this.FileEntryExpansionCache)
+            {
+                _used = 1
+            };
             return newContext;
         }
     }

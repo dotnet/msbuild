@@ -39,22 +39,22 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
-        protected IFileSystem FileSystem { get; }
+        protected EvaluationContext EvaluationContext { get; }
 
-        protected FileMatcher FileMatcher { get; }
+        protected IFileSystem FileSystem => EvaluationContext.FileSystem;
+        protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext.FileSystem);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext);
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext.FileSystem);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
-            FileSystem = evaluationContext.FileSystem;
-            FileMatcher = evaluationContext.FileMatcher;
+            EvaluationContext = evaluationContext;
         }
 
         private ImmutableList<I> GetItems(string itemType)
