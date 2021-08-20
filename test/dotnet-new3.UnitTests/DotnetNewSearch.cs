@@ -288,7 +288,7 @@ Examples:
         public void CanFilterType()
         {
             var commandResult = new DotnetNewCommand(_log, "console", "--search", "--columns", "type", "--type", "item")
-                .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithCustomHive(_sharedHome.HomeDirectory).WithDebug()
                 .Execute();
 
             commandResult.Should()
@@ -316,7 +316,7 @@ Examples:
         public void CanFilterType_WithoutName()
         {
             var commandResult = new DotnetNewCommand(_log, "--search", "--columns", "type", "--type", "item")
-                .WithCustomHive(_sharedHome.HomeDirectory)
+                .WithCustomHive(_sharedHome.HomeDirectory).WithDebug()
                 .Execute();
 
             commandResult.Should()
