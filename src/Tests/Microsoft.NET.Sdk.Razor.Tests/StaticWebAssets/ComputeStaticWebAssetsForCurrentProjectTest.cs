@@ -1,6 +1,9 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using FluentAssertions;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.Build.Framework;
@@ -48,8 +51,8 @@ namespace Microsoft.NET.Sdk.Razor.Tests
             {
                 BuildEngine = buildEngine.Object,
                 Source = "MyPackage",
-                Assets = new[] 
-                { 
+                Assets = new[]
+                {
                     CreateCandidate("wwwroot\\candidate.js", "MyPackage", "Discovered", "candidate.js", "All", "All"),
                     CreateCandidate("wwwroot\\candidate.other.js", "MyPackage", "Discovered", "candidate.js", "Build", "All")
                 },
@@ -303,7 +306,7 @@ namespace Microsoft.NET.Sdk.Razor.Tests
 
             result.ApplyDefaults();
             result.Normalize();
-            
+
             return result.ToTaskItem();
         }
 

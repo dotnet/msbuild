@@ -1,7 +1,10 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Razor.Tasks;
 using Microsoft.NET.Sdk.Razor.Tests;
 using Microsoft.NET.TestFramework;
@@ -22,7 +25,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
             {
                 return null;
             }
-            
+
             if (asset.RelatedAsset == originalValue)
             {
                 return null;

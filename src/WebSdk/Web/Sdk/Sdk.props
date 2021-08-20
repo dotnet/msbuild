@@ -58,7 +58,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       IsImplicitlyDefined="true" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable'">
+  <ItemGroup Condition="'$(Language)' == 'C#' AND ('$(ImplicitUsings)' == 'true' or '$(ImplicitUsings)' == 'enable')">
     <Using Include="System.Net.Http.Json" />
     <Using Include="Microsoft.AspNetCore.Builder" />
     <Using Include="Microsoft.AspNetCore.Hosting" />
