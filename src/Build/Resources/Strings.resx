@@ -1286,7 +1286,7 @@
     <comment>{StrBegin="MSB4244: "}</comment>
   </data>
   <data name="SDKResolverCriticalFailure" xml:space="preserve">
-    <value>MSB4242: SDK Resolver Failure: "{0}".</value>
+    <value>MSB4242: SDK Resolver Failure: "{0}"</value>
     <comment>{StrBegin="MSB4242: "}</comment>
   </data>
   <data name="SDKResolverFailed" xml:space="preserve">

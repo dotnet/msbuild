@@ -263,8 +263,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
-        <source>MSB4242: SDK Resolver Failure: "{0}".</source>
-        <target state="new">MSB4242: SDK Resolver Failure: "{0}".</target>
+        <source>MSB4242: SDK Resolver Failure: "{0}"</source>
+        <target state="new">MSB4242: SDK Resolver Failure: "{0}"</target>
         <note>{StrBegin="MSB4242: "}</note>
       </trans-unit>
       <trans-unit id="SDKResolverFailed">
