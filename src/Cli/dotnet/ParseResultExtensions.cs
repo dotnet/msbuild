@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Cli
             return properties.Where(property => !property.Contains("="));
         }
 
-        public static IEnumerable<string> GetRunCommandShorthandPropertyValues(this ParseResult parseResult)
+        public static IEnumerable<string> GetRunCommandPropertyValues(this ParseResult parseResult)
         {
             var shorthandProperties = GetRunPropertyOptions(parseResult, true)
                 .Where(property => property.Contains("="));
