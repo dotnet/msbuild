@@ -38,11 +38,11 @@ namespace Microsoft.DotNet.Tests
             logger.AddNamedPipe("np2");
             logger.LogMessage("Foo");
 
-            Task.Run(() => { pssl1.Connect(); pssl1.LogMessage("Hello from np1"); });
-            Task.Run(() => { pssl2.Connect(); pssl2.LogMessage("Hello from np2"); });
+            var t1 = Task.Run(() => { pssl1.Connect(); pssl1.LogMessage("Hello from np1"); });
+            var t2 = Task.Run(() => { pssl2.Connect(); pssl2.LogMessage("Hello from np2"); });
 
             // Give the other threads time to connect to the logging thread.
-            Thread.Sleep(1000);
+            Task.WaitAll(t1, t2);
             logger.Dispose();
 
             string logContent = File.ReadAllText(logFile);
