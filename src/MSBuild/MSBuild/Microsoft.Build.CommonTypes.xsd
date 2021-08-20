@@ -5808,4 +5808,32 @@ elementFormDefault="qualified">
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="InternalsVisibleTo" substitutionGroup="msb:Item">
+  <xs:annotation>
+    <xs:documentation>
+      <!-- _locID_text="InternalsVisibleTo" _locComment="" -->Specifies that types that are ordinarily visible only within the assembly are visible to the specified assemblies.
+    </xs:documentation>
+  </xs:annotation>
+  <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="msb:SimpleItemType">
+          <xs:attribute name="Include" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="InternalsVisibleTo_Include" _locComment="" -->The name of the friend assembly to make internal types visible to, e.g. Microsoft.AspNetCore.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="PublicKey" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="InternalsVisibleTo_PublicKey" _locComment="" -->Optional public key associated with the strong name signature of the friend assembly.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+
 </xs:schema>
