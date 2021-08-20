@@ -794,16 +794,15 @@ namespace Microsoft.Build.Tasks
                                     AppDomain.CurrentDomain.SetupInformation
                                 );
 
-                                object obj = appDomain.CreateInstanceFromAndUnwrap
+                                process = appDomain.CreateInstanceFromAndUnwrap
                                    (
                                        typeof(ProcessResourceFiles).Module.FullyQualifiedName,
                                        typeof(ProcessResourceFiles).FullName
-                                   );
+                                   ) as ProcessResourceFiles;
 
-                                Type processType = obj.GetType();
-                                ErrorUtilities.VerifyThrow(processType == typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
+                                ErrorUtilities.VerifyThrow(process is not null, "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
 
-                                process = (ProcessResourceFiles)obj;
+                                process.Setup();
 
                                 RecordItemsForDisconnectIfNecessary(_references);
                                 RecordItemsForDisconnectIfNecessary(inputsToProcess);
@@ -814,6 +813,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 process = new ProcessResourceFiles();
                             }
+
 
                             process.Run(Log,
                                         _references,
@@ -2391,6 +2391,24 @@ namespace Microsoft.Build.Tasks
         private bool _useSourcePath = false;
 
 #endregion
+        internal void Setup()
+        {
+            static Assembly TryLoadAssembly(AssemblyName assemblyName)
+            {
+                // Look in the MSBuild folder for any unresolved reference. It may be a dependency
+                // of MSBuild or a task.
+                string msbuildDirectoryPath = Path.GetDirectoryName(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+                string targetAssembly = Path.Combine(msbuildDirectoryPath, assemblyName.Name + ".dll");
+                if (File.Exists(targetAssembly))
+                {
+                    return Assembly.LoadFrom(targetAssembly);
+                }
+
+                return null;
+            }
+            AppDomain dom = AppDomain.CurrentDomain;
+            dom.AssemblyResolve += (_, eventArgs) => TryLoadAssembly(new AssemblyName(eventArgs.Name));
+        }
 
         /// <summary>
         /// Process all files.
