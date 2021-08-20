@@ -210,7 +210,7 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
             Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
             File.WriteAllText(configFilePath, configFileContent);
 
-            new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), dotnetRoot: dotnetRoot, dotnetVerion: "6.0.100", reporter: _reporter).Execute();
+            new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), dotnetRoot: dotnetRoot, dotnetVersion: "6.0.100", reporter: _reporter).Execute();
 
             var lines = string.Join(" ", _reporter.Lines);
             lines.Should().Contain(mockDownloadUri);
