@@ -1,5 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+namespace Microsoft.Build.BackEnd.SdkResolution
+{
+    public partial class SdkResolverException : System.Exception
+    {
+        public SdkResolverException(string resourceName, Microsoft.Build.Framework.SdkResolver resolver, Microsoft.Build.Framework.SdkReference sdk, System.Exception innerException, params string[] args) { }
+        public Microsoft.Build.Framework.SdkResolver Resolver { get { throw null; } }
+        public Microsoft.Build.Framework.SdkReference Sdk { get { throw null; } }
+    }
+}
 namespace Microsoft.Build.Construction
 {
     public abstract partial class ElementLocation

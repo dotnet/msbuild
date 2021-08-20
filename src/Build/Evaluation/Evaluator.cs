@@ -1789,7 +1789,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio);
                 }
-                catch (Exception e)
+                catch (SdkResolverException e)
                 {
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
                 }

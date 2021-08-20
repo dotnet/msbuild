@@ -92,7 +92,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkReference sdk = new SdkReference("1sdkName", "version1", "minimumVersion");
 
             // When an SDK resolver throws, the expander will catch it and stop the build.
-            Should.Throw<Exception>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
+            Should.Throw<SdkResolverException>(() => SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false));
         }
 
         [Fact]
