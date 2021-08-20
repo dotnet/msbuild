@@ -26,10 +26,11 @@ namespace Microsoft.DotNet.Tools.Sdk.Check
             INETBundleProvider bundleProvider = null,
             IProductCollectionProvider productCollectionProvider = null,
             IReporter reporter = null,
-            string dotnetRoot = null) : base(parseResult)
+            string dotnetRoot = null, 
+            string dotnetVerion = null) : base(parseResult)
         {
             _dotnetPath = dotnetRoot ?? EnvironmentProvider.GetDotnetExeDirectory();
-            var configFilePath = Path.Combine(_dotnetPath, "metadata", "sdk-check-config.json");
+            var configFilePath = Path.Combine(_dotnetPath, "sdk", dotnetVerion ?? Product.Version, "sdk-check-config.json");
             _sdkCheckConfig = File.Exists(configFilePath) ? JsonSerializer.Deserialize<SdkCheckConfig>(File.ReadAllText(configFilePath)) : null;
             _reporter = reporter ?? Reporter.Output;
             _netBundleProvider = bundleProvider == null ? new NETBundlesNativeWrapper() : bundleProvider;

@@ -206,11 +206,11 @@ namespace Microsoft.DotNet.Cli.SdkCheck.Tests
             var mockLifecycleUri = "MockLifecycleUri";
             var configFileContent = JsonSerializer.Serialize(new SdkCheckConfig() { ReleasesFilePath = Path.Combine(fakeReleasesPath, "releases-index.json"),
                 DownloadUri = mockDownloadUri, LifecyclesUri = mockLifecycleUri });
-            var configFilePath = Path.Combine(dotnetRoot, "metadata", "sdk-check-config.json");
+            var configFilePath = Path.Combine(dotnetRoot, "sdk", "6.0.100", "sdk-check-config.json");
             Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
             File.WriteAllText(configFilePath, configFileContent);
 
-            new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), dotnetRoot: dotnetRoot, reporter: _reporter).Execute();
+            new SdkCheckCommand(parseResult, new MockNETBundleProvider(bundles), dotnetRoot: dotnetRoot, dotnetVerion: "6.0.100", reporter: _reporter).Execute();
 
             var lines = string.Join(" ", _reporter.Lines);
             lines.Should().Contain(mockDownloadUri);
