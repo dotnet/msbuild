@@ -814,7 +814,6 @@ namespace Microsoft.Build.Tasks
                                 process = new ProcessResourceFiles();
                             }
 
-
                             process.Run(Log,
                                         _references,
                                         inputsToProcess,
