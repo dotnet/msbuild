@@ -95,10 +95,19 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly
                 outputItem.SetMetadata("OriginalItemSpec", file.ItemSpec);
                 CompressedFiles[i] = outputItem;
 
-                if (SkipIfOutputIsNewer && File.Exists(outputFullPath) && File.GetLastWriteTimeUtc(inputFullPath) < File.GetLastWriteTimeUtc(outputFullPath))
+                if (!File.Exists(outputRelativePath))
                 {
-                    Log.LogMessage(MessageImportance.Low, $"Skipping compression for '{file.ItemSpec}' because '{outputRelativePath}' is newer than '{file.ItemSpec}'.");
+                    Log.LogMessage(MessageImportance.Low, "Compressing '{0}' because compressed file '{1}' does not exist.", file.ItemSpec, outputRelativePath);
+                }
+                else if (File.GetLastWriteTimeUtc(inputFullPath) < File.GetLastWriteTimeUtc(outputRelativePath))
+                {
+                    // Incrementalism. If input source doesn't exist or it exists and is not newer than the expected output, do nothing.
+                    Log.LogMessage(MessageImportance.Low, "Skipping '{0}' because '{1}' is newer than '{2}'.", file.ItemSpec, outputRelativePath, file.ItemSpec);
                     continue;
+                }
+                else
+                {
+                    Log.LogMessage(MessageImportance.Low, "Compressing '{0}' because file is newer than '{1}'.", inputFullPath, outputRelativePath);
                 }
 
                 builder.AppendLine("-s");

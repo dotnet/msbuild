@@ -281,12 +281,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- TMP: Pack -->
     <GenerateStaticWebAssetsPackTargetsDependsOn>
+      ResolveStaticWebAssetsConfiguration;
       LoadStaticWebAssetsBuildManifest;
       $(GenerateStaticWebAssetsPackTargetsDependsOn);
     </GenerateStaticWebAssetsPackTargetsDependsOn>
 
     <TargetsForTfmSpecificContentInPackage>
-      ResolveStaticWebAssetsConfiguration;
       GenerateStaticWebAssetsPackTargets;
       $(TargetsForTfmSpecificContentInPackage)
     </TargetsForTfmSpecificContentInPackage>
@@ -295,7 +295,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ResolveStaticWebAssetsConfiguration">
     <PropertyGroup>
-      <_StaticWebAssetsManifestBase>$(BaseIntermediateOutputPath)$(Configuration)\$(TargetFramework.ToLowerInvariant())\</_StaticWebAssetsManifestBase>
+      <_StaticWebAssetsManifestBase>$(BaseIntermediateOutputPath)$(Configuration)\</_StaticWebAssetsManifestBase>
+      <_StaticWebAssetsManifestBase Condition="'$(AppendTargetFrameworkToOutputPath)' != 'false'">$(_StaticWebAssetsManifestBase)$(TargetFramework.ToLowerInvariant())\</_StaticWebAssetsManifestBase>
       <StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' == ''">_content/$(PackageId)</StaticWebAssetBasePath>
       <StaticWebAssetProjectMode Condition="'$(StaticWebAssetProjectMode)' == ''">Default</StaticWebAssetProjectMode>
       <StaticWebAssetBuildManifestPath>$(_StaticWebAssetsManifestBase)staticwebassets.build.json</StaticWebAssetBuildManifestPath>
@@ -937,6 +938,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <FileWrites Include="$(_GeneratedBuildTransitivePropsFile)" />
     </ItemGroup>
 
+    <!-- We need to adjust the path for files without extension (LICENSE) for example. Otherwise, when they get packed, nuget creates an
+         additional folder for the file. -->
+    <ComputeStaticWebAssetsTargetPaths Assets="@(_CurrentProjectStaticWebAsset)" PathPrefix="staticwebassets" AdjustPathsForPack="true">
+      <Output TaskParameter="AssetsWithTargetPath" ItemName="_PackStaticWebAssetWithTargetPath" />
+    </ComputeStaticWebAssetsTargetPaths>
+
     <!-- All files that go into the nuget package -->
     <ItemGroup Condition="'$(_CurrentProjectHasStaticWebAssets)' == 'true'">
 
@@ -968,8 +975,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 
       <!-- Project file contents -->
 
-      <TfmSpecificPackageFile Include="%(_CurrentProjectStaticWebAsset.Identity)">
-        <PackagePath>staticwebassets\%(_CurrentProjectStaticWebAsset.RelativePath)</PackagePath>
+      <TfmSpecificPackageFile Include="%(_PackStaticWebAssetWithTargetPath.Identity)">
+        <PackagePath>%(_PackStaticWebAssetWithTargetPath.TargetPath)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
 
