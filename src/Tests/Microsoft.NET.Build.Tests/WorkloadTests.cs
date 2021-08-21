@@ -263,14 +263,14 @@ namespace Microsoft.NET.Build.Tests
 
             getValuesCommand.GetValues()
                 .Should()
-                .BeEquivalentTo("android");
+                .BeEquivalentTo("microsoft-android-sdk-full");
         }
 
-        [Theory]
-        [InlineData("net6.0-android;net6.0-ios", "net6.0-android;net6.0-ios", "android;android-aot")]
-        [InlineData("net6.0", "net6.0;net6.0-android;net6.0-ios", "macos;android-aot")]
-        [InlineData("net6.0;net6.0-ios", "net6.0;net6.0-android", "macos;android-aot")]
-        [InlineData("net6.0", "net6.0", "macos")]
+        [Theory(Skip = "https://github.com/dotnet/sdk/issues/19866")]
+        [InlineData("net6.0-android;net6.0-ios", "net6.0-android;net6.0-ios", "microsoft-android-sdk-full;microsoft-ios-sdk-full")]
+        [InlineData("net6.0", "net6.0;net6.0-android;net6.0-ios", "microsoft-android-sdk-full;microsoft-ios-sdk-full")]
+        [InlineData("net6.0;net6.0-ios", "net6.0;net6.0-android", "microsoft-android-sdk-full;microsoft-ios-sdk-full")]
+        [InlineData("net6.0", "net6.0", null)]
         public void Given_multi_target_It_should_get_suggested_workload_by_GetRequiredWorkloads_target(string mainTfm, string referencingTfm, string expected)
         {
             var mainProject = new TestProject()
