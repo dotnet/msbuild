@@ -491,8 +491,6 @@ namespace Microsoft.Build.Evaluation
                 options.EvaluationContext);
         }
 
-        static EvaluationContext _sharedEvaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
-
         /// <summary>
         /// Create a <see cref="ProjectRootElement"/> based project.
         /// </summary>
@@ -507,7 +505,7 @@ namespace Microsoft.Build.Evaluation
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext ?? _sharedEvaluationContext);
+                options.EvaluationContext);
         }
 
         /// <summary>
