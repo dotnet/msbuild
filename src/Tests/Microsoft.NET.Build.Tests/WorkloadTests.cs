@@ -116,7 +116,7 @@ namespace Microsoft.NET.Build.Tests
             //  .HaveStdOutContaining("android");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19866")]
         public void It_should_fail_to_build_without_workload_when_multitargeted()
         {
             var testProject = new TestProject()
@@ -238,7 +238,7 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("true");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/sdk/issues/19866")]
         public void It_should_get_suggested_workload_by_GetRequiredWorkloads_target()
         {
             var mainProject = new TestProject()
@@ -266,7 +266,7 @@ namespace Microsoft.NET.Build.Tests
                 .BeEquivalentTo("microsoft-android-sdk-full");
         }
 
-        [Theory]
+        [Theory(Skip = "https://github.com/dotnet/sdk/issues/19866")]
         [InlineData("net6.0-android;net6.0-ios", "net6.0-android;net6.0-ios", "microsoft-android-sdk-full;microsoft-ios-sdk-full")]
         [InlineData("net6.0", "net6.0;net6.0-android;net6.0-ios", "microsoft-android-sdk-full;microsoft-ios-sdk-full")]
         [InlineData("net6.0;net6.0-ios", "net6.0;net6.0-android", "microsoft-android-sdk-full;microsoft-ios-sdk-full")]

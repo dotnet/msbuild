@@ -262,7 +262,6 @@ namespace Microsoft.DotNet.Pack.Tests
 
             new DotnetPackCommand(Log)
                 .WithWorkingDirectory(rootPath)
-                .WithEnvironmentVariable("ImplicitUsings", "enable") // Removing tracked as part of https://github.com/dotnet/sdk/issues/19696
                 .Execute("--no-restore")
                 .Should()
                 .Pass();

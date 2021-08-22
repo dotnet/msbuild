@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Xml.Linq;
@@ -213,7 +214,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
   </BlazorPublishExtension>
   <FileWrites Include=""$(IntermediateOutputPath)publish.extension.txt"" />
   </ItemGroup>
-  
+
   <WriteLinesToFile
     Lines=""@(_BlazorBootFilesToUpdate->'%(FullPath)')""
     File=""$(IntermediateOutputPath)publish.extension.txt""
@@ -290,7 +291,7 @@ namespace Microsoft.NET.Sdk.BlazorWebAssembly.Tests
   </BlazorPublishExtension>
   <FileWrites Include=""$(IntermediateOutputPath)publish.extension.txt"" />
   </ItemGroup>
-  
+
   <WriteLinesToFile
     Lines=""@(_BlazorBootFilesToUpdate->'%(FullPath)')""
     File=""$(IntermediateOutputPath)publish.extension.txt""

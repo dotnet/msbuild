@@ -1,7 +1,12 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.NuGetPackageDownloader;
@@ -61,7 +66,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
             if (IsElevated)
             {
-                // Turn off automatic updates. We don't want MU to potentially patch the SDK 
+                // Turn off automatic updates. We don't want MU to potentially patch the SDK
                 // and it also reduces the risk of hitting ERROR_INSTALL_ALREADY_RUNNING.
                 UpdateAgent.Stop();
             }
@@ -132,7 +137,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                     {
                         Log?.LogMessage($"Evaluating dependent for workload pack, dependent: {dependent}, pack ID: {packRecord.PackId}, pack version: {packRecord.PackVersion}");
 
-                        // Dependents created by the SDK should have 3 parts, for example, "Microsoft.NET.Sdk,6.0.100,x86". 
+                        // Dependents created by the SDK should have 3 parts, for example, "Microsoft.NET.Sdk,6.0.100,x86".
                         string[] dependentParts = dependent.Split(',');
 
                         if (dependentParts.Length != 3)
@@ -254,18 +259,18 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 Log?.LogMessage($"Installing manifest: Id: {manifestId}, version: {manifestVersion}, feature band: {sdkFeatureBand}, rollback: {isRollback}.");
 
                 // Resolve the package ID for the manifest payload package
-                string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId, InstallType.Msi).ToString();                
+                string msiPackageId = WorkloadManifestUpdater.GetManifestPackageId(sdkFeatureBand, manifestId, InstallType.Msi).ToString();
                 string msiPackageVersion = $"{manifestVersion}";
 
                 Log?.LogMessage($"Resolving {manifestId} ({manifestVersion}) to {msiPackageId} ({msiPackageVersion}).");
 
-                // Retrieve the payload from the MSI package cache. 
+                // Retrieve the payload from the MSI package cache.
                 MsiPayload msi = GetCachedMsiPayload(msiPackageId, msiPackageVersion, offlineCache);
                 VerifyPackage(msi);
                 DetectState state = DetectPackage(msi.ProductCode, out Version installedVersion);
                 InstallAction plannedAction = PlanPackage(msi, state, InstallAction.Install, installedVersion, out IEnumerable<string> relatedProducts);
 
-                // If we've detected a downgrade, it's possible we might be doing a rollback after the manifests were updated, 
+                // If we've detected a downgrade, it's possible we might be doing a rollback after the manifests were updated,
                 // but another error occurred. In this case we need to try and uninstall the upgrade and the install the lower
                 // version of the MSI.
                 if (plannedAction == InstallAction.Downgrade && isRollback && state == DetectState.Absent)
@@ -277,7 +282,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     // Let's try and remove the SDK dependency. If anything's left then this is a shared installation, e.g.
                     // the manifest was already installed by VS, we triggered a CLI installation, but because the package was
-                    // present, we simply added a dependent against it. 
+                    // present, we simply added a dependent against it.
                     UpdateDependent(InstallRequestType.RemoveDependent, msi.Manifest.ProviderKeyName, _dependent);
 
                     if (depProvider.Dependents.Any())
@@ -342,7 +347,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
                 string msiPackageId = GetMsiPackageId(packInfo);
 
-                // Retrieve the payload from the MSI package cache. 
+                // Retrieve the payload from the MSI package cache.
                 MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
                 VerifyPackage(msi);
                 DetectState state = DetectPackage(msi, out Version installedVersion);
@@ -368,7 +373,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
                 string msiPackageId = GetMsiPackageId(packInfo);
 
-                // Retrieve the payload from the MSI package cache. 
+                // Retrieve the payload from the MSI package cache.
                 MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
                 VerifyPackage(msi);
                 DetectState state = DetectPackage(msi, out Version installedVersion);
@@ -395,7 +400,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 // Determine the MSI payload package ID based on the host architecture, pack ID and pack version.
                 string msiPackageId = GetMsiPackageId(packInfo);
 
-                // Retrieve the payload from the MSI package cache. 
+                // Retrieve the payload from the MSI package cache.
                 MsiPayload msi = GetCachedMsiPayload(msiPackageId, packInfo.Version, offlineCache);
                 VerifyPackage(msi);
 
@@ -606,7 +611,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
                     if (relatedProduct.Attributes.HasFlag(UpgradeAttributes.OnlyDetect) && (state == DetectState.Absent))
                     {
-                        // If we're not installed, but detect-only related, it's very likely that 
+                        // If we're not installed, but detect-only related, it's very likely that
                         // that we'd trigger a downgrade launch condition. We can't know for sure, but
                         // generally that's the most common use for detect-only entries.
                         plannedAction = InstallAction.Downgrade;
@@ -665,7 +670,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
                 throw new FileNotFoundException(string.Format(LocalizableStrings.CacheMissingPackage, packageId, packageVersion, offlineCache));
             }
 
-            // Extract the contents to a random folder to avoid potential file injection/hijacking 
+            // Extract the contents to a random folder to avoid potential file injection/hijacking
             // shenanigans before moving it to the final cache directory.
             string extractionDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(extractionDirectory);
@@ -699,7 +704,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
 
         /// <summary>
         /// Tries to retrieve the MSI payload for the specified package ID and version from
-        /// the MSI package cache. 
+        /// the MSI package cache.
         /// </summary>
         /// <param name="packageId">The ID of the payload package.</param>
         /// <param name="packageVersion">The version of the payload package.</param>
@@ -814,7 +819,7 @@ namespace Microsoft.DotNet.Workloads.Workload.Install
         }
 
         /// <summary>
-        /// Creates a new <see cref="NetSdkMsiInstallerClient"/> instance. If the current host process is not elevated, 
+        /// Creates a new <see cref="NetSdkMsiInstallerClient"/> instance. If the current host process is not elevated,
         /// the elevated server process will also be started by running an additional command.
         /// </summary>
         /// <param name="nugetPackageDownloader"></param>
