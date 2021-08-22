@@ -4,27 +4,40 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.NET.Sdk.WorkloadManifestReader
 {
     public class TempDirectoryWorkloadManifestProvider : IWorkloadManifestProvider
     {
-        private readonly string _sdkVersionBand;
         private readonly string _manifestsPath;
+        private readonly string _sdkVersionBand;
 
+        /// <param name="manifestsPath">
+        ///     Result of directly extract manifest NuGet Packages. Should contain folders like
+        ///     microsoft.net.workload.emscripten.manifest-6.0.100.6.0.0-preview.7.21377.2
+        /// </param>
         public TempDirectoryWorkloadManifestProvider(string manifestsPath, string sdkVersion)
         {
             _manifestsPath = manifestsPath;
             _sdkVersionBand = sdkVersion;
         }
 
-        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)> GetManifests()
+        public IEnumerable<(string manifestId, string? informationalPath, Func<Stream> openManifestStream)>
+            GetManifests()
         {
             foreach (var workloadManifestDirectory in GetManifestDirectories())
             {
-                var workloadManifest = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
-                var id = Path.GetFileName(workloadManifestDirectory);
-                yield return (id, workloadManifest, () => File.OpenRead(workloadManifest));
+                string? workloadManifest = Path.Combine(workloadManifestDirectory, "WorkloadManifest.json");
+                var manifestId = Path.GetFileName(workloadManifestDirectory);
+
+                int index = manifestId.IndexOf(".Manifest", StringComparison.OrdinalIgnoreCase);
+                if (index >= 0)
+                {
+                    manifestId = manifestId.Substring(0, index);
+                }
+
+                yield return (manifestId, workloadManifest, () => File.OpenRead(workloadManifest));
             }
         }
 
@@ -39,9 +52,6 @@ namespace Microsoft.NET.Sdk.WorkloadManifestReader
             }
         }
 
-        public string GetSdkFeatureBand()
-        {
-            return _sdkVersionBand;
-        }
+        public string GetSdkFeatureBand() => _sdkVersionBand;
     }
 }

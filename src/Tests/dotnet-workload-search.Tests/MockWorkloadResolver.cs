@@ -27,7 +27,7 @@ namespace Microsoft.DotNet.Cli.Workload.Search.Tests
         public string GetManifestVersion(string manifestId) => throw new NotImplementedException();
         public IEnumerable<WorkloadResolver.ManifestInfo> GetInstalledManifests() => throw new NotImplementedException();
         public IWorkloadResolver CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider) => throw new NotImplementedException();
-        public string GetSdkFeatureBand() => throw new NotImplementedException();
+        public string GetSdkFeatureBand() => "12.0.400";
         public IEnumerable<WorkloadId> GetUpdatedWorkloads(WorkloadResolver advertisingManifestResolver, IEnumerable<WorkloadId> installedWorkloads) => throw new NotImplementedException();
         WorkloadResolver IWorkloadResolver.CreateOverlayResolver(IWorkloadManifestProvider overlayManifestProvider) => throw new NotImplementedException();
     }
