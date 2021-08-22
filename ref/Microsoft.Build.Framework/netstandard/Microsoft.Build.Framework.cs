@@ -152,6 +152,13 @@ namespace Microsoft.Build.Framework
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
     }
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
+    public abstract partial class EngineServices
+    {
+        public const int Version1 = 1;
+        protected EngineServices() { }
+        public virtual int Version { get { throw null; } }
+        public virtual bool LogsMessagesOfImportance(Microsoft.Build.Framework.MessageImportance importance) { throw null; }
+    }
     public partial class EnvironmentVariableReadEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
         public EnvironmentVariableReadEventArgs() { }
@@ -185,6 +192,10 @@ namespace Microsoft.Build.Framework
         void LogErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs e);
         void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e);
         void LogWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs e);
+    }
+    public partial interface IBuildEngine10 : Microsoft.Build.Framework.IBuildEngine, Microsoft.Build.Framework.IBuildEngine2, Microsoft.Build.Framework.IBuildEngine3, Microsoft.Build.Framework.IBuildEngine4, Microsoft.Build.Framework.IBuildEngine5, Microsoft.Build.Framework.IBuildEngine6, Microsoft.Build.Framework.IBuildEngine7, Microsoft.Build.Framework.IBuildEngine8, Microsoft.Build.Framework.IBuildEngine9
+    {
+        Microsoft.Build.Framework.EngineServices EngineServices { get; }
     }
     public partial interface IBuildEngine2 : Microsoft.Build.Framework.IBuildEngine
     {

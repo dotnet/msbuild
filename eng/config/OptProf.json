@@ -22,6 +22,12 @@
           "testCases": [
             "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
           ]
+        },
+        {
+          "container": "Microsoft.VisualStudio.ProjectSystem.DDRIT",
+          "testCases": [
+            "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
+          ]
         }  
       ]
     }

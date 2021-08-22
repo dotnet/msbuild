@@ -450,13 +450,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 // Raise the event with the filters
                 ProcessLoggingEvent(buildEvent);
-
-                // Make sure we process this event before going any further
-                if (_logMode == LoggerMode.Asynchronous)
-                {
-                    WaitForThreadToProcessEvents();
-                }
             }
+
+            // Make sure we process this event before going any further
+            WaitForThreadToProcessEvents();
         }
 
         /// <summary>
@@ -478,12 +475,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 BuildFinishedEventArgs buildEvent = new BuildFinishedEventArgs(message, null /* no help keyword */, success);
 
                 ProcessLoggingEvent(buildEvent);
-
-                if (_logMode == LoggerMode.Asynchronous)
-                {
-                    WaitForThreadToProcessEvents();
-                }
             }
+
+            // Make sure we process this event before going any further
+            WaitForThreadToProcessEvents();
         }
 
         /// <inheritdoc />
