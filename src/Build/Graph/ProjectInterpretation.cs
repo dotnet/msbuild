@@ -100,17 +100,17 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private static string GetInnerBuildPropertyValue(ProjectInstance project)
+        internal static string GetInnerBuildPropertyValue(ProjectInstance project)
         {
             return project.GetPropertyValue(GetInnerBuildPropertyName(project));
         }
 
-        private static string GetInnerBuildPropertyName(ProjectInstance project)
+        internal static string GetInnerBuildPropertyName(ProjectInstance project)
         {
             return project.GetPropertyValue(PropertyNames.InnerBuildProperty);
         }
 
-        private static string GetInnerBuildPropertyValues(ProjectInstance project)
+        internal static string GetInnerBuildPropertyValues(ProjectInstance project)
         {
             return project.GetPropertyValue(project.GetPropertyValue(PropertyNames.InnerBuildPropertyValues));
         }
