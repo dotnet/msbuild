@@ -36,7 +36,7 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override ImmutableList<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 var itemsToAdd = ImmutableList.CreateBuilder<I>();
 
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Evaluation
                 DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
             }
 
-            protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            protected override void SaveItems(ImmutableList<I> items, OrderedItemDataCollection.Builder listBuilder)
             {
                 foreach (var item in items)
                 {
