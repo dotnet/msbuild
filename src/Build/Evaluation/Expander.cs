@@ -3352,6 +3352,12 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
+                        // Check that the function that we're going to call is valid to call
+                        if (!IsInstanceMethodAvailable(_methodMethodName))
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionMethodUnavailable", _methodMethodName, _receiverType.FullName);
+                        }
+
                         _bindingFlags |= BindingFlags.Instance;
 
                         // The object that we're about to call methods on may have escaped characters
@@ -5015,6 +5021,19 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static bool IsInstanceMethodAvailable(string methodName)
+            {
+                if (Traits.Instance.EnableAllPropertyFunctions)
+                {
+                    // anything goes
+                    return true;
+                }
+
+                // This could be expanded to an allow / deny list.
+                return methodName != "GetType";
             }
 
             /// <summary>
