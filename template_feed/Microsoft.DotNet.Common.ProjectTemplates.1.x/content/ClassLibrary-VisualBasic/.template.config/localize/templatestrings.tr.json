@@ -25,7 +25,7 @@
   "symbols/Framework/choices/netstandard1.6/displayName": ".NET Standard 1.6",
   "symbols/Framework/displayName": "Çerçeve",
   "symbols/langVersion/description": "Oluşturulan proje dosyasında langVersion'ı ayarlar",
-  "symbols/langVersion/displayName": "Dil Sürümü",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Belirtilirse, oluşturma sırasında projenin otomatik geri yüklenmesini atlar.",
   "symbols/skipRestore/displayName": "Geri yüklemeyi atla",
   "postActions/restore/description": "Bu projenin gerektirdiği NuGet paketlerini geri yükleyin.",

@@ -25,7 +25,7 @@
   "symbols/Framework/choices/netstandard1.6/displayName": ".NET Standard 1.6",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Legt „LangVersion“ in der erstellten Projektdatei fest",
-  "symbols/langVersion/displayName": "Sprachversion",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Wenn angegeben, wird die automatische Wiederherstellung des Projekts beim Erstellen übersprungen.",
   "symbols/skipRestore/displayName": "Wiederherstellung überspringen",
   "postActions/restore/description": "„NuGet-Pakete“ wiederherstellen, die für dieses Projekt erforderlich sind.",

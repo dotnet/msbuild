@@ -25,7 +25,7 @@
   "symbols/Framework/choices/netstandard1.6/displayName": ".NET Standard 1.6",
   "symbols/Framework/displayName": "框架",
   "symbols/langVersion/description": "在创建的项目文件中设置 langVersion",
-  "symbols/langVersion/displayName": "语言版本",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "如果指定，则在创建时跳过项目的自动还原。",
   "symbols/skipRestore/displayName": "跳过还原",
   "postActions/restore/description": "还原此项目所需的 NuGet 包。",

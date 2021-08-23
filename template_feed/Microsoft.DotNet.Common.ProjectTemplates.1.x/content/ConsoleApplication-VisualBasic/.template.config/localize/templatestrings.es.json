@@ -11,7 +11,7 @@
   "symbols/Framework/choices/netcoreapp1.1/displayName": ".NET Core 1.1",
   "symbols/Framework/displayName": "Plataforma",
   "symbols/langVersion/description": "Establece langVersion en el archivo de proyecto creado.",
-  "symbols/langVersion/displayName": "Versión de lenguaje",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Si se especifica, se omite la restauración automática del proyecto durante la creación.",
   "symbols/skipRestore/displayName": "Omitir restauración",
   "postActions/restore/description": "Restaure los paquetes NuGet necesarios para este proyecto.",

@@ -9,7 +9,7 @@
   "symbols/Framework/choices/netcoreapp3.0/displayName": ".NET Core 3.0",
   "symbols/Framework/displayName": "架構",
   "symbols/langVersion/description": "設定建立的專案檔中的 LangVersion 屬性",
-  "symbols/langVersion/displayName": "語言版本",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "若指定，會在建立時跳過專案的自動還原。",
   "symbols/skipRestore/displayName": "略過還原",
   "postActions/restore/description": "還原此專案所需的 NuGet 套件。",

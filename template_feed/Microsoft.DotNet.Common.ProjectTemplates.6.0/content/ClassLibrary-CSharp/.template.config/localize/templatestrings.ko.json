@@ -13,11 +13,9 @@
   "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
   "symbols/Framework/displayName": "프레임워크",
   "symbols/langVersion/description": "만든 프로젝트 파일에 LangVersion 속성을 설정합니다",
-  "symbols/langVersion/displayName": "언어 버전",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "지정된 경우, 프로젝트 생성 시 자동 복원을 건너뜁니다.",
   "symbols/skipRestore/displayName": "복원 건너뛰기",
-  "symbols/Nullable/description": "이 프로젝트에 대해 nullable 참조 형식을 사용할지 여부를 지정합니다.",
-  "symbols/Nullable/displayName": "nullable 사용",
   "postActions/restore/description": "이 프로젝트에 필요한 NuGet 패키지를 복원합니다.",
   "postActions/restore/manualInstructions/default/text": "'dotnet restore' 실행",
   "postActions/open-file/description": "편집기에서 Class1.cs를 엽니다"

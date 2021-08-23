@@ -25,7 +25,7 @@
   "symbols/Framework/choices/netstandard1.6/displayName": ".NET Standard 1.6",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Imposta langVersion nel file di progetto creato",
-  "symbols/langVersion/displayName": "Versione linguaggio",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Se specificato, ignora il ripristino automatico del progetto durante la creazione.",
   "symbols/skipRestore/displayName": "Salta ripristino",
   "postActions/restore/description": "Ripristina i pacchetti NuGet richiesti da questo progetto.",

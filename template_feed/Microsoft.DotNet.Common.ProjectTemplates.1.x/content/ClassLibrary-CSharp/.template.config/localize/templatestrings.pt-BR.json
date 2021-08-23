@@ -25,7 +25,7 @@
   "symbols/Framework/choices/netstandard1.6/displayName": ".NET Standard 1.6",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Define a langVersion no arquivo do projeto criado",
-  "symbols/langVersion/displayName": "Versão da Linguagem",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Se especificado, ignora a restauração automática do projeto sendo criado.",
   "symbols/skipRestore/displayName": "Ignorar restauração",
   "postActions/restore/description": "Restaura os pacotes do NuGet exigidos por este projeto.",

@@ -13,11 +13,9 @@
   "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
   "symbols/Framework/displayName": "框架",
   "symbols/langVersion/description": "在创建的项目文件中设置 LangVersion 属性",
-  "symbols/langVersion/displayName": "语言版本",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "如果指定，则在创建时跳过项目的自动还原。",
   "symbols/skipRestore/displayName": "跳过还原",
-  "symbols/Nullable/description": "是否为此项目启用可为 null 的引用类型。",
-  "symbols/Nullable/displayName": "启用可为 null",
   "postActions/restore/description": "还原此项目所需的 NuGet 包。",
   "postActions/restore/manualInstructions/default/text": "运行“dotnet restore”",
   "postActions/open-file/description": "在编辑器中打开 Class1.cs"

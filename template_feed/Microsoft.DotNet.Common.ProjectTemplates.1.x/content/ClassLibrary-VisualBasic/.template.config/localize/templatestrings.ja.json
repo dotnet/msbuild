@@ -25,7 +25,7 @@
   "symbols/Framework/choices/netstandard1.6/displayName": ".NET Standard 1.6",
   "symbols/Framework/displayName": "フレームワーク",
   "symbols/langVersion/description": "作成されたプロジェクト ファイルで langVersion を設定します",
-  "symbols/langVersion/displayName": "言語バージョン",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "指定した場合、作成時にプロジェクトの自動復元がスキップされます。",
   "symbols/skipRestore/displayName": "復元のスキップ",
   "postActions/restore/description": "このプロジェクトに必要な NuGet パッケージを復元します。",

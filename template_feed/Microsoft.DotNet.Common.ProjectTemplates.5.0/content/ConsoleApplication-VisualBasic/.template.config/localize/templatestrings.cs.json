@@ -9,7 +9,7 @@
   "symbols/Framework/choices/net5.0/displayName": ".NET 5.0",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Nastaví vlastnost LangVersion ve vytvořeném souboru projektu.",
-  "symbols/langVersion/displayName": "Verze jazyka",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Pokud se tato možnost zadá, přeskočí automatické obnovení projektu při vytvoření.",
   "symbols/skipRestore/displayName": "Přeskočit obnovení",
   "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",

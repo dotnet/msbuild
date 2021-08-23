@@ -9,7 +9,7 @@
   "symbols/Framework/choices/netcoreapp2.2/displayName": ".NET Core 2.2",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Définit langVersion dans le fichier projet créé",
-  "symbols/langVersion/displayName": "Version du langage",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "S’il est spécifié, ignore la restauration automatique du projet lors de la création.",
   "symbols/skipRestore/displayName": "Ignorer la restauration",
   "postActions/restore/description": "Restaurez les packages NuGet requis par ce projet.",

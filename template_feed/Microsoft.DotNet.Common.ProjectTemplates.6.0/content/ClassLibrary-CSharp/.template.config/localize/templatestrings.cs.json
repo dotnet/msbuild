@@ -13,11 +13,9 @@
   "symbols/Framework/choices/netstandard2.0/displayName": ".NET Standard 2.0",
   "symbols/Framework/displayName": "Framework",
   "symbols/langVersion/description": "Nastaví vlastnost LangVersion ve vytvořeném souboru projektu.",
-  "symbols/langVersion/displayName": "Verze jazyka",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Je-li zadáno, přeskočí automatické obnovení projektu při vytvoření.",
   "symbols/skipRestore/displayName": "Přeskočit obnovení",
-  "symbols/Nullable/description": "Určuje, zda se mají pro tento projekt povolit odkazové typy s možnou hodnotou null.",
-  "symbols/Nullable/displayName": "Povolit vynulovatelnost",
   "postActions/restore/description": "Obnoví balíčky NuGet vyžadované tímto projektem.",
   "postActions/restore/manualInstructions/default/text": "Spustit dotnet restore",
   "postActions/open-file/description": "Otevře Class1.cs v editoru."

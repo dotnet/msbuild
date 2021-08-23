@@ -9,7 +9,7 @@
   "symbols/Framework/choices/netcoreapp3.1/displayName": ".NET Core 3.1",
   "symbols/Framework/displayName": "Platforma",
   "symbols/langVersion/description": "Ustawia właściwość LangVersion w utworzonym pliku projektu",
-  "symbols/langVersion/displayName": "Wersja języka",
+  "symbols/langVersion/displayName": "Language version",
   "symbols/skipRestore/description": "Jeśli ta opcja jest określona, pomija automatyczne przywracanie projektu podczas tworzenia.",
   "symbols/skipRestore/displayName": "Pomiń przywracanie",
   "postActions/restore/description": "Przywróć pakiety NuGet wymagane przez ten projekt.",
