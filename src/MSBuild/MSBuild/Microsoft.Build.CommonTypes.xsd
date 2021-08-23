@@ -5811,7 +5811,7 @@ elementFormDefault="qualified">
   <xs:element name="InternalsVisibleTo" substitutionGroup="msb:Item">
   <xs:annotation>
     <xs:documentation>
-      <!-- _locID_text="InternalsVisibleTo" _locComment="" -->Specifies that types that are ordinarily visible only within the assembly are visible to the specified assemblies.
+      <!-- _locID_text="InternalsVisibleTo" _locComment="" -->Specifies that internal types and members are visible to the specified friend assemblies.
     </xs:documentation>
   </xs:annotation>
   <xs:complexType>
@@ -5820,7 +5820,7 @@ elementFormDefault="qualified">
           <xs:attribute name="Include" type="xs:string">
             <xs:annotation>
               <xs:documentation>
-                <!-- _locID_text="InternalsVisibleTo_Include" _locComment="" -->The name of the friend assembly to make internal types visible to, e.g. Microsoft.AspNetCore.
+                <!-- _locID_text="InternalsVisibleTo_Include" _locComment="" -->The name of the friend assembly to make internal types and members visible to.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
