@@ -32,8 +32,8 @@ namespace Microsoft.Build.Evaluation
 
             public bool MoveNext()
             {
-                // If value is not a list, it is a single item.
-                int count = (_value is IList<I> list) ? list.Count : 1;
+                // If value is not a list, it is either null or a single item.
+                int count = (_value is IList<I> list) ? list.Count : (_value is null ? 0 : 1);
                 if (_index + 1 < count)
                 {
                     _index++;
@@ -62,39 +62,49 @@ namespace Microsoft.Build.Evaluation
 
         public void Add(I item)
         {
-            if (_value is not List<I> list)
+            if (_value is null)
             {
-                list = new List<I>();
-                _value = list;
+                _value = item;
             }
-            list.Add(item);
+            else
+            {
+                if (_value is not List<I> list)
+                {
+                    list = new List<I>()
+                    {
+                        (I)_value
+                    };
+                    _value = list;
+                }
+                list.Add(item);
+            }
         }
 
         public void Delete(I item)
         {
-            if (object.ReferenceEquals(_value, item))
-            {
-                _value = null;
-            }
-            else if (_value is List<I> list)
+            if (_value is List<I> list)
             {
                 list.Remove(item);
+            }
+            else if (object.Equals(_value, item))
+            {
+                _value = null;
             }
         }
 
         public void Replace(I oldItem, I newItem)
         {
-            if (object.ReferenceEquals(_value, oldItem))
+            if (_value is List<I> list)
             {
-                _value = newItem;
-            }
-            else if (_value is List<I> list)
-            {
-                int index = list.FindIndex(item => object.ReferenceEquals(item, oldItem));
+                int index = list.IndexOf(oldItem);
                 if (index >= 0)
                 {
                     list[index] = newItem;
                 }
+            }
+            else if (object.Equals(_value, oldItem))
+            {
+                _value = newItem;
             }
         }
 
