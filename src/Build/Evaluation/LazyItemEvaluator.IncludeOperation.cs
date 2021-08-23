@@ -6,6 +6,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.CodeAnalysis.Collections;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -21,9 +22,7 @@ namespace Microsoft.Build.Evaluation
             
             readonly string _rootDirectory;
 
-            // TODO: Convert this to ImmutableSegmentedList<T> once available.
-            // https://github.com/dotnet/msbuild/issues/6601
-            readonly List<string> _excludes;
+            readonly ImmutableSegmentedList<string> _excludes;
 
             readonly ImmutableList<ProjectMetadataElement> _metadata;
 
@@ -33,7 +32,7 @@ namespace Microsoft.Build.Evaluation
                 _elementOrder = builder.ElementOrder;
                 _rootDirectory = builder.RootDirectory;
 
-                _excludes = builder.Excludes;
+                _excludes = builder.Excludes.ToImmutable();
                 _metadata = builder.Metadata.ToImmutable();
             }
 
@@ -169,9 +168,7 @@ namespace Microsoft.Build.Evaluation
             public int ElementOrder { get; set; }
             public string RootDirectory { get; set; }
 
-            // TODO: Convert this to ImmutableSegmentedList<T>.Builder once available.
-            // https://github.com/dotnet/msbuild/issues/6601
-            public List<string> Excludes { get; } = new();
+            public ImmutableSegmentedList<string>.Builder Excludes { get; } = ImmutableSegmentedList.CreateBuilder<string>();
 
             public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
